@@ -365,6 +365,19 @@ export const ProfitTrackerPage = () => {
         setActiveSignal(signalRes.data);
       }
       
+      // Process trade logs into a date-keyed object
+      const logs = tradeLogsRes.data || [];
+      const logsMap = {};
+      logs.forEach(log => {
+        const dateKey = new Date(log.created_at).toISOString().split('T')[0];
+        logsMap[dateKey] = {
+          actual_profit: log.actual_profit,
+          has_traded: true,
+          ...log
+        };
+      });
+      setTradeLogs(logsMap);
+      
       if (allDeposits.length === 0) {
         setIsFirstTime(true);
         setInitialBalanceDialogOpen(true);
@@ -375,6 +388,23 @@ export const ProfitTrackerPage = () => {
       setLoading(false);
     }
   };
+
+  // Open daily projection for a month
+  const handleOpenDailyProjection = (month) => {
+    setSelectedMonth(month);
+    setDailyProjectionOpen(true);
+  };
+
+  // Get daily projection data for selected month
+  const getDailyProjectionForSelectedMonth = useMemo(() => {
+    if (!selectedMonth) return [];
+    return generateDailyProjectionForMonth(
+      selectedMonth.startBalance,
+      selectedMonth.monthDate,
+      tradeLogs,
+      activeSignal
+    );
+  }, [selectedMonth, tradeLogs, activeSignal]);
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
