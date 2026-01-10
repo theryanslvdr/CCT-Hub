@@ -277,10 +277,16 @@ async def verify_heartbeat_user(email: str) -> bool:
             )
             if response.status_code == 200:
                 data = response.json()
-                users = data.get("users", data.get("data", []))
-                for user in users:
-                    if user.get("email", "").lower() == email.lower():
-                        return True
+                # Handle both list and dict responses
+                if isinstance(data, list):
+                    users = data
+                else:
+                    users = data.get("users", data.get("data", []))
+                
+                if isinstance(users, list):
+                    for user in users:
+                        if isinstance(user, dict) and user.get("email", "").lower() == email.lower():
+                            return True
             return False
     except Exception as e:
         logger.error(f"Heartbeat verification error: {e}")
