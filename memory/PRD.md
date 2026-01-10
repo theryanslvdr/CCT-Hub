@@ -21,6 +21,31 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Live currency conversion (USDT-USD-Local currencies)
 - [x] Trading signals in Philippine/Taiwan/Singapore timezone (GMT+8)
 
+## P1 Features Completed (2026-01-10)
+
+### Member Management Enhancements
+- ✅ Search members by name/email
+- ✅ Filter by role (user/admin/super_admin)
+- ✅ Filter by status (active/suspended)
+- ✅ Pagination with page controls
+- ✅ View member details with Profile/Statistics/Activity tabs
+- ✅ Edit member profile (name, timezone, LOT size)
+- ✅ Suspend/unsuspend members
+- ✅ Set temporary password
+- ✅ Upgrade/downgrade roles
+
+### Trading Signals Improvements
+- ✅ Custom profit_points multiplier (default: 15)
+- ✅ Edit existing signals
+- ✅ Simulate signals (Super Admin only, marked as [SIMULATED])
+- ✅ Toggle signal active/inactive
+- ✅ Notes field for additional context
+
+### Profit Tracker Features
+- ✅ Initial balance setup dialog for first-time users
+- ✅ Reset tracker functionality (clears all deposits and trade logs)
+- ✅ Improved deposit history visualization
+
 ## Bug Fixes Completed (2026-01-10)
 - ✅ **PROB-1**: Fixed login persistence - Users now stay logged in after page refresh (AuthContext localStorage fix)
 - ✅ **DM-1**: Fixed "Add Debt" functionality - POST /api/debt now works correctly
