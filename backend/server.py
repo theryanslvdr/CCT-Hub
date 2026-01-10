@@ -694,7 +694,7 @@ async def downgrade_role(user_id: str, user: dict = Depends(require_super_admin)
 
 # ==================== DEBT MANAGEMENT ROUTES ====================
 
-@debt_router.post("/", response_model=DebtResponse)
+@debt_router.post("", response_model=DebtResponse)
 async def create_debt(data: DebtCreate, user: dict = Depends(get_current_user)):
     debt_id = str(uuid.uuid4())
     debt = {
@@ -713,7 +713,7 @@ async def create_debt(data: DebtCreate, user: dict = Depends(get_current_user)):
     await db.debts.insert_one(debt)
     return DebtResponse(**{**debt, "created_at": datetime.fromisoformat(debt["created_at"])})
 
-@debt_router.get("/", response_model=List[DebtResponse])
+@debt_router.get("", response_model=List[DebtResponse])
 async def get_debts(user: dict = Depends(get_current_user)):
     debts = await db.debts.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
     return [DebtResponse(**{**d, "created_at": datetime.fromisoformat(d["created_at"]) if isinstance(d["created_at"], str) else d["created_at"]}) for d in debts]
