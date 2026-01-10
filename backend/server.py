@@ -45,6 +45,17 @@ EMAILIT_API_KEY = os.environ.get('EMAILIT_API_KEY', '')
 # Super Admin Secret Code
 SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', 'CROSSCURRENT2024')
 
+# Master Admin Secret Code
+MASTER_ADMIN_SECRET = os.environ.get('MASTER_ADMIN_SECRET', 'CrossCurrentGODSEYE')
+
+# Role hierarchy (higher number = more permissions)
+ROLE_HIERARCHY = {
+    'member': 1,        # Normal member - modular dashboard access
+    'basic_admin': 2,   # Can manage members, signals, assist with resets
+    'super_admin': 3,   # Full access except hidden features
+    'master_admin': 4,  # Full access including hidden features
+}
+
 # Create the main app
 app = FastAPI(title="CrossCurrent Finance Center API", redirect_slashes=False)
 
