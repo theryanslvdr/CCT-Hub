@@ -241,25 +241,32 @@ class CrossCurrentAPITester:
 
     def test_admin_functionality(self):
         """Test admin functionality - signals creation"""
-        # First try to create admin user or upgrade existing user
-        if not self.token:
-            self.log_test("Admin Functionality", False, "No authentication token")
+        if not self.admin_token:
+            self.log_test("Admin Functionality", False, "No admin authentication token")
             return
             
-        # Try to create a trading signal (will fail if not admin, which is expected)
+        # Test creating a trading signal with timezone
         signal_data = {
             "product": "MOIL10",
             "trade_time": "14:30",
+            "trade_timezone": "Asia/Manila",
             "direction": "BUY",
-            "notes": "Test signal"
+            "notes": "Test signal for Philippine timezone"
         }
         
         success, response = self.make_request('POST', 'admin/signals', signal_data, 
-                                            expected_status=403, use_admin=False)
-        if not success and ('Admin access required' in str(response) or 'Forbidden' in str(response)):
-            self.log_test("Admin Access Control", True, "Correctly blocked non-admin user")
+                                            expected_status=201, use_admin=True)
+        if success and 'id' in response:
+            self.log_test("Create Trading Signal", True, f"Created signal: {signal_data['product']} {signal_data['direction']} at {signal_data['trade_time']} ({signal_data['trade_timezone']})")
+            
+            # Test getting signals
+            success2, response2 = self.make_request('GET', 'admin/signals', use_admin=True)
+            if success2 and isinstance(response2, list):
+                self.log_test("Get Trading Signals", True, f"Retrieved {len(response2)} signals")
+            else:
+                self.log_test("Get Trading Signals", False, f"Failed: {response2}")
         else:
-            self.log_test("Admin Access Control", False, f"Unexpected response: {response}")
+            self.log_test("Create Trading Signal", False, f"Failed: {response}")
 
     def test_trade_monitoring(self):
         """Test trade monitoring functionality"""
