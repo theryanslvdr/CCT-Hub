@@ -355,6 +355,17 @@ async def register(data: UserCreate):
             detail="You must be a Heartbeat community member to register. Please join the community first."
         )
     
+    # Determine role based on secret code
+    role = "member"  # Default to normal member
+    if data.secret_code:
+        if data.secret_code == MASTER_ADMIN_SECRET:
+            role = "master_admin"
+        elif data.secret_code == SUPER_ADMIN_SECRET:
+            role = "super_admin"
+    
+    # Default dashboards for normal members
+    default_dashboards = ["dashboard", "profit_tracker", "trade_monitor", "profile"]
+    
     user_id = str(uuid.uuid4())
     user = {
         "id": user_id,
@@ -362,17 +373,18 @@ async def register(data: UserCreate):
         "password": hash_password(data.password),
         "full_name": data.full_name,
         "heartbeat_email": heartbeat_email.lower(),
-        "role": "user",
+        "role": role,
         "profile_picture": None,
         "lot_size": 0.01,
         "timezone": "UTC",
+        "allowed_dashboards": default_dashboards if role == "member" else None,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(user)
     
-    token = create_token(user_id, data.email, "user")
+    token = create_token(user_id, data.email, role)
     
     return TokenResponse(
         access_token=token,
@@ -380,8 +392,9 @@ async def register(data: UserCreate):
             id=user_id,
             email=data.email,
             full_name=data.full_name,
-            role="user",
-            created_at=datetime.fromisoformat(user["created_at"])
+            role=role,
+            created_at=datetime.fromisoformat(user["created_at"]),
+            allowed_dashboards=user.get("allowed_dashboards")
         )
     )
 
