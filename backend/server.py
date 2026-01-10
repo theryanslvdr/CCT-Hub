@@ -85,6 +85,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: str
     heartbeat_email: Optional[str] = None
+    secret_code: Optional[str] = None  # For admin/super admin/master admin registration
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -99,6 +100,7 @@ class UserResponse(BaseModel):
     profile_picture: Optional[str] = None
     lot_size: Optional[float] = None
     timezone: Optional[str] = "UTC"
+    allowed_dashboards: Optional[List[str]] = None  # For normal members - modular access
 
 class TokenResponse(BaseModel):
     access_token: str
