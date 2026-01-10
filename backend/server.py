@@ -132,7 +132,16 @@ class TradingSignalCreate(BaseModel):
     trade_time: str  # HH:MM format
     trade_timezone: str = "Asia/Manila"  # Default to Philippine time
     direction: str  # BUY or SELL
+    profit_points: float = 15  # Default profit multiplier
     notes: Optional[str] = None
+
+class TradingSignalUpdate(BaseModel):
+    trade_time: Optional[str] = None
+    trade_timezone: Optional[str] = None
+    direction: Optional[str] = None
+    profit_points: Optional[float] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class TradingSignalResponse(BaseModel):
     id: str
@@ -140,8 +149,10 @@ class TradingSignalResponse(BaseModel):
     trade_time: str
     trade_timezone: str
     direction: str
+    profit_points: float
     notes: Optional[str]
     is_active: bool
+    is_simulated: bool = False
     created_by: str
     created_at: datetime
 
