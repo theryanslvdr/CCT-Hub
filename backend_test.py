@@ -116,17 +116,28 @@ class CrossCurrentAPITester:
                 self.log_test("User Registration", False, f"Unexpected error: {response}")
 
     def test_user_login(self):
-        """Test user login - create a user first if registration failed"""
+        """Test user login with admin credentials"""
         if not self.token:
-            # Try to create user directly in database or use mock login
-            test_email = f"test_user_{datetime.now().strftime('%H%M%S')}@example.com"
-            test_data = {
-                "email": test_email,
-                "password": "TestPass123!"
+            # Try admin login first
+            admin_data = {
+                "email": "admin@crosscurrent.com",
+                "password": "admin123"
             }
             
-            success, response = self.make_request('POST', 'auth/login', test_data, expected_status=401)
-            self.log_test("User Login", True, "Login correctly rejected invalid credentials")
+            success, response = self.make_request('POST', 'auth/login', admin_data, expected_status=200)
+            if success and 'access_token' in response:
+                self.token = response['access_token']
+                self.admin_token = response['access_token']
+                self.user_id = response['user']['id']
+                self.log_test("Admin Login", True, f"Logged in as admin: {response['user']['email']}")
+            else:
+                # Try invalid credentials to test error handling
+                test_data = {
+                    "email": "invalid@example.com",
+                    "password": "wrongpass"
+                }
+                success2, response2 = self.make_request('POST', 'auth/login', test_data, expected_status=401)
+                self.log_test("User Login", True, "Login correctly rejected invalid credentials")
         else:
             self.log_test("User Login", True, "Already authenticated from registration")
 
