@@ -291,6 +291,7 @@ export const ProfitTrackerPage = () => {
   const [summary, setSummary] = useState(null);
   const [deposits, setDeposits] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [tradeLogs, setTradeLogs] = useState({});
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeSignal, setActiveSignal] = useState(null);
@@ -302,9 +303,11 @@ export const ProfitTrackerPage = () => {
   const [withdrawalStep, setWithdrawalStep] = useState('input');
   const [initialBalanceDialogOpen, setInitialBalanceDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const [resetStep, setResetStep] = useState('confirm'); // 'confirm', 'newBalance', 'password'
+  const [resetStep, setResetStep] = useState('confirm');
   const [depositRecordsOpen, setDepositRecordsOpen] = useState(false);
   const [withdrawalRecordsOpen, setWithdrawalRecordsOpen] = useState(false);
+  const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(null);
   
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
@@ -334,12 +337,13 @@ export const ProfitTrackerPage = () => {
 
   const loadData = async () => {
     try {
-      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes] = await Promise.all([
+      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
         currencyAPI.getRates('USDT'),
         api.get('/profit/withdrawals').catch(() => ({ data: [] })),
         api.get('/trade/active-signal').catch(() => ({ data: null })),
+        api.get('/trade/logs').catch(() => ({ data: [] })),
       ]);
       setSummary(summaryRes.data);
       
