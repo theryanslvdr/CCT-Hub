@@ -104,7 +104,7 @@ class DepositResponse(BaseModel):
     id: str
     user_id: str
     amount: float
-    product: str
+    product: Optional[str] = "MOIL10"  # Made optional with default for withdrawals
     currency: str
     notes: Optional[str]
     created_at: datetime
