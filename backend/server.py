@@ -704,6 +704,103 @@ async def get_trade_logs(limit: int = 50, user: dict = Depends(get_current_user)
     ).sort("created_at", -1).to_list(limit)
     return [TradeLogResponse(**{**t, "created_at": datetime.fromisoformat(t["created_at"]) if isinstance(t["created_at"], str) else t["created_at"]}) for t in trades]
 
+@trade_router.get("/history")
+async def get_trade_history(
+    page: int = 1, 
+    page_size: int = 10, 
+    user: dict = Depends(get_current_user)
+):
+    """Get paginated trade history with signal details"""
+    skip = (page - 1) * page_size
+    
+    # Get total count
+    total = await db.trade_logs.count_documents({"user_id": user["id"]})
+    
+    # Get paginated trades
+    trades = await db.trade_logs.find(
+        {"user_id": user["id"]}, 
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
+    
+    # Enrich with signal details
+    enriched_trades = []
+    for trade in trades:
+        signal_details = None
+        if trade.get("signal_id"):
+            signal = await db.trading_signals.find_one({"id": trade["signal_id"]}, {"_id": 0})
+            if signal:
+                signal_details = {
+                    "product": signal.get("product", "MOIL10"),
+                    "trade_time": signal.get("trade_time"),
+                    "trade_timezone": signal.get("trade_timezone", "Asia/Manila"),
+                }
+        
+        enriched_trades.append({
+            **trade,
+            "created_at": datetime.fromisoformat(trade["created_at"]) if isinstance(trade["created_at"], str) else trade["created_at"],
+            "signal_details": signal_details,
+            "time_entered": trade.get("time_entered"),  # User-editable field
+        })
+    
+    return {
+        "trades": enriched_trades,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size if total > 0 else 1
+    }
+
+class UpdateTradeTimeEntered(BaseModel):
+    time_entered: str  # HH:MM format
+
+@trade_router.put("/logs/{trade_id}/time-entered")
+async def update_trade_time_entered(
+    trade_id: str, 
+    data: UpdateTradeTimeEntered, 
+    user: dict = Depends(get_current_user)
+):
+    """Update the time entered for a trade log"""
+    result = await db.trade_logs.update_one(
+        {"id": trade_id, "user_id": user["id"]},
+        {"$set": {"time_entered": data.time_entered}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    
+    return {"message": "Time entered updated", "time_entered": data.time_entered}
+
+@trade_router.get("/streak")
+async def get_trade_streak(user: dict = Depends(get_current_user)):
+    """Calculate current streak of 'exceeded' or 'perfect' trades"""
+    # Get all trades ordered by date descending
+    trades = await db.trade_logs.find(
+        {"user_id": user["id"]}, 
+        {"_id": 0, "performance": 1, "created_at": 1}
+    ).sort("created_at", -1).to_list(1000)
+    
+    if not trades:
+        return {"streak": 0, "streak_type": None}
+    
+    # Calculate streak
+    streak = 0
+    streak_type = None
+    
+    for trade in trades:
+        perf = trade.get("performance")
+        if perf in ["exceeded", "perfect"]:
+            if streak == 0:
+                streak_type = "winning"
+            streak += 1
+        else:
+            break  # Streak broken
+    
+    return {
+        "streak": streak,
+        "streak_type": streak_type,  # "winning" if positive, None if no streak
+        "total_trades": len(trades)
+    }
+
 @trade_router.get("/active-signal")
 async def get_active_signal():
     signal = await db.trading_signals.find_one({"is_active": True}, {"_id": 0})
