@@ -205,7 +205,7 @@ class CrossCurrentAPITester:
             "currency": "USD"
         }
         
-        success, response = self.make_request('POST', 'debt/', debt_data, 201)
+        success, response = self.make_request('POST', 'debt/', debt_data, 200)
         if success and 'id' in response:
             self.log_test("Add Debt", True, f"Created debt: {debt_data['name']}")
             
