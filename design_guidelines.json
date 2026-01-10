@@ -1,0 +1,137 @@
+{
+  "brand_identity": {
+    "name": "CrossCurrent Finance Center",
+    "archetype": "Electric & Jewel (Professional Trading)",
+    "emotional_tone": "Precision, Authority, High-Frequency, Trust",
+    "design_principles": [
+      "Fusion over Imitation: Mix Bloomberg Terminal density with Consumer Fintech polish",
+      "Data Density: High information density but with clear hierarchy",
+      "Dark Mode First: Optimized for low-light environments and long sessions",
+      "Visual Feedback: Immediate reaction to every interaction (hover, click, update)"
+    ]
+  },
+  "typography": {
+    "headings": {
+      "family": "Manrope, sans-serif",
+      "weights": ["600", "700", "800"],
+      "usage": "Page titles, Section headers, KPI values",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "family": "Inter, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "General text, labels, descriptions",
+      "letter_spacing": "tracking-normal"
+    },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "weights": ["400", "500"],
+      "usage": "Financial data, tabular numbers, wallet addresses, API keys",
+      "letter_spacing": "tracking-wide"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": {
+        "default": "#09090B",
+        "paper": "#18181B",
+        "subtle": "#27272A"
+      },
+      "primary": {
+        "default": "#3B82F6",
+        "hover": "#2563EB",
+        "foreground": "#FFFFFF"
+      },
+      "secondary": {
+        "default": "#27272A",
+        "hover": "#3F3F46",
+        "foreground": "#FAFAFA"
+      },
+      "accent": {
+        "cyan": "#06B6D4",
+        "purple": "#8B5CF6",
+        "amber": "#F59E0B"
+      },
+      "semantic": {
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    },
+    "gradients": {
+      "primary": "bg-gradient-to-r from-blue-600 to-cyan-500",
+      "glow": "bg-gradient-to-b from-white/10 to-transparent",
+      "surface": "bg-gradient-to-br from-zinc-900 to-zinc-950"
+    }
+  },
+  "layout_system": {
+    "dashboard_grid": {
+      "type": "Control Room Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:p-6",
+      "areas": {
+        "sidebar": "col-span-12 md:col-span-2",
+        "main": "col-span-12 md:col-span-10",
+        "widget_large": "col-span-12 md:col-span-8 lg:col-span-9",
+        "widget_small": "col-span-12 md:col-span-4 lg:col-span-3"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-4 md:p-8",
+      "section_gap": "gap-6 md:gap-8",
+      "component_gap": "gap-4"
+    }
+  },
+  "component_styles": {
+    "cards": {
+      "default": "bg-zinc-900/50 border border-white/10 backdrop-blur-md shadow-xl rounded-xl",
+      "highlight": "bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-blue-500/20 shadow-blue-900/10 rounded-xl",
+      "interactive": "hover:border-blue-500/40 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+    },
+    "buttons": {
+      "primary": "bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-400/20 rounded-lg font-medium transition-all active:scale-95",
+      "secondary": "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 hover:border-zinc-600 rounded-lg font-medium transition-all",
+      "ghost": "hover:bg-white/5 text-zinc-400 hover:text-white transition-colors rounded-lg"
+    },
+    "inputs": {
+      "default": "bg-zinc-950/50 border-zinc-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 transition-all"
+    },
+    "tables": {
+      "header": "text-xs uppercase tracking-wider text-zinc-500 font-medium bg-zinc-900/50",
+      "row": "border-b border-zinc-800/50 hover:bg-white/5 transition-colors",
+      "cell": "py-3 px-4 text-sm text-zinc-300"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-black/40 border border-white/10",
+    "neon_glow": "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
+    "grid_background": "bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+  },
+  "assets": {
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxjcnlwdG9jdXJyZW5jeSUyMHRyYWRpbmclMjBjaGFydCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODAzNTkxMHww&ixlib=rb-4.1.0&q=85",
+      "chart_viz": "https://images.unsplash.com/photo-1634097537825-b446635b2f7f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxjcnlwdG9jdXJyZW5jeSUyMHRyYWRpbmclMjBjaGFydCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODAzNTkxMHww&ixlib=rb-4.1.0&q=85",
+      "world_map": "https://images.unsplash.com/photo-1639060015191-9d83063eab2a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxmdXR1cmlzdGljJTIwd29ybGQlMjBtYXAlMjBkYXJrJTIwY29ubmVjdGlvbnxlbnwwfHx8fDE3NjgwMzU5MTJ8MA&ixlib=rb-4.1.0&q=85",
+      "abstract_data": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBmaW5hbmNpYWwlMjBkYXRhJTIwdmlzdWFsaXphdGlvbnxlbnwwfHx8fDE3NjgwMzU5MDl8MA&ixlib=rb-4.1.0&q=85"
+    },
+    "icons": "Use Lucide React (default) or Phosphor Icons for specific trading metaphors"
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Ensure 'Manrope' and 'JetBrains Mono' are imported in index.css or via Google Fonts.",
+    "2. THEME: Apply the 'dark' class to the root HTML element by default. Do not rely on system preference alone.",
+    "3. LAYOUT: Use the 'Control Room Grid' for the main dashboard. Sidebar on left (collapsible), Header on top, Main content in the center.",
+    "4. COMPONENTS: Customize Shadcn components to match the 'component_styles' defined above. Remove default rounded-md and use rounded-lg or rounded-xl.",
+    "5. CHARTS: Use Recharts. Style them with the 'semantic' colors defined in the palette. Ensure tooltips have the 'glassmorphism' style.",
+    "6. DATA: All financial data must use the 'mono' font family for alignment.",
+    "7. INTERACTION: Add hover states to all rows in tables and all cards. Use 'transition-all duration-200'.",
+    "8. ACCESSIBILITY: Ensure all text on dark backgrounds meets contrast ratios. Use 'text-zinc-400' for secondary text, not darker.",
+    "9. TESTING: Add 'data-testid' to all interactive elements (buttons, inputs, links)."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Avoid 'AI Slop': Do not use generic centered layouts or default Shadcn styles without customization.",
+    "Depth: Use z-index and shadows to create depth. The dashboard should feel layered, not flat.",
+    "Motion: Micro-interactions are mandatory. Buttons should scale slightly on press. Lists should stagger in.",
+    "Spacing: Use 'gap-6' or 'gap-8' between major sections. Don't cram content.",
+    "Toasts: Use 'sonner' for notifications. Style them to match the dark theme (black bg, white text, colored border)."
+  ]
+}
