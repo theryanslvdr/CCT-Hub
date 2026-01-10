@@ -1,34 +1,203 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* CrossCurrent Finance Center - Main App Styles */
+
+.app-container {
+    @apply min-h-screen bg-background;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+/* Sidebar */
+.sidebar {
+    @apply fixed left-0 top-0 h-full w-64 bg-zinc-950 border-r border-zinc-800/50 z-40;
+}
+
+.sidebar-collapsed {
+    @apply w-16;
+}
+
+.sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all rounded-lg mx-2 cursor-pointer;
+}
+
+.sidebar-item.active {
+    @apply bg-blue-600/10 text-blue-400 border border-blue-500/20;
+}
+
+/* Main content area */
+.main-content {
+    @apply ml-64 min-h-screen;
+}
+
+.main-content-collapsed {
+    @apply ml-16;
+}
+
+/* Header */
+.app-header {
+    @apply sticky top-0 z-30 h-16 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-6;
+}
+
+/* Dashboard grid */
+.dashboard-grid {
+    @apply grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:p-6;
+}
+
+/* Widget sizes */
+.widget-full {
+    @apply col-span-12;
+}
+
+.widget-large {
+    @apply col-span-12 lg:col-span-8;
+}
+
+.widget-medium {
+    @apply col-span-12 md:col-span-6;
+}
+
+.widget-small {
+    @apply col-span-12 md:col-span-6 lg:col-span-4;
+}
+
+.widget-mini {
+    @apply col-span-12 md:col-span-4 lg:col-span-3;
+}
+
+/* Trade direction badges */
+.direction-buy {
+    @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+}
+
+.direction-sell {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+}
+
+/* Performance badges */
+.performance-exceeded {
+    @apply bg-emerald-500/20 text-emerald-400;
+}
+
+.performance-perfect {
+    @apply bg-blue-500/20 text-blue-400;
+}
+
+.performance-below {
+    @apply bg-amber-500/20 text-amber-400;
+}
+
+/* World timer */
+.world-timer {
+    @apply font-mono text-4xl font-bold tracking-wider;
+}
+
+/* LOT Calculator */
+.lot-calculator {
+    @apply glass-card p-6;
+}
+
+.lot-result {
+    @apply text-5xl font-mono font-bold text-gradient py-4;
+}
+
+/* Exit Alert Section */
+.exit-section {
+    @apply glass-card p-6 border-2 border-dashed border-zinc-700 transition-all duration-500;
+}
+
+.exit-section.active {
+    @apply border-solid border-emerald-500 bg-emerald-500/10 exit-alert-pulse;
+}
+
+.exit-button {
+    @apply w-full py-6 text-2xl font-bold rounded-xl transition-all;
+}
+
+.exit-button.idle {
+    @apply bg-zinc-800 hover:bg-zinc-700 text-zinc-300;
+}
+
+.exit-button.countdown {
+    @apply bg-amber-600 hover:bg-amber-500 text-white animate-pulse;
+}
+
+.exit-button.exit-now {
+    @apply bg-emerald-500 hover:bg-emerald-400 text-white exit-alert-pulse text-3xl;
+}
+
+/* Auth pages */
+.auth-container {
+    @apply min-h-screen flex items-center justify-center p-4 grid-bg;
+}
+
+.auth-card {
+    @apply glass-card w-full max-w-md p-8;
+}
+
+/* Admin pages */
+.admin-header {
+    @apply flex items-center justify-between mb-6;
+}
+
+.admin-title {
+    @apply text-2xl font-bold text-white;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        @apply transform -translate-x-full transition-transform;
+    }
+    
+    .sidebar.open {
+        @apply translate-x-0;
+    }
+    
+    .main-content {
+        @apply ml-0;
+    }
+    
+    .kpi-value {
+        @apply text-2xl;
     }
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Loading states */
+.skeleton {
+    @apply bg-zinc-800 animate-pulse rounded;
 }
 
-.App-link {
-    color: #61dafb;
+.skeleton-text {
+    @apply h-4 skeleton;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.skeleton-title {
+    @apply h-8 skeleton;
+}
+
+/* Celebration animations */
+@keyframes celebrate {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    50% { transform: scale(1.2); }
+    75% { transform: scale(1.1) rotate(5deg); }
+}
+
+.celebrate {
+    animation: celebrate 0.5s ease-in-out;
+}
+
+@keyframes confetti {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+
+/* Toast customization */
+[data-sonner-toast] {
+    @apply bg-zinc-900 border border-zinc-800 text-zinc-100 !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+    @apply border-emerald-500/30 !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+    @apply border-red-500/30 !important;
 }
