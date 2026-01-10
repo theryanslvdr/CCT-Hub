@@ -42,30 +42,20 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Notes field for additional context
 
 ### Profit Tracker Features
-- ✅ Initial balance setup dialog for first-time users
+- ✅ Initial balance setup dialog for first-time users (limited to 2 decimals)
 - ✅ **Deposit Records**: Hidden behind button, shows Date, Amount, Currency, Notes
 - ✅ **Withdrawal Records**: Hidden behind button, shows Date Initiated, Amount (USDT), Final Binance (USDT), Est. Arrival, Notes, Confirm Receipt
 - ✅ **Confirm Receipt**: Button changes to exact date/time (user timezone) when clicked
-- ✅ Multi-step deposit simulation:
-  - Step 1: Input Binance USDT amount
-  - Step 2: Shows 1% deposit fee calculation and Receive Amount
-  - Step 3: Confirmation popup ("Yes, I confirm" / "No, I'm just thinking")
-- ✅ Multi-step withdrawal simulation:
-  - Shows Merin Fee (3%) + Binance Fee ($1)
-  - Shows estimated receive date (current date + 2 business days)
-  - **Deducts balance immediately** after confirmation
-  - Complete Withdrawal button with confirmation popup
-- ✅ **Projection Vision** card:
-  - Summary view: 1 Month, 3 Months, 6 Months cards + **Year dropdown (1-5 years)**
-  - **Monthly Table accordion**: Grouped by Year 1-5, shows Final Projected Balance per year
-  - Formula: LOT Size = Balance ÷ 980, Net Profit = LOT Size × 15
+- ✅ Multi-step deposit simulation with 1% fee calculation
+- ✅ Multi-step withdrawal simulation with immediate balance deduction
+- ✅ **Projection Vision** card with Year dropdown (1-5 years)
+- ✅ **Monthly Table accordion** grouped by Year 1-5
 - ✅ **Large number formatting**: $X.XX Million, Billion, Trillion
-- ✅ Current LOT Size card showing Balance ÷ 980 formula
-- ✅ Finance formatting: $XXX,XXX.XX (2 decimal places)
-- ✅ **Multi-step Reset Tracker**:
-  - Step 1: Warning about deletion
-  - Step 2: New Account Value + Reason for Reset
-  - Step 3: **Password verification** for security
+- ✅ **LOT Size**: All displays truncated to 2 decimal places (not rounded)
+- ✅ **Total Deposits card**: Currency dropdown inside (USD, PHP, EUR, GBP)
+- ✅ **Buttons aligned right**: Deposit Records, Withdrawal Records, Reset Tracker
+- ✅ **Trading Signal Banner**: Shows today's signal with Trade Now button → Merin
+- ✅ **Multi-step Reset Tracker** with password verification
 
 ## Bug Fixes Completed (2026-01-10)
 - ✅ **PROB-1**: Fixed login persistence - Users now stay logged in after page refresh (AuthContext localStorage fix)
