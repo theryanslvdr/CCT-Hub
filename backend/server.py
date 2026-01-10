@@ -602,6 +602,10 @@ async def get_active_signal():
     signal = await db.trading_signals.find_one({"is_active": True}, {"_id": 0})
     if not signal:
         return {"message": "No active signal", "signal": None}
+    # Handle missing fields for backward compatibility
+    signal.setdefault("profit_points", 15)
+    signal.setdefault("is_simulated", False)
+    signal.setdefault("trade_timezone", "Asia/Manila")
     return {"signal": TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"]) if isinstance(signal["created_at"], str) else signal["created_at"]})}
 
 @trade_router.get("/daily-summary")
