@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { userAPI } from '@/lib/api';
+import { userAPI, authAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { User, Globe, Calculator, Save } from 'lucide-react';
+import { User, Globe, Lock, Save, Eye, EyeOff } from 'lucide-react';
 
 const timezones = [
   { value: 'Asia/Manila', label: 'Philippines (GMT+8)' },
@@ -30,14 +30,20 @@ export const ProfilePage = () => {
   const { user, updateUser } = useAuth();
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [timezone, setTimezone] = useState(user?.timezone || 'Asia/Manila');
-  const [lotSize, setLotSize] = useState(user?.lot_size || 0.01);
   const [saving, setSaving] = useState(false);
+  
+  // Password reset fields
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
       setTimezone(user.timezone || 'Asia/Manila');
-      setLotSize(user.lot_size || 0.01);
     }
   }, [user]);
 
@@ -47,16 +53,47 @@ export const ProfilePage = () => {
       const response = await userAPI.updateProfile({
         full_name: fullName,
         timezone: timezone,
-        lot_size: parseFloat(lotSize),
       });
       
-      // Update local user state
       updateUser(response.data);
       toast.success('Profile updated successfully!');
     } catch (error) {
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    
+    setChangingPassword(true);
+    try {
+      await userAPI.changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+      toast.success('Password changed successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -77,7 +114,6 @@ export const ProfilePage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Full Name */}
           <div>
             <Label className="text-zinc-300">Full Name</Label>
             <Input
@@ -88,7 +124,6 @@ export const ProfilePage = () => {
             />
           </div>
 
-          {/* Email (read-only) */}
           <div>
             <Label className="text-zinc-300">Email</Label>
             <Input
@@ -128,7 +163,6 @@ export const ProfilePage = () => {
             </p>
           </div>
 
-          {/* Preview */}
           <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
             <p className="text-xs text-zinc-500 mb-2">Current time in your timezone:</p>
             <p className="text-3xl font-mono font-bold text-white">{currentTime}</p>
@@ -136,36 +170,76 @@ export const ProfilePage = () => {
         </CardContent>
       </Card>
 
-      {/* Trading Settings */}
+      {/* Password Reset */}
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <Calculator className="w-5 h-5" /> Trading Settings
+            <Lock className="w-5 h-5" /> Change Password
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           <div>
-            <Label className="text-zinc-300">Default LOT Size</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={lotSize}
-              onChange={(e) => setLotSize(e.target.value)}
-              className="input-dark mt-1"
-              data-testid="lot-size-input"
-            />
-            <p className="text-xs text-zinc-500 mt-1">
-              This will be your default LOT size in the Trade Monitor
-            </p>
+            <Label className="text-zinc-300">Current Password</Label>
+            <div className="relative mt-1">
+              <Input
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="input-dark pr-10"
+                placeholder="Enter current password"
+                data-testid="current-password-input"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+              >
+                {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
-          {/* Preview */}
-          <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-            <p className="text-xs text-zinc-500 mb-2">Projected Exit Value (LOT × 15):</p>
-            <p className="text-3xl font-mono font-bold text-gradient">
-              ${(parseFloat(lotSize) * 15).toFixed(2)}
-            </p>
+          <div>
+            <Label className="text-zinc-300">New Password</Label>
+            <div className="relative mt-1">
+              <Input
+                type={showNewPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="input-dark pr-10"
+                placeholder="Enter new password"
+                data-testid="new-password-input"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+              >
+                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
+
+          <div>
+            <Label className="text-zinc-300">Confirm New Password</Label>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="input-dark mt-1"
+              placeholder="Confirm new password"
+              data-testid="confirm-password-input"
+            />
+          </div>
+
+          <Button
+            onClick={handleChangePassword}
+            className="btn-secondary w-full"
+            disabled={changingPassword}
+            data-testid="change-password-button"
+          >
+            {changingPassword ? 'Changing...' : 'Change Password'}
+          </Button>
         </CardContent>
       </Card>
 
@@ -178,7 +252,7 @@ export const ProfilePage = () => {
           data-testid="save-profile-button"
         >
           <Save className="w-4 h-4" />
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? 'Saving...' : 'Save Profile Changes'}
         </Button>
       </div>
     </div>

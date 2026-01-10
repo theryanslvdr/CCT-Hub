@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Settings, Upload, Globe, Image, Palette } from 'lucide-react';
+import { Settings, Upload, Globe, Image, Palette, RefreshCw } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -16,6 +17,7 @@ export const AdminSettingsPage = () => {
     og_image_url: '',
     primary_color: '#3B82F6',
     accent_color: '#06B6D4',
+    hide_emergent_badge: false,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,6 +25,22 @@ export const AdminSettingsPage = () => {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  // Apply settings to document
+  useEffect(() => {
+    // Update favicon
+    if (settings.favicon_url) {
+      const favicon = document.querySelector("link[rel~='icon']") || document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.href = settings.favicon_url;
+      document.head.appendChild(favicon);
+    }
+    
+    // Update title
+    if (settings.site_title) {
+      document.title = settings.site_title;
+    }
+  }, [settings.favicon_url, settings.site_title]);
 
   const loadSettings = async () => {
     try {
@@ -39,10 +57,14 @@ export const AdminSettingsPage = () => {
     setSaving(true);
     try {
       await settingsAPI.updatePlatform(settings);
-      toast.success('Settings saved successfully!');
+      toast.success('Settings saved! Refreshing page...');
+      
+      // Auto-refresh after 1.5 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       toast.error('Failed to save settings');
-    } finally {
       setSaving(false);
     }
   };
@@ -88,13 +110,15 @@ export const AdminSettingsPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label className="text-zinc-300">Site Title</Label>
+            <Label className="text-zinc-300">Site Title (Browser Tab)</Label>
             <Input
               value={settings.site_title}
               onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
               className="input-dark mt-1"
+              placeholder="CrossCurrent Finance Center"
               data-testid="site-title-input"
             />
+            <p className="text-xs text-zinc-500 mt-1">This appears in the browser tab</p>
           </div>
           <div>
             <Label className="text-zinc-300">Site Description</Label>
@@ -127,7 +151,7 @@ export const AdminSettingsPage = () => {
         <CardContent className="space-y-6">
           {/* Logo */}
           <div>
-            <Label className="text-zinc-300">Logo</Label>
+            <Label className="text-zinc-300">Logo (replaces "CrossCurrent" text in sidebar)</Label>
             <div className="mt-2 flex items-center gap-4">
               {settings.logo_url ? (
                 <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden">
@@ -159,7 +183,7 @@ export const AdminSettingsPage = () => {
 
           {/* Favicon */}
           <div>
-            <Label className="text-zinc-300">Favicon</Label>
+            <Label className="text-zinc-300">Favicon (browser tab icon)</Label>
             <div className="mt-2 flex items-center gap-4">
               {settings.favicon_url ? (
                 <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden">
@@ -187,6 +211,19 @@ export const AdminSettingsPage = () => {
                 </label>
               </div>
             </div>
+          </div>
+
+          {/* Hide Emergent Badge Toggle */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+            <div>
+              <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
+              <p className="text-xs text-zinc-500 mt-1">Toggle to show/hide the Emergent branding badge</p>
+            </div>
+            <Switch
+              checked={settings.hide_emergent_badge}
+              onCheckedChange={(v) => setSettings({ ...settings, hide_emergent_badge: v })}
+              data-testid="hide-badge-toggle"
+            />
           </div>
         </CardContent>
       </Card>
@@ -253,8 +290,14 @@ export const AdminSettingsPage = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="btn-primary" disabled={saving} data-testid="save-settings-button">
-          {saving ? 'Saving...' : 'Save Settings'}
+        <Button onClick={handleSave} className="btn-primary gap-2" disabled={saving} data-testid="save-settings-button">
+          {saving ? (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin" /> Saving & Refreshing...
+            </>
+          ) : (
+            <>Save Settings</>
+          )}
         </Button>
       </div>
     </div>
