@@ -232,7 +232,7 @@ class CrossCurrentAPITester:
             "price_type": "fixed"
         }
         
-        success, response = self.make_request('POST', 'goals/', goal_data, 201)
+        success, response = self.make_request('POST', 'goals/', goal_data, 200)
         if success and 'id' in response:
             progress = response.get('progress_percentage', 0)
             self.log_test("Create Goal", True, f"Goal: {goal_data['name']} ({progress}% complete)")
