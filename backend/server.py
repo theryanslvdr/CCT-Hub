@@ -790,7 +790,7 @@ async def get_debt_repayment_plan(user: dict = Depends(get_current_user)):
 
 # ==================== PROFIT PLANNER (GOALS) ROUTES ====================
 
-@goals_router.post("/", response_model=GoalResponse)
+@goals_router.post("", response_model=GoalResponse)
 async def create_goal(data: GoalCreate, user: dict = Depends(get_current_user)):
     goal_id = str(uuid.uuid4())
     goal = {
@@ -816,7 +816,7 @@ async def create_goal(data: GoalCreate, user: dict = Depends(get_current_user)):
         "created_at": datetime.fromisoformat(goal["created_at"])
     })
 
-@goals_router.get("/", response_model=List[GoalResponse])
+@goals_router.get("", response_model=List[GoalResponse])
 async def get_goals(user: dict = Depends(get_current_user)):
     goals = await db.goals.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
     result = []
