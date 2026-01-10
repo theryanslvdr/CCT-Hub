@@ -6,26 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Play, Square, Calculator, Clock, Globe, AlertTriangle, Trophy, Target, TrendingUp, TrendingDown, Volume2, VolumeX } from 'lucide-react';
+import { Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send } from 'lucide-react';
 
 export const TradeMonitorPage = () => {
   const { user } = useAuth();
   const [signal, setSignal] = useState(null);
   const [dailySummary, setDailySummary] = useState(null);
+  const [profitSummary, setProfitSummary] = useState(null);
   const [isTrading, setIsTrading] = useState(false);
+  const [tradeEnded, setTradeEnded] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [showExitAlert, setShowExitAlert] = useState(false);
   const [lotSize, setLotSize] = useState(user?.lot_size || 0.01);
   const [exitValue, setExitValue] = useState(0);
   const [worldTime, setWorldTime] = useState(new Date());
-  const [selectedTimezone, setSelectedTimezone] = useState(user?.timezone || 'UTC');
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [logDialogOpen, setLogDialogOpen] = useState(false);
-  const [newTrade, setNewTrade] = useState({ lot_size: lotSize, direction: 'BUY', actual_profit: '', notes: '' });
-  const [lastPerformance, setLastPerformance] = useState(null);
+  const [actualExitValue, setActualExitValue] = useState('');
+  const [lastTrade, setLastTrade] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMessage, setCelebrationMessage] = useState('');
 
   const audioRef = useRef(null);
   const countdownRef = useRef(null);
@@ -33,11 +34,11 @@ export const TradeMonitorPage = () => {
   // Load data
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 30000); // Refresh every 30s
+    const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // World clock
+  // World clock - uses user's timezone from profile
   useEffect(() => {
     const timer = setInterval(() => setWorldTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -46,30 +47,40 @@ export const TradeMonitorPage = () => {
   // Calculate exit value when lot size changes
   useEffect(() => {
     setExitValue(calculateExitValue(lotSize));
-    setNewTrade(prev => ({ ...prev, lot_size: lotSize }));
   }, [lotSize]);
 
   const loadData = async () => {
     try {
-      const [signalRes, summaryRes] = await Promise.all([
+      const [signalRes, summaryRes, profitRes] = await Promise.all([
         tradeAPI.getActiveSignal(),
         tradeAPI.getDailySummary(),
+        profitAPI.getSummary(),
       ]);
       setSignal(signalRes.data.signal);
       setDailySummary(summaryRes.data);
+      setProfitSummary(profitRes.data);
     } catch (error) {
       console.error('Failed to load trade data:', error);
     }
   };
 
-  const formatTimeForTimezone = (date, timezone) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: timezone,
-    });
+  const formatTimeForTimezone = (date, tz = 'UTC') => {
+    try {
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: tz,
+      });
+    } catch {
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+    }
   };
 
   const startTrade = useCallback(() => {
@@ -79,13 +90,22 @@ export const TradeMonitorPage = () => {
     }
 
     setIsTrading(true);
+    setTradeEnded(false);
     setShowExitAlert(false);
+    setLastTrade(null);
+    setShowCelebration(false);
 
-    // Parse trade time
+    // Parse trade time based on signal timezone
     const [hours, minutes] = signal.trade_time.split(':').map(Number);
+    const signalTz = signal.trade_timezone || 'Asia/Manila';
+    
+    // Create target time in signal's timezone
     const now = new Date();
     const tradeTime = new Date();
-    tradeTime.setUTCHours(hours, minutes, 0, 0);
+    
+    // Convert signal time to UTC for comparison
+    const tzOffset = getTimezoneOffset(signalTz);
+    tradeTime.setUTCHours(hours - tzOffset, minutes, 0, 0);
 
     // If trade time has passed, set for tomorrow
     if (tradeTime <= now) {
@@ -98,12 +118,10 @@ export const TradeMonitorPage = () => {
       const diff = tradeTime - now;
 
       if (diff <= 0) {
-        // Trade time reached - show exit alert!
         clearInterval(countdownRef.current);
         setShowExitAlert(true);
         setCountdown(null);
         
-        // Play alarm sound
         if (soundEnabled && audioRef.current) {
           audioRef.current.play().catch(console.error);
         }
@@ -118,10 +136,19 @@ export const TradeMonitorPage = () => {
     }, 1000);
   }, [signal, soundEnabled]);
 
-  const stopTrade = () => {
-    setIsTrading(false);
+  const getTimezoneOffset = (tz) => {
+    const tzOffsets = {
+      'Asia/Manila': 8,
+      'Asia/Singapore': 8,
+      'Asia/Taipei': 8,
+      'UTC': 0,
+    };
+    return tzOffsets[tz] || 0;
+  };
+
+  const endTrade = () => {
     setShowExitAlert(false);
-    setCountdown(null);
+    setTradeEnded(true);
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
@@ -131,25 +158,46 @@ export const TradeMonitorPage = () => {
     }
   };
 
-  const handleLogTrade = async () => {
-    if (!newTrade.actual_profit) {
-      toast.error('Please enter your actual profit');
+  const stopTrade = () => {
+    setIsTrading(false);
+    setShowExitAlert(false);
+    setTradeEnded(false);
+    setCountdown(null);
+    setLastTrade(null);
+    setActualExitValue('');
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const submitActualProfit = async () => {
+    if (!actualExitValue || parseFloat(actualExitValue) < 0) {
+      toast.error('Please enter a valid exit value');
       return;
     }
 
     try {
       const response = await tradeAPI.logTrade({
-        lot_size: parseFloat(newTrade.lot_size),
-        direction: signal?.direction || newTrade.direction,
-        actual_profit: parseFloat(newTrade.actual_profit),
-        notes: newTrade.notes,
+        lot_size: lotSize,
+        direction: signal?.direction || 'BUY',
+        actual_profit: parseFloat(actualExitValue),
+        notes: `Signal: ${signal?.product || 'MOIL10'}`,
       });
 
       const result = response.data;
-      setLastPerformance(result);
+      setLastTrade(result);
+      setTradeEnded(false);
+      setIsTrading(false);
 
-      // Show celebration/encouragement based on performance
+      // Show celebration based on performance
       const message = getPerformanceMessage(result.performance);
+      setCelebrationMessage(message);
+      setShowCelebration(true);
+
       if (result.performance === 'exceeded') {
         toast.success(message, { duration: 5000 });
       } else if (result.performance === 'perfect') {
@@ -158,24 +206,27 @@ export const TradeMonitorPage = () => {
         toast.info(message, { duration: 5000 });
       }
 
-      setLogDialogOpen(false);
-      setNewTrade({ lot_size: lotSize, direction: 'BUY', actual_profit: '', notes: '' });
-      stopTrade();
+      setActualExitValue('');
       loadData();
     } catch (error) {
       toast.error('Failed to log trade');
     }
   };
 
-  const timezones = [
-    { value: 'UTC', label: 'UTC' },
-    { value: 'America/New_York', label: 'New York' },
-    { value: 'Europe/London', label: 'London' },
-    { value: 'Asia/Tokyo', label: 'Tokyo' },
-    { value: 'Asia/Singapore', label: 'Singapore' },
-    { value: 'Asia/Manila', label: 'Manila' },
-    { value: 'Australia/Sydney', label: 'Sydney' },
-  ];
+  const forwardToProfit = async (tradeId) => {
+    try {
+      await tradeAPI.forwardToProfit(tradeId);
+      toast.success('Trade profit forwarded to Profit Tracker!');
+      setLastTrade(null);
+      setShowCelebration(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to forward trade');
+    }
+  };
+
+  // Get projected profit from profit tracker
+  const projectedProfit = profitSummary?.total_projected_profit || 0;
 
   return (
     <div className="space-y-6">
@@ -186,7 +237,7 @@ export const TradeMonitorPage = () => {
 
       {/* Active Signal Banner */}
       {signal ? (
-        <div className={`glass-highlight p-6 ${showExitAlert ? 'exit-alert-pulse border-emerald-400' : ''}`}>
+        <div className={`glass-highlight p-6 ${showExitAlert ? 'exit-section active' : ''}`}>
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               <div>
@@ -197,7 +248,7 @@ export const TradeMonitorPage = () => {
                 {signal.direction}
               </div>
               <div>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">Trade Time (UTC)</p>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider">Trade Time ({signal.trade_timezone || 'Asia/Manila'})</p>
                 <p className="text-3xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
               </div>
             </div>
@@ -217,7 +268,7 @@ export const TradeMonitorPage = () => {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Exit Alert Section */}
+        {/* Trade Control */}
         <Card className={`glass-card lg:col-span-2 ${showExitAlert ? 'exit-section active' : ''}`}>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Trade Control</CardTitle>
@@ -238,54 +289,36 @@ export const TradeMonitorPage = () => {
                   <div className="text-6xl">🚨</div>
                 </div>
                 <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">EXIT NOW!</h2>
-                <p className="text-xl text-zinc-300">Trade time reached. Exit at ${formatNumber(exitValue)}</p>
+                <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">${formatNumber(exitValue)}</span></p>
                 <div className="flex gap-4 justify-center">
-                  <Dialog open={logDialogOpen} onOpenChange={setLogDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="btn-primary text-xl py-6 px-8" data-testid="log-trade-button">
-                        <Trophy className="w-6 h-6 mr-2" /> Log Trade
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="glass-card border-zinc-800">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Log Your Trade</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 mt-4">
-                        <div className="p-4 rounded-lg bg-zinc-900/50">
-                          <p className="text-sm text-zinc-400">Projected Exit Value</p>
-                          <p className="text-3xl font-bold font-mono text-blue-400">${formatNumber(exitValue)}</p>
-                        </div>
-                        <div>
-                          <Label className="text-zinc-300">Actual Profit ($)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={newTrade.actual_profit}
-                            onChange={(e) => setNewTrade({ ...newTrade, actual_profit: e.target.value })}
-                            placeholder="Enter your actual profit"
-                            className="input-dark mt-1"
-                            data-testid="actual-profit-input"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-zinc-300">Notes (optional)</Label>
-                          <Input
-                            value={newTrade.notes}
-                            onChange={(e) => setNewTrade({ ...newTrade, notes: e.target.value })}
-                            placeholder="Add notes..."
-                            className="input-dark mt-1"
-                          />
-                        </div>
-                        <Button onClick={handleLogTrade} className="w-full btn-primary" data-testid="confirm-log-trade">
-                          Confirm Trade
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="stop-trade-button">
-                    <Square className="w-5 h-5 mr-2" /> Stop
+                  <Button onClick={endTrade} className="btn-primary text-xl py-6 px-8" data-testid="end-trade-button">
+                    <Square className="w-6 h-6 mr-2" /> End Trade
                   </Button>
                 </div>
+              </div>
+            ) : tradeEnded ? (
+              <div className="text-center space-y-6">
+                <h3 className="text-2xl font-bold text-white">Enter Your Exit Value</h3>
+                <p className="text-zinc-400">How much did you actually exit with?</p>
+                <div className="max-w-xs mx-auto">
+                  <Label className="text-zinc-300">Actual Exit Value (USD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={actualExitValue}
+                    onChange={(e) => setActualExitValue(e.target.value)}
+                    placeholder="Enter actual profit"
+                    className="input-dark mt-1 text-xl font-mono text-center"
+                    data-testid="actual-exit-input"
+                  />
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50">
+                  <p className="text-sm text-zinc-400">Projected Value</p>
+                  <p className="text-2xl font-mono font-bold text-blue-400">${formatNumber(exitValue)}</p>
+                </div>
+                <Button onClick={submitActualProfit} className="btn-primary py-4 px-8" data-testid="submit-actual-button">
+                  Submit & See Results
+                </Button>
               </div>
             ) : isTrading && countdown ? (
               <div className="text-center space-y-6">
@@ -301,7 +334,7 @@ export const TradeMonitorPage = () => {
                   ))}
                 </div>
                 <div className="text-zinc-400">
-                  Exit at: <span className="text-2xl font-mono font-bold text-emerald-400">${formatNumber(exitValue)}</span>
+                  Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">${formatNumber(exitValue)}</span>
                 </div>
                 <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
                   <Square className="w-5 h-5 mr-2" /> Cancel
@@ -312,7 +345,7 @@ export const TradeMonitorPage = () => {
                 <p className="text-zinc-400">Ready to trade? Check in when you're ready.</p>
                 <Button
                   onClick={startTrade}
-                  className="exit-button idle py-8 text-2xl"
+                  className="exit-button idle py-8 text-2xl w-full max-w-md"
                   disabled={!signal}
                   data-testid="check-in-button"
                 >
@@ -353,34 +386,31 @@ export const TradeMonitorPage = () => {
         </Card>
       </div>
 
-      {/* World Timer & Daily Summary */}
+      {/* World Timer & Today's Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* World Timer */}
+        {/* World Timer - Shows only user's timezone */}
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Globe className="w-5 h-5" /> World Timer
+              <Clock className="w-5 h-5" /> Your Time
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {timezones.slice(0, 6).map((tz) => (
-                <div
-                  key={tz.value}
-                  className={`p-4 rounded-lg transition-all cursor-pointer ${selectedTimezone === tz.value ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-zinc-900/50 hover:bg-zinc-800/50'}`}
-                  onClick={() => setSelectedTimezone(tz.value)}
-                >
-                  <p className="text-xs text-zinc-500">{tz.label}</p>
-                  <p className="text-2xl font-mono font-bold text-white">
-                    {formatTimeForTimezone(worldTime, tz.value)}
-                  </p>
-                </div>
-              ))}
+            <div className="text-center">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
+                {user?.timezone || 'UTC'}
+              </p>
+              <p className="text-6xl font-mono font-bold text-white tracking-wider">
+                {formatTimeForTimezone(worldTime, user?.timezone || 'UTC')}
+              </p>
+              <p className="text-sm text-zinc-500 mt-4">
+                Set your timezone in Profile Settings
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Daily Summary */}
+        {/* Today's Summary */}
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white">Today's Summary</CardTitle>
@@ -392,11 +422,11 @@ export const TradeMonitorPage = () => {
                 <p className="text-3xl font-mono font-bold text-white">{dailySummary?.trades_count || 0}</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Projected</p>
+                <p className="text-sm text-zinc-400">Projected Total</p>
                 <p className="text-3xl font-mono font-bold text-blue-400">${formatNumber(dailySummary?.total_projected || 0)}</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Actual</p>
+                <p className="text-sm text-zinc-400">Actual Total</p>
                 <p className="text-3xl font-mono font-bold text-emerald-400">${formatNumber(dailySummary?.total_actual || 0)}</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
@@ -410,25 +440,40 @@ export const TradeMonitorPage = () => {
         </Card>
       </div>
 
-      {/* Last Performance Celebration */}
-      {lastPerformance && (
-        <Card className={`glass-card ${lastPerformance.performance === 'exceeded' ? 'border-emerald-500/30 neon-success' : lastPerformance.performance === 'perfect' ? 'border-blue-500/30 neon-glow' : 'border-amber-500/30 neon-warning'}`}>
+      {/* Celebration/Result Card */}
+      {showCelebration && lastTrade && (
+        <Card className={`glass-card ${lastTrade.performance === 'exceeded' ? 'border-emerald-500/30 neon-success' : lastTrade.performance === 'perfect' ? 'border-blue-500/30 neon-glow' : 'border-amber-500/30 neon-warning'}`}>
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                {lastPerformance.performance === 'exceeded' && <Trophy className="w-12 h-12 text-emerald-400" />}
-                {lastPerformance.performance === 'perfect' && <Target className="w-12 h-12 text-blue-400" />}
-                {lastPerformance.performance === 'below' && <TrendingDown className="w-12 h-12 text-amber-400" />}
+                {lastTrade.performance === 'exceeded' && <Trophy className="w-16 h-16 text-emerald-400 animate-bounce" />}
+                {lastTrade.performance === 'perfect' && <Target className="w-16 h-16 text-blue-400" />}
+                {lastTrade.performance === 'below' && <TrendingDown className="w-16 h-16 text-amber-400" />}
                 <div>
-                  <p className="text-2xl font-bold text-white">{getPerformanceMessage(lastPerformance.performance)}</p>
-                  <p className="text-zinc-400">
-                    Projected: ${formatNumber(lastPerformance.projected_profit)} | Actual: ${formatNumber(lastPerformance.actual_profit)}
+                  <p className="text-3xl font-bold text-white">{celebrationMessage}</p>
+                  <p className="text-zinc-400 mt-1">
+                    Projected: ${formatNumber(lastTrade.projected_profit)} | Actual: ${formatNumber(lastTrade.actual_profit)}
                   </p>
                 </div>
               </div>
-              <div className={`text-4xl font-mono font-bold ${lastPerformance.profit_difference >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {lastPerformance.profit_difference >= 0 ? '+' : ''}${formatNumber(lastPerformance.profit_difference)}
+              <div className="text-center md:text-right">
+                <p className={`text-5xl font-mono font-bold ${lastTrade.profit_difference >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {lastTrade.profit_difference >= 0 ? '+' : ''}${formatNumber(lastTrade.profit_difference)}
+                </p>
+                <p className="text-sm text-zinc-500 mt-1">Difference</p>
               </div>
+            </div>
+            
+            {/* Forward to Profit Tracker Button */}
+            <div className="mt-6 pt-6 border-t border-zinc-800 flex justify-center">
+              <Button
+                onClick={() => forwardToProfit(lastTrade.id)}
+                className="btn-primary gap-2"
+                data-testid="forward-to-profit-button"
+              >
+                <Send className="w-4 h-4" /> Forward to Profit Tracker
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>
