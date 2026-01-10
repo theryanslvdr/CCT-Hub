@@ -83,12 +83,12 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Add Debt bug (DM-1) - FIXED
 - [x] Add Goal bug (PPL-1) - FIXED
 
-### P1 (High) - PENDING
-- [ ] Member Management enhancements (user editing, activity logs, filtering)
-- [ ] Branding settings (logo, favicon, site title)
-- [ ] Profile page password reset
-- [ ] Trading Signals management improvements
-- [ ] Profit Tracker feature additions
+### P1 (High) - ✅ COMPLETED (2026-01-10)
+- [x] Member Management enhancements (search, filters, pagination, view details with tabs, edit profile, suspend/unsuspend, set temp password)
+- [x] Trading Signals management improvements (profit_points multiplier, edit signals, simulate signals for super admin)
+- [x] Profit Tracker feature additions (reset tracker, initial balance setup dialog)
+- [x] Profile page password reset (already implemented)
+- [ ] Branding settings (logo, favicon, site title) - partially implemented
 - [ ] Email notifications for trade signals (Emailit configured)
 
 ### P2 (Medium)
