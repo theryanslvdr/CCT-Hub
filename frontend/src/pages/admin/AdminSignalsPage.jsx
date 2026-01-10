@@ -10,6 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Plus, Radio, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 
+const tradingTimezones = [
+  { value: 'Asia/Manila', label: 'Philippines (GMT+8)' },
+  { value: 'Asia/Singapore', label: 'Singapore (GMT+8)' },
+  { value: 'Asia/Taipei', label: 'Taiwan (GMT+8)' },
+];
+
 export const AdminSignalsPage = () => {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +23,7 @@ export const AdminSignalsPage = () => {
   const [newSignal, setNewSignal] = useState({
     product: 'MOIL10',
     trade_time: '',
+    trade_timezone: 'Asia/Manila',
     direction: 'BUY',
     notes: '',
   });
@@ -46,7 +53,7 @@ export const AdminSignalsPage = () => {
       await adminAPI.createSignal(newSignal);
       toast.success('Trading signal created and activated!');
       setDialogOpen(false);
-      setNewSignal({ product: 'MOIL10', trade_time: '', direction: 'BUY', notes: '' });
+      setNewSignal({ product: 'MOIL10', trade_time: '', trade_timezone: 'Asia/Manila', direction: 'BUY', notes: '' });
       loadSignals();
     } catch (error) {
       toast.error('Failed to create signal');
@@ -82,7 +89,7 @@ export const AdminSignalsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div className="flex items-center gap-6">
                 <div>
                   <p className="text-xs text-zinc-400">Product</p>
@@ -92,7 +99,7 @@ export const AdminSignalsPage = () => {
                   {activeSignal.direction}
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-400">Trade Time (UTC)</p>
+                  <p className="text-xs text-zinc-400">Trade Time ({activeSignal.trade_timezone || 'Asia/Manila'})</p>
                   <p className="text-2xl font-mono font-bold text-blue-400">{activeSignal.trade_time}</p>
                 </div>
               </div>
@@ -127,15 +134,32 @@ export const AdminSignalsPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-zinc-300">Trade Time (UTC)</Label>
-              <Input
-                type="time"
-                value={newSignal.trade_time}
-                onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
-                className="input-dark mt-1"
-                data-testid="signal-time-input"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-zinc-300">Trade Time</Label>
+                <Input
+                  type="time"
+                  value={newSignal.trade_time}
+                  onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
+                  className="input-dark mt-1"
+                  data-testid="signal-time-input"
+                />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Timezone</Label>
+                <Select value={newSignal.trade_timezone} onValueChange={(v) => setNewSignal({ ...newSignal, trade_timezone: v })}>
+                  <SelectTrigger className="input-dark mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tradingTimezones.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div>
               <Label className="text-zinc-300">Direction</Label>
@@ -191,8 +215,8 @@ export const AdminSignalsPage = () => {
                     <th>Product</th>
                     <th>Direction</th>
                     <th>Trade Time</th>
+                    <th>Timezone</th>
                     <th>Created</th>
-                    <th>Notes</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -211,8 +235,8 @@ export const AdminSignalsPage = () => {
                         </span>
                       </td>
                       <td className="font-mono">{signal.trade_time}</td>
+                      <td className="text-zinc-400 text-sm">{signal.trade_timezone || 'Asia/Manila'}</td>
                       <td className="font-mono text-zinc-400">{new Date(signal.created_at).toLocaleDateString()}</td>
-                      <td className="text-zinc-500 max-w-[200px] truncate">{signal.notes || '-'}</td>
                       <td>
                         <Button
                           variant="ghost"
