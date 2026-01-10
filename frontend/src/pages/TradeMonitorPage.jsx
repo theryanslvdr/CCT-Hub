@@ -11,7 +11,8 @@ import { toast } from 'sonner';
 import { 
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
   TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
-  Sparkles, ExternalLink, Rocket
+  Sparkles, ExternalLink, Rocket, Radio, FlaskConical, Flame,
+  ChevronLeft, ChevronRight, Edit2, Check, X, Calendar
 } from 'lucide-react';
 
 // Truncate to 2 decimal places without rounding
@@ -40,6 +41,89 @@ const formatLargeNumber = (amount) => {
   }
 };
 
+// Convert time from one timezone to another
+const convertTimeToTimezone = (timeStr, fromTz, toTz) => {
+  if (!timeStr) return '';
+  
+  try {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    
+    // Create a date object for today
+    const now = new Date();
+    
+    // Create a date string with the time in the source timezone
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${timeStr}:00`;
+    
+    // Parse as if it's in the source timezone
+    const sourceDate = new Date(dateStr);
+    
+    // Get the time difference between source and target timezones
+    const sourceOffset = getTimezoneOffset(fromTz);
+    const targetOffset = getTimezoneOffset(toTz);
+    const diffHours = targetOffset - sourceOffset;
+    
+    // Adjust the time
+    let newHours = hours + diffHours;
+    let newMinutes = minutes;
+    let dayShift = '';
+    
+    if (newHours >= 24) {
+      newHours -= 24;
+      dayShift = ' (+1 day)';
+    } else if (newHours < 0) {
+      newHours += 24;
+      dayShift = ' (-1 day)';
+    }
+    
+    // Format in 12-hour format
+    const period = newHours >= 12 ? 'PM' : 'AM';
+    const displayHours = newHours % 12 || 12;
+    
+    return `${displayHours}:${String(newMinutes).padStart(2, '0')} ${period}${dayShift}`;
+  } catch (e) {
+    return timeStr;
+  }
+};
+
+// Get timezone offset in hours
+const getTimezoneOffset = (tz) => {
+  const offsets = {
+    'Asia/Manila': 8,
+    'Asia/Singapore': 8,
+    'Asia/Taipei': 8,
+    'America/New_York': -5,
+    'America/Chicago': -6,
+    'America/Denver': -7,
+    'America/Los_Angeles': -8,
+    'Europe/London': 0,
+    'Europe/Paris': 1,
+    'Europe/Berlin': 1,
+    'Australia/Sydney': 11,
+    'Asia/Tokyo': 9,
+    'Asia/Shanghai': 8,
+    'UTC': 0,
+  };
+  
+  // Try to get from browser if not in list
+  if (!offsets[tz]) {
+    try {
+      const date = new Date();
+      const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+      const tzDate = new Date(date.toLocaleString('en-US', { timeZone: tz }));
+      return Math.round((tzDate - utcDate) / (1000 * 60 * 60));
+    } catch {
+      return 0;
+    }
+  }
+  
+  return offsets[tz];
+};
+
+// Get user's local timezone
+const getUserTimezone = () => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
 export const TradeMonitorPage = () => {
   const { user } = useAuth();
   const [signal, setSignal] = useState(null);
@@ -59,17 +143,37 @@ export const TradeMonitorPage = () => {
   const [showExitCalculator, setShowExitCalculator] = useState(false);
   const [customLotSize, setCustomLotSize] = useState('');
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
+  
+  // Trade History state
+  const [tradeHistory, setTradeHistory] = useState([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [streak, setStreak] = useState({ streak: 0, streak_type: null });
+  const [editingTimeId, setEditingTimeId] = useState(null);
+  const [editTimeValue, setEditTimeValue] = useState('');
 
   const audioRef = useRef(null);
   const beepRef = useRef(null);
   const countdownRef = useRef(null);
-  const preTradeBeepRef = useRef(null);
 
   // Get LOT size from profit tracker
   const lotSize = profitSummary?.account_value ? truncateTo2Decimals(profitSummary.account_value / 980) : 0;
-  const userTimezone = user?.timezone || 'Asia/Manila';
+  const userTimezone = user?.timezone || getUserTimezone();
   const isPhilippines = userTimezone === 'Asia/Manila';
   const profitMultiplier = signal?.profit_points || 15;
+
+  // Get current trading date
+  const getTradingDate = () => {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', { 
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'Asia/Manila'
+    });
+  };
 
   // Load data
   useEffect(() => {
@@ -77,6 +181,11 @@ export const TradeMonitorPage = () => {
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Load trade history when page changes
+  useEffect(() => {
+    loadTradeHistory();
+  }, [historyPage]);
 
   // World clock
   useEffect(() => {
@@ -93,22 +202,34 @@ export const TradeMonitorPage = () => {
   useEffect(() => {
     return () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
-      if (preTradeBeepRef.current) clearInterval(preTradeBeepRef.current);
     };
   }, []);
 
   const loadData = async () => {
     try {
-      const [signalRes, summaryRes, profitRes] = await Promise.all([
+      const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
         tradeAPI.getActiveSignal(),
         tradeAPI.getDailySummary(),
         profitAPI.getSummary(),
+        tradeAPI.getStreak(),
       ]);
       setSignal(signalRes.data.signal);
       setDailySummary(summaryRes.data);
       setProfitSummary(profitRes.data);
+      setStreak(streakRes.data);
     } catch (error) {
       console.error('Failed to load trade data:', error);
+    }
+  };
+
+  const loadTradeHistory = async () => {
+    try {
+      const res = await tradeAPI.getHistory(historyPage, 10);
+      setTradeHistory(res.data.trades);
+      setHistoryTotalPages(res.data.total_pages);
+      setHistoryTotal(res.data.total);
+    } catch (error) {
+      console.error('Failed to load trade history:', error);
     }
   };
 
@@ -129,42 +250,6 @@ export const TradeMonitorPage = () => {
         hour12: false,
       });
     }
-  };
-
-  const formatTimeOnly = (date, tz = 'UTC') => {
-    try {
-      return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      });
-    }
-  };
-
-  // Convert signal time to user's local timezone
-  const getSignalTimeInLocalTz = () => {
-    if (!signal) return null;
-    const [hours, minutes] = signal.trade_time.split(':').map(Number);
-    const signalTz = signal.trade_timezone || 'Asia/Manila';
-    
-    // Create a date object with the signal time in signal's timezone
-    const now = new Date();
-    const signalDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
-    
-    // Format in user's timezone
-    return signalDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: userTimezone,
-    });
   };
 
   // Play beep sound for countdown
@@ -240,16 +325,6 @@ export const TradeMonitorPage = () => {
     }, 1000);
   }, [signal, soundEnabled]);
 
-  const getTimezoneOffset = (tz) => {
-    const tzOffsets = {
-      'Asia/Manila': 8,
-      'Asia/Singapore': 8,
-      'Asia/Taipei': 8,
-      'UTC': 0,
-    };
-    return tzOffsets[tz] || 0;
-  };
-
   const endTrade = () => {
     setShowExitAlert(false);
     setTradeEnded(true);
@@ -305,6 +380,7 @@ export const TradeMonitorPage = () => {
 
       setActualExitValue('');
       loadData();
+      loadTradeHistory();
     } catch (error) {
       toast.error('Failed to log trade');
     }
@@ -322,6 +398,27 @@ export const TradeMonitorPage = () => {
     }
   };
 
+  const handleEditTimeEntered = (tradeId, currentTime) => {
+    setEditingTimeId(tradeId);
+    setEditTimeValue(currentTime || '');
+  };
+
+  const handleSaveTimeEntered = async (tradeId) => {
+    try {
+      await tradeAPI.updateTimeEntered(tradeId, editTimeValue);
+      toast.success('Time updated');
+      setEditingTimeId(null);
+      loadTradeHistory();
+    } catch (error) {
+      toast.error('Failed to update time');
+    }
+  };
+
+  const handleCancelEditTime = () => {
+    setEditingTimeId(null);
+    setEditTimeValue('');
+  };
+
   // Calculate custom exit value
   const customExitValue = customLotSize ? parseFloat(customLotSize) * profitMultiplier : 0;
 
@@ -331,6 +428,13 @@ export const TradeMonitorPage = () => {
     if (diff > 0) return "🎉 Great job! You're exceeding targets today!";
     if (diff === 0) return "✨ Perfect execution! Right on target!";
     return "💪 Keep pushing! Every trade is a learning opportunity.";
+  };
+
+  // Get user local time from signal time
+  const getUserLocalTradeTime = () => {
+    if (!signal) return '';
+    const signalTz = signal.trade_timezone || 'Asia/Manila';
+    return convertTimeToTimezone(signal.trade_time, signalTz, userTimezone);
   };
 
   return (
@@ -343,50 +447,71 @@ export const TradeMonitorPage = () => {
         <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
       </audio>
 
-      {/* Active Signal Banner with User Local Time & Profit Multiplier */}
+      {/* Active Signal Card - Redesigned like AdminSignalsPage */}
       {signal ? (
-        <div className={`glass-highlight p-6 ${showExitAlert ? 'exit-section active' : ''}`} data-testid="active-signal-banner">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-6">
-              <div>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">Active Signal</p>
-                <p className="text-3xl font-bold text-white">{signal.product}</p>
-              </div>
-              <div className={`px-6 py-3 rounded-xl text-2xl font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                {signal.direction}
-              </div>
-              <div>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">
-                  Trade Time (Philippines)
-                </p>
-                <p className="text-3xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
-              </div>
-              {/* User Local Time & Profit Multiplier */}
-              <div className="flex items-center gap-4">
+        <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> 
+              Active Signal
+              {signal.is_simulated && (
+                <span className="ml-2 px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
+                  <FlaskConical className="w-3 h-3" /> SIMULATED
+                </span>
+              )}
+            </CardTitle>
+            <p className="text-sm text-zinc-400 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              {getTradingDate()}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-6">
+                <div>
+                  <p className="text-xs text-zinc-400">Product</p>
+                  <p className="text-2xl font-bold text-white">{signal.product}</p>
+                </div>
+                <div className={`px-6 py-3 rounded-xl text-xl font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {signal.direction === 'BUY' ? <TrendingUp className="inline w-5 h-5 mr-2" /> : <TrendingDown className="inline w-5 h-5 mr-2" />}
+                  {signal.direction}
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> Trade Time ({signal.trade_timezone || 'Asia/Manila'})
+                  </p>
+                  <p className="text-2xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
+                </div>
                 {!isPhilippines && (
                   <div>
-                    <p className="text-xs text-zinc-400 uppercase tracking-wider">Your Time ({userTimezone.split('/')[1]})</p>
-                    <p className="text-xl font-mono font-bold text-cyan-400">{getSignalTimeInLocalTz()}</p>
+                    <p className="text-xs text-zinc-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Your Time ({userTimezone.split('/').pop()})
+                    </p>
+                    <p className="text-xl font-mono font-bold text-cyan-400">{getUserLocalTradeTime()}</p>
                   </div>
                 )}
-                <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-                  <p className="text-xs text-zinc-400 uppercase tracking-wider text-center">Multiplier</p>
-                  <p className="text-2xl font-mono font-bold text-purple-400 text-center">×{profitMultiplier}</p>
+                <div>
+                  <p className="text-xs text-zinc-400 flex items-center gap-1">
+                    <Target className="w-3 h-3" /> Profit Multiplier
+                  </p>
+                  <p className="text-2xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
                 </div>
               </div>
             </div>
             {signal.notes && (
-              <div className="text-zinc-400 text-sm max-w-md">{signal.notes}</div>
+              <p className="text-zinc-400 mt-4 p-3 bg-zinc-900/50 rounded-lg">{signal.notes}</p>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="glass-card p-6 border-2 border-dashed border-zinc-700">
-          <div className="flex items-center gap-4 text-zinc-500">
-            <AlertTriangle className="w-6 h-6" />
-            <p>No active trading signal. Wait for admin to post today's signal.</p>
-          </div>
-        </div>
+        <Card className="glass-card border-2 border-dashed border-zinc-700">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 text-zinc-500">
+              <AlertTriangle className="w-6 h-6" />
+              <p>No active trading signal. Wait for admin to post today's signal.</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* LOT Size & Projected Exit Value Cards */}
@@ -598,6 +723,149 @@ export const TradeMonitorPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Trade History Card */}
+      <Card className="glass-card" data-testid="trade-history-card">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-white">Trade History</CardTitle>
+          {/* Streak indicator */}
+          {streak.streak > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
+              <Flame className="w-5 h-5 text-orange-400" />
+              <span className="font-bold text-orange-400">{streak.streak}</span>
+              <span className="text-xs text-zinc-400">streak</span>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          {tradeHistory.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Product</th>
+                      <th>Direction</th>
+                      <th>LOT Size</th>
+                      <th>Time Set</th>
+                      <th>Time Entered</th>
+                      <th>Projected</th>
+                      <th>Actual</th>
+                      <th>P/L Diff</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tradeHistory.map((trade) => (
+                      <tr key={trade.id}>
+                        <td className="font-mono text-zinc-400">
+                          {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </td>
+                        <td className="font-medium text-white">
+                          {trade.signal_details?.product || 'MOIL10'}
+                        </td>
+                        <td>
+                          <span className={`status-badge ${trade.direction === 'BUY' ? 'direction-buy' : 'direction-sell'}`}>
+                            {trade.direction}
+                          </span>
+                        </td>
+                        <td className="font-mono text-purple-400">{trade.lot_size?.toFixed(2)}</td>
+                        <td className="font-mono text-zinc-400">
+                          {trade.signal_details?.trade_time || '-'}
+                        </td>
+                        <td>
+                          {editingTimeId === trade.id ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="time"
+                                value={editTimeValue}
+                                onChange={(e) => setEditTimeValue(e.target.value)}
+                                className="input-dark w-24 h-8 text-sm"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleSaveTimeEntered(trade.id)}
+                                className="h-8 w-8 text-emerald-400 hover:text-emerald-300"
+                              >
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleCancelEditTime}
+                                className="h-8 w-8 text-red-400 hover:text-red-300"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono text-cyan-400">
+                                {trade.time_entered || '-'}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditTimeEntered(trade.id, trade.time_entered)}
+                                className="h-6 w-6 text-zinc-500 hover:text-blue-400"
+                                data-testid={`edit-time-${trade.id}`}
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="font-mono text-blue-400">${formatNumber(trade.projected_profit)}</td>
+                        <td className="font-mono text-emerald-400">${formatNumber(trade.actual_profit)}</td>
+                        <td className={`font-mono font-bold ${trade.profit_difference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {trade.profit_difference >= 0 ? '+' : ''}${formatNumber(trade.profit_difference)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                <p className="text-sm text-zinc-500">
+                  Showing {((historyPage - 1) * 10) + 1} - {Math.min(historyPage * 10, historyTotal)} of {historyTotal} trades
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                    disabled={historyPage === 1}
+                    className="btn-secondary"
+                    data-testid="prev-page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="text-sm text-zinc-400">
+                    Page {historyPage} of {historyTotalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))}
+                    disabled={historyPage === historyTotalPages}
+                    className="btn-secondary"
+                    data-testid="next-page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-zinc-500">
+              No trade history yet. Start trading to see your history here!
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Exit Value Calculator Popup */}
       <Dialog open={showExitCalculator} onOpenChange={setShowExitCalculator}>
