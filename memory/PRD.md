@@ -91,12 +91,15 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Dashboard with KPIs, performance chart, live rates
 - ✅ Profit Tracker with deposit management, withdrawal simulation
 - ✅ Trade Monitor with:
-  - LOT Calculator (LOT × 15 formula)
-  - World Timer (user's timezone from profile)
-  - Check-in → Countdown → Exit Alert → End Trade button
-  - Enter actual exit value → Celebration/Encouragement
+  - **LOT Size Card** (fetched from Profit Tracker: Balance ÷ 980)
+  - **Projected Exit Value Card** (LOT × multiplier, replaces LOT Calculator)
+  - **Exit Value Calculator Popup** (custom LOT input)
+  - **Your Time Card** - Philippine Time prominent, user local time underneath
+  - **Signal Banner** with user local time and profit multiplier (×15)
+  - Check-in → Countdown with **5-second beep alert** → "Enter the Trade Now!" button
+  - Enter actual profit → **Celebration Popup** with performance message
   - Forward profit to Profit Tracker button
-- ✅ Today's Summary in Trade Monitor
+- ✅ **Today's Summary** (simplified): Only Actual Total + P/L Difference + Encouragement message
 - ✅ Debt Management with repayment planning
 - ✅ Profit Planner with goal creation and progress tracking
 - ✅ Admin: Trading Signals with timezone selection (Asia/Manila, Asia/Singapore, Asia/Taipei)
