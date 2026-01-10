@@ -108,14 +108,15 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Admin: Platform Settings (SEO, branding, colors)
 
 ## Key Trading Flow
-1. Admin posts daily signal (product, time, direction, timezone)
-2. Trader checks Trade Monitor, sets LOT size
-3. LOT Calculator shows exit value (LOT × 15)
-4. Trader clicks "Check In" → countdown starts
-5. At trade time: Exit Alert shows → Trader clicks "End Trade"
-6. Trader enters actual exit value
-7. App shows celebration/encouragement based on performance
-8. Trader can forward profit to Profit Tracker
+1. Admin posts daily signal (product, time, direction, timezone, multiplier)
+2. Trader sees signal with **LOT Size Card** (from Profit Tracker) and **Projected Exit Value**
+3. **Your Time card** shows Philippine time prominently (local time underneath)
+4. Trader clicks "**Enter the Trade Now!**" → countdown starts
+5. Last **5 seconds**: beep countdown alert
+6. At trade time: "ENTER THE TRADE NOW!" alert shows → Trader clicks "End Trade"
+7. Trader enters actual profit amount
+8. **Celebration Popup** shows with performance message (exceeded/perfect/below)
+9. Trader clicks "Forward to Profit Tracker" button
 
 ## Prioritized Backlog
 ### P0 (Critical) - ✅ DONE
