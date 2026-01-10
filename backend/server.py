@@ -46,7 +46,7 @@ EMAILIT_API_KEY = os.environ.get('EMAILIT_API_KEY', '')
 SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', 'CROSSCURRENT2024')
 
 # Create the main app
-app = FastAPI(title="CrossCurrent Finance Center API")
+app = FastAPI(title="CrossCurrent Finance Center API", redirect_slashes=False)
 
 # Create routers
 api_router = APIRouter(prefix="/api")
