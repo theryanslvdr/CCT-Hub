@@ -103,7 +103,8 @@
 }
 
 .exit-section.active {
-    @apply border-solid border-emerald-500 bg-emerald-500/10 exit-alert-pulse;
+    @apply border-solid border-emerald-500 bg-emerald-500/10;
+    animation: exit-pulse 1s ease-in-out infinite;
 }
 
 .exit-button {
