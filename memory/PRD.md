@@ -43,7 +43,9 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ### Profit Tracker Features
 - ✅ Initial balance setup dialog for first-time users
-- ✅ Reset tracker functionality (clears all deposits and trade logs)
+- ✅ **Deposit Records**: Hidden behind button, shows Date, Amount, Currency, Notes
+- ✅ **Withdrawal Records**: Hidden behind button, shows Date Initiated, Amount (USDT), Final Binance (USDT), Est. Arrival, Notes, Confirm Receipt
+- ✅ **Confirm Receipt**: Button changes to exact date/time (user timezone) when clicked
 - ✅ Multi-step deposit simulation:
   - Step 1: Input Binance USDT amount
   - Step 2: Shows 1% deposit fee calculation and Receive Amount
@@ -51,14 +53,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Multi-step withdrawal simulation:
   - Shows Merin Fee (3%) + Binance Fee ($1)
   - Shows estimated receive date (current date + 2 business days)
+  - **Deducts balance immediately** after confirmation
   - Complete Withdrawal button with confirmation popup
-- ✅ Projection Vision card (replaces Account Breakdown):
-  - Summary view: Chart + projection grid (1mo, 3mo, 6mo, 1yr, 2yr, 3yr, 4yr, 5yr)
-  - Daily Table view: Date, Projected Balance, LOT Size, Target Profit, Funds Before Trade
+- ✅ **Projection Vision** card:
+  - Summary view: 1 Month, 3 Months, 6 Months cards + **Year dropdown (1-5 years)**
+  - **Monthly Table accordion**: Grouped by Year 1-5, shows Final Projected Balance per year
   - Formula: LOT Size = Balance ÷ 980, Net Profit = LOT Size × 15
+- ✅ **Large number formatting**: $X.XX Million, Billion, Trillion
 - ✅ Current LOT Size card showing Balance ÷ 980 formula
 - ✅ Finance formatting: $XXX,XXX.XX (2 decimal places)
-- ✅ Deposit Records table WITHOUT Product column
+- ✅ **Multi-step Reset Tracker**:
+  - Step 1: Warning about deletion
+  - Step 2: New Account Value + Reason for Reset
+  - Step 3: **Password verification** for security
 
 ## Bug Fixes Completed (2026-01-10)
 - ✅ **PROB-1**: Fixed login persistence - Users now stay logged in after page refresh (AuthContext localStorage fix)
