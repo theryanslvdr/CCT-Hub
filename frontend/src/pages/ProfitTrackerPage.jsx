@@ -213,11 +213,12 @@ export const ProfitTrackerPage = () => {
 
   const loadData = async () => {
     try {
-      const [summaryRes, depositsRes, ratesRes, withdrawalsRes] = await Promise.all([
+      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
         currencyAPI.getRates('USDT'),
         api.get('/profit/withdrawals').catch(() => ({ data: [] })),
+        api.get('/trade/active-signal').catch(() => ({ data: null })),
       ]);
       setSummary(summaryRes.data);
       
@@ -231,6 +232,11 @@ export const ProfitTrackerPage = () => {
       setWithdrawals(withdrawalData);
       
       setRates(ratesRes.data.rates || {});
+      
+      // Set active signal
+      if (signalRes.data) {
+        setActiveSignal(signalRes.data);
+      }
       
       if (allDeposits.length === 0) {
         setIsFirstTime(true);
