@@ -375,7 +375,8 @@ export const ProfitTrackerPage = () => {
     }
 
     try {
-      const amount = parseFloat(initialBalance);
+      // Limit to 2 decimal places
+      const amount = truncateTo2Decimals(parseFloat(initialBalance));
       if (amount > 0) {
         await profitAPI.createDeposit({
           amount: amount,
