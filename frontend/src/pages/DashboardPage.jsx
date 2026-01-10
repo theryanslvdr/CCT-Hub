@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { profitAPI, tradeAPI, currencyAPI } from '../../lib/api';
-import { formatCurrency, formatNumber } from '../../lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { profitAPI, tradeAPI, currencyAPI } from '@/lib/api';
+import { formatCurrency, formatNumber } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -16,7 +16,7 @@ import {
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['user', 'admin', 'super_admin'] },

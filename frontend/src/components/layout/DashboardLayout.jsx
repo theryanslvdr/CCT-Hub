@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { cn } from '../../lib/utils';
-import { Toaster } from '../ui/sonner';
+import { cn } from '@/lib/utils';
+import { Toaster } from '@/components/ui/sonner';
 
 const pagesTitles = {
   '/dashboard': 'Dashboard',
