@@ -19,10 +19,14 @@ export const ProfitTrackerPage = () => {
   const [loading, setLoading] = useState(true);
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
+  const [initialBalanceDialogOpen, setInitialBalanceDialogOpen] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [newDeposit, setNewDeposit] = useState({ amount: '', product: 'MOIL10', currency: 'USDT', notes: '' });
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [withdrawalResult, setWithdrawalResult] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [initialBalance, setInitialBalance] = useState('');
+  const [isFirstTime, setIsFirstTime] = useState(false);
 
   useEffect(() => {
     loadData();
