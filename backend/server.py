@@ -277,14 +277,30 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+async def require_basic_admin(user: dict = Depends(get_current_user)):
+    """Require at least basic_admin role"""
+    admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
+    if user.get("role") not in admin_roles:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
 async def require_admin(user: dict = Depends(get_current_user)):
-    if user.get("role") not in ["admin", "super_admin"]:
+    """Require at least admin role (legacy compatibility - same as basic_admin)"""
+    admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
+    if user.get("role") not in admin_roles:
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 
 async def require_super_admin(user: dict = Depends(get_current_user)):
-    if user.get("role") != "super_admin":
+    """Require at least super_admin role"""
+    if user.get("role") not in ["super_admin", "master_admin"]:
         raise HTTPException(status_code=403, detail="Super admin access required")
+    return user
+
+async def require_master_admin(user: dict = Depends(get_current_user)):
+    """Require master_admin role (full access including hidden features)"""
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Master admin access required")
     return user
 
 async def verify_heartbeat_user(email: str) -> bool:
