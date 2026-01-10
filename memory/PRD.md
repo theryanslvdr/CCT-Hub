@@ -15,47 +15,67 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 3. **Super Admins** - Full platform control including role management
 
 ## Core Requirements (Static)
-- [ ] Heartbeat community verification for registration
-- [ ] LOT Size Calculator (LOT × 15 = Exit Value)
-- [ ] Withdrawal fees: 3% Merin + $1 Binance, 1-2 business days processing
-- [ ] Live currency conversion (USDT-USD-Local currencies)
+- [x] Heartbeat community verification for registration
+- [x] LOT Size Calculator (LOT × 15 = Exit Value)
+- [x] Withdrawal fees: 3% Merin + $1 Binance, 1-2 business days processing
+- [x] Live currency conversion (USDT-USD-Local currencies)
+- [x] Trading signals in Philippine/Taiwan/Singapore timezone (GMT+8)
 
 ## What's Been Implemented (2026-01-10)
+
 ### Backend
 - ✅ User authentication with JWT and Heartbeat verification
 - ✅ Role-based access control (User/Admin/Super Admin)
+- ✅ Profile settings with timezone and LOT size
 - ✅ Profit Tracker APIs (deposits, summary, exit calculation, withdrawal simulation)
-- ✅ Trade Monitor APIs (trade logging, active signals, daily summary)
+- ✅ Trade Monitor APIs (trade logging, active signals, daily summary, forward to profit)
 - ✅ Debt Management APIs (CRUD, payments, repayment planning)
 - ✅ Profit Planner/Goals APIs (CRUD, contributions, goal planning)
-- ✅ Admin APIs (trading signals, member management, role upgrades)
+- ✅ Admin APIs (trading signals with timezone, member management, role upgrades)
 - ✅ API Center (external connections, webhook receiver)
 - ✅ Platform Settings APIs (SEO, branding, UI customization)
 - ✅ Currency conversion API
-- ✅ Cloudinary file upload integration
 
 ### Frontend
 - ✅ Dark professional UI design
+- ✅ Onboarding Tour (9 steps explaining all features)
 - ✅ Login/Register with Heartbeat notice
+- ✅ Profile Settings (timezone, LOT size)
 - ✅ Dashboard with KPIs, performance chart, live rates
 - ✅ Profit Tracker with deposit management, withdrawal simulation
-- ✅ Trade Monitor with LOT Calculator, World Timer, Check-in flow
+- ✅ Trade Monitor with:
+  - LOT Calculator (LOT × 15 formula)
+  - World Timer (user's timezone from profile)
+  - Check-in → Countdown → Exit Alert → End Trade button
+  - Enter actual exit value → Celebration/Encouragement
+  - Forward profit to Profit Tracker button
+- ✅ Today's Summary in Trade Monitor
 - ✅ Debt Management with repayment planning
 - ✅ Profit Planner with goal creation and progress tracking
-- ✅ Admin: Trading Signals management
+- ✅ Admin: Trading Signals with timezone selection (Asia/Manila, Asia/Singapore, Asia/Taipei)
 - ✅ Admin: Member management with role upgrades
 - ✅ Admin: API Center for external connections
 - ✅ Admin: Platform Settings (SEO, branding, colors)
 
+## Key Trading Flow
+1. Admin posts daily signal (product, time, direction, timezone)
+2. Trader checks Trade Monitor, sets LOT size
+3. LOT Calculator shows exit value (LOT × 15)
+4. Trader clicks "Check In" → countdown starts
+5. At trade time: Exit Alert shows → Trader clicks "End Trade"
+6. Trader enters actual exit value
+7. App shows celebration/encouragement based on performance
+8. Trader can forward profit to Profit Tracker
+
 ## Prioritized Backlog
-### P0 (Critical)
+### P0 (Critical) - DONE
 - [x] Core authentication flow
 - [x] Profit tracking and calculations
 - [x] Trade monitoring with exit alerts
+- [x] Profile settings with timezone
 
-### P1 (High)
-- [ ] Email notifications for trade signals
-- [ ] Sound alarm for exit alerts (implemented but needs audio file)
+### P1 (High) - IN PROGRESS
+- [ ] Email notifications for trade signals (Emailit configured)
 - [ ] Real-time WebSocket updates for signals
 
 ### P2 (Medium)
