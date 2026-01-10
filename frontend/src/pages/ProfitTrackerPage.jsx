@@ -200,8 +200,8 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // Skip month 0 (current month partial) for yearly grouping but include it
-    const yearNumber = monthOffset === 0 ? 0 : Math.ceil(monthOffset / 12);
+    // Include current month (offset 0) in Year 1
+    const yearNumber = Math.max(1, Math.ceil((monthOffset + 1) / 12));
     
     months.push({
       monthOffset: monthOffset,
@@ -227,7 +227,7 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}) => {
 const groupMonthsByYear = (monthlyData) => {
   const years = {};
   monthlyData.forEach(m => {
-    const yearKey = m.year === 0 ? 'current' : m.year;
+    const yearKey = m.year;
     if (!years[yearKey]) {
       years[yearKey] = [];
     }
