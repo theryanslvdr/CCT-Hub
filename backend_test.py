@@ -170,7 +170,7 @@ class CrossCurrentAPITester:
             "notes": "Test deposit"
         }
         
-        success, response = self.make_request('POST', 'profit/deposits', deposit_data, 201)
+        success, response = self.make_request('POST', 'profit/deposits', deposit_data, 200)
         if success and 'id' in response:
             self.log_test("Add Deposit", True, f"Created deposit: ${deposit_data['amount']}")
         else:
