@@ -672,8 +672,63 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
         "trade_time": data.trade_time,
         "trade_timezone": data.trade_timezone,
         "direction": data.direction,
+        "profit_points": data.profit_points,
         "notes": data.notes,
         "is_active": True,
+        "is_simulated": False,
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.trading_signals.insert_one(signal)
+    return TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"])})
+
+@admin_router.put("/signals/{signal_id}")
+async def update_signal(signal_id: str, data: TradingSignalUpdate, user: dict = Depends(require_admin)):
+    signal = await db.trading_signals.find_one({"id": signal_id}, {"_id": 0})
+    if not signal:
+        raise HTTPException(status_code=404, detail="Signal not found")
+    
+    update_data = {}
+    if data.trade_time is not None:
+        update_data["trade_time"] = data.trade_time
+    if data.trade_timezone is not None:
+        update_data["trade_timezone"] = data.trade_timezone
+    if data.direction is not None:
+        update_data["direction"] = data.direction
+    if data.profit_points is not None:
+        update_data["profit_points"] = data.profit_points
+    if data.notes is not None:
+        update_data["notes"] = data.notes
+    if data.is_active is not None:
+        if data.is_active:
+            # Deactivate all other signals first
+            await db.trading_signals.update_many({"id": {"$ne": signal_id}}, {"$set": {"is_active": False}})
+        update_data["is_active"] = data.is_active
+    
+    if update_data:
+        await db.trading_signals.update_one({"id": signal_id}, {"$set": update_data})
+    
+    updated = await db.trading_signals.find_one({"id": signal_id}, {"_id": 0})
+    return TradingSignalResponse(**{**updated, "created_at": datetime.fromisoformat(updated["created_at"]) if isinstance(updated["created_at"], str) else updated["created_at"]})
+
+@admin_router.post("/signals/simulate", response_model=TradingSignalResponse)
+async def simulate_signal(data: TradingSignalCreate, user: dict = Depends(require_super_admin)):
+    """Create a simulated signal for testing - Super Admin only"""
+    # Deactivate all existing signals
+    await db.trading_signals.update_many({}, {"$set": {"is_active": False}})
+    
+    signal_id = str(uuid.uuid4())
+    signal = {
+        "id": signal_id,
+        "product": data.product,
+        "trade_time": data.trade_time,
+        "trade_timezone": data.trade_timezone,
+        "direction": data.direction,
+        "profit_points": data.profit_points,
+        "notes": f"[SIMULATED] {data.notes or ''}".strip(),
+        "is_active": True,
+        "is_simulated": True,
         "created_by": user["id"],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -684,7 +739,12 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
 @admin_router.get("/signals", response_model=List[TradingSignalResponse])
 async def get_signals(user: dict = Depends(require_admin)):
     signals = await db.trading_signals.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return [TradingSignalResponse(**{**s, "created_at": datetime.fromisoformat(s["created_at"]) if isinstance(s["created_at"], str) else s["created_at"]}) for s in signals]
+    result = []
+    for s in signals:
+        s.setdefault("profit_points", 15)
+        s.setdefault("is_simulated", False)
+        result.append(TradingSignalResponse(**{**s, "created_at": datetime.fromisoformat(s["created_at"]) if isinstance(s["created_at"], str) else s["created_at"]}))
+    return result
 
 @admin_router.delete("/signals/{signal_id}")
 async def delete_signal(signal_id: str, user: dict = Depends(require_admin)):
@@ -693,10 +753,188 @@ async def delete_signal(signal_id: str, user: dict = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Signal not found")
     return {"message": "Signal deleted"}
 
+# Enhanced Member Management
 @admin_router.get("/members")
-async def get_members(user: dict = Depends(require_admin)):
-    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
-    return {"members": users, "total": len(users)}
+async def get_members(
+    page: int = 1,
+    limit: int = 20,
+    search: Optional[str] = None,
+    role: Optional[str] = None,
+    status: Optional[str] = None,
+    user: dict = Depends(require_admin)
+):
+    query = {}
+    if search:
+        query["$or"] = [
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}}
+        ]
+    if role and role != "all":
+        query["role"] = role
+    if status == "suspended":
+        query["is_suspended"] = True
+    elif status == "active":
+        query["is_suspended"] = {"$ne": True}
+    
+    total = await db.users.count_documents(query)
+    skip = (page - 1) * limit
+    users = await db.users.find(query, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    return {
+        "members": users,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit
+    }
+
+@admin_router.get("/members/{user_id}")
+async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get user's trades
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    
+    # Get user's deposits
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    
+    # Calculate summary
+    total_trades = len(trades)
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit")
+    
+    return {
+        "user": member,
+        "stats": {
+            "total_trades": total_trades,
+            "total_profit": round(total_profit, 2),
+            "total_deposits": round(total_deposits, 2),
+            "account_value": round(total_deposits + total_profit, 2)
+        },
+        "recent_trades": trades[:10],
+        "recent_deposits": deposits[:10]
+    }
+
+class AdminUserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    timezone: Optional[str] = None
+    lot_size: Optional[float] = None
+
+@admin_router.put("/members/{user_id}")
+async def update_member(user_id: str, data: AdminUserUpdate, user: dict = Depends(require_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if data.full_name:
+        update_data["full_name"] = data.full_name
+    if data.timezone:
+        update_data["timezone"] = data.timezone
+    if data.lot_size is not None:
+        update_data["lot_size"] = data.lot_size
+    
+    await db.users.update_one({"id": user_id}, {"$set": update_data})
+    return {"message": "User updated"}
+
+@admin_router.post("/members/{user_id}/suspend")
+async def suspend_member(user_id: str, user: dict = Depends(require_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if member.get("role") == "super_admin" and user["role"] != "super_admin":
+        raise HTTPException(status_code=403, detail="Cannot suspend super admin")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_suspended": True, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "User suspended"}
+
+@admin_router.post("/members/{user_id}/unsuspend")
+async def unsuspend_member(user_id: str, user: dict = Depends(require_admin)):
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_suspended": False, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "User unsuspended"}
+
+@admin_router.delete("/members/{user_id}")
+async def delete_member(user_id: str, user: dict = Depends(require_super_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if member.get("role") == "super_admin":
+        raise HTTPException(status_code=403, detail="Cannot delete super admin")
+    
+    # Delete user and related data
+    await db.users.delete_one({"id": user_id})
+    await db.deposits.delete_many({"user_id": user_id})
+    await db.trade_logs.delete_many({"user_id": user_id})
+    await db.debts.delete_many({"user_id": user_id})
+    await db.goals.delete_many({"user_id": user_id})
+    
+    return {"message": "User and all related data deleted"}
+
+class TempPasswordSet(BaseModel):
+    temp_password: str
+
+@admin_router.post("/members/{user_id}/set-temp-password")
+async def set_temp_password(user_id: str, data: TempPasswordSet, user: dict = Depends(require_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Set temporary password and flag for forced change
+    new_hash = hash_password(data.temp_password)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "password": new_hash,
+            "must_change_password": True,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # TODO: Send email with temp password via Emailit
+    
+    return {"message": "Temporary password set. User will be prompted to change on next login."}
+
+@admin_router.post("/members/{user_id}/send-email")
+async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if not EMAILIT_API_KEY:
+        raise HTTPException(status_code=500, detail="Email service not configured")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.emailit.com/v1/emails",
+                headers={
+                    "Authorization": f"Bearer {EMAILIT_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "noreply@crosscurrent.finance",
+                    "to": member["email"],
+                    "subject": subject,
+                    "html": body
+                },
+                timeout=30.0
+            )
+            if response.status_code in [200, 201, 202]:
+                return {"message": "Email sent successfully"}
+            else:
+                raise HTTPException(status_code=response.status_code, detail="Email sending failed")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email error: {str(e)}")
 
 @admin_router.post("/upgrade-role")
 async def upgrade_role(data: RoleUpgrade, user: dict = Depends(require_admin)):
