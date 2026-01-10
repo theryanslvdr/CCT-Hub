@@ -234,7 +234,9 @@ export const ProfitTrackerPage = () => {
       setRates(ratesRes.data.rates || {});
       
       // Set active signal
-      if (signalRes.data) {
+      if (signalRes.data?.signal) {
+        setActiveSignal(signalRes.data.signal);
+      } else if (signalRes.data && !signalRes.data.message) {
         setActiveSignal(signalRes.data);
       }
       
