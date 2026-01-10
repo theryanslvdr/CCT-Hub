@@ -432,6 +432,30 @@ async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_u
     updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
     return updated_user
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+@users_router.post("/change-password")
+async def change_password(data: PasswordChange, user: dict = Depends(get_current_user)):
+    # Get user with password
+    full_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    if not full_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Verify current password
+    if not verify_password(data.current_password, full_user["password"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    # Update password
+    new_hash = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password": new_hash, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Password changed successfully"}
+
 @users_router.post("/profile-picture")
 async def upload_profile_picture(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
     try:
