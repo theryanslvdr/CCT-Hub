@@ -42,19 +42,24 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Notes field for additional context
 
 ### Profit Tracker Features
-- ✅ Initial balance setup dialog for first-time users (limited to 2 decimals)
-- ✅ **Deposit Records**: Hidden behind button, shows Date, Amount, Currency, Notes
-- ✅ **Withdrawal Records**: Hidden behind button, shows Date Initiated, Amount (USDT), Final Binance (USDT), Est. Arrival, Notes, Confirm Receipt
-- ✅ **Confirm Receipt**: Button changes to exact date/time (user timezone) when clicked
-- ✅ Multi-step deposit simulation with 1% fee calculation
-- ✅ Multi-step withdrawal simulation with immediate balance deduction
+- ✅ Initial balance setup dialog (limited to 2 decimals)
+- ✅ **Deposit/Withdrawal Records**: Hidden behind buttons, aligned right
+- ✅ Multi-step deposit/withdrawal simulation with fee calculations
 - ✅ **Projection Vision** card with Year dropdown (1-5 years)
-- ✅ **Monthly Table accordion** grouped by Year 1-5
+- ✅ **Monthly Table accordion**: 
+  - Grouped by "Current Period" and Year 1-5
+  - Shows Trading Days count, Final Balance, LOT Size, Daily Profit
+  - **Daily View button** for each month
+- ✅ **Daily Projection Popup**:
+  - Shows only weekdays (excludes weekends and holidays)
+  - For current month: shows remaining days from today
+  - Columns: Date, Balance Before, LOT Size, Target Profit, **Actual Profit**
+  - Actual Profit status: `-` (future) | `Pending Trade` (past, no trade) | `Trade Now` (today + signal) | Value (completed)
+  - Trade Now button links to Trade Monitor
 - ✅ **Large number formatting**: $X.XX Million, Billion, Trillion
-- ✅ **LOT Size**: All displays truncated to 2 decimal places (not rounded)
+- ✅ **LOT Size**: All displays truncated to 2 decimal places
 - ✅ **Total Deposits card**: Currency dropdown inside (USD, PHP, EUR, GBP)
-- ✅ **Buttons aligned right**: Deposit Records, Withdrawal Records, Reset Tracker
-- ✅ **Trading Signal Banner**: Shows today's signal with Trade Now button → Merin
+- ✅ **Trading Signal Banner**: Shows today's signal with Trade Now → Merin
 - ✅ **Multi-step Reset Tracker** with password verification
 
 ## Bug Fixes Completed (2026-01-10)
