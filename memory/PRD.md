@@ -91,14 +91,17 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Dashboard with KPIs, performance chart, live rates
 - ✅ Profit Tracker with deposit management, withdrawal simulation
 - ✅ Trade Monitor with:
+  - **Active Signal Card** (redesigned from Admin Signals page, shows date, simulated tag)
   - **LOT Size Card** (fetched from Profit Tracker: Balance ÷ 980)
   - **Projected Exit Value Card** (LOT × multiplier, replaces LOT Calculator)
   - **Exit Value Calculator Popup** (custom LOT input)
   - **Your Time Card** - Philippine Time prominent, user local time underneath
-  - **Signal Banner** with user local time and profit multiplier (×15)
+  - **Timezone Conversion** in signal card (shows user's local trade time)
   - Check-in → Countdown with **5-second beep alert** → "Enter the Trade Now!" button
   - Enter actual profit → **Celebration Popup** with performance message
   - Forward profit to Profit Tracker button
+  - **Trade History Table** with pagination (Date, Product, Direction, LOT Size, Time Set, Time Entered (editable), Projected, Actual, P/L Diff)
+  - **Streak Indicator** (fire icon with count at top right of Trade History)
 - ✅ **Today's Summary** (simplified): Only Actual Total + P/L Difference + Encouragement message
 - ✅ Debt Management with repayment planning
 - ✅ Profit Planner with goal creation and progress tracking
