@@ -1423,7 +1423,7 @@ export const ProfitTrackerPage = () => {
                     >
                       <AccordionTrigger className="px-4 py-3 bg-zinc-900/50 hover:bg-zinc-900 text-white">
                         <div className="flex items-center justify-between w-full pr-4">
-                          <span className="font-medium">{year === 'current' ? 'Current Period' : `Year ${year}`}</span>
+                          <span className="font-medium">Year {year}</span>
                           <span className="font-mono text-emerald-400">
                             {formatLargeNumber(months[months.length - 1]?.endBalance || 0)}
                           </span>
