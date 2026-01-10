@@ -1220,7 +1220,7 @@ export const ProfitTrackerPage = () => {
                       {formatLargeNumber(p.balance)}
                     </p>
                     <p className="text-xs text-zinc-500 mt-1">
-                      LOT: {p.lotSize.toFixed(2)} | Daily: {formatLargeNumber(p.dailyProfit)}
+                      LOT: {truncateTo2Decimals(p.lotSize).toFixed(2)} | Daily: {formatLargeNumber(p.dailyProfit)}
                     </p>
                   </div>
                 ))}
@@ -1246,7 +1246,7 @@ export const ProfitTrackerPage = () => {
                     {formatLargeNumber(projectionData[4]?.balance || 0)}
                   </p>
                   <p className="text-xs text-zinc-500 mt-1">
-                    LOT: {(projectionData[4]?.lotSize || 0).toFixed(2)} | Daily: {formatLargeNumber(projectionData[4]?.dailyProfit || 0)}
+                    LOT: {truncateTo2Decimals(projectionData[4]?.lotSize || 0).toFixed(2)} | Daily: {formatLargeNumber(projectionData[4]?.dailyProfit || 0)}
                   </p>
                 </div>
               </div>
