@@ -21,6 +21,12 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Live currency conversion (USDT-USD-Local currencies)
 - [x] Trading signals in Philippine/Taiwan/Singapore timezone (GMT+8)
 
+## Bug Fixes Completed (2026-01-10)
+- ✅ **PROB-1**: Fixed login persistence - Users now stay logged in after page refresh (AuthContext localStorage fix)
+- ✅ **DM-1**: Fixed "Add Debt" functionality - POST /api/debt now works correctly
+- ✅ **PPL-1**: Fixed "Add Goal" functionality - POST /api/goals now works correctly
+- ✅ Fixed /api/trade/active-signal backward compatibility for missing profit_points field
+
 ## What's Been Implemented (2026-01-10)
 
 ### Backend
@@ -68,17 +74,27 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 8. Trader can forward profit to Profit Tracker
 
 ## Prioritized Backlog
-### P0 (Critical) - DONE
+### P0 (Critical) - ✅ DONE
 - [x] Core authentication flow
 - [x] Profit tracking and calculations
 - [x] Trade monitoring with exit alerts
 - [x] Profile settings with timezone
+- [x] Login persistence bug (PROB-1) - FIXED
+- [x] Add Debt bug (DM-1) - FIXED
+- [x] Add Goal bug (PPL-1) - FIXED
 
-### P1 (High) - IN PROGRESS
+### P1 (High) - PENDING
+- [ ] Member Management enhancements (user editing, activity logs, filtering)
+- [ ] Branding settings (logo, favicon, site title)
+- [ ] Profile page password reset
+- [ ] Trading Signals management improvements
+- [ ] Profit Tracker feature additions
 - [ ] Email notifications for trade signals (Emailit configured)
-- [ ] Real-time WebSocket updates for signals
 
 ### P2 (Medium)
+- [ ] Interactive onboarding tour
+- [ ] Tooltips for Debt Management
+- [ ] Alarm music selection for Trade Monitor
 - [ ] Integration with Merin Trading Platform chart
 - [ ] Heartbeat API user sync
 - [ ] Advanced analytics and reporting
