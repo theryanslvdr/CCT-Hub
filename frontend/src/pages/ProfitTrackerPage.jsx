@@ -13,11 +13,17 @@ import {
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
   TrendingUp, Wallet, RotateCcw, Rocket, Calendar,
   Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
-  ChevronDown, FileText, Receipt, Lock, Check
+  ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
+  Radio
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+
+// Truncate to 2 decimal places without rounding
+const truncateTo2Decimals = (num) => {
+  return Math.trunc(num * 100) / 100;
+};
 
 // Format large numbers (millions, billions, trillions)
 const formatLargeNumber = (amount) => {
