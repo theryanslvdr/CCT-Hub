@@ -144,6 +144,14 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Celebration popup after entering actual profit
 - [x] Today's Summary simplified: only Actual Total + P/L Difference + Encouragement
 
+### P0 (Critical) - Trade Monitor V2 Enhancements ✅ DONE (2026-01-10)
+- [x] Active Signal card redesigned from Admin Signals page (Radio icon, date, no edit)
+- [x] Fixed timezone conversion (shows user local time correctly)
+- [x] SIMULATED signals show Flask icon tag instead of [SIMULATED] text in notes
+- [x] Trade History table with pagination (all 9 columns)
+- [x] Time Entered column is editable (pencil icon, save/cancel)
+- [x] Streak indicator with fire icon at top right of Trade History
+
 ### P1 (High) - ✅ COMPLETED (2026-01-10)
 - [x] Member Management enhancements (search, filters, pagination, view details with tabs, edit profile, suspend/unsuspend, set temp password)
 - [x] Trading Signals management improvements (profit_points multiplier, edit signals, simulate signals for super admin)
