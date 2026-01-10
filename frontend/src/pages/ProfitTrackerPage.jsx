@@ -965,7 +965,7 @@ export const ProfitTrackerPage = () => {
                 </div>
                 <div className="p-3 rounded-lg bg-zinc-900/50">
                   <p className="text-xs text-zinc-500">New Balance</p>
-                  <p className="font-mono text-white">{formatMoney(parseFloat(newAccountValue) || 0)}</p>
+                  <p className="font-mono text-white">{formatMoney(truncateTo2Decimals(parseFloat(newAccountValue) || 0))}</p>
                   <p className="text-xs text-zinc-500 mt-2">Reason</p>
                   <p className="text-zinc-300 text-sm">{resetReason}</p>
                 </div>
