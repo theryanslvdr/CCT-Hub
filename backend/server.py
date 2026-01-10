@@ -464,10 +464,6 @@ async def get_me(user: dict = Depends(get_current_user)):
         timezone=user.get("timezone", "UTC"),
         allowed_dashboards=user.get("allowed_dashboards")
     )
-        profile_picture=user.get("profile_picture"),
-        lot_size=user.get("lot_size"),
-        timezone=user.get("timezone", "UTC")
-    )
 
 class VerifyPasswordRequest(BaseModel):
     password: str
