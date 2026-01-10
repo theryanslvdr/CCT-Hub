@@ -350,7 +350,77 @@ export const ProfitTrackerPage = () => {
             <SelectItem value="GBP">GBP</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Reset Button */}
+        <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300" data-testid="reset-tracker-button">
+              <RotateCcw className="w-4 h-4" /> Reset Tracker
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="glass-card border-zinc-800">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2 text-red-400">
+                <RotateCcw className="w-5 h-5" /> Reset Profit Tracker
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+                <p className="font-medium mb-2">Warning: This action cannot be undone!</p>
+                <p className="text-sm">Resetting will delete all your:</p>
+                <ul className="list-disc list-inside text-sm mt-2">
+                  <li>Deposit records</li>
+                  <li>Trade logs</li>
+                  <li>Profit calculations</li>
+                </ul>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setResetDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetTracker} data-testid="confirm-reset-button">
+                  Reset Everything
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {/* Initial Balance Setup Dialog */}
+      <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-blue-400" /> Welcome to Profit Tracker!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-zinc-400">
+              Let's get started by setting your initial Merin Trading Platform balance. 
+              This is the amount you've already deposited in your trading account.
+            </p>
+            <div>
+              <Label className="text-zinc-300">Your Current Merin Balance (USDT)</Label>
+              <Input
+                type="number"
+                value={initialBalance}
+                onChange={(e) => setInitialBalance(e.target.value)}
+                placeholder="e.g., 100"
+                className="input-dark mt-1"
+                data-testid="initial-balance-input"
+              />
+              <p className="text-xs text-zinc-500 mt-1">Enter 0 if you haven't deposited yet</p>
+            </div>
+            <Button onClick={handleInitialBalance} className="w-full btn-primary" data-testid="set-initial-balance-button">
+              <Rocket className="w-4 h-4 mr-2" /> Start Tracking My Profits
+            </Button>
+            <Button variant="ghost" className="w-full text-zinc-500" onClick={() => setInitialBalanceDialogOpen(false)}>
+              Skip for now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
