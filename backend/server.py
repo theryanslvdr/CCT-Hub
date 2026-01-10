@@ -579,6 +579,7 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "id": str(uuid.uuid4()),
         "user_id": user["id"],
         "amount": -data.amount,  # Negative to indicate withdrawal
+        "product": "WITHDRAWAL",  # Mark as withdrawal type
         "currency": "USDT",
         "notes": f"Withdrawal to Binance (Net: ${net_amount:.2f} after fees)",
         "is_withdrawal": True,
@@ -599,6 +600,7 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "binance_fee": binance_fee,
         "net_amount": round(net_amount, 2)
     }
+
 
 # ==================== TRADE MONITOR ROUTES ====================
 
