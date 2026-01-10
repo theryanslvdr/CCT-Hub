@@ -1287,7 +1287,7 @@ export const ProfitTrackerPage = () => {
                               <tr key={m.month}>
                                 <td className="font-medium">{m.monthName}</td>
                                 <td className="font-mono text-white">{formatLargeNumber(m.balance)}</td>
-                                <td className="font-mono text-purple-400">{m.lotSize.toFixed(4)}</td>
+                                <td className="font-mono text-purple-400">{truncateTo2Decimals(m.lotSize).toFixed(2)}</td>
                                 <td className="font-mono text-emerald-400">{formatLargeNumber(m.dailyProfit)}</td>
                               </tr>
                             ))}
