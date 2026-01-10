@@ -601,6 +601,35 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "net_amount": round(net_amount, 2)
     }
 
+@profit_router.get("/withdrawals")
+async def get_withdrawals(user: dict = Depends(get_current_user)):
+    """Get all withdrawals for the current user"""
+    withdrawals = await db.deposits.find(
+        {"user_id": user["id"], "is_withdrawal": True},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return withdrawals
+
+class ConfirmReceiptRequest(BaseModel):
+    confirmed_at: str
+
+@profit_router.put("/withdrawals/{withdrawal_id}/confirm")
+async def confirm_withdrawal_receipt(
+    withdrawal_id: str, 
+    data: ConfirmReceiptRequest,
+    user: dict = Depends(get_current_user)
+):
+    """Confirm receipt of a withdrawal"""
+    result = await db.deposits.update_one(
+        {"id": withdrawal_id, "user_id": user["id"], "is_withdrawal": True},
+        {"$set": {"confirmed_at": data.confirmed_at}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Withdrawal not found")
+    
+    return {"message": "Receipt confirmed", "confirmed_at": data.confirmed_at}
+
 
 # ==================== TRADE MONITOR ROUTES ====================
 
