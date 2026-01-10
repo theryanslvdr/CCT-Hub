@@ -990,6 +990,7 @@ export const ProfitTrackerPage = () => {
             )}
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Initial Balance Setup Dialog */}
