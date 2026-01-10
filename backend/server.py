@@ -408,23 +408,26 @@ async def get_me(user: dict = Depends(get_current_user)):
 
 # ==================== USER ROUTES ====================
 
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    timezone: Optional[str] = None
+    lot_size: Optional[float] = None
+
 @users_router.put("/profile")
-async def update_profile(
-    full_name: Optional[str] = None,
-    timezone: Optional[str] = None,
-    lot_size: Optional[float] = None,
-    user: dict = Depends(get_current_user)
-):
+async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_user)):
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
-    if full_name:
-        update_data["full_name"] = full_name
-    if timezone:
-        update_data["timezone"] = timezone
-    if lot_size is not None:
-        update_data["lot_size"] = lot_size
+    if data.full_name:
+        update_data["full_name"] = data.full_name
+    if data.timezone:
+        update_data["timezone"] = data.timezone
+    if data.lot_size is not None:
+        update_data["lot_size"] = data.lot_size
     
     await db.users.update_one({"id": user["id"]}, {"$set": update_data})
-    return {"message": "Profile updated successfully"}
+    
+    # Return updated user
+    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
+    return updated_user
 
 @users_router.post("/profile-picture")
 async def upload_profile_picture(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
