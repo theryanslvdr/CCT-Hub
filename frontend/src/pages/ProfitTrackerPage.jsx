@@ -97,6 +97,42 @@ export const ProfitTrackerPage = () => {
     });
   };
 
+  const handleInitialBalance = async () => {
+    if (!initialBalance || parseFloat(initialBalance) <= 0) {
+      toast.error('Please enter a valid initial balance');
+      return;
+    }
+
+    try {
+      await profitAPI.createDeposit({
+        amount: parseFloat(initialBalance),
+        product: 'MOIL10',
+        currency: 'USDT',
+        notes: 'Initial balance setup',
+      });
+      toast.success('Initial balance set successfully! Welcome to Profit Tracker!');
+      setInitialBalanceDialogOpen(false);
+      setInitialBalance('');
+      setIsFirstTime(false);
+      loadData();
+    } catch (error) {
+      toast.error('Failed to set initial balance');
+    }
+  };
+
+  const handleResetTracker = async () => {
+    try {
+      // Delete all deposits for current user
+      await api.delete('/profit/reset');
+      toast.success('Profit tracker has been reset. Start fresh!');
+      setResetDialogOpen(false);
+      loadData();
+    } catch (error) {
+      // If endpoint doesn't exist, show message
+      toast.error('Reset feature requires backend support. Contact admin.');
+    }
+  };
+
   const convertAmount = (amount, toCurrency) => {
     const rate = rates[toCurrency] || 1;
     return amount * rate;
