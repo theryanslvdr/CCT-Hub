@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
+import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
 
 const pagesTitles = {
   '/dashboard': 'Dashboard',
@@ -12,11 +13,11 @@ const pagesTitles = {
   '/trade-monitor': 'Trade Monitor',
   '/goals': 'Profit Planner',
   '/debt': 'Debt Management',
+  '/profile': 'Profile Settings',
   '/admin/signals': 'Trading Signals',
   '/admin/members': 'Member Management',
   '/admin/api-center': 'API Center',
   '/admin/settings': 'Platform Settings',
-  '/profile': 'Profile Settings',
 };
 
 export const DashboardLayout = () => {
@@ -24,6 +25,7 @@ export const DashboardLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { showTour, completeTour, resetTour } = useOnboarding();
 
   if (loading) {
     return (
@@ -47,6 +49,7 @@ export const DashboardLayout = () => {
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onShowTour={resetTour}
       />
       
       <main className={cn(
@@ -64,6 +67,9 @@ export const DashboardLayout = () => {
       </main>
 
       <Toaster position="top-right" richColors />
+      
+      {/* Onboarding Tour */}
+      <OnboardingTour isOpen={showTour} onClose={completeTour} />
     </div>
   );
 };
