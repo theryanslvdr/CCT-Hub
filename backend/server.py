@@ -634,6 +634,7 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
         "id": signal_id,
         "product": data.product,
         "trade_time": data.trade_time,
+        "trade_timezone": data.trade_timezone,
         "direction": data.direction,
         "notes": data.notes,
         "is_active": True,
