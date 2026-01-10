@@ -67,6 +67,7 @@ export const tradeAPI = {
   getLogs: (limit = 50) => api.get('/trade/logs', { params: { limit } }),
   getActiveSignal: () => api.get('/trade/active-signal'),
   getDailySummary: () => api.get('/trade/daily-summary'),
+  forwardToProfit: (tradeId) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId } }),
 };
 
 // Admin APIs
