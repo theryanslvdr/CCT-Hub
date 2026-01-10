@@ -42,6 +42,12 @@ export const ProfitTrackerPage = () => {
       setSummary(summaryRes.data);
       setDeposits(depositsRes.data);
       setRates(ratesRes.data.rates || {});
+      
+      // Check if first time (no deposits)
+      if (depositsRes.data.length === 0) {
+        setIsFirstTime(true);
+        setInitialBalanceDialogOpen(true);
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
