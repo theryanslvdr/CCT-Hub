@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, DollarSign, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, DollarSign, TrendingUp, TrendingDown, Wallet, RotateCcw, Rocket } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import api from '@/lib/api';
 
 export const ProfitTrackerPage = () => {
   const [summary, setSummary] = useState(null);
