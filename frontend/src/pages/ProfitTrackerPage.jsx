@@ -73,31 +73,151 @@ const addBusinessDays = (date, days) => {
   return result;
 };
 
-// Generate monthly projection data for accordion (up to 5 years = 60 months)
-const generateMonthlyProjection = (accountBalance) => {
-  const months = [];
-  let balance = accountBalance || 0;
-  const tradingDaysPerMonth = 22; // Approximate trading days per month
+// Common holidays (can be expanded)
+const isHoliday = (date) => {
+  const holidays = [
+    // US Holidays
+    { month: 0, day: 1 },   // New Year's Day
+    { month: 0, day: 2 },   // New Year's Day observed
+    { month: 6, day: 4 },   // Independence Day
+    { month: 11, day: 25 }, // Christmas
+    { month: 11, day: 26 }, // Christmas observed
+    // Add more as needed
+  ];
   
-  for (let month = 1; month <= 60; month++) {
-    // Simulate daily compounding for this month
-    for (let day = 0; day < tradingDaysPerMonth; day++) {
-      const lotSize = balance / 980;
-      const dailyProfit = lotSize * 15;
-      balance += dailyProfit;
+  return holidays.some(h => h.month === date.getMonth() && h.day === date.getDate());
+};
+
+// Check if date is a trading day (weekday and not holiday)
+const isTradingDay = (date) => {
+  const dayOfWeek = date.getDay();
+  return dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday(date);
+};
+
+// Generate daily projection for a specific month
+const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null) => {
+  const days = [];
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Get first day of month
+  const firstDay = new Date(year, month, 1);
+  // Get last day of month
+  const lastDay = new Date(year, month + 1, 0);
+  
+  let runningBalance = startBalance;
+  let currentDate = new Date(firstDay);
+  
+  // For current month, start from today if we're past the 1st
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  if (isCurrentMonth && today.getDate() > 1) {
+    currentDate = new Date(today);
+  }
+  
+  while (currentDate <= lastDay) {
+    if (isTradingDay(currentDate)) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      const lotSize = runningBalance / 980;
+      const targetProfit = lotSize * 15;
+      
+      // Check for actual profit from trade logs
+      const actualProfit = tradeLogs[dateKey]?.actual_profit;
+      const hasTraded = tradeLogs[dateKey]?.has_traded;
+      
+      // Determine status
+      let status = 'pending'; // Default: Pending Trade
+      const isToday = currentDate.toDateString() === today.toDateString();
+      const isFuture = currentDate > today;
+      
+      if (hasTraded && actualProfit !== undefined) {
+        status = 'completed';
+      } else if (isToday && activeSignal) {
+        status = 'active'; // Trade Now
+      } else if (isFuture) {
+        status = 'future';
+      }
+      
+      days.push({
+        date: new Date(currentDate),
+        dateStr: currentDate.toLocaleDateString('en-US', { 
+          weekday: 'short', 
+          month: 'short', 
+          day: 'numeric' 
+        }),
+        dateKey: dateKey,
+        balanceBefore: runningBalance,
+        lotSize: lotSize,
+        targetProfit: targetProfit,
+        actualProfit: actualProfit,
+        status: status,
+        isToday: isToday,
+      });
+      
+      // Add actual profit if completed, otherwise target
+      if (hasTraded && actualProfit !== undefined) {
+        runningBalance += actualProfit;
+      } else {
+        runningBalance += targetProfit;
+      }
     }
     
-    const date = new Date();
-    date.setMonth(date.getMonth() + month);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return days;
+};
+
+// Generate monthly projection data for accordion (up to 5 years = 60 months)
+const generateMonthlyProjection = (accountBalance, tradeLogs = {}) => {
+  const months = [];
+  let balance = accountBalance || 0;
+  const today = new Date();
+  
+  for (let monthOffset = 0; monthOffset <= 60; monthOffset++) {
+    const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+    const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Calculate trading days in this month
+    let tradingDays = 0;
+    let monthBalance = balance;
+    const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+    
+    // For current month, only count remaining days
+    const isCurrentMonth = monthDate.getFullYear() === today.getFullYear() && 
+                          monthDate.getMonth() === today.getMonth();
+    
+    let currentDate = isCurrentMonth ? new Date(today) : new Date(monthDate);
+    
+    while (currentDate <= lastDay) {
+      if (isTradingDay(currentDate)) {
+        tradingDays++;
+        const lotSize = monthBalance / 980;
+        const dailyProfit = lotSize * 15;
+        monthBalance += dailyProfit;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Skip month 0 (current month partial) for yearly grouping but include it
+    const yearNumber = monthOffset === 0 ? 0 : Math.ceil(monthOffset / 12);
     
     months.push({
-      month: month,
-      year: Math.ceil(month / 12),
-      monthName: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      balance: balance,
-      lotSize: balance / 980,
-      dailyProfit: (balance / 980) * 15,
+      monthOffset: monthOffset,
+      year: yearNumber,
+      monthDate: new Date(monthDate),
+      monthKey: monthKey,
+      monthName: monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      startBalance: balance,
+      endBalance: monthBalance,
+      lotSize: monthBalance / 980,
+      dailyProfit: (monthBalance / 980) * 15,
+      tradingDays: tradingDays,
+      isCurrentMonth: isCurrentMonth,
     });
+    
+    balance = monthBalance;
   }
   
   return months;
@@ -107,10 +227,11 @@ const generateMonthlyProjection = (accountBalance) => {
 const groupMonthsByYear = (monthlyData) => {
   const years = {};
   monthlyData.forEach(m => {
-    if (!years[m.year]) {
-      years[m.year] = [];
+    const yearKey = m.year === 0 ? 'current' : m.year;
+    if (!years[yearKey]) {
+      years[yearKey] = [];
     }
-    years[m.year].push(m);
+    years[yearKey].push(m);
   });
   return years;
 };
