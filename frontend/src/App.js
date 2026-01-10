@@ -12,6 +12,7 @@ import { ProfitTrackerPage } from "./pages/ProfitTrackerPage";
 import { TradeMonitorPage } from "./pages/TradeMonitorPage";
 import { DebtManagementPage } from "./pages/DebtManagementPage";
 import { ProfitPlannerPage } from "./pages/ProfitPlannerPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 // Admin Pages
 import { AdminSignalsPage } from "./pages/admin/AdminSignalsPage";
@@ -38,6 +39,7 @@ function App() {
             <Route path="/trade-monitor" element={<TradeMonitorPage />} />
             <Route path="/goals" element={<ProfitPlannerPage />} />
             <Route path="/debt" element={<DebtManagementPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
