@@ -934,7 +934,7 @@ async def simulate_signal(data: TradingSignalCreate, user: dict = Depends(requir
         "trade_timezone": data.trade_timezone,
         "direction": data.direction,
         "profit_points": data.profit_points,
-        "notes": f"[SIMULATED] {data.notes or ''}".strip(),
+        "notes": data.notes or "",  # Don't prepend [SIMULATED] - use is_simulated flag instead
         "is_active": True,
         "is_simulated": True,
         "created_by": user["id"],
