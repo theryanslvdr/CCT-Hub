@@ -553,6 +553,16 @@ async def simulate_withdrawal(data: WithdrawalSimulation, user: dict = Depends(g
         "balance_after_withdrawal": round(account_value - data.amount, 2)
     }
 
+@profit_router.delete("/reset")
+async def reset_profit_tracker(user: dict = Depends(get_current_user)):
+    """Reset all profit tracker data for the current user"""
+    # Delete deposits
+    await db.deposits.delete_many({"user_id": user["id"]})
+    # Delete trade logs
+    await db.trade_logs.delete_many({"user_id": user["id"]})
+    
+    return {"message": "Profit tracker reset successfully", "deleted": True}
+
 # ==================== TRADE MONITOR ROUTES ====================
 
 @trade_router.post("/log", response_model=TradeLogResponse)
