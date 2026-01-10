@@ -1423,9 +1423,9 @@ export const ProfitTrackerPage = () => {
                     >
                       <AccordionTrigger className="px-4 py-3 bg-zinc-900/50 hover:bg-zinc-900 text-white">
                         <div className="flex items-center justify-between w-full pr-4">
-                          <span className="font-medium">Year {year}</span>
+                          <span className="font-medium">{year === 'current' ? 'Current Period' : `Year ${year}`}</span>
                           <span className="font-mono text-emerald-400">
-                            {formatLargeNumber(months[months.length - 1]?.balance || 0)}
+                            {formatLargeNumber(months[months.length - 1]?.endBalance || 0)}
                           </span>
                         </div>
                       </AccordionTrigger>
@@ -1434,18 +1434,37 @@ export const ProfitTrackerPage = () => {
                           <thead>
                             <tr>
                               <th>Month</th>
+                              <th>Trading Days</th>
                               <th>Final Balance</th>
                               <th>LOT Size</th>
                               <th>Daily Profit</th>
+                              <th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {months.map((m) => (
-                              <tr key={m.month}>
-                                <td className="font-medium">{m.monthName}</td>
-                                <td className="font-mono text-white">{formatLargeNumber(m.balance)}</td>
+                              <tr key={m.monthKey} className={m.isCurrentMonth ? 'bg-blue-500/10' : ''}>
+                                <td className="font-medium">
+                                  {m.monthName}
+                                  {m.isCurrentMonth && (
+                                    <span className="ml-2 text-xs text-blue-400">(Current)</span>
+                                  )}
+                                </td>
+                                <td className="font-mono text-zinc-400">{m.tradingDays} days</td>
+                                <td className="font-mono text-white">{formatLargeNumber(m.endBalance)}</td>
                                 <td className="font-mono text-purple-400">{truncateTo2Decimals(m.lotSize).toFixed(2)}</td>
                                 <td className="font-mono text-emerald-400">{formatLargeNumber(m.dailyProfit)}</td>
+                                <td>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-xs text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                                    onClick={() => handleOpenDailyProjection(m)}
+                                    data-testid={`daily-projection-${m.monthKey}`}
+                                  >
+                                    <Eye className="w-3 h-3 mr-1" /> Daily View
+                                  </Button>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -1459,6 +1478,86 @@ export const ProfitTrackerPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Daily Projection Dialog */}
+      <Dialog open={dailyProjectionOpen} onOpenChange={setDailyProjectionOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-400" />
+              Daily Projection - {selectedMonth?.monthName}
+              {selectedMonth?.isCurrentMonth && (
+                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full ml-2">
+                  Remaining Days
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+            {getDailyProjectionForSelectedMonth.length > 0 ? (
+              <table className="w-full data-table text-sm">
+                <thead className="sticky top-0 bg-zinc-900">
+                  <tr>
+                    <th>Date</th>
+                    <th>Balance Before</th>
+                    <th>LOT Size</th>
+                    <th>Target Profit</th>
+                    <th>Actual Profit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getDailyProjectionForSelectedMonth.map((day, idx) => (
+                    <tr 
+                      key={day.dateKey} 
+                      className={day.isToday ? 'bg-blue-500/20 border-l-2 border-l-blue-500' : ''}
+                    >
+                      <td className="font-medium">
+                        {day.dateStr}
+                        {day.isToday && (
+                          <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
+                        )}
+                      </td>
+                      <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
+                      <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
+                      <td className="font-mono text-zinc-400">{formatMoney(day.targetProfit)}</td>
+                      <td>
+                        {day.status === 'completed' ? (
+                          <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
+                          </span>
+                        ) : day.status === 'active' ? (
+                          <Button
+                            size="sm"
+                            className="h-6 text-xs btn-primary"
+                            onClick={() => window.location.href = '/trade'}
+                            data-testid="trade-now-daily"
+                          >
+                            Trade Now
+                          </Button>
+                        ) : day.status === 'future' ? (
+                          <span className="text-zinc-500 text-xs">-</span>
+                        ) : (
+                          <span className="text-amber-400 text-xs">Pending Trade</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-zinc-500">
+                No trading days in this period.
+              </div>
+            )}
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
+            <p>• Weekends and holidays are excluded from projections</p>
+            <p>• <span className="text-amber-400">Pending Trade</span> = No trade recorded yet</p>
+            <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
+            <p>• Actual profits update your Account Value when recorded</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
