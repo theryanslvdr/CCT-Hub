@@ -128,6 +128,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Add Debt bug (DM-1) - FIXED
 - [x] Add Goal bug (PPL-1) - FIXED
 
+### P0 (Critical) - Trade Monitor Enhancements ✅ DONE (2026-01-10)
+- [x] LOT Size card fetches from Profit Tracker (Balance ÷ 980)
+- [x] Projected Exit Value card (LOT × multiplier) replaces LOT Calculator
+- [x] Exit Value Calculator popup with custom LOT input
+- [x] Philippine Time prioritized in Your Time card
+- [x] User local time shown smaller underneath
+- [x] Profit multiplier (×15) visible next to trading signal
+- [x] User local time visible next to trading signal in banner
+- [x] "Enter the Trade Now!" button (changed from "Exit Now!")
+- [x] 5-second countdown beep before trade time
+- [x] Celebration popup after entering actual profit
+- [x] Today's Summary simplified: only Actual Total + P/L Difference + Encouragement
+
 ### P1 (High) - ✅ COMPLETED (2026-01-10)
 - [x] Member Management enhancements (search, filters, pagination, view details with tabs, edit profile, suspend/unsuspend, set temp password)
 - [x] Trading Signals management improvements (profit_points multiplier, edit signals, simulate signals for super admin)
