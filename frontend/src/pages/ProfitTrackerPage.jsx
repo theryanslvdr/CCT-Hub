@@ -431,8 +431,8 @@ export const ProfitTrackerPage = () => {
       // Reset tracker
       await api.delete('/profit/reset');
       
-      // Add new initial balance if > 0
-      const amount = parseFloat(newAccountValue);
+      // Add new initial balance if > 0 (limited to 2 decimals)
+      const amount = truncateTo2Decimals(parseFloat(newAccountValue));
       if (amount > 0) {
         await profitAPI.createDeposit({
           amount: amount,
