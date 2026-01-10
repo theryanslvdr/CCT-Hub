@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 class CrossCurrentAPITester:
-    def __init__(self, base_url="https://profitcentral.preview.emergentagent.com"):
+    def __init__(self, base_url="https://tradeport-11.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
