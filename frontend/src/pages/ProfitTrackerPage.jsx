@@ -1481,14 +1481,14 @@ export const ProfitTrackerPage = () => {
 
       {/* Daily Projection Dialog */}
       <Dialog open={dailyProjectionOpen} onOpenChange={setDailyProjectionOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[80vh]">
+        <DialogContent className="glass-card border-zinc-800 max-w-5xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-400" />
               Daily Projection - {selectedMonth?.monthName}
               {selectedMonth?.isCurrentMonth && (
                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full ml-2">
-                  Remaining Days
+                  {getDailyProjectionForSelectedMonth.length} Remaining Days
                 </span>
               )}
             </DialogTitle>
@@ -1503,45 +1503,61 @@ export const ProfitTrackerPage = () => {
                     <th>LOT Size</th>
                     <th>Target Profit</th>
                     <th>Actual Profit</th>
+                    <th>P/L Diff</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {getDailyProjectionForSelectedMonth.map((day, idx) => (
-                    <tr 
-                      key={day.dateKey} 
-                      className={day.isToday ? 'bg-blue-500/20 border-l-2 border-l-blue-500' : ''}
-                    >
-                      <td className="font-medium">
-                        {day.dateStr}
-                        {day.isToday && (
-                          <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
-                        )}
-                      </td>
-                      <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
-                      <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
-                      <td className="font-mono text-zinc-400">{formatMoney(day.targetProfit)}</td>
-                      <td>
-                        {day.status === 'completed' ? (
-                          <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
-                          </span>
-                        ) : day.status === 'active' ? (
-                          <Button
-                            size="sm"
-                            className="h-6 text-xs btn-primary"
-                            onClick={() => window.location.href = '/trade'}
-                            data-testid="trade-now-daily"
-                          >
-                            Trade Now
-                          </Button>
-                        ) : day.status === 'future' ? (
-                          <span className="text-zinc-500 text-xs">-</span>
-                        ) : (
-                          <span className="text-amber-400 text-xs">Pending Trade</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {getDailyProjectionForSelectedMonth.map((day, idx) => {
+                    const plDiff = day.status === 'completed' && day.actualProfit !== undefined 
+                      ? day.actualProfit - day.targetProfit 
+                      : null;
+                    
+                    return (
+                      <tr 
+                        key={day.dateKey} 
+                        className={day.isToday ? 'bg-blue-500/20 border-l-2 border-l-blue-500' : ''}
+                      >
+                        <td className="font-medium">
+                          {day.dateStr}
+                          {day.isToday && (
+                            <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
+                          )}
+                        </td>
+                        <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
+                        <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
+                        <td className="font-mono text-zinc-400">{formatMoney(day.targetProfit)}</td>
+                        <td>
+                          {day.status === 'completed' ? (
+                            <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
+                            </span>
+                          ) : day.status === 'active' ? (
+                            <Button
+                              size="sm"
+                              className="h-6 text-xs btn-primary"
+                              onClick={() => window.location.href = '/trade'}
+                              data-testid="trade-now-daily"
+                            >
+                              Trade Now
+                            </Button>
+                          ) : day.status === 'future' ? (
+                            <span className="text-zinc-500 text-xs">-</span>
+                          ) : (
+                            <span className="text-amber-400 text-xs">Pending Trade</span>
+                          )}
+                        </td>
+                        <td>
+                          {plDiff !== null ? (
+                            <span className={`font-mono ${plDiff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {plDiff >= 0 ? '+' : ''}{formatMoney(plDiff)}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-500 text-xs">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             ) : (
