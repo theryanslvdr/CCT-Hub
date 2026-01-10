@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { profitAPI, currencyAPI } from '@/lib/api';
 import { formatNumber, calculateWithdrawalFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,18 +7,42 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
 import { 
-  Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, DollarSign, 
-  TrendingUp, TrendingDown, Wallet, RotateCcw, Rocket, Calendar,
-  Clock, CheckCircle2, AlertTriangle, Eye, Sparkles
+  Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
+  TrendingUp, Wallet, RotateCcw, Rocket, Calendar,
+  Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
+  ChevronDown, FileText, Receipt, Lock, Check
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 
-// Finance number formatting
+// Format large numbers (millions, billions, trillions)
+const formatLargeNumber = (amount) => {
+  if (amount === null || amount === undefined) return '$0.00';
+  
+  const absAmount = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  
+  if (absAmount >= 1e12) {
+    return `${sign}$${(absAmount / 1e12).toFixed(2)} Trillion`;
+  } else if (absAmount >= 1e9) {
+    return `${sign}$${(absAmount / 1e9).toFixed(2)} Billion`;
+  } else if (absAmount >= 1e6) {
+    return `${sign}$${(absAmount / 1e6).toFixed(2)} Million`;
+  } else {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  }
+};
+
+// Standard money formatting
 const formatMoney = (amount) => {
   if (amount === null || amount === undefined) return '$0.00';
   return new Intl.NumberFormat('en-US', {
@@ -43,24 +67,63 @@ const addBusinessDays = (date, days) => {
   return result;
 };
 
-// Generate projection data based on daily compounding
-const generateProjectionData = (accountBalance) => {
+// Generate monthly projection data for accordion (up to 5 years = 60 months)
+const generateMonthlyProjection = (accountBalance) => {
+  const months = [];
+  let balance = accountBalance || 0;
+  const tradingDaysPerMonth = 22; // Approximate trading days per month
+  
+  for (let month = 1; month <= 60; month++) {
+    // Simulate daily compounding for this month
+    for (let day = 0; day < tradingDaysPerMonth; day++) {
+      const lotSize = balance / 980;
+      const dailyProfit = lotSize * 15;
+      balance += dailyProfit;
+    }
+    
+    const date = new Date();
+    date.setMonth(date.getMonth() + month);
+    
+    months.push({
+      month: month,
+      year: Math.ceil(month / 12),
+      monthName: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      balance: balance,
+      lotSize: balance / 980,
+      dailyProfit: (balance / 980) * 15,
+    });
+  }
+  
+  return months;
+};
+
+// Group months by year for accordion
+const groupMonthsByYear = (monthlyData) => {
+  const years = {};
+  monthlyData.forEach(m => {
+    if (!years[m.year]) {
+      years[m.year] = [];
+    }
+    years[m.year].push(m);
+  });
+  return years;
+};
+
+// Generate projection for specific periods
+const generateProjectionData = (accountBalance, selectedYears = 1) => {
   const projections = [];
   let balance = accountBalance || 0;
   
-  // Time periods in days (trading days)
   const periods = [
     { label: '1 Month', days: 22 },
     { label: '3 Months', days: 66 },
     { label: '6 Months', days: 132 },
-    { label: '1 Year', days: 264 },
-    { label: '2 Years', days: 528 },
-    { label: '3 Years', days: 792 },
-    { label: '4 Years', days: 1056 },
-    { label: '5 Years', days: 1320 },
   ];
   
-  // Current state
+  // Add selected years
+  const yearDays = selectedYears * 264;
+  periods.push({ label: `${selectedYears} Year${selectedYears > 1 ? 's' : ''}`, days: yearDays });
+  
   const currentLotSize = balance / 980;
   const currentDailyProfit = currentLotSize * 15;
   
@@ -72,13 +135,15 @@ const generateProjectionData = (accountBalance) => {
   });
   
   let runningBalance = balance;
+  let lastDays = 0;
+  
   for (const period of periods) {
-    // Simulate daily compounding
-    for (let day = projections.length === 1 ? 0 : projections[projections.length - 2]?.totalDays || 0; day < period.days; day++) {
+    for (let day = lastDays; day < period.days; day++) {
       const lotSize = runningBalance / 980;
       const dailyProfit = lotSize * 15;
       runningBalance += dailyProfit;
     }
+    lastDays = period.days;
     
     const lotSize = runningBalance / 980;
     const dailyProfit = lotSize * 15;
@@ -88,76 +153,50 @@ const generateProjectionData = (accountBalance) => {
       balance: runningBalance,
       lotSize: lotSize,
       dailyProfit: dailyProfit,
-      totalDays: period.days,
     });
   }
   
   return projections;
 };
 
-// Generate daily projection table (like Excel)
-const generateDailyProjection = (accountBalance, days = 30, userTimezone = 'Asia/Manila') => {
-  const data = [];
-  let balance = accountBalance || 0;
-  const today = new Date();
-  
-  for (let i = 0; i <= days; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() + i);
-    
-    // Skip weekends
-    const dayOfWeek = date.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-    
-    const lotSize = balance / 980;
-    const dailyProfit = lotSize * 15;
-    
-    data.push({
-      date: date.toLocaleDateString('en-US', { 
-        weekday: 'short', 
-        month: 'short', 
-        day: 'numeric',
-        timeZone: userTimezone 
-      }),
-      projectedBal: balance,
-      lotSize: lotSize,
-      targetProfit: dailyProfit,
-      fundsBeforeTrade: balance,
-    });
-    
-    balance += dailyProfit;
-  }
-  
-  return data;
-};
-
 export const ProfitTrackerPage = () => {
   const { user } = useAuth();
   const [summary, setSummary] = useState(null);
   const [deposits, setDeposits] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
   
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
-  const [depositStep, setDepositStep] = useState('input'); // 'input', 'simulate', 'confirm'
+  const [depositStep, setDepositStep] = useState('input');
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
-  const [withdrawalStep, setWithdrawalStep] = useState('input'); // 'input', 'result', 'confirm'
+  const [withdrawalStep, setWithdrawalStep] = useState('input');
   const [initialBalanceDialogOpen, setInitialBalanceDialogOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetStep, setResetStep] = useState('confirm'); // 'confirm', 'newBalance', 'password'
+  const [depositRecordsOpen, setDepositRecordsOpen] = useState(false);
+  const [withdrawalRecordsOpen, setWithdrawalRecordsOpen] = useState(false);
   
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
   const [depositNotes, setDepositNotes] = useState('');
   const [depositSimulation, setDepositSimulation] = useState(null);
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalNotes, setWithdrawalNotes] = useState('');
   const [withdrawalResult, setWithdrawalResult] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [initialBalance, setInitialBalance] = useState('');
   const [isFirstTime, setIsFirstTime] = useState(false);
   
-  // Projection state
-  const [projectionView, setProjectionView] = useState('summary'); // 'summary' or 'table'
+  // Reset form states
+  const [newAccountValue, setNewAccountValue] = useState('');
+  const [resetReason, setResetReason] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  
+  // Projection states
+  const [selectedYears, setSelectedYears] = useState(1);
+  const [projectionView, setProjectionView] = useState('summary');
   
   const userTimezone = user?.timezone || 'Asia/Manila';
 
@@ -167,16 +206,26 @@ export const ProfitTrackerPage = () => {
 
   const loadData = async () => {
     try {
-      const [summaryRes, depositsRes, ratesRes] = await Promise.all([
+      const [summaryRes, depositsRes, ratesRes, withdrawalsRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
         currencyAPI.getRates('USDT'),
+        api.get('/profit/withdrawals').catch(() => ({ data: [] })),
       ]);
       setSummary(summaryRes.data);
-      setDeposits(depositsRes.data);
+      
+      // Separate deposits and withdrawals
+      const allDeposits = depositsRes.data || [];
+      const onlyDeposits = allDeposits.filter(d => d.amount >= 0);
+      setDeposits(onlyDeposits);
+      
+      // Get withdrawals from dedicated endpoint or filter
+      const withdrawalData = withdrawalsRes.data || allDeposits.filter(d => d.amount < 0 || d.is_withdrawal);
+      setWithdrawals(withdrawalData);
+      
       setRates(ratesRes.data.rates || {});
       
-      if (depositsRes.data.length === 0) {
+      if (allDeposits.length === 0) {
         setIsFirstTime(true);
         setInitialBalanceDialogOpen(true);
       }
@@ -195,7 +244,7 @@ export const ProfitTrackerPage = () => {
     }
     
     const amount = parseFloat(depositAmount);
-    const depositFee = amount * 0.01; // 1% deposit fee
+    const depositFee = amount * 0.01;
     const receiveAmount = amount - depositFee;
     
     setDepositSimulation({
@@ -256,24 +305,22 @@ export const ProfitTrackerPage = () => {
         day: 'numeric',
         timeZone: userTimezone,
       }),
+      estimatedDateISO: estimatedDate.toISOString(),
     });
     setWithdrawalStep('result');
   };
 
   const handleCompleteWithdrawal = async () => {
     try {
-      // In a real app, this would trigger actual withdrawal
-      // For now, we'll just record it as a negative deposit/withdrawal
       await api.post('/profit/withdrawal', {
         amount: parseFloat(withdrawalAmount),
+        notes: withdrawalNotes || '',
       });
-      toast.success('Withdrawal initiated! Check your Binance account in 1-2 business days.');
+      toast.success('Withdrawal initiated! Your balance has been updated. Check your Binance account in 1-2 business days.');
       resetWithdrawalDialog();
       loadData();
     } catch (error) {
-      // If endpoint doesn't exist, show simulation message
-      toast.info('Withdrawal simulation complete. In production, funds would be transferred to your Binance account.');
-      resetWithdrawalDialog();
+      toast.error('Failed to process withdrawal');
     }
   };
 
@@ -281,7 +328,30 @@ export const ProfitTrackerPage = () => {
     setWithdrawalDialogOpen(false);
     setWithdrawalStep('input');
     setWithdrawalAmount('');
+    setWithdrawalNotes('');
     setWithdrawalResult(null);
+  };
+
+  // Confirm receipt of withdrawal
+  const handleConfirmReceipt = async (withdrawalId) => {
+    try {
+      const confirmedAt = new Date().toLocaleString('en-US', {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      
+      await api.put(`/profit/withdrawals/${withdrawalId}/confirm`, {
+        confirmed_at: confirmedAt,
+      });
+      toast.success('Receipt confirmed!');
+      loadData();
+    } catch (error) {
+      toast.error('Failed to confirm receipt');
+    }
   };
 
   // Initial balance handler
@@ -310,16 +380,71 @@ export const ProfitTrackerPage = () => {
     }
   };
 
-  // Reset handler
-  const handleResetTracker = async () => {
+  // Reset handlers
+  const handleResetConfirm = () => {
+    setResetStep('newBalance');
+  };
+
+  const handleResetNewBalance = () => {
+    if (!newAccountValue || parseFloat(newAccountValue) < 0) {
+      toast.error('Please enter a valid account value');
+      return;
+    }
+    if (!resetReason.trim()) {
+      toast.error('Please provide a reason for the reset');
+      return;
+    }
+    setResetStep('password');
+  };
+
+  const handleResetWithPassword = async () => {
+    if (!resetPassword) {
+      toast.error('Please enter your password');
+      return;
+    }
+
     try {
+      // Verify password first
+      const verifyRes = await api.post('/auth/verify-password', {
+        password: resetPassword,
+      });
+      
+      if (!verifyRes.data.valid) {
+        toast.error('Invalid password');
+        return;
+      }
+      
+      // Reset tracker
       await api.delete('/profit/reset');
-      toast.success('Profit tracker has been reset. Start fresh!');
-      setResetDialogOpen(false);
+      
+      // Add new initial balance if > 0
+      const amount = parseFloat(newAccountValue);
+      if (amount > 0) {
+        await profitAPI.createDeposit({
+          amount: amount,
+          currency: 'USDT',
+          notes: `Reset: ${resetReason}`,
+        });
+      }
+      
+      toast.success('Profit tracker has been reset with new balance!');
+      resetResetDialog();
       loadData();
     } catch (error) {
-      toast.error('Reset feature requires backend support. Contact admin.');
+      if (error.response?.status === 401) {
+        toast.error('Invalid password. Please try again.');
+      } else {
+        toast.error('Failed to reset tracker');
+      }
     }
+  };
+
+  const resetResetDialog = () => {
+    setResetDialogOpen(false);
+    setResetStep('confirm');
+    setNewAccountValue('');
+    setResetReason('');
+    setResetPassword('');
   };
 
   const convertAmount = (amount, toCurrency) => {
@@ -328,10 +453,22 @@ export const ProfitTrackerPage = () => {
   };
 
   // Projection data
-  const projectionData = generateProjectionData(summary?.account_value || 0);
-  const dailyProjection = generateDailyProjection(summary?.account_value || 0, 30, userTimezone);
+  const projectionData = useMemo(() => 
+    generateProjectionData(summary?.account_value || 0, selectedYears),
+    [summary?.account_value, selectedYears]
+  );
+  
+  const monthlyProjection = useMemo(() => 
+    generateMonthlyProjection(summary?.account_value || 0),
+    [summary?.account_value]
+  );
+  
+  const yearlyGroupedProjection = useMemo(() => 
+    groupMonthsByYear(monthlyProjection),
+    [monthlyProjection]
+  );
 
-  // Chart data for projection
+  // Chart data
   const projectionChartData = projectionData.slice(1).map(p => ({
     name: p.period,
     balance: p.balance,
@@ -355,7 +492,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Account Value</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
-                  {formatMoney(summary?.account_value || 0)}
+                  {formatLargeNumber(summary?.account_value || 0)}
                 </p>
                 <p className="text-sm text-zinc-500 mt-1">
                   ≈ {selectedCurrency === 'PHP' ? '₱' : selectedCurrency} {formatNumber(convertAmount(summary?.account_value || 0, selectedCurrency))}
@@ -374,7 +511,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Total Deposits</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
-                  {formatMoney(summary?.total_deposits || 0)}
+                  {formatLargeNumber(summary?.total_deposits || 0)}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
@@ -390,7 +527,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Total Profit</p>
                 <p className={`text-3xl font-bold font-mono mt-2 ${(summary?.total_actual_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {(summary?.total_actual_profit || 0) >= 0 ? '+' : ''}{formatMoney(summary?.total_actual_profit || 0)}
+                  {(summary?.total_actual_profit || 0) >= 0 ? '+' : ''}{formatLargeNumber(summary?.total_actual_profit || 0)}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
@@ -541,7 +678,7 @@ export const ProfitTrackerPage = () => {
               <div className="space-y-4 mt-4">
                 <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                   <p className="text-sm text-zinc-400">Current Merin Balance</p>
-                  <p className="text-2xl font-bold font-mono text-white">{formatMoney(summary?.account_value || 0)}</p>
+                  <p className="text-2xl font-bold font-mono text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
                 </div>
                 <div>
                   <Label className="text-zinc-300">Withdrawal Amount (USDT)</Label>
@@ -556,6 +693,15 @@ export const ProfitTrackerPage = () => {
                       data-testid="withdrawal-amount-input"
                     />
                   </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Notes (optional)</Label>
+                  <Input
+                    value={withdrawalNotes}
+                    onChange={(e) => setWithdrawalNotes(e.target.value)}
+                    placeholder="Withdrawal reason..."
+                    className="input-dark mt-1"
+                  />
                 </div>
                 <Button onClick={handleSimulateWithdrawal} className="w-full btn-secondary" data-testid="calculate-withdrawal-button">
                   <Calculator className="w-4 h-4 mr-2" /> Calculate Fees
@@ -584,7 +730,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-400">Merin Balance After</span>
-                    <span className="font-mono text-white">{formatMoney(withdrawalResult.balanceAfter)}</span>
+                    <span className="font-mono text-white">{formatLargeNumber(withdrawalResult.balanceAfter)}</span>
                   </div>
                 </div>
                 
@@ -624,6 +770,9 @@ export const ProfitTrackerPage = () => {
                       <p className="text-sm text-zinc-400 mt-2">
                         You will receive <span className="text-emerald-400 font-mono">{formatMoney(withdrawalResult?.netAmount)}</span> in your Binance account.
                       </p>
+                      <p className="text-sm text-amber-400 mt-2 font-medium">
+                        Your Merin balance will be updated immediately.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -652,8 +801,17 @@ export const ProfitTrackerPage = () => {
           </SelectContent>
         </Select>
 
+        {/* Records Buttons */}
+        <Button variant="outline" className="btn-secondary gap-2" onClick={() => setDepositRecordsOpen(true)} data-testid="view-deposits-button">
+          <FileText className="w-4 h-4" /> Deposit Records
+        </Button>
+        
+        <Button variant="outline" className="btn-secondary gap-2" onClick={() => setWithdrawalRecordsOpen(true)} data-testid="view-withdrawals-button">
+          <Receipt className="w-4 h-4" /> Withdrawal Records
+        </Button>
+
         {/* Reset Button */}
-        <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
           <DialogTrigger asChild>
             <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300" data-testid="reset-tracker-button">
               <RotateCcw className="w-4 h-4" /> Reset Tracker
@@ -661,29 +819,114 @@ export const ProfitTrackerPage = () => {
           </DialogTrigger>
           <DialogContent className="glass-card border-zinc-800">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2 text-red-400">
-                <RotateCcw className="w-5 h-5" /> Reset Profit Tracker
+              <DialogTitle className="text-white flex items-center gap-2">
+                {resetStep === 'confirm' && <><RotateCcw className="w-5 h-5 text-red-400" /> Reset Profit Tracker</>}
+                {resetStep === 'newBalance' && <><Wallet className="w-5 h-5 text-blue-400" /> Set New Account Value</>}
+                {resetStep === 'password' && <><Lock className="w-5 h-5 text-amber-400" /> Security Verification</>}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
-                <p className="font-medium mb-2">Warning: This action cannot be undone!</p>
-                <p className="text-sm">Resetting will delete all your:</p>
-                <ul className="list-disc list-inside text-sm mt-2">
-                  <li>Deposit records</li>
-                  <li>Trade logs</li>
-                  <li>Profit calculations</li>
-                </ul>
+            
+            {resetStep === 'confirm' && (
+              <div className="space-y-4 mt-4">
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+                  <p className="font-medium mb-2">Warning: This action cannot be undone!</p>
+                  <p className="text-sm">Resetting will delete all your:</p>
+                  <ul className="list-disc list-inside text-sm mt-2">
+                    <li>Deposit records</li>
+                    <li>Withdrawal records</li>
+                    <li>Trade logs</li>
+                    <li>Profit calculations</li>
+                  </ul>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setResetDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetConfirm}>
+                    Continue
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setResetDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetTracker} data-testid="confirm-reset-button">
-                  Reset Everything
-                </Button>
+            )}
+
+            {resetStep === 'newBalance' && (
+              <div className="space-y-4 mt-4">
+                <p className="text-zinc-400 text-sm">Enter your new account value and the reason for this reset.</p>
+                <div>
+                  <Label className="text-zinc-300">New Account Value (USDT)</Label>
+                  <div className="relative mt-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                    <Input
+                      type="number"
+                      value={newAccountValue}
+                      onChange={(e) => setNewAccountValue(e.target.value)}
+                      placeholder="0.00"
+                      className="input-dark pl-7"
+                      data-testid="new-account-value-input"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Reason for Reset</Label>
+                  <Input
+                    value={resetReason}
+                    onChange={(e) => setResetReason(e.target.value)}
+                    placeholder="e.g., Starting fresh, Account correction..."
+                    className="input-dark mt-1"
+                    data-testid="reset-reason-input"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('confirm')}>
+                    Back
+                  </Button>
+                  <Button className="flex-1 btn-primary" onClick={handleResetNewBalance}>
+                    Continue
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {resetStep === 'password' && (
+              <div className="space-y-4 mt-4">
+                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <div className="flex items-start gap-3">
+                    <Lock className="w-5 h-5 text-amber-400 mt-0.5" />
+                    <div>
+                      <p className="text-amber-400 font-medium">Security Verification Required</p>
+                      <p className="text-sm text-zinc-400 mt-1">
+                        Please enter your password to confirm this action.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <p className="text-xs text-zinc-500">New Balance</p>
+                  <p className="font-mono text-white">{formatMoney(parseFloat(newAccountValue) || 0)}</p>
+                  <p className="text-xs text-zinc-500 mt-2">Reason</p>
+                  <p className="text-zinc-300 text-sm">{resetReason}</p>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Password</Label>
+                  <Input
+                    type="password"
+                    value={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="input-dark mt-1"
+                    data-testid="reset-password-input"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('newBalance')}>
+                    Back
+                  </Button>
+                  <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetWithPassword} data-testid="confirm-reset-button">
+                    <Lock className="w-4 h-4 mr-2" /> Confirm Reset
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -726,6 +969,106 @@ export const ProfitTrackerPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Deposit Records Dialog */}
+      <Dialog open={depositRecordsOpen} onOpenChange={setDepositRecordsOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-cyan-400" /> Deposit Records
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[400px] overflow-y-auto">
+            {deposits.length > 0 ? (
+              <table className="w-full data-table text-sm">
+                <thead className="sticky top-0 bg-zinc-900">
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deposits.map((deposit) => (
+                    <tr key={deposit.id}>
+                      <td className="font-mono">{new Date(deposit.created_at).toLocaleDateString()}</td>
+                      <td className="font-mono text-emerald-400">+{formatMoney(deposit.amount)}</td>
+                      <td>{deposit.currency}</td>
+                      <td className="text-zinc-500 max-w-[200px] truncate">{deposit.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-zinc-500">
+                No deposits recorded yet.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Withdrawal Records Dialog */}
+      <Dialog open={withdrawalRecordsOpen} onOpenChange={setWithdrawalRecordsOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-amber-400" /> Withdrawal Records
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[400px] overflow-y-auto">
+            {withdrawals.length > 0 ? (
+              <table className="w-full data-table text-sm">
+                <thead className="sticky top-0 bg-zinc-900">
+                  <tr>
+                    <th>Date Initiated</th>
+                    <th>Amount (USDT)</th>
+                    <th>Final Binance (USDT)</th>
+                    <th>Est. Arrival</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((w) => (
+                    <tr key={w.id}>
+                      <td className="font-mono">{new Date(w.created_at).toLocaleDateString()}</td>
+                      <td className="font-mono text-red-400">{formatMoney(Math.abs(w.gross_amount || w.amount))}</td>
+                      <td className="font-mono text-emerald-400">{formatMoney(w.net_amount || (Math.abs(w.amount) * 0.97 - 1))}</td>
+                      <td className="font-mono text-zinc-400">
+                        {w.estimated_arrival || addBusinessDays(new Date(w.created_at), 2).toLocaleDateString()}
+                      </td>
+                      <td className="text-zinc-500 max-w-[150px] truncate">{w.notes || '-'}</td>
+                      <td>
+                        {w.confirmed_at ? (
+                          <span className="text-emerald-400 text-xs flex items-center gap-1">
+                            <Check className="w-3 h-3" /> {w.confirmed_at}
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs h-7 text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                            onClick={() => handleConfirmReceipt(w.id)}
+                            data-testid={`confirm-receipt-${w.id}`}
+                          >
+                            Confirm Receipt
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-zinc-500">
+                No withdrawals recorded yet.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Projection Vision Card */}
       <Card className="glass-highlight border-blue-500/30">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -747,7 +1090,7 @@ export const ProfitTrackerPage = () => {
               onClick={() => setProjectionView('table')}
               className={projectionView === 'table' ? 'btn-primary' : 'btn-secondary'}
             >
-              <Eye className="w-4 h-4 mr-1" /> Daily Table
+              <Eye className="w-4 h-4 mr-1" /> Monthly Table
             </Button>
           </div>
         </CardHeader>
@@ -758,7 +1101,7 @@ export const ProfitTrackerPage = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg bg-zinc-900/50">
                 <div>
                   <p className="text-xs text-zinc-500">Current Balance</p>
-                  <p className="font-mono text-lg text-white">{formatMoney(summary?.account_value || 0)}</p>
+                  <p className="font-mono text-lg text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">LOT Size</p>
@@ -789,98 +1132,110 @@ export const ProfitTrackerPage = () => {
                     <YAxis 
                       stroke="#71717A" 
                       fontSize={11} 
-                      tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`}
+                      tickFormatter={(v) => {
+                        if (v >= 1e12) return `$${(v/1e12).toFixed(1)}T`;
+                        if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`;
+                        if (v >= 1e6) return `$${(v/1e6).toFixed(1)}M`;
+                        if (v >= 1e3) return `$${(v/1e3).toFixed(0)}k`;
+                        return `$${v.toFixed(0)}`;
+                      }}
                     />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
-                      formatter={(value) => [formatMoney(value), 'Projected Balance']}
+                      formatter={(value) => [formatLargeNumber(value), 'Projected Balance']}
                     />
                     <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Projection Grid */}
+              {/* Projection Grid - 1mo, 3mo, 6mo, then dropdown for years */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {projectionData.slice(1).map((p, i) => (
+                {projectionData.slice(1, 4).map((p, i) => (
                   <div key={p.period} className={`p-4 rounded-lg border ${i === 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-zinc-900/50 border-zinc-800'}`}>
                     <p className={`text-xs ${i === 0 ? 'text-blue-400' : 'text-zinc-500'}`}>{p.period}</p>
                     <p className={`font-mono text-lg ${i === 0 ? 'text-blue-400' : 'text-white'} mt-1`}>
-                      {formatMoney(p.balance)}
+                      {formatLargeNumber(p.balance)}
                     </p>
                     <p className="text-xs text-zinc-500 mt-1">
-                      LOT: {p.lotSize.toFixed(2)} | Daily: {formatMoney(p.dailyProfit)}
+                      LOT: {p.lotSize.toFixed(2)} | Daily: {formatLargeNumber(p.dailyProfit)}
                     </p>
                   </div>
                 ))}
+                
+                {/* Year selector card */}
+                <div className="p-4 rounded-lg border bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-purple-400">Year Projection</p>
+                    <Select value={selectedYears.toString()} onValueChange={(v) => setSelectedYears(parseInt(v))}>
+                      <SelectTrigger className="w-20 h-6 text-xs bg-zinc-900/50 border-zinc-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Year</SelectItem>
+                        <SelectItem value="2">2 Years</SelectItem>
+                        <SelectItem value="3">3 Years</SelectItem>
+                        <SelectItem value="4">4 Years</SelectItem>
+                        <SelectItem value="5">5 Years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="font-mono text-lg text-purple-400 mt-1">
+                    {formatLargeNumber(projectionData[4]?.balance || 0)}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    LOT: {(projectionData[4]?.lotSize || 0).toFixed(2)} | Daily: {formatLargeNumber(projectionData[4]?.dailyProfit || 0)}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-zinc-400">
-                Daily projection based on compounding (Balance ÷ 980 × 15 per trading day). Weekends excluded.
+                Monthly projection based on compounding (Balance ÷ 980 × 15 per trading day). Weekends excluded.
               </p>
-              <div className="overflow-x-auto max-h-[400px]">
-                <table className="w-full data-table text-sm">
-                  <thead className="sticky top-0 bg-zinc-900">
-                    <tr>
-                      <th>Date</th>
-                      <th>Projected Balance</th>
-                      <th>LOT Size</th>
-                      <th>Target Profit</th>
-                      <th>Funds Before Trade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dailyProjection.map((row, i) => (
-                      <tr key={i} className={i === 0 ? 'bg-blue-500/10' : ''}>
-                        <td className="font-medium">{row.date}</td>
-                        <td className="font-mono text-white">{formatMoney(row.projectedBal)}</td>
-                        <td className="font-mono text-purple-400">{row.lotSize.toFixed(4)}</td>
-                        <td className="font-mono text-emerald-400">{formatMoney(row.targetProfit)}</td>
-                        <td className="font-mono text-zinc-400">{formatMoney(row.fundsBeforeTrade)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Deposits Table */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white">Deposit Records</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {deposits.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Currency</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deposits.map((deposit) => (
-                    <tr key={deposit.id}>
-                      <td className="font-mono">{new Date(deposit.created_at).toLocaleDateString()}</td>
-                      <td className="font-mono text-emerald-400">+{formatMoney(deposit.amount)}</td>
-                      <td>{deposit.currency}</td>
-                      <td className="text-zinc-500">{deposit.notes || '-'}</td>
-                    </tr>
+              <div className="max-h-[500px] overflow-y-auto">
+                <Accordion type="multiple" className="space-y-2">
+                  {Object.entries(yearlyGroupedProjection).map(([year, months]) => (
+                    <AccordionItem 
+                      key={year} 
+                      value={`year-${year}`}
+                      className="border border-zinc-800 rounded-lg overflow-hidden"
+                    >
+                      <AccordionTrigger className="px-4 py-3 bg-zinc-900/50 hover:bg-zinc-900 text-white">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <span className="font-medium">Year {year}</span>
+                          <span className="font-mono text-emerald-400">
+                            {formatLargeNumber(months[months.length - 1]?.balance || 0)}
+                          </span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="bg-zinc-950/50">
+                        <table className="w-full data-table text-sm">
+                          <thead>
+                            <tr>
+                              <th>Month</th>
+                              <th>Final Balance</th>
+                              <th>LOT Size</th>
+                              <th>Daily Profit</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {months.map((m) => (
+                              <tr key={m.month}>
+                                <td className="font-medium">{m.monthName}</td>
+                                <td className="font-mono text-white">{formatLargeNumber(m.balance)}</td>
+                                <td className="font-mono text-purple-400">{m.lotSize.toFixed(4)}</td>
+                                <td className="font-mono text-emerald-400">{formatLargeNumber(m.dailyProfit)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-zinc-500">
-              No deposits recorded yet. Add your first deposit to get started!
+                </Accordion>
+              </div>
             </div>
           )}
         </CardContent>
