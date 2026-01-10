@@ -488,6 +488,16 @@ export const ProfitTrackerPage = () => {
     balance: p.balance,
   }));
 
+  // Currency symbols
+  const getCurrencySymbol = (currency) => {
+    switch(currency) {
+      case 'PHP': return '₱';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      default: return '$';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -498,18 +508,47 @@ export const ProfitTrackerPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Trading Signal Banner */}
+      {activeSignal && (
+        <Card className="glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Radio className="w-5 h-5 text-blue-400 animate-pulse" />
+                <div>
+                  <p className="text-xs text-zinc-400">Today's Trading Signal</p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-white font-bold">{activeSignal.product}</span>
+                    <span className={`px-3 py-1 rounded-lg font-bold text-sm ${activeSignal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                      {activeSignal.direction}
+                    </span>
+                    <span className="text-zinc-400">at</span>
+                    <span className="font-mono text-blue-400 font-bold">{activeSignal.trade_time}</span>
+                    <span className="text-zinc-500 text-sm">({activeSignal.trade_timezone || 'Asia/Manila'})</span>
+                  </div>
+                </div>
+              </div>
+              <Button 
+                className="btn-primary gap-2"
+                onClick={() => window.open('https://www.meringlobaltrading.com/', '_blank')}
+                data-testid="trade-now-button"
+              >
+                Trade Now <ExternalLink className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="glass-card" data-testid="account-value-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Account Value</p>
+                <p className="text-sm text-zinc-400">Account Value (USDT)</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
                   {formatLargeNumber(summary?.account_value || 0)}
-                </p>
-                <p className="text-sm text-zinc-500 mt-1">
-                  ≈ {selectedCurrency === 'PHP' ? '₱' : selectedCurrency} {formatNumber(convertAmount(summary?.account_value || 0, selectedCurrency))}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
@@ -522,13 +561,29 @@ export const ProfitTrackerPage = () => {
         <Card className="glass-card" data-testid="total-deposits-card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Total Deposits</p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-zinc-400">Total Deposits</p>
+                  <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                    <SelectTrigger className="w-20 h-6 text-xs bg-zinc-900/50 border-zinc-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="PHP">PHP</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
-                  {formatLargeNumber(summary?.total_deposits || 0)}
+                  {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(summary?.total_deposits || 0, selectedCurrency))}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  ≈ {formatMoney(summary?.total_deposits || 0)} USDT
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center ml-3">
                 <ArrowDownToLine className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -557,7 +612,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Current LOT Size</p>
                 <p className="text-3xl font-bold font-mono text-purple-400 mt-2">
-                  {((summary?.account_value || 0) / 980).toFixed(4)}
+                  {truncateTo2Decimals((summary?.account_value || 0) / 980).toFixed(2)}
                 </p>
                 <p className="text-xs text-zinc-500 mt-1">Balance ÷ 980</p>
               </div>
@@ -570,7 +625,9 @@ export const ProfitTrackerPage = () => {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Left side - Simulate buttons */}
+        <div className="flex flex-wrap gap-4 flex-1">
         {/* Simulate Deposit Dialog */}
         <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
           <DialogTrigger asChild>
