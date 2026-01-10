@@ -420,6 +420,19 @@ async def get_me(user: dict = Depends(get_current_user)):
         timezone=user.get("timezone", "UTC")
     )
 
+class VerifyPasswordRequest(BaseModel):
+    password: str
+
+@auth_router.post("/verify-password")
+async def verify_password(data: VerifyPasswordRequest, user: dict = Depends(get_current_user)):
+    """Verify the current user's password"""
+    db_user = await db.users.find_one({"id": user["id"]})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    is_valid = bcrypt.checkpw(data.password.encode(), db_user["password"].encode())
+    return {"valid": is_valid}
+
 # ==================== USER ROUTES ====================
 
 class ProfileUpdate(BaseModel):
