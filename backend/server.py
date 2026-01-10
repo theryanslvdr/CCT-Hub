@@ -563,6 +563,43 @@ async def reset_profit_tracker(user: dict = Depends(get_current_user)):
     
     return {"message": "Profit tracker reset successfully", "deleted": True}
 
+class WithdrawalRequest(BaseModel):
+    amount: float
+
+@profit_router.post("/withdrawal")
+async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_current_user)):
+    """Record a withdrawal from the Merin account"""
+    # Calculate fees
+    merin_fee = data.amount * 0.03  # 3% Merin fee
+    binance_fee = 1.0  # $1 Binance fee
+    net_amount = data.amount - merin_fee - binance_fee
+    
+    # Record as negative deposit (withdrawal)
+    withdrawal = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "amount": -data.amount,  # Negative to indicate withdrawal
+        "currency": "USDT",
+        "notes": f"Withdrawal to Binance (Net: ${net_amount:.2f} after fees)",
+        "is_withdrawal": True,
+        "gross_amount": data.amount,
+        "merin_fee": merin_fee,
+        "binance_fee": binance_fee,
+        "net_amount": net_amount,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.deposits.insert_one(withdrawal)
+    
+    return {
+        "message": "Withdrawal recorded successfully",
+        "withdrawal_id": withdrawal["id"],
+        "gross_amount": data.amount,
+        "merin_fee": round(merin_fee, 2),
+        "binance_fee": binance_fee,
+        "net_amount": round(net_amount, 2)
+    }
+
 # ==================== TRADE MONITOR ROUTES ====================
 
 @trade_router.post("/log", response_model=TradeLogResponse)
