@@ -8,7 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send } from 'lucide-react';
+import { 
+  Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
+  TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
+  Sparkles, ExternalLink
+} from 'lucide-react';
+
+// Truncate to 2 decimal places without rounding
+const truncateTo2Decimals = (num) => {
+  return Math.trunc(num * 100) / 100;
+};
 
 export const TradeMonitorPage = () => {
   const { user } = useAuth();
@@ -19,7 +28,6 @@ export const TradeMonitorPage = () => {
   const [tradeEnded, setTradeEnded] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [showExitAlert, setShowExitAlert] = useState(false);
-  const [lotSize, setLotSize] = useState(user?.lot_size || 0.01);
   const [exitValue, setExitValue] = useState(0);
   const [worldTime, setWorldTime] = useState(new Date());
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -27,9 +35,18 @@ export const TradeMonitorPage = () => {
   const [lastTrade, setLastTrade] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState('');
+  const [showLotCalculator, setShowLotCalculator] = useState(false);
+  const [customLotSize, setCustomLotSize] = useState('');
 
   const audioRef = useRef(null);
+  const beepRef = useRef(null);
   const countdownRef = useRef(null);
+
+  // Get LOT size from profit tracker
+  const lotSize = profitSummary?.account_value ? truncateTo2Decimals(profitSummary.account_value / 980) : 0;
+  const userTimezone = user?.timezone || 'Asia/Manila';
+  const isPhilippines = userTimezone === 'Asia/Manila';
+  const profitMultiplier = signal?.profit_points || 15;
 
   // Load data
   useEffect(() => {
@@ -38,16 +55,16 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // World clock - uses user's timezone from profile
+  // World clock
   useEffect(() => {
     const timer = setInterval(() => setWorldTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Calculate exit value when lot size changes
+  // Calculate exit value when lot size or multiplier changes
   useEffect(() => {
-    setExitValue(calculateExitValue(lotSize));
-  }, [lotSize]);
+    setExitValue(lotSize * profitMultiplier);
+  }, [lotSize, profitMultiplier]);
 
   const loadData = async () => {
     try {
@@ -80,6 +97,50 @@ export const TradeMonitorPage = () => {
         second: '2-digit',
         hour12: false,
       });
+    }
+  };
+
+  const formatTimeOnly = (date, tz = 'UTC') => {
+    try {
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: tz,
+      });
+    } catch {
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    }
+  };
+
+  // Convert signal time to user's local timezone
+  const getSignalTimeInLocalTz = () => {
+    if (!signal) return null;
+    const [hours, minutes] = signal.trade_time.split(':').map(Number);
+    const signalTz = signal.trade_timezone || 'Asia/Manila';
+    
+    // Create a date object with the signal time in signal's timezone
+    const now = new Date();
+    const signalDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+    
+    // Format in user's timezone
+    return signalDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: userTimezone,
+    });
+  };
+
+  // Play beep sound for countdown
+  const playBeep = () => {
+    if (beepRef.current && soundEnabled) {
+      beepRef.current.currentTime = 0;
+      beepRef.current.play().catch(console.error);
     }
   };
 
@@ -126,11 +187,17 @@ export const TradeMonitorPage = () => {
           audioRef.current.play().catch(console.error);
         }
         
-        toast.success('🚨 EXIT NOW! Trade time reached!', { duration: 10000 });
+        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        // Play beep in last 5 seconds
+        if (diff <= 5000 && diff > 0) {
+          playBeep();
+        }
+        
         setCountdown({ hours, minutes, seconds, total: diff });
       }
     }, 1000);
@@ -193,18 +260,10 @@ export const TradeMonitorPage = () => {
       setTradeEnded(false);
       setIsTrading(false);
 
-      // Show celebration based on performance
+      // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
       setCelebrationMessage(message);
       setShowCelebration(true);
-
-      if (result.performance === 'exceeded') {
-        toast.success(message, { duration: 5000 });
-      } else if (result.performance === 'perfect') {
-        toast.success(message, { duration: 5000 });
-      } else {
-        toast.info(message, { duration: 5000 });
-      }
 
       setActualExitValue('');
       loadData();
@@ -225,21 +284,32 @@ export const TradeMonitorPage = () => {
     }
   };
 
-  // Get projected profit from profit tracker
-  const projectedProfit = profitSummary?.total_projected_profit || 0;
+  // Calculate custom exit value
+  const customExitValue = customLotSize ? parseFloat(customLotSize) * profitMultiplier : 0;
+
+  // Performance message for today's summary
+  const getDailyPerformanceMessage = () => {
+    const diff = dailySummary?.difference || 0;
+    if (diff > 0) return "🎉 Great job! You're exceeding targets today!";
+    if (diff === 0) return "✨ Perfect execution! Right on target!";
+    return "💪 Keep pushing! Every trade is a learning opportunity.";
+  };
 
   return (
     <div className="space-y-6">
-      {/* Audio element for alarm */}
+      {/* Audio elements */}
       <audio ref={audioRef} loop>
         <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg" />
+      </audio>
+      <audio ref={beepRef}>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
       </audio>
 
       {/* Active Signal Banner */}
       {signal ? (
         <div className={`glass-highlight p-6 ${showExitAlert ? 'exit-section active' : ''}`}>
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-6">
               <div>
                 <p className="text-xs text-zinc-400 uppercase tracking-wider">Active Signal</p>
                 <p className="text-3xl font-bold text-white">{signal.product}</p>
@@ -248,8 +318,20 @@ export const TradeMonitorPage = () => {
                 {signal.direction}
               </div>
               <div>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">Trade Time ({signal.trade_timezone || 'Asia/Manila'})</p>
-                <p className="text-3xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider">
+                  Trade Time (Philippines)
+                  {!isPhilippines && (
+                    <span className="ml-2 text-blue-400">
+                      | {userTimezone}: {getSignalTimeInLocalTz()}
+                    </span>
+                  )}
+                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
+                  <span className="px-2 py-1 rounded-lg bg-purple-500/20 text-purple-400 text-sm font-mono">
+                    ×{profitMultiplier}
+                  </span>
+                </div>
               </div>
             </div>
             {signal.notes && (
@@ -266,129 +348,142 @@ export const TradeMonitorPage = () => {
         </div>
       )}
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trade Control */}
-        <Card className={`glass-card lg:col-span-2 ${showExitAlert ? 'exit-section active' : ''}`}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-white">Trade Control</CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="text-zinc-400"
-              data-testid="sound-toggle"
-            >
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {showExitAlert ? (
-              <div className="text-center space-y-6">
-                <div className="animate-bounce">
-                  <div className="text-6xl">🚨</div>
-                </div>
-                <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">EXIT NOW!</h2>
-                <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">${formatNumber(exitValue)}</span></p>
-                <div className="flex gap-4 justify-center">
-                  <Button onClick={endTrade} className="btn-primary text-xl py-6 px-8" data-testid="end-trade-button">
-                    <Square className="w-6 h-6 mr-2" /> End Trade
-                  </Button>
-                </div>
+      {/* LOT Size & Projected Exit Value Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* LOT Size Card */}
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-zinc-400">Current LOT Size</p>
+                <p className="text-4xl font-mono font-bold text-purple-400 mt-2">
+                  {lotSize.toFixed(2)}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">From Profit Tracker (Balance ÷ 980)</p>
               </div>
-            ) : tradeEnded ? (
-              <div className="text-center space-y-6">
-                <h3 className="text-2xl font-bold text-white">Enter Your Exit Value</h3>
-                <p className="text-zinc-400">How much did you actually exit with?</p>
-                <div className="max-w-xs mx-auto">
-                  <Label className="text-zinc-300">Actual Exit Value (USD)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={actualExitValue}
-                    onChange={(e) => setActualExitValue(e.target.value)}
-                    placeholder="Enter actual profit"
-                    className="input-dark mt-1 text-xl font-mono text-center"
-                    data-testid="actual-exit-input"
-                  />
-                </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50">
-                  <p className="text-sm text-zinc-400">Projected Value</p>
-                  <p className="text-2xl font-mono font-bold text-blue-400">${formatNumber(exitValue)}</p>
-                </div>
-                <Button onClick={submitActualProfit} className="btn-primary py-4 px-8" data-testid="submit-actual-button">
-                  Submit & See Results
-                </Button>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <Calculator className="w-7 h-7 text-white" />
               </div>
-            ) : isTrading && countdown ? (
-              <div className="text-center space-y-6">
-                <p className="text-zinc-400">Time until trade:</p>
-                <div className="flex justify-center gap-4">
-                  {['hours', 'minutes', 'seconds'].map((unit) => (
-                    <div key={unit} className="glass-card p-4 min-w-[100px]">
-                      <p className="text-4xl font-mono font-bold text-white">
-                        {String(countdown[unit]).padStart(2, '0')}
-                      </p>
-                      <p className="text-xs text-zinc-500 uppercase">{unit}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-zinc-400">
-                  Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">${formatNumber(exitValue)}</span>
-                </div>
-                <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
-                  <Square className="w-5 h-5 mr-2" /> Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center space-y-6">
-                <p className="text-zinc-400">Ready to trade? Check in when you're ready.</p>
-                <Button
-                  onClick={startTrade}
-                  className="exit-button idle py-8 text-2xl w-full max-w-md"
-                  disabled={!signal}
-                  data-testid="check-in-button"
-                >
-                  <Play className="w-8 h-8 mr-3" /> Check In
-                </Button>
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* LOT Calculator */}
+        {/* Projected Exit Value Card */}
         <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Calculator className="w-5 h-5" /> LOT Calculator
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-zinc-300">Your LOT Size</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={lotSize}
-                onChange={(e) => setLotSize(parseFloat(e.target.value) || 0)}
-                className="input-dark mt-1 text-xl font-mono"
-                data-testid="lot-size-input"
-              />
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-zinc-400">Projected Exit Value</p>
+                <p className="text-4xl font-mono font-bold text-emerald-400 mt-2">
+                  ${formatNumber(exitValue)}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">LOT × {profitMultiplier} = ${formatNumber(exitValue)}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLotCalculator(true)}
+                className="text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                data-testid="open-lot-calculator"
+              >
+                <Calculator className="w-4 h-4 mr-1" /> Calculate
+              </Button>
             </div>
-            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-center">
-              <p className="text-sm text-zinc-400 mb-2">Exit Value (LOT × 15)</p>
-              <p className="text-5xl font-mono font-bold text-gradient" data-testid="exit-value-display">
-                ${formatNumber(exitValue)}
-              </p>
-            </div>
-            <p className="text-xs text-zinc-500 text-center">Formula: LOT Size × 15 = Exit Value</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Trade Control */}
+      <Card className={`glass-card ${showExitAlert ? 'exit-section active' : ''}`}>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-white">Trade Control</CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className="text-zinc-400"
+            data-testid="sound-toggle"
+          >
+            {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {showExitAlert ? (
+            <div className="text-center space-y-6">
+              <div className="animate-bounce">
+                <div className="text-6xl">🚨</div>
+              </div>
+              <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">ENTER THE TRADE NOW!</h2>
+              <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">${formatNumber(exitValue)}</span></p>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={endTrade} className="btn-primary text-xl py-6 px-8" data-testid="end-trade-button">
+                  <Square className="w-6 h-6 mr-2" /> End Trade
+                </Button>
+              </div>
+            </div>
+          ) : tradeEnded ? (
+            <div className="text-center space-y-6">
+              <h3 className="text-2xl font-bold text-white">Enter Your Actual Profit</h3>
+              <p className="text-zinc-400">How much did you actually make from this trade?</p>
+              <div className="max-w-xs mx-auto">
+                <Label className="text-zinc-300">Actual Profit (USD)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={actualExitValue}
+                  onChange={(e) => setActualExitValue(e.target.value)}
+                  placeholder="Enter actual profit"
+                  className="input-dark mt-1 text-xl font-mono text-center"
+                  data-testid="actual-exit-input"
+                />
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-sm text-zinc-400">Projected Value</p>
+                <p className="text-2xl font-mono font-bold text-blue-400">${formatNumber(exitValue)}</p>
+              </div>
+              <Button onClick={submitActualProfit} className="btn-primary py-4 px-8" data-testid="submit-actual-button">
+                Submit & See Results
+              </Button>
+            </div>
+          ) : isTrading && countdown ? (
+            <div className="text-center space-y-6">
+              <p className="text-zinc-400">Time until trade:</p>
+              <div className="flex justify-center gap-4">
+                {['hours', 'minutes', 'seconds'].map((unit) => (
+                  <div key={unit} className={`glass-card p-4 min-w-[100px] ${countdown.total <= 5000 ? 'border-red-500/50 animate-pulse' : ''}`}>
+                    <p className={`text-4xl font-mono font-bold ${countdown.total <= 5000 ? 'text-red-400' : 'text-white'}`}>
+                      {String(countdown[unit]).padStart(2, '0')}
+                    </p>
+                    <p className="text-xs text-zinc-500 uppercase">{unit}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="text-zinc-400">
+                Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">${formatNumber(exitValue)}</span>
+              </div>
+              <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
+                <Square className="w-5 h-5 mr-2" /> Cancel
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center space-y-6">
+              <p className="text-zinc-400">Ready to trade? Check in when you're ready.</p>
+              <Button
+                onClick={startTrade}
+                className="exit-button idle py-8 text-2xl w-full max-w-md"
+                disabled={!signal}
+                data-testid="check-in-button"
+              >
+                <Play className="w-8 h-8 mr-3" /> Check In
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* World Timer & Today's Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* World Timer - Shows only user's timezone */}
+        {/* World Timer - Prioritize Philippines Time */}
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
@@ -398,19 +493,26 @@ export const TradeMonitorPage = () => {
           <CardContent>
             <div className="text-center">
               <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
-                {user?.timezone || 'UTC'}
+                Philippines (Asia/Manila)
               </p>
               <p className="text-6xl font-mono font-bold text-white tracking-wider">
-                {formatTimeForTimezone(worldTime, user?.timezone || 'UTC')}
+                {formatTimeForTimezone(worldTime, 'Asia/Manila')}
               </p>
-              <p className="text-sm text-zinc-500 mt-4">
-                Set your timezone in Profile Settings
-              </p>
+              {!isPhilippines && (
+                <div className="mt-4 pt-4 border-t border-zinc-800">
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">
+                    Your Local Time ({userTimezone})
+                  </p>
+                  <p className="text-2xl font-mono text-zinc-400">
+                    {formatTimeForTimezone(worldTime, userTimezone)}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Today's Summary */}
+        {/* Today's Summary - Simplified */}
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white">Today's Summary</CardTitle>
@@ -418,66 +520,107 @@ export const TradeMonitorPage = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Trades Today</p>
-                <p className="text-3xl font-mono font-bold text-white">{dailySummary?.trades_count || 0}</p>
-              </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Projected Total</p>
-                <p className="text-3xl font-mono font-bold text-blue-400">${formatNumber(dailySummary?.total_projected || 0)}</p>
-              </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-sm text-zinc-400">Actual Total</p>
                 <p className="text-3xl font-mono font-bold text-emerald-400">${formatNumber(dailySummary?.total_actual || 0)}</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Difference</p>
-                <p className={`text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <p className="text-sm text-zinc-400">P/L Difference</p>
+                <p className={`text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {(dailySummary?.difference || 0) >= 0 ? '+' : ''}${formatNumber(dailySummary?.difference || 0)}
                 </p>
               </div>
+            </div>
+            {/* Encouragement phrase */}
+            <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
+              <p className="text-zinc-300">{getDailyPerformanceMessage()}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Celebration/Result Card */}
-      {showCelebration && lastTrade && (
-        <Card className={`glass-card ${lastTrade.performance === 'exceeded' ? 'border-emerald-500/30 neon-success' : lastTrade.performance === 'perfect' ? 'border-blue-500/30 neon-glow' : 'border-amber-500/30 neon-warning'}`}>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                {lastTrade.performance === 'exceeded' && <Trophy className="w-16 h-16 text-emerald-400 animate-bounce" />}
-                {lastTrade.performance === 'perfect' && <Target className="w-16 h-16 text-blue-400" />}
-                {lastTrade.performance === 'below' && <TrendingDown className="w-16 h-16 text-amber-400" />}
-                <div>
-                  <p className="text-3xl font-bold text-white">{celebrationMessage}</p>
-                  <p className="text-zinc-400 mt-1">
-                    Projected: ${formatNumber(lastTrade.projected_profit)} | Actual: ${formatNumber(lastTrade.actual_profit)}
-                  </p>
-                </div>
+      {/* Exit Value Calculator Popup */}
+      <Dialog open={showLotCalculator} onOpenChange={setShowLotCalculator}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Calculator className="w-5 h-5 text-blue-400" /> Exit Value Calculator
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-zinc-300">Custom LOT Size</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={customLotSize}
+                onChange={(e) => setCustomLotSize(e.target.value)}
+                placeholder="Enter LOT size"
+                className="input-dark mt-1 text-xl font-mono"
+                data-testid="custom-lot-input"
+              />
+            </div>
+            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-center">
+              <p className="text-sm text-zinc-400 mb-2">Exit Value (LOT × {profitMultiplier})</p>
+              <p className="text-5xl font-mono font-bold text-gradient" data-testid="custom-exit-value">
+                ${formatNumber(customExitValue)}
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-zinc-900/50 text-sm text-zinc-400">
+              <p>• Current LOT from Profit Tracker: <span className="text-purple-400 font-mono">{lotSize.toFixed(2)}</span></p>
+              <p>• Profit Multiplier: <span className="text-cyan-400 font-mono">×{profitMultiplier}</span></p>
+              <p>• Formula: LOT Size × {profitMultiplier} = Exit Value</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Celebration Popup */}
+      <Dialog open={showCelebration} onOpenChange={setShowCelebration}>
+        <DialogContent className={`glass-card border-zinc-800 ${lastTrade?.performance === 'exceeded' ? 'border-emerald-500/50' : lastTrade?.performance === 'perfect' ? 'border-blue-500/50' : 'border-amber-500/50'}`}>
+          <div className="text-center space-y-6 py-4">
+            {lastTrade?.performance === 'exceeded' && (
+              <div className="animate-bounce">
+                <Trophy className="w-20 h-20 text-emerald-400 mx-auto" />
               </div>
-              <div className="text-center md:text-right">
-                <p className={`text-5xl font-mono font-bold ${lastTrade.profit_difference >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {lastTrade.profit_difference >= 0 ? '+' : ''}${formatNumber(lastTrade.profit_difference)}
-                </p>
-                <p className="text-sm text-zinc-500 mt-1">Difference</p>
+            )}
+            {lastTrade?.performance === 'perfect' && (
+              <Target className="w-20 h-20 text-blue-400 mx-auto" />
+            )}
+            {lastTrade?.performance === 'below' && (
+              <TrendingDown className="w-20 h-20 text-amber-400 mx-auto" />
+            )}
+            
+            <h2 className="text-3xl font-bold text-white">{celebrationMessage}</h2>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-sm text-zinc-400">Projected</p>
+                <p className="text-2xl font-mono font-bold text-blue-400">${formatNumber(lastTrade?.projected_profit || 0)}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-sm text-zinc-400">Actual</p>
+                <p className="text-2xl font-mono font-bold text-emerald-400">${formatNumber(lastTrade?.actual_profit || 0)}</p>
               </div>
             </div>
             
-            {/* Forward to Profit Tracker Button */}
-            <div className="mt-6 pt-6 border-t border-zinc-800 flex justify-center">
-              <Button
-                onClick={() => forwardToProfit(lastTrade.id)}
-                className="btn-primary gap-2"
-                data-testid="forward-to-profit-button"
-              >
-                <Send className="w-4 h-4" /> Forward to Profit Tracker
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+            <div className="p-4 rounded-lg bg-zinc-900/50">
+              <p className="text-sm text-zinc-400">P/L Difference</p>
+              <p className={`text-4xl font-mono font-bold ${(lastTrade?.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {(lastTrade?.profit_difference || 0) >= 0 ? '+' : ''}${formatNumber(lastTrade?.profit_difference || 0)}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            <Button
+              onClick={() => forwardToProfit(lastTrade?.id)}
+              className="btn-primary gap-2 w-full"
+              data-testid="forward-to-profit-button"
+            >
+              <Send className="w-4 h-4" /> Forward to Profit Tracker
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
