@@ -859,35 +859,25 @@ export const ProfitTrackerPage = () => {
             )}
           </DialogContent>
         </Dialog>
+        </div>
 
-        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-          <SelectTrigger className="w-32 input-dark">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="USD">USD</SelectItem>
-            <SelectItem value="PHP">PHP</SelectItem>
-            <SelectItem value="EUR">EUR</SelectItem>
-            <SelectItem value="GBP">GBP</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Right side - Records and Reset Buttons */}
+        <div className="flex gap-2 ml-auto">
+          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setDepositRecordsOpen(true)} data-testid="view-deposits-button">
+            <FileText className="w-4 h-4" /> Deposit Records
+          </Button>
+          
+          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setWithdrawalRecordsOpen(true)} data-testid="view-withdrawals-button">
+            <Receipt className="w-4 h-4" /> Withdrawal Records
+          </Button>
 
-        {/* Records Buttons */}
-        <Button variant="outline" className="btn-secondary gap-2" onClick={() => setDepositRecordsOpen(true)} data-testid="view-deposits-button">
-          <FileText className="w-4 h-4" /> Deposit Records
-        </Button>
-        
-        <Button variant="outline" className="btn-secondary gap-2" onClick={() => setWithdrawalRecordsOpen(true)} data-testid="view-withdrawals-button">
-          <Receipt className="w-4 h-4" /> Withdrawal Records
-        </Button>
-
-        {/* Reset Button */}
-        <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300" data-testid="reset-tracker-button">
-              <RotateCcw className="w-4 h-4" /> Reset Tracker
-            </Button>
-          </DialogTrigger>
+          {/* Reset Button */}
+          <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300" data-testid="reset-tracker-button">
+                <RotateCcw className="w-4 h-4" /> Reset Tracker
+              </Button>
+            </DialogTrigger>
           <DialogContent className="glass-card border-zinc-800">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
