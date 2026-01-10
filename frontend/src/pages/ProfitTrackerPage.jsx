@@ -1167,7 +1167,7 @@ export const ProfitTrackerPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">LOT Size</p>
-                  <p className="font-mono text-lg text-purple-400">{((summary?.account_value || 0) / 980).toFixed(4)}</p>
+                  <p className="font-mono text-lg text-purple-400">{truncateTo2Decimals((summary?.account_value || 0) / 980).toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">Daily Profit (×15)</p>
