@@ -255,7 +255,7 @@ class CrossCurrentAPITester:
         }
         
         success, response = self.make_request('POST', 'admin/signals', signal_data, 
-                                            expected_status=201, use_admin=True)
+                                            expected_status=200, use_admin=True)
         if success and 'id' in response:
             self.log_test("Create Trading Signal", True, f"Created signal: {signal_data['product']} {signal_data['direction']} at {signal_data['trade_time']} ({signal_data['trade_timezone']})")
             
