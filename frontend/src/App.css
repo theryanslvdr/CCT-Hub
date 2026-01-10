@@ -120,7 +120,8 @@
 }
 
 .exit-button.exit-now {
-    @apply bg-emerald-500 hover:bg-emerald-400 text-white exit-alert-pulse text-3xl;
+    @apply bg-emerald-500 hover:bg-emerald-400 text-white text-3xl;
+    animation: exit-pulse 1s ease-in-out infinite;
 }
 
 /* Auth pages */
