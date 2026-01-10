@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  User,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +33,7 @@ const navItems = [
   { path: '/admin/settings', icon: Settings, label: 'Platform Settings', roles: ['super_admin'] },
 ];
 
-export const Sidebar = ({ collapsed, onToggle }) => {
+export const Sidebar = ({ collapsed, onToggle, onShowTour }) => {
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
 
@@ -42,7 +44,7 @@ export const Sidebar = ({ collapsed, onToggle }) => {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-full bg-zinc-950 border-r border-zinc-800/50 z-40 transition-all duration-300",
+      "fixed left-0 top-0 h-full bg-zinc-950 border-r border-zinc-800/50 z-40 transition-all duration-300 flex flex-col",
       collapsed ? "w-16" : "w-64"
     )}>
       {/* Logo */}
@@ -95,10 +97,33 @@ export const Sidebar = ({ collapsed, onToggle }) => {
         })}
       </nav>
 
+      {/* Help Tour Button */}
+      {!collapsed && (
+        <div className="px-4 py-2">
+          <button
+            onClick={onShowTour}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+            data-testid="show-tour-button"
+          >
+            <HelpCircle className="w-5 h-5" />
+            <span className="text-sm">Show Tour</span>
+          </button>
+        </div>
+      )}
+
       {/* User section */}
       <div className="border-t border-zinc-800/50 p-4">
         {!collapsed && (
-          <div className="flex items-center gap-3 mb-3">
+          <NavLink
+            to="/profile"
+            className={cn(
+              "flex items-center gap-3 mb-3 p-2 rounded-lg transition-all",
+              location.pathname === '/profile'
+                ? "bg-blue-600/10 border border-blue-500/20"
+                : "hover:bg-white/5"
+            )}
+            data-testid="nav-profile"
+          >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-medium">
               {user?.full_name?.charAt(0) || 'U'}
             </div>
@@ -106,10 +131,10 @@ export const Sidebar = ({ collapsed, onToggle }) => {
               <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
               <div className="flex items-center gap-1">
                 {user?.role !== 'user' && <ShieldCheck className="w-3 h-3 text-blue-400" />}
-                <p className="text-xs text-zinc-500 capitalize">{user?.role}</p>
+                <p className="text-xs text-zinc-500 capitalize">{user?.role?.replace('_', ' ')}</p>
               </div>
             </div>
-          </div>
+          </NavLink>
         )}
         <button
           onClick={logout}
