@@ -630,8 +630,8 @@ export const ProfitTrackerPage = () => {
   );
   
   const monthlyProjection = useMemo(() => 
-    generateMonthlyProjection(summary?.account_value || 0),
-    [summary?.account_value]
+    generateMonthlyProjection(summary?.account_value || 0, tradeLogs),
+    [summary?.account_value, tradeLogs]
   );
   
   const yearlyGroupedProjection = useMemo(() => 
