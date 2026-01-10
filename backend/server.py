@@ -587,6 +587,39 @@ async def get_daily_summary(user: dict = Depends(get_current_user)):
         "trades": trades
     }
 
+@trade_router.post("/forward-to-profit")
+async def forward_trade_to_profit(trade_id: str, user: dict = Depends(get_current_user)):
+    """Forward trade profit to profit tracker by creating a deposit entry"""
+    trade = await db.trade_logs.find_one({"id": trade_id, "user_id": user["id"]}, {"_id": 0})
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    
+    # Check if already forwarded
+    existing = await db.deposits.find_one({"trade_id": trade_id, "user_id": user["id"]})
+    if existing:
+        raise HTTPException(status_code=400, detail="Trade already forwarded to profit tracker")
+    
+    # Create deposit entry for the profit
+    deposit_id = str(uuid.uuid4())
+    deposit = {
+        "id": deposit_id,
+        "user_id": user["id"],
+        "amount": trade["actual_profit"],
+        "product": "MOIL10",
+        "currency": "USD",
+        "notes": f"Trade profit from {trade['created_at'][:10]} - {trade['direction']}",
+        "trade_id": trade_id,
+        "type": "profit",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.deposits.insert_one(deposit)
+    
+    return {
+        "message": "Trade profit forwarded to profit tracker",
+        "deposit_id": deposit_id,
+        "amount": trade["actual_profit"]
+    }
+
 # ==================== ADMIN ROUTES ====================
 
 @admin_router.post("/signals", response_model=TradingSignalResponse)
