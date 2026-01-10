@@ -129,7 +129,8 @@ class TradeLogResponse(BaseModel):
 
 class TradingSignalCreate(BaseModel):
     product: str = "MOIL10"
-    trade_time: str  # HH:MM format in UTC
+    trade_time: str  # HH:MM format
+    trade_timezone: str = "Asia/Manila"  # Default to Philippine time
     direction: str  # BUY or SELL
     notes: Optional[str] = None
 
@@ -137,6 +138,7 @@ class TradingSignalResponse(BaseModel):
     id: str
     product: str
     trade_time: str
+    trade_timezone: str
     direction: str
     notes: Optional[str]
     is_active: bool
