@@ -172,6 +172,7 @@ export const ProfitTrackerPage = () => {
   const [withdrawals, setWithdrawals] = useState([]);
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
+  const [activeSignal, setActiveSignal] = useState(null);
   
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
@@ -191,7 +192,7 @@ export const ProfitTrackerPage = () => {
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [withdrawalNotes, setWithdrawalNotes] = useState('');
   const [withdrawalResult, setWithdrawalResult] = useState(null);
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState('PHP');
   const [initialBalance, setInitialBalance] = useState('');
   const [isFirstTime, setIsFirstTime] = useState(false);
   
