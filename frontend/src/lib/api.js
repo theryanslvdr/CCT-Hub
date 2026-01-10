@@ -66,6 +66,9 @@ export const profitAPI = {
 export const tradeAPI = {
   logTrade: (data) => api.post('/trade/log', data),
   getLogs: (limit = 50) => api.get('/trade/logs', { params: { limit } }),
+  getHistory: (page = 1, pageSize = 10) => api.get('/trade/history', { params: { page, page_size: pageSize } }),
+  updateTimeEntered: (tradeId, timeEntered) => api.put(`/trade/logs/${tradeId}/time-entered`, { time_entered: timeEntered }),
+  getStreak: () => api.get('/trade/streak'),
   getActiveSignal: () => api.get('/trade/active-signal'),
   getDailySummary: () => api.get('/trade/daily-summary'),
   forwardToProfit: (tradeId) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId } }),
