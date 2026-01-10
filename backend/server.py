@@ -370,14 +370,15 @@ async def login(data: UserLogin):
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Re-verify Heartbeat membership on login
-    heartbeat_email = user.get("heartbeat_email", user["email"])
-    is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
-    if not is_heartbeat_user:
-        raise HTTPException(
-            status_code=403, 
-            detail="Your Heartbeat membership could not be verified. Please ensure you're still a community member."
-        )
+    # Skip Heartbeat verification for admins and super_admins
+    if user.get("role") not in ["admin", "super_admin"]:
+        heartbeat_email = user.get("heartbeat_email", user["email"])
+        is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
+        if not is_heartbeat_user:
+            raise HTTPException(
+                status_code=403, 
+                detail="Your Heartbeat membership could not be verified. Please ensure you're still a community member."
+            )
     
     token = create_token(user["id"], user["email"], user["role"])
     
