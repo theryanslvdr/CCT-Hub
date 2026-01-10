@@ -43,6 +43,7 @@ export const authAPI = {
 // User APIs
 export const userAPI = {
   updateProfile: (data) => api.put('/users/profile', data),
+  changePassword: (data) => api.post('/users/change-password', data),
   uploadProfilePicture: (file) => {
     const formData = new FormData();
     formData.append('file', file);
