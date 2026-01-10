@@ -578,6 +578,17 @@ async def reset_profit_tracker(user: dict = Depends(get_current_user)):
 
 class WithdrawalRequest(BaseModel):
     amount: float
+    notes: Optional[str] = ""
+
+def add_business_days(start_date, days):
+    """Add business days to a date, skipping weekends"""
+    current = start_date
+    added = 0
+    while added < days:
+        current += timedelta(days=1)
+        if current.weekday() < 5:  # Monday to Friday
+            added += 1
+    return current
 
 @profit_router.post("/withdrawal")
 async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_current_user)):
@@ -587,6 +598,9 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
     binance_fee = 1.0  # $1 Binance fee
     net_amount = data.amount - merin_fee - binance_fee
     
+    # Calculate estimated arrival date (2 business days)
+    estimated_arrival = add_business_days(datetime.now(timezone.utc), 2)
+    
     # Record as negative deposit (withdrawal)
     withdrawal = {
         "id": str(uuid.uuid4()),
@@ -594,12 +608,14 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "amount": -data.amount,  # Negative to indicate withdrawal
         "product": "WITHDRAWAL",  # Mark as withdrawal type
         "currency": "USDT",
-        "notes": f"Withdrawal to Binance (Net: ${net_amount:.2f} after fees)",
+        "notes": data.notes or f"Withdrawal to Binance",
         "is_withdrawal": True,
         "gross_amount": data.amount,
         "merin_fee": merin_fee,
         "binance_fee": binance_fee,
         "net_amount": net_amount,
+        "estimated_arrival": estimated_arrival.strftime("%Y-%m-%d"),
+        "confirmed_at": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
