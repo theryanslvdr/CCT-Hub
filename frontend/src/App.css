@@ -203,3 +203,23 @@
 [data-sonner-toast][data-type="error"] {
     @apply border-red-500/30 !important;
 }
+
+
+
+/* Tour highlight effect */
+.tour-highlight {
+    @apply relative;
+    animation: tour-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    z-index: 10;
+}
+
+@keyframes tour-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
+    }
+}
