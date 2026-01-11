@@ -52,22 +52,47 @@ export const LicenseeAccountPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [txRes, summaryRes] = await Promise.all([
-        licenseeAPI.getMyTransactions(),
-        profitAPI.getSummary()
-      ]);
-      
-      setTransactions(txRes.data.transactions || []);
-      setIsLicensee(txRes.data.is_licensee);
-      setLicense(txRes.data.license || null);
-      setAccountSummary(summaryRes.data);
+      // If simulating a licensee, load that licensee's data
+      if (isSimulatingLicensee && simulatedView?.memberId) {
+        // Load simulated licensee's data
+        const licRes = await adminAPI.getLicenses();
+        const memberLicense = licRes.data.licenses?.find(
+          l => l.user_id === simulatedView.memberId && l.is_active
+        );
+        
+        if (memberLicense) {
+          // Get licensee's transactions
+          const txRes = await adminAPI.getLicenseeTransactions();
+          const memberTx = txRes.data.transactions?.filter(
+            t => t.user_id === simulatedView.memberId
+          ) || [];
+          
+          setTransactions(memberTx);
+          setIsLicensee(true);
+          setLicense(memberLicense);
+          setAccountSummary({ current_balance: memberLicense.current_amount || 0 });
+        } else {
+          setIsLicensee(false);
+        }
+      } else {
+        // Normal flow - load current user's data
+        const [txRes, summaryRes] = await Promise.all([
+          licenseeAPI.getMyTransactions(),
+          profitAPI.getSummary()
+        ]);
+        
+        setTransactions(txRes.data.transactions || []);
+        setIsLicensee(txRes.data.is_licensee);
+        setLicense(txRes.data.license || null);
+        setAccountSummary(summaryRes.data);
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
       toast.error('Failed to load account data');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isSimulatingLicensee, simulatedView?.memberId]);
 
   useEffect(() => {
     loadData();
