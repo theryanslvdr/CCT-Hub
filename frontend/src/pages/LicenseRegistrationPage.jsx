@@ -108,7 +108,21 @@ export const LicenseRegistrationPage = () => {
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Registration failed');
+      // Handle different error formats
+      const errorData = err.response?.data;
+      if (typeof errorData === 'string') {
+        toast.error(errorData);
+      } else if (errorData?.detail) {
+        if (typeof errorData.detail === 'string') {
+          toast.error(errorData.detail);
+        } else if (Array.isArray(errorData.detail)) {
+          toast.error(errorData.detail.map(e => e.msg).join(', '));
+        } else {
+          toast.error('Registration failed');
+        }
+      } else {
+        toast.error('Registration failed');
+      }
     } finally {
       setRegistering(false);
     }
