@@ -171,6 +171,8 @@ export const AuthProvider = ({ children }) => {
         memberName: memberData.full_name,
         accountValue: memberData.account_value,
         lotSize: memberData.lot_size,
+        totalDeposits: memberData.total_deposits,
+        totalProfit: memberData.total_profit,
         allowed_dashboards: memberData.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
       });
     }
@@ -198,6 +200,22 @@ export const AuthProvider = ({ children }) => {
   const getSimulatedLotSize = useCallback(() => {
     if (simulatedView && simulatedView.lotSize !== undefined) {
       return simulatedView.lotSize;
+    }
+    return null;
+  }, [simulatedView]);
+
+  // Get simulated total deposits
+  const getSimulatedTotalDeposits = useCallback(() => {
+    if (simulatedView && simulatedView.totalDeposits !== undefined) {
+      return simulatedView.totalDeposits;
+    }
+    return null;
+  }, [simulatedView]);
+
+  // Get simulated total profit
+  const getSimulatedTotalProfit = useCallback(() => {
+    if (simulatedView && simulatedView.totalProfit !== undefined) {
+      return simulatedView.totalProfit;
     }
     return null;
   }, [simulatedView]);
