@@ -7,7 +7,15 @@ const WebSocketContext = createContext(null);
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
+    // Return default values if not in provider (e.g., during initial render)
+    return {
+      connected: false,
+      notifications: [],
+      unreadCount: 0,
+      markAllAsRead: () => {},
+      clearNotifications: () => {},
+      reconnect: () => {},
+    };
   }
   return context;
 };
@@ -21,6 +29,56 @@ export const WebSocketProvider = ({ children }) => {
   const reconnectTimeoutRef = useRef(null);
   const pingIntervalRef = useRef(null);
 
+  // Handle incoming notification
+  const handleNotification = useCallback((notification) => {
+    // Add to notifications list
+    setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50
+    setUnreadCount(prev => prev + 1);
+
+    // Show toast notification based on type
+    const { type, title, message, amount } = notification;
+    
+    switch (type) {
+      case 'deposit_request':
+        toast.info(title, {
+          description: `${message}${amount ? ` - $${amount.toLocaleString()}` : ''}`,
+          duration: 5000,
+        });
+        break;
+      case 'withdrawal_request':
+        toast.warning(title, {
+          description: `${message}${amount ? ` - $${amount.toLocaleString()}` : ''}`,
+          duration: 5000,
+        });
+        break;
+      case 'transaction_status':
+        toast.success(title, {
+          description: message,
+          duration: 5000,
+        });
+        break;
+      case 'trade_signal':
+        toast(title, {
+          description: message,
+          duration: 8000,
+          icon: '📊',
+        });
+        break;
+      case 'system_announcement':
+        toast.info(title, {
+          description: message,
+          duration: 10000,
+        });
+        break;
+      default:
+        toast(title, {
+          description: message,
+          duration: 5000,
+        });
+    }
+  }, []);
+
+  // Connect to WebSocket
   const connect = useCallback(() => {
     if (!isAuthenticated || !user || !token) return;
     
@@ -86,7 +144,7 @@ export const WebSocketProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
     }
-  }, [isAuthenticated, user, token]);
+  }, [isAuthenticated, user, token, handleNotification]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -100,54 +158,6 @@ export const WebSocketProvider = ({ children }) => {
       wsRef.current = null;
     }
     setConnected(false);
-  }, []);
-
-  const handleNotification = useCallback((notification) => {
-    // Add to notifications list
-    setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50
-    setUnreadCount(prev => prev + 1);
-
-    // Show toast notification based on type
-    const { type, title, message, amount } = notification;
-    
-    switch (type) {
-      case 'deposit_request':
-        toast.info(title, {
-          description: `${message}${amount ? ` - $${amount.toLocaleString()}` : ''}`,
-          duration: 5000,
-        });
-        break;
-      case 'withdrawal_request':
-        toast.warning(title, {
-          description: `${message}${amount ? ` - $${amount.toLocaleString()}` : ''}`,
-          duration: 5000,
-        });
-        break;
-      case 'transaction_status':
-        toast.success(title, {
-          description: message,
-          duration: 5000,
-        });
-        break;
-      case 'trade_signal':
-        toast(title, {
-          description: message,
-          duration: 8000,
-          icon: '📊',
-        });
-        break;
-      case 'system_announcement':
-        toast.info(title, {
-          description: message,
-          duration: 10000,
-        });
-        break;
-      default:
-        toast(title, {
-          description: message,
-          duration: 5000,
-        });
-    }
   }, []);
 
   const markAllAsRead = useCallback(() => {
