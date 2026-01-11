@@ -281,7 +281,7 @@ class TestHiddenFeatures:
         """Debt Management endpoint is accessible"""
         headers = {"Authorization": f"Bearer {master_admin_token}"}
         
-        response = requests.get(f"{BASE_URL}/api/debts", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/debt", headers=headers)
         assert response.status_code == 200, f"Debts endpoint failed: {response.text}"
         print("✓ Debt Management endpoint accessible")
     
@@ -289,7 +289,7 @@ class TestHiddenFeatures:
         """Debt repayment plan endpoint is accessible"""
         headers = {"Authorization": f"Bearer {master_admin_token}"}
         
-        response = requests.get(f"{BASE_URL}/api/debts/plan", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/debt/plan", headers=headers)
         assert response.status_code == 200, f"Debt plan endpoint failed: {response.text}"
         print("✓ Debt repayment plan endpoint accessible")
 
