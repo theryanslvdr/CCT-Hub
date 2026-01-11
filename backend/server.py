@@ -581,7 +581,8 @@ async def login(data: UserLogin):
             profile_picture=user.get("profile_picture"),
             lot_size=user.get("lot_size"),
             timezone=user.get("timezone", "UTC"),
-            allowed_dashboards=user.get("allowed_dashboards")
+            allowed_dashboards=user.get("allowed_dashboards"),
+            license_type=user.get("license_type")
         )
     )
 
