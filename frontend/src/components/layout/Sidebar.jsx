@@ -69,8 +69,10 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     }
     
     // For members or simulated view, filter based on allowed dashboards
+    // Always include licensee_account for all members (access controlled on the page)
     const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
-    return memberNavItems.filter(item => effectiveDashboards.includes(item.id));
+    const dashboardsWithLicensee = [...effectiveDashboards, 'licensee_account'];
+    return memberNavItems.filter(item => dashboardsWithLicensee.includes(item.id));
   };
 
   const navLinkClass = ({ isActive }) => 
