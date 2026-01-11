@@ -47,6 +47,11 @@ export const AdminSettingsPage = () => {
     // Footer
     footer_copyright: '© 2024 CrossCurrent Finance Center. All rights reserved.',
     footer_links: [],
+    // Maintenance
+    maintenance_mode: false,
+    maintenance_message: 'Our services are undergoing maintenance, and will be back soon!',
+    // Announcements
+    announcements: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
