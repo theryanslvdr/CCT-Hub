@@ -1205,6 +1205,226 @@ export const AdminSettingsPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Maintenance Tab */}
+        <TabsContent value="maintenance" className="mt-6 space-y-6">
+          {/* Maintenance Mode Card */}
+          <Card className={`glass-card ${settings.maintenance_mode ? 'border-amber-500/50' : ''}`}>
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <AlertTriangle className={`w-5 h-5 ${settings.maintenance_mode ? 'text-amber-400' : 'text-zinc-400'}`} /> 
+                Maintenance Mode
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div>
+                  <p className="text-white font-medium">Enable Maintenance Mode</p>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    When enabled, all users except Master Admin will see a maintenance page and cannot login.
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.maintenance_mode}
+                  onCheckedChange={(checked) => setSettings({ ...settings, maintenance_mode: checked })}
+                  data-testid="maintenance-toggle"
+                />
+              </div>
+              
+              {settings.maintenance_mode && (
+                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <div className="flex items-center gap-2 text-amber-400 mb-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="font-medium">Maintenance Mode Active</span>
+                  </div>
+                  <p className="text-sm text-zinc-300">
+                    All users are blocked from logging in. Only Master Admin can access by clicking the hidden button.
+                  </p>
+                </div>
+              )}
+              
+              <div>
+                <Label className="text-zinc-300">Maintenance Message</Label>
+                <Textarea
+                  value={settings.maintenance_message}
+                  onChange={(e) => setSettings({ ...settings, maintenance_message: e.target.value })}
+                  placeholder="Our services are undergoing maintenance, and will be back soon!"
+                  className="input-dark mt-1 min-h-[100px]"
+                  data-testid="maintenance-message"
+                />
+                <p className="text-xs text-zinc-500 mt-1">This message will be displayed on the maintenance page.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Announcements Card */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-blue-400" /> Announcements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-zinc-400">
+                Create announcement banners that appear at the top of the dashboard for all users.
+              </p>
+
+              {/* Add New Announcement Form */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-4">
+                <h4 className="text-white font-medium">New Announcement</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-zinc-300">Title (Optional)</Label>
+                    <Input
+                      value={newAnnouncement.title}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                      placeholder="e.g., System Update"
+                      className="input-dark mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Type</Label>
+                    <Select 
+                      value={newAnnouncement.type} 
+                      onValueChange={(value) => setNewAnnouncement({ ...newAnnouncement, type: value })}
+                    >
+                      <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-white mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800">
+                        <SelectItem value="info" className="text-white hover:bg-zinc-800">
+                          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-500" /> Info</span>
+                        </SelectItem>
+                        <SelectItem value="warning" className="text-white hover:bg-zinc-800">
+                          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500" /> Warning</span>
+                        </SelectItem>
+                        <SelectItem value="success" className="text-white hover:bg-zinc-800">
+                          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Success</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-zinc-300">Message *</Label>
+                  <Textarea
+                    value={newAnnouncement.message}
+                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })}
+                    placeholder="Enter your announcement message..."
+                    className="input-dark mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-zinc-300">Link URL (Optional)</Label>
+                    <Input
+                      value={newAnnouncement.link_url}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, link_url: e.target.value })}
+                      placeholder="https://..."
+                      className="input-dark mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Link Text (Optional)</Label>
+                    <Input
+                      value={newAnnouncement.link_text}
+                      onChange={(e) => setNewAnnouncement({ ...newAnnouncement, link_text: e.target.value })}
+                      placeholder="Learn more"
+                      className="input-dark mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={newAnnouncement.sticky}
+                      onCheckedChange={(checked) => setNewAnnouncement({ ...newAnnouncement, sticky: checked })}
+                    />
+                    <Label className="text-zinc-300">Sticky (stays at top)</Label>
+                  </div>
+                  <Button onClick={handleAddAnnouncement} className="btn-primary gap-2">
+                    <Plus className="w-4 h-4" /> Add Announcement
+                  </Button>
+                </div>
+              </div>
+
+              {/* Active Announcements List */}
+              {(settings.announcements || []).length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-white font-medium">Active Announcements</h4>
+                  {(settings.announcements || []).map((announcement, index) => (
+                    <div 
+                      key={announcement.id || index}
+                      className={`p-4 rounded-lg border ${
+                        announcement.type === 'warning' ? 'bg-amber-500/10 border-amber-500/30' :
+                        announcement.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30' :
+                        'bg-blue-500/10 border-blue-500/30'
+                      } ${!announcement.active ? 'opacity-50' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          {announcement.title && (
+                            <p className="font-medium text-white">{announcement.title}</p>
+                          )}
+                          <p className={`text-sm ${
+                            announcement.type === 'warning' ? 'text-amber-200' :
+                            announcement.type === 'success' ? 'text-emerald-200' :
+                            'text-blue-200'
+                          }`}>{announcement.message}</p>
+                          {announcement.link_url && (
+                            <a 
+                              href={announcement.link_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-400 hover:underline mt-1 inline-flex items-center gap-1"
+                            >
+                              {announcement.link_text || 'Learn more'} <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            {announcement.sticky && (
+                              <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-xs rounded">Sticky</span>
+                            )}
+                            <span className={`px-2 py-0.5 text-xs rounded ${
+                              announcement.active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-500'
+                            }`}>
+                              {announcement.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={announcement.active}
+                            onCheckedChange={() => handleToggleAnnouncement(index)}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveAnnouncement(index)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {(settings.announcements || []).length === 0 && (
+                <div className="text-center py-8 text-zinc-500">
+                  <Megaphone className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No announcements yet. Add one above!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
