@@ -2817,8 +2817,10 @@ async def register_with_license(
     # Generate token
     token = create_token(user_id, email.lower(), "member")
     
-    # Remove password from response
+    # Remove password and _id from response
     del new_user["password"]
+    if "_id" in new_user:
+        del new_user["_id"]
     
     return {
         "access_token": token,
