@@ -223,6 +223,37 @@ class PlatformSettings(BaseModel):
     primary_color: str = "#3B82F6"
     accent_color: str = "#06B6D4"
     hide_emergent_badge: bool = False
+    # Integration API Keys
+    emailit_api_key: Optional[str] = None
+    cloudinary_cloud_name: Optional[str] = None
+    cloudinary_api_key: Optional[str] = None
+    cloudinary_api_secret: Optional[str] = None
+    heartbeat_api_key: Optional[str] = None
+
+class LicenseType(str, Enum):
+    STANDARD = "standard"
+    EXTENDED = "extended"
+    HONORARY = "honorary"
+
+class LicenseCreate(BaseModel):
+    user_id: str
+    license_type: str  # extended or honorary
+    starting_amount: float
+    start_date: Optional[str] = None  # YYYY-MM-DD format
+    notes: Optional[str] = None
+
+class LicenseResponse(BaseModel):
+    id: str
+    user_id: str
+    user_name: str
+    license_type: str
+    starting_amount: float
+    current_amount: float
+    start_date: str
+    notes: Optional[str] = None
+    is_active: bool
+    created_at: str
+    created_by: str
 
 class NotificationCreate(BaseModel):
     type: str  # deposit, withdrawal, trade_underperform
