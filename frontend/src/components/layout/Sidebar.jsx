@@ -111,6 +111,11 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     handleNavClick();
   };
 
+  const handleLicensesClick = () => {
+    navigate('/admin/licenses');
+    handleNavClick();
+  };
+
   // Determine logo display
   const hasLogo = platformSettings?.logo_url;
   const hasFavicon = platformSettings?.favicon_url;
