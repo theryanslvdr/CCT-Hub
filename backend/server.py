@@ -253,6 +253,11 @@ class PlatformSettings(BaseModel):
     # Footer Settings
     footer_copyright: str = "© 2024 CrossCurrent Finance Center. All rights reserved."
     footer_links: Optional[List[dict]] = None  # [{label: "Privacy", url: "/privacy"}, ...]
+    # Maintenance Settings
+    maintenance_mode: bool = False
+    maintenance_message: str = "Our services are undergoing maintenance, and will be back soon!"
+    # Announcements
+    announcements: Optional[List[dict]] = None  # List of announcement dicts
 
 class LicenseType(str, Enum):
     STANDARD = "standard"
