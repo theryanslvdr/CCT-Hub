@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { settingsAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Settings, Upload, Globe, Image, Palette, RefreshCw } from 'lucide-react';
+import { Settings, Upload, Globe, Image, Palette, RefreshCw, Crown } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
+  const { isMasterAdmin } = useAuth();
   const [settings, setSettings] = useState({
     site_title: 'CrossCurrent Finance Center',
     site_description: 'Trading profit management platform',
