@@ -9,8 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import { Plus, Radio, Trash2, TrendingUp, TrendingDown, Edit, Clock, Target, Zap, FlaskConical } from 'lucide-react';
+import { 
+  Plus, Radio, Trash2, TrendingUp, TrendingDown, Edit, Clock, Target, Zap, 
+  FlaskConical, ChevronLeft, ChevronRight, Archive, Calendar, FolderOpen
+} from 'lucide-react';
 import api from '@/lib/api';
 
 const tradingTimezones = [
@@ -26,7 +30,19 @@ export const AdminSignalsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [simulateDialogOpen, setSimulateDialogOpen] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalSignals, setTotalSignals] = useState(0);
+  const pageSize = 10;
+  
+  // Archive state
+  const [archiveData, setArchiveData] = useState([]);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+  
   const [newSignal, setNewSignal] = useState({
     product: 'MOIL10',
     trade_time: '',
@@ -46,36 +62,82 @@ export const AdminSignalsPage = () => {
 
   useEffect(() => {
     loadSignals();
-  }, []);
+  }, [currentPage]);
 
   const loadSignals = async () => {
     try {
-      const res = await adminAPI.getSignals();
-      setSignals(res.data);
+      setLoading(true);
+      const res = await adminAPI.getSignalsHistory(currentPage, pageSize);
+      setSignals(res.data.signals);
+      setTotalPages(res.data.total_pages);
+      setTotalSignals(res.data.total);
     } catch (error) {
       console.error('Failed to load signals:', error);
+      // Fallback to old method
+      try {
+        const res = await adminAPI.getSignals();
+        setSignals(res.data);
+      } catch (e) {
+        toast.error('Failed to load signals');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const loadArchive = async () => {
+    try {
+      setArchiveLoading(true);
+      const res = await adminAPI.getSignalsArchive();
+      setArchiveData(res.data.months || []);
+    } catch (error) {
+      console.error('Failed to load archive:', error);
+      toast.error('Failed to load signal archive');
+    } finally {
+      setArchiveLoading(false);
+    }
+  };
+
+  const handleOpenArchive = () => {
+    loadArchive();
+    setArchiveDialogOpen(true);
+  };
+
+  const handleArchiveMonth = async () => {
+    try {
+      const res = await adminAPI.archiveMonth();
+      toast.success(res.data.message);
+      loadSignals();
+      loadArchive();
+    } catch (error) {
+      toast.error('Failed to archive signals');
+    }
+  };
+
   const handleCreateSignal = async () => {
     if (!newSignal.trade_time) {
-      toast.error('Please set the trade time');
+      toast.error('Please select a trade time');
       return;
     }
-
+    
     try {
       await adminAPI.createSignal({
         ...newSignal,
         profit_points: parseFloat(newSignal.profit_points) || 15,
       });
-      toast.success('Trading signal created and activated!');
+      toast.success('Trading signal created!');
       setDialogOpen(false);
-      setNewSignal({ product: 'MOIL10', trade_time: '', trade_timezone: 'Asia/Manila', direction: 'BUY', profit_points: '15', notes: '' });
+      setNewSignal({
+        product: 'MOIL10',
+        trade_time: '',
+        trade_timezone: 'Asia/Manila',
+        direction: 'BUY',
+        profit_points: '15',
+        notes: '',
+      });
       loadSignals();
     } catch (error) {
-      toast.error('Failed to create signal');
+      toast.error(error.response?.data?.detail || 'Failed to create signal');
     }
   };
 
@@ -106,35 +168,15 @@ export const AdminSignalsPage = () => {
       setEditDialogOpen(false);
       loadSignals();
     } catch (error) {
-      toast.error('Failed to update signal');
+      toast.error(error.response?.data?.detail || 'Failed to update signal');
     }
   };
 
-  const handleSimulateSignal = async () => {
-    if (!newSignal.trade_time) {
-      toast.error('Please set the trade time');
-      return;
-    }
-
-    try {
-      await api.post('/admin/signals/simulate', {
-        ...newSignal,
-        profit_points: parseFloat(newSignal.profit_points) || 15,
-      });
-      toast.success('Simulated signal created! (Super Admin testing only)');
-      setSimulateDialogOpen(false);
-      setNewSignal({ product: 'MOIL10', trade_time: '', trade_timezone: 'Asia/Manila', direction: 'BUY', profit_points: '15', notes: '' });
-      loadSignals();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create simulated signal');
-    }
-  };
-
-  const handleDeleteSignal = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this signal?')) return;
+  const handleDeleteSignal = async (signalId) => {
+    if (!confirm('Are you sure you want to delete this signal?')) return;
     
     try {
-      await adminAPI.deleteSignal(id);
+      await adminAPI.deleteSignal(signalId);
       toast.success('Signal deleted');
       loadSignals();
     } catch (error) {
@@ -142,212 +184,193 @@ export const AdminSignalsPage = () => {
     }
   };
 
-  const handleToggleActive = async (signal) => {
+  const handleSimulateSignal = async () => {
+    if (!newSignal.trade_time) {
+      toast.error('Please select a trade time');
+      return;
+    }
+    
     try {
-      await api.put(`/admin/signals/${signal.id}`, {
-        is_active: !signal.is_active,
+      await api.post('/admin/signals/simulate', {
+        ...newSignal,
+        profit_points: parseFloat(newSignal.profit_points) || 15,
       });
-      toast.success(signal.is_active ? 'Signal deactivated' : 'Signal activated');
+      toast.success('Simulated signal created! Check Trade Monitor.');
+      setSimulateDialogOpen(false);
+      setNewSignal({
+        product: 'MOIL10',
+        trade_time: '',
+        trade_timezone: 'Asia/Manila',
+        direction: 'BUY',
+        profit_points: '15',
+        notes: '',
+      });
       loadSignals();
     } catch (error) {
-      toast.error('Failed to toggle signal');
+      toast.error(error.response?.data?.detail || 'Failed to simulate signal');
     }
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>;
-  }
-
   const activeSignal = signals.find(s => s.is_active);
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Active Signal Card */}
-      {activeSignal && (
-        <Card className={`glass-highlight ${activeSignal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`}>
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> 
-              Active Signal
-              {activeSignal.is_simulated && (
-                <span className="ml-2 px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
-                  <FlaskConical className="w-3 h-3" /> SIMULATED
-                </span>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-6">
-                <div>
-                  <p className="text-xs text-zinc-400">Product</p>
-                  <p className="text-2xl font-bold text-white">{activeSignal.product}</p>
-                </div>
-                <div className={`px-6 py-3 rounded-xl text-xl font-bold ${activeSignal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                  {activeSignal.direction === 'BUY' ? <TrendingUp className="inline w-5 h-5 mr-2" /> : <TrendingDown className="inline w-5 h-5 mr-2" />}
-                  {activeSignal.direction}
-                </div>
-                <div>
-                  <p className="text-xs text-zinc-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Trade Time ({activeSignal.trade_timezone || 'Asia/Manila'})
-                  </p>
-                  <p className="text-2xl font-mono font-bold text-blue-400">{activeSignal.trade_time}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-zinc-400 flex items-center gap-1">
-                    <Target className="w-3 h-3" /> Profit Multiplier
-                  </p>
-                  <p className="text-2xl font-mono font-bold text-cyan-400">×{activeSignal.profit_points || 15}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditSignal(activeSignal)}
-                  className="btn-secondary"
-                >
-                  <Edit className="w-4 h-4 mr-1" /> Edit
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Trading Signals</h1>
+          <p className="text-zinc-400">Manage daily trading signals for members</p>
+        </div>
+        <div className="flex gap-2">
+          {/* Archive Button */}
+          <Button 
+            variant="outline" 
+            onClick={handleOpenArchive} 
+            className="btn-secondary gap-2"
+            data-testid="open-archive-btn"
+          >
+            <Archive className="w-4 h-4" /> Monthly Archive
+          </Button>
+          
+          {/* Simulate Button (Super Admin Only) */}
+          {isSuperAdmin() && (
+            <Dialog open={simulateDialogOpen} onOpenChange={setSimulateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="btn-secondary gap-2" data-testid="simulate-signal-btn">
+                  <FlaskConical className="w-4 h-4" /> Simulate
                 </Button>
-              </div>
-            </div>
-            {activeSignal.notes && (
-              <p className="text-zinc-400 mt-4 p-3 bg-zinc-900/50 rounded-lg">{activeSignal.notes}</p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4">
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="btn-primary gap-2" data-testid="create-signal-button">
-              <Plus className="w-4 h-4" /> Create New Signal
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card border-zinc-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">Create Trading Signal</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div>
-                <Label className="text-zinc-300">Product</Label>
-                <Select value={newSignal.product} onValueChange={(v) => setNewSignal({ ...newSignal, product: v })}>
-                  <SelectTrigger className="input-dark mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MOIL10">MOIL10</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-zinc-300">Trade Time</Label>
-                  <Input
-                    type="time"
-                    value={newSignal.trade_time}
-                    onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
-                    className="input-dark mt-1"
-                    data-testid="signal-time-input"
-                  />
+              </DialogTrigger>
+              <DialogContent className="glass-card border-zinc-800">
+                <DialogHeader>
+                  <DialogTitle className="text-white flex items-center gap-2">
+                    <FlaskConical className="w-5 h-5 text-amber-400" /> Simulate Test Signal
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <p className="text-sm text-amber-400 bg-amber-500/10 p-3 rounded-lg">
+                    This will create a test signal visible only in Trade Monitor. It will replace any active signal.
+                  </p>
+                  {/* Same form as create signal */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-zinc-300">Product</Label>
+                      <Select value={newSignal.product} onValueChange={(v) => setNewSignal({ ...newSignal, product: v })}>
+                        <SelectTrigger className="input-dark mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MOIL10">MOIL10</SelectItem>
+                          <SelectItem value="XAUUSD">XAUUSD (Gold)</SelectItem>
+                          <SelectItem value="BTCUSD">BTCUSD (Bitcoin)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Direction</Label>
+                      <Select value={newSignal.direction} onValueChange={(v) => setNewSignal({ ...newSignal, direction: v })}>
+                        <SelectTrigger className="input-dark mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="BUY">BUY</SelectItem>
+                          <SelectItem value="SELL">SELL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-zinc-300">Trade Time</Label>
+                      <Input
+                        type="time"
+                        value={newSignal.trade_time}
+                        onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
+                        className="input-dark mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Timezone</Label>
+                      <Select value={newSignal.trade_timezone} onValueChange={(v) => setNewSignal({ ...newSignal, trade_timezone: v })}>
+                        <SelectTrigger className="input-dark mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tradingTimezones.map((tz) => (
+                            <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Profit Points (Multiplier)</Label>
+                    <Input
+                      type="number"
+                      value={newSignal.profit_points}
+                      onChange={(e) => setNewSignal({ ...newSignal, profit_points: e.target.value })}
+                      className="input-dark mt-1"
+                      placeholder="15"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Notes (Optional)</Label>
+                    <Input
+                      value={newSignal.notes}
+                      onChange={(e) => setNewSignal({ ...newSignal, notes: e.target.value })}
+                      className="input-dark mt-1"
+                      placeholder="Any additional notes..."
+                    />
+                  </div>
+                  <Button onClick={handleSimulateSignal} className="w-full bg-amber-500 hover:bg-amber-600 text-black" data-testid="submit-simulate-btn">
+                    <FlaskConical className="w-4 h-4 mr-2" /> Create Simulated Signal
+                  </Button>
                 </div>
-                <div>
-                  <Label className="text-zinc-300">Timezone</Label>
-                  <Select value={newSignal.trade_timezone} onValueChange={(v) => setNewSignal({ ...newSignal, trade_timezone: v })}>
-                    <SelectTrigger className="input-dark mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tradingTimezones.map((tz) => (
-                        <SelectItem key={tz.value} value={tz.value}>
-                          {tz.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-zinc-300">Direction</Label>
-                  <Select value={newSignal.direction} onValueChange={(v) => setNewSignal({ ...newSignal, direction: v })}>
-                    <SelectTrigger className="input-dark mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BUY">
-                        <span className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 text-emerald-400" /> BUY
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="SELL">
-                        <span className="flex items-center gap-2">
-                          <TrendingDown className="w-4 h-4 text-red-400" /> SELL
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Profit Multiplier (×)</Label>
-                  <Input
-                    type="number"
-                    value={newSignal.profit_points}
-                    onChange={(e) => setNewSignal({ ...newSignal, profit_points: e.target.value })}
-                    placeholder="15"
-                    className="input-dark mt-1"
-                    data-testid="profit-points-input"
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">Exit Value = LOT × {newSignal.profit_points || 15}</p>
-                </div>
-              </div>
-              <div>
-                <Label className="text-zinc-300">Notes (optional)</Label>
-                <Input
-                  value={newSignal.notes}
-                  onChange={(e) => setNewSignal({ ...newSignal, notes: e.target.value })}
-                  placeholder="Add notes for traders..."
-                  className="input-dark mt-1"
-                />
-              </div>
-              <Button onClick={handleCreateSignal} className="w-full btn-primary" data-testid="confirm-create-signal">
-                Create & Activate Signal
-              </Button>
-              <p className="text-xs text-zinc-500 text-center">
-                Creating a new signal will deactivate any existing active signal.
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {isSuperAdmin && (
-          <Dialog open={simulateDialogOpen} onOpenChange={setSimulateDialogOpen}>
+              </DialogContent>
+            </Dialog>
+          )}
+          
+          {/* Create Signal Button */}
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-secondary gap-2" data-testid="simulate-signal-button">
-                <FlaskConical className="w-4 h-4" /> Simulate Signal
+              <Button className="btn-primary gap-2" data-testid="create-signal-btn">
+                <Plus className="w-4 h-4" /> New Signal
               </Button>
             </DialogTrigger>
             <DialogContent className="glass-card border-zinc-800">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
-                  <FlaskConical className="w-5 h-5 text-amber-400" /> Create Simulated Signal
+                  <Radio className="w-5 h-5 text-blue-400" /> Create Trading Signal
                 </DialogTitle>
               </DialogHeader>
-              <div className="p-3 mb-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm">
-                <strong>Super Admin Only:</strong> Simulated signals are for testing purposes and will be marked as "[SIMULATED]".
-              </div>
-              <div className="space-y-4">
+              <div className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-zinc-300">Trade Time</Label>
-                    <Input
-                      type="time"
-                      value={newSignal.trade_time}
-                      onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
-                      className="input-dark mt-1"
-                    />
+                    <Label className="text-zinc-300">Product</Label>
+                    <Select value={newSignal.product} onValueChange={(v) => setNewSignal({ ...newSignal, product: v })}>
+                      <SelectTrigger className="input-dark mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MOIL10">MOIL10</SelectItem>
+                        <SelectItem value="XAUUSD">XAUUSD (Gold)</SelectItem>
+                        <SelectItem value="BTCUSD">BTCUSD (Bitcoin)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label className="text-zinc-300">Direction</Label>
@@ -362,113 +385,312 @@ export const AdminSignalsPage = () => {
                     </Select>
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-zinc-300">Trade Time</Label>
+                    <Input
+                      type="time"
+                      value={newSignal.trade_time}
+                      onChange={(e) => setNewSignal({ ...newSignal, trade_time: e.target.value })}
+                      className="input-dark mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-zinc-300">Timezone</Label>
+                    <Select value={newSignal.trade_timezone} onValueChange={(v) => setNewSignal({ ...newSignal, trade_timezone: v })}>
+                      <SelectTrigger className="input-dark mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tradingTimezones.map((tz) => (
+                          <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
                 <div>
-                  <Label className="text-zinc-300">Notes</Label>
+                  <Label className="text-zinc-300">Profit Points (Multiplier)</Label>
+                  <Input
+                    type="number"
+                    value={newSignal.profit_points}
+                    onChange={(e) => setNewSignal({ ...newSignal, profit_points: e.target.value })}
+                    className="input-dark mt-1"
+                    placeholder="15"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Exit Value = LOT Size × Profit Points</p>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Notes (Optional)</Label>
                   <Input
                     value={newSignal.notes}
                     onChange={(e) => setNewSignal({ ...newSignal, notes: e.target.value })}
-                    placeholder="Test scenario..."
                     className="input-dark mt-1"
+                    placeholder="Market conditions, strategy notes..."
                   />
                 </div>
-                <Button onClick={handleSimulateSignal} className="w-full bg-amber-500 hover:bg-amber-600 text-black">
-                  Create Simulated Signal
+                <Button onClick={handleCreateSignal} className="w-full btn-primary" data-testid="submit-signal-btn">
+                  <Radio className="w-4 h-4 mr-2" /> Publish Signal
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
-        )}
+        </div>
       </div>
 
-      {/* Signals History */}
+      {/* Active Signal Card */}
+      {activeSignal && (
+        <Card className="glass-highlight border-blue-500/30">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> Active Signal
+              {activeSignal.is_simulated && (
+                <span className="ml-2 px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
+                  <FlaskConical className="w-3 h-3" /> SIMULATED
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-6">
+              <div>
+                <p className="text-xs text-zinc-400">Product</p>
+                <p className="text-2xl font-bold text-white">{activeSignal.product}</p>
+              </div>
+              <div className={`px-6 py-3 rounded-xl text-xl font-bold ${activeSignal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                {activeSignal.direction === 'BUY' ? <TrendingUp className="inline w-5 h-5 mr-2" /> : <TrendingDown className="inline w-5 h-5 mr-2" />}
+                {activeSignal.direction}
+              </div>
+              <div>
+                <p className="text-xs text-zinc-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Trade Time ({activeSignal.trade_timezone || 'Asia/Manila'})
+                </p>
+                <p className="text-2xl font-mono font-bold text-blue-400">{activeSignal.trade_time}</p>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-400 flex items-center gap-1">
+                  <Target className="w-3 h-3" /> Profit Points
+                </p>
+                <p className="text-2xl font-mono font-bold text-purple-400">×{activeSignal.profit_points || 15}</p>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button variant="outline" size="sm" onClick={() => handleEditSignal(activeSignal)} className="btn-secondary">
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            {activeSignal.notes && (
+              <p className="mt-4 text-zinc-400 p-3 bg-zinc-900/50 rounded-lg">{activeSignal.notes}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Signal History with Pagination */}
       <Card className="glass-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-white">Signal History</CardTitle>
+          <p className="text-sm text-zinc-500">{totalSignals} total signals</p>
         </CardHeader>
         <CardContent>
-          {signals.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full data-table">
-                <thead>
-                  <tr>
-                    <th>Status</th>
-                    <th>Product</th>
-                    <th>Direction</th>
-                    <th>Trade Time</th>
-                    <th>Timezone</th>
-                    <th>Multiplier</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {signals.map((signal) => (
-                    <tr key={signal.id} className={signal.is_simulated ? 'bg-amber-500/5' : ''}>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <span className={`status-badge ${signal.is_active ? 'status-success' : 'bg-zinc-700/50 text-zinc-400'}`}>
-                            {signal.is_active ? 'Active' : 'Inactive'}
-                          </span>
-                          {signal.is_simulated && (
-                            <span className="text-amber-400" title="Simulated">
-                              <FlaskConical className="w-4 h-4" />
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="font-medium text-white">{signal.product}</td>
-                      <td>
-                        <span className={`status-badge ${signal.direction === 'BUY' ? 'direction-buy' : 'direction-sell'}`}>
-                          {signal.direction}
-                        </span>
-                      </td>
-                      <td className="font-mono">{signal.trade_time}</td>
-                      <td className="text-zinc-400 text-sm">{signal.trade_timezone || 'Asia/Manila'}</td>
-                      <td className="font-mono text-cyan-400">×{signal.profit_points || 15}</td>
-                      <td className="font-mono text-zinc-400">{new Date(signal.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditSignal(signal)}
-                            className="text-zinc-400 hover:text-blue-400"
-                            data-testid={`edit-signal-${signal.id}`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleToggleActive(signal)}
-                            className={signal.is_active ? 'text-emerald-400 hover:text-emerald-300' : 'text-zinc-400 hover:text-emerald-400'}
-                            title={signal.is_active ? 'Deactivate' : 'Activate'}
-                          >
-                            <Zap className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteSignal(signal.id)}
-                            className="text-zinc-400 hover:text-red-400"
-                            data-testid={`delete-signal-${signal.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
             </div>
+          ) : signals.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Product</th>
+                      <th>Direction</th>
+                      <th>Time</th>
+                      <th>Multiplier</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {signals.map((signal) => (
+                      <tr key={signal.id} className={signal.is_active ? 'bg-blue-500/5' : ''}>
+                        <td className="font-mono text-zinc-400">
+                          {formatDate(signal.created_at)}
+                        </td>
+                        <td className="font-medium text-white">{signal.product}</td>
+                        <td>
+                          <span className={`status-badge ${signal.direction === 'BUY' ? 'direction-buy' : 'direction-sell'}`}>
+                            {signal.direction}
+                          </span>
+                        </td>
+                        <td className="font-mono text-blue-400">{signal.trade_time}</td>
+                        <td className="font-mono text-purple-400">×{signal.profit_points || 15}</td>
+                        <td>
+                          {signal.is_simulated ? (
+                            <span className="status-badge bg-amber-500/20 text-amber-400 flex items-center gap-1 w-fit">
+                              <FlaskConical className="w-3 h-3" /> Simulated
+                            </span>
+                          ) : signal.is_active ? (
+                            <span className="status-badge bg-emerald-500/20 text-emerald-400">Active</span>
+                          ) : (
+                            <span className="status-badge bg-zinc-500/20 text-zinc-400">Completed</span>
+                          )}
+                        </td>
+                        <td>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditSignal(signal)}
+                              className="text-zinc-400 hover:text-blue-400"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteSignal(signal.id)}
+                              className="text-zinc-400 hover:text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                <p className="text-sm text-zinc-500">
+                  Page {currentPage} of {totalPages}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="btn-secondary"
+                    data-testid="prev-page-btn"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="text-sm text-zinc-400 px-2">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="btn-secondary"
+                    data-testid="next-page-btn"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
           ) : (
-            <div className="text-center py-8 text-zinc-500">
-              No signals created yet. Create your first trading signal!
+            <div className="text-center py-12">
+              <Radio className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+              <p className="text-zinc-400">No signals yet. Create your first trading signal!</p>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Monthly Archive Dialog */}
+      <Dialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Archive className="w-5 h-5 text-blue-400" /> Monthly Signal Archive
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {archiveLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              </div>
+            ) : archiveData.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-2">
+                {archiveData.map((month) => (
+                  <AccordionItem 
+                    key={month.month_key} 
+                    value={month.month_key}
+                    className="glass-card border border-zinc-800 rounded-lg overflow-hidden"
+                  >
+                    <AccordionTrigger className="px-4 py-3 hover:bg-zinc-800/50">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-blue-400" />
+                        <span className="text-white font-medium">{month.month_label}</span>
+                        <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">
+                          {month.signals.length} signals
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div className="space-y-2">
+                        {month.signals.map((signal, index) => (
+                          <div 
+                            key={signal.id || index} 
+                            className="p-3 rounded-lg bg-zinc-900/50 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-4">
+                              <span className="text-xs text-zinc-500 font-mono">
+                                {new Date(signal.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </span>
+                              <span className="font-medium text-white">{signal.product}</span>
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                              }`}>
+                                {signal.direction}
+                              </span>
+                              <span className="text-blue-400 font-mono">{signal.trade_time}</span>
+                              <span className="text-purple-400 font-mono">×{signal.profit_points || 15}</span>
+                            </div>
+                            {signal.is_simulated && (
+                              <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
+                                <FlaskConical className="w-3 h-3" /> Simulated
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center py-12">
+                <FolderOpen className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-zinc-400">No archived signals yet.</p>
+              </div>
+            )}
+            
+            {/* Archive Action */}
+            {isSuperAdmin() && (
+              <div className="mt-6 pt-4 border-t border-zinc-800">
+                <Button 
+                  onClick={handleArchiveMonth} 
+                  variant="outline" 
+                  className="btn-secondary w-full gap-2"
+                >
+                  <Archive className="w-4 h-4" /> Archive Current Month's Inactive Signals
+                </Button>
+                <p className="text-xs text-zinc-500 mt-2 text-center">
+                  This will mark all inactive signals from the current month as archived.
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Signal Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -495,9 +717,7 @@ export const AdminSignalsPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {tradingTimezones.map((tz) => (
-                      <SelectItem key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </SelectItem>
+                      <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -517,7 +737,7 @@ export const AdminSignalsPage = () => {
                 </Select>
               </div>
               <div>
-                <Label className="text-zinc-300">Profit Multiplier (×)</Label>
+                <Label className="text-zinc-300">Profit Points</Label>
                 <Input
                   type="number"
                   value={editForm.profit_points}
@@ -531,18 +751,17 @@ export const AdminSignalsPage = () => {
               <Input
                 value={editForm.notes}
                 onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                placeholder="Add notes..."
                 className="input-dark mt-1"
               />
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50">
-              <Label className="text-zinc-300">Active</Label>
+              <Label className="text-zinc-300">Active Signal</Label>
               <Switch
                 checked={editForm.is_active}
                 onCheckedChange={(v) => setEditForm({ ...editForm, is_active: v })}
               />
             </div>
-            <Button onClick={handleSaveEdit} className="w-full btn-primary" data-testid="save-signal-edit">
+            <Button onClick={handleSaveEdit} className="w-full btn-primary">
               Save Changes
             </Button>
           </div>
