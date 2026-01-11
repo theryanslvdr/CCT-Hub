@@ -495,65 +495,6 @@ export const AdminMembersPage = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleEditMember(member)}
-                                className="text-zinc-400 hover:text-blue-400"
-                                data-testid={`edit-${member.id}`}
-                                title="Edit"
-                              >
-                                <UserCog className="w-4 h-4" />
-                              </Button>
-                              {/* License Button - Master Admin only */}
-                              {isMasterAdmin() && member.role === 'user' && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleOpenLicenseDialog(member)}
-                                  className={`${getMemberLicense(member.id) ? 'text-purple-400 hover:text-purple-300' : 'text-zinc-400 hover:text-purple-400'}`}
-                                  data-testid={`license-${member.id}`}
-                                  title="Manage License"
-                                >
-                                  <Award className="w-4 h-4" />
-                                </Button>
-                              )}
-                              {member.role === 'user' && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleSimulateMember(member)}
-                                  className="text-zinc-400 hover:text-purple-400"
-                                  data-testid={`simulate-${member.id}`}
-                                  title="Simulate Member View"
-                                >
-                                  <Play className="w-4 h-4" />
-                                </Button>
-                              )}
-                              {member.role === 'user' && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => { setSelectedMember(member); setUpgradeDialogOpen(true); }}
-                                  className="text-zinc-400 hover:text-emerald-400"
-                                  data-testid={`upgrade-${member.id}`}
-                                  title="Upgrade Role"
-                                >
-                                  <ShieldCheck className="w-4 h-4" />
-                                </Button>
-                              )}
-                              {member.role !== 'user' && isSuperAdmin && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDowngradeRole(member.id)}
-                                  className="text-zinc-400 hover:text-amber-400"
-                                  data-testid={`downgrade-${member.id}`}
-                                  title="Downgrade"
-                                >
-                                  <Users className="w-4 h-4" />
-                                </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="icon"
                                 onClick={() => { setSelectedMember(member); setTempPasswordDialogOpen(true); }}
                                 className="text-zinc-400 hover:text-cyan-400"
                                 title="Set Temp Password"
