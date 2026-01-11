@@ -261,60 +261,51 @@ export const LicenseeAccountPage = () => {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Wallet className="w-6 h-6" /> Deposit / Withdrawal
+            {isSimulatingLicensee && (
+              <span className="text-sm bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full ml-2">
+                Simulating: {simulatedView?.memberName}
+              </span>
+            )}
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
             {license?.license_type === 'extended' ? 'Extended' : 'Honorary'} Licensee • 
             Since {formatDate(license?.start_date)}
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button 
-            onClick={() => setDepositDialogOpen(true)}
-            className="btn-primary gap-2"
-            data-testid="new-deposit-btn"
-          >
-            <ArrowUpCircle className="w-4 h-4" /> New Deposit
-          </Button>
-          <Button 
-            onClick={() => setWithdrawalDialogOpen(true)}
-            variant="outline"
-            className="btn-secondary gap-2"
-            data-testid="new-withdrawal-btn"
-          >
-            <ArrowDownCircle className="w-4 h-4" /> Request Withdrawal
-          </Button>
-        </div>
+        {!isSimulatingLicensee && (
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => setDepositDialogOpen(true)}
+              className="btn-primary gap-2"
+              data-testid="new-deposit-btn"
+            >
+              <ArrowUpCircle className="w-4 h-4" /> New Deposit
+            </Button>
+            <Button 
+              onClick={() => setWithdrawalDialogOpen(true)}
+              variant="outline"
+              className="btn-secondary gap-2"
+              data-testid="new-withdrawal-btn"
+            >
+              <ArrowDownCircle className="w-4 h-4" /> Request Withdrawal
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Quick Stats - 3 cards only (removed Starting Amount) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-zinc-500 uppercase tracking-wider">Current Balance</p>
                 <p className="text-2xl font-bold text-white mt-1">
-                  ${(accountSummary?.current_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  ${(accountSummary?.current_balance || license?.current_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-emerald-500/10">
                 <DollarSign className="w-5 h-5 text-emerald-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-zinc-500 uppercase tracking-wider">Starting Amount</p>
-                <p className="text-2xl font-bold text-white mt-1">
-                  ${(license?.starting_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-blue-500/10">
-                <Wallet className="w-5 h-5 text-blue-400" />
               </div>
             </div>
           </CardContent>
