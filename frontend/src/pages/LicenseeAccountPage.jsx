@@ -341,7 +341,7 @@ export const LicenseeAccountPage = () => {
       </div>
 
       {/* Awaiting Confirmation Banner */}
-      {awaitingCount > 0 && (
+      {awaitingCount > 0 && !isSimulatingLicensee && (
         <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-purple-400 shrink-0" />
