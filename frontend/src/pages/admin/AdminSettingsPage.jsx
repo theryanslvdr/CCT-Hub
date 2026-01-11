@@ -494,8 +494,27 @@ export const AdminSettingsPage = () => {
           {/* Emailit */}
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Mail className="w-5 h-5 text-emerald-400" /> Emailit
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-emerald-400" /> Emailit
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleTestEmailit}
+                  disabled={testingEmailit}
+                  className={`btn-secondary ${testResults.emailit?.success ? 'border-emerald-500/30' : testResults.emailit?.success === false ? 'border-red-500/30' : ''}`}
+                >
+                  {testingEmailit ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testing...</>
+                  ) : testResults.emailit?.success ? (
+                    <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Connected</>
+                  ) : testResults.emailit?.success === false ? (
+                    <><XCircle className="w-4 h-4 mr-2 text-red-400" /> Failed</>
+                  ) : (
+                    <><Zap className="w-4 h-4 mr-2" /> Test Connection</>
+                  )}
+                </Button>
               </CardTitle>
               <p className="text-sm text-zinc-500">Email notification service for trade signals and alerts</p>
             </CardHeader>
@@ -531,8 +550,27 @@ export const AdminSettingsPage = () => {
           {/* Cloudinary */}
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Cloud className="w-5 h-5 text-blue-400" /> Cloudinary
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cloud className="w-5 h-5 text-blue-400" /> Cloudinary
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleTestCloudinary}
+                  disabled={testingCloudinary}
+                  className={`btn-secondary ${testResults.cloudinary?.success ? 'border-emerald-500/30' : testResults.cloudinary?.success === false ? 'border-red-500/30' : ''}`}
+                >
+                  {testingCloudinary ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testing...</>
+                  ) : testResults.cloudinary?.success ? (
+                    <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Connected</>
+                  ) : testResults.cloudinary?.success === false ? (
+                    <><XCircle className="w-4 h-4 mr-2 text-red-400" /> Failed</>
+                  ) : (
+                    <><Zap className="w-4 h-4 mr-2" /> Test Connection</>
+                  )}
+                </Button>
               </CardTitle>
               <p className="text-sm text-zinc-500">Image and file upload service for logos and profile pictures</p>
             </CardHeader>
