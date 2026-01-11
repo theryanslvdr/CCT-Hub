@@ -821,8 +821,15 @@ export const AdminMembersPage = () => {
               <div className="flex gap-3 pt-4 border-t border-zinc-800">
                 <Button
                   onClick={() => {
-                    simulateMemberView(selectedMember.id);
+                    simulateMemberView({
+                      id: selectedMember.id,
+                      full_name: selectedMember.full_name,
+                      account_value: simulationData.account_value,
+                      lot_size: simulationData.lot_size,
+                      allowed_dashboards: selectedMember.allowed_dashboards,
+                    });
                     setSimulateDialogOpen(false);
+                    toast.success(`Now simulating ${selectedMember.full_name}'s view`);
                   }}
                   className="btn-primary flex items-center gap-2"
                 >
