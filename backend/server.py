@@ -3235,65 +3235,82 @@ async def complete_transaction(
     
     await db.licensee_transactions.update_one({"id": tx_id}, {"$set": update_data})
     
-    # If withdrawal, deduct from user balance AND Master Admin balance
-    if tx["type"] == "withdrawal":
-        licensee = await db.users.find_one({"id": tx["user_id"]}, {"_id": 0})
-        if licensee:
-            # Record the withdrawal for the licensee
-            withdrawal_record = {
-                "id": str(uuid.uuid4()),
-                "user_id": tx["user_id"],
-                "amount": -abs(tx["amount"]),
-                "type": "withdrawal",
-                "notes": f"Licensee withdrawal - Transaction #{tx_id[:8]}",
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            await db.deposits.insert_one(withdrawal_record)
-            
-            # Also deduct from Master Admin's balance (since licensee funds are tied to master admin)
-            master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0})
-            if master_admin:
-                master_withdrawal_record = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": master_admin["id"],
-                    "amount": -abs(tx["amount"]),
-                    "type": "withdrawal",
-                    "notes": f"Licensee ({licensee.get('full_name', 'Unknown')}) withdrawal - Transaction #{tx_id[:8]}",
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "related_licensee_id": tx["user_id"],
-                    "related_transaction_id": tx_id
-                }
-                await db.deposits.insert_one(master_withdrawal_record)
+    # Get licensee info and their active license
+    licensee = await db.users.find_one({"id": tx["user_id"]}, {"_id": 0})
+    license = await db.licenses.find_one({"user_id": tx["user_id"], "is_active": True}, {"_id": 0})
     
     # If deposit and approved, add to user balance AND Master Admin balance  
-    elif tx["type"] == "deposit":
-        licensee = await db.users.find_one({"id": tx["user_id"]}, {"_id": 0})
-        if licensee:
-            # Record the deposit for the licensee
-            deposit_record = {
+    if tx["type"] == "deposit" and licensee and license:
+        deposit_amount = abs(tx.get("final_amount", tx["amount"]))
+        current_balance = license.get("current_amount", license.get("starting_amount", 0))
+        new_balance = current_balance + deposit_amount
+        
+        # Update license current_amount
+        await db.licenses.update_one(
+            {"id": license["id"]},
+            {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        
+        # Update user's account_value
+        await db.users.update_one(
+            {"id": tx["user_id"]},
+            {"$set": {"account_value": new_balance}}
+        )
+        
+        # Record the deposit for tracking
+        deposit_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": tx["user_id"],
+            "amount": deposit_amount,
+            "type": "deposit",
+            "notes": f"Licensee deposit - Transaction #{tx_id[:8]}",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.deposits.insert_one(deposit_record)
+        
+        # Also add to Master Admin's balance (since licensee funds are tied to master admin)
+        master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0})
+        if master_admin:
+            master_deposit_record = {
                 "id": str(uuid.uuid4()),
-                "user_id": tx["user_id"],
-                "amount": abs(tx.get("final_amount", tx["amount"])),
+                "user_id": master_admin["id"],
+                "amount": deposit_amount,
                 "type": "deposit",
-                "notes": f"Licensee deposit - Transaction #{tx_id[:8]}",
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "notes": f"Licensee ({licensee.get('full_name', 'Unknown')}) deposit - Transaction #{tx_id[:8]}",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "related_licensee_id": tx["user_id"],
+                "related_transaction_id": tx_id
             }
-            await db.deposits.insert_one(deposit_record)
-            
-            # Also add to Master Admin's balance (since licensee funds are tied to master admin)
-            master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0})
-            if master_admin:
-                master_deposit_record = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": master_admin["id"],
-                    "amount": abs(tx.get("final_amount", tx["amount"])),
-                    "type": "deposit",
-                    "notes": f"Licensee ({licensee.get('full_name', 'Unknown')}) deposit - Transaction #{tx_id[:8]}",
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "related_licensee_id": tx["user_id"],
-                    "related_transaction_id": tx_id
-                }
-                await db.deposits.insert_one(master_deposit_record)
+            await db.deposits.insert_one(master_deposit_record)
+    
+    # If withdrawal completed, deduct from Master Admin's balance
+    # (Licensee balance was already deducted when withdrawal was submitted)
+    elif tx["type"] == "withdrawal" and licensee:
+        # Record the withdrawal for tracking
+        withdrawal_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": tx["user_id"],
+            "amount": -abs(tx["amount"]),
+            "type": "withdrawal",
+            "notes": f"Licensee withdrawal - Transaction #{tx_id[:8]}",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.deposits.insert_one(withdrawal_record)
+        
+        # Also deduct from Master Admin's balance (since licensee funds are tied to master admin)
+        master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0})
+        if master_admin:
+            master_withdrawal_record = {
+                "id": str(uuid.uuid4()),
+                "user_id": master_admin["id"],
+                "amount": -abs(tx["amount"]),
+                "type": "withdrawal",
+                "notes": f"Licensee ({licensee.get('full_name', 'Unknown')}) withdrawal - Transaction #{tx_id[:8]}",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "related_licensee_id": tx["user_id"],
+                "related_transaction_id": tx_id
+            }
+            await db.deposits.insert_one(master_withdrawal_record)
     
     return {"message": "Transaction completed successfully"}
 
