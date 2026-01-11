@@ -161,7 +161,22 @@ export const AuthProvider = ({ children }) => {
     if (typeof memberData === 'string') {
       setSimulatedView({
         role: memberData,
+        displayName: memberData.charAt(0).toUpperCase() + memberData.slice(1),
         allowed_dashboards: ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+      });
+    } else if (memberData.role && !memberData.id) {
+      // Role-based simulation (no specific member)
+      const roleBasedDashboards = {
+        'member': ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+        'basic_admin': ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+        'super_admin': ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+      };
+      
+      setSimulatedView({
+        role: memberData.role,
+        displayName: memberData.displayName || memberData.role,
+        license_type: memberData.license_type || null,
+        allowed_dashboards: roleBasedDashboards[memberData.role] || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
       });
     } else {
       // If object with member data, use full simulation
@@ -169,10 +184,12 @@ export const AuthProvider = ({ children }) => {
         role: 'member',
         memberId: memberData.id,
         memberName: memberData.full_name,
+        displayName: memberData.full_name,
         accountValue: memberData.account_value,
         lotSize: memberData.lot_size,
         totalDeposits: memberData.total_deposits,
         totalProfit: memberData.total_profit,
+        license_type: memberData.license_type || null,
         allowed_dashboards: memberData.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
       });
     }
