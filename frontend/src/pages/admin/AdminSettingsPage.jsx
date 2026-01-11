@@ -238,7 +238,7 @@ export const AdminSettingsPage = () => {
             <CardContent className="space-y-6">
               {/* Logo */}
               <div>
-                <Label className="text-zinc-300">Logo (replaces "CrossCurrent" text in sidebar)</Label>
+                <Label className="text-zinc-300">Logo (replaces CrossCurrent text in sidebar)</Label>
                 <div className="mt-2 flex items-center gap-4">
                   {settings.logo_url ? (
                     <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
@@ -306,7 +306,7 @@ export const AdminSettingsPage = () => {
                   <div className="flex items-center gap-3">
                     <Crown className="w-5 h-5 text-purple-400" />
                     <div>
-                      <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
+                      <Label className="text-zinc-300">Hide Made with Emergent Badge</Label>
                       <p className="text-xs text-zinc-500 mt-1">Master Admin only - Toggle to show/hide the Emergent branding badge</p>
                     </div>
                   </div>
