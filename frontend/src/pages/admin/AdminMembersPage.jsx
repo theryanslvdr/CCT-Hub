@@ -57,6 +57,15 @@ export const AdminMembersPage = () => {
   });
   const [licenseLoading, setLicenseLoading] = useState(false);
   
+  // Change License Type state
+  const [changeLicenseDialogOpen, setChangeLicenseDialogOpen] = useState(false);
+  const [changeLicenseForm, setChangeLicenseForm] = useState({
+    new_license_type: 'extended',
+    new_starting_amount: '',
+    notes: ''
+  });
+  const [changingLicense, setChangingLicense] = useState(false);
+  
   // Form states
   const [newRole, setNewRole] = useState('admin');
   const [secretCode, setSecretCode] = useState('');
