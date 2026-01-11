@@ -844,16 +844,15 @@ export const AdminSettingsPage = () => {
         </TabsContent>
 
         {/* Custom Links Tab */}
-        <TabsContent value="links" className="mt-6">
+        <TabsContent value="links" className="mt-6 space-y-6">
+          {/* Registration Link */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Link className="w-5 h-5 text-blue-400" /> Custom Links
+                <Link className="w-5 h-5 text-blue-400" /> Registration Link
               </CardTitle>
-              <p className="text-sm text-zinc-500">Configure custom links used throughout the platform</p>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Registration Link */}
+            <CardContent>
               <div>
                 <Label className="text-zinc-300">External Registration Link</Label>
                 <p className="text-xs text-zinc-500 mt-1 mb-2">
@@ -881,6 +880,88 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Footer Settings */}
+          {(isSuperAdmin() || isMasterAdmin()) && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Copyright className="w-5 h-5 text-amber-400" /> Footer Settings
+                </CardTitle>
+                <p className="text-sm text-zinc-500">Configure footer links and copyright notice</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Copyright Text */}
+                <div>
+                  <Label className="text-zinc-300">Copyright Text</Label>
+                  <Input
+                    value={settings.footer_copyright || ''}
+                    onChange={(e) => setSettings({ ...settings, footer_copyright: e.target.value })}
+                    placeholder="© 2024 CrossCurrent Finance Center. All rights reserved."
+                    className="input-dark mt-1"
+                  />
+                </div>
+
+                {/* Footer Links */}
+                <div>
+                  <Label className="text-zinc-300 mb-2 block">Footer Links</Label>
+                  
+                  {/* Current Links */}
+                  {(settings.footer_links || []).length > 0 && (
+                    <div className="space-y-2 mb-4">
+                      {(settings.footer_links || []).map((link, index) => (
+                        <div key={index} className="flex items-center gap-2 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                          <GripVertical className="w-4 h-4 text-zinc-600" />
+                          <span className="text-zinc-300 flex-1">{link.label}</span>
+                          <span className="text-zinc-500 text-sm truncate max-w-[200px]">{link.url}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveFooterLink(index)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add New Link */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newFooterLink.label}
+                      onChange={(e) => setNewFooterLink({ ...newFooterLink, label: e.target.value })}
+                      placeholder="Link Label (e.g., Privacy)"
+                      className="input-dark flex-1"
+                    />
+                    <Input
+                      value={newFooterLink.url}
+                      onChange={(e) => setNewFooterLink({ ...newFooterLink, url: e.target.value })}
+                      placeholder="URL (e.g., /privacy)"
+                      className="input-dark flex-1"
+                    />
+                    <Button onClick={handleAddFooterLink} className="btn-primary">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Footer Preview */}
+                <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-3">Preview:</p>
+                  <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+                    <span className="text-zinc-500">{settings.footer_copyright}</span>
+                    <div className="flex gap-4">
+                      {(settings.footer_links || []).map((link, index) => (
+                        <span key={index} className="text-zinc-400 hover:text-white cursor-pointer">{link.label}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Email Templates Tab */}
