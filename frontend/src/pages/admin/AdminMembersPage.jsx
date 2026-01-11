@@ -329,6 +329,7 @@ export const AdminMembersPage = () => {
                       <th>Member</th>
                       <th>Email</th>
                       <th>Role</th>
+                      {canSeeAccountValue && <th>Account Value</th>}
                       <th>Status</th>
                       <th>Joined</th>
                       <th>Actions</th>
@@ -352,6 +353,11 @@ export const AdminMembersPage = () => {
                             {member.role?.replace('_', ' ')}
                           </span>
                         </td>
+                        {canSeeAccountValue && (
+                          <td className="font-mono text-emerald-400">
+                            ${member.account_value?.toFixed(2) || '0.00'}
+                          </td>
+                        )}
                         <td>
                           <span className={`status-badge ${member.is_suspended ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
                             {member.is_suspended ? 'Suspended' : 'Active'}
