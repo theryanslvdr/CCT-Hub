@@ -171,6 +171,29 @@ export const AdminMembersPage = () => {
     }
   };
 
+  const handleSaveViewEdit = async () => {
+    try {
+      await api.put(`/admin/members/${selectedMember.id}`, {
+        full_name: viewEditForm.full_name,
+        timezone: viewEditForm.timezone,
+      });
+      toast.success('Profile updated successfully');
+      setIsEditingProfile(false);
+      // Update local state
+      setMemberDetails(prev => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          full_name: viewEditForm.full_name,
+          timezone: viewEditForm.timezone
+        }
+      }));
+      loadMembers();
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
+  };
+
   const handleUpgradeRole = async () => {
     try {
       await api.post('/admin/upgrade-role', {
