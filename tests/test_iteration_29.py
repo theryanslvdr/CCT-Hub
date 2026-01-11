@@ -94,7 +94,7 @@ class TestDebtManagementAPI:
     
     def test_get_debts(self):
         """Test get debts endpoint"""
-        response = requests.get(f"{BASE_URL}/api/profit/debts", headers=self.headers)
+        response = requests.get(f"{BASE_URL}/api/debt", headers=self.headers)
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
@@ -102,7 +102,7 @@ class TestDebtManagementAPI:
     
     def test_get_debt_plan(self):
         """Test get debt plan endpoint"""
-        response = requests.get(f"{BASE_URL}/api/profit/debt-plan", headers=self.headers)
+        response = requests.get(f"{BASE_URL}/api/debt/plan", headers=self.headers)
         assert response.status_code == 200
         data = response.json()
         # Verify debt plan structure
