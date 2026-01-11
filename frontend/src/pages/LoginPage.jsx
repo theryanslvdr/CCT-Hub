@@ -141,11 +141,19 @@ export const LoginPage = () => {
       <div className="glass-card w-full max-w-md p-8">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
-            <TrendingUp className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">CrossCurrent</h1>
-          <p className="text-zinc-400 mt-1">Finance Center</p>
+          {platformSettings?.logo_url ? (
+            <img 
+              src={platformSettings.logo_url} 
+              alt={platformSettings?.platform_name || 'Platform'} 
+              className="w-16 h-16 rounded-2xl object-cover mb-4"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+              <TrendingUp className="w-8 h-8 text-white" />
+            </div>
+          )}
+          <h1 className="text-2xl font-bold text-white">{platformSettings?.platform_name || 'CrossCurrent'}</h1>
+          <p className="text-zinc-400 mt-1">{platformSettings?.tagline || 'Finance Center'}</p>
         </div>
 
         {/* Error Alert */}
