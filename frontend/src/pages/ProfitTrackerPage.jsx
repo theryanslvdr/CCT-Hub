@@ -287,7 +287,13 @@ const generateProjectionData = (accountBalance, selectedYears = 1) => {
 };
 
 export const ProfitTrackerPage = () => {
-  const { user } = useAuth();
+  const { 
+    user, 
+    simulatedView, 
+    getSimulatedAccountValue, 
+    getSimulatedLotSize, 
+    getSimulatedMemberName 
+  } = useAuth();
   const [summary, setSummary] = useState(null);
   const [deposits, setDeposits] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
@@ -295,6 +301,19 @@ export const ProfitTrackerPage = () => {
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeSignal, setActiveSignal] = useState(null);
+  
+  // Simulation values
+  const simulatedAccountValue = getSimulatedAccountValue();
+  const simulatedLotSize = getSimulatedLotSize();
+  const simulatedMemberName = getSimulatedMemberName();
+  
+  // Effective values - use simulated if in simulation mode
+  const effectiveAccountValue = simulatedAccountValue !== null 
+    ? simulatedAccountValue 
+    : (summary?.account_value || 0);
+  const effectiveLotSize = simulatedLotSize !== null 
+    ? truncateTo2Decimals(simulatedLotSize) 
+    : truncateTo2Decimals(effectiveAccountValue / 980);
   
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
