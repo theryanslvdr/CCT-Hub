@@ -791,17 +791,6 @@ export const AdminSettingsPage = () => {
                             <div className="flex items-center gap-1 bg-zinc-800 rounded-lg p-0.5">
                               <button
                                 type="button"
-                                onClick={() => setEditorMode('wysiwyg')}
-                                className={`px-2 py-1 text-xs rounded transition-colors flex items-center gap-1 ${
-                                  editorMode === 'wysiwyg' 
-                                    ? 'bg-blue-500 text-white' 
-                                    : 'text-zinc-400 hover:text-white'
-                                }`}
-                              >
-                                <Type className="w-3 h-3" /> Visual
-                              </button>
-                              <button
-                                type="button"
                                 onClick={() => setEditorMode('code')}
                                 className={`px-2 py-1 text-xs rounded transition-colors flex items-center gap-1 ${
                                   editorMode === 'code' 
@@ -809,85 +798,38 @@ export const AdminSettingsPage = () => {
                                     : 'text-zinc-400 hover:text-white'
                                 }`}
                               >
-                                <Code className="w-3 h-3" /> Code
+                                <Code className="w-3 h-3" /> Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditorMode('preview')}
+                                className={`px-2 py-1 text-xs rounded transition-colors flex items-center gap-1 ${
+                                  editorMode === 'preview' 
+                                    ? 'bg-blue-500 text-white' 
+                                    : 'text-zinc-400 hover:text-white'
+                                }`}
+                              >
+                                <EyePreview className="w-3 h-3" /> Preview
                               </button>
                             </div>
                           </div>
                           
-                          {editorMode === 'wysiwyg' ? (
-                            <div className="email-editor-wrapper">
-                              <ReactQuill
-                                theme="snow"
-                                value={editingTemplate.body}
-                                onChange={(content) => setEditingTemplate({ ...editingTemplate, body: content })}
-                                modules={{
-                                  toolbar: [
-                                    [{ 'header': [1, 2, 3, false] }],
-                                    ['bold', 'italic', 'underline', 'strike'],
-                                    [{ 'color': [] }, { 'background': [] }],
-                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                    [{ 'align': [] }],
-                                    ['link'],
-                                    ['clean']
-                                  ]
-                                }}
-                                className="bg-zinc-900 rounded-lg border border-zinc-700"
-                                style={{ minHeight: '250px' }}
-                              />
-                              <style>{`
-                                .email-editor-wrapper .ql-toolbar {
-                                  background: #27272a;
-                                  border-color: #3f3f46;
-                                  border-radius: 8px 8px 0 0;
-                                }
-                                .email-editor-wrapper .ql-container {
-                                  background: #18181b;
-                                  border-color: #3f3f46;
-                                  border-radius: 0 0 8px 8px;
-                                  font-size: 14px;
-                                  min-height: 200px;
-                                }
-                                .email-editor-wrapper .ql-editor {
-                                  color: #e4e4e7;
-                                  min-height: 200px;
-                                }
-                                .email-editor-wrapper .ql-editor.ql-blank::before {
-                                  color: #71717a;
-                                }
-                                .email-editor-wrapper .ql-stroke {
-                                  stroke: #a1a1aa;
-                                }
-                                .email-editor-wrapper .ql-fill {
-                                  fill: #a1a1aa;
-                                }
-                                .email-editor-wrapper .ql-picker {
-                                  color: #a1a1aa;
-                                }
-                                .email-editor-wrapper .ql-picker-options {
-                                  background: #27272a;
-                                  border-color: #3f3f46;
-                                }
-                                .email-editor-wrapper button:hover .ql-stroke,
-                                .email-editor-wrapper .ql-picker:hover .ql-stroke {
-                                  stroke: #fff;
-                                }
-                                .email-editor-wrapper button:hover .ql-fill,
-                                .email-editor-wrapper .ql-picker:hover .ql-fill {
-                                  fill: #fff;
-                                }
-                                .email-editor-wrapper .ql-active .ql-stroke {
-                                  stroke: #3b82f6;
-                                }
-                                .email-editor-wrapper .ql-active .ql-fill {
-                                  fill: #3b82f6;
-                                }
-                              `}</style>
+                          {editorMode === 'preview' ? (
+                            <div className="p-4 rounded-lg bg-white text-black min-h-[250px] overflow-auto border border-zinc-700">
+                              <div 
+                                className="prose prose-sm max-w-none"
+                                style={{ whiteSpace: 'pre-wrap', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                              >
+                                {editingTemplate.body.split('\n').map((line, i) => (
+                                  <p key={i} className="mb-2">{line || '\u00A0'}</p>
+                                ))}
+                              </div>
                             </div>
                           ) : (
                             <Textarea
                               value={editingTemplate.body}
                               onChange={(e) => setEditingTemplate({ ...editingTemplate, body: e.target.value })}
-                              className="input-dark mt-1 min-h-[250px] font-mono text-sm"
+                              className="input-dark min-h-[250px] font-mono text-sm"
                               rows={12}
                             />
                           )}
