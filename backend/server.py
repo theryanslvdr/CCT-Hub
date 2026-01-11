@@ -1529,8 +1529,15 @@ async def notify_missed_trade(data: NotifyMissedTradeRequest, user: dict = Depen
         raise HTTPException(status_code=500, detail=f"Email error: {str(e)}")
 
 @admin_router.get("/analytics/growth-data")
-async def get_growth_data(user: dict = Depends(require_admin)):
-    """Get historical data for growth charts"""
+async def get_growth_data(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    user: dict = Depends(require_admin)
+):
+    """Get historical data for growth charts with optional date filtering"""
+    
+    # Build query filter
+    query = {}
     
     # Get all trades sorted by date
     all_trades = await db.trade_logs.find({}, {"_id": 0}).sort("created_at", 1).to_list(10000)
@@ -1579,7 +1586,7 @@ async def get_growth_data(user: dict = Depends(require_admin)):
         if trade.get("performance") in ["exceeded", "perfect"]:
             daily_data[date_str]["winning"] += 1
     
-    # Build cumulative chart data
+    # Build cumulative chart data with optional date filtering
     chart_data = []
     for date_str in sorted(daily_data.keys()):
         day = daily_data[date_str]
@@ -1587,6 +1594,12 @@ async def get_growth_data(user: dict = Depends(require_admin)):
         running_profit += day["profit"]
         running_trades += day["trades"]
         running_winning += day["winning"]
+        
+        # Apply date filter
+        if start_date and date_str < start_date:
+            continue
+        if end_date and date_str > end_date:
+            continue
         
         performance_rate = (running_winning / running_trades * 100) if running_trades > 0 else 0
         
@@ -1598,7 +1611,63 @@ async def get_growth_data(user: dict = Depends(require_admin)):
             "performance_rate": round(performance_rate, 1)
         })
     
-    return {"chart_data": chart_data[-30:]}  # Last 30 data points
+    # If no date filter, return last 30 points; otherwise return all filtered data
+    if not start_date and not end_date:
+        return {"chart_data": chart_data[-30:]}
+    return {"chart_data": chart_data}
+
+@admin_router.get("/analytics/member/{user_id}")
+async def get_member_analytics(user_id: str, user: dict = Depends(require_admin)):
+    """Get individual member analytics"""
+    
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get deposits
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit", "withdrawal"])
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+    
+    # Get trades
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    account_value = total_deposits - total_withdrawals + total_profit
+    
+    winning_trades = len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]])
+    performance_rate = (winning_trades / len(trades) * 100) if trades else 0
+    
+    # Build daily trade history for chart
+    trade_history = {}
+    for trade in trades:
+        date_str = trade.get("created_at", "")[:10]
+        if date_str not in trade_history:
+            trade_history[date_str] = {"date": date_str, "profit": 0, "trades": 0}
+        trade_history[date_str]["profit"] += trade.get("actual_profit", 0)
+        trade_history[date_str]["trades"] += 1
+    
+    return {
+        "member": {
+            "id": member["id"],
+            "name": member.get("full_name", "Unknown"),
+            "email": member.get("email", ""),
+            "role": member.get("role", "member"),
+            "timezone": member.get("timezone", "Asia/Manila"),
+            "joined": member.get("created_at", "")
+        },
+        "stats": {
+            "account_value": round(account_value, 2),
+            "lot_size": round(account_value / 980, 2) if account_value > 0 else 0,
+            "total_deposits": round(total_deposits, 2),
+            "total_withdrawals": round(total_withdrawals, 2),
+            "total_profit": round(total_profit, 2),
+            "total_trades": len(trades),
+            "winning_trades": winning_trades,
+            "performance_rate": round(performance_rate, 1)
+        },
+        "recent_trades": trades[:10],
+        "trade_history": sorted(trade_history.values(), key=lambda x: x["date"])[-30:]
+    }
 
 @admin_router.get("/analytics/recent-trades")
 async def get_recent_team_trades(
