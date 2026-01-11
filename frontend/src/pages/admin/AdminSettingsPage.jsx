@@ -7,14 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { 
   Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
-  Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2
+  Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
+  FileText, Zap, XCircle, Loader2
 } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
-  const { isMasterAdmin } = useAuth();
+  const { isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
     site_title: 'CrossCurrent Finance Center',
     site_description: 'Trading profit management platform',
@@ -34,6 +36,18 @@ export const AdminSettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('seo');
+  
+  // Email templates state
+  const [emailTemplates, setEmailTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  
+  // Integration test states
+  const [testingEmailit, setTestingEmailit] = useState(false);
+  const [testingCloudinary, setTestingCloudinary] = useState(false);
+  const [testingHeartbeat, setTestingHeartbeat] = useState(false);
+  const [testResults, setTestResults] = useState({});
   
   // Visibility toggles for sensitive fields
   const [showKeys, setShowKeys] = useState({
