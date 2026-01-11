@@ -497,11 +497,69 @@ export const AdminSettingsPage = () => {
         </TabsContent>
 
         {/* UI Customization Tab */}
-        <TabsContent value="ui" className="mt-6">
+        <TabsContent value="ui" className="mt-6 space-y-6">
+          {/* Login Page Settings */}
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Palette className="w-5 h-5 text-cyan-400" /> UI Customization
+                <LogIn className="w-5 h-5 text-purple-400" /> Login Page Customization
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-zinc-300">Login Title (Optional)</Label>
+                  <Input
+                    value={settings.login_title || ''}
+                    onChange={(e) => setSettings({ ...settings, login_title: e.target.value })}
+                    placeholder="e.g., Welcome Back"
+                    className="input-dark mt-1"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Displayed below the logo</p>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Login Tagline</Label>
+                  <Input
+                    value={settings.login_tagline || ''}
+                    onChange={(e) => setSettings({ ...settings, login_tagline: e.target.value })}
+                    placeholder={settings.tagline || 'Finance Center'}
+                    className="input-dark mt-1"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Shown below the title</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-zinc-300">Login Notice Message</Label>
+                <Input
+                  value={settings.login_notice || ''}
+                  onChange={(e) => setSettings({ ...settings, login_notice: e.target.value })}
+                  placeholder="Only CrossCurrent community members can access this platform."
+                  className="input-dark mt-1"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Displayed at the bottom of the login card</p>
+              </div>
+              
+              {/* Preview */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <p className="text-xs text-zinc-500 mb-3">Preview:</p>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-2">
+                    <Settings className="w-6 h-6 text-white" />
+                  </div>
+                  {settings.login_title && (
+                    <p className="text-lg font-bold text-white">{settings.login_title}</p>
+                  )}
+                  <p className="text-zinc-400 text-sm">{settings.login_tagline || settings.tagline || 'Finance Center'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Color Scheme */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Palette className="w-5 h-5 text-cyan-400" /> Color Scheme
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
