@@ -223,7 +223,7 @@ export const LicenseRegistrationPage = () => {
             {inviteData?.license_type === 'extended' && (
               <div className="mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
                 <p className="text-xs text-purple-400">
-                  Extended License: Your daily profit is calculated quarterly using the formula (Balance ÷ 980) × 15
+                  Extended License: Your account is managed under special terms. Contact admin for details.
                 </p>
               </div>
             )}
@@ -231,7 +231,7 @@ export const LicenseRegistrationPage = () => {
             {inviteData?.license_type === 'honorary' && (
               <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <p className="text-xs text-amber-400">
-                  Honorary License: Standard profit calculations apply. Your funds are managed separately from the team pool.
+                  Honorary License: Your account is managed separately from the team pool.
                 </p>
               </div>
             )}
