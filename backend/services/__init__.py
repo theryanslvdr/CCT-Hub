@@ -7,6 +7,10 @@ from .email_service import (
     get_admin_notification_email,
     get_password_reset_email,
     get_trade_alert_email,
+    get_welcome_email,
+    get_transaction_update_email,
+    get_missed_trade_email,
+    get_weekly_summary_email,
 )
 
 from .file_service import (
