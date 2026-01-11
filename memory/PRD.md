@@ -90,13 +90,15 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ### Frontend
 - ✅ Dark professional UI design
-- ✅ Onboarding Tour (9 steps explaining all features)
+- ✅ **Interactive Onboarding Tour** (8 steps with progress bar, navigation, page highlighting)
 - ✅ Login/Register with Heartbeat notice
 - ✅ Profile Settings (timezone, LOT size)
 - ✅ Dashboard with KPIs, performance chart, live rates
 - ✅ Profit Tracker with deposit management, withdrawal simulation
 - ✅ Trade Monitor with:
-  - **Active Signal Card** (redesigned from Admin Signals page, shows date, simulated tag)
+  - **Split Screen Layout** - Trade controls on left, Merin iframe on right
+  - **Merin Trading Platform** - Embedded in mobile aspect ratio for seamless trading
+  - **Active Signal Card** (redesigned with date, simulated tag with Flask icon)
   - **LOT Size Card** (fetched from Profit Tracker: Balance ÷ 980)
   - **Projected Exit Value Card** (LOT × multiplier, replaces LOT Calculator)
   - **Exit Value Calculator Popup** (custom LOT input)
@@ -108,12 +110,16 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - **Trade History Table** with pagination (Date, Product, Direction, LOT Size, Time Set, Time Entered (editable), Projected, Actual, P/L Diff)
   - **Streak Indicator** (fire icon with count at top right of Trade History)
 - ✅ **Today's Summary** (simplified): Only Actual Total + P/L Difference + Encouragement message
-- ✅ Debt Management with repayment planning
-- ✅ Profit Planner with goal creation and progress tracking
+- ✅ Debt Management with repayment planning (**HIDDEN - Master Admin only**)
+- ✅ Profit Planner with goal creation and progress tracking (**HIDDEN - Master Admin only**)
 - ✅ Admin: Trading Signals with timezone selection (Asia/Manila, Asia/Singapore, Asia/Taipei)
-- ✅ Admin: Member management with role upgrades
+- ✅ Admin: Member management with role upgrades and allowed_dashboards assignment
 - ✅ Admin: API Center for external connections
 - ✅ Admin: Platform Settings (SEO, branding, colors)
+- ✅ **Sidebar Updates (2026-01-11)**:
+  - "Simulate Member View" button (Master Admin only)
+  - "HIDDEN FEATURES" section with Crown icon (Master Admin only)
+  - Role label with Crown icon for Master Admin
 
 ## Key Trading Flow
 1. Admin posts daily signal (product, time, direction, timezone, multiplier)
