@@ -2662,6 +2662,73 @@ async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, u
     
     return {"message": f"License changed to {data.new_license_type}", "new_license_id": new_license_id}
 
+class ResetStartingAmountRequest(BaseModel):
+    new_amount: float
+    notes: Optional[str] = None
+    record_as_deposit: bool = True  # Whether to record the adjustment as a deposit/withdrawal
+
+@admin_router.post("/licenses/{license_id}/reset-balance")
+async def reset_license_balance(license_id: str, data: ResetStartingAmountRequest, user: dict = Depends(require_admin)):
+    """Reset license starting amount/current balance (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can reset license balances")
+    
+    if data.new_amount < 0:
+        raise HTTPException(status_code=400, detail="Amount cannot be negative")
+    
+    license = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    if not license.get("is_active"):
+        raise HTTPException(status_code=400, detail="Cannot reset an inactive license")
+    
+    old_amount = license.get("current_amount", license.get("starting_amount", 0))
+    difference = data.new_amount - old_amount
+    
+    # Update license
+    await db.licenses.update_one(
+        {"id": license_id},
+        {"$set": {
+            "starting_amount": data.new_amount,
+            "current_amount": data.new_amount,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "reset_by": user["id"],
+            "reset_notes": data.notes
+        }}
+    )
+    
+    # Update user's account_value
+    await db.users.update_one(
+        {"id": license["user_id"]},
+        {"$set": {"account_value": data.new_amount}}
+    )
+    
+    # Record adjustment as transaction
+    if data.record_as_deposit and difference != 0:
+        adjustment_type = "deposit" if difference > 0 else "withdrawal"
+        transaction = {
+            "id": str(uuid.uuid4()),
+            "user_id": license["user_id"],
+            "type": adjustment_type,
+            "amount": abs(difference),
+            "status": "completed",
+            "notes": data.notes or f"Balance reset by admin (was ${old_amount:,.2f}, now ${data.new_amount:,.2f})",
+            "is_balance_reset": True,
+            "balance_before": old_amount,
+            "balance_after": data.new_amount,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "completed_by": user["id"]
+        }
+        await db.licensee_transactions.insert_one(transaction)
+    
+    return {
+        "message": f"License balance reset from ${old_amount:,.2f} to ${data.new_amount:,.2f}",
+        "old_amount": old_amount,
+        "new_amount": data.new_amount
+    }
+
 @admin_router.delete("/licenses/{license_id}")
 async def delete_license(license_id: str, user: dict = Depends(require_admin)):
     """Delete a license (Master Admin only)"""
