@@ -129,6 +129,15 @@ export const adminAPI = {
   getLicenseDetails: (licenseId) => api.get(`/admin/licenses/${licenseId}`),
   updateLicense: (licenseId, data) => api.put(`/admin/licenses/${licenseId}`, null, { params: data }),
   deleteLicense: (licenseId) => api.delete(`/admin/licenses/${licenseId}`),
+  // License Invites
+  getLicenseInvites: () => api.get('/admin/license-invites'),
+  createLicenseInvite: (data) => api.post('/admin/license-invites', data),
+  getLicenseInviteDetails: (inviteId) => api.get(`/admin/license-invites/${inviteId}`),
+  updateLicenseInvite: (inviteId, data) => api.put(`/admin/license-invites/${inviteId}`, data),
+  revokeLicenseInvite: (inviteId) => api.post(`/admin/license-invites/${inviteId}/revoke`),
+  renewLicenseInvite: (inviteId, duration) => api.post(`/admin/license-invites/${inviteId}/renew`, null, { params: { new_duration: duration } }),
+  resendLicenseInvite: (inviteId) => api.post(`/admin/license-invites/${inviteId}/resend`),
+  deleteLicenseInvite: (inviteId) => api.delete(`/admin/license-invites/${inviteId}`),
 };
 
 // Debt Management APIs
