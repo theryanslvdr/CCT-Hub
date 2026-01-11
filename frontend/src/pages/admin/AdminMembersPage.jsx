@@ -230,6 +230,44 @@ export const AdminMembersPage = () => {
     }
   };
 
+  const handleOpenChangeLicense = () => {
+    if (!memberLicense) return;
+    setChangeLicenseForm({
+      new_license_type: memberLicense.license_type === 'extended' ? 'honorary' : 'extended',
+      new_starting_amount: memberLicense.current_amount?.toString() || memberLicense.starting_amount?.toString() || '',
+      notes: ''
+    });
+    setChangeLicenseDialogOpen(true);
+  };
+
+  const handleChangeLicenseType = async () => {
+    if (!changeLicenseForm.new_starting_amount || parseFloat(changeLicenseForm.new_starting_amount) <= 0) {
+      toast.error('Please enter a valid starting amount');
+      return;
+    }
+
+    setChangingLicense(true);
+    try {
+      await adminAPI.changeLicenseType(memberLicense.id, {
+        new_license_type: changeLicenseForm.new_license_type,
+        new_starting_amount: parseFloat(changeLicenseForm.new_starting_amount),
+        notes: changeLicenseForm.notes
+      });
+      toast.success(`License changed to ${changeLicenseForm.new_license_type}`);
+      setChangeLicenseDialogOpen(false);
+      // Reload license info
+      const licRes = await adminAPI.getLicenses();
+      setLicenses(licRes.data.licenses || []);
+      const updatedLicense = licRes.data.licenses.find(l => l.user_id === selectedMember?.id && l.is_active);
+      setMemberLicense(updatedLicense || null);
+      loadMembers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to change license type');
+    } finally {
+      setChangingLicense(false);
+    }
+  };
+
   const handleSuspendMember = async (member) => {
     const action = member.is_suspended ? 'unsuspend' : 'suspend';
     if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
