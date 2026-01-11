@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { settingsAPI } from '@/lib/api';
+import { settingsAPI, adminAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,11 +17,32 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const { user, isAdmin, isMasterAdmin, isSuperAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation, logout } = useAuth();
   const [platformSettings, setPlatformSettings] = useState(null);
   const navigate = useNavigate();
+  
+  // Licensee simulation dialog state
+  const [licenseeDialogOpen, setLicenseeDialogOpen] = useState(false);
+  const [selectedLicenseType, setSelectedLicenseType] = useState(null);
+  const [licensees, setLicensees] = useState([]);
+  const [loadingLicensees, setLoadingLicensees] = useState(false);
+  const [selectedLicenseeId, setSelectedLicenseeId] = useState('');
 
   // Load platform settings for logo
   useEffect(() => {
@@ -35,6 +56,81 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     };
     loadSettings();
   }, []);
+  
+  // Load licensees when dialog opens
+  const handleLicenseeSimulationClick = async (licenseType) => {
+    setSelectedLicenseType(licenseType);
+    setLicenseeDialogOpen(true);
+    setLoadingLicensees(true);
+    setSelectedLicenseeId('');
+    
+    try {
+      const [licensesRes, membersRes] = await Promise.all([
+        adminAPI.getLicenses(),
+        adminAPI.getMembers()
+      ]);
+      
+      // Filter licensees by type
+      const activeLicenses = licensesRes.data.licenses?.filter(
+        l => l.is_active && l.license_type === licenseType
+      ) || [];
+      
+      // Match with member details
+      const licenseesWithDetails = activeLicenses.map(license => {
+        const member = membersRes.data.find(m => m.id === license.user_id);
+        return {
+          ...license,
+          full_name: member?.full_name || 'Unknown User',
+          email: member?.email || 'N/A',
+          account_value: member?.account_value || license.current_amount || 0,
+          lot_size: member?.lot_size || 0.01,
+          total_deposits: member?.total_deposits || 0,
+          total_profit: member?.total_profit || 0,
+          allowed_dashboards: member?.allowed_dashboards
+        };
+      });
+      
+      setLicensees(licenseesWithDetails);
+    } catch (error) {
+      console.error('Failed to load licensees:', error);
+      setLicensees([]);
+    } finally {
+      setLoadingLicensees(false);
+    }
+  };
+  
+  const handleSimulateLicensee = () => {
+    if (selectedLicenseeId === 'dummy') {
+      // Simulate with dummy values
+      simulateMemberView({ 
+        role: 'member', 
+        license_type: selectedLicenseType, 
+        displayName: `${selectedLicenseType === 'honorary' ? 'Honorary' : 'Extended'} Licensee (Demo)`,
+        accountValue: 5000,
+        lotSize: 0.05,
+        totalDeposits: 5000,
+        totalProfit: 0
+      });
+    } else {
+      // Simulate specific licensee
+      const licensee = licensees.find(l => l.user_id === selectedLicenseeId);
+      if (licensee) {
+        simulateMemberView({
+          id: licensee.user_id,
+          memberId: licensee.user_id,
+          full_name: licensee.full_name,
+          account_value: licensee.account_value,
+          lot_size: licensee.lot_size,
+          total_deposits: licensee.total_deposits,
+          total_profit: licensee.total_profit,
+          allowed_dashboards: licensee.allowed_dashboards,
+          license_type: selectedLicenseType,
+          displayName: licensee.full_name
+        });
+      }
+    }
+    setLicenseeDialogOpen(false);
+  };
 
   // Member navigation items (modular access)
   const memberNavItems = [
