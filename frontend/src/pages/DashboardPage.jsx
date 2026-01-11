@@ -299,19 +299,39 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* Currency Rates */}
+        {/* User Performance Stats */}
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle className="text-white">Live Rates (USDT)</CardTitle>
+            <CardTitle className="text-white">Your Stats</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {['USD', 'PHP', 'EUR', 'GBP'].map((currency) => (
-                <div key={currency} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors">
-                  <span className="text-zinc-400">{currency}</span>
-                  <span className="font-mono text-white">{formatNumber(rates[currency] || 1, 4)}</span>
-                </div>
-              ))}
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                <p className="text-xs text-emerald-400 uppercase tracking-wider">Total Profit</p>
+                <p className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                  {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
+                <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                  {((summary?.account_value || 0) / 980).toFixed(2)}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
+              </div>
+              <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
+                <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                  {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">LOT × 15 multiplier</p>
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-xs text-zinc-400 uppercase tracking-wider">Performance Rate</p>
+                <p className="text-2xl font-bold font-mono text-white mt-1">
+                  {formatNumber(summary?.performance_rate || 0, 1)}%
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
