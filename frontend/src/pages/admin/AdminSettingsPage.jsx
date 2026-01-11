@@ -215,6 +215,57 @@ export const AdminSettingsPage = () => {
     });
   };
 
+  // Announcement handlers
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: '',
+    message: '',
+    link_url: '',
+    link_text: '',
+    type: 'info', // info, warning, success
+    sticky: false,
+    active: true
+  });
+
+  const handleAddAnnouncement = () => {
+    if (!newAnnouncement.message.trim()) {
+      toast.error('Please enter announcement message');
+      return;
+    }
+    const currentAnnouncements = settings.announcements || [];
+    setSettings({
+      ...settings,
+      announcements: [...currentAnnouncements, { 
+        ...newAnnouncement, 
+        id: Date.now().toString(),
+        created_at: new Date().toISOString()
+      }]
+    });
+    setNewAnnouncement({
+      title: '',
+      message: '',
+      link_url: '',
+      link_text: '',
+      type: 'info',
+      sticky: false,
+      active: true
+    });
+    toast.success('Announcement added! Remember to save settings.');
+  };
+
+  const handleRemoveAnnouncement = (index) => {
+    const currentAnnouncements = settings.announcements || [];
+    setSettings({
+      ...settings,
+      announcements: currentAnnouncements.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleToggleAnnouncement = (index) => {
+    const currentAnnouncements = [...(settings.announcements || [])];
+    currentAnnouncements[index].active = !currentAnnouncements[index].active;
+    setSettings({ ...settings, announcements: currentAnnouncements });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
