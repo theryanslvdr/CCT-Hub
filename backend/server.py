@@ -1320,9 +1320,10 @@ async def archive_current_month_signals(user: dict = Depends(require_super_admin
 async def get_team_analytics(user: dict = Depends(require_admin)):
     """Get collective team analytics: total account value, profit, traders, performance"""
     
-    # Get all members (exclude admins from team stats)
+    # Get all users including admins (include all roles in team stats)
     all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
-    member_users = [u for u in all_users if u.get("role") in ["user", "member"]]
+    # Include all users: members, admins, super_admins, master_admin
+    active_users = [u for u in all_users if not u.get("is_suspended", False)]
     
     total_account_value = 0
     total_profit = 0
@@ -1331,7 +1332,7 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     
     member_stats = []
     
-    for member in member_users:
+    for member in active_users:
         user_id = member["id"]
         
         # Get deposits
@@ -1352,6 +1353,8 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         member_stats.append({
             "id": user_id,
             "name": member.get("full_name", "Unknown"),
+            "email": member.get("email", ""),
+            "role": member.get("role", "member"),
             "account_value": round(user_account_value, 2),
             "total_profit": round(user_profit, 2),
             "trades_count": len(trades)
@@ -1363,7 +1366,7 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     return {
         "total_account_value": round(total_account_value, 2),
         "total_profit": round(total_profit, 2),
-        "total_traders": len(member_users),
+        "total_traders": len(active_users),
         "total_trades": total_trades,
         "winning_trades": winning_trades,
         "performance_rate": round(performance_rate, 1),
