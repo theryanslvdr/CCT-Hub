@@ -260,6 +260,8 @@ export const AuthProvider = ({ children }) => {
     getEffectiveAllowedDashboards,
     getSimulatedAccountValue,
     getSimulatedLotSize,
+    getSimulatedTotalDeposits,
+    getSimulatedTotalProfit,
     getSimulatedMemberName,
     getSimulatedMemberId,
   };
