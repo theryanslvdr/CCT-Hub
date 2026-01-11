@@ -249,7 +249,7 @@ export const AdminSettingsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-5 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
           <TabsTrigger 
             value="seo" 
             className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
@@ -269,7 +269,7 @@ export const AdminSettingsPage = () => {
             className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
             data-testid="tab-ui"
           >
-            <Palette className="w-4 h-4 mr-2" /> UI Customization
+            <Palette className="w-4 h-4 mr-2" /> UI
           </TabsTrigger>
           <TabsTrigger 
             value="integrations" 
@@ -277,6 +277,14 @@ export const AdminSettingsPage = () => {
             data-testid="tab-integrations"
           >
             <Plug className="w-4 h-4 mr-2" /> Integrations
+          </TabsTrigger>
+          <TabsTrigger 
+            value="emails" 
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            data-testid="tab-emails"
+          >
+            <Mail className="w-4 h-4 mr-2" /> Emails
+          </TabsTrigger>
           </TabsTrigger>
         </TabsList>
 
