@@ -231,7 +231,7 @@ export const LicenseeAccountPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Wallet className="w-6 h-6" /> Licensee Account
+            <Wallet className="w-6 h-6" /> Deposit / Withdrawal
           </h1>
           <p className="text-zinc-400 text-sm mt-1">
             {license?.license_type === 'extended' ? 'Extended' : 'Honorary'} Licensee • 
