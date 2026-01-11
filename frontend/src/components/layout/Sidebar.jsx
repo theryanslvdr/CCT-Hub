@@ -39,6 +39,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor' },
+    { path: '/licensee-account', icon: Award, label: 'Licensee Account', id: 'licensee_account' },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
