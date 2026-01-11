@@ -197,6 +197,7 @@ export const currencyAPI = {
 
 // Settings APIs
 export const settingsAPI = {
+  get: () => api.get('/settings/platform'),
   getPlatform: () => api.get('/settings/platform'),
   updatePlatform: (data) => api.put('/settings/platform', data),
   uploadLogo: (file) => {
