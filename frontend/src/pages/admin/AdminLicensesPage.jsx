@@ -585,7 +585,7 @@ export const AdminLicensesPage = () => {
                         <th>Starting Amount</th>
                         <th>Current Amount</th>
                         <th>Start Date</th>
-                        <th>Created</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -615,8 +615,17 @@ export const AdminLicensesPage = () => {
                           <td className="text-zinc-400">
                             {license.start_date?.split('T')[0]}
                           </td>
-                          <td className="text-zinc-500 text-sm">
-                            {new Date(license.created_at).toLocaleDateString()}
+                          <td>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenChangeLicense(license)}
+                              className="text-zinc-400 hover:text-purple-400"
+                              title="Change License Type"
+                            >
+                              <RefreshCw className="w-4 h-4 mr-1" />
+                              Change Type
+                            </Button>
                           </td>
                         </tr>
                       ))}
