@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +12,8 @@ import { toast } from 'sonner';
 import { 
   Award, Plus, Copy, Mail, RefreshCw, Trash2, Ban, Eye, 
   Clock, Users, CheckCircle2, XCircle, Calendar, DollarSign,
-  FileText, Send, RotateCcw, Link2
+  FileText, Send, RotateCcw, Link2, Upload, ArrowUpCircle,
+  ArrowDownCircle, MessageSquare, Image, Loader2
 } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 
@@ -19,11 +21,20 @@ export const AdminLicensesPage = () => {
   const { isMasterAdmin } = useAuth();
   const [invites, setInvites] = useState([]);
   const [licenses, setLicenses] = useState([]);
+  const [licenseeTransactions, setLicenseeTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedInvite, setSelectedInvite] = useState(null);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [activeTab, setActiveTab] = useState('invites');
+  
+  // Email dialog state
+  const [emailTo, setEmailTo] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
   
   // Create form state
   const [createForm, setCreateForm] = useState({
@@ -32,20 +43,30 @@ export const AdminLicensesPage = () => {
     valid_duration: '3_months',
     max_uses: '1',
     invitee_name: '',
-    invitee_email: '',
     notes: ''
   });
   const [creating, setCreating] = useState(false);
+  
+  // Feedback form state
+  const [feedbackForm, setFeedbackForm] = useState({
+    message: '',
+    status: '',
+    final_amount: '',
+    screenshot: null
+  });
+  const [sendingFeedback, setSendingFeedback] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [invitesRes, licensesRes] = await Promise.all([
+      const [invitesRes, licensesRes, txRes] = await Promise.all([
         adminAPI.getLicenseInvites(),
-        adminAPI.getLicenses()
+        adminAPI.getLicenses(),
+        adminAPI.getLicenseeTransactions()
       ]);
       setInvites(invitesRes.data.invites || []);
       setLicenses(licensesRes.data.licenses || []);
+      setLicenseeTransactions(txRes.data.transactions || []);
     } catch (error) {
       console.error('Failed to load licenses data:', error);
       toast.error('Failed to load licenses data');
@@ -72,7 +93,7 @@ export const AdminLicensesPage = () => {
         valid_duration: createForm.valid_duration,
         max_uses: parseInt(createForm.max_uses),
         invitee_name: createForm.invitee_name || null,
-        invitee_email: createForm.invitee_email || null,
+        invitee_email: null, // Email is no longer attached to invite
         notes: createForm.notes || null
       });
 
@@ -91,7 +112,6 @@ export const AdminLicensesPage = () => {
         valid_duration: '3_months',
         max_uses: '1',
         invitee_name: '',
-        invitee_email: '',
         notes: ''
       });
       loadData();
@@ -108,22 +128,37 @@ export const AdminLicensesPage = () => {
     toast.success('Registration link copied!');
   };
 
-  const handleSendEmail = async (invite) => {
-    if (!invite.invitee_email) {
-      toast.error('No email address for this invite');
+  const handleOpenEmailDialog = (invite) => {
+    setSelectedInvite(invite);
+    setEmailTo(invite.invitee_email || '');
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailTo || !emailTo.includes('@')) {
+      toast.error('Please enter a valid email address');
       return;
     }
 
+    setSendingEmail(true);
     try {
-      const res = await adminAPI.resendLicenseInvite(invite.id);
-      toast.success(res.data.message);
+      // First update the invite with the email
+      await adminAPI.updateLicenseInvite(selectedInvite.id, { invitee_email: emailTo });
+      // Then send the email
+      const res = await adminAPI.resendLicenseInvite(selectedInvite.id);
+      toast.success(res.data.message || 'Email sent successfully!');
+      setEmailDialogOpen(false);
+      setEmailTo('');
+      loadData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to send email');
+    } finally {
+      setSendingEmail(false);
     }
   };
 
   const handleRevoke = async (invite) => {
-    if (!window.confirm(`Revoke invite for ${invite.invitee_name || invite.code}?`)) return;
+    if (!window.confirm(`Revoke invite ${invite.code}?`)) return;
 
     try {
       await adminAPI.revokeLicenseInvite(invite.id);
@@ -161,7 +196,81 @@ export const AdminLicensesPage = () => {
     setViewDialogOpen(true);
   };
 
-  const getStatusBadge = (invite) => {
+  const handleViewTransaction = (tx) => {
+    setSelectedTransaction(tx);
+    setTransactionDialogOpen(true);
+  };
+
+  const handleOpenFeedbackDialog = (tx) => {
+    setSelectedTransaction(tx);
+    setFeedbackForm({
+      message: '',
+      status: tx.status === 'pending' ? 'processing' : tx.status === 'processing' ? 'awaiting_confirmation' : '',
+      final_amount: '',
+      screenshot: null
+    });
+    setFeedbackDialogOpen(true);
+  };
+
+  const handleSendFeedback = async () => {
+    if (!feedbackForm.message.trim()) {
+      toast.error('Please enter a message');
+      return;
+    }
+
+    setSendingFeedback(true);
+    try {
+      const formData = new FormData();
+      formData.append('message', feedbackForm.message);
+      if (feedbackForm.status) formData.append('status', feedbackForm.status);
+      if (feedbackForm.final_amount) formData.append('final_amount', feedbackForm.final_amount);
+      if (feedbackForm.screenshot) formData.append('screenshot', feedbackForm.screenshot);
+
+      await adminAPI.addTransactionFeedback(selectedTransaction.id, formData);
+      toast.success('Feedback sent successfully');
+      setFeedbackDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error('Failed to send feedback');
+    } finally {
+      setSendingFeedback(false);
+    }
+  };
+
+  const handleApproveTransaction = async (tx) => {
+    try {
+      await adminAPI.approveTransaction(tx.id);
+      toast.success('Transaction approved');
+      loadData();
+    } catch (error) {
+      toast.error('Failed to approve transaction');
+    }
+  };
+
+  const handleCompleteTransaction = async (tx) => {
+    try {
+      const formData = new FormData();
+      await adminAPI.completeTransaction(tx.id, formData);
+      toast.success('Transaction completed');
+      loadData();
+    } catch (error) {
+      toast.error('Failed to complete transaction');
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      active: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Active</span>,
+      pending: <span className="px-2 py-1 rounded text-xs bg-amber-500/20 text-amber-400">Pending</span>,
+      processing: <span className="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400">Processing</span>,
+      awaiting_confirmation: <span className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-400">Awaiting Confirmation</span>,
+      completed: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Completed</span>,
+      rejected: <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400">Rejected</span>,
+    };
+    return badges[status] || <span className="px-2 py-1 rounded text-xs bg-zinc-500/20 text-zinc-400">{status}</span>;
+  };
+
+  const getInviteStatusBadge = (invite) => {
     if (invite.is_revoked) {
       return <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400">Revoked</span>;
     }
@@ -200,6 +309,8 @@ export const AdminLicensesPage = () => {
     );
   }
 
+  const pendingTransactions = licenseeTransactions.filter(tx => tx.status === 'pending' || tx.status === 'processing');
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -212,8 +323,34 @@ export const AdminLicensesPage = () => {
         </Button>
       </div>
 
+      {/* Pending Transactions Alert */}
+      {pendingTransactions.length > 0 && (
+        <Card className="glass-card border-amber-500/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-amber-400 font-medium">
+                  {pendingTransactions.length} Pending Transaction{pendingTransactions.length > 1 ? 's' : ''}
+                </p>
+                <p className="text-sm text-zinc-400">Licensee deposit/withdrawal requests need your attention</p>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab('transactions')}
+                className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              >
+                View Requests
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="glass-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -242,7 +379,7 @@ export const AdminLicensesPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Extended Licenses</p>
+                <p className="text-sm text-zinc-400">Extended</p>
                 <p className="text-2xl font-bold text-purple-400">
                   {licenses.filter(l => l.license_type === 'extended' && l.is_active).length}
                 </p>
@@ -255,12 +392,23 @@ export const AdminLicensesPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Honorary Licenses</p>
+                <p className="text-sm text-zinc-400">Honorary</p>
                 <p className="text-2xl font-bold text-amber-400">
                   {licenses.filter(l => l.license_type === 'honorary' && l.is_active).length}
                 </p>
               </div>
               <Award className="w-8 h-8 text-amber-400" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="glass-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-zinc-400">Pending Requests</p>
+                <p className="text-2xl font-bold text-cyan-400">{pendingTransactions.length}</p>
+              </div>
+              <Clock className="w-8 h-8 text-cyan-400" />
             </div>
           </CardContent>
         </Card>
@@ -274,6 +422,14 @@ export const AdminLicensesPage = () => {
           </TabsTrigger>
           <TabsTrigger value="active" className="data-[state=active]:bg-blue-500">
             Active Licenses ({licenses.filter(l => l.is_active).length})
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-500">
+            Transactions ({licenseeTransactions.length})
+            {pendingTransactions.length > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-amber-500 text-white">
+                {pendingTransactions.length}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -322,12 +478,7 @@ export const AdminLicensesPage = () => {
                               {invite.license_type}
                             </span>
                           </td>
-                          <td>
-                            <div>
-                              <p className="text-white text-sm">{invite.invitee_name || '-'}</p>
-                              <p className="text-zinc-500 text-xs">{invite.invitee_email || '-'}</p>
-                            </div>
-                          </td>
+                          <td className="text-white text-sm">{invite.invitee_name || '-'}</td>
                           <td className="font-mono text-emerald-400">
                             ${invite.starting_amount?.toLocaleString()}
                           </td>
@@ -339,7 +490,7 @@ export const AdminLicensesPage = () => {
                               {invite.uses_count || 0} / {invite.max_uses}
                             </span>
                           </td>
-                          <td>{getStatusBadge(invite)}</td>
+                          <td>{getInviteStatusBadge(invite)}</td>
                           <td>
                             <div className="flex gap-1">
                               <Button
@@ -360,17 +511,15 @@ export const AdminLicensesPage = () => {
                               >
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              {invite.invitee_email && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleSendEmail(invite)}
-                                  className="text-zinc-400 hover:text-emerald-400"
-                                  title="Send Email"
-                                >
-                                  <Mail className="w-4 h-4" />
-                                </Button>
-                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenEmailDialog(invite)}
+                                className="text-zinc-400 hover:text-emerald-400"
+                                title="Send Email"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </Button>
                               {(invite.is_expired || invite.is_revoked) && (
                                 <Button
                                   variant="ghost"
@@ -478,6 +627,111 @@ export const AdminLicensesPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Licensee Transactions Tab */}
+        <TabsContent value="transactions" className="mt-4">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white">Licensee Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {licenseeTransactions.length === 0 ? (
+                <div className="text-center py-12">
+                  <DollarSign className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                  <p className="text-zinc-500">No licensee transactions yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full data-table">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {licenseeTransactions.map((tx) => (
+                        <tr key={tx.id}>
+                          <td>
+                            <div className="flex items-center gap-2">
+                              {tx.type === 'deposit' ? (
+                                <ArrowDownCircle className="w-4 h-4 text-emerald-400" />
+                              ) : (
+                                <ArrowUpCircle className="w-4 h-4 text-red-400" />
+                              )}
+                              <span className="capitalize text-white">{tx.type}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <p className="text-white">{tx.user_name}</p>
+                              <p className="text-zinc-500 text-xs">{tx.user_email}</p>
+                            </div>
+                          </td>
+                          <td className={`font-mono ${tx.type === 'deposit' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {tx.type === 'deposit' ? '+' : '-'}${tx.amount?.toLocaleString()}
+                          </td>
+                          <td>{getStatusBadge(tx.status)}</td>
+                          <td className="text-zinc-400 text-sm">
+                            {new Date(tx.created_at).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewTransaction(tx)}
+                                className="text-zinc-400 hover:text-white"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenFeedbackDialog(tx)}
+                                className="text-zinc-400 hover:text-blue-400"
+                                title="Send Feedback"
+                              >
+                                <MessageSquare className="w-4 h-4" />
+                              </Button>
+                              {tx.status === 'pending' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleApproveTransaction(tx)}
+                                  className="text-zinc-400 hover:text-emerald-400"
+                                  title="Approve"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {tx.status === 'processing' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleCompleteTransaction(tx)}
+                                  className="text-zinc-400 hover:text-emerald-400"
+                                  title="Complete"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Create Invite Dialog */}
@@ -496,7 +750,7 @@ export const AdminLicensesPage = () => {
                 value={createForm.license_type} 
                 onValueChange={(v) => setCreateForm({ ...createForm, license_type: v })}
               >
-                <SelectTrigger className="input-dark mt-1" data-testid="invite-type-select">
+                <SelectTrigger className="input-dark mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -520,7 +774,6 @@ export const AdminLicensesPage = () => {
                   onChange={(e) => setCreateForm({ ...createForm, starting_amount: e.target.value })}
                   placeholder="10000"
                   className="input-dark pl-7"
-                  data-testid="invite-amount-input"
                 />
               </div>
             </div>
@@ -552,35 +805,16 @@ export const AdminLicensesPage = () => {
                 onChange={(e) => setCreateForm({ ...createForm, max_uses: e.target.value })}
                 className="input-dark mt-1"
               />
-              <p className="text-xs text-zinc-500 mt-1">How many users can register with this invite</p>
             </div>
 
-            <div className="border-t border-zinc-800 pt-4">
-              <p className="text-sm text-zinc-400 mb-3">Optional: Pre-fill invitee details</p>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-zinc-300">Invitee Name</Label>
-                  <Input
-                    value={createForm.invitee_name}
-                    onChange={(e) => setCreateForm({ ...createForm, invitee_name: e.target.value })}
-                    placeholder="John Doe"
-                    className="input-dark mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label className="text-zinc-300">Invitee Email</Label>
-                  <Input
-                    type="email"
-                    value={createForm.invitee_email}
-                    onChange={(e) => setCreateForm({ ...createForm, invitee_email: e.target.value })}
-                    placeholder="john@example.com"
-                    className="input-dark mt-1"
-                  />
-                  <p className="text-xs text-zinc-500 mt-1">If provided, you can send the invite via email</p>
-                </div>
-              </div>
+            <div>
+              <Label className="text-zinc-300">Invitee Name (optional)</Label>
+              <Input
+                value={createForm.invitee_name}
+                onChange={(e) => setCreateForm({ ...createForm, invitee_name: e.target.value })}
+                placeholder="For your reference"
+                className="input-dark mt-1"
+              />
             </div>
 
             <div>
@@ -597,23 +831,76 @@ export const AdminLicensesPage = () => {
               onClick={handleCreateInvite}
               className="w-full btn-primary"
               disabled={creating}
-              data-testid="generate-invite-btn"
             >
               {creating ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Generating...
-                </>
+                <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
               ) : (
-                <>
-                  <Link2 className="w-4 h-4 mr-2" /> Generate Invite Link
-                </>
+                <><Link2 className="w-4 h-4 mr-2" /> Generate Invite Link</>
               )}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* View Details Dialog */}
+      {/* Email Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Mail className="w-5 h-5 text-emerald-400" /> Send License Invite Email
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-zinc-300">Recipient Email</Label>
+              <Input
+                type="email"
+                value={emailTo}
+                onChange={(e) => setEmailTo(e.target.value)}
+                placeholder="invitee@example.com"
+                className="input-dark mt-1"
+              />
+            </div>
+
+            {selectedInvite && (
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <p className="text-xs text-zinc-500 mb-2">Invite Details</p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-zinc-500">Code</p>
+                    <code className="text-blue-400">{selectedInvite.code}</code>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Type</p>
+                    <p className={selectedInvite.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}>
+                      {selectedInvite.license_type}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Amount</p>
+                    <p className="text-emerald-400">${selectedInvite.starting_amount?.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Button 
+              onClick={handleSendEmail}
+              className="w-full btn-primary"
+              disabled={sendingEmail}
+            >
+              {sendingEmail ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+              ) : (
+                <><Send className="w-4 h-4 mr-2" /> Send Email</>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Invite Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="glass-card border-zinc-800 max-w-lg">
           <DialogHeader>
@@ -627,7 +914,7 @@ export const AdminLicensesPage = () => {
               <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                 <div className="flex items-center justify-between mb-3">
                   <code className="text-lg font-mono text-blue-400">{selectedInvite.code}</code>
-                  {getStatusBadge(selectedInvite)}
+                  {getInviteStatusBadge(selectedInvite)}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -649,55 +936,8 @@ export const AdminLicensesPage = () => {
                     <p className="text-zinc-500">Uses</p>
                     <p className="text-white">{selectedInvite.uses_count || 0} / {selectedInvite.max_uses}</p>
                   </div>
-                  {selectedInvite.valid_until && (
-                    <div>
-                      <p className="text-zinc-500">Expires</p>
-                      <p className="text-white">{selectedInvite.valid_until?.split('T')[0]}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-zinc-500">Created</p>
-                    <p className="text-white">{new Date(selectedInvite.created_at).toLocaleDateString()}</p>
-                  </div>
                 </div>
-
-                {selectedInvite.invitee_name && (
-                  <div className="mt-4 pt-4 border-t border-zinc-800">
-                    <p className="text-zinc-500 text-sm">Invitee</p>
-                    <p className="text-white">{selectedInvite.invitee_name}</p>
-                    {selectedInvite.invitee_email && (
-                      <p className="text-zinc-400 text-sm">{selectedInvite.invitee_email}</p>
-                    )}
-                  </div>
-                )}
-
-                {selectedInvite.notes && (
-                  <div className="mt-4 pt-4 border-t border-zinc-800">
-                    <p className="text-zinc-500 text-sm">Notes</p>
-                    <p className="text-zinc-300">{selectedInvite.notes}</p>
-                  </div>
-                )}
               </div>
-
-              {/* Registered Users */}
-              {selectedInvite.registered_users?.length > 0 && (
-                <div>
-                  <p className="text-sm text-zinc-400 mb-2">Registered Users ({selectedInvite.registered_users.length})</p>
-                  <div className="space-y-2">
-                    {selectedInvite.registered_users.map((user) => (
-                      <div key={user.id} className="p-3 rounded-lg bg-zinc-900/50 flex items-center justify-between">
-                        <div>
-                          <p className="text-white text-sm">{user.full_name}</p>
-                          <p className="text-zinc-500 text-xs">{user.email}</p>
-                        </div>
-                        <p className="text-zinc-500 text-xs">
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Registration Link */}
               <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
@@ -717,7 +957,6 @@ export const AdminLicensesPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
@@ -726,17 +965,250 @@ export const AdminLicensesPage = () => {
                 >
                   <Copy className="w-4 h-4 mr-2" /> Copy Link
                 </Button>
-                {selectedInvite.invitee_email && (
+                <Button
+                  onClick={() => {
+                    setViewDialogOpen(false);
+                    handleOpenEmailDialog(selectedInvite);
+                  }}
+                  className="flex-1 btn-primary"
+                >
+                  <Send className="w-4 h-4 mr-2" /> Send Email
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Transaction Dialog */}
+      <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              {selectedTransaction?.type === 'deposit' ? (
+                <ArrowDownCircle className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <ArrowUpCircle className="w-5 h-5 text-red-400" />
+              )}
+              {selectedTransaction?.type?.charAt(0).toUpperCase() + selectedTransaction?.type?.slice(1)} Request
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedTransaction && (
+            <div className="space-y-4 mt-4">
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-zinc-500">User</p>
+                    <p className="text-white">{selectedTransaction.user_name}</p>
+                    <p className="text-zinc-500 text-xs">{selectedTransaction.user_email}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Amount</p>
+                    <p className={`text-xl font-mono ${selectedTransaction.type === 'deposit' ? 'text-emerald-400' : 'text-red-400'}`}>
+                      ${selectedTransaction.amount?.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Status</p>
+                    {getStatusBadge(selectedTransaction.status)}
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Date</p>
+                    <p className="text-white">{new Date(selectedTransaction.created_at).toLocaleString()}</p>
+                  </div>
+                  {selectedTransaction.deposit_date && (
+                    <div>
+                      <p className="text-zinc-500">Deposit Date</p>
+                      <p className="text-white">{selectedTransaction.deposit_date}</p>
+                    </div>
+                  )}
+                  {selectedTransaction.processing_days && (
+                    <div>
+                      <p className="text-zinc-500">Processing Time</p>
+                      <p className="text-white">{selectedTransaction.processing_days} business days</p>
+                    </div>
+                  )}
+                </div>
+                
+                {selectedTransaction.notes && (
+                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                    <p className="text-zinc-500 text-sm">Notes</p>
+                    <p className="text-zinc-300">{selectedTransaction.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Screenshot */}
+              {selectedTransaction.screenshot_url && (
+                <div>
+                  <p className="text-sm text-zinc-400 mb-2">Submitted Screenshot</p>
+                  <a href={selectedTransaction.screenshot_url} target="_blank" rel="noopener noreferrer">
+                    <img 
+                      src={selectedTransaction.screenshot_url} 
+                      alt="Transaction screenshot" 
+                      className="rounded-lg border border-zinc-800 max-h-60 object-contain"
+                    />
+                  </a>
+                </div>
+              )}
+
+              {/* Feedback History */}
+              {selectedTransaction.feedback?.length > 0 && (
+                <div>
+                  <p className="text-sm text-zinc-400 mb-2">Communication History</p>
+                  <div className="space-y-3">
+                    {selectedTransaction.feedback.map((fb, idx) => (
+                      <div key={fb.id || idx} className={`p-3 rounded-lg ${fb.from_admin ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-zinc-900/50 border border-zinc-800'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-xs ${fb.from_admin ? 'text-blue-400' : 'text-zinc-400'}`}>
+                            {fb.from_admin ? fb.created_by_name || 'Admin' : 'Licensee'}
+                          </span>
+                          <span className="text-xs text-zinc-500">
+                            {new Date(fb.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-zinc-300 text-sm">{fb.message}</p>
+                        {fb.final_amount && (
+                          <p className="text-emerald-400 font-mono mt-2">Final Amount: ${fb.final_amount.toLocaleString()}</p>
+                        )}
+                        {fb.screenshot_url && (
+                          <a href={fb.screenshot_url} target="_blank" rel="noopener noreferrer" className="block mt-2">
+                            <img src={fb.screenshot_url} alt="Feedback screenshot" className="rounded-lg border border-zinc-800 max-h-40 object-contain" />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-4 border-t border-zinc-800">
+                <Button
+                  onClick={() => {
+                    setTransactionDialogOpen(false);
+                    handleOpenFeedbackDialog(selectedTransaction);
+                  }}
+                  className="flex-1 btn-secondary"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" /> Send Feedback
+                </Button>
+                {selectedTransaction.status === 'pending' && (
                   <Button
-                    onClick={() => handleSendEmail(selectedInvite)}
+                    onClick={() => {
+                      handleApproveTransaction(selectedTransaction);
+                      setTransactionDialogOpen(false);
+                    }}
                     className="flex-1 btn-primary"
                   >
-                    <Send className="w-4 h-4 mr-2" /> Send Email
+                    <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                  </Button>
+                )}
+                {selectedTransaction.status === 'processing' && (
+                  <Button
+                    onClick={() => {
+                      handleCompleteTransaction(selectedTransaction);
+                      setTransactionDialogOpen(false);
+                    }}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" /> Complete
                   </Button>
                 )}
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback Dialog */}
+      <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-400" /> Send Feedback
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label className="text-zinc-300">Message</Label>
+              <Textarea
+                value={feedbackForm.message}
+                onChange={(e) => setFeedbackForm({ ...feedbackForm, message: e.target.value })}
+                placeholder="Enter your feedback message..."
+                className="input-dark mt-1 min-h-[100px]"
+              />
+            </div>
+
+            <div>
+              <Label className="text-zinc-300">Update Status (optional)</Label>
+              <Select 
+                value={feedbackForm.status} 
+                onValueChange={(v) => setFeedbackForm({ ...feedbackForm, status: v })}
+              >
+                <SelectTrigger className="input-dark mt-1">
+                  <SelectValue placeholder="Keep current status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="awaiting_confirmation">Awaiting Confirmation</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedTransaction?.type === 'withdrawal' && (
+              <div>
+                <Label className="text-zinc-300">Final Amount After Fees (optional)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={feedbackForm.final_amount}
+                    onChange={(e) => setFeedbackForm({ ...feedbackForm, final_amount: e.target.value })}
+                    placeholder="Amount after fees"
+                    className="input-dark pl-7"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <Label className="text-zinc-300">Attach Screenshot (optional)</Label>
+              <div className="mt-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFeedbackForm({ ...feedbackForm, screenshot: e.target.files?.[0] || null })}
+                  className="hidden"
+                  id="feedback-screenshot"
+                />
+                <label htmlFor="feedback-screenshot">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-zinc-700 cursor-pointer hover:border-zinc-500 transition-colors">
+                    <Upload className="w-4 h-4 text-zinc-500" />
+                    <span className="text-sm text-zinc-400">
+                      {feedbackForm.screenshot ? feedbackForm.screenshot.name : 'Click to upload'}
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleSendFeedback}
+              className="w-full btn-primary"
+              disabled={sendingFeedback}
+            >
+              {sendingFeedback ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+              ) : (
+                <><Send className="w-4 h-4 mr-2" /> Send Feedback</>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
