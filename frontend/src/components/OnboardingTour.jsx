@@ -1,72 +1,151 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { 
   TrendingUp, Activity, Target, CreditCard, Calculator, 
-  Globe, Radio, Users, Settings, ArrowRight, Check, Sparkles
+  Globe, Radio, Users, Settings, ArrowRight, Check, Sparkles,
+  Play, ChevronLeft, ChevronRight, Eye, MousePointer, Rocket
 } from 'lucide-react';
 
+// Interactive tour steps with navigation targets
 const tourSteps = [
   {
+    id: 'welcome',
     title: "Welcome to CrossCurrent Finance Center! 🎉",
-    content: "Your complete trading profit management platform for the Merin Trading Platform. Let's get you started with a quick tour!",
+    content: "Your complete trading profit management platform for the Merin Trading Platform. Let's take an interactive tour of your new trading dashboard!",
     icon: Sparkles,
+    type: 'modal',
+    highlight: null,
+    action: null,
   },
   {
-    title: "Profit Tracker",
-    content: "Track your deposits and see your actual vs projected profits. Add deposits when you fund your Merin account, and watch your account value grow.\n\n• Withdrawal simulation shows 3% Merin fee + $1 Binance fee\n• Processing time: 1-2 business days",
+    id: 'dashboard',
+    title: "Your Dashboard",
+    content: "This is your home base. See your total balance, recent trades, and quick stats at a glance. Everything you need to track your trading performance.",
     icon: TrendingUp,
+    type: 'page',
+    path: '/dashboard',
+    highlight: '[data-testid="balance-card"]',
+    tip: "💡 Click on cards to explore more details",
+  },
+  {
+    id: 'profit-tracker',
+    title: "Profit Tracker",
+    content: "Track deposits, withdrawals, and watch your account grow! The projection system shows you potential earnings based on daily compounding.\n\n• Add deposits when you fund your Merin account\n• Simulate withdrawals (3% Merin + $1 Binance fee)\n• View daily/monthly projections",
+    icon: TrendingUp,
+    type: 'page',
     path: '/profit-tracker',
+    highlight: '[data-testid="balance-card"], [data-testid="add-deposit-btn"]',
+    tip: "💡 Try clicking 'Add Deposit' to see the simulation",
   },
   {
-    title: "Trade Monitor",
-    content: "Your trading command center!\n\n• Check the active trading signal (product, direction, time)\n• LOT Calculator: Your LOT size × 15 = Exit Value\n• Check in when ready, wait for the exit alert\n• Enter your actual exit value after the trade\n• Forward profits to your Profit Tracker",
-    icon: Activity,
-    path: '/trade-monitor',
-  },
-  {
-    title: "LOT Size Formula",
-    content: "The exit calculation is simple:\n\nLOT Size × 15 = Exit Value\n\nFor example:\n• 0.01 LOT = $0.15 exit\n• 0.10 LOT = $1.50 exit\n• 1.00 LOT = $15.00 exit\n\nSet your default LOT size in Profile Settings!",
+    id: 'lot-formula',
+    title: "The LOT Formula",
+    content: "Your exit value is calculated as:\n\nLOT Size × Multiplier = Exit Value\n\n• LOT Size is auto-calculated from your balance ÷ 980\n• Multiplier comes from the daily signal (usually 15)\n\nExample: 14.71 LOT × 15 = $220.65 exit",
     icon: Calculator,
+    type: 'modal',
+    highlight: null,
+    tip: "💡 Your LOT size automatically updates as your balance grows",
   },
   {
-    title: "World Timer",
-    content: "Trading signals are based on Philippine/Taiwan/Singapore time (GMT+8).\n\nSet your timezone in Profile Settings so the Trade Monitor shows your local time. This helps you know exactly when to enter and exit trades!",
+    id: 'trade-monitor',
+    title: "Trade Monitor - Your Trading Hub",
+    content: "This is where the action happens!\n\n1. Check the Active Signal (product, direction, time)\n2. See your calculated LOT size and projected exit value\n3. Click 'Enter the Trade Now!' when ready\n4. Wait for the countdown and enter your actual profit",
+    icon: Activity,
+    type: 'page',
+    path: '/trade-monitor',
+    highlight: '[data-testid="active-signal-card"], [data-testid="lot-size-card"]',
+    tip: "💡 The Merin platform is embedded on the right for seamless trading",
+  },
+  {
+    id: 'trade-flow',
+    title: "The Trading Flow",
+    content: "1. Admin posts daily signal (time, direction, multiplier)\n2. Check in and wait for countdown\n3. 5-second beep alert before trade time\n4. ENTER THE TRADE NOW! appears\n5. Enter your actual profit\n6. Celebrate and forward to Profit Tracker!",
+    icon: Play,
+    type: 'modal',
+    highlight: null,
+    tip: "💡 The Trade History table tracks all your trades with P/L",
+  },
+  {
+    id: 'timezone',
+    title: "Timezone Settings",
+    content: "Trading signals are based on Philippine Time (GMT+8).\n\nSet your timezone in Profile Settings so you see the correct local trade time. The Trade Monitor shows both Philippine time and your local time!",
     icon: Globe,
+    type: 'page',
     path: '/profile',
+    highlight: null,
+    tip: "💡 Update your timezone for accurate trade time conversion",
   },
   {
-    title: "Profit Planner",
-    content: "Set financial goals and track your progress!\n\n• Create goals for items you want to buy\n• Add contributions from your trading profits\n• Get suggestions on when to withdraw\n• Celebrate when you reach your goals!",
-    icon: Target,
-    path: '/goals',
-  },
-  {
-    title: "Debt Management",
-    content: "Plan your debt repayments using trading profits.\n\n• Add your debts with due dates\n• See withdrawal deadlines (1-2 days before due)\n• Track payments and remaining balances\n• Plan your monthly commitment",
-    icon: CreditCard,
-    path: '/debt',
-  },
-  {
-    title: "For Admins",
-    content: "Admins can:\n• Post daily trading signals (product, time, direction)\n• Manage platform members\n• Connect external apps via API Center\n• Customize platform settings\n\nSuper Admins have full control over all features.",
-    icon: Radio,
-  },
-  {
-    title: "You're All Set! 🚀",
-    content: "Remember:\n\n1. Set your timezone in Profile Settings\n2. Check the Trade Monitor for daily signals\n3. Use LOT × 15 to calculate your exit\n4. Forward profits to your Profit Tracker\n5. Plan your goals and debt payments\n\nHappy trading!",
-    icon: Check,
+    id: 'ready',
+    title: "You're Ready to Trade! 🚀",
+    content: "Quick recap:\n\n✅ Check Trade Monitor for daily signals\n✅ Your LOT size × Multiplier = Exit Value\n✅ Forward profits to your Profit Tracker\n✅ Track your progress in the dashboard\n\nHappy trading with CrossCurrent!",
+    icon: Rocket,
+    type: 'modal',
+    highlight: null,
+    action: 'complete',
   },
 ];
 
 export const OnboardingTour = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const step = tourSteps[currentStep];
+  const Icon = step.icon;
+  const isLastStep = currentStep === tourSteps.length - 1;
+  const isFirstStep = currentStep === 0;
+  const progress = ((currentStep + 1) / tourSteps.length) * 100;
+
+  // Navigate to the step's page if needed
+  useEffect(() => {
+    if (step.path && step.type === 'page' && location.pathname !== step.path) {
+      setIsNavigating(true);
+      navigate(step.path);
+      // Wait for navigation and re-render
+      setTimeout(() => {
+        setIsNavigating(false);
+        highlightElements();
+      }, 500);
+    } else if (step.type === 'page') {
+      highlightElements();
+    }
+    
+    return () => {
+      // Clean up highlights when step changes
+      removeHighlights();
+    };
+  }, [currentStep, step.path, location.pathname]);
+
+  const highlightElements = useCallback(() => {
+    if (step.highlight) {
+      const selectors = step.highlight.split(',').map(s => s.trim());
+      selectors.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+          element.classList.add('tour-highlight');
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+  }, [step.highlight]);
+
+  const removeHighlights = () => {
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+      el.classList.remove('tour-highlight');
+    });
+  };
 
   const handleNext = () => {
-    if (currentStep < tourSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
+    if (isLastStep) {
+      removeHighlights();
       onClose();
+    } else {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -77,47 +156,70 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
   };
 
   const handleSkip = () => {
+    removeHighlights();
     onClose();
   };
 
-  const step = tourSteps[currentStep];
-  const Icon = step.icon;
-  const isLastStep = currentStep === tourSteps.length - 1;
+  const handleStepClick = (index) => {
+    setCurrentStep(index);
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card border-zinc-800 max-w-lg">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleSkip(); }}>
+      <DialogContent className="glass-card border-zinc-800 max-w-lg" data-testid="onboarding-dialog">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <Icon className="w-6 h-6 text-white" />
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+              isLastStep 
+                ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
+                : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+            }`}>
+              <Icon className="w-7 h-7 text-white" />
             </div>
-            <div>
-              <p className="text-xs text-zinc-500">Step {currentStep + 1} of {tourSteps.length}</p>
-              <DialogTitle className="text-white">{step.title}</DialogTitle>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-zinc-500">Step {currentStep + 1} of {tourSteps.length}</p>
+                {step.type === 'page' && (
+                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
+                    <Eye className="w-3 h-3" /> Interactive
+                  </span>
+                )}
+              </div>
+              <DialogTitle className="text-white text-xl">{step.title}</DialogTitle>
             </div>
           </div>
+          
+          {/* Progress bar */}
+          <Progress value={progress} className="h-1 mt-2" />
         </DialogHeader>
 
         <div className="mt-4">
           <div className="text-zinc-300 whitespace-pre-line text-sm leading-relaxed">
             {step.content}
           </div>
+          
+          {/* Tip box */}
+          {step.tip && (
+            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-sm text-blue-400">{step.tip}</p>
+            </div>
+          )}
         </div>
 
-        {/* Progress dots */}
+        {/* Step indicators - clickable */}
         <div className="flex justify-center gap-2 mt-6">
-          {tourSteps.map((_, index) => (
+          {tourSteps.map((s, index) => (
             <button
-              key={index}
-              onClick={() => setCurrentStep(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
+              key={s.id}
+              onClick={() => handleStepClick(index)}
+              className={`h-2 rounded-full transition-all cursor-pointer hover:opacity-80 ${
                 index === currentStep 
-                  ? 'w-6 bg-blue-500' 
+                  ? 'w-8 bg-gradient-to-r from-blue-500 to-cyan-500' 
                   : index < currentStep 
-                    ? 'bg-blue-500/50' 
-                    : 'bg-zinc-700'
+                    ? 'w-2 bg-emerald-500' 
+                    : 'w-2 bg-zinc-700 hover:bg-zinc-600'
               }`}
+              title={s.title}
             />
           ))}
         </div>
@@ -128,30 +230,36 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
             variant="ghost"
             onClick={handleSkip}
             className="text-zinc-400 hover:text-white"
+            data-testid="skip-tour-btn"
           >
             Skip Tour
           </Button>
           <div className="flex gap-2">
-            {currentStep > 0 && (
+            {!isFirstStep && (
               <Button
                 variant="outline"
                 onClick={handlePrev}
-                className="btn-secondary"
+                className="btn-secondary gap-1"
+                data-testid="prev-step-btn"
               >
-                Previous
+                <ChevronLeft className="w-4 h-4" /> Previous
               </Button>
             )}
             <Button
               onClick={handleNext}
-              className="btn-primary gap-2"
+              className={`gap-2 ${isLastStep ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700' : 'btn-primary'}`}
+              disabled={isNavigating}
+              data-testid="next-step-btn"
             >
-              {isLastStep ? (
+              {isNavigating ? (
+                <>Loading...</>
+              ) : isLastStep ? (
                 <>
-                  Get Started <Check className="w-4 h-4" />
+                  Start Trading <Rocket className="w-4 h-4" />
                 </>
               ) : (
                 <>
-                  Next <ArrowRight className="w-4 h-4" />
+                  Next <ChevronRight className="w-4 h-4" />
                 </>
               )}
             </Button>
@@ -169,7 +277,9 @@ export const useOnboarding = () => {
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('crosscurrent_tour_completed');
     if (!hasSeenTour) {
-      setShowTour(true);
+      // Slight delay to ensure the page has loaded
+      const timer = setTimeout(() => setShowTour(true), 500);
+      return () => clearTimeout(timer);
     }
   }, []);
 
