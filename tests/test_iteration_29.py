@@ -69,14 +69,13 @@ class TestEmailTemplates:
         assert login_response.status_code == 200
         token = login_response.json()["access_token"]
         
-        # Test email endpoint
+        # Test email endpoint - to_email is a query parameter
         headers = {"Authorization": f"Bearer {token}"}
-        response = requests.post(f"{BASE_URL}/api/email/test", 
-            json={"to_email": "test@example.com"},
+        response = requests.post(f"{BASE_URL}/api/email/test?to_email=test@example.com", 
             headers=headers
         )
-        # Should return 200 (success) or 400/500 if email not configured
-        assert response.status_code in [200, 400, 500]
+        # Should return 200 (success) or 500 if email not configured
+        assert response.status_code in [200, 500]
         print(f"PASS: Email test endpoint exists - status: {response.status_code}")
 
 
