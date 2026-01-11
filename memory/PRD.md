@@ -7,118 +7,153 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Backend**: FastAPI (Python) with MongoDB
 - **Frontend**: React with Tailwind CSS + Shadcn UI
 - **Auth**: JWT with Heartbeat API verification gatekeeper
-- **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion), Merin Trading Platform (embedded iframe)
+- **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion)
 
 ## User Personas & Role Hierarchy
-1. **Normal Member** (role: `member`) - Modular dashboard access assigned by Super Admin
-2. **Basic Admin** (role: `basic_admin`) - Manage members, trading signals, assist with resets
-3. **Super Admin** (role: `super_admin`) - Full access except hidden features (Code: `CROSSCURRENT2024`)
-4. **Master Admin** (role: `master_admin`) - Full access including hidden features (Code: `CrossCurrentGODSEYE`)
-5. **Extended Licensee** / **Honorary Licensee** - Special member types with custom profit calculation
-
-## Core Requirements
-- [x] Heartbeat community verification for registration
-- [x] LOT Size Calculator (LOT × 15 = Exit Value)
-- [x] Withdrawal fees: 3% Merin + $1 Binance, 1-2 business days processing
-- [x] Live currency conversion (USDT-USD-Local currencies)
-- [x] Trading signals in GMT+8 timezone
+1. **Normal Member** (role: `member`) - Modular dashboard with tabs
+2. **Basic Admin** (role: `basic_admin`) - Manage members, signals
+3. **Super Admin** (role: `super_admin`) - Full access except hidden features
+4. **Master Admin** (role: `master_admin`) - Full access including hidden features
+5. **Extended/Honorary Licensee** - Special member types
 
 ## Completed Work
 
-### Session 28 (2026-01-11) - P1 Complete ✅
+### Session 29 (2026-01-11) - P2 Complete ✅
 
-#### P1 Backend Services Package
-Created modular `/app/backend/services/` package:
+#### 1. Debt Management Tooltips ✅
+- Added `TooltipProvider` wrapper to DebtManagementPage
+- Created `InfoTooltip` component with HelpCircle icon
+- Added tooltips to all 4 overview cards:
+  - **Total Debt**: "The sum of all remaining balances..."
+  - **Monthly Commitment**: "Total of all minimum payments due..."
+  - **Account Balance**: "Your current trading account balance..."
+  - **Status**: Context-aware based on can_cover_this_month
+- Added tooltips to Add Debt form fields:
+  - Debt Name, Total Amount, Minimum Payment, Due Day, Interest Rate
 
-1. **email_service.py** - Emailit Integration ✅
-   - `send_email()` - Send emails via Emailit API
-   - `get_license_invite_email()` - HTML template for license invites
-   - `get_admin_notification_email()` - HTML template for admin alerts
-   - `get_password_reset_email()` - HTML template for password reset
-   - `get_trade_alert_email()` - HTML template for trade signals
+#### 2. Shared Admin Components ✅
+Created `/app/frontend/src/components/admin/SharedComponents.jsx`:
+- `StatsCard` - Displays metric with icon
+- `SearchFilterBar` - Search input with filters
+- `Pagination` - Page navigation controls
+- `RoleBadge` - Role display with icon
+- `LicenseBadge` - License type badge
+- `StatusBadge` - Transaction/status badge
+- `LoadingSpinner` - Loading indicator
+- `EmptyState` - No data placeholder
+- `ActionButtons` - Action button group
 
-2. **file_service.py** - Cloudinary Integration ✅
-   - `upload_file()` - Generic file upload
-   - `upload_profile_picture()` - User profile picture upload
-   - `upload_deposit_screenshot()` - Transaction screenshot upload
-   - `delete_file()` - Delete from Cloudinary
-   - `get_user_files()` - Get user's uploaded files
+#### 3. Backend Route Structure ✅
+Created modular route files in `/app/backend/routes/`:
+- `auth.py` - Authentication routes structure
+- `admin.py` - Admin management routes structure
+- `trade.py` - Trading routes structure
+- `profit.py` - Financial routes structure
+- `settings.py` - Settings routes structure
+- `__init__.py` - Package exports with migration docs
 
-3. **websocket_service.py** - Real-time Notifications ✅
-   - `ConnectionManager` - Manages WebSocket connections per user/role
-   - `notify_admins_deposit_request()` - Alert admins about deposits
-   - `notify_admins_withdrawal_request()` - Alert admins about withdrawals
-   - `notify_user_transaction_status()` - Notify user of status changes
-   - `notify_trade_signal()` - Broadcast new trade signals
-   - `notify_system_announcement()` - System-wide announcements
+#### 4. Additional Email Templates ✅
+Added 4 new templates to `/app/backend/services/email_service.py`:
+- `get_welcome_email()` - New user welcome with feature list
+- `get_transaction_update_email()` - Transaction status updates
+- `get_missed_trade_email()` - Missed trade notifications
+- `get_weekly_summary_email()` - Weekly performance summary
 
-#### New API Endpoints Added
-- `POST /api/email/test` - Send test email (Master Admin only)
-- `POST /api/email/send-license-invite` - Send license invite email
-- `POST /api/upload/profile-picture` - Upload profile picture
-- `POST /api/upload/deposit-screenshot/{transaction_id}` - Upload transaction screenshot
-- `POST /api/upload/general` - General file upload
-- `GET /api/ws/status` - WebSocket connection statistics (Admin only)
-- `WS /ws/{user_id}` - WebSocket endpoint for real-time notifications
-
-#### Frontend WebSocket Integration
-- `WebSocketContext.jsx` - React context for WebSocket management
-- Updated `Header.jsx` - Notification bell shows WS connection status
-- Real-time toasts for incoming notifications
+### Session 28 - P1 Complete ✅
+- Backend Services Package (email, file, websocket)
+- WebSocket real-time notifications
+- File upload endpoints
+- Email test endpoint
 
 ### Session 27 - P0 Complete ✅
-All 6 P0 features implemented and tested (100% pass rate):
-1. Dashboard Tabs for Members
-2. API Key Security Modal
-3. Persistent Footer
-4. Login Customization
-5. Production Site URL Setting
-6. CrossCurrent Branding
+- Dashboard tabs for members
+- API key security modal
+- Persistent footer
+- Login customization
+- Production URL setting
+- CrossCurrent branding
 
-## P1 Backend Models Package (Created)
+## Backend Structure
+
+### Models (`/app/backend/models/`)
 ```
-/app/backend/models/
+models/
 ├── __init__.py - Exports all models
-├── user.py - UserCreate, UserLogin, UserResponse, TokenResponse
-├── trade.py - TradeLogCreate, TradingSignalCreate/Update/Response
-├── common.py - DepositCreate, DebtCreate, GoalCreate, NotificationCreate
-├── license.py - LicenseCreate, LicenseInviteCreate, LicenseeTransactionStatus
-└── settings.py - PlatformSettings, EmailTemplateType
+├── user.py - User, Auth, Profile models
+├── trade.py - Trade, Signal models
+├── common.py - Deposit, Debt, Goal, Notification models
+├── license.py - License, Invite, Transaction models
+└── settings.py - Platform, Email template models
 ```
 
-## P1 Backend Utils Package (Created)
+### Utils (`/app/backend/utils/`)
 ```
-/app/backend/utils/
+utils/
 ├── __init__.py - Exports all utilities
-├── auth.py - hash_password, verify_password, create_access_token, decode_token
-└── calculations.py - calculate_lot_size, calculate_projected_profit, calculate_withdrawal_fees
+├── auth.py - Password, JWT, role functions
+└── calculations.py - LOT, profit, fee calculations
 ```
 
-## Future/Backlog (P2)
-- [ ] Refactor large frontend components (AdminMembersPage, AdminLicensesPage)
-- [ ] Add Tooltips to Debt Management page
-- [ ] Add Alarm Music Selection for Trade Monitor
-- [ ] Complete migration of routes from server.py to /routes/ package
+### Services (`/app/backend/services/`)
+```
+services/
+├── __init__.py - Exports all services
+├── email_service.py - Emailit + 8 templates
+├── file_service.py - Cloudinary uploads
+└── websocket_service.py - Real-time notifications
+```
+
+### Routes (`/app/backend/routes/`)
+```
+routes/
+├── __init__.py - Package with migration docs
+├── auth.py - Auth routes structure
+├── admin.py - Admin routes structure
+├── trade.py - Trade routes structure
+├── profit.py - Financial routes structure
+└── settings.py - Settings routes structure
+```
+
+## Frontend Structure
+
+### Admin Components (`/app/frontend/src/components/admin/`)
+```
+admin/
+└── SharedComponents.jsx - 9 reusable components
+```
+
+## API Endpoints Summary
+
+### Core APIs
+- `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Register
+- `GET /api/profit/summary` - Profit summary
+- `GET /api/trade/logs` - Trade history
+- `GET /api/debt` - Get debts
+- `GET /api/debt/plan` - Debt repayment plan
+
+### Admin APIs
+- `GET /api/admin/members` - Member list
+- `GET /api/admin/notifications` - Notifications
+- `GET /api/admin/licenses` - License management
+
+### Integration APIs
+- `POST /api/email/test` - Test email service
+- `POST /api/upload/profile-picture` - Upload profile pic
+- `GET /api/ws/status` - WebSocket stats
+- `WS /ws/{user_id}` - Real-time notifications
 
 ## Test Credentials
 - **Master Admin**: iam@ryansalvador.com / admin123
 - **Regular Member**: jaspersalvador9413@gmail.com / test123
 
-## API Keys (Configured in Admin Settings > Integrations)
-- **Heartbeat**: For community verification
-- **Emailit**: For sending notification emails
-- **Cloudinary**: For file uploads and image storage
+## Testing Summary
+- **Iteration 29**: 13/13 backend tests passed (100%)
+- **Iteration 28**: 16/16 backend tests passed (100%)
+- **Iteration 27**: All P0 features tested (100%)
 
-## Key Technical Notes
-- **Backend:** FastAPI, Motor (async MongoDB), PyJWT, Pydantic
-- **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
-- **State Management:** React Context API (AuthContext, WebSocketContext)
-- **Real-time:** WebSocket for notifications with auto-reconnect
-- **File Uploads:** Cloudinary with base64 encoding
-
-## Database Schema (key collections)
-- **platform_settings:** Extended with login customization, footer settings, API keys
-- **users:** Synced with licenses.current_amount for licensees
-- **licenses:** current_amount is source of truth for licensee balance
-- **file_uploads:** Stores Cloudinary file references
-- **admin_notifications:** Stores notifications for admin dashboard
+## Future Tasks
+- [ ] Implement actual route migration from server.py
+- [ ] Add Alarm Music Selection for Trade Monitor
+- [ ] Break down AdminMembersPage.jsx into smaller components
+- [ ] Break down AdminLicensesPage.jsx into smaller components
