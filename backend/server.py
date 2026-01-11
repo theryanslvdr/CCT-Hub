@@ -222,6 +222,7 @@ class PlatformSettings(BaseModel):
     og_image_url: Optional[str] = None
     primary_color: str = "#3B82F6"
     accent_color: str = "#06B6D4"
+    hide_emergent_badge: bool = False
 
 class APIConnectionCreate(BaseModel):
     name: str
