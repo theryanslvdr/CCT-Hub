@@ -139,9 +139,9 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay - Less blur, lighter background */}
       <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[10000]" 
+        className="fixed inset-0 bg-black/40 z-[10000]" 
         onClick={(e) => e.stopPropagation()}
       />
       
