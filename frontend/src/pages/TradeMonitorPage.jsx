@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { MobileNotice } from '@/components/MobileNotice';
 import { 
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
   TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
