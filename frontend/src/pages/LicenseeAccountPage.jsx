@@ -13,15 +13,18 @@ import {
   XCircle, AlertCircle, Upload, Eye, Loader2, MessageSquare,
   DollarSign, Calendar, Image as ImageIcon, FileText, RefreshCw
 } from 'lucide-react';
-import { licenseeAPI, profitAPI } from '@/lib/api';
+import { licenseeAPI, profitAPI, adminAPI } from '@/lib/api';
 
 export const LicenseeAccountPage = () => {
-  const { user } = useAuth();
+  const { user, simulatedView, isMasterAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [license, setLicense] = useState(null);
   const [isLicensee, setIsLicensee] = useState(false);
   const [accountSummary, setAccountSummary] = useState(null);
+  
+  // Check if simulating a licensee view
+  const isSimulatingLicensee = simulatedView?.license_type && isMasterAdmin();
   
   // Deposit form
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
