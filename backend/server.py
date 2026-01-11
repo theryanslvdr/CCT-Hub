@@ -1190,6 +1190,131 @@ async def set_temp_password(user_id: str, data: TempPasswordSet, user: dict = De
     
     return {"message": "Temporary password set. User will be prompted to change on next login."}
 
+# Simulate Member View - Get member's complete data for Master Admin
+@admin_router.get("/members/{user_id}/simulate")
+async def simulate_member_view(user_id: str, user: dict = Depends(require_master_admin)):
+    """Master Admin only: Get all data to simulate viewing as a specific member"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get member's deposits
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    # Get member's trades
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get member's debts
+    debts = await db.debts.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    
+    # Get member's goals
+    goals = await db.goals.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    
+    # Calculate account value
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit" and d.get("type") != "withdrawal")
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    account_value = round(total_deposits - total_withdrawals + total_profit, 2)
+    
+    # Calculate LOT size
+    lot_size = round(account_value / 980, 2) if account_value > 0 else 0
+    
+    return {
+        "member": member,
+        "account_value": account_value,
+        "lot_size": lot_size,
+        "total_deposits": round(total_deposits, 2),
+        "total_withdrawals": round(total_withdrawals, 2),
+        "total_profit": round(total_profit, 2),
+        "deposits": deposits,
+        "trades": trades[:20],
+        "debts": debts,
+        "goals": goals,
+        "summary": {
+            "total_trades": len(trades),
+            "winning_trades": len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]]),
+            "total_debts": len(debts),
+            "total_goals": len(goals)
+        }
+    }
+
+# Trading Signals - Paginated History
+@admin_router.get("/signals/history")
+async def get_signals_history(
+    page: int = 1,
+    page_size: int = 20,
+    user: dict = Depends(require_admin)
+):
+    """Get paginated signal history"""
+    skip = (page - 1) * page_size
+    
+    total = await db.trading_signals.count_documents({})
+    signals = await db.trading_signals.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
+    
+    return {
+        "signals": signals,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size if total > 0 else 1
+    }
+
+# Trading Signals - Monthly Archive
+@admin_router.get("/signals/archive")
+async def get_signals_archive(user: dict = Depends(require_admin)):
+    """Get signals organized by month"""
+    signals = await db.trading_signals.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Organize by month
+    archive = {}
+    for signal in signals:
+        created_at = signal.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        
+        month_key = created_at.strftime("%Y-%m")  # e.g., "2026-01"
+        month_label = created_at.strftime("%B %Y")  # e.g., "January 2026"
+        
+        if month_key not in archive:
+            archive[month_key] = {
+                "month_key": month_key,
+                "month_label": month_label,
+                "signals": []
+            }
+        archive[month_key]["signals"].append(signal)
+    
+    # Convert to sorted list (newest first)
+    months = sorted(archive.values(), key=lambda x: x["month_key"], reverse=True)
+    
+    return {"months": months}
+
+# Archive current month signals (move to archive and clear from main list)
+@admin_router.post("/signals/archive-month")
+async def archive_current_month_signals(user: dict = Depends(require_super_admin)):
+    """Archive all signals from the current month"""
+    now = datetime.now(timezone.utc)
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    # Get signals from current month that are not active
+    signals_to_archive = await db.trading_signals.find({
+        "created_at": {"$gte": start_of_month.isoformat()},
+        "is_active": False
+    }, {"_id": 0}).to_list(1000)
+    
+    if not signals_to_archive:
+        return {"message": "No inactive signals to archive", "archived_count": 0}
+    
+    # Mark them as archived
+    archived_count = 0
+    for signal in signals_to_archive:
+        await db.trading_signals.update_one(
+            {"id": signal["id"]},
+            {"$set": {"is_archived": True}}
+        )
+        archived_count += 1
+    
+    return {"message": f"Archived {archived_count} signals", "archived_count": archived_count}
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
