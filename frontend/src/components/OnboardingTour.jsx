@@ -209,6 +209,13 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
   const isLastStep = currentStep === tourSteps.length - 1;
   const isFirstStep = currentStep === 0;
 
+  // Remove highlights helper
+  const removeHighlights = useCallback(() => {
+    document.querySelectorAll('.tour-highlight').forEach(el => {
+      el.classList.remove('tour-highlight');
+    });
+  }, []);
+
   // Clean up click handlers
   const cleanupClickHandler = useCallback(() => {
     if (clickHandlerRef.current) {
@@ -217,55 +224,32 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
     }
   }, []);
 
-  // Setup click handler for highlighted elements
-  const setupClickHandler = useCallback(() => {
-    cleanupClickHandler();
-    
-    if (step.clickToAdvance && step.highlight) {
-      const handler = (e) => {
-        const selectors = step.highlight.split(',').map(s => s.trim());
-        for (const selector of selectors) {
-          const element = document.querySelector(selector);
-          if (element && (element.contains(e.target) || element === e.target)) {
-            e.preventDefault();
-            e.stopPropagation();
-            handleNext();
-            return;
-          }
-        }
-      };
-      
-      clickHandlerRef.current = handler;
-      // Use setTimeout to ensure it's added after React's event handlers
-      setTimeout(() => {
-        document.addEventListener('click', handler, true);
-      }, 100);
-    }
-  }, [step, currentStep]);
-
-  // Navigate to the step's page if needed
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    if (step.path && step.type === 'page' && location.pathname !== step.path) {
-      setIsNavigating(true);
-      navigate(step.path);
-      setTimeout(() => {
-        setIsNavigating(false);
-        highlightElements();
-        setupClickHandler();
-      }, 500);
-    } else if (step.type === 'page') {
-      highlightElements();
-      setupClickHandler();
-    }
-    
-    return () => {
+  // Handle next step
+  const handleNext = useCallback(() => {
+    if (isLastStep) {
       removeHighlights();
       cleanupClickHandler();
-    };
-  }, [currentStep, step.path, location.pathname, isOpen]);
+      onClose();
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
+  }, [isLastStep, removeHighlights, cleanupClickHandler, onClose]);
 
+  // Handle previous step
+  const handlePrev = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  }, [currentStep]);
+
+  // Handle skip
+  const handleSkip = useCallback(() => {
+    removeHighlights();
+    cleanupClickHandler();
+    onClose();
+  }, [removeHighlights, cleanupClickHandler, onClose]);
+
+  // Highlight elements helper
   const highlightElements = useCallback(() => {
     if (step.highlight) {
       const selectors = step.highlight.split(',').map(s => s.trim());
@@ -301,33 +285,54 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
     }
   }, [step.highlight]);
 
-  const removeHighlights = () => {
-    document.querySelectorAll('.tour-highlight').forEach(el => {
-      el.classList.remove('tour-highlight');
-    });
-  };
+  // Setup click handler for highlighted elements
+  const setupClickHandler = useCallback(() => {
+    cleanupClickHandler();
+    
+    if (step.clickToAdvance && step.highlight) {
+      const handler = (e) => {
+        const selectors = step.highlight.split(',').map(s => s.trim());
+        for (const selector of selectors) {
+          const element = document.querySelector(selector);
+          if (element && (element.contains(e.target) || element === e.target)) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleNext();
+            return;
+          }
+        }
+      };
+      
+      clickHandlerRef.current = handler;
+      // Use setTimeout to ensure it's added after React's event handlers
+      setTimeout(() => {
+        document.addEventListener('click', handler, true);
+      }, 100);
+    }
+  }, [step.clickToAdvance, step.highlight, cleanupClickHandler, handleNext]);
 
-  const handleNext = () => {
-    if (isLastStep) {
+  // Navigate to the step's page if needed
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    if (step.path && step.type === 'page' && location.pathname !== step.path) {
+      setIsNavigating(true);
+      navigate(step.path);
+      setTimeout(() => {
+        setIsNavigating(false);
+        highlightElements();
+        setupClickHandler();
+      }, 500);
+    } else if (step.type === 'page') {
+      highlightElements();
+      setupClickHandler();
+    }
+    
+    return () => {
       removeHighlights();
       cleanupClickHandler();
-      onClose();
-    } else {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleSkip = () => {
-    removeHighlights();
-    cleanupClickHandler();
-    onClose();
-  };
+    };
+  }, [currentStep, step.path, step.type, location.pathname, isOpen, navigate, highlightElements, setupClickHandler, removeHighlights, cleanupClickHandler]);
 
   if (!isOpen) return null;
 
