@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -17,6 +17,14 @@ import httpx
 import requests
 import cloudinary
 import cloudinary.uploader
+
+# Import services
+from services import (
+    send_email, get_license_invite_email, get_admin_notification_email,
+    upload_file, upload_profile_picture, upload_deposit_screenshot,
+    websocket_manager, notify_admins_deposit_request, notify_admins_withdrawal_request,
+    notify_user_transaction_status, notify_trade_signal
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
