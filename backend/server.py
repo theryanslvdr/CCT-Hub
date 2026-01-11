@@ -1471,13 +1471,20 @@ async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit")
     
+    # For licensees, use license.current_amount as the authoritative account_value
+    account_value = round(total_deposits + total_profit, 2)
+    if member.get("license_type"):
+        license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
+        if license:
+            account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
+    
     return {
         "user": member,
         "stats": {
             "total_trades": total_trades,
             "total_profit": round(total_profit, 2),
             "total_deposits": round(total_deposits, 2),
-            "account_value": round(total_deposits + total_profit, 2)
+            "account_value": account_value
         },
         "recent_trades": trades[:10],
         "recent_deposits": deposits[:10]
