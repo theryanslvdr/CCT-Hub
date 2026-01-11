@@ -703,6 +703,125 @@ export const AdminSettingsPage = () => {
             </div>
           </div>
         </TabsContent>
+
+        {/* Email Templates Tab */}
+        <TabsContent value="emails" className="mt-6">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-cyan-400" /> Email Templates
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Customize email templates for notifications and communications</p>
+            </CardHeader>
+            <CardContent>
+              {emailTemplates.length === 0 ? (
+                <div className="text-center py-8">
+                  <Mail className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-zinc-500">No email templates configured</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Template List */}
+                  <div className="grid gap-3">
+                    {emailTemplates.map((template) => (
+                      <div 
+                        key={template.type}
+                        className={`p-4 rounded-lg border transition-all cursor-pointer ${
+                          selectedTemplate?.type === template.type 
+                            ? 'bg-blue-500/10 border-blue-500/30' 
+                            : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                        }`}
+                        onClick={() => {
+                          setSelectedTemplate(template);
+                          setEditingTemplate({ ...template });
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-white font-medium capitalize">
+                              {template.type.replace(/_/g, ' ')}
+                            </p>
+                            <p className="text-xs text-zinc-500 mt-0.5">{template.subject}</p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            Edit
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Edit Template Panel */}
+                  {editingTemplate && (
+                    <div className="mt-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-white font-medium capitalize">
+                          Edit: {editingTemplate.type.replace(/_/g, ' ')}
+                        </h3>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setEditingTemplate(null)}
+                          className="text-zinc-400"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+
+                      <div>
+                        <Label className="text-zinc-300">Subject Line</Label>
+                        <Input
+                          value={editingTemplate.subject}
+                          onChange={(e) => setEditingTemplate({ ...editingTemplate, subject: e.target.value })}
+                          className="input-dark mt-1"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-zinc-300">Email Body</Label>
+                        <Textarea
+                          value={editingTemplate.body}
+                          onChange={(e) => setEditingTemplate({ ...editingTemplate, body: e.target.value })}
+                          className="input-dark mt-1 min-h-[200px] font-mono text-sm"
+                          rows={10}
+                        />
+                      </div>
+
+                      {editingTemplate.variables?.length > 0 && (
+                        <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                          <p className="text-xs text-blue-400 mb-2">Available Variables:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {editingTemplate.variables.map((v) => (
+                              <code key={v} className="px-2 py-1 rounded bg-zinc-800 text-xs text-zinc-300">
+                                {`{{${v}}}`}
+                              </code>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <Button 
+                        onClick={handleSaveTemplate}
+                        disabled={savingTemplate}
+                        className="btn-primary w-full"
+                      >
+                        {savingTemplate ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                        ) : (
+                          <><CheckCircle2 className="w-4 h-4 mr-2" /> Save Template</>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
