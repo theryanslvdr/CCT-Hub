@@ -717,22 +717,22 @@ export const TradeMonitorPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center">
+            <div className="text-center overflow-hidden">
               {/* Primary: Philippine Time */}
               <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
                 Philippines (Asia/Manila)
               </p>
-              <p className="text-6xl font-mono font-bold text-white tracking-wider" data-testid="ph-time">
+              <p className="text-4xl sm:text-5xl lg:text-6xl font-mono font-bold text-white tracking-wider truncate" data-testid="ph-time">
                 {formatTimeForTimezone(worldTime, 'Asia/Manila')}
               </p>
               
               {/* Secondary: User's Local Time (smaller, underneath) */}
               {!isPhilippines && (
                 <div className="mt-4 pt-4 border-t border-zinc-800">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">
-                    Your Local Time ({userTimezone})
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1 truncate">
+                    Your Local Time ({userTimezone.split('/').pop()})
                   </p>
-                  <p className="text-2xl font-mono text-zinc-400" data-testid="local-time">
+                  <p className="text-xl sm:text-2xl font-mono text-zinc-400 truncate" data-testid="local-time">
                     {formatTimeForTimezone(worldTime, userTimezone)}
                   </p>
                 </div>
