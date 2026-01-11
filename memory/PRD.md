@@ -9,148 +9,116 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Auth**: JWT with Heartbeat API verification gatekeeper
 - **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion), Merin Trading Platform (embedded iframe)
 
-## User Personas & Role Hierarchy (2026-01-11)
+## User Personas & Role Hierarchy
 1. **Normal Member** (role: `member`) - Modular dashboard access assigned by Super Admin
-   - Default dashboards: Dashboard, Profit Tracker, Trade Monitor, Profile
 2. **Basic Admin** (role: `basic_admin`) - Manage members, trading signals, assist with resets
-3. **Super Admin** (role: `super_admin`) - Full access except hidden/upcoming features
-   - Secret code for registration: `CROSSCURRENT2024`
-4. **Master Admin** (role: `master_admin`) - Full access including hidden features + simulate member view
-   - Secret code for registration: `CrossCurrentGODSEYE`
-   - Current Master Admin: iam@ryansalvador.com
-5. **Extended Licensee** (special member) - Custom quarterly profit calculation
-6. **Honorary Licensee** (special member) - Standard calculations, excluded from team analytics
+3. **Super Admin** (role: `super_admin`) - Full access except hidden features (Code: `CROSSCURRENT2024`)
+4. **Master Admin** (role: `master_admin`) - Full access including hidden features (Code: `CrossCurrentGODSEYE`)
+5. **Extended Licensee** / **Honorary Licensee** - Special member types with custom profit calculation
 
-## Core Requirements (Static)
+## Core Requirements
 - [x] Heartbeat community verification for registration
 - [x] LOT Size Calculator (LOT × 15 = Exit Value)
 - [x] Withdrawal fees: 3% Merin + $1 Binance, 1-2 business days processing
 - [x] Live currency conversion (USDT-USD-Local currencies)
-- [x] Trading signals in Philippine/Taiwan/Singapore timezone (GMT+8)
+- [x] Trading signals in GMT+8 timezone
 
-## Completed Work - Session 27 (2026-01-11)
+## Completed Work
 
-### P0 - 6 New Features ✅ ALL COMPLETE (100% Pass Rate)
+### Session 28 (2026-01-11) - P1 Complete ✅
 
-1. **Dashboard Tabs for Members** ✅
-   - Regular members (role: member/user) see 4 tabs: Overview, Profit, Trades, Charts
-   - Admins do NOT see tabs (original layout preserved)
-   - Each tab has unique content:
-     - Overview: Performance chart + Your Stats
-     - Profit: Profit Summary + Performance Metrics
-     - Trades: Full trade history table
-     - Charts: Profit Trend + Projected vs Actual bar chart
+#### P1 Backend Services Package
+Created modular `/app/backend/services/` package:
 
-2. **API Key Security Check Modal** ✅
-   - Master Admin sees "Missing API Keys" modal on login
-   - Checks for: Heartbeat, Emailit, Cloudinary (all 3 keys)
-   - Modal shows: List of missing integrations with descriptions
-   - Options: "Remind Me Later" or "Configure Now" → redirects to Settings
+1. **email_service.py** - Emailit Integration ✅
+   - `send_email()` - Send emails via Emailit API
+   - `get_license_invite_email()` - HTML template for license invites
+   - `get_admin_notification_email()` - HTML template for admin alerts
+   - `get_password_reset_email()` - HTML template for password reset
+   - `get_trade_alert_email()` - HTML template for trade signals
 
-3. **Persistent Footer with Custom Links** ✅
-   - Footer appears at bottom of ALL pages
-   - Shows: Copyright text + Custom links + Made with Emergent badge
-   - Admin can customize via Settings > Links tab:
-     - Footer Copyright text
-     - Footer Links (add/remove with label and URL)
+2. **file_service.py** - Cloudinary Integration ✅
+   - `upload_file()` - Generic file upload
+   - `upload_profile_picture()` - User profile picture upload
+   - `upload_deposit_screenshot()` - Transaction screenshot upload
+   - `delete_file()` - Delete from Cloudinary
+   - `get_user_files()` - Get user's uploaded files
 
-4. **Login Page Customization** ✅
-   - Admin can customize via Settings > UI tab:
-     - Login Title (e.g., "Welcome to CrossCurrent")
-     - Login Tagline (e.g., "Your Trading Finance Hub")
-     - Login Notice Message
-   - Live preview in settings
-   - Login page fetches and displays these settings
+3. **websocket_service.py** - Real-time Notifications ✅
+   - `ConnectionManager` - Manages WebSocket connections per user/role
+   - `notify_admins_deposit_request()` - Alert admins about deposits
+   - `notify_admins_withdrawal_request()` - Alert admins about withdrawals
+   - `notify_user_transaction_status()` - Notify user of status changes
+   - `notify_trade_signal()` - Broadcast new trade signals
+   - `notify_system_announcement()` - System-wide announcements
 
-5. **Production Site URL Setting** ✅
-   - Admin can set via Settings > Branding tab
-   - Description: "All test/preview links will be replaced with this URL in emails and exports"
-   - Stored in platform_settings collection
+#### New API Endpoints Added
+- `POST /api/email/test` - Send test email (Master Admin only)
+- `POST /api/email/send-license-invite` - Send license invite email
+- `POST /api/upload/profile-picture` - Upload profile picture
+- `POST /api/upload/deposit-screenshot/{transaction_id}` - Upload transaction screenshot
+- `POST /api/upload/general` - General file upload
+- `GET /api/ws/status` - WebSocket connection statistics (Admin only)
+- `WS /ws/{user_id}` - WebSocket endpoint for real-time notifications
 
-6. **Login Card Text Fix** ✅
-   - All references to "Heartbeat" in community context changed to "CrossCurrent"
-   - Login page says "Only CrossCurrent community members can access this platform."
-   - Error messages say "CrossCurrent Traders"
-   - Note: Internal Heartbeat API references remain (referring to the API itself)
+#### Frontend WebSocket Integration
+- `WebSocketContext.jsx` - React context for WebSocket management
+- Updated `Header.jsx` - Notification bell shows WS connection status
+- Real-time toasts for incoming notifications
 
-### Files Modified
-- `/app/frontend/src/pages/DashboardPage.jsx` - Added tabs for members
-- `/app/frontend/src/components/layout/DashboardLayout.jsx` - Footer integration + API key modal
-- `/app/frontend/src/components/layout/Footer.jsx` - Footer component (already existed)
-- `/app/frontend/src/pages/LoginPage.jsx` - Uses customizable settings (already had CrossCurrent text)
-- `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` - Login settings + Footer settings (already had these)
-- `/app/backend/server.py` - PlatformSettings model (already had all fields)
+### Session 27 - P0 Complete ✅
+All 6 P0 features implemented and tested (100% pass rate):
+1. Dashboard Tabs for Members
+2. API Key Security Modal
+3. Persistent Footer
+4. Login Customization
+5. Production Site URL Setting
+6. CrossCurrent Branding
 
-### Testing Results (iteration_27.json)
-- Backend: 100% pass rate (10 tests)
-- Frontend: 100% pass rate (all UI tests)
-- All 6 features verified working
+## P1 Backend Models Package (Created)
+```
+/app/backend/models/
+├── __init__.py - Exports all models
+├── user.py - UserCreate, UserLogin, UserResponse, TokenResponse
+├── trade.py - TradeLogCreate, TradingSignalCreate/Update/Response
+├── common.py - DepositCreate, DebtCreate, GoalCreate, NotificationCreate
+├── license.py - LicenseCreate, LicenseInviteCreate, LicenseeTransactionStatus
+└── settings.py - PlatformSettings, EmailTemplateType
+```
 
-## P1 Tasks - READY TO START
-
-### Backend Refactoring (IN PROGRESS)
-Directory structure created, code migration pending:
-- `/app/backend/models/` - Pydantic models (files created, empty)
-- `/app/backend/routes/` - FastAPI routers (files created, empty)
-- `/app/backend/utils/` - Utility functions (files created, empty)
-
-**Next Steps:**
-1. Move Pydantic models from server.py to `/app/backend/models/`
-2. Move routes from server.py to `/app/backend/routes/`
-3. Move utility functions to `/app/backend/utils/`
-4. Update server.py to import from new modules
-
-### Frontend Refactoring
-- Break down `AdminMembersPage.jsx` into smaller components
-- Break down `AdminLicensesPage.jsx` into smaller components
+## P1 Backend Utils Package (Created)
+```
+/app/backend/utils/
+├── __init__.py - Exports all utilities
+├── auth.py - hash_password, verify_password, create_access_token, decode_token
+└── calculations.py - calculate_lot_size, calculate_projected_profit, calculate_withdrawal_fees
+```
 
 ## Future/Backlog (P2)
-
-- [ ] Implement WebSockets for real-time notifications
+- [ ] Refactor large frontend components (AdminMembersPage, AdminLicensesPage)
 - [ ] Add Tooltips to Debt Management page
-- [ ] Add Alarm Music Selection to Trade Monitor
-- [ ] Fully activate and test Emailit integration for sending emails
-- [ ] Fully activate and test Cloudinary integration for file storage
+- [ ] Add Alarm Music Selection for Trade Monitor
+- [ ] Complete migration of routes from server.py to /routes/ package
 
 ## Test Credentials
 - **Master Admin**: iam@ryansalvador.com / admin123
 - **Regular Member**: jaspersalvador9413@gmail.com / test123
 
-## API Keys Configured
-- Heartbeat: hb:579ef3a8e97533a0461dd93c23ceb6fb531817e4ae65b8b669
-- Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
-- Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
+## API Keys (Configured in Admin Settings > Integrations)
+- **Heartbeat**: For community verification
+- **Emailit**: For sending notification emails
+- **Cloudinary**: For file uploads and image storage
 
-## Key Technical Concepts
-- **Backend:** FastAPI, Motor (async MongoDB), PyJWT, Pydantic.
-- **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts.
-- **State Management:** React Context API (`AuthContext` for user/simulation state) and component-level state.
-- **File Uploads:** Required for licensee deposit workflow. Uses `UploadFile` from FastAPI.
+## Key Technical Notes
+- **Backend:** FastAPI, Motor (async MongoDB), PyJWT, Pydantic
+- **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
+- **State Management:** React Context API (AuthContext, WebSocketContext)
+- **Real-time:** WebSocket for notifications with auto-reconnect
+- **File Uploads:** Cloudinary with base64 encoding
 
 ## Database Schema (key collections)
-- **platform_settings:** Extended to include `login_title`, `login_tagline`, `login_notice`, `platform_name`, `production_site_url`, `footer_copyright`, and `footer_links`.
-- **users:** `account_value` is synced with `licenses.current_amount` for licensees.
-- **licenses:** `current_amount` is the source of truth for a licensee's balance.
-
-## Previous Sessions Summary
-
-### Session 26 (Previous)
-- Master Admin role promotion without secret code
-- LOT Size calculation fix in member details
-- Licensee onboarding tour (5 steps)
-- Dashboard "Your Stats" card replacement
-
-### Session 25 (Previous)
-- Licensee account value sync
-- Licensees removed from Member Management
-- Login card styling fix
-
-### Sessions 21-24
-- Multiple bug fixes for:
-  - Heartbeat API verification
-  - License type in user response
-  - Trade Monitor hidden for licensees
-  - Profit Tracker buttons hidden for licensees
-  - Password setting flow
-  - Licensee simulation dialog
-  - Balance logic for deposits/withdrawals
+- **platform_settings:** Extended with login customization, footer settings, API keys
+- **users:** Synced with licenses.current_amount for licensees
+- **licenses:** current_amount is source of truth for licensee balance
+- **file_uploads:** Stores Cloudinary file references
+- **admin_notifications:** Stores notifications for admin dashboard
