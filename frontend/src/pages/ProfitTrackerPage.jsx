@@ -365,10 +365,45 @@ export const ProfitTrackerPage = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [simulatedView]);
 
   const loadData = async () => {
     try {
+      // For demo/role-based simulation (no memberId), use simulated values
+      const isDemoSimulation = simulatedView && !simulatedView.memberId;
+      
+      if (isDemoSimulation) {
+        // Use demo values for role-based simulation
+        setSummary({
+          account_value: simulatedView.accountValue || 5000,
+          total_deposits: simulatedView.totalDeposits || 5000,
+          total_profit: simulatedView.totalProfit || 0,
+          current_lot_size: simulatedView.lotSize || 0.05
+        });
+        setDeposits([{
+          id: 'demo-deposit',
+          amount: simulatedView.totalDeposits || 5000,
+          type: 'initial',
+          notes: 'Demo initial balance',
+          created_at: new Date().toISOString()
+        }]);
+        setWithdrawals([]);
+        setTradeLogs({});
+        setIsFirstTime(false);
+        
+        // Still load rates and signals
+        const [ratesRes, signalRes] = await Promise.all([
+          currencyAPI.getRates('USDT'),
+          api.get('/trade/active-signal').catch(() => ({ data: null })),
+        ]);
+        setRates(ratesRes.data.rates || {});
+        if (signalRes.data?.signal) {
+          setActiveSignal(signalRes.data.signal);
+        }
+        setLoading(false);
+        return;
+      }
+      
       const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
