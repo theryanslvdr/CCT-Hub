@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
-  FlaskConical, Crown
+  FlaskConical, Crown, LogOut, User, ChevronUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
-  const { user, isAdmin, isMasterAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation } = useAuth();
+  const { user, isAdmin, isMasterAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation, logout } = useAuth();
   const [platformSettings, setPlatformSettings] = useState(null);
+  const navigate = useNavigate();
 
   // Load platform settings for logo
   useEffect(() => {
@@ -31,7 +39,6 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor' },
-    { path: '/profile', icon: Settings, label: 'Profile', id: 'profile' },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
@@ -81,12 +88,22 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+    handleNavClick();
+  };
+
   // Determine logo display
   const hasLogo = platformSettings?.logo_url;
   const hasFavicon = platformSettings?.favicon_url;
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
+    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''} flex flex-col`}>
       {/* Logo Section */}
       <div className="p-5 pb-4">
         <div className="flex items-center gap-3">
@@ -149,7 +166,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         </div>
       )}
 
-      <nav className="px-3 space-y-1">
+      {/* Navigation - Scrollable */}
+      <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
         {/* Regular menu items */}
         {getVisibleMemberItems().map((item) => (
           <NavLink 
@@ -214,29 +232,92 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         )}
       </nav>
 
-      {/* User section at bottom */}
-      {!collapsed && (
-        <div className="mt-auto p-3 border-t border-zinc-800">
-          <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-              {user?.full_name?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-              <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
-                {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
-                {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </p>
-            </div>
-          </div>
-          <button 
-            onClick={() => onClose()}
-            className="w-full mt-2 text-xs text-zinc-500 hover:text-white transition-colors lg:hidden"
-          >
-            Close Menu
-          </button>
-        </div>
-      )}
+      {/* User Profile Section - Fixed at Bottom */}
+      <div className="p-3 border-t border-zinc-800 mt-auto">
+        {!collapsed ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                  {user?.full_name?.charAt(0) || 'U'}
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+                  <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
+                    {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
+                    {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                </div>
+                <ChevronUp className="w-4 h-4 text-zinc-500" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              side="top" 
+              className="w-56 bg-zinc-900 border-zinc-800"
+            >
+              <DropdownMenuItem 
+                onClick={handleProfileClick}
+                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Log Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center justify-center p-2 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                  {user?.full_name?.charAt(0) || 'U'}
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="center" 
+              side="right" 
+              className="w-56 bg-zinc-900 border-zinc-800"
+            >
+              <div className="px-2 py-1.5 text-sm text-zinc-400">
+                {user?.full_name}
+              </div>
+              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuItem 
+                onClick={handleProfileClick}
+                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Log Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        
+        {/* Mobile close button */}
+        <button 
+          onClick={() => onClose()}
+          className="w-full mt-2 text-xs text-zinc-500 hover:text-white transition-colors lg:hidden"
+        >
+          Close Menu
+        </button>
+      </div>
     </aside>
   );
 };
