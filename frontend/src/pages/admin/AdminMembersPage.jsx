@@ -39,6 +39,13 @@ export const AdminMembersPage = () => {
   const [memberDetails, setMemberDetails] = useState(null);
   const [simulationData, setSimulationData] = useState(null);
   
+  // View dialog editing states
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [viewEditForm, setViewEditForm] = useState({
+    full_name: '',
+    timezone: ''
+  });
+  
   // License state
   const [licenses, setLicenses] = useState([]);
   const [memberLicense, setMemberLicense] = useState(null);
