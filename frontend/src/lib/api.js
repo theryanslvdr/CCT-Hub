@@ -180,6 +180,23 @@ export const settingsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  // Email Templates
+  getEmailTemplates: () => api.get('/settings/email-templates'),
+  updateEmailTemplate: (type, data) => api.put(`/settings/email-templates/${type}`, data),
+  // Integration Tests
+  testEmailit: () => api.post('/settings/test-emailit'),
+  testCloudinary: () => api.post('/settings/test-cloudinary'),
+  testHeartbeat: () => api.post('/settings/test-heartbeat'),
+};
+
+// Auth APIs for license registration
+export const authAPI = {
+  validateLicenseInvite: (code) => api.get(`/auth/license-invite/${code}`),
+  registerWithLicense: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => formData.append(key, data[key]));
+    return api.post('/auth/register-with-license', formData);
+  },
 };
 
 // API Center APIs
