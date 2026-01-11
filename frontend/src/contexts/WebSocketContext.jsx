@@ -28,6 +28,7 @@ export const WebSocketProvider = ({ children }) => {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const pingIntervalRef = useRef(null);
+  const connectFnRef = useRef(null);
 
   // Handle incoming notification
   const handleNotification = useCallback((notification) => {
@@ -133,7 +134,10 @@ export const WebSocketProvider = ({ children }) => {
         if (event.code !== 1000 && isAuthenticated) {
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log('Attempting to reconnect WebSocket...');
-            connect();
+            // Use ref to call connect to avoid stale closure
+            if (connectFnRef.current) {
+              connectFnRef.current();
+            }
           }, 5000);
         }
       };
@@ -145,6 +149,11 @@ export const WebSocketProvider = ({ children }) => {
       console.error('Failed to create WebSocket connection:', error);
     }
   }, [isAuthenticated, user, token, handleNotification]);
+
+  // Keep connectFnRef in sync with connect
+  useEffect(() => {
+    connectFnRef.current = connect;
+  }, [connect]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
