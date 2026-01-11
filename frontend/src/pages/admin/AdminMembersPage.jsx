@@ -716,6 +716,120 @@ export const AdminMembersPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Simulate Member Dialog */}
+      <Dialog open={simulateDialogOpen} onOpenChange={setSimulateDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Play className="w-5 h-5" /> Simulate Member View - {selectedMember?.full_name}
+            </DialogTitle>
+          </DialogHeader>
+          {simulationData ? (
+            <div className="space-y-6 mt-4">
+              {/* Account Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-lg bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <DollarSign className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500">Account Balance</p>
+                      {canSeeAccountValue ? (
+                        <p className="text-xl font-bold text-emerald-400">
+                          ${simulationData.account_balance?.toFixed(2) || '0.00'}
+                        </p>
+                      ) : (
+                        <p className="text-xl font-bold text-zinc-500">***.**</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500">Total Profit</p>
+                      <p className="text-xl font-bold text-blue-400">
+                        ${simulationData.total_profit?.toFixed(2) || '0.00'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500">Total Trades</p>
+                      <p className="text-xl font-bold text-white">
+                        {simulationData.total_trades || 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div>
+                <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trading Activity</h4>
+                {simulationData.recent_trades?.length > 0 ? (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {simulationData.recent_trades.slice(0, 10).map((trade) => (
+                      <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {trade.direction}
+                          </span>
+                          <span className="text-zinc-400 text-sm">
+                            {trade.symbol} • {new Date(trade.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <span className={`font-mono ${trade.actual_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {trade.actual_profit >= 0 ? '+' : ''}${trade.actual_profit.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-zinc-500 text-center py-8">No recent trading activity</p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-zinc-800">
+                <Button
+                  onClick={() => {
+                    simulateMemberView(selectedMember.id);
+                    setSimulateDialogOpen(false);
+                  }}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <Play className="w-4 h-4" />
+                  Start Simulation
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setSimulateDialogOpen(false)}
+                  className="btn-secondary"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32">
+              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
