@@ -45,6 +45,8 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
+  verifyPassword: (password) => api.post('/auth/verify-password', { password }),
+  secretUpgrade: (data) => api.post('/auth/secret-upgrade', data),
 };
 
 // User APIs
