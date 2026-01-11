@@ -240,6 +240,10 @@ export const AuthProvider = ({ children }) => {
     exitSimulation,
     getEffectiveRole,
     getEffectiveAllowedDashboards,
+    getSimulatedAccountValue,
+    getSimulatedLotSize,
+    getSimulatedMemberName,
+    getSimulatedMemberId,
   };
 
   return (
