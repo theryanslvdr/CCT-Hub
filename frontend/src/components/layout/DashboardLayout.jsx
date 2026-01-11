@@ -143,6 +143,11 @@ export const DashboardLayout = () => {
         const res = await settingsAPI.getPlatform();
         setPlatformSettings(res.data);
         
+        // Load announcements
+        if (res.data?.announcements) {
+          setAnnouncements(res.data.announcements);
+        }
+        
         // Apply favicon
         if (res.data?.favicon_url) {
           const favicon = document.querySelector("link[rel~='icon']") || document.createElement('link');
