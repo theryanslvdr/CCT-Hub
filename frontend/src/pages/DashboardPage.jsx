@@ -96,7 +96,7 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [loadDashboardData]);
+  }, [loadDashboardData, simulatedView]); // Also re-run when simulatedView changes
 
   const kpiCards = [
     {
