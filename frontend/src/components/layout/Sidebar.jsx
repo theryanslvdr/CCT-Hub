@@ -1,151 +1,183 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  LayoutDashboard,
-  TrendingUp,
-  Activity,
-  Target,
-  CreditCard,
-  Users,
-  Radio,
-  Settings,
-  Link2,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck,
-  User,
-  HelpCircle,
+import { 
+  LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
+  Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
+  FlaskConical, Crown
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
-const navItems = [
-  { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ['user', 'admin', 'super_admin'] },
-  { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', roles: ['user', 'admin', 'super_admin'] },
-  { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', roles: ['user', 'admin', 'super_admin'] },
-  { path: '/goals', icon: Target, label: 'Profit Planner', roles: ['user', 'admin', 'super_admin'] },
-  { path: '/debt', icon: CreditCard, label: 'Debt Management', roles: ['user', 'admin', 'super_admin'] },
-  { divider: true },
-  { path: '/admin/signals', icon: Radio, label: 'Trading Signals', roles: ['admin', 'super_admin'] },
-  { path: '/admin/members', icon: Users, label: 'Members', roles: ['admin', 'super_admin'] },
-  { path: '/admin/api-center', icon: Link2, label: 'API Center', roles: ['admin', 'super_admin'] },
-  { path: '/admin/settings', icon: Settings, label: 'Platform Settings', roles: ['super_admin'] },
-];
-
-export const Sidebar = ({ collapsed, onToggle, onShowTour }) => {
-  const { user, logout, isAdmin } = useAuth();
+export const Sidebar = ({ isOpen, onClose }) => {
+  const { user, isAdmin, isSuperAdmin, isMasterAdmin, canAccessDashboard, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation } = useAuth();
   const location = useLocation();
 
-  const filteredItems = navItems.filter(item => {
-    if (item.divider) return isAdmin;
-    return item.roles.includes(user?.role || 'user');
-  });
+  // Member navigation items (modular access)
+  const memberNavItems = [
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
+    { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
+    { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor' },
+    { path: '/profile', icon: Settings, label: 'Profile', id: 'profile' },
+  ];
+
+  // Hidden features (only for Master Admin)
+  const hiddenFeatures = [
+    { path: '/profit-planner', icon: Target, label: 'Profit Planner', id: 'profit_planner' },
+    { path: '/debt-management', icon: CreditCard, label: 'Debt Management', id: 'debt_management' },
+  ];
+
+  // Admin navigation items
+  const adminNavItems = [
+    { path: '/admin/members', icon: Users, label: 'Members' },
+    { path: '/admin/signals', icon: Radio, label: 'Trading Signals' },
+    { path: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/admin/settings', icon: Cog, label: 'Settings' },
+    { path: '/admin/api-center', icon: FlaskConical, label: 'API Center' },
+  ];
+
+  // Filter nav items based on user's allowed dashboards (if member)
+  const getVisibleMemberItems = () => {
+    if (isAdmin() && !simulatedView) {
+      return memberNavItems;
+    }
+    
+    // For members or simulated view, filter based on allowed dashboards
+    const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
+    return memberNavItems.filter(item => effectiveDashboards.includes(item.id));
+  };
+
+  const navLinkClass = ({ isActive }) => 
+    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+      isActive 
+        ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30' 
+        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+    }`;
+
+  const handleNavClick = () => {
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
 
   return (
-    <aside className={cn(
-      "fixed left-0 top-0 h-full bg-zinc-950 border-r border-zinc-800/50 z-40 transition-all duration-300 flex flex-col",
-      collapsed ? "w-16" : "w-64"
-    )}>
-      {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-800/50">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-white text-lg">CrossCurrent</span>
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <TrendingUp className="w-6 h-6 text-white" />
           </div>
-        )}
-        <button
-          onClick={onToggle}
-          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white"
-          data-testid="sidebar-toggle"
-        >
-          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
+          <div>
+            <h1 className="text-xl font-bold text-white">CrossCurrent</h1>
+            <p className="text-xs text-zinc-500">Finance Center</p>
+          </div>
+        </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 overflow-y-auto scrollbar-dark">
-        {filteredItems.map((item, index) => {
-          if (item.divider) {
-            return (
-              <div key={`divider-${index}`} className="my-2 mx-4 border-t border-zinc-800/50" />
-            );
-          }
-
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg transition-all",
-                isActive
-                  ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
-              )}
-              data-testid={`nav-${item.path.replace(/\//g, '-')}`}
+      {/* Master Admin Simulation Control */}
+      {isMasterAdmin() && (
+        <div className="px-4 mb-4">
+          {simulatedView ? (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+              <div className="flex items-center gap-2 text-amber-400 text-sm mb-2">
+                <Eye className="w-4 h-4" />
+                <span>Simulating Member View</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exitSimulation}
+                className="w-full text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+              >
+                <EyeOff className="w-4 h-4 mr-2" /> Exit Simulation
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => simulateMemberView('member')}
+              className="w-full text-zinc-400 border-zinc-700 hover:bg-zinc-800"
             >
-              <Icon className={cn("w-5 h-5 flex-shrink-0", collapsed && "mx-auto")} />
-              {!collapsed && <span className="font-medium">{item.label}</span>}
-            </NavLink>
-          );
-        })}
-      </nav>
-
-      {/* Help Tour Button */}
-      {!collapsed && (
-        <div className="px-4 py-2">
-          <button
-            onClick={onShowTour}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-            data-testid="show-tour-button"
-          >
-            <HelpCircle className="w-5 h-5" />
-            <span className="text-sm">Show Tour</span>
-          </button>
+              <Eye className="w-4 h-4 mr-2" /> Simulate Member View
+            </Button>
+          )}
         </div>
       )}
 
-      {/* User section */}
-      <div className="border-t border-zinc-800/50 p-4">
-        {!collapsed && (
-          <NavLink
-            to="/profile"
-            className={cn(
-              "flex items-center gap-3 mb-3 p-2 rounded-lg transition-all",
-              location.pathname === '/profile'
-                ? "bg-blue-600/10 border border-blue-500/20"
-                : "hover:bg-white/5"
-            )}
-            data-testid="nav-profile"
+      <nav className="px-4 space-y-2">
+        <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3 px-4">Main Menu</p>
+        
+        {getVisibleMemberItems().map((item) => (
+          <NavLink 
+            key={item.path} 
+            to={item.path} 
+            className={navLinkClass}
+            onClick={handleNavClick}
+            data-testid={`nav-${item.id}`}
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-medium">
-              {user?.full_name?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-              <div className="flex items-center gap-1">
-                {user?.role !== 'user' && <ShieldCheck className="w-3 h-3 text-blue-400" />}
-                <p className="text-xs text-zinc-500 capitalize">{user?.role?.replace('_', ' ')}</p>
-              </div>
-            </div>
+            <item.icon className="w-5 h-5" />
+            <span>{item.label}</span>
           </NavLink>
+        ))}
+
+        {/* Hidden Features (Master Admin only) */}
+        {canAccessHiddenFeatures() && !simulatedView && (
+          <>
+            <p className="text-xs text-purple-400 uppercase tracking-wider mt-6 mb-3 px-4 flex items-center gap-2">
+              <Crown className="w-3 h-3" /> Hidden Features
+            </p>
+            {hiddenFeatures.map((item) => (
+              <NavLink 
+                key={item.path} 
+                to={item.path} 
+                className={navLinkClass}
+                onClick={handleNavClick}
+                data-testid={`nav-${item.id}`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </>
         )}
-        <button
-          onClick={logout}
-          className={cn(
-            "flex items-center gap-3 w-full px-3 py-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all",
-            collapsed && "justify-center"
-          )}
-          data-testid="logout-button"
+
+        {/* Admin Section */}
+        {isAdmin() && !simulatedView && (
+          <>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mt-6 mb-3 px-4">Administration</p>
+            {adminNavItems.map((item) => (
+              <NavLink 
+                key={item.path} 
+                to={item.path} 
+                className={navLinkClass}
+                onClick={handleNavClick}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
+          </>
+        )}
+      </nav>
+
+      <div className="mt-auto p-4 border-t border-zinc-800">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+            {user?.full_name?.charAt(0) || 'U'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+            <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
+              {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
+              {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </p>
+          </div>
+        </div>
+        <button 
+          onClick={() => onClose()}
+          className="w-full mt-3 text-sm text-zinc-500 hover:text-white transition-colors lg:hidden"
         >
-          <LogOut className="w-5 h-5" />
-          {!collapsed && <span>Logout</span>}
+          Close Menu
         </button>
       </div>
     </aside>
