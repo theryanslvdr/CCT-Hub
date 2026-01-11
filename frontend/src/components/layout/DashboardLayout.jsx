@@ -10,11 +10,88 @@ import { Toaster } from '@/components/ui/sonner';
 import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Settings, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Settings, ExternalLink, X, Info, CheckCircle, Bell } from 'lucide-react';
 
 // API Key Status Context - to share missing keys info across the app
 export const ApiKeyStatusContext = createContext({ missingKeys: [], hasMissingKeys: false });
 export const useApiKeyStatus = () => useContext(ApiKeyStatusContext);
+
+// Announcement Banner Component
+const AnnouncementBanner = ({ announcements, onDismiss }) => {
+  if (!announcements || announcements.length === 0) return null;
+  
+  const activeAnnouncements = announcements.filter(a => a.active);
+  if (activeAnnouncements.length === 0) return null;
+
+  // Sort: sticky first, then by created_at
+  const sortedAnnouncements = [...activeAnnouncements].sort((a, b) => {
+    if (a.sticky && !b.sticky) return -1;
+    if (!a.sticky && b.sticky) return 1;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  const getTypeStyles = (type) => {
+    switch (type) {
+      case 'warning':
+        return 'bg-amber-500/20 border-amber-500/50 text-amber-200';
+      case 'success':
+        return 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
+      default:
+        return 'bg-blue-500/20 border-blue-500/50 text-blue-200';
+    }
+  };
+
+  const getIcon = (type) => {
+    switch (type) {
+      case 'warning':
+        return <AlertTriangle className="w-4 h-4 text-amber-400" />;
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-emerald-400" />;
+      default:
+        return <Info className="w-4 h-4 text-blue-400" />;
+    }
+  };
+
+  return (
+    <div className="space-y-2 mb-4">
+      {sortedAnnouncements.map((announcement) => (
+        <div
+          key={announcement.id}
+          className={`px-4 py-3 rounded-lg border ${getTypeStyles(announcement.type)} flex items-start justify-between gap-3`}
+          data-testid={`announcement-${announcement.id}`}
+        >
+          <div className="flex items-start gap-3 flex-1">
+            {getIcon(announcement.type)}
+            <div className="flex-1">
+              {announcement.title && (
+                <p className="font-medium text-white text-sm">{announcement.title}</p>
+              )}
+              <p className="text-sm">{announcement.message}</p>
+              {announcement.link_url && (
+                <a
+                  href={announcement.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs mt-1 text-blue-400 hover:text-blue-300 hover:underline"
+                >
+                  {announcement.link_text || 'Learn more'} <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+          {!announcement.sticky && (
+            <button
+              onClick={() => onDismiss(announcement.id)}
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const pagesTitles = {
   '/dashboard': 'Dashboard',
