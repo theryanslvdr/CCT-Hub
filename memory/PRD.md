@@ -243,7 +243,50 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 7 - Latest)
+## Completed Work (2026-01-11 Session 8 - Latest)
+
+### P0 - Critical Bug Fixes ✅ COMPLETE
+
+1. **Heartbeat API Fallback**
+   - Fixed: `/api/auth/verify-heartbeat` and `/api/auth/set-password` now fallback to `HEARTBEAT_API_KEY` environment variable when not found in `platform_settings` database
+   - The Heartbeat API key (`hb:579ef3a8e97533a0461dd93c23ceb6fb531817e4ae65b8b669`) is properly configured in `backend/.env`
+   - Improved error messages when Heartbeat is not configured
+
+2. **Dashboard Simulation Fix**
+   - Dashboard now shows simulated member's data when Master Admin uses simulation
+   - Added `getMemberDetails` API call to fetch member stats
+   - Added `user_id` parameter support to `/api/trade/logs` endpoint for admins
+   - Shows simulation banner with member name and role info
+
+3. **Licensee Account During Simulation**
+   - Deposit/Withdrawal page is now accessible when simulating a licensee
+   - Loads the simulated licensee's transactions and license data
+   - Actions are hidden during simulation (view-only mode)
+
+### P1 - UI Refinements ✅ COMPLETE
+
+4. **Trade Monitor Restricted for Licensees**
+   - Sidebar hides "Trade Monitor" link when user is a licensee
+   - TradeMonitorPage shows "Access Restricted" message if a licensee navigates directly
+   - Works for both actual licensees and simulated licensee views
+
+5. **Profit Tracker UI for Licensees**
+   - Hidden for licensees: "Simulate Deposit", "Simulate Withdrawal", "Deposit Records", "Withdrawal Records", "Reset Tracker" buttons
+   - Licensees should use the Deposit/Withdrawal page instead
+
+### Testing Results (iteration_21.json)
+- Backend: 100% pass rate (17/17 tests)
+- Frontend: 100% pass rate
+- All P0 and P1 features verified working
+
+### Files Modified This Session
+- `/app/backend/server.py` - Heartbeat API fallback, trade logs user_id support
+- `/app/frontend/src/pages/DashboardPage.jsx` - Simulation support with member data fetching
+- `/app/frontend/src/pages/TradeMonitorPage.jsx` - Licensee restriction check
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Hide buttons for licensees
+- `/app/frontend/src/lib/api.js` - Added getMemberDetails, getLogs with user_id
+
+## Completed Work (2026-01-11 Session 7 - Previous)
 
 ### P0 - User Feedback Implementation ✅ COMPLETE
 
