@@ -152,7 +152,10 @@ export const LoginPage = () => {
               <TrendingUp className="w-8 h-8 text-white" />
             </div>
           )}
-          <p className="text-zinc-400 text-sm">{platformSettings?.tagline || 'Finance Center'}</p>
+          {platformSettings?.login_title && (
+            <h1 className="text-2xl font-bold text-white">{platformSettings.login_title}</h1>
+          )}
+          <p className="text-zinc-400 text-sm mt-1">{platformSettings?.login_tagline || platformSettings?.tagline || 'Finance Center'}</p>
         </div>
 
         {/* Error Alert */}
