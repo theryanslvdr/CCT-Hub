@@ -118,7 +118,6 @@ export const AdminMembersPage = () => {
       await api.put(`/admin/members/${selectedMember.id}`, {
         full_name: editForm.full_name,
         timezone: editForm.timezone,
-        lot_size: parseFloat(editForm.lot_size),
       });
       toast.success('Member updated successfully');
       setEditDialogOpen(false);
