@@ -630,33 +630,51 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
     if not heartbeat_api_key:
         raise HTTPException(status_code=500, detail="Heartbeat integration not configured. Please add your Heartbeat API key in Admin Settings > Integrations.")
     
-    # Verify with Heartbeat
+    # Verify with Heartbeat using the query parameter format (same as verify_heartbeat_user)
     try:
         import httpx
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://api.heartbeat.chat/v0/users/byEmail/{email}",
-                headers={"Authorization": f"Bearer {heartbeat_api_key}"}
+                "https://api.heartbeat.chat/v0/users",
+                headers={"Authorization": f"Bearer {heartbeat_api_key}"},
+                params={"email": email},
+                timeout=10.0
             )
             
             if response.status_code == 200:
-                heartbeat_data = response.json()
-                heartbeat_user_id = heartbeat_data.get("id")
+                data = response.json()
+                # Handle both list and dict responses
+                users = []
+                if isinstance(data, list):
+                    users = data
+                else:
+                    users = data.get("users", data.get("data", []))
                 
-                # Check if user already exists in our DB
-                existing_user = await db.users.find_one({"email": email}, {"_id": 0, "id": 1, "full_name": 1, "password": 1})
+                # Find the user with matching email
+                heartbeat_user = None
+                if isinstance(users, list):
+                    for u in users:
+                        if isinstance(u, dict) and u.get("email", "").lower() == email.lower():
+                            heartbeat_user = u
+                            break
                 
-                return {
-                    "verified": True,
-                    "user": {
-                        "email": email,
-                        "full_name": heartbeat_data.get("name", email.split('@')[0]),
-                        "heartbeat_id": heartbeat_user_id,
-                        "has_password": existing_user is not None and existing_user.get("password") is not None
+                if heartbeat_user:
+                    heartbeat_user_id = heartbeat_user.get("id")
+                    
+                    # Check if user already exists in our DB
+                    existing_user = await db.users.find_one({"email": email}, {"_id": 0, "id": 1, "full_name": 1, "password": 1})
+                    
+                    return {
+                        "verified": True,
+                        "user": {
+                            "email": email,
+                            "full_name": heartbeat_user.get("name", email.split('@')[0]),
+                            "heartbeat_id": heartbeat_user_id,
+                            "has_password": existing_user is not None and existing_user.get("password") is not None
+                        }
                     }
-                }
-            else:
-                return {"verified": False, "user": None}
+            
+            return {"verified": False, "user": None}
     except Exception as e:
         print(f"Heartbeat verification error: {e}")
         return {"verified": False, "user": None}
@@ -688,16 +706,34 @@ async def set_password_for_member(data: SetPasswordRequest):
         import httpx
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://api.heartbeat.chat/v0/users/byEmail/{email}",
-                headers={"Authorization": f"Bearer {heartbeat_api_key}"}
+                "https://api.heartbeat.chat/v0/users",
+                headers={"Authorization": f"Bearer {heartbeat_api_key}"},
+                params={"email": email},
+                timeout=10.0
             )
             
-            if response.status_code != 200:
-                raise HTTPException(status_code=400, detail="Email not verified with Heartbeat")
-            
-            heartbeat_data = response.json()
-            heartbeat_user_id = heartbeat_data.get("id")
-            full_name = heartbeat_data.get("name", email.split('@')[0])
+            if response.status_code == 200:
+                data = response.json()
+                # Handle both list and dict responses
+                users = []
+                if isinstance(data, list):
+                    users = data
+                else:
+                    users = data.get("users", data.get("data", []))
+                
+                # Find the user with matching email
+                heartbeat_user = None
+                if isinstance(users, list):
+                    for u in users:
+                        if isinstance(u, dict) and u.get("email", "").lower() == email.lower():
+                            heartbeat_user = u
+                            break
+                
+                if not heartbeat_user:
+                    raise HTTPException(status_code=400, detail="Email not verified with Heartbeat")
+                
+                heartbeat_user_id = heartbeat_user.get("id")
+                full_name = heartbeat_user.get("name", email.split('@')[0])
     except Exception as e:
         print(f"Heartbeat verification error: {e}")
         raise HTTPException(status_code=400, detail="Failed to verify Heartbeat membership")
