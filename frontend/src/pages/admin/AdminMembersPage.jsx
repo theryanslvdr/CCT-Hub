@@ -750,7 +750,10 @@ export const AdminMembersPage = () => {
                       </div>
                       <div className="p-4 rounded-lg bg-zinc-900/50">
                         <p className="text-xs text-zinc-500">LOT Size</p>
-                        <p className="text-white font-medium">{memberDetails.user.lot_size || 0.01}</p>
+                        <p className="text-white font-medium">
+                          {((memberDetails.stats?.account_value || 0) / 980).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-1">Based on ${(memberDetails.stats?.account_value || 0).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -774,7 +777,10 @@ export const AdminMembersPage = () => {
                     </div>
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <p className="text-xs text-zinc-500">LOT Size</p>
-                      <p className="text-white font-medium">{memberDetails.user.lot_size || 0.01}</p>
+                      <p className="text-white font-medium">
+                        {((memberDetails.stats?.account_value || 0) / 980).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">Based on ${(memberDetails.stats?.account_value || 0).toLocaleString()}</p>
                     </div>
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <p className="text-xs text-zinc-500">Joined</p>
