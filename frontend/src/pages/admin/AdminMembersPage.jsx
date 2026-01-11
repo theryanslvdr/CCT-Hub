@@ -1071,7 +1071,7 @@ export const AdminMembersPage = () => {
       <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
-            <DialogTitle className="text-white">Upgrade {selectedMember?.full_name}</DialogTitle>
+            <DialogTitle className="text-white">Promote {selectedMember?.full_name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
@@ -1081,12 +1081,13 @@ export const AdminMembersPage = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="basic_admin">Basic Admin</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
-                  {isSuperAdmin && <SelectItem value="super_admin">Super Admin</SelectItem>}
+                  {(isSuperAdmin() || isMasterAdmin()) && <SelectItem value="super_admin">Super Admin</SelectItem>}
                 </SelectContent>
               </Select>
             </div>
-            {newRole === 'super_admin' && (
+            {newRole === 'super_admin' && !isMasterAdmin() && (
               <div>
                 <Label className="text-zinc-300">Super Admin Secret Code</Label>
                 <Input
@@ -1099,8 +1100,13 @@ export const AdminMembersPage = () => {
                 />
               </div>
             )}
+            {isMasterAdmin() && (
+              <p className="text-xs text-emerald-400 flex items-center gap-1">
+                <Crown className="w-3 h-3" /> As Master Admin, you can promote directly without secret code
+              </p>
+            )}
             <Button onClick={handleUpgradeRole} className="w-full btn-primary" data-testid="confirm-upgrade">
-              Upgrade to {newRole?.replace('_', ' ')}
+              Promote to {newRole?.replace('_', ' ')}
             </Button>
           </div>
         </DialogContent>
