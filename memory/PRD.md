@@ -18,6 +18,8 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 4. **Master Admin** (role: `master_admin`) - Full access including hidden features + simulate member view
    - Secret code for registration: `CrossCurrentGODSEYE`
    - Current Master Admin: iam@ryansalvador.com
+5. **Extended Licensee** (special member) - Custom quarterly profit calculation
+6. **Honorary Licensee** (special member) - Standard calculations, excluded from team analytics
 
 ## Core Requirements (Static)
 - [x] Heartbeat community verification for registration
@@ -25,6 +27,47 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - [x] Withdrawal fees: 3% Merin + $1 Binance, 1-2 business days processing
 - [x] Live currency conversion (USDT-USD-Local currencies)
 - [x] Trading signals in Philippine/Taiwan/Singapore timezone (GMT+8)
+
+## P0 Features Completed (2026-01-11 Session 3 - Latest)
+
+### Interactive Onboarding Tour (FIXED)
+- ✅ Modal-based tour with 8 steps
+- ✅ Next/Previous/Skip buttons all functional
+- ✅ Automatic page navigation to relevant pages during tour
+- ✅ Progress bar and step indicators
+- ✅ Tips for each step
+
+### License Invite System (NEW)
+- ✅ Generate License Invites with code (LIC-XXXXXX)
+- ✅ License types: Extended and Honorary
+- ✅ Valid duration options: 3 months, 6 months, 1 year, indefinite
+- ✅ Max uses per invite (default: 1)
+- ✅ Invite actions: Copy Link, Send Email, Revoke, Renew, Delete
+- ✅ Pre-fill invitee name and email
+- ✅ Track usage count and registered users
+- ✅ `/register/license/:code` - License registration page
+
+### License Registration Page (NEW)
+- ✅ Validates invite code on page load
+- ✅ Shows license info (type, starting amount, valid until)
+- ✅ Pre-fills form with invitee name and email
+- ✅ Auto-applies license on registration
+- ✅ Redirects to dashboard after successful registration
+
+### Settings Page Overhaul (UPDATED)
+- ✅ 5 tabs: SEO & Meta, Branding, UI, Integrations, Emails
+- ✅ Test Connection buttons for Emailit, Cloudinary, Heartbeat
+- ✅ Email Templates management (7 default templates)
+- ✅ Edit email templates with variable placeholders
+
+### Team Analytics Updates
+- ✅ Both Extended AND Honorary licensees excluded from team totals
+- ✅ `is_licensed`, `is_extended`, `is_honorary` flags for each member
+- ✅ `licensed_excluded_count` in response
+
+### Sidebar Updates
+- ✅ "Licenses" link in profile popover (Master Admin only)
+- ✅ Profile popover now has: Profile Settings, Platform Settings, API Center, Licenses, Log Out
 
 ## P1 Features Completed (2026-01-10)
 
