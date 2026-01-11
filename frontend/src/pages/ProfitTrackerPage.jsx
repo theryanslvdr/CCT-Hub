@@ -354,6 +354,9 @@ export const ProfitTrackerPage = () => {
   const [resetReason, setResetReason] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   
+  // Check if user is a licensee (hide simulation/record buttons)
+  const isLicensee = simulatedView?.license_type || user?.license_type;
+  
   // Projection states
   const [selectedYears, setSelectedYears] = useState(1);
   const [projectionView, setProjectionView] = useState('summary');
