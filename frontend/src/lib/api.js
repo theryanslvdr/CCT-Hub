@@ -114,6 +114,28 @@ export const adminAPI = {
     params: { page, page_size: pageSize, transaction_type: type } 
   }),
   getTransactionStats: () => api.get('/admin/transactions/stats'),
+  // Licenses
+  getLicenses: () => api.get('/admin/licenses'),
+  createLicense: (data) => api.post('/admin/licenses', data),
+  getLicenseDetails: (licenseId) => api.get(`/admin/licenses/${licenseId}`),
+  updateLicense: (licenseId, data) => api.put(`/admin/licenses/${licenseId}`, null, { params: data }),
+  deleteLicense: (licenseId) => api.delete(`/admin/licenses/${licenseId}`),
+};
+
+// Profit APIs - add license projections
+export const profitAPI = {
+  getSummary: () => api.get('/profit/summary'),
+  getDeposits: () => api.get('/profit/deposits'),
+  addDeposit: (data) => api.post('/profit/deposits', data),
+  deleteDeposit: (id) => api.delete(`/profit/deposits/${id}`),
+  getWithdrawals: () => api.get('/profit/withdrawals'),
+  recordWithdrawal: (data) => api.post('/profit/withdrawal', data),
+  confirmWithdrawal: (id, data) => api.post(`/profit/withdrawal/${id}/confirm`, data),
+  getTrades: () => api.get('/profit/trades'),
+  recordTrade: (data) => api.post('/profit/trades', data),
+  simulateWithdrawal: (data) => api.post('/profit/simulate-withdrawal', data),
+  getRates: () => api.get('/profit/rates'),
+  getLicenseProjections: () => api.get('/profit/license-projections'),
 };
 
 // Debt Management APIs
