@@ -12,6 +12,7 @@ export const DashboardPage = () => {
     user, 
     simulatedView, 
     isMasterAdmin,
+    isAdmin,
     getSimulatedAccountValue,
     getSimulatedLotSize,
     getSimulatedTotalDeposits,
@@ -24,6 +25,7 @@ export const DashboardPage = () => {
   const [signal, setSignal] = useState(null);
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
@@ -31,6 +33,9 @@ export const DashboardPage = () => {
   const simulatedAccountValue = getSimulatedAccountValue();
   const simulatedTotalProfit = getSimulatedTotalProfit();
   const isSimulating = simulatedView && isMasterAdmin();
+  
+  // Check if user is a regular member (not admin)
+  const isMember = !isAdmin();
 
   const loadDashboardData = useCallback(async () => {
     try {
