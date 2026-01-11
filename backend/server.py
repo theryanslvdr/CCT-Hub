@@ -1526,7 +1526,9 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
             "account_value": round(user_account_value, 2),
             "total_profit": round(user_profit, 2),
             "trades_count": len(trades),
-            "is_honorary": is_honorary
+            "is_licensed": is_licensed,
+            "is_honorary": is_honorary,
+            "is_extended": is_extended
         })
     
     # Calculate performance rate
