@@ -255,7 +255,64 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 12 - Latest)
+## Completed Work (2026-01-11 Session 13 - Latest)
+
+### Bug Fixes ✅ COMPLETE
+
+1. **Master Admin Role Promotion**
+   - Master Admin can now promote members to `basic_admin`, `admin`, or `super_admin` without secret code
+   - Non-master admins still require secret code for `super_admin` promotion
+   - Added "As Master Admin, you can promote directly without secret code" message in UI
+   - Promotion dialog includes Basic Admin option
+
+2. **LOT Size Calculation Fixed**
+   - Member Details popup now shows LOT Size calculated as `account_value / 980`
+   - Formula is shown: "Based on $X,XXX"
+   - Works for both regular members and licensees
+
+### P1 Tasks ✅ COMPLETE
+
+3. **Licensee Onboarding Tour**
+   - Created simplified 5-step tour for licensees:
+     1. Welcome (as Licensed Trader)
+     2. Dashboard (balance overview)
+     3. Profit Tracker (daily profit formula)
+     4. Deposit/Withdrawal (fund requests)
+     5. Ready (recap)
+   - Regular members still see 8-step tour with Trade Monitor content
+
+4. **Dashboard "Your Stats" Card**
+   - Replaced "Live Rates (USDT)" with "Your Stats" card
+   - Shows: Total Profit, LOT Size (with formula), Projected Daily (LOT × 15), Performance Rate
+   - More user-relevant information
+
+### Refactoring ✅ IN PROGRESS
+
+5. **Backend Modular Structure Created**
+   - Created `/app/backend/models/` with:
+     - `user.py` - User, Token, RoleUpgrade models
+     - `trade.py` - TradeLog, TradingSignal models
+     - `license.py` - License, LicenseInvite, Transaction models
+     - `settings.py` - PlatformSettings, EmailTemplate models
+     - `common.py` - Deposit, Debt, Goal, Notification models
+   - Created `/app/backend/utils/` with:
+     - `auth.py` - Password hashing, JWT tokens, secret codes
+     - `calculations.py` - LOT size, withdrawal fees, daily profit
+
+### Testing Results (iteration_26.json)
+- Backend: 100% pass rate (11 tests)
+- Frontend: 100% pass rate
+- All 6 features verified working
+
+### Files Modified This Session
+- `/app/backend/server.py` - upgrade-role endpoint, LOT size calculation
+- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - LOT calculation, promote dialog
+- `/app/frontend/src/components/OnboardingTour.jsx` - Licensee tour steps
+- `/app/frontend/src/pages/DashboardPage.jsx` - Your Stats card
+- `/app/backend/models/*` - New model files (refactoring)
+- `/app/backend/utils/*` - New utility files (refactoring)
+
+## Completed Work (2026-01-11 Session 12 - Previous)
 
 ### Bug Fixes ✅ COMPLETE
 
