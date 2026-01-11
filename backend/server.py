@@ -1072,9 +1072,14 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     return TradeLogResponse(**{**trade, "created_at": datetime.fromisoformat(trade["created_at"])})
 
 @trade_router.get("/logs", response_model=List[TradeLogResponse])
-async def get_trade_logs(limit: int = 50, user: dict = Depends(get_current_user)):
+async def get_trade_logs(limit: int = 50, user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    # For admins, allow fetching another user's logs
+    target_user_id = user["id"]
+    if user_id and user["role"] in ["basic_admin", "admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+    
     trades = await db.trade_logs.find(
-        {"user_id": user["id"]}, 
+        {"user_id": target_user_id}, 
         {"_id": 0}
     ).sort("created_at", -1).to_list(limit)
     return [TradeLogResponse(**{**t, "created_at": datetime.fromisoformat(t["created_at"]) if isinstance(t["created_at"], str) else t["created_at"]}) for t in trades]
