@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { settingsAPI } from '@/lib/api';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { cn } from '@/lib/utils';
@@ -18,14 +19,47 @@ const pagesTitles = {
   '/admin/members': 'Member Management',
   '/admin/api-center': 'API Center',
   '/admin/settings': 'Platform Settings',
+  '/admin/analytics': 'Team Analytics',
+  '/profit-planner': 'Profit Planner',
+  '/debt-management': 'Debt Management',
 };
 
 export const DashboardLayout = () => {
   const { isAuthenticated, loading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [platformSettings, setPlatformSettings] = useState(null);
   const location = useLocation();
   const { showTour, completeTour, resetTour } = useOnboarding();
+
+  // Load platform settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsAPI.getPlatform();
+        setPlatformSettings(res.data);
+        
+        // Apply favicon
+        if (res.data?.favicon_url) {
+          const favicon = document.querySelector("link[rel~='icon']") || document.createElement('link');
+          favicon.rel = 'icon';
+          favicon.href = res.data.favicon_url;
+          document.head.appendChild(favicon);
+        }
+        
+        // Apply title
+        if (res.data?.site_title) {
+          document.title = res.data.site_title;
+        }
+      } catch (error) {
+        console.error('Failed to load platform settings');
+      }
+    };
+    
+    if (isAuthenticated) {
+      loadSettings();
+    }
+  }, [isAuthenticated]);
 
   if (loading) {
     return (
@@ -43,10 +77,13 @@ export const DashboardLayout = () => {
   }
 
   const currentTitle = pagesTitles[location.pathname] || 'CrossCurrent Finance';
+  const hideEmergentBadge = platformSettings?.hide_emergent_badge === true;
 
   return (
     <div className="min-h-screen bg-background grid-bg">
       <Sidebar
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         onShowTour={resetTour}
@@ -70,6 +107,20 @@ export const DashboardLayout = () => {
       
       {/* Onboarding Tour */}
       <OnboardingTour isOpen={showTour} onClose={completeTour} />
+
+      {/* Made with Emergent Badge - can be hidden via settings */}
+      {!hideEmergentBadge && (
+        <a
+          href="https://emergentagent.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/50 text-xs text-zinc-400 hover:text-white hover:border-zinc-600 transition-all backdrop-blur-sm"
+          data-testid="emergent-badge"
+        >
+          <span>Made with</span>
+          <span className="font-semibold text-blue-400">Emergent</span>
+        </a>
+      )}
     </div>
   );
 };
