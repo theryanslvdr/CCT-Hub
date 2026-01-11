@@ -49,14 +49,15 @@ export const authAPI = {
   secretUpgrade: (data) => api.post('/auth/secret-upgrade', data),
   // License registration
   validateLicenseInvite: (code) => api.get(`/auth/license-invite/${code}`),
-  registerWithLicense: (data) => api.post('/auth/register-with-license', data, {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    transformRequest: [(data) => {
-      const params = new URLSearchParams();
-      Object.keys(data).forEach(key => params.append(key, data[key]));
-      return params.toString();
-    }]
-  }),
+  registerWithLicense: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+      formData.append(key, data[key]);
+    });
+    return api.post('/auth/register-with-license', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // User APIs
