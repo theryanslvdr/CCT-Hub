@@ -2183,7 +2183,14 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
         
         # Calculate current amount for extended licensees
         if lic["license_type"] == "extended" and lic.get("is_active"):
-            start_date = datetime.fromisoformat(lic["start_date"].replace("Z", "+00:00"))
+            # Parse start_date - handle both string and datetime formats
+            start_date_raw = lic.get("start_date", "")
+            if isinstance(start_date_raw, str):
+                # Parse date string like "2026-01-01" as UTC
+                start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            else:
+                start_date = start_date_raw.replace(tzinfo=timezone.utc)
+            
             today = datetime.now(timezone.utc)
             days_since_start = (today - start_date).days
             if days_since_start > 0:
