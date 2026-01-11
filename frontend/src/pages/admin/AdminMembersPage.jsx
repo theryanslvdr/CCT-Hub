@@ -1411,6 +1411,7 @@ export const AdminMembersPage = () => {
                       total_deposits: simulationData.total_deposits,
                       total_profit: simulationData.total_profit,
                       allowed_dashboards: selectedMember.allowed_dashboards,
+                      license_type: selectedMember.license_type || null,
                     });
                     setSimulateDialogOpen(false);
                     toast.success(`Now simulating ${selectedMember.full_name}'s view`);
