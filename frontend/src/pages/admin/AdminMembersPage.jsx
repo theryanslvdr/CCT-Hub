@@ -206,17 +206,19 @@ export const AdminMembersPage = () => {
 
   const handleUpgradeRole = async () => {
     try {
+      // Master Admin doesn't need secret code
+      const needsSecretCode = newRole === 'super_admin' && !isMasterAdmin();
       await api.post('/admin/upgrade-role', {
         user_id: selectedMember.id,
         new_role: newRole,
-        secret_code: newRole === 'super_admin' ? secretCode : undefined,
+        secret_code: needsSecretCode ? secretCode : undefined,
       });
-      toast.success(`User upgraded to ${newRole}!`);
+      toast.success(`User promoted to ${newRole.replace('_', ' ')}!`);
       setUpgradeDialogOpen(false);
       setSecretCode('');
       loadMembers();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upgrade role');
+      toast.error(error.response?.data?.detail || 'Failed to promote user');
     }
   };
 
