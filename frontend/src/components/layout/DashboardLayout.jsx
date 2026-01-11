@@ -20,6 +20,7 @@ const pagesTitles = {
   '/admin/api-center': 'API Center',
   '/admin/settings': 'Platform Settings',
   '/admin/analytics': 'Team Analytics',
+  '/admin/transactions': 'Team Transactions',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',
 };
