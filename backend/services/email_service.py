@@ -381,3 +381,330 @@ def get_trade_alert_email(signal: Dict, user_name: str) -> Dict[str, str]:
         "html": html,
         "text": text
     }
+
+
+def get_welcome_email(user_name: str, login_url: str) -> Dict[str, str]:
+    """Generate welcome email for new users"""
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: linear-gradient(135deg, #3B82F6, #06B6D4); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .button {{ display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }}
+            .features {{ margin: 20px 0; }}
+            .feature {{ display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 6px; }}
+            .feature-icon {{ width: 40px; height: 40px; background: #EFF6FF; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎉 Welcome to CrossCurrent!</h1>
+            </div>
+            <div class="content">
+                <p>Hello {user_name},</p>
+                <p>Welcome to CrossCurrent Finance Center! Your account has been successfully created.</p>
+                
+                <div class="features">
+                    <h3>Here's what you can do:</h3>
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <div>
+                            <strong>Track Your Profits</strong>
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">Monitor your daily trading performance</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">⏰</div>
+                        <div>
+                            <strong>Trade Monitor</strong>
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">Never miss a trading signal</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💰</div>
+                        <div>
+                            <strong>Manage Finances</strong>
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">Plan your profits and manage debts</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="text-align: center;">
+                    <a href="{login_url}" class="button">Get Started</a>
+                </p>
+                
+                <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                    If you have any questions, feel free to reach out to our support team.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+    Welcome to CrossCurrent Finance Center!
+    
+    Hello {user_name},
+    
+    Your account has been successfully created.
+    
+    Here's what you can do:
+    - Track Your Profits: Monitor your daily trading performance
+    - Trade Monitor: Never miss a trading signal
+    - Manage Finances: Plan your profits and manage debts
+    
+    Get started: {login_url}
+    """
+    
+    return {
+        "subject": "🎉 Welcome to CrossCurrent Finance Center!",
+        "html": html,
+        "text": text
+    }
+
+
+def get_transaction_update_email(
+    user_name: str, 
+    transaction_type: str, 
+    status: str, 
+    amount: float,
+    message: str = "",
+    dashboard_url: str = ""
+) -> Dict[str, str]:
+    """Generate transaction status update email"""
+    
+    status_colors = {
+        "pending": "#F59E0B",
+        "processing": "#3B82F6",
+        "awaiting_confirmation": "#06B6D4",
+        "completed": "#10B981",
+        "rejected": "#EF4444"
+    }
+    
+    status_color = status_colors.get(status, "#6B7280")
+    type_label = "Deposit" if transaction_type == "deposit" else "Withdrawal"
+    status_label = status.replace("_", " ").title()
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: {status_color}; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .status-box {{ background: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border-left: 4px solid {status_color}; }}
+            .amount {{ font-size: 32px; font-weight: bold; color: #111; }}
+            .button {{ display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>{type_label} Update</h1>
+            </div>
+            <div class="content">
+                <p>Hello {user_name},</p>
+                <p>Your {type_label.lower()} request has been updated.</p>
+                
+                <div class="status-box">
+                    <p style="margin: 0; color: #6b7280;">Amount</p>
+                    <p class="amount">${amount:,.2f}</p>
+                    <p style="margin: 10px 0 0; font-weight: bold; color: {status_color};">
+                        Status: {status_label}
+                    </p>
+                </div>
+                
+                {f'<p style="background: #FEF3C7; padding: 12px; border-radius: 6px; border-left: 4px solid #F59E0B;"><strong>Note:</strong> {message}</p>' if message else ''}
+                
+                <p style="text-align: center;">
+                    <a href="{dashboard_url}" class="button">View Dashboard</a>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+    {type_label} Update
+    
+    Hello {user_name},
+    
+    Your {type_label.lower()} request has been updated.
+    
+    Amount: ${amount:,.2f}
+    Status: {status_label}
+    
+    {f'Note: {message}' if message else ''}
+    
+    View your dashboard: {dashboard_url}
+    """
+    
+    return {
+        "subject": f"💵 {type_label} {status_label} - ${amount:,.2f}",
+        "html": html,
+        "text": text
+    }
+
+
+def get_missed_trade_email(user_name: str, signal: Dict, dashboard_url: str) -> Dict[str, str]:
+    """Generate missed trade notification email"""
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: #F59E0B; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .alert-box {{ background: #FEF3C7; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px solid #F59E0B; }}
+            .button {{ display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>⚠️ You Missed a Trade!</h1>
+            </div>
+            <div class="content">
+                <p>Hello {user_name},</p>
+                <p>We noticed you didn't log a trade for today's signal.</p>
+                
+                <div class="alert-box">
+                    <p style="margin: 0; font-weight: bold; font-size: 18px;">{signal.get('direction', 'N/A')} Signal</p>
+                    <p style="margin: 5px 0;">Product: {signal.get('product', 'MOIL10')}</p>
+                    <p style="margin: 5px 0;">Time: {signal.get('trade_time', 'N/A')}</p>
+                    <p style="margin: 5px 0;">Expected Profit: ${signal.get('profit_points', 15) * signal.get('lot_size', 1):.2f}</p>
+                </div>
+                
+                <p>Don't forget to log your trades to keep accurate records of your performance!</p>
+                
+                <p style="text-align: center;">
+                    <a href="{dashboard_url}" class="button">Log Trade Now</a>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+    You Missed a Trade!
+    
+    Hello {user_name},
+    
+    We noticed you didn't log a trade for today's signal.
+    
+    {signal.get('direction', 'N/A')} Signal
+    Product: {signal.get('product', 'MOIL10')}
+    Time: {signal.get('trade_time', 'N/A')}
+    
+    Don't forget to log your trades to keep accurate records!
+    
+    Log trade: {dashboard_url}
+    """
+    
+    return {
+        "subject": "⚠️ You Missed Today's Trade - CrossCurrent",
+        "html": html,
+        "text": text
+    }
+
+
+def get_weekly_summary_email(
+    user_name: str,
+    week_stats: Dict,
+    dashboard_url: str
+) -> Dict[str, str]:
+    """Generate weekly performance summary email"""
+    
+    total_profit = week_stats.get("total_profit", 0)
+    trades_count = week_stats.get("trades_count", 0)
+    performance_rate = week_stats.get("performance_rate", 0)
+    profit_color = "#10B981" if total_profit >= 0 else "#EF4444"
+    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+            .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+            .stats-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }}
+            .stat-box {{ background: white; padding: 20px; border-radius: 8px; text-align: center; }}
+            .stat-value {{ font-size: 28px; font-weight: bold; }}
+            .stat-label {{ font-size: 12px; color: #6b7280; text-transform: uppercase; }}
+            .button {{ display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📊 Your Weekly Summary</h1>
+                <p style="margin: 0; opacity: 0.9;">Week of {week_stats.get('week_start', 'N/A')}</p>
+            </div>
+            <div class="content">
+                <p>Hello {user_name},</p>
+                <p>Here's your trading performance summary for the week:</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <p class="stat-value" style="color: {profit_color};">${abs(total_profit):,.2f}</p>
+                        <p class="stat-label">{'Profit' if total_profit >= 0 else 'Loss'}</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="stat-value" style="color: #3B82F6;">{trades_count}</p>
+                        <p class="stat-label">Trades</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="stat-value" style="color: #8B5CF6;">{performance_rate:.1f}%</p>
+                        <p class="stat-label">Performance</p>
+                    </div>
+                </div>
+                
+                <p style="text-align: center;">
+                    <a href="{dashboard_url}" class="button">View Full Report</a>
+                </p>
+                
+                <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                    Keep up the great work! 💪
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""
+    Your Weekly Summary - Week of {week_stats.get('week_start', 'N/A')}
+    
+    Hello {user_name},
+    
+    Here's your trading performance summary:
+    
+    {'Profit' if total_profit >= 0 else 'Loss'}: ${abs(total_profit):,.2f}
+    Trades: {trades_count}
+    Performance: {performance_rate:.1f}%
+    
+    View full report: {dashboard_url}
+    """
+    
+    return {
+        "subject": f"📊 Your Weekly Summary - {'Profit' if total_profit >= 0 else 'Loss'} ${abs(total_profit):,.2f}",
+        "html": html,
+        "text": text
+    }
+
