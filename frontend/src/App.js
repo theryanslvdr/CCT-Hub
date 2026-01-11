@@ -7,6 +7,7 @@ import { Toaster } from "./components/ui/sonner";
 // Pages
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { LicenseRegistrationPage } from "./pages/LicenseRegistrationPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ProfitTrackerPage } from "./pages/ProfitTrackerPage";
 import { TradeMonitorPage } from "./pages/TradeMonitorPage";
@@ -21,6 +22,7 @@ import { AdminAPICenterPage } from "./pages/admin/AdminAPICenterPage";
 import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
 import { AdminTransactionsPage } from "./pages/admin/AdminTransactionsPage";
+import { AdminLicensesPage } from "./pages/admin/AdminLicensesPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -33,6 +35,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/license/:code" element={<LicenseRegistrationPage />} />
 
           {/* Protected routes */}
           <Route element={<DashboardLayout />}>
@@ -50,6 +53,7 @@ function App() {
             <Route path="/admin/transactions" element={<AdminTransactionsPage />} />
             <Route path="/admin/api-center" element={<AdminAPICenterPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin/licenses" element={<AdminLicensesPage />} />
           </Route>
 
           {/* Default redirect */}
