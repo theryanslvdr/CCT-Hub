@@ -153,13 +153,27 @@ export const AuthProvider = ({ children }) => {
     return user?.role === 'master_admin';
   }, [user]);
 
-  // Master Admin: Simulate member view
-  const simulateMemberView = useCallback((memberRole = 'member') => {
+  // Master Admin: Simulate member view with their actual data
+  const simulateMemberView = useCallback((memberData) => {
     if (!isMasterAdmin()) return;
-    setSimulatedView({
-      role: memberRole,
-      allowed_dashboards: ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
-    });
+    
+    // If just a string (role), use basic simulation
+    if (typeof memberData === 'string') {
+      setSimulatedView({
+        role: memberData,
+        allowed_dashboards: ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+      });
+    } else {
+      // If object with member data, use full simulation
+      setSimulatedView({
+        role: 'member',
+        memberId: memberData.id,
+        memberName: memberData.full_name,
+        accountValue: memberData.account_value,
+        lotSize: memberData.lot_size,
+        allowed_dashboards: memberData.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+      });
+    }
   }, [isMasterAdmin]);
 
   const exitSimulation = useCallback(() => {
