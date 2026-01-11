@@ -451,6 +451,20 @@ export const TradeMonitorPage = () => {
     return convertTimeToTimezone(signal.trade_time, signalTz, userTimezone);
   };
 
+  // Restrict licensees from accessing Trade Monitor
+  if (isLicensee) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <AlertTriangle className="w-16 h-16 text-amber-500/60 mb-4" />
+        <h2 className="text-xl font-semibold text-white mb-2">Access Restricted</h2>
+        <p className="text-zinc-500 max-w-md">
+          Trade Monitor is not available for licensed accounts.
+          Please use the Deposit/Withdrawal page to manage your account.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
