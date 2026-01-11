@@ -792,10 +792,10 @@ export const AdminMembersPage = () => {
               {/* Recent Activity */}
               <div>
                 <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trading Activity</h4>
-                {simulationData.recent_trades?.length > 0 ? (
+                {simulationData.trades?.length > 0 ? (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {simulationData.recent_trades.slice(0, 10).map((trade) => (
-                      <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 flex justify-between items-center">
+                    {simulationData.trades.slice(0, 10).map((trade, index) => (
+                      <div key={trade.id || index} className="p-3 rounded-lg bg-zinc-900/50 flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
@@ -803,11 +803,11 @@ export const AdminMembersPage = () => {
                             {trade.direction}
                           </span>
                           <span className="text-zinc-400 text-sm">
-                            {trade.symbol} • {new Date(trade.created_at).toLocaleString()}
+                            {new Date(trade.created_at).toLocaleString()}
                           </span>
                         </div>
                         <span className={`font-mono ${trade.actual_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {trade.actual_profit >= 0 ? '+' : ''}${trade.actual_profit.toFixed(2)}
+                          {trade.actual_profit >= 0 ? '+' : ''}${trade.actual_profit?.toFixed(2) || '0.00'}
                         </span>
                       </div>
                     ))}
