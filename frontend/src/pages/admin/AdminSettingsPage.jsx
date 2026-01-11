@@ -215,18 +215,23 @@ export const AdminSettingsPage = () => {
             </div>
           </div>
 
-          {/* Hide Emergent Badge Toggle */}
-          <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-            <div>
-              <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
-              <p className="text-xs text-zinc-500 mt-1">Toggle to show/hide the Emergent branding badge</p>
+          {/* Hide Emergent Badge Toggle - Master Admin Only */}
+          {isMasterAdmin() && (
+            <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-purple-500/20">
+              <div className="flex items-center gap-3">
+                <Crown className="w-5 h-5 text-purple-400" />
+                <div>
+                  <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
+                  <p className="text-xs text-zinc-500 mt-1">Master Admin only - Toggle to show/hide the Emergent branding badge</p>
+                </div>
+              </div>
+              <Switch
+                checked={settings.hide_emergent_badge}
+                onCheckedChange={(v) => setSettings({ ...settings, hide_emergent_badge: v })}
+                data-testid="hide-badge-toggle"
+              />
             </div>
-            <Switch
-              checked={settings.hide_emergent_badge}
-              onCheckedChange={(v) => setSettings({ ...settings, hide_emergent_badge: v })}
-              data-testid="hide-badge-toggle"
-            />
-          </div>
+          )}
         </CardContent>
       </Card>
 
