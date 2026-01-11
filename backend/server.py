@@ -361,7 +361,7 @@ class WithdrawalSimulation(BaseModel):
 
 class RoleUpgrade(BaseModel):
     user_id: str
-    new_role: str  # admin or super_admin
+    new_role: str  # basic_admin, admin, super_admin
     secret_code: Optional[str] = None
 
 # ==================== HELPERS ====================
