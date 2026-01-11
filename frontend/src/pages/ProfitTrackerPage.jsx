@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
-import api from '@/lib/api';
 
 // Truncate to 2 decimal places without rounding
 const truncateTo2Decimals = (num) => {
