@@ -2396,6 +2396,583 @@ async def delete_license(license_id: str, user: dict = Depends(require_admin)):
     
     return {"message": "License deleted successfully"}
 
+# ==================== LICENSE INVITES ====================
+def calculate_validity_date(duration: str) -> Optional[str]:
+    """Calculate expiry date based on duration string"""
+    if duration == "indefinite":
+        return None
+    
+    today = datetime.now(timezone.utc)
+    if duration == "3_months":
+        expiry = today + timedelta(days=90)
+    elif duration == "6_months":
+        expiry = today + timedelta(days=180)
+    elif duration == "1_year":
+        expiry = today + timedelta(days=365)
+    else:
+        expiry = today + timedelta(days=90)  # Default to 3 months
+    
+    return expiry.isoformat()
+
+def generate_invite_code() -> str:
+    """Generate a unique invite code"""
+    import secrets
+    return f"LIC-{secrets.token_urlsafe(12).upper()[:16]}"
+
+@admin_router.get("/license-invites")
+async def get_all_license_invites(user: dict = Depends(require_admin)):
+    """Get all license invites (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can manage license invites")
+    
+    invites = await db.license_invites.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with usage info
+    for invite in invites:
+        # Check if expired
+        if invite.get("valid_until"):
+            valid_until = datetime.fromisoformat(invite["valid_until"].replace("Z", "+00:00"))
+            invite["is_expired"] = datetime.now(timezone.utc) > valid_until
+        else:
+            invite["is_expired"] = False
+        
+        # Check if fully used
+        invite["is_fully_used"] = invite.get("uses_count", 0) >= invite.get("max_uses", 1)
+        
+        # Get users who registered with this invite
+        registered_users = await db.users.find(
+            {"license_invite_code": invite["code"]}, 
+            {"_id": 0, "id": 1, "full_name": 1, "email": 1, "created_at": 1}
+        ).to_list(100)
+        invite["registered_users"] = registered_users
+    
+    return {"invites": invites}
+
+@admin_router.post("/license-invites")
+async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(require_admin)):
+    """Create a new license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can create license invites")
+    
+    if data.license_type not in ["extended", "honorary"]:
+        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended' or 'honorary'")
+    
+    invite_code = generate_invite_code()
+    valid_until = calculate_validity_date(data.valid_duration)
+    
+    invite = {
+        "id": str(uuid.uuid4()),
+        "code": invite_code,
+        "license_type": data.license_type,
+        "starting_amount": data.starting_amount,
+        "valid_duration": data.valid_duration,
+        "valid_until": valid_until,
+        "max_uses": data.max_uses,
+        "uses_count": 0,
+        "notes": data.notes,
+        "invitee_email": data.invitee_email,
+        "invitee_name": data.invitee_name,
+        "is_revoked": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"],
+        "created_by_name": user.get("full_name", "Admin")
+    }
+    
+    await db.license_invites.insert_one(invite)
+    
+    # Generate registration URL
+    frontend_url = os.environ.get("FRONTEND_URL", "https://trader-hub-39.preview.emergentagent.com")
+    registration_url = f"{frontend_url}/register/license/{invite_code}"
+    
+    return {
+        "message": "License invite created successfully",
+        "invite_id": invite["id"],
+        "code": invite_code,
+        "registration_url": registration_url
+    }
+
+@admin_router.get("/license-invites/{invite_id}")
+async def get_license_invite(invite_id: str, user: dict = Depends(require_admin)):
+    """Get a specific license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can view license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    # Get registered users
+    registered_users = await db.users.find(
+        {"license_invite_code": invite["code"]}, 
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "created_at": 1}
+    ).to_list(100)
+    invite["registered_users"] = registered_users
+    
+    return invite
+
+@admin_router.put("/license-invites/{invite_id}")
+async def update_license_invite(invite_id: str, data: LicenseInviteUpdate, user: dict = Depends(require_admin)):
+    """Update a license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can update license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    update_fields = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if data.valid_duration is not None:
+        update_fields["valid_duration"] = data.valid_duration
+        update_fields["valid_until"] = calculate_validity_date(data.valid_duration)
+    
+    if data.max_uses is not None:
+        update_fields["max_uses"] = data.max_uses
+    
+    if data.notes is not None:
+        update_fields["notes"] = data.notes
+    
+    if data.invitee_email is not None:
+        update_fields["invitee_email"] = data.invitee_email
+    
+    if data.invitee_name is not None:
+        update_fields["invitee_name"] = data.invitee_name
+    
+    await db.license_invites.update_one({"id": invite_id}, {"$set": update_fields})
+    
+    return {"message": "License invite updated successfully"}
+
+@admin_router.post("/license-invites/{invite_id}/revoke")
+async def revoke_license_invite(invite_id: str, user: dict = Depends(require_admin)):
+    """Revoke a license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can revoke license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    await db.license_invites.update_one(
+        {"id": invite_id}, 
+        {"$set": {"is_revoked": True, "revoked_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "License invite revoked successfully"}
+
+@admin_router.post("/license-invites/{invite_id}/renew")
+async def renew_license_invite(invite_id: str, new_duration: str = "3_months", user: dict = Depends(require_admin)):
+    """Renew/revive an expired or revoked license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can renew license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    new_valid_until = calculate_validity_date(new_duration)
+    
+    await db.license_invites.update_one(
+        {"id": invite_id}, 
+        {"$set": {
+            "is_revoked": False,
+            "valid_duration": new_duration,
+            "valid_until": new_valid_until,
+            "renewed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "License invite renewed successfully", "valid_until": new_valid_until}
+
+@admin_router.post("/license-invites/{invite_id}/resend")
+async def resend_license_invite(invite_id: str, user: dict = Depends(require_admin)):
+    """Resend license invite email (Master Admin only) - ILI"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can resend license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    if not invite.get("invitee_email"):
+        raise HTTPException(status_code=400, detail="No email address associated with this invite")
+    
+    # Get email template
+    template = await db.email_templates.find_one({"type": "license_invite"}, {"_id": 0})
+    if not template:
+        template = {
+            "subject": "You've been invited to CrossCurrent Finance Center",
+            "body": """Hello {{name}},
+
+You have been invited to join CrossCurrent Finance Center as a {{license_type}} Licensee!
+
+Click the link below to complete your registration:
+{{registration_link}}
+
+Your license details:
+- Type: {{license_type}} Licensee
+- Starting Amount: ${{starting_amount}}
+
+This invite is valid until: {{valid_until}}
+
+Best regards,
+CrossCurrent Team"""
+        }
+    
+    frontend_url = os.environ.get("FRONTEND_URL", "https://trader-hub-39.preview.emergentagent.com")
+    registration_url = f"{frontend_url}/register/license/{invite['code']}"
+    
+    # Replace template variables
+    body = template["body"]
+    body = body.replace("{{name}}", invite.get("invitee_name", "Trader"))
+    body = body.replace("{{license_type}}", invite["license_type"].title())
+    body = body.replace("{{registration_link}}", registration_url)
+    body = body.replace("{{starting_amount}}", f"{invite['starting_amount']:,.2f}")
+    body = body.replace("{{valid_until}}", invite.get("valid_until", "Indefinite")[:10] if invite.get("valid_until") else "Indefinite")
+    
+    subject = template["subject"]
+    
+    # Send email via Emailit
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    emailit_key = settings.get("emailit_api_key") if settings else None
+    
+    if not emailit_key:
+        emailit_key = os.environ.get("EMAILIT_API_KEY")
+    
+    if emailit_key:
+        try:
+            email_response = requests.post(
+                "https://api.emailit.com/v1/emails",
+                headers={
+                    "Authorization": f"Bearer {emailit_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "CrossCurrent Finance <noreply@crosscurrent.finance>",
+                    "to": invite["invitee_email"],
+                    "subject": subject,
+                    "text": body
+                },
+                timeout=10
+            )
+            
+            if email_response.status_code in [200, 201, 202]:
+                await db.license_invites.update_one(
+                    {"id": invite_id},
+                    {"$set": {"last_sent_at": datetime.now(timezone.utc).isoformat()}}
+                )
+                return {"message": "License invite email sent successfully"}
+            else:
+                return {"message": "Email service returned an error, but invite is still valid", "registration_url": registration_url}
+        except Exception as e:
+            return {"message": f"Could not send email: {str(e)}", "registration_url": registration_url}
+    else:
+        return {"message": "Email service not configured. Please share the link manually.", "registration_url": registration_url}
+
+@admin_router.delete("/license-invites/{invite_id}")
+async def delete_license_invite(invite_id: str, user: dict = Depends(require_admin)):
+    """Delete a license invite (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can delete license invites")
+    
+    invite = await db.license_invites.find_one({"id": invite_id}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="License invite not found")
+    
+    await db.license_invites.delete_one({"id": invite_id})
+    
+    return {"message": "License invite deleted successfully"}
+
+# Public endpoint to validate license invite code
+@auth_router.get("/license-invite/{code}")
+async def validate_license_invite(code: str):
+    """Validate a license invite code (public endpoint for registration page)"""
+    invite = await db.license_invites.find_one({"code": code}, {"_id": 0})
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+    
+    if invite.get("is_revoked"):
+        raise HTTPException(status_code=400, detail="This invite has been revoked")
+    
+    # Check expiry
+    if invite.get("valid_until"):
+        valid_until = datetime.fromisoformat(invite["valid_until"].replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) > valid_until:
+            raise HTTPException(status_code=400, detail="This invite has expired")
+    
+    # Check uses
+    if invite.get("uses_count", 0) >= invite.get("max_uses", 1):
+        raise HTTPException(status_code=400, detail="This invite has reached its maximum number of uses")
+    
+    return {
+        "valid": True,
+        "license_type": invite["license_type"],
+        "starting_amount": invite["starting_amount"],
+        "invitee_name": invite.get("invitee_name"),
+        "invitee_email": invite.get("invitee_email"),
+        "valid_until": invite.get("valid_until"),
+        "notes": invite.get("notes")
+    }
+
+# Registration with license invite
+@auth_router.post("/register-with-license")
+async def register_with_license(
+    email: str = Form(...),
+    password: str = Form(...),
+    full_name: str = Form(...),
+    invite_code: str = Form(...)
+):
+    """Register a new user with a license invite code"""
+    # Validate invite
+    invite = await db.license_invites.find_one({"code": invite_code}, {"_id": 0})
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+    
+    if invite.get("is_revoked"):
+        raise HTTPException(status_code=400, detail="This invite has been revoked")
+    
+    if invite.get("valid_until"):
+        valid_until = datetime.fromisoformat(invite["valid_until"].replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) > valid_until:
+            raise HTTPException(status_code=400, detail="This invite has expired")
+    
+    if invite.get("uses_count", 0) >= invite.get("max_uses", 1):
+        raise HTTPException(status_code=400, detail="This invite has reached its maximum number of uses")
+    
+    # Check if email already exists
+    existing = await db.users.find_one({"email": email.lower()}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create user
+    user_id = str(uuid.uuid4())
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    
+    new_user = {
+        "id": user_id,
+        "email": email.lower(),
+        "password": hashed_password.decode('utf-8'),
+        "full_name": full_name,
+        "role": "member",
+        "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "profile"],
+        "timezone": "Asia/Manila",
+        "lot_size": 0.01,
+        "is_verified": False,
+        "is_suspended": False,
+        "license_invite_code": invite_code,
+        "license_type": invite["license_type"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(new_user)
+    
+    # Create the actual license
+    license_id = str(uuid.uuid4())
+    license_doc = {
+        "id": license_id,
+        "user_id": user_id,
+        "license_type": invite["license_type"],
+        "starting_amount": invite["starting_amount"],
+        "start_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "notes": f"Created via invite: {invite_code}",
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": invite.get("created_by", "system")
+    }
+    
+    await db.licenses.insert_one(license_doc)
+    
+    # Increment invite uses count
+    await db.license_invites.update_one(
+        {"code": invite_code},
+        {"$inc": {"uses_count": 1}}
+    )
+    
+    # Generate token
+    token = create_access_token({"sub": user_id})
+    
+    # Remove password from response
+    del new_user["password"]
+    
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": new_user,
+        "license": {
+            "type": invite["license_type"],
+            "starting_amount": invite["starting_amount"]
+        }
+    }
+
+# ==================== EMAIL TEMPLATES ====================
+@settings_router.get("/email-templates")
+async def get_email_templates(user: dict = Depends(require_admin)):
+    """Get all email templates"""
+    if user["role"] not in ["master_admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin or Master Admin can manage email templates")
+    
+    templates = await db.email_templates.find({}, {"_id": 0}).to_list(100)
+    
+    # Default templates if none exist
+    default_templates = [
+        {
+            "type": "welcome",
+            "subject": "Welcome to CrossCurrent Finance Center!",
+            "body": "Hello {{name}},\n\nWelcome to CrossCurrent Finance Center! Your account has been created successfully.\n\nYou can now log in and start trading.\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "email"]
+        },
+        {
+            "type": "forgot_password",
+            "subject": "Reset Your Password - CrossCurrent",
+            "body": "Hello {{name}},\n\nWe received a request to reset your password.\n\nClick the link below to reset:\n{{reset_link}}\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "reset_link"]
+        },
+        {
+            "type": "trade_notification",
+            "subject": "New Trading Signal Available!",
+            "body": "Hello {{name}},\n\nA new trading signal is available!\n\nProduct: {{product}}\nDirection: {{direction}}\nTime: {{time}}\n\nLog in to your Trade Monitor to execute the trade.\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "product", "direction", "time"]
+        },
+        {
+            "type": "missed_trade",
+            "subject": "You Missed Today's Trade",
+            "body": "Hello {{name}},\n\nIt looks like you missed today's trading signal.\n\nDon't worry - there will be more opportunities tomorrow!\n\nMake sure to check your Trade Monitor daily.\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "date"]
+        },
+        {
+            "type": "license_invite",
+            "subject": "You've been invited to CrossCurrent Finance Center",
+            "body": "Hello {{name}},\n\nYou have been invited to join CrossCurrent Finance Center as a {{license_type}} Licensee!\n\nClick the link below to complete your registration:\n{{registration_link}}\n\nYour license details:\n- Type: {{license_type}} Licensee\n- Starting Amount: ${{starting_amount}}\n\nThis invite is valid until: {{valid_until}}\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "license_type", "registration_link", "starting_amount", "valid_until"]
+        },
+        {
+            "type": "admin_notification",
+            "subject": "Admin Notification - {{subject}}",
+            "body": "Hello Admin,\n\n{{message}}\n\nBest regards,\nCrossCurrent System",
+            "variables": ["subject", "message"]
+        },
+        {
+            "type": "super_admin_notification",
+            "subject": "Super Admin Alert - {{subject}}",
+            "body": "Hello Super Admin,\n\n{{message}}\n\nThis is an important system notification.\n\nBest regards,\nCrossCurrent System",
+            "variables": ["subject", "message"]
+        }
+    ]
+    
+    # Merge with defaults
+    existing_types = {t["type"] for t in templates}
+    for default in default_templates:
+        if default["type"] not in existing_types:
+            templates.append(default)
+    
+    return {"templates": templates}
+
+@settings_router.put("/email-templates/{template_type}")
+async def update_email_template(template_type: str, data: EmailTemplateUpdate, user: dict = Depends(require_admin)):
+    """Update an email template"""
+    if user["role"] not in ["master_admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin or Master Admin can manage email templates")
+    
+    template = {
+        "type": template_type,
+        "subject": data.subject,
+        "body": data.body,
+        "variables": data.variables or [],
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user["id"]
+    }
+    
+    await db.email_templates.update_one(
+        {"type": template_type},
+        {"$set": template},
+        upsert=True
+    )
+    
+    return {"message": "Email template updated successfully"}
+
+# ==================== INTEGRATION TESTS ====================
+@settings_router.post("/test-emailit")
+async def test_emailit_connection(user: dict = Depends(require_admin)):
+    """Test Emailit API connection"""
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    emailit_key = settings.get("emailit_api_key") if settings else None
+    
+    if not emailit_key:
+        emailit_key = os.environ.get("EMAILIT_API_KEY")
+    
+    if not emailit_key:
+        return {"success": False, "message": "Emailit API key not configured"}
+    
+    try:
+        # Test by checking account status
+        response = requests.get(
+            "https://api.emailit.com/v1/account",
+            headers={"Authorization": f"Bearer {emailit_key}"},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "message": "Emailit connection successful!", "data": response.json()}
+        else:
+            return {"success": False, "message": f"Emailit returned status {response.status_code}"}
+    except Exception as e:
+        return {"success": False, "message": f"Connection failed: {str(e)}"}
+
+@settings_router.post("/test-cloudinary")
+async def test_cloudinary_connection(user: dict = Depends(require_admin)):
+    """Test Cloudinary API connection"""
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    
+    cloud_name = settings.get("cloudinary_cloud_name") if settings else None
+    api_key = settings.get("cloudinary_api_key") if settings else None
+    api_secret = settings.get("cloudinary_api_secret") if settings else None
+    
+    if not all([cloud_name, api_key, api_secret]):
+        return {"success": False, "message": "Cloudinary credentials not fully configured"}
+    
+    try:
+        # Test by pinging Cloudinary API
+        response = requests.get(
+            f"https://api.cloudinary.com/v1_1/{cloud_name}/ping",
+            auth=(api_key, api_secret),
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "message": "Cloudinary connection successful!"}
+        else:
+            return {"success": False, "message": f"Cloudinary returned status {response.status_code}"}
+    except Exception as e:
+        return {"success": False, "message": f"Connection failed: {str(e)}"}
+
+@settings_router.post("/test-heartbeat")
+async def test_heartbeat_connection(user: dict = Depends(require_admin)):
+    """Test Heartbeat API connection"""
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    heartbeat_key = settings.get("heartbeat_api_key") if settings else None
+    
+    if not heartbeat_key:
+        heartbeat_key = os.environ.get("HEARTBEAT_API_KEY")
+    
+    if not heartbeat_key:
+        return {"success": False, "message": "Heartbeat API key not configured"}
+    
+    try:
+        # Test Heartbeat connection
+        response = requests.get(
+            "https://api.heartbeat.chat/v0/community",
+            headers={"Authorization": f"Bearer {heartbeat_key}"},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "message": "Heartbeat connection successful!", "data": response.json()}
+        else:
+            return {"success": False, "message": f"Heartbeat returned status {response.status_code}"}
+    except Exception as e:
+        return {"success": False, "message": f"Connection failed: {str(e)}"}
+
 # User endpoint to get their own license projections
 @profit_router.get("/license-projections")
 async def get_my_license_projections(user: dict = Depends(get_current_user)):
