@@ -18,6 +18,8 @@ import {
 export const AdminSettingsPage = () => {
   const { isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
+    platform_name: 'CrossCurrent',
+    tagline: 'Finance Center',
     site_title: 'CrossCurrent Finance Center',
     site_description: 'Trading profit management platform',
     favicon_url: '',
