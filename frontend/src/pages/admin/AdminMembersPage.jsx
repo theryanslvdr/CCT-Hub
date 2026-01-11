@@ -1551,5 +1551,6 @@ export const AdminMembersPage = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </MobileNotice>
   );
 };
