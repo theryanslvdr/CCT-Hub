@@ -373,7 +373,9 @@ class TestLicenseeSimulationDialog:
         response = requests.get(f"{BASE_URL}/api/admin/members", headers=headers)
         assert response.status_code == 200, f"Get members failed: {response.text}"
         
-        members = response.json()
+        data = response.json()
+        # API returns {members: [...], total, page, limit, pages}
+        members = data.get("members", [])
         licensees = [m for m in members if m.get("license_type")]
         
         print(f"✓ Members available: {len(members)}")
@@ -385,7 +387,8 @@ class TestLicenseeSimulationDialog:
         
         # Get a licensee to simulate
         members_response = requests.get(f"{BASE_URL}/api/admin/members", headers=headers)
-        members = members_response.json()
+        data = members_response.json()
+        members = data.get("members", [])
         licensee = next((m for m in members if m.get("license_type")), None)
         
         if not licensee:
