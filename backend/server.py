@@ -2518,6 +2518,63 @@ async def update_license(license_id: str, starting_amount: Optional[float] = Non
     
     return {"message": "License updated successfully"}
 
+class ChangeLicenseTypeRequest(BaseModel):
+    new_license_type: str
+    new_starting_amount: float
+    notes: Optional[str] = None
+
+@admin_router.post("/licenses/{license_id}/change-type")
+async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, user: dict = Depends(require_admin)):
+    """Change license type - creates new license and invalidates old one (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can change license types")
+    
+    # Get existing license
+    old_license = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not old_license:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    if not old_license.get("is_active"):
+        raise HTTPException(status_code=400, detail="Cannot change an inactive license")
+    
+    if data.new_license_type not in ["extended", "honorary"]:
+        raise HTTPException(status_code=400, detail="Invalid license type")
+    
+    # Deactivate old license
+    await db.licenses.update_one(
+        {"id": license_id},
+        {"$set": {
+            "is_active": False,
+            "deactivated_at": datetime.now(timezone.utc).isoformat(),
+            "deactivation_reason": f"Changed to {data.new_license_type} by {user['full_name']}"
+        }}
+    )
+    
+    # Create new license
+    new_license_id = str(uuid.uuid4())
+    new_license = {
+        "id": new_license_id,
+        "user_id": old_license["user_id"],
+        "license_type": data.new_license_type,
+        "starting_amount": data.new_starting_amount,
+        "current_amount": data.new_starting_amount,
+        "start_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "is_active": True,
+        "notes": data.notes or f"Changed from {old_license['license_type']} license",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"],
+        "previous_license_id": license_id
+    }
+    await db.licenses.insert_one(new_license)
+    
+    # Update user record
+    await db.users.update_one(
+        {"id": old_license["user_id"]},
+        {"$set": {"license_type": data.new_license_type}}
+    )
+    
+    return {"message": f"License changed to {data.new_license_type}", "new_license_id": new_license_id}
+
 @admin_router.delete("/licenses/{license_id}")
 async def delete_license(license_id: str, user: dict = Depends(require_admin)):
     """Delete a license (Master Admin only)"""
