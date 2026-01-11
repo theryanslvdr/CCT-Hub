@@ -1,189 +1,195 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authAPI } from '@/lib/api';
+import api from '@/lib/api';
+import { storage } from '@/lib/utils';
 
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-// Storage helpers that work with localStorage directly
-const getStoredToken = () => {
-  try {
-    return localStorage.getItem('crosscurrent_token');
-  } catch {
-    return null;
-  }
-};
-
-const setStoredToken = (token) => {
-  try {
-    if (token) {
-      localStorage.setItem('crosscurrent_token', token);
-      localStorage.setItem('token', token); // Keep for API
-    } else {
-      localStorage.removeItem('crosscurrent_token');
-      localStorage.removeItem('token');
-    }
-  } catch (e) {
-    console.error('Failed to store token:', e);
-  }
-};
-
-const getStoredUser = () => {
-  try {
-    const user = localStorage.getItem('crosscurrent_user');
-    return user ? JSON.parse(user) : null;
-  } catch {
-    return null;
-  }
-};
-
-const setStoredUser = (user) => {
-  try {
-    if (user) {
-      localStorage.setItem('crosscurrent_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('crosscurrent_user');
-    }
-  } catch (e) {
-    console.error('Failed to store user:', e);
-  }
+// Role hierarchy
+const ROLE_HIERARCHY = {
+  'member': 1,
+  'user': 1,           // Legacy support
+  'basic_admin': 2,
+  'admin': 2,          // Legacy support
+  'super_admin': 3,
+  'master_admin': 4,
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => getStoredUser());
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [simulatedView, setSimulatedView] = useState(null); // For Master Admin to simulate member view
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const token = getStoredToken();
-      if (!token) {
+  // Initialize auth state from storage
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const token = storage.get('token');
+        const savedUser = storage.get('user');
+        
+        if (token && savedUser) {
+          // Verify token is still valid by fetching user data
+          try {
+            const response = await api.get('/auth/me');
+            const freshUser = response.data;
+            setUser(freshUser);
+            storage.set('user', freshUser);
+          } catch (error) {
+            // Token is invalid, clear storage
+            storage.remove('token');
+            storage.remove('user');
+            setUser(null);
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
         setLoading(false);
-        return;
       }
+    };
 
-      // Set token for API calls
-      localStorage.setItem('token', token);
-      
-      const response = await authAPI.getMe();
-      setUser(response.data);
-      setStoredUser(response.data);
-    } catch (err) {
-      console.error('Auth check failed:', err);
-      // Clear stored data on auth failure
-      setStoredToken(null);
-      setStoredUser(null);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    initAuth();
   }, []);
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+  const login = useCallback(async (email, password) => {
+    const response = await api.post('/auth/login', { email, password });
+    const { access_token, user: userData } = response.data;
+    
+    storage.set('token', access_token);
+    storage.set('user', userData);
+    setUser(userData);
+    
+    return userData;
+  }, []);
 
-  const login = async (email, password) => {
-    try {
-      setError(null);
-      const response = await authAPI.login({ email, password });
-      const { access_token, user: userData } = response.data;
-      
-      // Store token and user
-      setStoredToken(access_token);
-      setStoredUser(userData);
-      setUser(userData);
-      
-      return { success: true };
-    } catch (err) {
-      const message = err.response?.data?.detail || 'Login failed';
-      setError(message);
-      return { success: false, error: message };
-    }
-  };
+  const register = useCallback(async (email, password, fullName, heartbeatEmail, secretCode) => {
+    const response = await api.post('/auth/register', {
+      email,
+      password,
+      full_name: fullName,
+      heartbeat_email: heartbeatEmail,
+      secret_code: secretCode,
+    });
+    const { access_token, user: userData } = response.data;
+    
+    storage.set('token', access_token);
+    storage.set('user', userData);
+    setUser(userData);
+    
+    return userData;
+  }, []);
 
-  const register = async (data) => {
-    try {
-      setError(null);
-      const response = await authAPI.register(data);
-      const { access_token, user: userData } = response.data;
-      
-      // Store token and user
-      setStoredToken(access_token);
-      setStoredUser(userData);
-      setUser(userData);
-      
-      return { success: true };
-    } catch (err) {
-      const message = err.response?.data?.detail || 'Registration failed';
-      setError(message);
-      return { success: false, error: message };
-    }
-  };
-
-  const logout = () => {
-    setStoredToken(null);
-    setStoredUser(null);
+  const logout = useCallback(() => {
+    storage.remove('token');
+    storage.remove('user');
     setUser(null);
-  };
+    setSimulatedView(null);
+  }, []);
 
-  const updateUser = (updates) => {
-    const updatedUser = { ...user, ...updates };
-    setUser(updatedUser);
-    setStoredUser(updatedUser);
-  };
+  const updateUser = useCallback((userData) => {
+    setUser(prev => ({ ...prev, ...userData }));
+    storage.set('user', { ...user, ...userData });
+  }, [user]);
 
-  // Impersonation for super admins
-  const impersonateUser = async (targetUserId, targetUserData) => {
-    // Store original admin data
-    localStorage.setItem('original_admin_token', getStoredToken());
-    localStorage.setItem('original_admin_user', JSON.stringify(user));
+  // Role-based access helpers
+  const hasRole = useCallback((requiredRole) => {
+    if (!user) return false;
+    const userLevel = ROLE_HIERARCHY[user.role] || 0;
+    const requiredLevel = ROLE_HIERARCHY[requiredRole] || 0;
+    return userLevel >= requiredLevel;
+  }, [user]);
+
+  const isAdmin = useCallback(() => {
+    return hasRole('basic_admin');
+  }, [hasRole]);
+
+  const isSuperAdmin = useCallback(() => {
+    return hasRole('super_admin');
+  }, [hasRole]);
+
+  const isMasterAdmin = useCallback(() => {
+    return user?.role === 'master_admin';
+  }, [user]);
+
+  const isMember = useCallback(() => {
+    return user?.role === 'member' || user?.role === 'user';
+  }, [user]);
+
+  // Check if user can access a specific dashboard (for modular member access)
+  const canAccessDashboard = useCallback((dashboardId) => {
+    if (!user) return false;
     
-    // Set impersonated user (in real impl, would get a token from backend)
-    setUser({ ...targetUserData, impersonating: true });
-    setStoredUser({ ...targetUserData, impersonating: true });
-  };
-
-  const stopImpersonation = () => {
-    const originalToken = localStorage.getItem('original_admin_token');
-    const originalUser = JSON.parse(localStorage.getItem('original_admin_user') || 'null');
+    // Admin and above can access everything (except hidden for non-master)
+    if (hasRole('basic_admin')) return true;
     
-    if (originalToken && originalUser) {
-      setStoredToken(originalToken);
-      setStoredUser(originalUser);
-      setUser(originalUser);
-      
-      localStorage.removeItem('original_admin_token');
-      localStorage.removeItem('original_admin_user');
-    }
-  };
+    // For normal members, check allowed_dashboards
+    const allowedDashboards = user.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
+    return allowedDashboards.includes(dashboardId);
+  }, [user, hasRole]);
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
-  const isSuperAdmin = user?.role === 'super_admin';
-  const isImpersonating = user?.impersonating === true;
+  // Check if user can access hidden features (only master_admin)
+  const canAccessHiddenFeatures = useCallback(() => {
+    return user?.role === 'master_admin';
+  }, [user]);
+
+  // Master Admin: Simulate member view
+  const simulateMemberView = useCallback((memberRole = 'member') => {
+    if (!isMasterAdmin()) return;
+    setSimulatedView({
+      role: memberRole,
+      allowed_dashboards: ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+    });
+  }, [isMasterAdmin]);
+
+  const exitSimulation = useCallback(() => {
+    setSimulatedView(null);
+  }, []);
+
+  // Get effective role (considering simulation)
+  const getEffectiveRole = useCallback(() => {
+    if (simulatedView) return simulatedView.role;
+    return user?.role;
+  }, [user, simulatedView]);
+
+  // Get effective allowed dashboards (considering simulation)
+  const getEffectiveAllowedDashboards = useCallback(() => {
+    if (simulatedView) return simulatedView.allowed_dashboards;
+    return user?.allowed_dashboards;
+  }, [user, simulatedView]);
+
+  const value = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    updateUser,
+    isAuthenticated: !!user,
+    // Role helpers
+    hasRole,
+    isAdmin,
+    isSuperAdmin,
+    isMasterAdmin,
+    isMember,
+    canAccessDashboard,
+    canAccessHiddenFeatures,
+    // Simulation (Master Admin only)
+    simulatedView,
+    simulateMemberView,
+    exitSimulation,
+    getEffectiveRole,
+    getEffectiveAllowedDashboards,
+  };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      error,
-      login,
-      register,
-      logout,
-      updateUser,
-      impersonateUser,
-      stopImpersonation,
-      isAdmin,
-      isSuperAdmin,
-      isImpersonating,
-      isAuthenticated: !!user,
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
