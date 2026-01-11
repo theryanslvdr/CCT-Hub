@@ -1,42 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { profitAPI, tradeAPI, currencyAPI } from '@/lib/api';
+import { profitAPI, tradeAPI, currencyAPI, adminAPI } from '@/lib/api';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export const DashboardPage = () => {
-  const { user } = useAuth();
+  const { 
+    user, 
+    simulatedView, 
+    isMasterAdmin,
+    getSimulatedAccountValue,
+    getSimulatedLotSize,
+    getSimulatedTotalDeposits,
+    getSimulatedTotalProfit,
+    getSimulatedMemberName,
+    getSimulatedMemberId
+  } = useAuth();
   const [summary, setSummary] = useState(null);
   const [trades, setTrades] = useState([]);
   const [signal, setSignal] = useState(null);
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  // Simulation values
+  const simulatedMemberId = getSimulatedMemberId();
+  const simulatedMemberName = getSimulatedMemberName();
+  const simulatedAccountValue = getSimulatedAccountValue();
+  const simulatedTotalProfit = getSimulatedTotalProfit();
+  const isSimulating = simulatedView && isMasterAdmin();
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
-      const [summaryRes, tradesRes, signalRes, ratesRes] = await Promise.all([
-        profitAPI.getSummary(),
-        tradeAPI.getLogs(10),
-        tradeAPI.getActiveSignal(),
-        currencyAPI.getRates('USDT'),
-      ]);
+      // If simulating a specific member, fetch their data
+      if (isSimulating && simulatedMemberId) {
+        // Fetch the simulated member's data
+        const [memberRes, tradesRes, signalRes, ratesRes] = await Promise.all([
+          adminAPI.getMemberDetails(simulatedMemberId),
+          tradeAPI.getLogs(10, simulatedMemberId),
+          tradeAPI.getActiveSignal(),
+          currencyAPI.getRates('USDT'),
+        ]);
 
-      setSummary(summaryRes.data);
-      setTrades(tradesRes.data);
-      setSignal(signalRes.data.signal);
-      setRates(ratesRes.data.rates || {});
+        // Build summary from member data
+        const memberData = memberRes.data;
+        setSummary({
+          account_value: memberData.account_value || simulatedAccountValue || 0,
+          total_actual_profit: memberData.total_profit || simulatedTotalProfit || 0,
+          total_trades: memberData.total_trades || 0,
+          performance_rate: memberData.performance_rate || 0,
+          profit_difference: 0,
+        });
+        setTrades(tradesRes.data || []);
+        setSignal(signalRes.data.signal);
+        setRates(ratesRes.data.rates || {});
+      } else if (isSimulating && !simulatedMemberId) {
+        // Role-based simulation (no specific member) - use simulated values
+        const [tradesRes, signalRes, ratesRes] = await Promise.all([
+          tradeAPI.getLogs(10),
+          tradeAPI.getActiveSignal(),
+          currencyAPI.getRates('USDT'),
+        ]);
+
+        setSummary({
+          account_value: simulatedAccountValue || 0,
+          total_actual_profit: simulatedTotalProfit || 0,
+          total_trades: 0,
+          performance_rate: 0,
+          profit_difference: 0,
+        });
+        setTrades(tradesRes.data || []);
+        setSignal(signalRes.data.signal);
+        setRates(ratesRes.data.rates || {});
+      } else {
+        // Normal flow - load current user's data
+        const [summaryRes, tradesRes, signalRes, ratesRes] = await Promise.all([
+          profitAPI.getSummary(),
+          tradeAPI.getLogs(10),
+          tradeAPI.getActiveSignal(),
+          currencyAPI.getRates('USDT'),
+        ]);
+
+        setSummary(summaryRes.data);
+        setTrades(tradesRes.data);
+        setSignal(signalRes.data.signal);
+        setRates(ratesRes.data.rates || {});
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isSimulating, simulatedMemberId, simulatedAccountValue, simulatedTotalProfit]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const kpiCards = [
     {
@@ -94,14 +154,36 @@ export const DashboardPage = () => {
     );
   }
 
+  // Get effective display name
+  const displayName = isSimulating && simulatedMemberName 
+    ? simulatedMemberName.split(' ')[0] 
+    : user?.full_name?.split(' ')[0];
+
   return (
     <div className="space-y-6">
+      {/* Simulation Banner */}
+      {isSimulating && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
+          <div className="flex items-center gap-3">
+            <Eye className="w-5 h-5 text-amber-400" />
+            <div>
+              <p className="text-amber-400 font-medium">
+                Simulating: {simulatedMemberName || simulatedView?.displayName || 'Member View'}
+              </p>
+              <p className="text-xs text-amber-400/70">
+                You are viewing this dashboard as {simulatedView?.license_type ? `a ${simulatedView.license_type} licensee` : 'a member'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Section */}
       <div className="glass-card p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              Welcome back, {user?.full_name?.split(' ')[0]}!
+              Welcome back, {displayName}!
             </h2>
             <p className="text-zinc-400 mt-1">
               Here's your trading overview for today.
