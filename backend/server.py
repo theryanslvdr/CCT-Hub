@@ -48,6 +48,9 @@ SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', 'CROSSCURRENT2024')
 # Master Admin Secret Code
 MASTER_ADMIN_SECRET = os.environ.get('MASTER_ADMIN_SECRET', 'CrossCurrentGODSEYE')
 
+# Super Admin Bypass Code (for hidden settings click feature)
+SUPER_ADMIN_BYPASS = os.environ.get('SUPER_ADMIN_BYPASS', 'SUPER_ADMIN_BYPASS')
+
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
     'member': 1,        # Normal member - modular dashboard access
