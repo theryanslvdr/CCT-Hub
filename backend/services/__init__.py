@@ -41,6 +41,10 @@ __all__ = [
     "get_admin_notification_email",
     "get_password_reset_email",
     "get_trade_alert_email",
+    "get_welcome_email",
+    "get_transaction_update_email",
+    "get_missed_trade_email",
+    "get_weekly_summary_email",
     # File service
     "upload_file",
     "delete_file",
