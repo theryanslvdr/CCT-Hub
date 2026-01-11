@@ -155,6 +155,7 @@ export const adminAPI = {
   renewLicenseInvite: (inviteId, duration) => api.post(`/admin/license-invites/${inviteId}/renew`, null, { params: { new_duration: duration } }),
   resendLicenseInvite: (inviteId) => api.post(`/admin/license-invites/${inviteId}/resend`),
   deleteLicenseInvite: (inviteId) => api.delete(`/admin/license-invites/${inviteId}`),
+  resetLicenseBalance: (licenseId, data) => api.post(`/admin/licenses/${licenseId}/reset-balance`, data),
   // Licensee Transactions
   getLicenseeTransactions: () => api.get('/admin/licensee-transactions'),
   addTransactionFeedback: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/feedback`, formData, {
