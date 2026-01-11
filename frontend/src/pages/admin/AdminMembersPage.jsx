@@ -109,7 +109,6 @@ export const AdminMembersPage = () => {
     setEditForm({
       full_name: member.full_name || '',
       timezone: member.timezone || 'UTC',
-      lot_size: member.lot_size?.toString() || '0.01',
     });
     setEditDialogOpen(true);
   };
