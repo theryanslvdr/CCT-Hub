@@ -1466,12 +1466,20 @@ async def archive_current_month_signals(user: dict = Depends(require_super_admin
 # ==================== TEAM ANALYTICS ====================
 @admin_router.get("/analytics/team")
 async def get_team_analytics(user: dict = Depends(require_admin)):
-    """Get collective team analytics: total account value, profit, traders, performance"""
+    """Get collective team analytics: total account value, profit, traders, performance
+    Note: Honorary Licensees are excluded from team totals but still shown in member stats"""
     
     # Get all users including admins (include all roles in team stats)
     all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     # Include all users: members, admins, super_admins, master_admin
     active_users = [u for u in all_users if not u.get("is_suspended", False)]
+    
+    # Get all active licenses to check for honorary licensees
+    all_licenses = await db.licenses.find({"is_active": True}, {"_id": 0}).to_list(1000)
+    honorary_user_ids = set(
+        lic["user_id"] for lic in all_licenses 
+        if lic.get("license_type") == "honorary"
+    )
     
     total_account_value = 0
     total_profit = 0
@@ -1482,6 +1490,7 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     
     for member in active_users:
         user_id = member["id"]
+        is_honorary = user_id in honorary_user_ids
         
         # Get deposits
         deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
@@ -1493,8 +1502,12 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         user_profit = sum(t.get("actual_profit", 0) for t in trades)
         user_account_value = total_deposits - total_withdrawals + user_profit
         
-        total_account_value += user_account_value
-        total_profit += user_profit
+        # Only add to team totals if NOT an honorary licensee
+        if not is_honorary:
+            total_account_value += user_account_value
+            total_profit += user_profit
+        
+        # Always count trades for performance tracking
         total_trades += len(trades)
         winning_trades += len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]])
         
@@ -1505,7 +1518,8 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
             "role": member.get("role", "member"),
             "account_value": round(user_account_value, 2),
             "total_profit": round(user_profit, 2),
-            "trades_count": len(trades)
+            "trades_count": len(trades),
+            "is_honorary": is_honorary
         })
     
     # Calculate performance rate
@@ -1518,7 +1532,8 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         "total_trades": total_trades,
         "winning_trades": winning_trades,
         "performance_rate": round(performance_rate, 1),
-        "member_stats": sorted(member_stats, key=lambda x: x["total_profit"], reverse=True)
+        "member_stats": sorted(member_stats, key=lambda x: x["total_profit"], reverse=True),
+        "honorary_excluded_count": len(honorary_user_ids)
     }
 
 @admin_router.get("/analytics/missed-trades")
