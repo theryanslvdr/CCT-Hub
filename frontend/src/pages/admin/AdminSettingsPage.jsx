@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 import { 
   Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
-  FileText, Zap, XCircle, Loader2
+  FileText, Zap, XCircle, Loader2, Code, Type
 } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export const AdminSettingsPage = () => {
   const { isMasterAdmin, isSuperAdmin } = useAuth();
