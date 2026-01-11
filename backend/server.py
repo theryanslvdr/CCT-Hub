@@ -2036,6 +2036,363 @@ async def get_transaction_stats(user: dict = Depends(require_admin)):
         "today_withdrawals": round(today_withdrawals, 2)
     }
 
+# ==================== LICENSE MANAGEMENT ====================
+def get_us_trading_holidays(year: int) -> set:
+    """Get US stock market holidays for a given year"""
+    holidays = set()
+    
+    # Fixed holidays (or observed dates)
+    holidays.add(f"{year}-01-01")  # New Year's Day
+    holidays.add(f"{year}-07-04")  # Independence Day
+    holidays.add(f"{year}-12-25")  # Christmas
+    holidays.add(f"{year}-06-19")  # Juneteenth
+    
+    # Variable holidays (simplified - would need proper calculation)
+    # MLK Day - 3rd Monday of January
+    # Presidents' Day - 3rd Monday of February
+    # Good Friday - varies
+    # Memorial Day - Last Monday of May
+    # Labor Day - 1st Monday of September
+    # Thanksgiving - 4th Thursday of November
+    
+    # For 2026 specifically:
+    if year == 2026:
+        holidays.update([
+            "2026-01-19",  # MLK Day
+            "2026-02-16",  # Presidents' Day
+            "2026-04-03",  # Good Friday
+            "2026-05-25",  # Memorial Day
+            "2026-09-07",  # Labor Day
+            "2026-11-26",  # Thanksgiving
+        ])
+    
+    return holidays
+
+def is_trading_day(date: datetime) -> bool:
+    """Check if a date is a valid trading day (not weekend or holiday)"""
+    if date.weekday() >= 5:  # Saturday = 5, Sunday = 6
+        return False
+    
+    holidays = get_us_trading_holidays(date.year)
+    date_str = date.strftime("%Y-%m-%d")
+    return date_str not in holidays
+
+def get_quarter(date: datetime) -> int:
+    """Get the quarter number (1-4) for a date"""
+    return (date.month - 1) // 3 + 1
+
+def get_quarter_start(year: int, quarter: int) -> datetime:
+    """Get the first day of a quarter"""
+    month = (quarter - 1) * 3 + 1
+    return datetime(year, month, 1, tzinfo=timezone.utc)
+
+def get_quarter_end(year: int, quarter: int) -> datetime:
+    """Get the last day of a quarter"""
+    if quarter == 4:
+        return datetime(year, 12, 31, tzinfo=timezone.utc)
+    else:
+        next_quarter_start = get_quarter_start(year, quarter + 1)
+        return next_quarter_start - timedelta(days=1)
+
+def get_first_trading_day_of_quarter(year: int, quarter: int) -> datetime:
+    """Get the first valid trading day of a quarter"""
+    date = get_quarter_start(year, quarter)
+    while not is_trading_day(date):
+        date += timedelta(days=1)
+    return date
+
+def calculate_extended_license_projections(starting_amount: float, start_date: datetime, days_to_project: int = 365) -> List[Dict]:
+    """
+    Calculate projections for Extended Licensee using quarterly compounding.
+    Daily profit is fixed within each quarter and recalculated at quarter start.
+    """
+    projections = []
+    current_date = start_date
+    current_amount = starting_amount
+    current_quarter = get_quarter(start_date)
+    current_year = start_date.year
+    
+    # Calculate initial quarter's daily profit
+    quarter_daily_profit = round((current_amount / 980) * 15, 2)
+    quarter_start_amount = current_amount
+    
+    trading_days_processed = 0
+    
+    while trading_days_processed < days_to_project:
+        # Check if we've moved to a new quarter
+        new_quarter = get_quarter(current_date)
+        new_year = current_date.year
+        
+        if new_year != current_year or new_quarter != current_quarter:
+            # Recalculate daily profit for new quarter using last amount
+            quarter_daily_profit = round((current_amount / 980) * 15, 2)
+            quarter_start_amount = current_amount
+            current_quarter = new_quarter
+            current_year = new_year
+        
+        if is_trading_day(current_date):
+            current_amount = round(current_amount + quarter_daily_profit, 2)
+            
+            projections.append({
+                "date": current_date.strftime("%Y-%m-%d"),
+                "quarter": f"Q{current_quarter} {current_year}",
+                "daily_profit": quarter_daily_profit,
+                "account_value": current_amount,
+                "cumulative_profit": round(current_amount - starting_amount, 2),
+                "is_trading_day": True
+            })
+            
+            trading_days_processed += 1
+        
+        current_date += timedelta(days=1)
+    
+    return projections
+
+@admin_router.get("/licenses")
+async def get_all_licenses(user: dict = Depends(require_admin)):
+    """Get all licensed users (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can manage licenses")
+    
+    licenses = await db.licenses.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with user info
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}).to_list(1000)
+    user_lookup = {u["id"]: u for u in all_users}
+    
+    enriched = []
+    for lic in licenses:
+        user_info = user_lookup.get(lic["user_id"], {})
+        lic["user_name"] = user_info.get("full_name", "Unknown")
+        lic["user_email"] = user_info.get("email", "")
+        
+        # Calculate current amount for extended licensees
+        if lic["license_type"] == "extended" and lic.get("is_active"):
+            start_date = datetime.fromisoformat(lic["start_date"].replace("Z", "+00:00"))
+            today = datetime.now(timezone.utc)
+            days_since_start = (today - start_date).days
+            if days_since_start > 0:
+                projections = calculate_extended_license_projections(
+                    lic["starting_amount"], 
+                    start_date, 
+                    min(days_since_start + 1, 365)
+                )
+                if projections:
+                    lic["current_amount"] = projections[-1]["account_value"]
+                else:
+                    lic["current_amount"] = lic["starting_amount"]
+            else:
+                lic["current_amount"] = lic["starting_amount"]
+        else:
+            lic["current_amount"] = lic.get("starting_amount", 0)
+        
+        enriched.append(lic)
+    
+    return {"licenses": enriched}
+
+@admin_router.post("/licenses")
+async def create_license(data: LicenseCreate, user: dict = Depends(require_admin)):
+    """Create a new license for a user (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can create licenses")
+    
+    # Verify target user exists
+    target_user = await db.users.find_one({"id": data.user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if user already has an active license
+    existing = await db.licenses.find_one({"user_id": data.user_id, "is_active": True}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="User already has an active license")
+    
+    # Validate license type
+    if data.license_type not in ["extended", "honorary"]:
+        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended' or 'honorary'")
+    
+    # Determine start date
+    if data.start_date:
+        start_date = datetime.fromisoformat(data.start_date)
+    else:
+        # Default to first trading day of current quarter
+        today = datetime.now(timezone.utc)
+        start_date = get_first_trading_day_of_quarter(today.year, get_quarter(today))
+    
+    license_id = str(uuid.uuid4())
+    license_doc = {
+        "id": license_id,
+        "user_id": data.user_id,
+        "license_type": data.license_type,
+        "starting_amount": data.starting_amount,
+        "start_date": start_date.isoformat(),
+        "notes": data.notes,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"]
+    }
+    
+    await db.licenses.insert_one(license_doc)
+    
+    # Update user record with license type
+    await db.users.update_one(
+        {"id": data.user_id},
+        {"$set": {"license_type": data.license_type}}
+    )
+    
+    return {"message": "License created successfully", "license_id": license_id}
+
+@admin_router.get("/licenses/{license_id}")
+async def get_license_details(license_id: str, user: dict = Depends(require_admin)):
+    """Get detailed license information including projections"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can view license details")
+    
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    # Get user info
+    target_user = await db.users.find_one({"id": license_doc["user_id"]}, {"_id": 0, "password": 0})
+    
+    result = {
+        "license": license_doc,
+        "user": target_user
+    }
+    
+    # Calculate projections for extended licensees
+    if license_doc["license_type"] == "extended":
+        start_date = datetime.fromisoformat(license_doc["start_date"].replace("Z", "+00:00"))
+        projections = calculate_extended_license_projections(
+            license_doc["starting_amount"],
+            start_date,
+            365  # 1 year projection
+        )
+        result["projections"] = projections
+        
+        # Get current values
+        today = datetime.now(timezone.utc)
+        today_str = today.strftime("%Y-%m-%d")
+        current_projection = next((p for p in projections if p["date"] == today_str), None)
+        if current_projection:
+            result["current_values"] = current_projection
+        elif projections:
+            # Find the most recent trading day
+            result["current_values"] = projections[-1]
+    
+    return result
+
+@admin_router.put("/licenses/{license_id}")
+async def update_license(license_id: str, starting_amount: Optional[float] = None, notes: Optional[str] = None, is_active: Optional[bool] = None, user: dict = Depends(require_admin)):
+    """Update a license (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can update licenses")
+    
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    update_fields = {}
+    if starting_amount is not None:
+        update_fields["starting_amount"] = starting_amount
+    if notes is not None:
+        update_fields["notes"] = notes
+    if is_active is not None:
+        update_fields["is_active"] = is_active
+        # Update user record if deactivating
+        if not is_active:
+            await db.users.update_one(
+                {"id": license_doc["user_id"]},
+                {"$unset": {"license_type": ""}}
+            )
+    
+    if update_fields:
+        update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.licenses.update_one({"id": license_id}, {"$set": update_fields})
+    
+    return {"message": "License updated successfully"}
+
+@admin_router.delete("/licenses/{license_id}")
+async def delete_license(license_id: str, user: dict = Depends(require_admin)):
+    """Delete a license (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can delete licenses")
+    
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    # Remove license type from user
+    await db.users.update_one(
+        {"id": license_doc["user_id"]},
+        {"$unset": {"license_type": ""}}
+    )
+    
+    await db.licenses.delete_one({"id": license_id})
+    
+    return {"message": "License deleted successfully"}
+
+# User endpoint to get their own license projections
+@profit_router.get("/license-projections")
+async def get_my_license_projections(user: dict = Depends(get_current_user)):
+    """Get license projections for the current user (if they have an extended license)"""
+    license_doc = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    
+    if not license_doc:
+        return {"has_license": False, "message": "No active license found"}
+    
+    if license_doc["license_type"] != "extended":
+        return {
+            "has_license": True,
+            "license_type": license_doc["license_type"],
+            "message": "Honorary licenses use standard calculations"
+        }
+    
+    # Calculate projections for extended license
+    start_date = datetime.fromisoformat(license_doc["start_date"].replace("Z", "+00:00"))
+    projections = calculate_extended_license_projections(
+        license_doc["starting_amount"],
+        start_date,
+        365
+    )
+    
+    # Get current values
+    today = datetime.now(timezone.utc)
+    today_str = today.strftime("%Y-%m-%d")
+    current_projection = next((p for p in projections if p["date"] == today_str), None)
+    
+    # Get this month's projections
+    current_month = today.strftime("%Y-%m")
+    monthly_projections = [p for p in projections if p["date"].startswith(current_month)]
+    
+    return {
+        "has_license": True,
+        "license_type": "extended",
+        "starting_amount": license_doc["starting_amount"],
+        "start_date": license_doc["start_date"],
+        "current_values": current_projection or (projections[-1] if projections else None),
+        "monthly_projections": monthly_projections,
+        "quarterly_summary": get_quarterly_summary(projections)
+    }
+
+def get_quarterly_summary(projections: List[Dict]) -> List[Dict]:
+    """Get summary by quarter from projections"""
+    quarters = {}
+    for p in projections:
+        q = p["quarter"]
+        if q not in quarters:
+            quarters[q] = {
+                "quarter": q,
+                "daily_profit": p["daily_profit"],
+                "start_value": p["account_value"] - p["daily_profit"],
+                "trading_days": 0,
+                "total_profit": 0
+            }
+        quarters[q]["trading_days"] += 1
+        quarters[q]["end_value"] = p["account_value"]
+        quarters[q]["total_profit"] = round(p["account_value"] - quarters[q]["start_value"], 2)
+    
+    return list(quarters.values())
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
