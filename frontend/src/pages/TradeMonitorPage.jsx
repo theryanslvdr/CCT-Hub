@@ -451,6 +451,21 @@ export const TradeMonitorPage = () => {
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
       <div className="flex-1 space-y-6 lg:overflow-y-auto lg:pr-4">
+        {/* Simulation Banner */}
+        {simulatedView && simulatedMemberName && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Eye className="w-5 h-5 text-amber-400" />
+                <div>
+                  <p className="text-amber-400 font-medium">Simulating: {simulatedMemberName}</p>
+                  <p className="text-xs text-amber-400/70">Account Value: ${formatLargeNumber(accountValue)} • LOT Size: {lotSize.toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Audio elements */}
         <audio ref={audioRef} loop>
           <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg" />
