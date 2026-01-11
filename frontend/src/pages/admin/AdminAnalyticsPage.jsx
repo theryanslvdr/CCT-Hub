@@ -4,12 +4,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { 
   DollarSign, TrendingUp, Users, Target, Bell, Archive,
-  ChevronLeft, ChevronRight, AlertTriangle, Send, BarChart3,
-  LineChart as LineChartIcon, Activity, Trophy
+  ChevronLeft, ChevronRight, AlertTriangle, BarChart3,
+  Activity, Trophy, Calendar, User, Filter, X
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -24,6 +28,16 @@ export const AdminAnalyticsPage = () => {
   const [growthData, setGrowthData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notifyingUser, setNotifyingUser] = useState(null);
+  
+  // Member selector state
+  const [selectedMember, setSelectedMember] = useState('all');
+  const [memberAnalytics, setMemberAnalytics] = useState(null);
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  
+  // Date range filter state
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [dateFilterApplied, setDateFilterApplied] = useState(false);
   
   // Pagination for recent trades
   const [tradesPage, setTradesPage] = useState(1);
@@ -67,6 +81,45 @@ export const AdminAnalyticsPage = () => {
     }
   };
 
+  const loadMemberAnalytics = async (memberId) => {
+    try {
+      const res = await adminAPI.getMemberAnalytics(memberId);
+      setMemberAnalytics(res.data);
+      setMemberDialogOpen(true);
+    } catch (error) {
+      toast.error('Failed to load member analytics');
+    }
+  };
+
+  const handleApplyDateFilter = async () => {
+    if (!startDate && !endDate) {
+      toast.error('Please select at least one date');
+      return;
+    }
+    
+    try {
+      const res = await adminAPI.getGrowthData(startDate || undefined, endDate || undefined);
+      setGrowthData(res.data.chart_data || []);
+      setDateFilterApplied(true);
+      toast.success('Date filter applied');
+    } catch (error) {
+      toast.error('Failed to apply date filter');
+    }
+  };
+
+  const handleClearDateFilter = async () => {
+    setStartDate('');
+    setEndDate('');
+    setDateFilterApplied(false);
+    
+    try {
+      const res = await adminAPI.getGrowthData();
+      setGrowthData(res.data.chart_data || []);
+    } catch (error) {
+      console.error('Failed to reload growth data');
+    }
+  };
+
   const handleNotify = async (userId, userName) => {
     setNotifyingUser(userId);
     try {
@@ -90,12 +143,30 @@ export const AdminAnalyticsPage = () => {
     }
   };
 
+  const handleMemberChange = (value) => {
+    setSelectedMember(value);
+    if (value !== 'all') {
+      loadMemberAnalytics(value);
+    }
+  };
+
   // Format currency
   const formatCurrency = (value) => {
     if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
     if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
     if (value >= 1e3) return `$${(value / 1e3).toFixed(1)}K`;
     return `$${formatNumber(value, 2)}`;
+  };
+
+  // Get role badge class
+  const getRoleBadgeClass = (role) => {
+    switch (role) {
+      case 'master_admin': return 'bg-amber-500/20 text-amber-400';
+      case 'super_admin': return 'bg-purple-500/20 text-purple-400';
+      case 'basic_admin': 
+      case 'admin': return 'bg-blue-500/20 text-blue-400';
+      default: return 'bg-zinc-500/20 text-zinc-400';
+    }
   };
 
   if (loading) {
@@ -152,18 +223,36 @@ export const AdminAnalyticsPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Team Analytics</h1>
-          <p className="text-zinc-400">Track your trading team's collective performance</p>
+          <p className="text-zinc-400">Track your trading team&apos;s collective performance</p>
         </div>
-        {isSuperAdmin() && (
-          <Button 
-            variant="outline" 
-            onClick={handleArchiveTrades} 
-            className="btn-secondary gap-2"
-            data-testid="archive-trades-btn"
-          >
-            <Archive className="w-4 h-4" /> Archive Old Trades
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {/* Member Selector */}
+          <Select value={selectedMember} onValueChange={handleMemberChange}>
+            <SelectTrigger className="w-48 input-dark" data-testid="member-selector">
+              <User className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="All Members" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Members</SelectItem>
+              {teamStats?.member_stats?.map((member) => (
+                <SelectItem key={member.id} value={member.id}>
+                  {member.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {isSuperAdmin() && (
+            <Button 
+              variant="outline" 
+              onClick={handleArchiveTrades} 
+              className="btn-secondary gap-2"
+              data-testid="archive-trades-btn"
+            >
+              <Archive className="w-4 h-4" /> Archive Old Trades
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Team KPIs */}
@@ -205,9 +294,53 @@ export const AdminAnalyticsPage = () => {
         {/* Performance Charts with Tabs */}
         <Card className="glass-card lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-400" /> Performance Overview
-            </CardTitle>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <CardTitle className="text-white flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-400" /> Performance Overview
+              </CardTitle>
+              
+              {/* Date Range Filter */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-zinc-500">From</Label>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="input-dark w-36 h-8 text-sm"
+                    data-testid="start-date-picker"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-zinc-500">To</Label>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="input-dark w-36 h-8 text-sm"
+                    data-testid="end-date-picker"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleApplyDateFilter}
+                  className="btn-primary h-8"
+                  data-testid="apply-date-filter"
+                >
+                  <Filter className="w-3 h-3 mr-1" /> Apply
+                </Button>
+                {dateFilterApplied && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleClearDateFilter}
+                    className="h-8 text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-3 h-3 mr-1" /> Clear
+                  </Button>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="account_value" className="w-full">
@@ -333,7 +466,7 @@ export const AdminAnalyticsPage = () => {
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-400" /> Missed Today's Trade
+              <AlertTriangle className="w-5 h-5 text-amber-400" /> Missed Today&apos;s Trade
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -493,7 +626,9 @@ export const AdminAnalyticsPage = () => {
               {teamStats.member_stats.slice(0, 6).map((member, index) => (
                 <div 
                   key={member.id} 
-                  className={`p-4 rounded-lg bg-zinc-900/50 flex items-center gap-4 ${index === 0 ? 'border border-amber-500/30' : ''}`}
+                  className={`p-4 rounded-lg bg-zinc-900/50 flex items-center gap-4 cursor-pointer hover:bg-zinc-800/50 transition-colors ${index === 0 ? 'border border-amber-500/30' : ''}`}
+                  onClick={() => loadMemberAnalytics(member.id)}
+                  data-testid={`performer-${member.id}`}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
                     index === 0 ? 'bg-gradient-to-br from-amber-500 to-orange-500' :
@@ -504,7 +639,14 @@ export const AdminAnalyticsPage = () => {
                     {index < 3 ? index + 1 : member.name?.charAt(0)}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white font-medium">{member.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-medium">{member.name}</p>
+                      {member.role && member.role !== 'user' && member.role !== 'member' && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeClass(member.role)}`}>
+                          {member.role.replace('_', ' ')}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-zinc-500">{member.trades_count} trades</p>
                   </div>
                   <div className="text-right">
@@ -517,6 +659,99 @@ export const AdminAnalyticsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Member Analytics Dialog */}
+      <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <User className="w-5 h-5" /> {memberAnalytics?.member?.name || 'Member'} Analytics
+            </DialogTitle>
+          </DialogHeader>
+          {memberAnalytics ? (
+            <div className="space-y-6 mt-4">
+              {/* Member Info */}
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-900/50">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xl font-bold">
+                  {memberAnalytics.member.name?.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-bold text-lg">{memberAnalytics.member.name}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeClass(memberAnalytics.member.role)}`}>
+                      {memberAnalytics.member.role?.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <p className="text-zinc-400 text-sm">{memberAnalytics.member.email}</p>
+                  <p className="text-zinc-500 text-xs">Joined {new Date(memberAnalytics.member.joined).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Account Value</p>
+                  <p className="text-xl font-bold text-blue-400 font-mono">${formatNumber(memberAnalytics.stats.account_value, 2)}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">LOT Size</p>
+                  <p className="text-xl font-bold text-purple-400 font-mono">{memberAnalytics.stats.lot_size.toFixed(2)}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Total Profit</p>
+                  <p className="text-xl font-bold text-emerald-400 font-mono">${formatNumber(memberAnalytics.stats.total_profit, 2)}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Performance</p>
+                  <p className="text-xl font-bold text-amber-400 font-mono">{memberAnalytics.stats.performance_rate}%</p>
+                </div>
+              </div>
+
+              {/* Trade Summary */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Total Trades</p>
+                  <p className="text-lg font-bold text-white">{memberAnalytics.stats.total_trades}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Winning Trades</p>
+                  <p className="text-lg font-bold text-emerald-400">{memberAnalytics.stats.winning_trades}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                  <p className="text-xs text-zinc-500">Total Deposits</p>
+                  <p className="text-lg font-bold text-cyan-400">${formatNumber(memberAnalytics.stats.total_deposits, 2)}</p>
+                </div>
+              </div>
+
+              {/* Recent Trades */}
+              {memberAnalytics.recent_trades?.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trades</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {memberAnalytics.recent_trades.map((trade, idx) => (
+                      <div key={idx} className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/50">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {trade.direction}
+                          </span>
+                          <span className="text-zinc-400 text-sm">{new Date(trade.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <span className={`font-mono ${trade.actual_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {trade.actual_profit >= 0 ? '+' : ''}${trade.actual_profit?.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32">
+              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
