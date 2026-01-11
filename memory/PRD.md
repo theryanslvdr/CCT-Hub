@@ -248,13 +248,63 @@ CROSSCURRENT2024
 
 ## Current Test Accounts
 - **Master Admin**: iam@ryansalvador.com / admin123 (role: master_admin, account_value: $14,521.62)
-- **Test User**: test_user_092113@example.com (role: user, account_value: $100, total_deposits: $100)
+- **Test User**: test_user_092113@example.com (role: user, account_value: $100, has: Honorary License)
+
+## Completed Work (2026-01-11 Session 2 - Latest)
+
+### P0 - Settings Page Overhaul ✅ COMPLETE
+- **Tabbed Interface**: Reorganized AdminSettingsPage into 4 tabs:
+  1. **SEO & Meta** - Site Title, Description, OG Image URL
+  2. **Branding** - Logo upload, Favicon upload, Hide Emergent Badge toggle
+  3. **UI Customization** - Primary/Accent color pickers with preview
+  4. **Integrations** - API key fields for Emailit, Cloudinary (3 fields), Heartbeat
+- All fields with proper labels, descriptions, and external links
+- Eye toggle icons for showing/hiding sensitive API keys
+
+### P0 - Sidebar Restructure ✅ COMPLETE
+- **Moved to Profile Popover**: "Platform Settings" and "API Center" links
+- **Admin Section Anchored**: Members, Trading Signals, Team Analytics, Transactions at bottom of sidebar (above user profile)
+- **Clean Layout**: Profile popover now includes: Profile Settings, Platform Settings, API Center, Log Out
+
+### P0 - Custom License System ✅ COMPLETE
+**License Types**:
+1. **Extended Licensee** - Complex quarterly profit calculation
+   - Formula: Daily Profit = (Account Value / 980) × 15
+   - Fixed for entire quarter, recalculated at quarter start based on ending balance
+   - Trading calendar skips weekends and US holidays (NYSE schedule)
+   - Badge: "EXT" (purple)
+
+2. **Honorary Licensee** - Standard profit calculations
+   - Funds are **EXCLUDED** from team analytics totals
+   - Badge: "HON" (amber)
+   - `honorary_excluded_count` returned in team analytics
+
+**Backend Endpoints** (Master Admin only):
+- `GET /api/admin/licenses` - List all licenses with current calculated amounts
+- `POST /api/admin/licenses` - Assign new license
+- `DELETE /api/admin/licenses/{id}` - Remove license
+
+**Frontend Implementation**:
+- License badge (EXT/HON) next to member names in Members table
+- Award icon button for license management (Master Admin only)
+- License dialog shows: License type, Starting Amount, Current Amount, Start Date, Status, Notes
+- "Remove License" button in manage dialog
+- License count in Members page stats cards
+
+**Team Analytics Updates**:
+- `is_honorary` flag returned for each member
+- `honorary_excluded_count` in response
+- Honorary licensee funds excluded from `total_account_value` and `total_profit`
+
+### Testing Results (iteration_15.json)
+- Backend: 100% pass rate (13/13 tests)
+- Frontend: 100% all critical flows working
+- All features verified working
 
 ## Files Modified This Session
-- `/app/frontend/src/contexts/AuthContext.jsx` - Added getSimulatedTotalDeposits, getSimulatedTotalProfit
-- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Use effective deposits/profit during simulation
-- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Pass total_deposits to simulation
-- `/app/frontend/src/pages/admin/AdminAnalyticsPage.jsx` - Member dropdown, date pickers, stats dialog
-- `/app/frontend/src/lib/api.js` - Added getMemberAnalytics, updated getGrowthData params
-- `/app/backend/server.py` - Include all roles in team stats, date filter support, member analytics endpoint
-- `/app/tests/test_iteration_14.py` - New test file
+- `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` - Complete rewrite with tabs
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Restructured with profile popover
+- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Added license management UI
+- `/app/frontend/src/lib/api.js` - Fixed duplicate profitAPI export
+- `/app/backend/server.py` - Team analytics honorary exclusion, license datetime fix
+- `/app/tests/test_iteration_15.py` - New comprehensive test file
