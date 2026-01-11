@@ -1315,6 +1315,355 @@ async def archive_current_month_signals(user: dict = Depends(require_super_admin
     
     return {"message": f"Archived {archived_count} signals", "archived_count": archived_count}
 
+# ==================== TEAM ANALYTICS ====================
+@admin_router.get("/analytics/team")
+async def get_team_analytics(user: dict = Depends(require_admin)):
+    """Get collective team analytics: total account value, profit, traders, performance"""
+    
+    # Get all members (exclude admins from team stats)
+    all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    member_users = [u for u in all_users if u.get("role") in ["user", "member"]]
+    
+    total_account_value = 0
+    total_profit = 0
+    total_trades = 0
+    winning_trades = 0
+    
+    member_stats = []
+    
+    for member in member_users:
+        user_id = member["id"]
+        
+        # Get deposits
+        deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+        total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit", "withdrawal"])
+        total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+        
+        # Get trades
+        trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+        user_profit = sum(t.get("actual_profit", 0) for t in trades)
+        user_account_value = total_deposits - total_withdrawals + user_profit
+        
+        total_account_value += user_account_value
+        total_profit += user_profit
+        total_trades += len(trades)
+        winning_trades += len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]])
+        
+        member_stats.append({
+            "id": user_id,
+            "name": member.get("full_name", "Unknown"),
+            "account_value": round(user_account_value, 2),
+            "total_profit": round(user_profit, 2),
+            "trades_count": len(trades)
+        })
+    
+    # Calculate performance rate
+    performance_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
+    
+    return {
+        "total_account_value": round(total_account_value, 2),
+        "total_profit": round(total_profit, 2),
+        "total_traders": len(member_users),
+        "total_trades": total_trades,
+        "winning_trades": winning_trades,
+        "performance_rate": round(performance_rate, 1),
+        "member_stats": sorted(member_stats, key=lambda x: x["total_profit"], reverse=True)
+    }
+
+@admin_router.get("/analytics/missed-trades")
+async def get_missed_trades(user: dict = Depends(require_admin)):
+    """Get members who didn't enter today's trade"""
+    
+    # Get today's date range
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_end = datetime.combine(today, datetime.max.time()).replace(tzinfo=timezone.utc)
+    
+    # Get all member users
+    all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    member_users = [u for u in all_users if u.get("role") in ["user", "member"]]
+    
+    # Get today's trades
+    today_trades = await db.trade_logs.find({
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0}).to_list(1000)
+    
+    # Get users who traded today
+    users_who_traded = set(t.get("user_id") for t in today_trades)
+    
+    # Find who missed
+    missed_members = []
+    for member in member_users:
+        if member["id"] not in users_who_traded:
+            missed_members.append({
+                "id": member["id"],
+                "name": member.get("full_name", "Unknown"),
+                "email": member.get("email", "")
+            })
+    
+    # Calculate today's team stats for email
+    team_profit_today = sum(t.get("actual_profit", 0) for t in today_trades)
+    highest_earner = None
+    highest_profit = 0
+    
+    for trade in today_trades:
+        if trade.get("actual_profit", 0) > highest_profit:
+            highest_profit = trade.get("actual_profit", 0)
+            # Find the user's name
+            user_id = trade.get("user_id")
+            user_data = next((u for u in all_users if u["id"] == user_id), None)
+            if user_data:
+                highest_earner = user_data.get("full_name", "Unknown")
+    
+    return {
+        "missed_members": missed_members,
+        "team_profit_today": round(team_profit_today, 2),
+        "highest_earner": highest_earner,
+        "highest_profit": round(highest_profit, 2),
+        "total_traded_today": len(users_who_traded)
+    }
+
+class NotifyMissedTradeRequest(BaseModel):
+    user_id: str
+
+@admin_router.post("/analytics/notify-missed")
+async def notify_missed_trade(data: NotifyMissedTradeRequest, user: dict = Depends(require_admin)):
+    """Send email to member who missed the trade"""
+    member = await db.users.find_one({"id": data.user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get today's stats
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_end = datetime.combine(today, datetime.max.time()).replace(tzinfo=timezone.utc)
+    
+    today_trades = await db.trade_logs.find({
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0}).to_list(1000)
+    
+    team_profit = sum(t.get("actual_profit", 0) for t in today_trades)
+    
+    # Find highest earner
+    highest_earner = "the team"
+    highest_profit = 0
+    for trade in today_trades:
+        if trade.get("actual_profit", 0) > highest_profit:
+            highest_profit = trade.get("actual_profit", 0)
+            trader = await db.users.find_one({"id": trade.get("user_id")}, {"_id": 0})
+            if trader:
+                highest_earner = trader.get("full_name", "a teammate")
+    
+    # Create email content
+    subject = "You Missed Today's Trade! 🚨"
+    html_body = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #18181B; color: #fff; padding: 40px; border-radius: 16px;">
+        <h1 style="color: #EF4444; margin-bottom: 20px;">You Missed Today's Trade!</h1>
+        <p style="color: #A1A1AA; font-size: 16px; line-height: 1.6;">
+            Hey {member.get('full_name', 'Trader')},
+        </p>
+        <div style="background: linear-gradient(135deg, #1E3A5F 0%, #1E1E3F 100%); padding: 30px; border-radius: 12px; margin: 20px 0;">
+            <p style="color: #fff; font-size: 18px; margin: 0;">
+                The team earned <span style="color: #10B981; font-weight: bold; font-size: 24px;">${team_profit:.2f}</span> today,
+                but you weren't a part of it.
+            </p>
+            <p style="color: #A1A1AA; margin-top: 15px;">
+                The highest earner is <span style="color: #3B82F6; font-weight: bold;">{highest_earner}</span> 
+                with <span style="color: #10B981;">${highest_profit:.2f}</span>!
+            </p>
+        </div>
+        <p style="color: #FBBF24; font-size: 18px; font-weight: bold; text-align: center;">
+            🔔 Remember to join us for tomorrow's trade!
+        </p>
+        <hr style="border: none; border-top: 1px solid #27272A; margin: 30px 0;">
+        <p style="color: #71717A; font-size: 12px; text-align: center;">
+            CrossCurrent Finance Center - Your Trading Success Partner
+        </p>
+    </div>
+    """
+    
+    if not EMAILIT_API_KEY:
+        # Return preview if email not configured
+        return {
+            "message": "Email preview (Emailit not configured)",
+            "preview": {
+                "to": member.get("email"),
+                "subject": subject,
+                "team_profit": round(team_profit, 2),
+                "highest_earner": highest_earner,
+                "highest_profit": round(highest_profit, 2)
+            }
+        }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.emailit.com/v1/emails",
+                headers={
+                    "Authorization": f"Bearer {EMAILIT_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "noreply@crosscurrent.finance",
+                    "to": member["email"],
+                    "subject": subject,
+                    "html": html_body
+                },
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=500, detail="Failed to send email")
+                
+        return {"message": f"Notification sent to {member.get('full_name')}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email error: {str(e)}")
+
+@admin_router.get("/analytics/growth-data")
+async def get_growth_data(user: dict = Depends(require_admin)):
+    """Get historical data for growth charts"""
+    
+    # Get all trades sorted by date
+    all_trades = await db.trade_logs.find({}, {"_id": 0}).sort("created_at", 1).to_list(10000)
+    
+    # Get all deposits sorted by date
+    all_deposits = await db.deposits.find({}, {"_id": 0}).sort("created_at", 1).to_list(10000)
+    
+    # Build daily aggregates
+    daily_data = {}
+    running_account_value = 0
+    running_profit = 0
+    running_trades = 0
+    running_winning = 0
+    
+    for deposit in all_deposits:
+        date_str = deposit.get("created_at", "")[:10]  # Get YYYY-MM-DD
+        if date_str not in daily_data:
+            daily_data[date_str] = {
+                "date": date_str,
+                "deposits": 0,
+                "withdrawals": 0,
+                "profit": 0,
+                "trades": 0,
+                "winning": 0
+            }
+        
+        if deposit.get("type") == "withdrawal":
+            daily_data[date_str]["withdrawals"] += abs(deposit.get("amount", 0))
+        else:
+            daily_data[date_str]["deposits"] += deposit.get("amount", 0)
+    
+    for trade in all_trades:
+        date_str = trade.get("created_at", "")[:10]
+        if date_str not in daily_data:
+            daily_data[date_str] = {
+                "date": date_str,
+                "deposits": 0,
+                "withdrawals": 0,
+                "profit": 0,
+                "trades": 0,
+                "winning": 0
+            }
+        
+        daily_data[date_str]["profit"] += trade.get("actual_profit", 0)
+        daily_data[date_str]["trades"] += 1
+        if trade.get("performance") in ["exceeded", "perfect"]:
+            daily_data[date_str]["winning"] += 1
+    
+    # Build cumulative chart data
+    chart_data = []
+    for date_str in sorted(daily_data.keys()):
+        day = daily_data[date_str]
+        running_account_value += day["deposits"] - day["withdrawals"] + day["profit"]
+        running_profit += day["profit"]
+        running_trades += day["trades"]
+        running_winning += day["winning"]
+        
+        performance_rate = (running_winning / running_trades * 100) if running_trades > 0 else 0
+        
+        chart_data.append({
+            "date": date_str,
+            "account_value": round(running_account_value, 2),
+            "total_profit": round(running_profit, 2),
+            "total_trades": running_trades,
+            "performance_rate": round(performance_rate, 1)
+        })
+    
+    return {"chart_data": chart_data[-30:]}  # Last 30 data points
+
+@admin_router.get("/analytics/recent-trades")
+async def get_recent_team_trades(
+    page: int = 1,
+    page_size: int = 20,
+    user: dict = Depends(require_admin)
+):
+    """Get recent trades from all team members with pagination"""
+    
+    # Get all users for name lookup
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1}).to_list(1000)
+    user_names = {u["id"]: u.get("full_name", "Unknown") for u in all_users}
+    
+    skip = (page - 1) * page_size
+    total = await db.trade_logs.count_documents({})
+    
+    trades = await db.trade_logs.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
+    
+    # Add user names to trades
+    enriched_trades = []
+    for trade in trades:
+        trade["trader_name"] = user_names.get(trade.get("user_id"), "Unknown")
+        enriched_trades.append(trade)
+    
+    return {
+        "trades": enriched_trades,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size if total > 0 else 1
+    }
+
+@admin_router.post("/analytics/archive-trades")
+async def archive_old_trades(user: dict = Depends(require_super_admin)):
+    """Archive trades older than 3 days, delete archive older than 2 months"""
+    now = datetime.now(timezone.utc)
+    
+    # Archive threshold: 3 days ago
+    archive_threshold = now - timedelta(days=3)
+    
+    # Delete threshold: 2 months ago
+    delete_threshold = now - timedelta(days=60)
+    
+    # Delete very old archived trades
+    delete_result = await db.trade_logs.delete_many({
+        "is_archived": True,
+        "archived_at": {"$lt": delete_threshold.isoformat()}
+    })
+    
+    # Archive trades older than 3 days
+    archive_result = await db.trade_logs.update_many(
+        {
+            "created_at": {"$lt": archive_threshold.isoformat()},
+            "is_archived": {"$ne": True}
+        },
+        {
+            "$set": {
+                "is_archived": True,
+                "archived_at": now.isoformat()
+            }
+        }
+    )
+    
+    return {
+        "archived_count": archive_result.modified_count,
+        "deleted_count": delete_result.deleted_count
+    }
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
