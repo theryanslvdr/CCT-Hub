@@ -902,7 +902,7 @@ export const AdminLicensesPage = () => {
 
       {/* View Invite Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-lg">
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Eye className="w-5 h-5" /> Invite Details
@@ -913,66 +913,73 @@ export const AdminLicensesPage = () => {
             <div className="space-y-4 mt-4">
               <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                 <div className="flex items-center justify-between mb-3">
-                  <code className="text-lg font-mono text-blue-400">{selectedInvite.code}</code>
+                  <code className="text-base font-mono text-blue-400">{selectedInvite.code}</code>
                   {getInviteStatusBadge(selectedInvite)}
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-zinc-500">License Type</p>
-                    <p className={`${selectedInvite.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}`}>
-                      {selectedInvite.license_type?.charAt(0).toUpperCase() + selectedInvite.license_type?.slice(1)} Licensee
+                    <p className="text-zinc-500 text-xs">License Type</p>
+                    <p className={`text-sm ${selectedInvite.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}`}>
+                      {selectedInvite.license_type?.charAt(0).toUpperCase() + selectedInvite.license_type?.slice(1)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-zinc-500">Starting Amount</p>
-                    <p className="text-emerald-400 font-mono">${selectedInvite.starting_amount?.toLocaleString()}</p>
+                    <p className="text-zinc-500 text-xs">Starting Amount</p>
+                    <p className="text-emerald-400 font-mono text-sm">${selectedInvite.starting_amount?.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-zinc-500">Valid Duration</p>
-                    <p className="text-white">{getDurationLabel(selectedInvite.valid_duration)}</p>
+                    <p className="text-zinc-500 text-xs">Valid Duration</p>
+                    <p className="text-white text-sm">{getDurationLabel(selectedInvite.valid_duration)}</p>
                   </div>
                   <div>
-                    <p className="text-zinc-500">Uses</p>
-                    <p className="text-white">{selectedInvite.uses_count || 0} / {selectedInvite.max_uses}</p>
+                    <p className="text-zinc-500 text-xs">Uses</p>
+                    <p className="text-white text-sm">{selectedInvite.uses_count || 0} / {selectedInvite.max_uses}</p>
                   </div>
                 </div>
+                
+                {selectedInvite.invitee_name && (
+                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                    <p className="text-zinc-500 text-xs">Invitee</p>
+                    <p className="text-white text-sm">{selectedInvite.invitee_name}</p>
+                  </div>
+                )}
               </div>
 
-              {/* Registration Link */}
+              {/* Registration Link - Compact */}
               <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                <p className="text-xs text-zinc-400 mb-1">Registration Link</p>
+                <p className="text-xs text-zinc-400 mb-2">Registration Link</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-blue-400 flex-1 truncate">
-                    {window.location.origin}/register/license/{selectedInvite.code}
+                  <code className="text-xs text-blue-400 bg-zinc-900/50 px-2 py-1 rounded truncate max-w-[200px]">
+                    .../register/license/{selectedInvite.code?.slice(0, 8)}...
                   </code>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyLink(selectedInvite)}
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-blue-400 hover:text-blue-300 shrink-0"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   onClick={() => handleCopyLink(selectedInvite)}
-                  className="flex-1 btn-secondary"
+                  className="flex-1 btn-secondary text-sm"
                 >
-                  <Copy className="w-4 h-4 mr-2" /> Copy Link
+                  <Copy className="w-4 h-4 mr-1" /> Copy Link
                 </Button>
                 <Button
                   onClick={() => {
                     setViewDialogOpen(false);
                     handleOpenEmailDialog(selectedInvite);
                   }}
-                  className="flex-1 btn-primary"
+                  className="flex-1 btn-primary text-sm"
                 >
-                  <Send className="w-4 h-4 mr-2" /> Send Email
+                  <Send className="w-4 h-4 mr-1" /> Email
                 </Button>
               </div>
             </div>
