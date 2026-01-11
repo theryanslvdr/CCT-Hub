@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { adminAPI } from '@/lib/api';
-import { Settings, Menu, Bell, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Check, ExternalLink } from 'lucide-react';
+import { Settings, Menu, Bell, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Check, ExternalLink, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/api';
+import { useWebSocket } from '@/contexts/WebSocketContext';
 
 const SECRET_CODE = 'SUPER_ADMIN_BYPASS';
 const CLICKS_REQUIRED = 10;
