@@ -28,8 +28,10 @@ export const AdminLicensesPage = () => {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [changeLicenseDialogOpen, setChangeLicenseDialogOpen] = useState(false);
   const [selectedInvite, setSelectedInvite] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [selectedLicense, setSelectedLicense] = useState(null);
   const [activeTab, setActiveTab] = useState('invites');
   
   // Email dialog state
@@ -46,6 +48,14 @@ export const AdminLicensesPage = () => {
     notes: ''
   });
   const [creating, setCreating] = useState(false);
+  
+  // Change license form state
+  const [changeLicenseForm, setChangeLicenseForm] = useState({
+    new_license_type: 'extended',
+    new_starting_amount: '',
+    notes: ''
+  });
+  const [changingLicense, setChangingLicense] = useState(false);
   
   // Feedback form state
   const [feedbackForm, setFeedbackForm] = useState({
