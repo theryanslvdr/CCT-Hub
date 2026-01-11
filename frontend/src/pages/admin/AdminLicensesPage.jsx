@@ -13,7 +13,7 @@ import {
   Award, Plus, Copy, Mail, RefreshCw, Trash2, Ban, Eye, 
   Clock, Users, CheckCircle2, XCircle, Calendar, DollarSign,
   FileText, Send, RotateCcw, Link2, Upload, ArrowUpCircle,
-  ArrowDownCircle, MessageSquare, Image, Loader2
+  ArrowDownCircle, MessageSquare, Image, Loader2, AlertCircle
 } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 
