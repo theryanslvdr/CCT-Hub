@@ -544,7 +544,8 @@ async def register(data: UserCreate):
             full_name=data.full_name,
             role=role,
             created_at=datetime.fromisoformat(user["created_at"]),
-            allowed_dashboards=user.get("allowed_dashboards")
+            allowed_dashboards=user.get("allowed_dashboards"),
+            license_type=user.get("license_type")
         )
     )
 
