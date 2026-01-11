@@ -1270,6 +1270,110 @@ export const AdminLicensesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Change License Type Dialog */}
+      <Dialog open={changeLicenseDialogOpen} onOpenChange={setChangeLicenseDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-purple-400" /> Change License Type
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedLicense && (
+            <div className="space-y-4 mt-4">
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="text-amber-400 font-medium">Important</p>
+                    <p className="text-amber-400/80 text-xs mt-1">
+                      This will generate a new license and invalidate the current one. The change will be applied immediately.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-zinc-500">Current User</p>
+                    <p className="text-white">{selectedLicense.user_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Current Type</p>
+                    <p className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}>
+                      {selectedLicense.license_type?.charAt(0).toUpperCase() + selectedLicense.license_type?.slice(1)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Current Amount</p>
+                    <p className="text-emerald-400 font-mono">${selectedLicense.current_amount?.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">New License Type</Label>
+                <Select
+                  value={changeLicenseForm.new_license_type}
+                  onValueChange={(v) => setChangeLicenseForm({ ...changeLicenseForm, new_license_type: v })}
+                >
+                  <SelectTrigger className="input-dark mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="extended">Extended Licensee</SelectItem>
+                    <SelectItem value="honorary">Honorary Licensee</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">New Starting Amount</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={changeLicenseForm.new_starting_amount}
+                    onChange={(e) => setChangeLicenseForm({ ...changeLicenseForm, new_starting_amount: e.target.value })}
+                    placeholder="0.00"
+                    className="input-dark pl-7"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Suggested: ${selectedLicense.current_amount?.toLocaleString()} (current amount)
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Notes (optional)</Label>
+                <Textarea
+                  value={changeLicenseForm.notes}
+                  onChange={(e) => setChangeLicenseForm({ ...changeLicenseForm, notes: e.target.value })}
+                  placeholder="Reason for license type change..."
+                  className="input-dark mt-1"
+                  rows={2}
+                />
+              </div>
+
+              <Button
+                onClick={handleChangeLicenseType}
+                disabled={changingLicense}
+                className="w-full btn-primary"
+              >
+                {changingLicense ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Changing...</>
+                ) : (
+                  <><RefreshCw className="w-4 h-4 mr-2" /> Change License Type</>
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
