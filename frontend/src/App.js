@@ -2,6 +2,7 @@ import React from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { Toaster } from "./components/ui/sonner";
 
 // Pages
@@ -31,12 +32,13 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/register/license/:code" element={<LicenseRegistrationPage />} />
+      <WebSocketProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/register/license/:code" element={<LicenseRegistrationPage />} />
 
           {/* Protected routes */}
           <Route element={<DashboardLayout />}>
