@@ -255,7 +255,64 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 10 - Latest)
+## Completed Work (2026-01-11 Session 11 - Latest)
+
+### Bug Fixes & Features ✅ COMPLETE
+
+1. **Licensee Simulation Dialog Fixed**
+   - Fixed: `membersRes.data.members` instead of `membersRes.data` for correct API response handling
+   - Dialog now properly shows existing honorary/extended licensees
+
+2. **Deposit/Withdrawal Menu Hidden for Standard Members**
+   - Added `licenseeOnly: true` flag to menu item
+   - Only visible for users with `license_type` (actual or simulated)
+
+3. **Trade Monitor Timer Overflow Fixed**
+   - Changed from fixed `text-6xl` to responsive `text-4xl sm:text-5xl lg:text-6xl`
+   - Added `truncate` class and `overflow-hidden` to container
+   - Displays timezone name without full path (just city name)
+
+4. **Reset Starting Amount Feature**
+   - New endpoint: `POST /api/admin/licenses/{id}/reset-balance`
+   - New dialog in Active Licenses tab with Reset button
+   - Option to record adjustment as deposit/withdrawal transaction
+   - Updates both `licenses.current_amount` and `users.account_value`
+
+5. **Settings Persistence Fixed**
+   - Added `platform_name` and `tagline` to `PlatformSettings` model
+   - Added input fields in Admin Settings > Branding tab
+   - Settings now properly persist after refresh
+
+6. **Login Page Uses Settings Logo**
+   - LoginPage now loads `platformSettings` on mount
+   - Displays uploaded logo or fallback gradient icon
+   - Shows `platform_name` and `tagline` from settings
+
+7. **Licensee Account Value Sync**
+   - Admin members endpoint now uses `license.current_amount` for licensees
+   - Account values properly sync with license balance
+
+8. **Demo Simulation Shows Correct Values**
+   - ProfitTrackerPage checks `isDemoSimulation` (simulatedView without memberId)
+   - Demo mode shows $5,000 balance with demo initial deposit
+   - Re-loads data when `simulatedView` changes
+
+### Testing Results (iteration_24.json)
+- Backend: 100% pass rate (10 tests)
+- Frontend: 100% pass rate
+- All 8 features verified working
+- Testing agent fixed missing `AlertCircle` import
+
+### Files Modified This Session
+- `/app/backend/server.py` - PlatformSettings model, reset-balance endpoint, members endpoint licensee handling
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Licensee simulation dialog, menu filtering
+- `/app/frontend/src/pages/TradeMonitorPage.jsx` - Timer responsive sizing
+- `/app/frontend/src/pages/admin/AdminLicensesPage.jsx` - Reset Balance dialog
+- `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` - Platform name/tagline fields
+- `/app/frontend/src/pages/LoginPage.jsx` - Settings logo loading
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Demo simulation handling
+
+## Completed Work (2026-01-11 Session 10 - Previous)
 
 ### Bug Fixes & Features ✅ COMPLETE
 
