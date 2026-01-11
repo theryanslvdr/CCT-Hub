@@ -1495,7 +1495,9 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     
     for member in active_users:
         user_id = member["id"]
+        is_licensed = user_id in licensed_user_ids
         is_honorary = user_id in honorary_user_ids
+        is_extended = user_id in extended_user_ids
         
         # Get deposits
         deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
