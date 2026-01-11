@@ -7,8 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
-import { Plus, CreditCard, Calendar, AlertCircle, CheckCircle, DollarSign } from 'lucide-react';
+import { Plus, CreditCard, Calendar, AlertCircle, CheckCircle, DollarSign, HelpCircle, Info, Trash2, Wallet } from 'lucide-react';
+
+// Tooltip helper component
+const InfoTooltip = ({ content }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <button className="ml-1.5 text-zinc-500 hover:text-zinc-300 transition-colors">
+        <HelpCircle className="w-4 h-4" />
+      </button>
+    </TooltipTrigger>
+    <TooltipContent className="max-w-xs bg-zinc-800 text-zinc-200 border-zinc-700">
+      <p>{content}</p>
+    </TooltipContent>
+  </Tooltip>
+);
 
 export const DebtManagementPage = () => {
   const [debts, setDebts] = useState([]);
