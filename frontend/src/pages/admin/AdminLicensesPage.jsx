@@ -1505,5 +1505,6 @@ export const AdminLicensesPage = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </MobileNotice>
   );
 };
