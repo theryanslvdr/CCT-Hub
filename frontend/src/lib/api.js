@@ -105,6 +105,15 @@ export const adminAPI = {
   getMemberAnalytics: (userId) => api.get(`/admin/analytics/member/${userId}`),
   getRecentTeamTrades: (page = 1, pageSize = 20) => api.get('/admin/analytics/recent-trades', { params: { page, page_size: pageSize } }),
   archiveTrades: () => api.post('/admin/analytics/archive-trades'),
+  // Notifications
+  getNotifications: (limit = 50, unreadOnly = false) => api.get('/admin/notifications', { params: { limit, unread_only: unreadOnly } }),
+  markNotificationRead: (notificationId) => api.put(`/admin/notifications/${notificationId}/read`),
+  markAllNotificationsRead: () => api.put('/admin/notifications/read-all'),
+  // Team Transactions
+  getTeamTransactions: (page = 1, pageSize = 20, type = null) => api.get('/admin/transactions', { 
+    params: { page, page_size: pageSize, transaction_type: type } 
+  }),
+  getTransactionStats: () => api.get('/admin/transactions/stats'),
 };
 
 // Debt Management APIs
