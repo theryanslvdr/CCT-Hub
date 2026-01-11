@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { settingsAPI } from '@/lib/api';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { Footer } from './Footer';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
 import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Settings, ExternalLink } from 'lucide-react';
+
+// API Key Status Context - to share missing keys info across the app
+export const ApiKeyStatusContext = createContext({ missingKeys: [], hasMissingKeys: false });
+export const useApiKeyStatus = () => useContext(ApiKeyStatusContext);
 
 const pagesTitles = {
   '/dashboard': 'Dashboard',
@@ -26,14 +34,16 @@ const pagesTitles = {
 };
 
 export const DashboardLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isMasterAdmin } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [platformSettings, setPlatformSettings] = useState(null);
+  const [missingKeys, setMissingKeys] = useState([]);
+  const [showMissingKeysModal, setShowMissingKeysModal] = useState(false);
   const location = useLocation();
   const { showTour, completeTour, resetTour } = useOnboarding();
 
-  // Load platform settings
+  // Load platform settings and check for missing API keys
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -52,6 +62,21 @@ export const DashboardLayout = () => {
         if (res.data?.site_title) {
           document.title = res.data.site_title;
         }
+        
+        // Check for missing API keys (only show modal for Master Admin)
+        const missing = [];
+        if (!res.data?.heartbeat_api_key) missing.push({ name: 'Heartbeat', description: 'Required for community member verification' });
+        if (!res.data?.emailit_api_key) missing.push({ name: 'Emailit', description: 'Required for sending notification emails' });
+        if (!res.data?.cloudinary_cloud_name || !res.data?.cloudinary_api_key || !res.data?.cloudinary_api_secret) {
+          missing.push({ name: 'Cloudinary', description: 'Required for file uploads and image storage' });
+        }
+        
+        setMissingKeys(missing);
+        
+        // Show modal if there are missing keys and user is Master Admin
+        if (missing.length > 0 && isMasterAdmin()) {
+          setShowMissingKeysModal(true);
+        }
       } catch (error) {
         console.error('Failed to load platform settings');
       }
@@ -60,7 +85,7 @@ export const DashboardLayout = () => {
     if (isAuthenticated) {
       loadSettings();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isMasterAdmin]);
 
   if (loading) {
     return (
@@ -81,47 +106,94 @@ export const DashboardLayout = () => {
   const hideEmergentBadge = platformSettings?.hide_emergent_badge === true;
 
   return (
-    <div className="min-h-screen bg-background grid-bg">
-      <Sidebar
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        onShowTour={resetTour}
-      />
-      
-      <main className={cn(
-        "min-h-screen transition-all duration-300",
-        sidebarCollapsed ? "ml-16" : "ml-64"
-      )}>
-        <Header
-          title={currentTitle}
-          onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    <ApiKeyStatusContext.Provider value={{ missingKeys, hasMissingKeys: missingKeys.length > 0 }}>
+      <div className="min-h-screen bg-background grid-bg flex flex-col">
+        <Sidebar
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onShowTour={resetTour}
         />
         
-        <div className="p-6">
-          <Outlet />
-        </div>
-      </main>
+        <main className={cn(
+          "flex-1 flex flex-col transition-all duration-300",
+          sidebarCollapsed ? "ml-16" : "ml-64"
+        )}>
+          <Header
+            title={currentTitle}
+            onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          />
+          
+          <div className="flex-1 p-6">
+            <Outlet />
+          </div>
+          
+          {/* Persistent Footer */}
+          <Footer />
+        </main>
 
-      <Toaster position="top-right" richColors />
-      
-      {/* Onboarding Tour */}
-      <OnboardingTour isOpen={showTour} onClose={completeTour} />
+        <Toaster position="top-right" richColors />
+        
+        {/* Onboarding Tour */}
+        <OnboardingTour isOpen={showTour} onClose={completeTour} />
 
-      {/* Made with Emergent Badge - can be hidden via settings */}
-      {!hideEmergentBadge && (
-        <a
-          href="https://emergentagent.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/50 text-xs text-zinc-400 hover:text-white hover:border-zinc-600 transition-all backdrop-blur-sm"
-          data-testid="emergent-badge"
-        >
-          <span>Made with</span>
-          <span className="font-semibold text-blue-400">Emergent</span>
-        </a>
-      )}
-    </div>
+        {/* Missing API Keys Modal - Only for Master Admin */}
+        <Dialog open={showMissingKeysModal} onOpenChange={setShowMissingKeysModal}>
+          <DialogContent className="glass-card border-amber-500/30 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-amber-400 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" /> Missing API Keys
+              </DialogTitle>
+              <DialogDescription className="text-zinc-400">
+                Some integrations are not configured. The application may not work correctly without these API keys.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-3 my-4">
+              {missingKeys.map((key, index) => (
+                <div key={index} className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                  <p className="text-white font-medium">{key.name}</p>
+                  <p className="text-xs text-zinc-400 mt-1">{key.description}</p>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowMissingKeysModal(false)}
+                className="flex-1 btn-secondary"
+              >
+                Remind Me Later
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowMissingKeysModal(false);
+                  window.location.href = '/admin/settings';
+                }}
+                className="flex-1 btn-primary gap-2"
+              >
+                <Settings className="w-4 h-4" /> Configure Now
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Made with Emergent Badge - can be hidden via settings */}
+        {!hideEmergentBadge && (
+          <a
+            href="https://emergentagent.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/50 text-xs text-zinc-400 hover:text-white hover:border-zinc-600 transition-all backdrop-blur-sm"
+            data-testid="emergent-badge"
+          >
+            <span>Made with</span>
+            <span className="font-semibold text-blue-400">Emergent</span>
+          </a>
+        )}
+      </div>
+    </ApiKeyStatusContext.Provider>
   );
 };
