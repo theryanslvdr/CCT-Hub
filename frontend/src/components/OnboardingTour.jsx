@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
   TrendingUp, Activity, Target, CreditCard, Calculator, 
-  Globe, Play, ChevronLeft, ChevronRight, Eye, Sparkles, Rocket, X
+  Globe, Play, ChevronLeft, ChevronRight, Eye, Sparkles, Rocket, X,
+  Award, Wallet, ArrowUpFromLine, ArrowDownToLine
 } from 'lucide-react';
 
-// Interactive tour steps with navigation targets
-const tourSteps = [
+// Interactive tour steps for REGULAR MEMBERS
+const memberTourSteps = [
   {
     id: 'welcome',
     title: "Welcome to CrossCurrent Finance Center! 🎉",
@@ -25,7 +27,7 @@ const tourSteps = [
     icon: TrendingUp,
     type: 'page',
     path: '/dashboard',
-    highlight: null, // We'll use modal for dashboard too since dynamic elements
+    highlight: null,
     tip: "💡 Your dashboard updates in real-time as you trade",
   },
   {
@@ -87,11 +89,68 @@ const tourSteps = [
   },
 ];
 
+// Simplified tour steps for LICENSEES
+const licenseeTourSteps = [
+  {
+    id: 'welcome',
+    title: "Welcome, Licensee! 🌟",
+    content: "You're part of the CrossCurrent Licensed Trader Program. Your account is managed by our team - here's a quick overview of what you need to know.",
+    icon: Award,
+    type: 'modal',
+    highlight: null,
+    action: null,
+  },
+  {
+    id: 'dashboard',
+    title: "Your Dashboard",
+    content: "This is your home base. View your current account value, total profit, and account statistics. Your balance is updated automatically as trades are made on your behalf.",
+    icon: TrendingUp,
+    type: 'page',
+    path: '/dashboard',
+    highlight: null,
+    tip: "💡 Your account value reflects your license balance",
+  },
+  {
+    id: 'profit-tracker',
+    title: "Profit Tracker",
+    content: "Track your profit growth over time. As a licensee, your profits are calculated daily based on your license amount.\n\nDaily Profit = (Balance ÷ 980) × 15",
+    icon: TrendingUp,
+    type: 'page',
+    path: '/profit-tracker',
+    highlight: null,
+    tip: "💡 Watch your account grow with daily trading profits",
+  },
+  {
+    id: 'deposit-withdrawal',
+    title: "Deposit & Withdrawal",
+    content: "Request deposits and withdrawals here:\n\n📥 Deposit: Submit a request with proof of payment\n📤 Withdraw: Request to withdraw from your balance\n\nAll requests are reviewed by the admin team.",
+    icon: Wallet,
+    type: 'page',
+    path: '/licensee-account',
+    highlight: null,
+    tip: "💡 Withdrawals are processed within 5 business days",
+  },
+  {
+    id: 'ready',
+    title: "You're All Set! 🎉",
+    content: "Quick recap:\n\n✅ Check Dashboard for your current balance\n✅ View Profit Tracker for growth projection\n✅ Use Deposit/Withdrawal for fund requests\n\nYour trading is managed by our team - sit back and watch your account grow!",
+    icon: Rocket,
+    type: 'modal',
+    highlight: null,
+    action: 'complete',
+  },
+];
+
 export const OnboardingTour = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Determine which tour steps to use based on user type
+  const isLicensee = user?.license_type;
+  const tourSteps = isLicensee ? licenseeTourSteps : memberTourSteps;
 
   const step = tourSteps[currentStep];
   const Icon = step.icon;
