@@ -1428,6 +1428,80 @@ export const AdminLicensesPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Reset Balance Dialog */}
+      <Dialog open={resetBalanceDialogOpen} onOpenChange={setResetBalanceDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-700 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-emerald-400" />
+              Reset Starting Balance
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLicense && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                <p className="text-zinc-500 text-xs">Current Balance</p>
+                <p className="text-emerald-400 font-mono text-lg">
+                  ${selectedLicense.current_amount?.toLocaleString() || selectedLicense.starting_amount?.toLocaleString()}
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">New Balance (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={resetBalanceForm.new_amount}
+                    onChange={(e) => setResetBalanceForm({ ...resetBalanceForm, new_amount: e.target.value })}
+                    placeholder="0.00"
+                    className="input-dark pl-7"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Notes (optional)</Label>
+                <Textarea
+                  value={resetBalanceForm.notes}
+                  onChange={(e) => setResetBalanceForm({ ...resetBalanceForm, notes: e.target.value })}
+                  placeholder="Reason for balance reset..."
+                  className="input-dark mt-1"
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="record_as_deposit"
+                  checked={resetBalanceForm.record_as_deposit}
+                  onChange={(e) => setResetBalanceForm({ ...resetBalanceForm, record_as_deposit: e.target.checked })}
+                  className="rounded border-zinc-700 bg-zinc-800"
+                />
+                <Label htmlFor="record_as_deposit" className="text-zinc-400 text-sm cursor-pointer">
+                  Record adjustment as deposit/withdrawal transaction
+                </Label>
+              </div>
+
+              <Button
+                onClick={handleResetBalance}
+                disabled={resettingBalance}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {resettingBalance ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Resetting...</>
+                ) : (
+                  <><RotateCcw className="w-4 h-4 mr-2" /> Reset Balance</>
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
