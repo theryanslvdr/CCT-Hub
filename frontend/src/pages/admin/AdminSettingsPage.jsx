@@ -187,6 +187,28 @@ export const AdminSettingsPage = () => {
     }
   };
 
+  // Footer link handlers
+  const handleAddFooterLink = () => {
+    if (!newFooterLink.label.trim() || !newFooterLink.url.trim()) {
+      toast.error('Please enter both label and URL');
+      return;
+    }
+    const currentLinks = settings.footer_links || [];
+    setSettings({
+      ...settings,
+      footer_links: [...currentLinks, { ...newFooterLink, id: Date.now().toString() }]
+    });
+    setNewFooterLink({ label: '', url: '' });
+  };
+
+  const handleRemoveFooterLink = (index) => {
+    const currentLinks = settings.footer_links || [];
+    setSettings({
+      ...settings,
+      footer_links: currentLinks.filter((_, i) => i !== index)
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
