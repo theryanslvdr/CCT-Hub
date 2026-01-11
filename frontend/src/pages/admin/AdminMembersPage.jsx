@@ -68,7 +68,7 @@ export const AdminMembersPage = () => {
   const [changingLicense, setChangingLicense] = useState(false);
   
   // Form states
-  const [newRole, setNewRole] = useState('admin');
+  const [newRole, setNewRole] = useState('basic_admin');
   const [secretCode, setSecretCode] = useState('');
   const [editForm, setEditForm] = useState({ full_name: '', timezone: '' });
   const [tempPassword, setTempPassword] = useState('');
