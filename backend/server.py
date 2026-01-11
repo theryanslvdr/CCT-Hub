@@ -2489,6 +2489,7 @@ async def create_license(data: LicenseCreate, user: dict = Depends(require_admin
         "user_id": data.user_id,
         "license_type": data.license_type,
         "starting_amount": data.starting_amount,
+        "current_amount": data.starting_amount,  # Set current_amount = starting_amount
         "start_date": start_date.isoformat(),
         "notes": data.notes,
         "is_active": True,
@@ -2498,11 +2499,31 @@ async def create_license(data: LicenseCreate, user: dict = Depends(require_admin
     
     await db.licenses.insert_one(license_doc)
     
-    # Update user record with license type
+    # Update user record with license type and account_value
     await db.users.update_one(
         {"id": data.user_id},
-        {"$set": {"license_type": data.license_type}}
+        {"$set": {
+            "license_type": data.license_type,
+            "account_value": data.starting_amount  # Sync account_value with license
+        }}
     )
+    
+    # Record the starting amount as an initial deposit transaction
+    if data.starting_amount > 0:
+        initial_deposit = {
+            "id": str(uuid.uuid4()),
+            "user_id": data.user_id,
+            "type": "deposit",
+            "amount": data.starting_amount,
+            "status": "completed",
+            "deposit_date": start_date.isoformat(),
+            "notes": "Initial starting balance",
+            "is_initial_balance": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "completed_by": user["id"]
+        }
+        await db.licensee_transactions.insert_one(initial_deposit)
     
     return {"message": "License created successfully", "license_id": license_id}
 
