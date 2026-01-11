@@ -18,6 +18,17 @@ from .file_service import (
     get_cloudinary_config,
 )
 
+from .websocket_service import (
+    manager as websocket_manager,
+    NotificationType,
+    create_notification,
+    notify_admins_deposit_request,
+    notify_admins_withdrawal_request,
+    notify_user_transaction_status,
+    notify_trade_signal,
+    notify_system_announcement,
+)
+
 __all__ = [
     # Email service
     "send_email",
@@ -33,4 +44,13 @@ __all__ = [
     "upload_profile_picture",
     "upload_deposit_screenshot",
     "get_cloudinary_config",
+    # WebSocket service
+    "websocket_manager",
+    "NotificationType",
+    "create_notification",
+    "notify_admins_deposit_request",
+    "notify_admins_withdrawal_request",
+    "notify_user_transaction_status",
+    "notify_trade_signal",
+    "notify_system_announcement",
 ]
