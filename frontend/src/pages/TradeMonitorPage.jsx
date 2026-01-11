@@ -125,7 +125,7 @@ const getUserTimezone = () => {
 };
 
 export const TradeMonitorPage = () => {
-  const { user } = useAuth();
+  const { user, simulatedView, getSimulatedAccountValue, getSimulatedLotSize, getSimulatedMemberName } = useAuth();
   const [signal, setSignal] = useState(null);
   const [dailySummary, setDailySummary] = useState(null);
   const [profitSummary, setProfitSummary] = useState(null);
@@ -157,8 +157,18 @@ export const TradeMonitorPage = () => {
   const beepRef = useRef(null);
   const countdownRef = useRef(null);
 
-  // Get LOT size from profit tracker
-  const lotSize = profitSummary?.account_value ? truncateTo2Decimals(profitSummary.account_value / 980) : 0;
+  // Get LOT size - use simulated value if in simulation mode, otherwise from profit tracker
+  const simulatedAccountValue = getSimulatedAccountValue();
+  const simulatedLotSize = getSimulatedLotSize();
+  const simulatedMemberName = getSimulatedMemberName();
+  
+  const accountValue = simulatedAccountValue !== null 
+    ? simulatedAccountValue 
+    : (profitSummary?.account_value || 0);
+  const lotSize = simulatedLotSize !== null 
+    ? truncateTo2Decimals(simulatedLotSize) 
+    : truncateTo2Decimals(accountValue / 980);
+  
   const userTimezone = user?.timezone || getUserTimezone();
   const isPhilippines = userTimezone === 'Asia/Manila';
   const profitMultiplier = signal?.profit_points || 15;
