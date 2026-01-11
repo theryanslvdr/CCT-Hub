@@ -684,6 +684,21 @@ export const ProfitTrackerPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* Simulation Banner */}
+      {simulatedView && simulatedMemberName && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Eye className="w-5 h-5 text-amber-400" />
+              <div>
+                <p className="text-amber-400 font-medium">Simulating: {simulatedMemberName}</p>
+                <p className="text-xs text-amber-400/70">Account Value: {formatLargeNumber(effectiveAccountValue)} • LOT Size: {effectiveLotSize.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Trading Signal Banner */}
       {activeSignal && (
         <Card className="glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
@@ -724,7 +739,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Account Value (USDT)</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
-                  {formatLargeNumber(summary?.account_value || 0)}
+                  {formatLargeNumber(effectiveAccountValue)}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
@@ -788,7 +803,7 @@ export const ProfitTrackerPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Current LOT Size</p>
                 <p className="text-3xl font-bold font-mono text-purple-400 mt-2">
-                  {truncateTo2Decimals((summary?.account_value || 0) / 980).toFixed(2)}
+                  {effectiveLotSize.toFixed(2)}
                 </p>
                 <p className="text-xs text-zinc-500 mt-1">Balance ÷ 980</p>
               </div>
