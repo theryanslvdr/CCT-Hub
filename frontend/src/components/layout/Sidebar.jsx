@@ -1,6 +1,7 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
@@ -8,9 +9,22 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export const Sidebar = ({ isOpen, onClose }) => {
-  const { user, isAdmin, isSuperAdmin, isMasterAdmin, canAccessDashboard, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation } = useAuth();
-  const location = useLocation();
+export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
+  const { user, isAdmin, isMasterAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation } = useAuth();
+  const [platformSettings, setPlatformSettings] = useState(null);
+
+  // Load platform settings for logo
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsAPI.getPlatform();
+        setPlatformSettings(res.data);
+      } catch (error) {
+        console.error('Failed to load platform settings');
+      }
+    };
+    loadSettings();
+  }, []);
 
   // Member navigation items (modular access)
   const memberNavItems = [
@@ -20,10 +34,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { path: '/profile', icon: Settings, label: 'Profile', id: 'profile' },
   ];
 
-  // Hidden features (only for Master Admin)
+  // Hidden features (only for Master Admin) - with crown indicator
   const hiddenFeatures = [
-    { path: '/profit-planner', icon: Target, label: 'Profit Planner', id: 'profit_planner' },
-    { path: '/debt-management', icon: CreditCard, label: 'Debt Management', id: 'debt_management' },
+    { path: '/profit-planner', icon: Target, label: 'Profit Planner', id: 'profit_planner', hidden: true },
+    { path: '/debt-management', icon: CreditCard, label: 'Debt Management', id: 'debt_management', hidden: true },
   ];
 
   // Admin navigation items
@@ -53,28 +67,59 @@ export const Sidebar = ({ isOpen, onClose }) => {
         : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
     }`;
 
+  // Special class for hidden features - purple text on hover
+  const hiddenNavLinkClass = ({ isActive }) => 
+    `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+      isActive 
+        ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border border-purple-500/30' 
+        : 'text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10'
+    }`;
+
   const handleNavClick = () => {
     if (window.innerWidth < 1024) {
       onClose();
     }
   };
 
+  // Determine logo display
+  const hasLogo = platformSettings?.logo_url;
+  const hasFavicon = platformSettings?.favicon_url;
+
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* Logo Section */}
       <div className="p-5 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">CrossCurrent</h1>
-            <p className="text-xs text-zinc-500">Finance Center</p>
-          </div>
+          {collapsed ? (
+            // Collapsed: Show favicon or icon
+            hasFavicon ? (
+              <img src={platformSettings.favicon_url} alt="Logo" className="w-9 h-9 rounded-lg object-contain" />
+            ) : (
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+            )
+          ) : (
+            // Expanded: Show full logo or text
+            hasLogo ? (
+              <img src={platformSettings.logo_url} alt="CrossCurrent" className="h-10 max-w-[180px] object-contain" />
+            ) : (
+              <>
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-white">CrossCurrent</h1>
+                  <p className="text-xs text-zinc-500">Finance Center</p>
+                </div>
+              </>
+            )
+          )}
         </div>
       </div>
 
       {/* Master Admin Simulation Control */}
-      {isMasterAdmin() && (
+      {isMasterAdmin() && !collapsed && (
         <div className="px-3 mb-3">
           {simulatedView ? (
             <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
@@ -105,6 +150,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       <nav className="px-3 space-y-1">
+        {/* Regular menu items */}
         {getVisibleMemberItems().map((item) => (
           <NavLink 
             key={item.path} 
@@ -112,29 +158,35 @@ export const Sidebar = ({ isOpen, onClose }) => {
             className={navLinkClass}
             onClick={handleNavClick}
             data-testid={`nav-${item.id}`}
+            title={collapsed ? item.label : undefined}
           >
             <item.icon className="w-4 h-4" />
-            <span className="text-sm">{item.label}</span>
+            {!collapsed && <span className="text-sm">{item.label}</span>}
           </NavLink>
         ))}
 
-        {/* Hidden Features (Master Admin only) */}
+        {/* Hidden Features (Master Admin only) - No section title, just crown icons */}
         {canAccessHiddenFeatures() && !simulatedView && (
           <>
-            <p className="text-xs text-purple-400 uppercase tracking-wider mt-5 mb-2 px-3 flex items-center justify-between">
-              <span>Hidden Features</span>
-              <Crown className="w-3.5 h-3.5" />
-            </p>
+            {/* Divider */}
+            <div className="my-3 border-t border-zinc-800/50" />
+            
             {hiddenFeatures.map((item) => (
               <NavLink 
                 key={item.path} 
                 to={item.path} 
-                className={navLinkClass}
+                className={hiddenNavLinkClass}
                 onClick={handleNavClick}
                 data-testid={`nav-${item.id}`}
+                title={collapsed ? item.label : undefined}
               >
                 <item.icon className="w-4 h-4" />
-                <span className="text-sm">{item.label}</span>
+                {!collapsed && (
+                  <>
+                    <span className="text-sm flex-1">{item.label}</span>
+                    <Crown className="w-3.5 h-3.5 text-purple-400" />
+                  </>
+                )}
               </NavLink>
             ))}
           </>
@@ -143,42 +195,48 @@ export const Sidebar = ({ isOpen, onClose }) => {
         {/* Admin Section */}
         {isAdmin() && !simulatedView && (
           <>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mt-5 mb-2 px-3">Admin Section</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mt-5 mb-2 px-3">
+              {!collapsed && 'Admin Section'}
+            </p>
             {adminNavItems.map((item) => (
               <NavLink 
                 key={item.path} 
                 to={item.path} 
                 className={navLinkClass}
                 onClick={handleNavClick}
+                title={collapsed ? item.label : undefined}
               >
                 <item.icon className="w-4 h-4" />
-                <span className="text-sm">{item.label}</span>
+                {!collapsed && <span className="text-sm">{item.label}</span>}
               </NavLink>
             ))}
           </>
         )}
       </nav>
 
-      <div className="mt-auto p-3 border-t border-zinc-800">
-        <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-            {user?.full_name?.charAt(0) || 'U'}
+      {/* User section at bottom */}
+      {!collapsed && (
+        <div className="mt-auto p-3 border-t border-zinc-800">
+          <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+              {user?.full_name?.charAt(0) || 'U'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+              <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
+                {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
+                {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-            <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
-              {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
-              {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-            </p>
-          </div>
+          <button 
+            onClick={() => onClose()}
+            className="w-full mt-2 text-xs text-zinc-500 hover:text-white transition-colors lg:hidden"
+          >
+            Close Menu
+          </button>
         </div>
-        <button 
-          onClick={() => onClose()}
-          className="w-full mt-2 text-xs text-zinc-500 hover:text-white transition-colors lg:hidden"
-        >
-          Close Menu
-        </button>
-      </div>
+      )}
     </aside>
   );
 };
