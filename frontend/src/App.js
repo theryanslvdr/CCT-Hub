@@ -46,6 +46,7 @@ function App() {
             <Route path="/goals" element={<ProfitPlannerPage />} />
             <Route path="/debt" element={<DebtManagementPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/licensee-account" element={<LicenseeAccountPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
