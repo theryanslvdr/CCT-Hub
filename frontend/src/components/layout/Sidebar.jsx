@@ -40,7 +40,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const memberNavItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
-    { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor' },
+    { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account' },
   ];
 
@@ -62,6 +62,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
   ];
 
+  // Check if user or simulated view is a licensee
+  const isLicenseeView = simulatedView?.license_type || user?.license_type;
+
   // Filter nav items based on user's allowed dashboards (if member)
   const getVisibleMemberItems = () => {
     if (isAdmin() && !simulatedView) {
@@ -72,7 +75,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     // Always include licensee_account for all members (access controlled on the page)
     const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
     const dashboardsWithLicensee = [...effectiveDashboards, 'licensee_account'];
-    return memberNavItems.filter(item => dashboardsWithLicensee.includes(item.id));
+    
+    return memberNavItems.filter(item => {
+      // Hide Trade Monitor for licensees
+      if (item.hideForLicensee && isLicenseeView) {
+        return false;
+      }
+      return dashboardsWithLicensee.includes(item.id);
+    });
   };
 
   const navLinkClass = ({ isActive }) => 
