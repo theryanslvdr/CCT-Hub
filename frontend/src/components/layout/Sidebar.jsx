@@ -322,14 +322,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <DropdownMenuSeparator className="bg-zinc-700" />
                 <DropdownMenuLabel className="text-zinc-500 text-xs">Licensee Simulation</DropdownMenuLabel>
                 <DropdownMenuItem 
-                  onClick={() => simulateMemberView({ role: 'member', license_type: 'honorary', displayName: 'Honorary Licensee' })}
+                  onClick={() => handleLicenseeSimulationClick('honorary')}
                   className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
                 >
                   <Star className="w-4 h-4 mr-2 text-amber-400" />
                   Honorary Licensee View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => simulateMemberView({ role: 'member', license_type: 'extended', displayName: 'Extended Licensee' })}
+                  onClick={() => handleLicenseeSimulationClick('extended')}
                   className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
@@ -337,6 +337,110 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            
+            {/* Licensee Simulation Dialog */}
+            <Dialog open={licenseeDialogOpen} onOpenChange={setLicenseeDialogOpen}>
+              <DialogContent className="bg-zinc-900 border-zinc-700 max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-white flex items-center gap-2">
+                    {selectedLicenseType === 'honorary' ? (
+                      <Star className="w-5 h-5 text-amber-400" />
+                    ) : (
+                      <Sparkles className="w-5 h-5 text-purple-400" />
+                    )}
+                    Simulate {selectedLicenseType === 'honorary' ? 'Honorary' : 'Extended'} Licensee
+                  </DialogTitle>
+                  <DialogDescription className="text-zinc-400">
+                    Choose how you want to simulate this licensee view.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-300">Simulation Mode</label>
+                    <Select value={selectedLicenseeId} onValueChange={setSelectedLicenseeId}>
+                      <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-zinc-300">
+                        <SelectValue placeholder="Select simulation mode..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-800 border-zinc-700">
+                        <SelectItem value="dummy" className="text-zinc-300 hover:bg-zinc-700">
+                          <div className="flex flex-col">
+                            <span className="font-medium">Demo Mode (Dummy Values)</span>
+                            <span className="text-xs text-zinc-500">Use placeholder data ($5,000 balance)</span>
+                          </div>
+                        </SelectItem>
+                        {loadingLicensees ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                          </div>
+                        ) : licensees.length === 0 ? (
+                          <div className="px-2 py-3 text-sm text-zinc-500 text-center">
+                            No {selectedLicenseType} licensees found
+                          </div>
+                        ) : (
+                          licensees.map(licensee => (
+                            <SelectItem 
+                              key={licensee.user_id} 
+                              value={licensee.user_id}
+                              className="text-zinc-300 hover:bg-zinc-700"
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">{licensee.full_name}</span>
+                                <span className="text-xs text-zinc-500">
+                                  {licensee.email} • Balance: ${(licensee.account_value || 0).toLocaleString()}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {selectedLicenseeId && selectedLicenseeId !== 'dummy' && (
+                    <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                      {(() => {
+                        const selected = licensees.find(l => l.user_id === selectedLicenseeId);
+                        return selected ? (
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-zinc-500">Account Value:</span>
+                              <span className="text-white font-mono">${(selected.account_value || 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-zinc-500">Total Deposits:</span>
+                              <span className="text-white font-mono">${(selected.total_deposits || 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-zinc-500">Total Profit:</span>
+                              <span className="text-white font-mono">${(selected.total_profit || 0).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-zinc-700"
+                    onClick={() => setLicenseeDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 btn-primary"
+                    onClick={handleSimulateLicensee}
+                    disabled={!selectedLicenseeId}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Start Simulation
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       )}
