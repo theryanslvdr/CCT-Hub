@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { MobileNotice } from '@/components/MobileNotice';
 import { 
   Award, Plus, Copy, Mail, RefreshCw, Trash2, Ban, Eye, 
   Clock, Users, CheckCircle2, XCircle, Calendar, DollarSign,
