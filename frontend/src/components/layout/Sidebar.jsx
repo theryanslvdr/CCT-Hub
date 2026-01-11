@@ -137,7 +137,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor', hideForLicensee: true },
-    { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account' },
+    { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
@@ -164,20 +164,22 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   // Filter nav items based on user's allowed dashboards (if member)
   const getVisibleMemberItems = () => {
     // For members or simulated view, filter based on allowed dashboards
-    // Always include licensee_account for all members (access controlled on the page)
     const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
-    const dashboardsWithLicensee = [...effectiveDashboards, 'licensee_account'];
     
     return memberNavItems.filter(item => {
       // Hide Trade Monitor for licensees (both simulated and actual)
       if (item.hideForLicensee && isLicenseeView) {
         return false;
       }
-      // For admins NOT in simulation, show all items
-      if (isAdmin() && !simulatedView) {
-        return true;
+      // Deposit/Withdrawal only for licensees
+      if (item.licenseeOnly && !isLicenseeView) {
+        return false;
       }
-      return dashboardsWithLicensee.includes(item.id);
+      // For admins NOT in simulation, show all items except licensee-only
+      if (isAdmin() && !simulatedView) {
+        return !item.licenseeOnly;
+      }
+      return effectiveDashboards.includes(item.id) || (item.licenseeOnly && isLicenseeView);
     });
   };
 
