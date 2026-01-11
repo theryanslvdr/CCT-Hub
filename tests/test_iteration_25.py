@@ -84,7 +84,8 @@ class TestLicenseeAccountValueFromAPI:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200, f"Failed to get licenses: {licenses_response.text}"
         
-        licenses = licenses_response.json()
+        data = licenses_response.json()
+        licenses = data.get("licenses", []) if isinstance(data, dict) else data
         active_licenses = [l for l in licenses if l.get("is_active")]
         
         if not active_licenses:
