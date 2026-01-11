@@ -16,6 +16,7 @@ const CLICKS_REQUIRED = 10;
 
 export const Header = ({ onMenuClick, title }) => {
   const { user, updateUser, isSuperAdmin, isMasterAdmin } = useAuth();
+  const { connected: wsConnected, notifications: wsNotifications, unreadCount: wsUnreadCount, markAllAsRead: wsMarkAllRead } = useWebSocket();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   
