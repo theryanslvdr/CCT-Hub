@@ -387,6 +387,18 @@ export const AdminMembersPage = () => {
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  onClick={() => handleSimulateMember(member)}
+                                  className="text-zinc-400 hover:text-purple-400"
+                                  data-testid={`simulate-${member.id}`}
+                                  title="Simulate Member View"
+                                >
+                                  <Play className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {member.role === 'user' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => { setSelectedMember(member); setUpgradeDialogOpen(true); }}
                                   className="text-zinc-400 hover:text-emerald-400"
                                   data-testid={`upgrade-${member.id}`}
