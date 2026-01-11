@@ -1509,8 +1509,8 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         user_profit = sum(t.get("actual_profit", 0) for t in trades)
         user_account_value = total_deposits - total_withdrawals + user_profit
         
-        # Only add to team totals if NOT an honorary licensee
-        if not is_honorary:
+        # Only add to team totals if NOT a licensed user (both extended and honorary are excluded)
+        if not is_licensed:
             total_account_value += user_account_value
             total_profit += user_profit
         
