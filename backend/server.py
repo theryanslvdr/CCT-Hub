@@ -3861,15 +3861,29 @@ async def send_email_to_member(user_id: str, subject: str, body: str, user: dict
 
 @admin_router.post("/upgrade-role")
 async def upgrade_role(data: RoleUpgrade, user: dict = Depends(require_admin)):
+    """Upgrade a user's role. Master Admin can promote to any role without secret code."""
     target_user = await db.users.find_one({"id": data.user_id}, {"_id": 0})
     if not target_user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    if data.new_role == "super_admin":
+    # Validate role
+    valid_roles = ["basic_admin", "admin", "super_admin"]
+    if data.new_role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
+    
+    # Master Admin can promote to any role without secret code
+    if user["role"] == "master_admin":
+        pass  # No restrictions for master admin
+    elif data.new_role == "super_admin":
+        # Non-master admins need secret code for super_admin promotion
         if data.secret_code != SUPER_ADMIN_SECRET:
             raise HTTPException(status_code=403, detail="Invalid secret code")
-        if user["role"] != "super_admin":
-            raise HTTPException(status_code=403, detail="Only super admin can create super admins")
+        if user["role"] not in ["super_admin", "master_admin"]:
+            raise HTTPException(status_code=403, detail="Only super admin or master admin can create super admins")
+    elif data.new_role == "basic_admin" or data.new_role == "admin":
+        # Super admins can create basic admins
+        if user["role"] not in ["super_admin", "master_admin"]:
+            raise HTTPException(status_code=403, detail="Only super admin or master admin can create admins")
     
     await db.users.update_one(
         {"id": data.user_id},
