@@ -844,8 +844,8 @@ export const AdminMembersPage = () => {
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium text-zinc-400">Member Actions</h4>
                   
-                  {/* Simulate Member View */}
-                  {selectedMember?.role === 'member' && (
+                  {/* Simulate Member View - for regular members */}
+                  {(selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -870,8 +870,8 @@ export const AdminMembersPage = () => {
                     </div>
                   )}
 
-                  {/* Manage License - Master Admin only */}
-                  {isMasterAdmin() && selectedMember?.role === 'member' && (
+                  {/* Manage License - Master Admin only, for regular members */}
+                  {isMasterAdmin() && (selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -900,8 +900,8 @@ export const AdminMembersPage = () => {
                     </div>
                   )}
 
-                  {/* Upgrade Role */}
-                  {selectedMember?.role === 'member' && (
+                  {/* Upgrade Role - for regular members */}
+                  {(selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -927,7 +927,7 @@ export const AdminMembersPage = () => {
                   )}
 
                   {/* Downgrade Role - For admins */}
-                  {selectedMember?.role !== 'member' && isSuperAdmin && selectedMember?.id !== user?.id && (
+                  {selectedMember?.role !== 'member' && selectedMember?.role !== 'user' && isSuperAdmin && selectedMember?.id !== user?.id && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
