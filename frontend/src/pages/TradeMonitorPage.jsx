@@ -952,6 +952,32 @@ export const TradeMonitorPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
+
+      {/* Right Panel - Merin Trading Platform */}
+      <div className="lg:w-[400px] xl:w-[450px] flex-shrink-0" data-testid="merin-panel">
+        <Card className="glass-card h-full sticky top-0">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white flex items-center gap-2">
+              <ExternalLink className="w-5 h-5 text-blue-400" />
+              Merin Trading Platform
+            </CardTitle>
+            <p className="text-xs text-zinc-500">Trade directly from here</p>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="relative w-full bg-zinc-900 rounded-b-xl overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: 'calc(100vh - 200px)' }}>
+              <iframe
+                src="https://www.meringlobaltrading.com/"
+                title="Merin Trading Platform"
+                className="absolute inset-0 w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                data-testid="merin-iframe"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
