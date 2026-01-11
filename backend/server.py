@@ -753,6 +753,17 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
     
     await db.deposits.insert_one(withdrawal)
     
+    # Create notification for admins
+    await create_admin_notification(
+        notification_type="withdrawal",
+        title="New Withdrawal",
+        message=f"{user['full_name']} withdrew ${data.amount:.2f}",
+        user_id=user["id"],
+        user_name=user["full_name"],
+        amount=data.amount,
+        metadata={"net_amount": net_amount, "merin_fee": merin_fee, "binance_fee": binance_fee}
+    )
+    
     return {
         "message": "Withdrawal recorded successfully",
         "withdrawal_id": withdrawal["id"],
