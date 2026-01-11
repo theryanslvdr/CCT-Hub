@@ -1421,15 +1421,23 @@ async def get_members(
     for u in users_cursor:
         user_data = dict(u)
         if can_see_account_value:
-            # Calculate account value from deposits and profits
-            deposits = await db.deposits.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
-            trades = await db.trade_logs.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
-            
-            total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit" and d.get("type") != "withdrawal")
-            total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
-            total_profit = sum(t.get("actual_profit", 0) for t in trades)
-            
-            user_data["account_value"] = round(total_deposits - total_withdrawals + total_profit, 2)
+            # Check if user is a licensee - use license current_amount for their account_value
+            if u.get("license_type"):
+                license = await db.licenses.find_one({"user_id": u["id"], "is_active": True}, {"_id": 0})
+                if license:
+                    user_data["account_value"] = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
+                else:
+                    user_data["account_value"] = round(u.get("account_value", 0), 2)
+            else:
+                # Calculate account value from deposits and profits for non-licensees
+                deposits = await db.deposits.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
+                trades = await db.trade_logs.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
+                
+                total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit" and d.get("type") != "withdrawal")
+                total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+                total_profit = sum(t.get("actual_profit", 0) for t in trades)
+                
+                user_data["account_value"] = round(total_deposits - total_withdrawals + total_profit, 2)
         users.append(user_data)
     
     return {
