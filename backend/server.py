@@ -272,6 +272,23 @@ class RoleUpgrade(BaseModel):
 
 # ==================== HELPERS ====================
 
+async def create_admin_notification(notification_type: str, title: str, message: str, user_id: str, user_name: str, amount: float = None, metadata: dict = None):
+    """Create a notification for admins about member activity"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "type": notification_type,
+        "title": title,
+        "message": message,
+        "user_id": user_id,
+        "user_name": user_name,
+        "amount": amount,
+        "metadata": metadata or {},
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.admin_notifications.insert_one(notification)
+    return notification
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
