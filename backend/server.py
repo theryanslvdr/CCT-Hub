@@ -289,6 +289,30 @@ class EmailTemplateUpdate(BaseModel):
     body: str
     variables: Optional[List[str]] = None  # Available template variables like {{name}}, {{link}}
 
+# Licensee Transaction Models
+class LicenseeTransactionStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    AWAITING_CONFIRMATION = "awaiting_confirmation"
+    COMPLETED = "completed"
+    REJECTED = "rejected"
+
+class LicenseeDepositCreate(BaseModel):
+    amount: float
+    deposit_date: str
+    notes: Optional[str] = None
+    # screenshot_url will be added after file upload
+
+class LicenseeWithdrawalCreate(BaseModel):
+    amount: float
+    notes: Optional[str] = None
+
+class LicenseeTransactionFeedback(BaseModel):
+    message: str
+    status: Optional[str] = None  # pending, processing, awaiting_confirmation, completed, rejected
+    final_amount: Optional[float] = None
+    # screenshot_url will be added after file upload
+
 class NotificationCreate(BaseModel):
     type: str  # deposit, withdrawal, trade_underperform
     title: str
