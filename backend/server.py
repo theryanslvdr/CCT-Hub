@@ -691,8 +691,9 @@ class SetPasswordRequest(BaseModel):
 async def set_password_for_member(data: SetPasswordRequest):
     """Set password for a verified Heartbeat member"""
     email = data.email.lower().strip()
+    password = data.password  # Store password before any overwrites
     
-    if len(data.password) < 6:
+    if len(password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
     
     # Verify Heartbeat membership first - check settings then fallback to env
@@ -717,13 +718,13 @@ async def set_password_for_member(data: SetPasswordRequest):
             )
             
             if response.status_code == 200:
-                data = response.json()
+                hb_response = response.json()
                 # Handle both list and dict responses
                 users = []
-                if isinstance(data, list):
-                    users = data
+                if isinstance(hb_response, list):
+                    users = hb_response
                 else:
-                    users = data.get("users", data.get("data", []))
+                    users = hb_response.get("users", hb_response.get("data", []))
                 
                 # Find the user with matching email
                 heartbeat_user = None
@@ -738,12 +739,16 @@ async def set_password_for_member(data: SetPasswordRequest):
                 
                 heartbeat_user_id = heartbeat_user.get("id")
                 full_name = heartbeat_user.get("name", email.split('@')[0])
+            else:
+                raise HTTPException(status_code=400, detail="Failed to verify Heartbeat membership")
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Heartbeat verification error: {e}")
         raise HTTPException(status_code=400, detail="Failed to verify Heartbeat membership")
     
     # Hash password
-    hashed_password = hash_password(data.password)
+    hashed_password = hash_password(password)
     
     # Check if user exists
     existing_user = await db.users.find_one({"email": email}, {"_id": 0})
