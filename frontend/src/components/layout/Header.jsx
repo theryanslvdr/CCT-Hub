@@ -307,6 +307,12 @@ export const Header = ({ onMenuClick, title }) => {
                   </div>
                   
                   <div className="p-2 border-t border-zinc-800">
+                    <div className="flex items-center justify-between px-2 py-1 text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1">
+                        {wsConnected ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-zinc-500" />}
+                        {wsConnected ? 'Real-time connected' : 'Offline'}
+                      </span>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
