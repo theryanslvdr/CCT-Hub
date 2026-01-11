@@ -837,6 +837,24 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     }
     
     await db.trade_logs.insert_one(trade)
+    
+    # Create notification if member exited below projected amount
+    if performance == "below" and profit_difference < -5:  # Only notify if more than $5 below
+        await create_admin_notification(
+            notification_type="trade_underperform",
+            title="Underperforming Trade",
+            message=f"{user['full_name']} exited ${abs(profit_difference):.2f} below projected",
+            user_id=user["id"],
+            user_name=user["full_name"],
+            amount=data.actual_profit,
+            metadata={
+                "projected": projected_profit,
+                "actual": data.actual_profit,
+                "difference": profit_difference,
+                "lot_size": data.lot_size
+            }
+        )
+    
     return TradeLogResponse(**{**trade, "created_at": datetime.fromisoformat(trade["created_at"])})
 
 @trade_router.get("/logs", response_model=List[TradeLogResponse])
