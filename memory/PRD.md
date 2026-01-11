@@ -238,6 +238,18 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 ## Super Admin Secret Code
 CROSSCURRENT2024
 
+## Remaining P1 Tasks
+- [ ] Create special onboarding tutorial for licensees (shorter, focused on Deposit/Withdrawal)
+- [ ] Replace "Live Rates" with "Performance Overview" chart on Dashboard
+
+## Future/Backlog
+- [ ] Refactor `server.py` into modular structure (routes, models, services)
+- [ ] Implement WebSockets for real-time notifications
+- [ ] Activate Emailit integration for sending emails
+- [ ] Activate Cloudinary integration for file storage
+- [ ] Add Tooltips to Debt Management page
+- [ ] Add Alarm Music Selection to Trade Monitor
+
 ## API Keys Configured
 - Heartbeat: hb:579ef3a8e97533a0461dd93c23ceb6fb531817e4ae65b8b669
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
