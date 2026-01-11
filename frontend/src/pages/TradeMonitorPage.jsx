@@ -126,6 +126,10 @@ const getUserTimezone = () => {
 
 export const TradeMonitorPage = () => {
   const { user, simulatedView, getSimulatedAccountValue, getSimulatedLotSize, getSimulatedMemberName } = useAuth();
+  
+  // Check if user is a licensee - redirect them away
+  const isLicensee = simulatedView?.license_type || user?.license_type;
+  
   const [signal, setSignal] = useState(null);
   const [dailySummary, setDailySummary] = useState(null);
   const [profitSummary, setProfitSummary] = useState(null);
