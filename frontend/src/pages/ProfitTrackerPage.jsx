@@ -371,6 +371,7 @@ export const ProfitTrackerPage = () => {
     try {
       // For demo/role-based simulation (no memberId), use simulated values
       const isDemoSimulation = simulatedView && !simulatedView.memberId;
+      const isSpecificMemberSimulation = simulatedView && simulatedView.memberId;
       
       if (isDemoSimulation) {
         // Use demo values for role-based simulation
@@ -396,6 +397,34 @@ export const ProfitTrackerPage = () => {
           currencyAPI.getRates('USDT'),
           api.get('/trade/active-signal').catch(() => ({ data: null })),
         ]);
+        setRates(ratesRes.data.rates || {});
+        if (signalRes.data?.signal) {
+          setActiveSignal(signalRes.data.signal);
+        }
+        setLoading(false);
+        return;
+      }
+      
+      if (isSpecificMemberSimulation) {
+        // For specific member simulation, fetch their data from API
+        // The API returns license.current_amount for licensees
+        const [memberRes, ratesRes, signalRes] = await Promise.all([
+          adminAPI.getMemberDetails(simulatedView.memberId),
+          currencyAPI.getRates('USDT'),
+          api.get('/trade/active-signal').catch(() => ({ data: null })),
+        ]);
+        
+        const stats = memberRes.data.stats || {};
+        setSummary({
+          account_value: stats.account_value || 0,  // Authoritative value from license.current_amount
+          total_deposits: stats.total_deposits || 0,
+          total_profit: stats.total_profit || 0,
+          current_lot_size: memberRes.data.user?.lot_size || 0.01
+        });
+        setDeposits(memberRes.data.recent_deposits || []);
+        setWithdrawals([]);
+        setTradeLogs({});
+        setIsFirstTime(false);
         setRates(ratesRes.data.rates || {});
         if (signalRes.data?.signal) {
           setActiveSignal(signalRes.data.signal);
