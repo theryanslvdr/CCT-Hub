@@ -283,6 +283,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </Button>
             </div>
           ) : (
+            <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
