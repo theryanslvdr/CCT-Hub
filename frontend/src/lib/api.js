@@ -85,8 +85,12 @@ export const tradeAPI = {
 export const adminAPI = {
   createSignal: (data) => api.post('/admin/signals', data),
   getSignals: () => api.get('/admin/signals'),
+  getSignalsHistory: (page = 1, pageSize = 20) => api.get('/admin/signals/history', { params: { page, page_size: pageSize } }),
+  getSignalsArchive: () => api.get('/admin/signals/archive'),
+  archiveMonth: () => api.post('/admin/signals/archive-month'),
   deleteSignal: (id) => api.delete(`/admin/signals/${id}`),
   getMembers: () => api.get('/admin/members'),
+  getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
 };
