@@ -442,6 +442,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </div>
               </DialogContent>
             </Dialog>
+            </>
           )}
         </div>
       )}
