@@ -200,34 +200,46 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session)
+## Completed Work (2026-01-11 Session - Latest)
 
-### P0 Bug Fix - Member Simulation Feature ✅ FIXED
-**Issue**: When master_admin simulates a member's view, dashboards showed admin's account values instead of the simulated member's.
+### P0 Bug Fix - Member Simulation Feature ✅ COMPLETE
+**Issue 1**: Simulation didn't show member's Total Deposits  
+**Issue 2**: Analytics didn't include admin account values  
+**Issue 3**: No way to view individual member stats  
+**Issue 4**: No date filtering for performance graphs  
 
-**Solution Implemented**:
-1. Updated `ProfitTrackerPage.jsx` to use `effectiveAccountValue` and `effectiveLotSize` from AuthContext
-2. Added simulation banner to ProfitTrackerPage showing member's name and values
-3. Updated Projection Vision section to use effective values during simulation
-4. TradeMonitorPage already had partial simulation support - verified working
+**Solutions Implemented**:
+1. **Total Deposits Fix**: Added `getSimulatedTotalDeposits()` and `getSimulatedTotalProfit()` to AuthContext. Updated ProfitTrackerPage to use `effectiveTotalDeposits` and `effectiveTotalProfit`.
 
-**Testing Results** (iteration_13.json):
-- Backend: 92% pass rate (12/13 tests)
+2. **Admin in Analytics**: Modified `/admin/analytics/team` endpoint to include ALL user roles (members + admins) in team statistics. Team Account Value now shows $14.6K (admin + users).
+
+3. **Member Dropdown**: Added "All Members" dropdown to Analytics page header. Clicking a member opens detailed stats dialog showing Account Value, LOT Size, Total Profit, Total Deposits, Recent Trades.
+
+4. **Date Range Picker**: Added From/To date pickers with Apply button to Performance Overview section. Backend supports `start_date` and `end_date` query parameters.
+
+**Testing Results** (iteration_14.json):
+- Backend: 100% pass rate (8/8 tests)
 - Frontend: 100% all critical flows working
-- Simulation correctly shows member's Account Value ($100) and LOT Size (0.10) when simulating test user
+- All four improvements verified working
 
-### Admin Analytics Dashboard ✅ VERIFIED
-- Team KPIs (Total Account Value, Total Profit, Trader Count, Performance Rate)
-- Performance graphs with tabs (Account Value, Profit, Trades, Performance Rate)
-- Missed Trade notification system with email button
-- Top Performers leaderboard
-- Archive Old Trades button (visible to Super/Master Admin)
-- Recent Team Trades table with pagination
+### Analytics Dashboard Features ✅ COMPLETE
+- Team KPIs (includes all user roles)
+- Performance graphs with date filtering
+- Member dropdown with stats dialog
+- Missed Trade notification system
+- Top Performers leaderboard (shows role badges)
+- Archive Old Trades button
+- Recent Team Trades with pagination
 
 ## Current Test Accounts
-- **Master Admin**: iam@ryansalvador.com / admin123 (role: master_admin)
-- **Test User**: test_user_092113@example.com (role: user, account_value: $100)
+- **Master Admin**: iam@ryansalvador.com / admin123 (role: master_admin, account_value: $14,521.62)
+- **Test User**: test_user_092113@example.com (role: user, account_value: $100, total_deposits: $100)
 
 ## Files Modified This Session
-- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Added simulation support
-- `/app/tests/test_simulation_feature.py` - New test file for simulation feature
+- `/app/frontend/src/contexts/AuthContext.jsx` - Added getSimulatedTotalDeposits, getSimulatedTotalProfit
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Use effective deposits/profit during simulation
+- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Pass total_deposits to simulation
+- `/app/frontend/src/pages/admin/AdminAnalyticsPage.jsx` - Member dropdown, date pickers, stats dialog
+- `/app/frontend/src/lib/api.js` - Added getMemberAnalytics, updated getGrowthData params
+- `/app/backend/server.py` - Include all roles in team stats, date filter support, member analytics endpoint
+- `/app/tests/test_iteration_14.py` - New test file
