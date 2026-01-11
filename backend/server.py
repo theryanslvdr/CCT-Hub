@@ -620,7 +620,7 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
     email = data.email.lower().strip()
     
     # Get Heartbeat API key from settings
-    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
     heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
     
     if not heartbeat_api_key:
