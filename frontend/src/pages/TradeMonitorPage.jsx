@@ -1024,5 +1024,6 @@ export const TradeMonitorPage = () => {
         </Card>
       </div>
     </div>
+    </MobileNotice>
   );
 };
