@@ -262,7 +262,289 @@ export const DashboardPage = () => {
         })}
       </div>
 
-      {/* Charts & Recent Trades */}
+      {/* Tabbed Interface for Members */}
+      {isMember && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1" data-testid="dashboard-tabs">
+            <TabsTrigger 
+              value="overview" 
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              data-testid="tab-overview"
+            >
+              <Wallet className="w-4 h-4" /> Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="profit" 
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              data-testid="tab-profit"
+            >
+              <TrendingUp className="w-4 h-4" /> Profit
+            </TabsTrigger>
+            <TabsTrigger 
+              value="trades" 
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              data-testid="tab-trades"
+            >
+              <History className="w-4 h-4" /> Trades
+            </TabsTrigger>
+            <TabsTrigger 
+              value="charts" 
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              data-testid="tab-charts"
+            >
+              <BarChart3 className="w-4 h-4" /> Charts
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Performance Chart */}
+              <Card className="glass-card lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-white">Performance Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={chartData}>
+                        <defs>
+                          <linearGradient id="colorActualOverview" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorProjectedOverview" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
+                        <YAxis stroke="#71717A" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
+                        <Area type="monotone" dataKey="projected" stroke="#3B82F6" fillOpacity={1} fill="url(#colorProjectedOverview)" name="Projected" />
+                        <Area type="monotone" dataKey="actual" stroke="#10B981" fillOpacity={1} fill="url(#colorActualOverview)" name="Actual" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-zinc-500">
+                      No trade data yet. Start trading to see your performance!
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Your Stats */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Your Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                      <p className="text-xs text-emerald-400 uppercase tracking-wider">Total Profit</p>
+                      <p className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                        {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                      <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
+                      <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                        {((summary?.account_value || 0) / 980).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                      <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
+                      <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                        {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">LOT × 15 multiplier</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Profit Tab */}
+          <TabsContent value="profit" className="mt-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-emerald-400" /> Profit Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Total Deposits</span>
+                      <span className="text-xl font-mono text-white">{formatCurrency(summary?.total_deposits || 0, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Total Profit</span>
+                      <span className="text-xl font-mono text-emerald-400">{formatCurrency(summary?.total_actual_profit || 0, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Projected Profit</span>
+                      <span className="text-xl font-mono text-blue-400">{formatCurrency(summary?.total_projected_profit || 0, 'USD')}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <span className="text-zinc-300 font-medium">Current Balance</span>
+                      <span className="text-2xl font-mono font-bold text-emerald-400">{formatCurrency(summary?.account_value || 0, 'USD')}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-400" /> Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Performance Rate</span>
+                      <span className="text-xl font-mono text-purple-400">{formatNumber(summary?.performance_rate || 0, 1)}%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Profit Difference</span>
+                      <span className={`text-xl font-mono ${(summary?.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {(summary?.profit_difference || 0) >= 0 ? '+' : ''}{formatCurrency(summary?.profit_difference || 0, 'USD')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Total Trades</span>
+                      <span className="text-xl font-mono text-cyan-400">{summary?.total_trades || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Current LOT Size</span>
+                      <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Trades Tab */}
+          <TabsContent value="trades" className="mt-6">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <History className="w-5 h-5 text-cyan-400" /> Trade History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {trades.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full data-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Direction</th>
+                          <th>LOT Size</th>
+                          <th>Projected</th>
+                          <th>Actual</th>
+                          <th>Difference</th>
+                          <th>Performance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {trades.map((trade) => (
+                          <tr key={trade.id}>
+                            <td className="font-mono">{new Date(trade.created_at).toLocaleDateString()}</td>
+                            <td>
+                              <span className={`status-badge ${trade.direction === 'BUY' ? 'direction-buy' : 'direction-sell'}`}>
+                                {trade.direction}
+                              </span>
+                            </td>
+                            <td className="font-mono">{trade.lot_size}</td>
+                            <td className="font-mono">${formatNumber(trade.projected_profit)}</td>
+                            <td className="font-mono">${formatNumber(trade.actual_profit)}</td>
+                            <td className={`font-mono ${trade.profit_difference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {trade.profit_difference >= 0 ? '+' : ''}${formatNumber(trade.profit_difference)}
+                            </td>
+                            <td>
+                              <span className={`status-badge performance-${trade.performance}`}>
+                                {trade.performance === 'exceeded' ? 'Exceeded' : trade.performance === 'perfect' ? 'Perfect' : 'Below'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-zinc-500">
+                    No trades recorded yet. Log your first trade in the Trade Monitor!
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Charts Tab */}
+          <TabsContent value="charts" className="mt-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Profit Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
+                        <YAxis stroke="#71717A" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
+                        <Line type="monotone" dataKey="actual" stroke="#10B981" strokeWidth={2} dot={{ fill: '#10B981' }} name="Actual Profit" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-zinc-500">
+                      No trade data yet.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white">Projected vs Actual</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
+                        <YAxis stroke="#71717A" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
+                        <Bar dataKey="projected" fill="#3B82F6" name="Projected" />
+                        <Bar dataKey="actual" fill="#10B981" name="Actual" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-zinc-500">
+                      No trade data yet.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* Original Layout for Admins (no tabs) */}
+      {!isMember && (
+        <>
+          {/* Charts & Recent Trades */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Performance Chart */}
         <Card className="glass-card lg:col-span-2">
