@@ -255,7 +255,41 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 11 - Latest)
+## Completed Work (2026-01-11 Session 12 - Latest)
+
+### Bug Fixes ✅ COMPLETE
+
+1. **Licensee Account Value Controlled Only by Admin/Deposits/Withdrawals/Trades**
+   - Dashboard and Profit Tracker now fetch `account_value` from `adminAPI.getMemberDetails()` API
+   - API returns `license.current_amount` as the authoritative value for licensees
+   - Removed fallback to `simulatedAccountValue` - only API value is used
+   - Account value synced across Dashboard, Profit Tracker, and Deposit/Withdrawal pages
+
+2. **Licensees Removed from Member Management**
+   - Backend `/admin/members` endpoint now excludes users with `license_type`
+   - Query filter: `"license_type": {"$exists": False}`
+   - Licensees should be managed through Licenses page, not Member Management
+   - Their role is treated as "Licensee", not standard "member"
+
+3. **Login Card Styling**
+   - Removed the `<h1>` title element (platform_name)
+   - Logo now uses `max-w-[200px] max-h-[80px] object-contain mb-2`
+   - Logo is not cropped, displayed at natural aspect ratio
+   - Tagline moved closer to logo with `text-sm` styling
+
+### Testing Results (iteration_25.json)
+- Backend: 100% pass rate (5 tests)
+- Frontend: 100% pass rate
+- All API endpoints verified working
+- UI tests confirmed correct behavior
+
+### Files Modified This Session
+- `/app/backend/server.py` - Member query excludes license_type, getMemberDetails uses license.current_amount
+- `/app/frontend/src/pages/DashboardPage.jsx` - Uses API value only for licensee simulation
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Added specific member simulation case
+- `/app/frontend/src/pages/LoginPage.jsx` - Removed title, fixed logo styling
+
+## Completed Work (2026-01-11 Session 11 - Previous)
 
 ### Bug Fixes & Features ✅ COMPLETE
 
