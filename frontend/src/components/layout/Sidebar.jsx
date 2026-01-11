@@ -5,7 +5,7 @@ import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
-  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug
+  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
