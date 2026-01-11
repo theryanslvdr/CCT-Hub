@@ -11,9 +11,9 @@ import { toast } from 'sonner';
 import { 
   Users, ShieldCheck, ShieldAlert, Search, UserCog, Eye, Ban, 
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
-  Activity, DollarSign, TrendingUp, Calendar
+  Activity, DollarSign, TrendingUp, Calendar, Crown, Play
 } from 'lucide-react';
-import api from '@/lib/api';
+import api, { adminAPI } from '@/lib/api';
 
 export const AdminMembersPage = () => {
   const { user: currentUser, isSuperAdmin } = useAuth();
