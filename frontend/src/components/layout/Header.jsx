@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { adminAPI } from '@/lib/api';
+import { authAPI } from '@/lib/api';
 
 const SECRET_CODE = 'SUPER_ADMIN_BYPASS';
 const CLICKS_REQUIRED = 10;
