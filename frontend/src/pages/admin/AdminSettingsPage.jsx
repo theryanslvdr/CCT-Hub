@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import { 
   Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
-  FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link
+  FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link,
+  LogIn, Plus, Trash2, GripVertical, Copyright
 } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
@@ -28,6 +29,12 @@ export const AdminSettingsPage = () => {
     primary_color: '#3B82F6',
     accent_color: '#06B6D4',
     hide_emergent_badge: false,
+    // Login Customization
+    login_title: '',
+    login_tagline: '',
+    login_notice: 'Only CrossCurrent community members can access this platform.',
+    // Production URL
+    production_site_url: '',
     // Integration API Keys
     emailit_api_key: '',
     cloudinary_cloud_name: '',
@@ -36,6 +43,9 @@ export const AdminSettingsPage = () => {
     heartbeat_api_key: '',
     // Custom Links
     custom_registration_link: '',
+    // Footer
+    footer_copyright: '© 2024 CrossCurrent Finance Center. All rights reserved.',
+    footer_links: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,6 +58,8 @@ export const AdminSettingsPage = () => {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [editorMode, setEditorMode] = useState('code'); // 'code' or 'preview'
   
+  // Footer links management
+  const [newFooterLink, setNewFooterLink] = useState({ label: '', url: '' });
   // Integration test states
   const [testingEmailit, setTestingEmailit] = useState(false);
   const [testingCloudinary, setTestingCloudinary] = useState(false);
