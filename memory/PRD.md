@@ -113,7 +113,14 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - ✅ Debt Management with repayment planning (**HIDDEN - Master Admin only**)
 - ✅ Profit Planner with goal creation and progress tracking (**HIDDEN - Master Admin only**)
 - ✅ Admin: Trading Signals with timezone selection (Asia/Manila, Asia/Singapore, Asia/Taipei)
+  - **Signal History** with pagination (10 per page)
+  - **Monthly Archive** with accordion view (signals organized by month)
+  - Archive Current Month button to clear history
 - ✅ Admin: Member management with role upgrades and allowed_dashboards assignment
+  - **Account Value column** (visible to Super/Master Admin only)
+  - **Simulate Member** feature (view member's real account data)
+  - **Edit Member** without LOT size field
+  - **Pagination** for members list
 - ✅ Admin: API Center for external connections
 - ✅ Admin: Platform Settings (SEO, branding, colors)
 - ✅ **Sidebar Updates (2026-01-11)**:
