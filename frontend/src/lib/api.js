@@ -145,6 +145,27 @@ export const adminAPI = {
   renewLicenseInvite: (inviteId, duration) => api.post(`/admin/license-invites/${inviteId}/renew`, null, { params: { new_duration: duration } }),
   resendLicenseInvite: (inviteId) => api.post(`/admin/license-invites/${inviteId}/resend`),
   deleteLicenseInvite: (inviteId) => api.delete(`/admin/license-invites/${inviteId}`),
+  // Licensee Transactions
+  getLicenseeTransactions: () => api.get('/admin/licensee-transactions'),
+  addTransactionFeedback: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/feedback`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  approveTransaction: (txId) => api.post(`/admin/licensee-transactions/${txId}/approve`),
+  completeTransaction: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/complete`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+};
+
+// Licensee APIs (for licensed users)
+export const licenseeAPI = {
+  getMyTransactions: () => api.get('/profit/licensee/transactions'),
+  submitDeposit: (formData) => api.post('/profit/licensee/deposit', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  submitWithdrawal: (formData) => api.post('/profit/licensee/withdrawal', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  confirmTransaction: (txId) => api.post(`/profit/licensee/transactions/${txId}/confirm`),
 };
 
 // Debt Management APIs
