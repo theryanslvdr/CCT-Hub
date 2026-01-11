@@ -353,6 +353,30 @@ export const AdminSettingsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Platform Name */}
+              <div>
+                <Label className="text-zinc-300">Platform Name</Label>
+                <Input
+                  value={settings.platform_name || ''}
+                  onChange={(e) => setSettings({ ...settings, platform_name: e.target.value })}
+                  placeholder="CrossCurrent"
+                  className="input-dark mt-1"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Displayed in sidebar and login page</p>
+              </div>
+
+              {/* Tagline */}
+              <div>
+                <Label className="text-zinc-300">Tagline</Label>
+                <Input
+                  value={settings.tagline || ''}
+                  onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
+                  placeholder="Finance Center"
+                  className="input-dark mt-1"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Displayed below platform name on login page</p>
+              </div>
+
               {/* Logo */}
               <div>
                 <Label className="text-zinc-300">Logo (replaces CrossCurrent text in sidebar)</Label>
