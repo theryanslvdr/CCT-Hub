@@ -186,7 +186,7 @@ export const DashboardPage = () => {
               Welcome back, {displayName}!
             </h2>
             <p className="text-zinc-400 mt-1">
-              Here's your trading overview for today.
+              Here&apos;s your trading overview for today.
             </p>
           </div>
           {signal && (
