@@ -734,21 +734,30 @@ export const AdminMembersPage = () => {
           {simulationData ? (
             <div className="space-y-6 mt-4">
               {/* Account Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg bg-zinc-900/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <DollarSign className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-xs text-zinc-500">Account Balance</p>
-                      {canSeeAccountValue ? (
-                        <p className="text-xl font-bold text-emerald-400">
-                          ${simulationData.account_balance?.toFixed(2) || '0.00'}
-                        </p>
-                      ) : (
-                        <p className="text-xl font-bold text-zinc-500">***.**</p>
-                      )}
+                      <p className="text-xs text-zinc-500">Account Value</p>
+                      <p className="text-xl font-bold text-emerald-400">
+                        ${simulationData.account_value?.toFixed(2) || '0.00'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-lg bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500">LOT Size</p>
+                      <p className="text-xl font-bold text-purple-400">
+                        {simulationData.lot_size?.toFixed(2) || '0.00'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -767,13 +776,13 @@ export const AdminMembersPage = () => {
                 </div>
                 <div className="p-4 rounded-lg bg-zinc-900/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-purple-400" />
+                    <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
                       <p className="text-xs text-zinc-500">Total Trades</p>
                       <p className="text-xl font-bold text-white">
-                        {simulationData.total_trades || 0}
+                        {simulationData.summary?.total_trades || 0}
                       </p>
                     </div>
                   </div>
