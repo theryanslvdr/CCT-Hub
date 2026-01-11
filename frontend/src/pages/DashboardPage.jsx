@@ -43,13 +43,13 @@ export const DashboardPage = () => {
           currencyAPI.getRates('USDT'),
         ]);
 
-        // Build summary from member data
-        const memberData = memberRes.data;
+        // Build summary from member data - API returns { user, stats, recent_trades }
+        const stats = memberRes.data.stats || {};
         setSummary({
-          account_value: memberData.account_value || simulatedAccountValue || 0,
-          total_actual_profit: memberData.total_profit || simulatedTotalProfit || 0,
-          total_trades: memberData.total_trades || 0,
-          performance_rate: memberData.performance_rate || 0,
+          account_value: stats.account_value || simulatedAccountValue || 0,
+          total_actual_profit: stats.total_profit || simulatedTotalProfit || 0,
+          total_trades: stats.total_trades || 0,
+          performance_rate: 0,
           profit_difference: 0,
         });
         setTrades(tradesRes.data || []);
