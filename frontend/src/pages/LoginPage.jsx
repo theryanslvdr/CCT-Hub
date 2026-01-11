@@ -220,10 +220,10 @@ export const LoginPage = () => {
           </button>
         </div>
 
-        {/* Heartbeat notice */}
+        {/* Community notice */}
         <div className="mt-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
           <p className="text-xs text-zinc-500 text-center">
-            Only Heartbeat community members can access this platform.
+            {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
           </p>
         </div>
       </div>
