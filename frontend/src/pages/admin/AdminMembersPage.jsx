@@ -412,6 +412,7 @@ export const AdminMembersPage = () => {
   const superAdminCount = members.filter(m => m.role === 'super_admin').length;
 
   return (
+    <MobileNotice featureName="Member Management" showOnMobile={true}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
