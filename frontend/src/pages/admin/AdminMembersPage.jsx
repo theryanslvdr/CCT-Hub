@@ -16,7 +16,7 @@ import {
 import api, { adminAPI } from '@/lib/api';
 
 export const AdminMembersPage = () => {
-  const { user: currentUser, isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin, isMasterAdmin, simulateMemberView } = useAuth();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,14 +32,19 @@ export const AdminMembersPage = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [tempPasswordDialogOpen, setTempPasswordDialogOpen] = useState(false);
+  const [simulateDialogOpen, setSimulateDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [memberDetails, setMemberDetails] = useState(null);
+  const [simulationData, setSimulationData] = useState(null);
   
   // Form states
   const [newRole, setNewRole] = useState('admin');
   const [secretCode, setSecretCode] = useState('');
-  const [editForm, setEditForm] = useState({ full_name: '', timezone: '', lot_size: '' });
+  const [editForm, setEditForm] = useState({ full_name: '', timezone: '' });
   const [tempPassword, setTempPassword] = useState('');
+
+  // Check if can see account value (super_admin or master_admin only)
+  const canSeeAccountValue = isSuperAdmin() || isMasterAdmin();
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -75,6 +80,18 @@ export const AdminMembersPage = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Simulate member view
+  const handleSimulateMember = async (member) => {
+    try {
+      const res = await adminAPI.getMemberSimulation(member.id);
+      setSimulationData(res.data);
+      setSelectedMember(member);
+      setSimulateDialogOpen(true);
+    } catch (error) {
+      toast.error('Failed to load member simulation data');
+    }
+  };
 
   const handleViewMember = async (member) => {
     setSelectedMember(member);
