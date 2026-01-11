@@ -3,8 +3,8 @@
   "backend_issues": {
     "critical": [],
     "minor": [
-      {"endpoint": "/api/auth/verify-heartbeat", "issue": "Was using wrong MongoDB filter (id: platform_settings instead of {}). Fixed during testing.", "priority": "FIXED"},
-      {"endpoint": "/api/settings", "issue": "No public /api/settings endpoint exists - LoginPage uses /api/settings/platform which works without auth", "priority": "LOW"}
+      {"endpoint": "/api/auth/verify-heartbeat", "issue": "Was using wrong MongoDB filter. Fixed during testing.", "priority": "FIXED"},
+      {"endpoint": "/api/settings", "issue": "No public /api/settings endpoint - LoginPage uses /api/settings/platform which works without auth", "priority": "LOW"}
     ]
   },
   "frontend_issues": {
@@ -12,60 +12,27 @@
     "integration_issues": [],
     "design_issues": []
   },
-  "test_report_links": [
-    "/app/tests/test_iteration_20.py",
-    "/app/test_reports/pytest/pytest_results_iter20.xml"
-  ],
+  "test_report_links": ["/app/tests/test_iteration_20.py", "/app/test_reports/pytest/pytest_results_iter20.xml"],
   "action_items": [],
   "critical_code_review_comments": [
-    "Backend: Fixed verify-heartbeat endpoint to use correct MongoDB filter {} instead of {id: platform_settings}",
-    "Frontend: Added settingsAPI.get() method to api.js for LoginPage to fetch custom_registration_link"
+    "Backend: Fixed verify-heartbeat endpoint MongoDB filter",
+    "Frontend: Added settingsAPI.get() method to api.js"
   ],
-  "updated_files": [
-    "/app/backend/server.py - Fixed verify-heartbeat MongoDB filter",
-    "/app/frontend/src/lib/api.js - Added settingsAPI.get() method"
-  ],
-  "success_rate": {
-    "backend": "92% (11/12 tests passed)",
-    "frontend": "100% (all UI features verified)"
-  },
-  "test_credentials": {
-    "master_admin": "iam@ryansalvador.com / admin123",
-    "licensee": "iamryan@ryansalvador.me / admin123"
-  },
-  "seed_data_creation": "Updated platform_settings with heartbeat_api_key for testing",
+  "updated_files": ["/app/backend/server.py", "/app/frontend/src/lib/api.js"],
+  "success_rate": {"backend": "92%", "frontend": "100%"},
+  "test_credentials": {"master_admin": "iam@ryansalvador.com / admin123", "licensee": "iamryan@ryansalvador.me / admin123"},
+  "seed_data_creation": "Updated platform_settings with heartbeat_api_key",
   "retest_needed": false,
   "should_main_agent_self_test": false,
-  "context_for_next_testing_agent": "All iteration 20 features verified: 1) Login Page Account Setup dialog with Yes/No membership question works, 2) Settings Links tab with External Registration Link field works, 3) Sidebar Deposit/Withdrawal visible for all users including licensees, 4) Admin Licenses has Change Type button in Active Licenses tab, 5) Member Details Actions tab has Change Type button, 6) View Invite Dialog properly contained, 7) Onboarding overlay uses bg-black/40 (less blur)",
+  "context_for_next_testing_agent": "All iteration 20 features verified working",
   "features_tested": {
-    "login_page_account_setup": {
-      "status": "PASS",
-      "details": "Don't have an account/password? link opens Account Setup dialog with Yes/No membership question"
-    },
-    "settings_links_tab": {
-      "status": "PASS",
-      "details": "Links tab present with External Registration Link field, custom_registration_link saved to platform_settings"
-    },
-    "sidebar_deposit_withdrawal": {
-      "status": "PASS",
-      "details": "Deposit/Withdrawal link visible for master admin and licensee users"
-    },
-    "admin_licenses_change_type": {
-      "status": "PASS",
-      "details": "Change Type button present in Active Licenses tab for each license"
-    },
-    "member_details_change_type": {
-      "status": "PASS",
-      "details": "Change Type button present in Member Details Actions tab for licensed members"
-    },
-    "view_invite_dialog": {
-      "status": "PASS",
-      "details": "Dialog properly contained (448x467 pixels), no overflow issues"
-    },
-    "onboarding_blur": {
-      "status": "PASS",
-      "details": "Overlay uses bg-black/40 class (less blur than previous bg-black/70)"
-    }
+    "login_page_account_setup": "PASS",
+    "settings_links_tab": "PASS",
+    "sidebar_deposit_withdrawal": "PASS",
+    "admin_licenses_change_type": "PASS",
+    "member_details_change_type": "PASS",
+    "view_invite_dialog": "PASS",
+    "onboarding_blur": "PASS"
   },
   "test_date": "2026-01-11T07:30:00Z"
 }
