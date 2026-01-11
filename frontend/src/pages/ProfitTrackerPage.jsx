@@ -642,15 +642,15 @@ export const ProfitTrackerPage = () => {
     return amount * rate;
   };
 
-  // Projection data
+  // Projection data - use effective account value for simulations
   const projectionData = useMemo(() => 
-    generateProjectionData(summary?.account_value || 0, selectedYears),
-    [summary?.account_value, selectedYears]
+    generateProjectionData(effectiveAccountValue, selectedYears),
+    [effectiveAccountValue, selectedYears]
   );
   
   const monthlyProjection = useMemo(() => 
-    generateMonthlyProjection(summary?.account_value || 0, tradeLogs),
-    [summary?.account_value, tradeLogs]
+    generateMonthlyProjection(effectiveAccountValue, tradeLogs),
+    [effectiveAccountValue, tradeLogs]
   );
   
   const yearlyGroupedProjection = useMemo(() => 
