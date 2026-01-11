@@ -670,7 +670,7 @@ async def set_password_for_member(data: SetPasswordRequest):
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
     
     # Verify Heartbeat membership first
-    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
     heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
     
     if not heartbeat_api_key:
