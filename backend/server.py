@@ -630,6 +630,18 @@ async def create_deposit(data: DepositCreate, user: dict = Depends(get_current_u
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.deposits.insert_one(deposit)
+    
+    # Create notification for admins
+    await create_admin_notification(
+        notification_type="deposit",
+        title="New Deposit",
+        message=f"{user['full_name']} deposited ${data.amount:.2f}",
+        user_id=user["id"],
+        user_name=user["full_name"],
+        amount=data.amount,
+        metadata={"product": data.product, "currency": data.currency}
+    )
+    
     return DepositResponse(**{**deposit, "created_at": datetime.fromisoformat(deposit["created_at"])})
 
 @profit_router.get("/deposits", response_model=List[DepositResponse])
