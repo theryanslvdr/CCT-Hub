@@ -32,6 +32,8 @@ export const AdminSettingsPage = () => {
     cloudinary_api_key: '',
     cloudinary_api_secret: '',
     heartbeat_api_key: '',
+    // Custom Links
+    custom_registration_link: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
