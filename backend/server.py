@@ -609,6 +609,121 @@ async def verify_password(data: VerifyPasswordRequest, user: dict = Depends(get_
     is_valid = bcrypt.checkpw(data.password.encode(), db_user["password"].encode())
     return {"valid": is_valid}
 
+class HeartbeatVerifyRequest(BaseModel):
+    email: str
+
+@auth_router.post("/verify-heartbeat")
+async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
+    """Verify if email is a Heartbeat member and return user info if exists"""
+    email = data.email.lower().strip()
+    
+    # Get Heartbeat API key from settings
+    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
+    
+    if not heartbeat_api_key:
+        raise HTTPException(status_code=500, detail="Heartbeat integration not configured")
+    
+    # Verify with Heartbeat
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.heartbeat.chat/v0/users/byEmail/{email}",
+                headers={"Authorization": f"Bearer {heartbeat_api_key}"}
+            )
+            
+            if response.status_code == 200:
+                heartbeat_data = response.json()
+                heartbeat_user_id = heartbeat_data.get("id")
+                
+                # Check if user already exists in our DB
+                existing_user = await db.users.find_one({"email": email}, {"_id": 0, "id": 1, "full_name": 1, "password": 1})
+                
+                return {
+                    "verified": True,
+                    "user": {
+                        "email": email,
+                        "full_name": heartbeat_data.get("name", email.split('@')[0]),
+                        "heartbeat_id": heartbeat_user_id,
+                        "has_password": existing_user is not None and existing_user.get("password") is not None
+                    }
+                }
+            else:
+                return {"verified": False, "user": None}
+    except Exception as e:
+        print(f"Heartbeat verification error: {e}")
+        return {"verified": False, "user": None}
+
+class SetPasswordRequest(BaseModel):
+    email: str
+    password: str
+
+@auth_router.post("/set-password")
+async def set_password_for_member(data: SetPasswordRequest):
+    """Set password for a verified Heartbeat member"""
+    email = data.email.lower().strip()
+    
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Verify Heartbeat membership first
+    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
+    
+    if not heartbeat_api_key:
+        raise HTTPException(status_code=500, detail="Heartbeat integration not configured")
+    
+    try:
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.heartbeat.chat/v0/users/byEmail/{email}",
+                headers={"Authorization": f"Bearer {heartbeat_api_key}"}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail="Email not verified with Heartbeat")
+            
+            heartbeat_data = response.json()
+            heartbeat_user_id = heartbeat_data.get("id")
+            full_name = heartbeat_data.get("name", email.split('@')[0])
+    except Exception as e:
+        print(f"Heartbeat verification error: {e}")
+        raise HTTPException(status_code=400, detail="Failed to verify Heartbeat membership")
+    
+    # Hash password
+    hashed_password = hash_password(data.password)
+    
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": email}, {"_id": 0})
+    
+    if existing_user:
+        # Update existing user's password
+        await db.users.update_one(
+            {"email": email},
+            {"$set": {"password": hashed_password}}
+        )
+        return {"message": "Password updated successfully"}
+    else:
+        # Create new user
+        user_id = str(uuid.uuid4())
+        new_user = {
+            "id": user_id,
+            "email": email,
+            "password": hashed_password,
+            "full_name": full_name,
+            "role": "member",
+            "heartbeat_user_id": heartbeat_user_id,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "is_suspended": False,
+            "lot_size": 0.01,
+            "timezone": "Asia/Manila",
+            "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "profile"]
+        }
+        await db.users.insert_one(new_user)
+        return {"message": "Account created successfully"}
+
 class SecretUpgradeRequest(BaseModel):
     user_id: str
     new_role: str
