@@ -826,6 +826,8 @@ export const AdminMembersPage = () => {
                       full_name: selectedMember.full_name,
                       account_value: simulationData.account_value,
                       lot_size: simulationData.lot_size,
+                      total_deposits: simulationData.total_deposits,
+                      total_profit: simulationData.total_profit,
                       allowed_dashboards: selectedMember.allowed_dashboards,
                     });
                     setSimulateDialogOpen(false);
