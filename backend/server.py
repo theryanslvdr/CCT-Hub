@@ -2830,6 +2830,348 @@ async def register_with_license(
         }
     }
 
+# ==================== LICENSEE TRANSACTIONS ====================
+@admin_router.get("/licensee-transactions")
+async def get_all_licensee_transactions(user: dict = Depends(require_admin)):
+    """Get all licensee deposit/withdrawal requests (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can view licensee transactions")
+    
+    transactions = await db.licensee_transactions.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with user info
+    for tx in transactions:
+        user_doc = await db.users.find_one({"id": tx["user_id"]}, {"_id": 0, "full_name": 1, "email": 1})
+        if user_doc:
+            tx["user_name"] = user_doc.get("full_name", "Unknown")
+            tx["user_email"] = user_doc.get("email", "")
+    
+    return {"transactions": transactions}
+
+@admin_router.post("/licensee-transactions/{tx_id}/feedback")
+async def add_transaction_feedback(
+    tx_id: str, 
+    message: str = Form(...),
+    status: Optional[str] = Form(None),
+    final_amount: Optional[float] = Form(None),
+    screenshot: Optional[UploadFile] = File(None),
+    user: dict = Depends(require_admin)
+):
+    """Add feedback to a licensee transaction (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can respond to transactions")
+    
+    tx = await db.licensee_transactions.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Handle screenshot upload
+    screenshot_url = None
+    if screenshot:
+        try:
+            contents = await screenshot.read()
+            upload_result = cloudinary.uploader.upload(
+                contents,
+                folder="licensee_transactions",
+                resource_type="auto"
+            )
+            screenshot_url = upload_result.get("secure_url")
+        except Exception as e:
+            logging.error(f"Failed to upload screenshot: {e}")
+    
+    feedback_entry = {
+        "id": str(uuid.uuid4()),
+        "message": message,
+        "status_change": status,
+        "final_amount": final_amount,
+        "screenshot_url": screenshot_url,
+        "from_admin": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"],
+        "created_by_name": user.get("full_name", "Admin")
+    }
+    
+    update_data = {
+        "$push": {"feedback": feedback_entry},
+        "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+    }
+    
+    if status:
+        update_data["$set"]["status"] = status
+    
+    if final_amount is not None:
+        update_data["$set"]["final_amount"] = final_amount
+    
+    await db.licensee_transactions.update_one({"id": tx_id}, update_data)
+    
+    # Create notification for the licensee
+    notification = {
+        "id": str(uuid.uuid4()),
+        "type": "transaction_feedback",
+        "title": f"Update on your {tx['type']} request",
+        "message": message,
+        "user_id": tx["user_id"],
+        "admin_id": user["id"],
+        "transaction_id": tx_id,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
+    return {"message": "Feedback added successfully"}
+
+@admin_router.post("/licensee-transactions/{tx_id}/approve")
+async def approve_transaction(tx_id: str, user: dict = Depends(require_admin)):
+    """Approve/accept a pending transaction (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can approve transactions")
+    
+    tx = await db.licensee_transactions.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    await db.licensee_transactions.update_one(
+        {"id": tx_id},
+        {"$set": {
+            "status": "processing",
+            "approved_at": datetime.now(timezone.utc).isoformat(),
+            "approved_by": user["id"]
+        }}
+    )
+    
+    return {"message": "Transaction approved and set to processing"}
+
+@admin_router.post("/licensee-transactions/{tx_id}/complete")
+async def complete_transaction(
+    tx_id: str,
+    screenshot: Optional[UploadFile] = File(None),
+    user: dict = Depends(require_admin)
+):
+    """Mark transaction as completed with optional screenshot (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can complete transactions")
+    
+    tx = await db.licensee_transactions.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Handle screenshot upload
+    screenshot_url = None
+    if screenshot:
+        try:
+            contents = await screenshot.read()
+            upload_result = cloudinary.uploader.upload(
+                contents,
+                folder="licensee_transactions",
+                resource_type="auto"
+            )
+            screenshot_url = upload_result.get("secure_url")
+        except Exception as e:
+            logging.error(f"Failed to upload screenshot: {e}")
+    
+    update_data = {
+        "status": "completed",
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "completed_by": user["id"]
+    }
+    
+    if screenshot_url:
+        update_data["completion_screenshot_url"] = screenshot_url
+    
+    await db.licensee_transactions.update_one({"id": tx_id}, {"$set": update_data})
+    
+    # If withdrawal, deduct from user balance
+    if tx["type"] == "withdrawal":
+        licensee = await db.users.find_one({"id": tx["user_id"]}, {"_id": 0})
+        if licensee:
+            # Record the withdrawal in deposits collection
+            withdrawal_record = {
+                "id": str(uuid.uuid4()),
+                "user_id": tx["user_id"],
+                "amount": -abs(tx["amount"]),
+                "type": "withdrawal",
+                "notes": f"Licensee withdrawal - Transaction #{tx_id[:8]}",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.deposits.insert_one(withdrawal_record)
+    
+    return {"message": "Transaction completed successfully"}
+
+# Licensee endpoints (for licensed users)
+@profit_router.post("/licensee/deposit")
+async def create_licensee_deposit(
+    amount: float = Form(...),
+    deposit_date: str = Form(...),
+    notes: Optional[str] = Form(None),
+    screenshot: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """Submit a deposit request (Licensees only)"""
+    # Check if user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        raise HTTPException(status_code=403, detail="Only licensed users can use this feature")
+    
+    # Upload screenshot
+    screenshot_url = None
+    try:
+        contents = await screenshot.read()
+        upload_result = cloudinary.uploader.upload(
+            contents,
+            folder="licensee_deposits",
+            resource_type="auto"
+        )
+        screenshot_url = upload_result.get("secure_url")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload screenshot: {str(e)}")
+    
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "type": "deposit",
+        "amount": amount,
+        "deposit_date": deposit_date,
+        "notes": notes,
+        "screenshot_url": screenshot_url,
+        "status": "pending",
+        "feedback": [],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.licensee_transactions.insert_one(transaction)
+    
+    # Notify master admin
+    admins = await db.users.find({"role": "master_admin"}, {"_id": 0, "id": 1}).to_list(100)
+    for admin in admins:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "type": "licensee_deposit",
+            "title": "New Licensee Deposit Request",
+            "message": f"{user.get('full_name', 'A licensee')} submitted a deposit request for ${amount:,.2f}",
+            "user_id": admin["id"],
+            "from_user_id": user["id"],
+            "transaction_id": transaction["id"],
+            "amount": amount,
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    return {"message": "Deposit request submitted successfully", "transaction_id": transaction["id"]}
+
+@profit_router.post("/licensee/withdrawal")
+async def create_licensee_withdrawal(
+    amount: float = Form(...),
+    notes: Optional[str] = Form(None),
+    user: dict = Depends(get_current_user)
+):
+    """Submit a withdrawal request (Licensees only) - 5 business days processing"""
+    # Check if user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        raise HTTPException(status_code=403, detail="Only licensed users can use this feature")
+    
+    # Check if user has sufficient balance
+    deposits = await db.deposits.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit", "withdrawal"])
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+    
+    trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    
+    current_balance = total_deposits - total_withdrawals + total_profit
+    
+    if amount > current_balance:
+        raise HTTPException(status_code=400, detail=f"Insufficient balance. Current balance: ${current_balance:,.2f}")
+    
+    transaction = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "type": "withdrawal",
+        "amount": amount,
+        "notes": notes,
+        "status": "pending",
+        "processing_days": 5,  # 5 business days for licensees
+        "feedback": [],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.licensee_transactions.insert_one(transaction)
+    
+    # Notify master admin
+    admins = await db.users.find({"role": "master_admin"}, {"_id": 0, "id": 1}).to_list(100)
+    for admin in admins:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "type": "licensee_withdrawal",
+            "title": "New Licensee Withdrawal Request",
+            "message": f"{user.get('full_name', 'A licensee')} requested a withdrawal of ${amount:,.2f}",
+            "user_id": admin["id"],
+            "from_user_id": user["id"],
+            "transaction_id": transaction["id"],
+            "amount": amount,
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    return {
+        "message": "Withdrawal request submitted successfully. Processing time: 5 business days.",
+        "transaction_id": transaction["id"],
+        "processing_days": 5
+    }
+
+@profit_router.get("/licensee/transactions")
+async def get_my_licensee_transactions(user: dict = Depends(get_current_user)):
+    """Get current user's licensee transactions"""
+    # Check if user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        return {"transactions": [], "is_licensee": False}
+    
+    transactions = await db.licensee_transactions.find(
+        {"user_id": user["id"]}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"transactions": transactions, "is_licensee": True, "license": license}
+
+@profit_router.post("/licensee/transactions/{tx_id}/confirm")
+async def confirm_licensee_transaction(tx_id: str, user: dict = Depends(get_current_user)):
+    """Licensee confirms the transaction after seeing admin's calculations"""
+    tx = await db.licensee_transactions.find_one({"id": tx_id, "user_id": user["id"]}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    if tx["status"] != "awaiting_confirmation":
+        raise HTTPException(status_code=400, detail="Transaction is not awaiting confirmation")
+    
+    await db.licensee_transactions.update_one(
+        {"id": tx_id},
+        {"$set": {
+            "status": "processing",
+            "confirmed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify master admin
+    admins = await db.users.find({"role": "master_admin"}, {"_id": 0, "id": 1}).to_list(100)
+    for admin in admins:
+        notification = {
+            "id": str(uuid.uuid4()),
+            "type": "licensee_confirmation",
+            "title": "Licensee Confirmed Transaction",
+            "message": f"{user.get('full_name', 'A licensee')} confirmed their {tx['type']} request",
+            "user_id": admin["id"],
+            "from_user_id": user["id"],
+            "transaction_id": tx_id,
+            "is_read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notification)
+    
+    return {"message": "Transaction confirmed. Admin will process your request."}
+
 # ==================== EMAIL TEMPLATES ====================
 @settings_router.get("/email-templates")
 async def get_email_templates(user: dict = Depends(require_admin)):
