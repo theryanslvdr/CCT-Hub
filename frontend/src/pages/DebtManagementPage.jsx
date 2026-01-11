@@ -204,7 +204,10 @@ export const DebtManagementPage = () => {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <Label className="text-zinc-300">Debt Name</Label>
+              <Label className="text-zinc-300 flex items-center">
+                Debt Name
+                <InfoTooltip content="Give your debt a recognizable name like 'Chase Credit Card' or 'Car Loan'" />
+              </Label>
               <Input
                 value={newDebt.name}
                 onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
@@ -215,7 +218,10 @@ export const DebtManagementPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-zinc-300">Total Amount</Label>
+                <Label className="text-zinc-300 flex items-center">
+                  Total Amount
+                  <InfoTooltip content="The total remaining balance you owe on this debt" />
+                </Label>
                 <Input
                   type="number"
                   value={newDebt.total_amount}
@@ -226,7 +232,10 @@ export const DebtManagementPage = () => {
                 />
               </div>
               <div>
-                <Label className="text-zinc-300">Minimum Payment</Label>
+                <Label className="text-zinc-300 flex items-center">
+                  Minimum Payment
+                  <InfoTooltip content="The minimum amount due each month to stay current" />
+                </Label>
                 <Input
                   type="number"
                   value={newDebt.minimum_payment}
@@ -238,7 +247,10 @@ export const DebtManagementPage = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-zinc-300">Due Day (1-31)</Label>
+                <Label className="text-zinc-300 flex items-center">
+                  Due Day (1-31)
+                  <InfoTooltip content="The day of the month when your payment is due" />
+                </Label>
                 <Input
                   type="number"
                   min="1"
@@ -249,7 +261,10 @@ export const DebtManagementPage = () => {
                 />
               </div>
               <div>
-                <Label className="text-zinc-300">Interest Rate (%)</Label>
+                <Label className="text-zinc-300 flex items-center">
+                  Interest Rate (%)
+                  <InfoTooltip content="Annual interest rate (APR). Used to calculate how much extra you'll pay over time" />
+                </Label>
                 <Input
                   type="number"
                   step="0.1"
