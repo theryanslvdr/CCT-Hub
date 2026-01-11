@@ -388,6 +388,7 @@ export const DebtManagementPage = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
