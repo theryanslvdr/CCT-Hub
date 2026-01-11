@@ -82,7 +82,7 @@ class TestLicenseRegistration:
             json={
                 "license_type": "honorary",
                 "starting_amount": 1000,
-                "valid_days": 30,
+                "valid_duration": "3_months",  # 3_months, 6_months, 1_year, indefinite
                 "max_uses": 1,
                 "invitee_name": f"Test User {unique_id}",
                 "notes": "Test invite for registration"
@@ -153,8 +153,10 @@ class TestAdminLicensesAccess:
         assert response.status_code == 200, f"Licenses endpoint failed: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list), "Expected list of licenses"
-        print(f"✓ Master admin can access licenses endpoint: {len(data)} licenses found")
+        # Response is wrapped in {"licenses": [...]}
+        licenses = data.get("licenses", data) if isinstance(data, dict) else data
+        assert isinstance(licenses, list), f"Expected list of licenses, got {type(licenses)}"
+        print(f"✓ Master admin can access licenses endpoint: {len(licenses)} licenses found")
     
     def test_license_invites_endpoint(self):
         """Test license invites endpoint"""
@@ -172,8 +174,10 @@ class TestAdminLicensesAccess:
         assert response.status_code == 200, f"License invites endpoint failed: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list), "Expected list of license invites"
-        print(f"✓ Master admin can access license invites: {len(data)} invites found")
+        # Response is wrapped in {"invites": [...]}
+        invites = data.get("invites", data) if isinstance(data, dict) else data
+        assert isinstance(invites, list), f"Expected list of license invites, got {type(invites)}"
+        print(f"✓ Master admin can access license invites: {len(invites)} invites found")
 
 
 class TestLicenseeTransactions:
@@ -195,8 +199,10 @@ class TestLicenseeTransactions:
         assert response.status_code == 200, f"Licensee transactions endpoint failed: {response.text}"
         
         data = response.json()
-        assert isinstance(data, list), "Expected list of transactions"
-        print(f"✓ Master admin can access licensee transactions: {len(data)} transactions found")
+        # Response is wrapped in {"transactions": [...]}
+        transactions = data.get("transactions", data) if isinstance(data, dict) else data
+        assert isinstance(transactions, list), f"Expected list of transactions, got {type(transactions)}"
+        print(f"✓ Master admin can access licensee transactions: {len(transactions)} transactions found")
 
 
 class TestHealthCheck:
