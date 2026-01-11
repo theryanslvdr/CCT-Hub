@@ -838,6 +838,122 @@ export const AdminMembersPage = () => {
                   )}
                 </div>
               </TabsContent>
+              
+              {/* Actions Tab */}
+              <TabsContent value="actions" className="mt-4">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-zinc-400">Member Actions</h4>
+                  
+                  {/* Simulate Member View */}
+                  {selectedMember?.role === 'member' && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <Play className="w-5 h-5 text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">Simulate Member View</p>
+                            <p className="text-xs text-zinc-500">See the platform from this member's perspective</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            handleSimulateMember(selectedMember);
+                          }}
+                          className="btn-secondary"
+                        >
+                          <Play className="w-4 h-4 mr-1" /> Simulate
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manage License - Master Admin only */}
+                  {isMasterAdmin() && selectedMember?.role === 'member' && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${memberLicense ? 'bg-purple-500/20' : 'bg-zinc-800'}`}>
+                            <Award className={`w-5 h-5 ${memberLicense ? 'text-purple-400' : 'text-zinc-500'}`} />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">
+                              {memberLicense ? `${memberLicense.license_type === 'extended' ? 'Extended' : 'Honorary'} License` : 'No License'}
+                            </p>
+                            <p className="text-xs text-zinc-500">
+                              {memberLicense ? `Since ${memberLicense.start_date}` : 'Assign a license to this member'}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            handleOpenLicenseDialog(selectedMember);
+                          }}
+                          className={memberLicense ? 'btn-secondary' : 'btn-primary'}
+                        >
+                          <Award className="w-4 h-4 mr-1" /> {memberLicense ? 'Manage' : 'Assign'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upgrade Role */}
+                  {selectedMember?.role === 'member' && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">Upgrade Role</p>
+                            <p className="text-xs text-zinc-500">Promote to Admin or Super Admin</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            setUpgradeDialogOpen(true);
+                          }}
+                          className="btn-secondary"
+                        >
+                          <ShieldCheck className="w-4 h-4 mr-1" /> Upgrade
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Downgrade Role - For admins */}
+                  {selectedMember?.role !== 'member' && isSuperAdmin && selectedMember?.id !== user?.id && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                            <Users className="w-5 h-5 text-amber-400" />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">Downgrade Role</p>
+                            <p className="text-xs text-zinc-500">Demote to regular member</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            handleDowngradeRole(selectedMember.id);
+                          }}
+                          variant="outline"
+                          className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                        >
+                          <Users className="w-4 h-4 mr-1" /> Downgrade
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
             </Tabs>
           ) : (
             <div className="flex items-center justify-center h-32">
