@@ -285,7 +285,6 @@ export const AdminSettingsPage = () => {
           >
             <Mail className="w-4 h-4 mr-2" /> Emails
           </TabsTrigger>
-          </TabsTrigger>
         </TabsList>
 
         {/* SEO & Meta Tab */}
