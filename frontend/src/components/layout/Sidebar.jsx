@@ -163,7 +163,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
               <div className="flex items-center gap-2 text-amber-400 text-xs mb-2">
                 <Eye className="w-3.5 h-3.5" />
-                <span>Simulating Member View</span>
+                <span>Simulating: {simulatedView.displayName || simulatedView.role}</span>
               </div>
               <Button 
                 variant="outline" 
@@ -175,14 +175,60 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </Button>
             </div>
           ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => simulateMemberView('member')}
-              className="w-full h-8 text-xs text-zinc-400 border-zinc-700 hover:bg-zinc-800"
-            >
-              <Eye className="w-3.5 h-3.5 mr-1.5" /> Simulate Member View
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full h-8 text-xs text-zinc-400 border-zinc-700 hover:bg-zinc-800 justify-between"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5" /> Simulate View
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-zinc-900 border-zinc-700">
+                <DropdownMenuLabel className="text-zinc-500 text-xs">Role Simulation</DropdownMenuLabel>
+                <DropdownMenuItem 
+                  onClick={() => simulateMemberView({ role: 'member', displayName: 'Member' })}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <User className="w-4 h-4 mr-2 text-blue-400" />
+                  Member View
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => simulateMemberView({ role: 'basic_admin', displayName: 'Basic Admin' })}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <UserCheck className="w-4 h-4 mr-2 text-green-400" />
+                  Basic Admin View
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => simulateMemberView({ role: 'super_admin', displayName: 'Super Admin' })}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2 text-purple-400" />
+                  Super Admin View
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-700" />
+                <DropdownMenuLabel className="text-zinc-500 text-xs">Licensee Simulation</DropdownMenuLabel>
+                <DropdownMenuItem 
+                  onClick={() => simulateMemberView({ role: 'member', license_type: 'honorary', displayName: 'Honorary Licensee' })}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <Star className="w-4 h-4 mr-2 text-amber-400" />
+                  Honorary Licensee View
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => simulateMemberView({ role: 'member', license_type: 'extended', displayName: 'Extended Licensee' })}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
+                  Extended Licensee View
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       )}
