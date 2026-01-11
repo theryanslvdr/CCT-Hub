@@ -231,6 +231,8 @@ class PlatformSettings(BaseModel):
     cloudinary_api_key: Optional[str] = None
     cloudinary_api_secret: Optional[str] = None
     heartbeat_api_key: Optional[str] = None
+    # Custom Links
+    custom_registration_link: Optional[str] = None
 
 class LicenseType(str, Enum):
     STANDARD = "standard"
