@@ -150,11 +150,11 @@ class TestLicenseInviteActions:
         return invite
     
     def test_revoke_invite(self, auth_token, test_invite):
-        """Test 5: PUT /api/admin/license-invites/:id/revoke revokes invite"""
+        """Test 5: POST /api/admin/license-invites/:id/revoke revokes invite"""
         if not test_invite:
             pytest.skip("No test invite available")
         
-        response = requests.put(
+        response = requests.post(
             f"{BASE_URL}/api/admin/license-invites/{test_invite['id']}/revoke",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
@@ -162,14 +162,14 @@ class TestLicenseInviteActions:
         print(f"✓ Test 5: Revoked invite {test_invite['code']}")
     
     def test_renew_invite(self, auth_token, test_invite):
-        """Test 6: PUT /api/admin/license-invites/:id/renew renews invite"""
+        """Test 6: POST /api/admin/license-invites/:id/renew renews invite"""
         if not test_invite:
             pytest.skip("No test invite available")
         
-        response = requests.put(
+        response = requests.post(
             f"{BASE_URL}/api/admin/license-invites/{test_invite['id']}/renew",
             headers={"Authorization": f"Bearer {auth_token}"},
-            json={"duration": "6_months"}
+            params={"new_duration": "6_months"}
         )
         assert response.status_code == 200, f"Renew failed: {response.text}"
         print(f"✓ Test 6: Renewed invite {test_invite['code']}")
