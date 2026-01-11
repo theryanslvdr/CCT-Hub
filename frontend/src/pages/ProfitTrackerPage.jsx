@@ -1197,6 +1197,7 @@ export const ProfitTrackerPage = () => {
         </Dialog>
         </div>
       </div>
+      )}
 
       {/* Initial Balance Setup Dialog */}
       <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
