@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { TrendingUp, Mail, Lock, AlertCircle, HelpCircle, CheckCircle2, XCircle, ExternalLink, Loader2, Key } from 'lucide-react';
+import { TrendingUp, Mail, Lock, AlertCircle, HelpCircle, CheckCircle2, XCircle, ExternalLink, Loader2, Key, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { settingsAPI } from '@/lib/api';
 
@@ -16,6 +16,12 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [platformSettings, setPlatformSettings] = useState(null);
+  
+  // Maintenance mode states
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState('');
+  const [masterOverrideClicks, setMasterOverrideClicks] = useState(0);
+  const [showLoginOverride, setShowLoginOverride] = useState(false);
   
   // No account dialog states
   const [noAccountOpen, setNoAccountOpen] = useState(false);
@@ -29,12 +35,18 @@ export const LoginPage = () => {
   const [customLink, setCustomLink] = useState('');
   const [creating, setCreating] = useState(false);
 
-  // Load platform settings for logo
+  // Load platform settings for logo and maintenance mode
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const res = await settingsAPI.getPlatform();
         setPlatformSettings(res.data);
+        
+        // Check maintenance mode
+        if (res.data?.maintenance_mode) {
+          setMaintenanceMode(true);
+          setMaintenanceMessage(res.data.maintenance_message || 'Our services are undergoing maintenance, and will be back soon!');
+        }
       } catch (error) {
         console.error('Failed to load platform settings');
       }
@@ -42,8 +54,86 @@ export const LoginPage = () => {
     loadSettings();
   }, []);
 
+  // Handle master admin override clicks
+  const handleOverrideClick = () => {
+    const newClicks = masterOverrideClicks + 1;
+    setMasterOverrideClicks(newClicks);
+    
+    if (newClicks >= 5) {
+      setShowLoginOverride(true);
+      toast.info('Master Admin override activated');
+    }
+  };
+
   if (isAuthenticated && !loading) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // Maintenance Page
+  if (maintenanceMode && !showLoginOverride) {
+    return (
+      <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl text-center">
+          {/* Logo */}
+          <div className="mb-8">
+            {platformSettings?.logo_url ? (
+              <img 
+                src={platformSettings.logo_url} 
+                alt={platformSettings?.platform_name || 'Logo'} 
+                className="h-16 mx-auto mb-4"
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <TrendingUp className="w-7 h-7 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-white tracking-wider">
+                  {platformSettings?.platform_name || 'CROSS CURRENT'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Maintenance Icon */}
+          <div className="mb-8">
+            <div className="w-24 h-24 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center animate-pulse">
+              <Wrench className="w-12 h-12 text-amber-400" />
+            </div>
+          </div>
+
+          {/* Maintenance Message */}
+          <div className="glass-card p-8 rounded-2xl">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Under Maintenance
+            </h1>
+            <p className="text-lg sm:text-xl text-zinc-300 leading-relaxed">
+              {maintenanceMessage.split('soon').map((part, index, array) => (
+                <React.Fragment key={index}>
+                  {part}
+                  {index < array.length - 1 && (
+                    <span 
+                      onClick={handleOverrideClick}
+                      className="cursor-default select-none"
+                      data-testid="maintenance-override-trigger"
+                    >
+                      soon
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </p>
+            <p className="text-zinc-500 mt-6 text-sm">
+              We're working hard to bring you an improved experience. Please check back later.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <p className="mt-8 text-zinc-600 text-sm">
+            {platformSettings?.footer_copyright || '© 2024 CrossCurrent Finance Center'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e) => {
