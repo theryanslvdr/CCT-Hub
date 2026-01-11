@@ -94,7 +94,11 @@ export const profitAPI = {
 // Trade Monitor APIs
 export const tradeAPI = {
   logTrade: (data) => api.post('/trade/log', data),
-  getLogs: (limit = 50) => api.get('/trade/logs', { params: { limit } }),
+  getLogs: (limit = 50, userId = null) => {
+    const params = { limit };
+    if (userId) params.user_id = userId;
+    return api.get('/trade/logs', { params });
+  },
   getHistory: (page = 1, pageSize = 10) => api.get('/trade/history', { params: { page, page_size: pageSize } }),
   updateTimeEntered: (tradeId, timeEntered) => api.put(`/trade/logs/${tradeId}/time-entered`, { time_entered: timeEntered }),
   getStreak: () => api.get('/trade/streak'),
@@ -112,6 +116,7 @@ export const adminAPI = {
   archiveMonth: () => api.post('/admin/signals/archive-month'),
   deleteSignal: (id) => api.delete(`/admin/signals/${id}`),
   getMembers: () => api.get('/admin/members'),
+  getMemberDetails: (userId) => api.get(`/admin/members/${userId}/details`),
   getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
