@@ -175,7 +175,7 @@ def get_license_invite_email(invite_code: str, invitee_name: str, license_type: 
     """
     
     return {
-        "subject": f"You're Invited to Join CrossCurrent Finance Center",
+        "subject": "You're Invited to Join CrossCurrent Finance Center",
         "html": html,
         "text": text
     }
