@@ -59,6 +59,7 @@ export const AdminSettingsPage = () => {
 
   useEffect(() => {
     loadSettings();
+    loadEmailTemplates();
   }, []);
 
   // Apply settings to document
@@ -83,6 +84,89 @@ export const AdminSettingsPage = () => {
       console.error('Failed to load settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadEmailTemplates = async () => {
+    try {
+      const res = await settingsAPI.getEmailTemplates();
+      setEmailTemplates(res.data.templates || []);
+    } catch (error) {
+      console.error('Failed to load email templates:', error);
+    }
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!editingTemplate) return;
+    
+    setSavingTemplate(true);
+    try {
+      await settingsAPI.updateEmailTemplate(editingTemplate.type, {
+        subject: editingTemplate.subject,
+        body: editingTemplate.body,
+        variables: editingTemplate.variables
+      });
+      toast.success('Email template saved!');
+      setEditingTemplate(null);
+      loadEmailTemplates();
+    } catch (error) {
+      toast.error('Failed to save template');
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  const handleTestEmailit = async () => {
+    setTestingEmailit(true);
+    try {
+      const res = await settingsAPI.testEmailit();
+      setTestResults(prev => ({ ...prev, emailit: res.data }));
+      if (res.data.success) {
+        toast.success('Emailit connection successful!');
+      } else {
+        toast.error(res.data.message || 'Connection failed');
+      }
+    } catch (error) {
+      setTestResults(prev => ({ ...prev, emailit: { success: false, message: 'Connection failed' } }));
+      toast.error('Failed to test connection');
+    } finally {
+      setTestingEmailit(false);
+    }
+  };
+
+  const handleTestCloudinary = async () => {
+    setTestingCloudinary(true);
+    try {
+      const res = await settingsAPI.testCloudinary();
+      setTestResults(prev => ({ ...prev, cloudinary: res.data }));
+      if (res.data.success) {
+        toast.success('Cloudinary connection successful!');
+      } else {
+        toast.error(res.data.message || 'Connection failed');
+      }
+    } catch (error) {
+      setTestResults(prev => ({ ...prev, cloudinary: { success: false, message: 'Connection failed' } }));
+      toast.error('Failed to test connection');
+    } finally {
+      setTestingCloudinary(false);
+    }
+  };
+
+  const handleTestHeartbeat = async () => {
+    setTestingHeartbeat(true);
+    try {
+      const res = await settingsAPI.testHeartbeat();
+      setTestResults(prev => ({ ...prev, heartbeat: res.data }));
+      if (res.data.success) {
+        toast.success('Heartbeat connection successful!');
+      } else {
+        toast.error(res.data.message || 'Connection failed');
+      }
+    } catch (error) {
+      setTestResults(prev => ({ ...prev, heartbeat: { success: false, message: 'Connection failed' } }));
+      toast.error('Failed to test connection');
+    } finally {
+      setTestingHeartbeat(false);
     }
   };
 
