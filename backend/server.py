@@ -224,6 +224,27 @@ class PlatformSettings(BaseModel):
     accent_color: str = "#06B6D4"
     hide_emergent_badge: bool = False
 
+class NotificationCreate(BaseModel):
+    type: str  # deposit, withdrawal, trade_underperform
+    title: str
+    message: str
+    user_id: str  # The user who triggered the notification
+    user_name: str
+    amount: Optional[float] = None
+    metadata: Optional[Dict] = None
+
+class NotificationResponse(BaseModel):
+    id: str
+    type: str
+    title: str
+    message: str
+    user_id: str
+    user_name: str
+    amount: Optional[float] = None
+    metadata: Optional[Dict] = None
+    is_read: bool = False
+    created_at: datetime
+
 class APIConnectionCreate(BaseModel):
     name: str
     endpoint_url: str
