@@ -33,9 +33,9 @@ export const DashboardPage = () => {
 
   const loadDashboardData = useCallback(async () => {
     try {
-      // If simulating a specific member, fetch their data
+      // If simulating a specific member, fetch their data from API
       if (isSimulating && simulatedMemberId) {
-        // Fetch the simulated member's data
+        // Fetch the simulated member's data - API returns license.current_amount for licensees
         const [memberRes, tradesRes, signalRes, ratesRes] = await Promise.all([
           adminAPI.getMemberDetails(simulatedMemberId),
           tradeAPI.getLogs(10, simulatedMemberId),
@@ -44,10 +44,13 @@ export const DashboardPage = () => {
         ]);
 
         // Build summary from member data - API returns { user, stats, recent_trades }
+        // For licensees, stats.account_value comes from license.current_amount
         const stats = memberRes.data.stats || {};
+        const user = memberRes.data.user || {};
+        
         setSummary({
-          account_value: stats.account_value || simulatedAccountValue || 0,
-          total_actual_profit: stats.total_profit || simulatedTotalProfit || 0,
+          account_value: stats.account_value || 0,  // This is the authoritative value from license.current_amount
+          total_actual_profit: stats.total_profit || 0,
           total_trades: stats.total_trades || 0,
           performance_rate: 0,
           profit_difference: 0,
@@ -56,7 +59,7 @@ export const DashboardPage = () => {
         setSignal(signalRes.data.signal);
         setRates(ratesRes.data.rates || {});
       } else if (isSimulating && !simulatedMemberId) {
-        // Role-based simulation (no specific member) - use simulated values
+        // Role-based simulation (demo mode) - use demo values
         const [tradesRes, signalRes, ratesRes] = await Promise.all([
           tradeAPI.getLogs(10),
           tradeAPI.getActiveSignal(),
@@ -64,13 +67,13 @@ export const DashboardPage = () => {
         ]);
 
         setSummary({
-          account_value: simulatedAccountValue || 0,
+          account_value: simulatedAccountValue || 5000,  // Demo value
           total_actual_profit: simulatedTotalProfit || 0,
           total_trades: 0,
           performance_rate: 0,
           profit_difference: 0,
         });
-        setTrades(tradesRes.data || []);
+        setTrades([]);  // No trades for demo mode
         setSignal(signalRes.data.signal);
         setRates(ratesRes.data.rates || {});
       } else {
