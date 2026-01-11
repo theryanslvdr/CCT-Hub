@@ -28,26 +28,28 @@ MASTER_ADMIN_PASSWORD = "admin123"
 EXISTING_INVITE_CODE = "LIC-V59SF-9JKK0FPARD"
 
 
+def get_auth_token():
+    """Get master admin auth token"""
+    response = requests.post(
+        f"{BASE_URL}/api/auth/login",
+        json={"email": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
+    )
+    if response.status_code != 200:
+        print(f"Login failed: {response.text}")
+        return None
+    return response.json()["access_token"]
+
+
 class TestAuth:
     """Authentication tests"""
-    
-    @pytest.fixture(scope="class")
-    def auth_token(self):
-        """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        assert response.status_code == 200, f"Login failed: {response.text}"
-        return response.json()["access_token"]
     
     def test_login_master_admin(self):
         """Test 1: Login as master_admin"""
         response = requests.post(
             f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
+            json={"email": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
         assert "access_token" in data
         assert data["user"]["role"] == "master_admin"
@@ -60,11 +62,7 @@ class TestLicenseInvites:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_get_license_invites(self, auth_token):
         """Test 2: GET /api/admin/license-invites returns list of invites"""
@@ -94,7 +92,7 @@ class TestLicenseInvites:
                 "notes": "Test invite for iteration 16"
             }
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Create invite failed: {response.text}"
         data = response.json()
         assert "code" in data
         assert "registration_url" in data
@@ -122,11 +120,7 @@ class TestLicenseInviteActions:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     @pytest.fixture(scope="class")
     def test_invite(self, auth_token):
@@ -143,7 +137,7 @@ class TestLicenseInviteActions:
                 "notes": "Test invite for action tests"
             }
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Create test invite failed: {response.text}"
         data = response.json()
         
         # Get the invite ID
@@ -164,7 +158,7 @@ class TestLicenseInviteActions:
             f"{BASE_URL}/api/admin/license-invites/{test_invite['id']}/revoke",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Revoke failed: {response.text}"
         print(f"✓ Test 5: Revoked invite {test_invite['code']}")
     
     def test_renew_invite(self, auth_token, test_invite):
@@ -177,7 +171,7 @@ class TestLicenseInviteActions:
             headers={"Authorization": f"Bearer {auth_token}"},
             json={"duration": "6_months"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Renew failed: {response.text}"
         print(f"✓ Test 6: Renewed invite {test_invite['code']}")
     
     def test_delete_invite(self, auth_token, test_invite):
@@ -189,7 +183,7 @@ class TestLicenseInviteActions:
             f"{BASE_URL}/api/admin/license-invites/{test_invite['id']}",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Delete failed: {response.text}"
         print(f"✓ Test 7: Deleted invite {test_invite['code']}")
 
 
@@ -199,11 +193,7 @@ class TestTeamAnalytics:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_team_analytics_excludes_licensed_users(self, auth_token):
         """Test 8: Team Analytics excludes both extended AND honorary licensees"""
@@ -211,7 +201,7 @@ class TestTeamAnalytics:
             f"{BASE_URL}/api/admin/team-analytics",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Team analytics failed: {response.text}"
         data = response.json()
         
         # Check that the response includes exclusion counts
@@ -231,11 +221,7 @@ class TestEmailTemplates:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_get_email_templates(self, auth_token):
         """Test 9: GET /api/settings/email-templates returns default templates"""
@@ -243,7 +229,7 @@ class TestEmailTemplates:
             f"{BASE_URL}/api/settings/email-templates",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get email templates failed: {response.text}"
         data = response.json()
         assert "templates" in data
         
@@ -264,11 +250,7 @@ class TestIntegrationTests:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_emailit_connection(self, auth_token):
         """Test 10: POST /api/settings/test-emailit tests Emailit connection"""
@@ -276,7 +258,7 @@ class TestIntegrationTests:
             f"{BASE_URL}/api/settings/test-emailit",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Emailit test failed: {response.text}"
         data = response.json()
         assert "success" in data
         assert "message" in data
@@ -288,7 +270,7 @@ class TestIntegrationTests:
             f"{BASE_URL}/api/settings/test-cloudinary",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Cloudinary test failed: {response.text}"
         data = response.json()
         assert "success" in data
         assert "message" in data
@@ -300,7 +282,7 @@ class TestIntegrationTests:
             f"{BASE_URL}/api/settings/test-heartbeat",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Heartbeat test failed: {response.text}"
         data = response.json()
         assert "success" in data
         assert "message" in data
@@ -313,11 +295,7 @@ class TestLicensesEndpoint:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_get_licenses(self, auth_token):
         """Test 13: GET /api/admin/licenses returns list of licenses"""
@@ -325,7 +303,7 @@ class TestLicensesEndpoint:
             f"{BASE_URL}/api/admin/licenses",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get licenses failed: {response.text}"
         data = response.json()
         assert "licenses" in data
         print(f"✓ Test 13: GET licenses returned {len(data['licenses'])} licenses")
@@ -337,11 +315,7 @@ class TestSettingsPage:
     @pytest.fixture(scope="class")
     def auth_token(self):
         """Get master admin auth token"""
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login",
-            data={"username": MASTER_ADMIN_EMAIL, "password": MASTER_ADMIN_PASSWORD}
-        )
-        return response.json()["access_token"]
+        return get_auth_token()
     
     def test_get_platform_settings(self, auth_token):
         """Test 14: GET /api/settings/platform returns settings"""
@@ -349,7 +323,7 @@ class TestSettingsPage:
             f"{BASE_URL}/api/settings/platform",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Get platform settings failed: {response.text}"
         data = response.json()
         # Check for expected settings fields
         expected_fields = ["site_title", "primary_color", "accent_color"]
