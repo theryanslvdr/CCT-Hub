@@ -2,176 +2,163 @@
 The user wants to build a Finance Center for CrossCurrent traders. This is a comprehensive full-stack application with a dashboard and login. The core features are a Profit Tracker, Trade Monitor, Debt Management, and a Profit Planner. The application needs to be connected to the Merin Trading Platform and have an API Center for external communications.
 
 **PRODUCT REQUIREMENTS:**
-- **Authentication:** JWT-based login, originally planned to be gated by Heartbeat community membership.
-- **Roles:** Super Admin, Admin, and User.
-- **Profit Tracker:** Track deposits, withdrawals, and P/L. Includes advanced projection features based on compounding daily profits.
-- **Trade Monitor:** A dashboard for daily trading, showing signals, timers, calculators, and performance feedback.
-- **Admin Panel:** Manage users, trading signals, and platform settings (branding).
-- **Debt Management & Profit Planner:** Core tools for financial planning.
-- **Integrations:** Heartbeat, Emailit, Cloudinary, and a currency conversion API.
-- **Design:** A customizable, dark, professional design.
+- **Authentication:** A 4-tier role system is required: , , , and .
+- **Admin Structure:**
+    - : Can see and modify everything, including hidden features (Profit Planner, Debt Management), and can simulate member views. The email for this role is .
+    - : Can see and modify everything except hidden features.
+    - : Manages members, signals, and basic support requests.
+    - : Has modular access to dashboards assigned by an admin.
+- **Trade Monitor:** Must include a split-screen view with the Merin trading platform embedded.
+- **Onboarding:** An interactive onboarding tour to guide new users.
+- **Admin Panel:**
+    - **Member Management:** A paginated table of all members, an Account Value column (visible only to /), and the ability for a  to simulate a member's view, which should reflect the member's actual account data on all dashboards.
+    - **Trading Signals:** A paginated history of signals with a monthly archive feature.
+- **Analytics Dashboard:** A new dashboard for admins showing:
+    - Collective team KPIs (Total Account Value, Profit, Trader Count, Performance Rate).
+    - A list of members who missed the latest trade, with a Notify button to send a templated email.
+    - A graph showing historical growth for key metrics.
+    - Automated archiving for recent trade data.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a FastAPI backend and a React frontend. All critical P0 bugs (auth persistence, API routing) have been fixed and verified. All P1 priority features from the initial request have been implemented, including a comprehensive Member Management page, enhanced Trading Signals admin, and branding options. The Profit Tracker dashboard has undergone extensive, multi-iteration refinement based on detailed user feedback and is now considered complete and perfected. It features a highly detailed projection system with daily/monthly views, holiday/weekend exclusion, and complex simulation flows for deposits and withdrawals.
+A full-stack application with a FastAPI backend and a React frontend. The application has a 4-tier role system (, , , ). The  can view hidden pages (Profit Planner, Debt Management) and has access to a member simulation feature.
+
+The Admin section includes:
+- **Member Management:** A paginated table with an Account Value column and a UI for member simulation.
+- **Trading Signals:** A paginated history table with a monthly archive feature.
+- **Analytics Dashboard:** A new page displaying team-wide KPIs, performance graphs, and a Missed Trade notification system.
+
+The  features a split-screen layout with the Merin trading platform embedded. An interactive onboarding tour has also been implemented.
 
 **Last working item**:
-The user requested a new set of enhancements for the Trade Monitor dashboard, parking all other previously planned tasks to focus on perfecting this section.
+The agent was implementing a large set of features for the Admin section, primarily the new Analytics Dashboard and fixing the Member Simulation functionality as per the user's latest request.
 
-- **Last item agent was working:** The agent was about to begin implementing a list of 9 specific changes to the  file. The work had not yet started beyond viewing the target file.
-- **Status:** NOT STARTED
+- **Last item agent was working:** The agent was trying to fix the member simulation feature. The user reported that when simulating a member's view, the dashboards did not reflect the member's account values. The agent updated  to manage simulation state and modified  to consume this state. However,  was not updated, and the overall fix was incomplete and unverified.
+- **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** frontend testing agent. The changes involve multiple UI components, state management, and logic updates on a single page, making it a good candidate for comprehensive testing.
+- **Which testing method agent to use?** both. The backend needs testing for the analytics and simulation endpoints. The frontend requires extensive testing of the simulation flow across the  and , as well as the functionality of the new .
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-There are no pending bugs. The following is the list of requested features for the Trade Monitor page.
-
--   **Issue 1: Trade Monitor Enhancements** (Priority: P0)
+- **Issue 1: Member Simulation Doesn't Update Account Values** (Priority: P0)
 
 **Issues Detail:**
--   **Issue 1: Trade Monitor Enhancements**
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:** Implement the 9-point plan from the user's last message in  and associated backend/frontend files if needed.
-        1. Add a LOT Size card next to the signal card, fetching the value from the Profit Tracker.
-        2. Replace the LOT Calculator with a Projected Exit Value card, using the value for the upcoming trade day from the Profit Tracker.
-        3. Add an Exit Value Calculator popup button inside the new card.
-        4. In the Your Time card, prioritize Philippine Time, with local time shown smaller underneath (unless local is also PH time).
-        5. Add the user's local time and the profit multiplier next to the trading signal.
-        6. Remove the projected total from the Todays Summary" card.
-        7. Change the "Exit Now!" button text to "Enter the Trade Now!" and add a 5-second countdown beep before the trade time.
-        8. Make the celebration/encouragement message a popup after entering actual profit.
-        9. Rework the "Todays Summary card to only show Actual Total and P/L Difference, and place the encouragement phrase there.
-    -   **Why fix this issue and what will be achieved with the fix?** This will perfect the Trade Monitor dashboard, aligning it with the user's specific workflow and improving usability.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both (Frontend for UI/UX, Backend to ensure data is fetched correctly).
-    -   **Blocked on other issue:** None.
+- **Issue 1: Member Simulation Doesn't Update Account Values**
+    - **Attempted fixes:** The agent updated  to store simulation data and modified  to use it. This fix was incomplete as it didn't include  and the user's feedback confirms it is not working.
+    - **Next debug checklist:**
+        1.  Modify  to consume , , and  from the  when  is true. All data fetching and calculations must use the simulated user's data.
+        2.  Thoroughly review  to ensure all relevant data points (LOT Size, Projected Exit Value, etc.) are correctly using the simulated values from .
+        3.  Verify that a conspicuous Simulating Member banner appears on *all* pages viewed during simulation.
+    - **Why fix this issue and what will be achieved with the fix?** This is a critical feature for the  to provide support and verify what a specific member is seeing. Fixing it will complete a core requirement of the new admin structure.
+    - **Status:** IN PROGRESS
+    - **Is recurring issue?** N
+    - **Should Test frontend/backend/both after fix?** Both
+    - **Blocked on other issue:** None.
 
 **In progress Task List**:
--   **Task 1: Implement Trade Monitor Enhancements** (Priority: P0)
-    -   **Where to resume:** Begin editing  to implement the 9 feature requests from the user.
-    -   **What will be achieved with this?** The Trade Monitor dashboard will be brought to the same level of polish and custom functionality as the Profit Tracker.
-    -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** None.
+- **Task 1: Complete Analytics Dashboard Features** (Priority: P1)
+    - **Where to resume:**
+        1.  The user requested that Recent Trades on the analytics page be archived every 3 days. The backend endpoint  exists, but there is no frontend button or automated trigger to call it. Implement a manual Archive Recent Trades button on  that calls this endpoint.
+    - **What will be achieved with this?** It will implement the user's data retention policy for the team trades feed.
+    - **Status:** NOT STARTED
+    - **Should Test frontend/backend/both after fix?** Both
+    - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
-The user has explicitly asked to park all other tasks to focus on perfecting the dashboards one by one. The following were mentioned previously but are now on hold:
--   **P2: Implement Interactive Onboarding ():** Upgrade  to be an interactive tutorial.
--   **P2: Add Tooltips to Debt Management ():** Edit  to include explanatory tooltips.
--   **P2: Add Alarm Music Selection ():** Add a settings modal to  for changing the trade exit alarm sound.
+- **P2 (Parked):** Implement Interactive Onboarding (): A V1 was implemented, but user verification is pending to confirm if it meets the interactive requirement.
+- **P2 (Parked):** Add Tooltips to Debt Management ().
+- **P2 (Parked):** Add Alarm Music Selection ().
+- **Future:** Introduce a dedicated dashboard for the  with high-level KPIs and bulk member management actions (as suggested by the agent).
 
 **Completed work in this session**
-- **P0 Bug Fixes (RESOLVED):**
-  - : Fixed user logout on page refresh by correcting auth state persistence in .
-  -  & : Fixed API errors for adding debts and goals by resolving trailing slash inconsistencies in .
-- **P1 Feature Implementation (DONE):**
-  - Implemented enhanced Member Management page with stats, search, filters, and actions ().
-  - Implemented enhanced Trading Signals page with  ().
-  - Implemented a reset button and initial balance setup for the Profit Tracker.
-- **Profit Tracker Perfection (DONE):**
-  - **Phase 1:** Implemented Projection Vision card, daily profit formulas, new deposit/withdrawal simulation flows, and number formatting.
-  - **Phase 2:** Implemented collapsible record tables, year-selection dropdown, large number formatting (e.g., ), a multi-step tracker reset flow with password verification, and a withdrawal records table with receipt confirmation.
-  - **Phase 3:** Added a currency conversion dropdown for deposits, right-aligned action buttons, and replaced the UTC clock with a dynamic trading signal banner. Truncated LOT sizes to 2 decimal places.
-  - **Phase 4:** Implemented a Daily Projection popup that excludes weekends/holidays, tracks remaining days for the current month, and includes an Actual Profit vs. Target Profit column with a P/L difference. The Current Period was merged into the main yearly accordion.
-
-**Earlier issues found/mentioned but not fixed**
-- None. The agent has been diligent in addressing all user feedback in a sequential manner.
-
-**Known issue recurrence from previous fork**
-- **Issue recurrence in previous fork:** API routing issues related to trailing slashes.
-- **Recurrence count:** 2
-- **Status:** RESOLVED. The agent successfully fixed this by ensuring all backend routes in  and frontend calls in  do not use trailing slashes. The fix was verified with both  tests and a full testing agent run.
+- **Admin Role-Based Access Control (RBAC):**
+  - Implemented a 4-tier role system (, , , ) in  and .
+  - Updated  to dynamically render navigation based on roles, including a Hidden Features section for the .
+- **User Migration:**
+  - Updated the primary admin user's email to  and role to .
+- **Trade Monitor - Merin Integration:**
+  - Implemented a split-screen layout in  to embed the Merin trading platform via an iframe.
+- **Admin Page Enhancements:**
+  - **AdminMembersPage:** Added Account Value column, implemented pagination, and removed LOT Size from the edit form.
+  - **AdminSignalsPage:** Implemented pagination and a Monthly Archive feature.
+- **Admin Analytics Dashboard (V1):**
+  - Created the new .
+  - Added backend endpoints for team-wide KPIs, chart data, and a Missed Trade notification system.
+  - Built the UI with KPI cards, a performance graph, and lists for top performers and missed trades.
+- **Bug Fixes:**
+  - Resolved a critical login failure by correcting a token handling mismatch between  and .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend:** FastAPI, Pydantic, Motor (async MongoDB), PyJWT.
--   **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, React Context API, Recharts.
--   **Database:** MongoDB.
--   **Architecture:** Monolithic backend () with a standard Create React App frontend.
+- **Backend:** FastAPI, Motor (async MongoDB), PyJWT
+- **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
+- **State Management:** React Context API ( is central to auth, roles, and simulation).
+- **Architecture:** Monolithic backend with a standard CRA frontend. Role-Based Access Control (RBAC) is now a core concept.
 
 **key DB schema**
--   : {id, email, hashed_password, role, full_name, timezone, lot_size, balance, ...}
--   : {id, product, direction, trade_time, profit_points, is_active, ...}
--   : {id, user_id, name, total_amount, ...}
--   : {id, user_id, name, target_amount, ...}
--   : {id, user_id, amount, created_at, type: deposit | withdrawal, ...}
--   : {id, user_id, signal_id, actual_profit, trade_date, ...}
-
-**changes in tech stack**
--   None.
+- **users:**  (String),  (Array) fields added.
+- **trading_signals:**  (String) field added for archiving.
 
 **All files of reference**
--   **/app/frontend/src/pages/TradeMonitorPage.jsx**: The primary file for the next set of tasks.
--   **/app/frontend/src/pages/ProfitTrackerPage.jsx**: Heavily modified in this session; serves as a template for the expected level of perfection.
--   **/app/backend/server.py**: Contains all backend logic. Was modified to add new endpoints (, , ) and fix routing.
--   **/app/memory/PRD.md**: Contains the full product requirements and has been regularly updated with completed tasks.
+- **/app/backend/server.py**: Heavily modified with new roles, analytics endpoints, and simulation logic.
+- **/app/frontend/src/contexts/AuthContext.jsx**: The heart of the auth and simulation logic.
+- **/app/frontend/src/pages/admin/AdminAnalyticsPage.jsx**: New page for team analytics.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: **Needs to be modified** to support member simulation.
+- **/app/frontend/src/pages/TradeMonitorPage.jsx**: Partially updated for simulation; needs verification and completion.
+- **/app/frontend/src/pages/admin/AdminMembersPage.jsx**: Contains the UI to trigger member simulation.
 
 **Areas that need refactoring**:
--   The  file is a large monolith. It should be broken down into a modular structure (e.g., , , ) for better maintainability.
+- The  file has become very large and contains all models, routes, and business logic. It should be refactored into a modular structure (e.g., , , ).
 
 **key api endpoints**
--   : Login.
--   : Verify user password for sensitive actions.
--   : Add a new debt.
--   : Add a new goal.
--   : Get all profit tracker data (balance, logs, projections).
--   : Simulate and record a deposit.
--   : Simulate and record a withdrawal.
--   : Reset all profit tracker data.
--   : Get withdrawal history.
--   : Get the current day's trading signal.
--   : Get user's trade history.
--   : Get list of users.
+- : Retrieves data to initiate a member simulation session.
+- : Fetches team-wide KPIs for the analytics dashboard.
+- : Provides data for the performance graphs.
+- : Sends an email notification to a member.
+- : Archives inactive trading signals for the current month.
 
 **Critical Info for New Agent**
--   **Follow the User's Workflow:** The user's current pattern is to focus intensely on perfecting one dashboard at a time. The current focus is the **Trade Monitor**. Do not work on any other parked/future tasks until the user confirms the Trade Monitor is complete.
--   **Password Change:** The correct super admin password is , not  as stated in the original handoff.
--   **API Routing:** The trailing slash issue is resolved. Maintain the convention of **no trailing slashes** for all new frontend API calls and backend routes.
--   **Profit Tracker as a Reference:** The heavily customized  is the user's gold standard. Refer to its code for patterns related to UI, state management, and API integration.
+- **Priority #1 is fixing the Member Simulation.** The user has explicitly stated it's broken. This involves ensuring that when a  simulates a member, all data-driven components in  and  correctly display the simulated member's data, not the admin's.
+- The new four-tier role system is fundamental. All new features and access control must adhere to this structure.
+- Log in as  (password: ) to test all  functionalities, including simulation and viewing hidden pages.
 
 **documents and test reports created in this job**
--   /app/test_reports/iteration_3.json
--   /app/test_reports/iteration_4.json
--   /app/test_reports/iteration_5.json
--   /app/test_reports/iteration_6.json
--   /app/test_reports/iteration_7.json
--   /app/test_reports/iteration_8.json
--   /app/memory/PRD.md (updated multiple times)
+- /app/test_reports/iteration_9.json
+- /app/test_reports/iteration_10.json
+- /app/test_reports/iteration_11.json
+- /app/test_reports/iteration_12.json
+- /app/memory/PRD.md
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **User (Latest):** Requested 3 final fixes for the Profit Tracker: add a P/L difference column, merge the Current Period into the Year 1 accordion, and add a remaining days count to the daily view. **Status: COMPLETED**.
--   **User:** Requested the final major feature for the Profit Tracker: a daily projection popup with holiday/weekend exclusion and actual profit tracking. **Status: COMPLETED**.
--   **User:** Requested another round of enhancements for the Profit Tracker, including collapsible record tables, large number formatting, and a multi-step reset flow with password verification. **Status: COMPLETED**.
--   **User:** Provided the first major list of enhancements for the Profit Tracker, including the Projection Vision card and new deposit/withdrawal flows. **Status: COMPLETED**.
--   **User:** Confirmed the plan to implement P1 features. **Status: COMPLETED**.
--   **User:** Confirmed the initial plan to fix P0 bugs first. **Status: COMPLETED**.
+- **User (Latest):** Pointed out that member simulation doesn't change account values. Requested a comprehensive analytics dashboard with team-wide stats, missed trade notifications, and performance graphs. Also requested that recent trades be archived periodically.
+- **User (Previous):** Confirmed the plan to implement a new  role with the email  and the ability to simulate member views.
+- **User (Previous):** Approved the plan to introduce the new admin structure, embed the Merin platform, hide specific dashboards, and upgrade the onboarding tour.
+- **User (Previous):** Requested several enhancements to the , including a new signal card design, a trade history table with pagination, and a streak counter.
+- **User (Previous):** Confirmed completion of the first round of  enhancements and requested a new set of changes.
 
 **Project Health Check:**
--   **Broken:** None. All known critical bugs have been fixed and verified.
--   **Mocked:** Heartbeat API user validation is still non-blocking, allowing any user to register. This is intentional for development.
+- **Broken:** The Member Simulation feature is not working as per user requirements.
+- **Mocked:** The Heartbeat API integration is non-blocking for development. The Notify Missed Trade email feature relies on a configured email service.
 
 **3rd Party Integrations**
--   **Heartbeat** (User Management) - Requires User API Key.
--   **Emailit** (Email) - Requires User API Key.
--   **Cloudinary** (File Uploads) - Requires User API Key.
--   **ExchangeRate-API** (Currency Conversion) - Planned, will require User API Key.
--   **Rewards Platform API** (Custom) - Planned.
+- **Heartbeat** (User Management)
+- **Emailit** (Email for notifications)
+- **Cloudinary** (File Uploads) - Not currently used in the main workflow.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The agent consistently used the testing agent after each major iteration of features (6 times in this session).
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None. Testing has been done via the testing agent.
--   **Known regressions:** None.
+- **Testing agent used after significant changes:** YES. However, the last test run had a gap and failed to detect the broken simulation logic.
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** None.
+- **Known regressions:** The Member Simulation feature is a regression, as the user expects it to work based on the implemented UI.
 
 **Credentials to test flow:**
--   **Role:** Super Admin
--   **Email:** 
--   **Password:** 
+- **Role:** Master Admin
+- **Email:** 
+- **Password:** 
 
 **What agent forgot to execute**
--   Nothing. The agent was about to begin the user's latest request to enhance the Trade Monitor page when the session ended.</analysis>
+- The agent did not modify  to use the simulated user data from , which is a crucial part of the simulation fix.
+- The agent implemented the backend endpoint for archiving recent trades but did not implement any frontend UI or trigger mechanism for the user's archive every 3 days requirement.</analysis>
