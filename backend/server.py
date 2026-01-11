@@ -4368,6 +4368,193 @@ async def send_email(to: str, subject: str, body: str, user: dict = Depends(requ
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Email error: {str(e)}")
 
+# ==================== WEBSOCKET ROUTES ====================
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint for real-time notifications"""
+    # Get user info from token in query param
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=4001)
+        return
+    
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("sub") != user_id:
+            await websocket.close(code=4003)
+            return
+        role = payload.get("role", "member")
+    except jwt.ExpiredSignatureError:
+        await websocket.close(code=4002)
+        return
+    except jwt.InvalidTokenError:
+        await websocket.close(code=4001)
+        return
+    
+    await websocket_manager.connect(websocket, user_id, role)
+    
+    try:
+        while True:
+            # Keep connection alive and handle incoming messages
+            data = await websocket.receive_text()
+            # Handle ping/pong for keepalive
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(websocket, user_id, role)
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id}: {e}")
+        websocket_manager.disconnect(websocket, user_id, role)
+
+@api_router.get("/ws/status")
+async def get_websocket_status(user: dict = Depends(require_admin)):
+    """Get WebSocket connection statistics (admin only)"""
+    return websocket_manager.get_connection_count()
+
+# ==================== FILE UPLOAD ROUTES ====================
+
+@api_router.post("/upload/profile-picture")
+async def upload_profile_picture_endpoint(
+    file: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """Upload a profile picture for the current user"""
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: JPEG, PNG, WebP, GIF")
+    
+    # Validate file size (max 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 5MB")
+    
+    result = await upload_profile_picture(db, user["id"], contents, file.filename, file.content_type)
+    
+    if result.get("success"):
+        return {"message": "Profile picture uploaded", "url": result.get("url")}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Upload failed"))
+
+@api_router.post("/upload/deposit-screenshot/{transaction_id}")
+async def upload_deposit_screenshot_endpoint(
+    transaction_id: str,
+    file: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """Upload a deposit screenshot for a transaction"""
+    # Verify transaction belongs to user
+    transaction = await db.licensee_transactions.find_one({"id": transaction_id, "user_id": user["id"]})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: JPEG, PNG, WebP")
+    
+    # Validate file size (max 10MB)
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 10MB")
+    
+    result = await upload_deposit_screenshot(db, user["id"], transaction_id, contents, file.filename, file.content_type)
+    
+    if result.get("success"):
+        return {"message": "Screenshot uploaded", "url": result.get("url")}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Upload failed"))
+
+@api_router.post("/upload/general")
+async def upload_general_file(
+    file: UploadFile = File(...),
+    folder: str = Form("uploads"),
+    file_type: str = Form("general"),
+    user: dict = Depends(get_current_user)
+):
+    """Upload a general file"""
+    # Validate file size (max 20MB)
+    contents = await file.read()
+    if len(contents) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 20MB")
+    
+    result = await upload_file(db, contents, file.filename, file.content_type, folder, user["id"], file_type)
+    
+    if result.get("success"):
+        return {"message": "File uploaded", "url": result.get("url"), "public_id": result.get("public_id")}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Upload failed"))
+
+# ==================== ENHANCED EMAIL ROUTES ====================
+
+@api_router.post("/email/send-license-invite")
+async def send_license_invite_email(
+    invite_code: str,
+    invitee_email: str,
+    invitee_name: str = "",
+    user: dict = Depends(require_master_admin)
+):
+    """Send a license invite email"""
+    # Get invite details
+    invite = await db.license_invites.find_one({"invite_code": invite_code})
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    
+    # Get production URL from settings
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    base_url = settings.get("production_site_url") or os.environ.get("REACT_APP_BACKEND_URL", "https://crosscurrent.finance")
+    
+    # Generate email content
+    email_content = get_license_invite_email(
+        invite_code=invite_code,
+        invitee_name=invitee_name,
+        license_type=invite.get("license_type", "extended"),
+        starting_amount=invite.get("starting_amount", 0),
+        base_url=base_url
+    )
+    
+    result = await send_email(
+        db=db,
+        to_email=invitee_email,
+        subject=email_content["subject"],
+        html_content=email_content["html"],
+        text_content=email_content["text"]
+    )
+    
+    if result.get("success"):
+        # Update invite with email sent timestamp
+        await db.license_invites.update_one(
+            {"invite_code": invite_code},
+            {"$set": {"email_sent_at": datetime.now(timezone.utc).isoformat(), "invitee_email": invitee_email}}
+        )
+        return {"message": "Invite email sent successfully"}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Failed to send email"))
+
+@api_router.post("/email/test")
+async def test_email_service(
+    to_email: str,
+    user: dict = Depends(require_master_admin)
+):
+    """Send a test email to verify email service configuration"""
+    result = await send_email(
+        db=db,
+        to_email=to_email,
+        subject="Test Email from CrossCurrent Finance Center",
+        html_content="""
+        <h1>Email Service Test</h1>
+        <p>This is a test email from CrossCurrent Finance Center.</p>
+        <p>If you received this email, your email service is configured correctly!</p>
+        """,
+        text_content="This is a test email from CrossCurrent Finance Center. If you received this, your email service is configured correctly!"
+    )
+    
+    if result.get("success"):
+        return {"message": "Test email sent successfully", "to": to_email}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Failed to send test email"))
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
