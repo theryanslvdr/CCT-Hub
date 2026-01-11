@@ -243,7 +243,54 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 6 - Latest)
+## Completed Work (2026-01-11 Session 7 - Latest)
+
+### P0 - User Feedback Implementation ✅ COMPLETE
+
+1. **Account Setup Flow (Login Page)**
+   - "Don't have an account/password?" link on login page
+   - 4-step dialog: Ask membership → Verify Heartbeat email → Set password → Error handling
+   - After 2 failed attempts, shows button to external registration link
+   - New endpoints: `/api/auth/verify-heartbeat`, `/api/auth/set-password`
+
+2. **Custom Links Tab (Settings)**
+   - New "Links" tab in Platform Settings
+   - External Registration Link field (e.g., Heartbeat signup URL)
+   - Used by login page for "Register as Member" button
+
+3. **Change License Type Feature**
+   - Master Admin can change Honorary ↔ Extended license
+   - Creates new license, invalidates old one
+   - Available in: Active Licenses tab, Member Details → Actions tab
+   - New endpoint: `/api/admin/licenses/{id}/change-type`
+
+4. **Fixed Deposit/Withdrawal Visibility**
+   - Sidebar now shows "Deposit/Withdrawal" for ALL members
+   - Access controlled on the page level (shows "Licensed Account Required" for non-licensees)
+
+5. **Onboarding Tour Improvement**
+   - Reduced overlay blur from `bg-black/70` to `bg-black/40`
+   - Sections are now more visible during tour
+
+6. **View Invite Dialog Fix**
+   - UI properly contained in dialog
+   - Registration link now truncated with copy button
+
+### Testing Results (iteration_20.json)
+- Backend: 92% pass rate
+- Frontend: 100% pass rate
+- All features verified working
+
+### Files Modified This Session
+- `/app/frontend/src/pages/LoginPage.jsx` - Complete rewrite with Account Setup dialog
+- `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` - Added Links tab
+- `/app/frontend/src/pages/admin/AdminLicensesPage.jsx` - Added Change License Type dialog
+- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Added Change License Type in Actions tab
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Fixed licensee_account visibility
+- `/app/frontend/src/components/OnboardingTour.jsx` - Reduced blur
+- `/app/backend/server.py` - Added verify-heartbeat, set-password, change-type endpoints
+
+## Completed Work (2026-01-11 Session 6 - Previous)
 
 ### P0 - Consolidated Member List Actions ✅ COMPLETE
 1. **Simplified Table Actions**
@@ -253,7 +300,7 @@ CROSSCURRENT2024
 2. **Enhanced View Member Dialog**
    - 4 tabs: Profile, Statistics, Activity, Actions
    - **Profile Tab**: Editable inline with Edit/Cancel/Save buttons
-   - **Actions Tab**: Contains Simulate, Manage License, Upgrade buttons
+   - **Actions Tab**: Contains Simulate, Manage License, Upgrade, Change Type buttons
    - License info displayed directly in Profile tab for licensed members
 
 3. **Role Check Fix**
@@ -263,9 +310,6 @@ CROSSCURRENT2024
 ### Testing Results (iteration_19.json)
 - Frontend: 100% pass rate (10/10 tests)
 - All features verified working
-
-### Files Modified This Session
-- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Consolidated actions, enhanced View dialog
 
 ## Completed Work (2026-01-11 Session 5 - Previous)
 
