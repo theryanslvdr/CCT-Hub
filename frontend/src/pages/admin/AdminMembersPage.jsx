@@ -548,7 +548,7 @@ export const AdminMembersPage = () => {
                               >
                                 <Ban className="w-4 h-4" />
                               </Button>
-                              {isSuperAdmin && (
+                              {isSuperAdmin() && (
                                 <Button
                                   variant="ghost"
                                   size="icon"
