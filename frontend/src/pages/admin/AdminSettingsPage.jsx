@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { 
   Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
-  FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview
+  FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link
 } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
