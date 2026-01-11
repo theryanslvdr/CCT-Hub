@@ -131,22 +131,6 @@ export const adminAPI = {
   deleteLicense: (licenseId) => api.delete(`/admin/licenses/${licenseId}`),
 };
 
-// Profit APIs - add license projections
-export const profitAPI = {
-  getSummary: () => api.get('/profit/summary'),
-  getDeposits: () => api.get('/profit/deposits'),
-  addDeposit: (data) => api.post('/profit/deposits', data),
-  deleteDeposit: (id) => api.delete(`/profit/deposits/${id}`),
-  getWithdrawals: () => api.get('/profit/withdrawals'),
-  recordWithdrawal: (data) => api.post('/profit/withdrawal', data),
-  confirmWithdrawal: (id, data) => api.post(`/profit/withdrawal/${id}/confirm`, data),
-  getTrades: () => api.get('/profit/trades'),
-  recordTrade: (data) => api.post('/profit/trades', data),
-  simulateWithdrawal: (data) => api.post('/profit/simulate-withdrawal', data),
-  getRates: () => api.get('/profit/rates'),
-  getLicenseProjections: () => api.get('/profit/license-projections'),
-};
-
 // Debt Management APIs
 export const debtAPI = {
   create: (data) => api.post('/debt', data),
