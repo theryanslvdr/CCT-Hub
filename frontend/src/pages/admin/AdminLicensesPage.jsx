@@ -201,6 +201,39 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  const handleOpenChangeLicense = (license) => {
+    setSelectedLicense(license);
+    setChangeLicenseForm({
+      new_license_type: license.license_type === 'extended' ? 'honorary' : 'extended',
+      new_starting_amount: license.current_amount?.toString() || license.starting_amount?.toString() || '',
+      notes: ''
+    });
+    setChangeLicenseDialogOpen(true);
+  };
+
+  const handleChangeLicenseType = async () => {
+    if (!changeLicenseForm.new_starting_amount || parseFloat(changeLicenseForm.new_starting_amount) <= 0) {
+      toast.error('Please enter a valid starting amount');
+      return;
+    }
+
+    setChangingLicense(true);
+    try {
+      await adminAPI.changeLicenseType(selectedLicense.id, {
+        new_license_type: changeLicenseForm.new_license_type,
+        new_starting_amount: parseFloat(changeLicenseForm.new_starting_amount),
+        notes: changeLicenseForm.notes
+      });
+      toast.success(`License changed to ${changeLicenseForm.new_license_type}`);
+      setChangeLicenseDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to change license type');
+    } finally {
+      setChangingLicense(false);
+    }
+  };
+
   const handleViewDetails = (invite) => {
     setSelectedInvite(invite);
     setViewDialogOpen(true);
