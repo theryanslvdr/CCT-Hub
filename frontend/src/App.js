@@ -14,6 +14,7 @@ import { TradeMonitorPage } from "./pages/TradeMonitorPage";
 import { DebtManagementPage } from "./pages/DebtManagementPage";
 import { ProfitPlannerPage } from "./pages/ProfitPlannerPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { LicenseeAccountPage } from "./pages/LicenseeAccountPage";
 
 // Admin Pages
 import { AdminSignalsPage } from "./pages/admin/AdminSignalsPage";
