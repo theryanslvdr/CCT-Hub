@@ -319,6 +319,17 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </>
               )}
               
+              {/* Master Admin only: Licenses */}
+              {isMasterAdmin() && (
+                <DropdownMenuItem 
+                  onClick={handleLicensesClick}
+                  className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"
+                >
+                  <Award className="w-4 h-4 mr-2" />
+                  Licenses
+                </DropdownMenuItem>
+              )}
+              
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 
                 onClick={handleLogout}
@@ -374,6 +385,17 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                     API Center
                   </DropdownMenuItem>
                 </>
+              )}
+              
+              {/* Master Admin only: Licenses */}
+              {isMasterAdmin() && (
+                <DropdownMenuItem 
+                  onClick={handleLicensesClick}
+                  className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"
+                >
+                  <Award className="w-4 h-4 mr-2" />
+                  Licenses
+                </DropdownMenuItem>
               )}
               
               <DropdownMenuSeparator className="bg-zinc-800" />
