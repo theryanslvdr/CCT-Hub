@@ -1031,7 +1031,26 @@ async def get_members(
     
     total = await db.users.count_documents(query)
     skip = (page - 1) * limit
-    users = await db.users.find(query, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
+    users_cursor = await db.users.find(query, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    # For super_admin and master_admin, calculate account_value for each user
+    users = []
+    requesting_user_role = user.get("role")
+    can_see_account_value = requesting_user_role in ["super_admin", "master_admin"]
+    
+    for u in users_cursor:
+        user_data = dict(u)
+        if can_see_account_value:
+            # Calculate account value from deposits and profits
+            deposits = await db.deposits.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
+            trades = await db.trade_logs.find({"user_id": u["id"]}, {"_id": 0}).to_list(1000)
+            
+            total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit" and d.get("type") != "withdrawal")
+            total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
+            total_profit = sum(t.get("actual_profit", 0) for t in trades)
+            
+            user_data["account_value"] = round(total_deposits - total_withdrawals + total_profit, 2)
+        users.append(user_data)
     
     return {
         "members": users,
