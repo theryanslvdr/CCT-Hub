@@ -186,6 +186,32 @@ export const AuthProvider = ({ children }) => {
     return user?.role;
   }, [user, simulatedView]);
 
+  // Get simulated account value (for Trade Monitor/Profit Tracker)
+  const getSimulatedAccountValue = useCallback(() => {
+    if (simulatedView && simulatedView.accountValue !== undefined) {
+      return simulatedView.accountValue;
+    }
+    return null; // Return null to use real data
+  }, [simulatedView]);
+
+  // Get simulated LOT size
+  const getSimulatedLotSize = useCallback(() => {
+    if (simulatedView && simulatedView.lotSize !== undefined) {
+      return simulatedView.lotSize;
+    }
+    return null;
+  }, [simulatedView]);
+
+  // Get simulated member name
+  const getSimulatedMemberName = useCallback(() => {
+    return simulatedView?.memberName || null;
+  }, [simulatedView]);
+
+  // Get simulated member ID
+  const getSimulatedMemberId = useCallback(() => {
+    return simulatedView?.memberId || null;
+  }, [simulatedView]);
+
   // Get effective allowed dashboards (considering simulation)
   const getEffectiveAllowedDashboards = useCallback(() => {
     if (simulatedView) return simulatedView.allowed_dashboards;
