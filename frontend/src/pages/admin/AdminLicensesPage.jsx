@@ -701,16 +701,28 @@ export const AdminLicensesPage = () => {
                             {license.start_date?.split('T')[0]}
                           </td>
                           <td>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenChangeLicense(license)}
-                              className="text-zinc-400 hover:text-purple-400"
-                              title="Change License Type"
-                            >
-                              <RefreshCw className="w-4 h-4 mr-1" />
-                              Change Type
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenChangeLicense(license)}
+                                className="text-zinc-400 hover:text-purple-400"
+                                title="Change License Type"
+                              >
+                                <RefreshCw className="w-4 h-4 mr-1" />
+                                Change
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenResetBalance(license)}
+                                className="text-zinc-400 hover:text-emerald-400"
+                                title="Reset Balance"
+                              >
+                                <RotateCcw className="w-4 h-4 mr-1" />
+                                Reset
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
