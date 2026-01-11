@@ -619,12 +619,16 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
     """Verify if email is a Heartbeat member and return user info if exists"""
     email = data.email.lower().strip()
     
-    # Get Heartbeat API key from settings
+    # Get Heartbeat API key from settings, fallback to environment variable
     settings = await db.platform_settings.find_one({}, {"_id": 0})
     heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
     
+    # Fallback to environment variable if not in settings
     if not heartbeat_api_key:
-        raise HTTPException(status_code=500, detail="Heartbeat integration not configured")
+        heartbeat_api_key = os.environ.get("HEARTBEAT_API_KEY")
+    
+    if not heartbeat_api_key:
+        raise HTTPException(status_code=500, detail="Heartbeat integration not configured. Please add your Heartbeat API key in Admin Settings > Integrations.")
     
     # Verify with Heartbeat
     try:
@@ -669,12 +673,16 @@ async def set_password_for_member(data: SetPasswordRequest):
     if len(data.password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
     
-    # Verify Heartbeat membership first
+    # Verify Heartbeat membership first - check settings then fallback to env
     settings = await db.platform_settings.find_one({}, {"_id": 0})
     heartbeat_api_key = settings.get("heartbeat_api_key") if settings else None
     
+    # Fallback to environment variable if not in settings
     if not heartbeat_api_key:
-        raise HTTPException(status_code=500, detail="Heartbeat integration not configured")
+        heartbeat_api_key = os.environ.get("HEARTBEAT_API_KEY")
+    
+    if not heartbeat_api_key:
+        raise HTTPException(status_code=500, detail="Heartbeat integration not configured. Please add your Heartbeat API key in Admin Settings > Integrations.")
     
     try:
         import httpx
