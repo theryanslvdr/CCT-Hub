@@ -77,20 +77,27 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const register = useCallback(async (email, password, fullName, heartbeatEmail, secretCode) => {
-    const response = await api.post('/auth/register', {
-      email,
-      password,
-      full_name: fullName,
-      heartbeat_email: heartbeatEmail,
-      secret_code: secretCode,
-    });
-    const { access_token, user: userData } = response.data;
-    
-    storage.set('token', access_token);
-    storage.set('user', userData);
-    setUser(userData);
-    
-    return userData;
+    try {
+      const response = await api.post('/auth/register', {
+        email,
+        password,
+        full_name: fullName,
+        heartbeat_email: heartbeatEmail,
+        secret_code: secretCode,
+      });
+      const { access_token, user: userData } = response.data;
+      
+      storage.set('token', access_token);
+      storage.set('user', userData);
+      setUser(userData);
+      
+      return { success: true, user: userData };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || 'Registration failed. Please try again.' 
+      };
+    }
   }, []);
 
   const logout = useCallback(() => {
