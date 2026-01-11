@@ -836,7 +836,6 @@ export const AdminSettingsPage = () => {
                     )}
                   </div>
                 </div>
-                </div>
               )}
             </CardContent>
           </Card>
