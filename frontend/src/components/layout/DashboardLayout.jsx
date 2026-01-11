@@ -224,6 +224,12 @@ export const DashboardLayout = () => {
           />
           
           <div className="flex-1 p-6">
+            {/* Announcements Banner */}
+            <AnnouncementBanner 
+              announcements={visibleAnnouncements} 
+              onDismiss={handleDismissAnnouncement}
+            />
+            
             <Outlet />
           </div>
           
