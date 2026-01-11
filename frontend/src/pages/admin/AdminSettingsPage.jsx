@@ -42,7 +42,7 @@ export const AdminSettingsPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [savingTemplate, setSavingTemplate] = useState(false);
-  const [editorMode, setEditorMode] = useState('wysiwyg'); // 'wysiwyg' or 'code'
+  const [editorMode, setEditorMode] = useState('code'); // 'code' or 'preview'
   
   // Integration test states
   const [testingEmailit, setTestingEmailit] = useState(false);
