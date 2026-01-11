@@ -75,16 +75,19 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         l => l.is_active && l.license_type === licenseType
       ) || [];
       
+      // Get members array from response
+      const members = membersRes.data.members || membersRes.data || [];
+      
       // Match with member details
       const licenseesWithDetails = activeLicenses.map(license => {
-        const member = membersRes.data.find(m => m.id === license.user_id);
+        const member = members.find(m => m.id === license.user_id);
         return {
           ...license,
           full_name: member?.full_name || 'Unknown User',
           email: member?.email || 'N/A',
-          account_value: member?.account_value || license.current_amount || 0,
+          account_value: license.current_amount || member?.account_value || 0,
           lot_size: member?.lot_size || 0.01,
-          total_deposits: member?.total_deposits || 0,
+          total_deposits: license.starting_amount || member?.total_deposits || 0,
           total_profit: member?.total_profit || 0,
           allowed_dashboards: member?.allowed_dashboards
         };
