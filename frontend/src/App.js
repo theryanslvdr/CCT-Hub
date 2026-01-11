@@ -20,6 +20,7 @@ import { AdminMembersPage } from "./pages/admin/AdminMembersPage";
 import { AdminAPICenterPage } from "./pages/admin/AdminAPICenterPage";
 import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
+import { AdminTransactionsPage } from "./pages/admin/AdminTransactionsPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -46,6 +47,7 @@ function App() {
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
             <Route path="/admin/members" element={<AdminMembersPage />} />
             <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+            <Route path="/admin/transactions" element={<AdminTransactionsPage />} />
             <Route path="/admin/api-center" element={<AdminAPICenterPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
           </Route>
