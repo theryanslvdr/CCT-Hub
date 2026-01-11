@@ -828,7 +828,8 @@ export const ProfitTrackerPage = () => {
         </Card>
       </div>
 
-      {/* Actions */}
+      {/* Actions - Hidden for licensees who have their own Deposit/Withdrawal page */}
+      {!isLicensee && (
       <div className="flex flex-wrap items-center gap-4">
         {/* Left side - Simulate buttons */}
         <div className="flex flex-wrap gap-4 flex-1">
