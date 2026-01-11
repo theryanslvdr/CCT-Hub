@@ -475,6 +475,18 @@ export const AdminSettingsPage = () => {
                 </div>
               </div>
 
+              {/* Production Site URL */}
+              <div>
+                <Label className="text-zinc-300">Production Site URL</Label>
+                <Input
+                  value={settings.production_site_url || ''}
+                  onChange={(e) => setSettings({ ...settings, production_site_url: e.target.value })}
+                  placeholder="https://app.crosscurrent.com"
+                  className="input-dark mt-1"
+                />
+                <p className="text-xs text-zinc-500 mt-1">All test/preview links will be replaced with this URL in emails and exports</p>
+              </div>
+
               {/* Hide Emergent Badge Toggle - Master Admin Only */}
               {isMasterAdmin() && (
                 <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-purple-500/20">
