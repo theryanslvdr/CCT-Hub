@@ -218,6 +218,8 @@ class GoalResponse(BaseModel):
     created_at: datetime
 
 class PlatformSettings(BaseModel):
+    platform_name: str = "CrossCurrent"
+    tagline: str = "Finance Center"
     site_title: str = "CrossCurrent Finance Center"
     site_description: str = "Trading profit management platform"
     favicon_url: Optional[str] = None
