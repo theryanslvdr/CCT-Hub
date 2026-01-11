@@ -361,7 +361,7 @@ export const AdminMembersPage = () => {
                           {new Date(member.created_at).toLocaleDateString()}
                         </td>
                         <td>
-                          {member.id !== currentUser?.id && (
+                          {member.id !== user?.id && (
                             <div className="flex gap-1">
                               <Button
                                 variant="ghost"
