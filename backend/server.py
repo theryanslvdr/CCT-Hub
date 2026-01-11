@@ -1852,6 +1852,158 @@ async def archive_old_trades(user: dict = Depends(require_super_admin)):
         "deleted_count": delete_result.deleted_count
     }
 
+# ==================== ADMIN NOTIFICATIONS ====================
+@admin_router.get("/notifications")
+async def get_admin_notifications(
+    limit: int = 50,
+    unread_only: bool = False,
+    user: dict = Depends(require_admin)
+):
+    """Get notifications for admins (deposits, withdrawals, underperforming trades)"""
+    # Check if user is super_admin or master_admin
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can view notifications")
+    
+    query = {}
+    if unread_only:
+        query["is_read"] = False
+    
+    notifications = await db.admin_notifications.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Count unread
+    unread_count = await db.admin_notifications.count_documents({"is_read": False})
+    
+    return {
+        "notifications": notifications,
+        "unread_count": unread_count
+    }
+
+@admin_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, user: dict = Depends(require_admin)):
+    """Mark a notification as read"""
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can manage notifications")
+    
+    result = await db.admin_notifications.update_one(
+        {"id": notification_id},
+        {"$set": {"is_read": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    return {"message": "Notification marked as read"}
+
+@admin_router.put("/notifications/read-all")
+async def mark_all_notifications_read(user: dict = Depends(require_admin)):
+    """Mark all notifications as read"""
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can manage notifications")
+    
+    result = await db.admin_notifications.update_many(
+        {"is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    
+    return {"message": f"Marked {result.modified_count} notifications as read"}
+
+# ==================== TEAM TRANSACTIONS ====================
+@admin_router.get("/transactions")
+async def get_team_transactions(
+    page: int = 1,
+    page_size: int = 20,
+    transaction_type: Optional[str] = None,  # deposit, withdrawal, or None for all
+    user: dict = Depends(require_admin)
+):
+    """Get all team transactions (deposits and withdrawals) with pagination"""
+    # Check if user is super_admin or master_admin
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can view transactions")
+    
+    # Get all users for name lookup
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}).to_list(1000)
+    user_lookup = {u["id"]: {"name": u.get("full_name", "Unknown"), "email": u.get("email", "")} for u in all_users}
+    
+    # Build query
+    query = {}
+    if transaction_type == "withdrawal":
+        query["is_withdrawal"] = True
+    elif transaction_type == "deposit":
+        query["$or"] = [
+            {"is_withdrawal": {"$ne": True}},
+            {"is_withdrawal": {"$exists": False}}
+        ]
+    
+    skip = (page - 1) * page_size
+    total = await db.deposits.count_documents(query)
+    
+    transactions = await db.deposits.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
+    
+    # Enrich with user info
+    enriched = []
+    for tx in transactions:
+        user_info = user_lookup.get(tx.get("user_id"), {"name": "Unknown", "email": ""})
+        tx["user_name"] = user_info["name"]
+        tx["user_email"] = user_info["email"]
+        tx["type"] = "withdrawal" if tx.get("is_withdrawal") else "deposit"
+        enriched.append(tx)
+    
+    # Get summary stats
+    all_deposits = await db.deposits.find({}, {"_id": 0}).to_list(10000)
+    total_deposits = sum(d.get("amount", 0) for d in all_deposits if not d.get("is_withdrawal") and d.get("amount", 0) > 0)
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in all_deposits if d.get("is_withdrawal"))
+    
+    return {
+        "transactions": enriched,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size if total > 0 else 1,
+        "summary": {
+            "total_deposits": round(total_deposits, 2),
+            "total_withdrawals": round(total_withdrawals, 2),
+            "net_flow": round(total_deposits - total_withdrawals, 2)
+        }
+    }
+
+@admin_router.get("/transactions/stats")
+async def get_transaction_stats(user: dict = Depends(require_admin)):
+    """Get transaction statistics summary"""
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can view transaction stats")
+    
+    all_deposits = await db.deposits.find({}, {"_id": 0}).to_list(10000)
+    
+    # Calculate stats
+    deposits = [d for d in all_deposits if not d.get("is_withdrawal") and d.get("amount", 0) > 0]
+    withdrawals = [d for d in all_deposits if d.get("is_withdrawal")]
+    
+    total_deposits = sum(d.get("amount", 0) for d in deposits)
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in withdrawals)
+    
+    # Get unique depositors
+    unique_depositors = len(set(d.get("user_id") for d in deposits))
+    
+    # Get today's stats
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today_deposits = sum(d.get("amount", 0) for d in deposits if d.get("created_at", "").startswith(today))
+    today_withdrawals = sum(abs(d.get("amount", 0)) for d in withdrawals if d.get("created_at", "").startswith(today))
+    
+    return {
+        "total_deposits": round(total_deposits, 2),
+        "total_withdrawals": round(total_withdrawals, 2),
+        "net_flow": round(total_deposits - total_withdrawals, 2),
+        "deposit_count": len(deposits),
+        "withdrawal_count": len(withdrawals),
+        "unique_depositors": unique_depositors,
+        "today_deposits": round(today_deposits, 2),
+        "today_withdrawals": round(today_withdrawals, 2)
+    }
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
