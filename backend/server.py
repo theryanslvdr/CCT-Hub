@@ -3365,38 +3365,58 @@ async def create_licensee_withdrawal(
     notes: Optional[str] = Form(None),
     user: dict = Depends(get_current_user)
 ):
-    """Submit a withdrawal request (Licensees only) - 5 business days processing"""
+    """Submit a withdrawal request (Licensees only) - 5 business days processing
+    
+    IMPORTANT: Withdrawal amount is IMMEDIATELY deducted from the licensee's balance.
+    """
     # Check if user is a licensee
     license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
     if not license:
         raise HTTPException(status_code=403, detail="Only licensed users can use this feature")
     
-    # Check if user has sufficient balance
-    deposits = await db.deposits.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit", "withdrawal"])
-    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("type") == "withdrawal")
-    
-    trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-    total_profit = sum(t.get("actual_profit", 0) for t in trades)
-    
-    current_balance = total_deposits - total_withdrawals + total_profit
+    # Check if user has sufficient balance using the license's current_amount
+    current_balance = license.get("current_amount", license.get("starting_amount", 0))
     
     if amount > current_balance:
         raise HTTPException(status_code=400, detail=f"Insufficient balance. Current balance: ${current_balance:,.2f}")
+    
+    # Calculate fees
+    fees = calculate_withdrawal_fees(amount)
+    net_amount = fees["net_amount"]
     
     transaction = {
         "id": str(uuid.uuid4()),
         "user_id": user["id"],
         "type": "withdrawal",
         "amount": amount,
+        "gross_amount": amount,
+        "merin_fee": fees["merin_fee"],
+        "binance_fee": fees["binance_fee"],
+        "total_fees": fees["total_fees"],
+        "net_amount": net_amount,
         "notes": notes,
         "status": "pending",
         "processing_days": 5,  # 5 business days for licensees
         "feedback": [],
+        "balance_before": current_balance,
+        "balance_after": current_balance - amount,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.licensee_transactions.insert_one(transaction)
+    
+    # IMMEDIATELY deduct from licensee's balance
+    new_balance = current_balance - amount
+    await db.licenses.update_one(
+        {"id": license["id"]},
+        {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Also update user's account_value
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"account_value": new_balance}}
+    )
     
     # Notify master admin
     admins = await db.users.find({"role": "master_admin"}, {"_id": 0, "id": 1}).to_list(100)
