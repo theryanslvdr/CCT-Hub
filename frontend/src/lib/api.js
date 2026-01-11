@@ -64,11 +64,20 @@ export const userAPI = {
 
 // Profit Tracker APIs
 export const profitAPI = {
-  createDeposit: (data) => api.post('/profit/deposits', data),
-  getDeposits: () => api.get('/profit/deposits'),
   getSummary: () => api.get('/profit/summary'),
+  getDeposits: () => api.get('/profit/deposits'),
+  createDeposit: (data) => api.post('/profit/deposits', data),
+  addDeposit: (data) => api.post('/profit/deposits', data),
+  deleteDeposit: (id) => api.delete(`/profit/deposits/${id}`),
+  getWithdrawals: () => api.get('/profit/withdrawals'),
+  recordWithdrawal: (data) => api.post('/profit/withdrawal', data),
+  confirmWithdrawal: (id, data) => api.post(`/profit/withdrawal/${id}/confirm`, data),
+  getTrades: () => api.get('/profit/trades'),
+  recordTrade: (data) => api.post('/profit/trades', data),
   calculateExit: (lotSize) => api.post('/profit/calculate-exit', null, { params: { lot_size: lotSize } }),
   simulateWithdrawal: (data) => api.post('/profit/simulate-withdrawal', data),
+  getRates: () => api.get('/profit/rates'),
+  getLicenseProjections: () => api.get('/profit/license-projections'),
 };
 
 // Trade Monitor APIs
