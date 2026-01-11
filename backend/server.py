@@ -1542,7 +1542,9 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         "winning_trades": winning_trades,
         "performance_rate": round(performance_rate, 1),
         "member_stats": sorted(member_stats, key=lambda x: x["total_profit"], reverse=True),
-        "honorary_excluded_count": len(honorary_user_ids)
+        "licensed_excluded_count": len(licensed_user_ids),
+        "honorary_count": len(honorary_user_ids),
+        "extended_count": len(extended_user_ids)
     }
 
 @admin_router.get("/analytics/missed-trades")
