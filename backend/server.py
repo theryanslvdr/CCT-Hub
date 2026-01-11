@@ -1474,11 +1474,16 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     # Include all users: members, admins, super_admins, master_admin
     active_users = [u for u in all_users if not u.get("is_suspended", False)]
     
-    # Get all active licenses to check for honorary licensees
+    # Get all active licenses to check for licensed users (both extended and honorary are excluded)
     all_licenses = await db.licenses.find({"is_active": True}, {"_id": 0}).to_list(1000)
+    licensed_user_ids = set(lic["user_id"] for lic in all_licenses)
     honorary_user_ids = set(
         lic["user_id"] for lic in all_licenses 
         if lic.get("license_type") == "honorary"
+    )
+    extended_user_ids = set(
+        lic["user_id"] for lic in all_licenses 
+        if lic.get("license_type") == "extended"
     )
     
     total_account_value = 0
