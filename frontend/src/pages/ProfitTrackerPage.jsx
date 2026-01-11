@@ -292,6 +292,8 @@ export const ProfitTrackerPage = () => {
     simulatedView, 
     getSimulatedAccountValue, 
     getSimulatedLotSize, 
+    getSimulatedTotalDeposits,
+    getSimulatedTotalProfit,
     getSimulatedMemberName 
   } = useAuth();
   const [summary, setSummary] = useState(null);
@@ -305,6 +307,8 @@ export const ProfitTrackerPage = () => {
   // Simulation values
   const simulatedAccountValue = getSimulatedAccountValue();
   const simulatedLotSize = getSimulatedLotSize();
+  const simulatedTotalDeposits = getSimulatedTotalDeposits();
+  const simulatedTotalProfit = getSimulatedTotalProfit();
   const simulatedMemberName = getSimulatedMemberName();
   
   // Effective values - use simulated if in simulation mode
@@ -314,6 +318,12 @@ export const ProfitTrackerPage = () => {
   const effectiveLotSize = simulatedLotSize !== null 
     ? truncateTo2Decimals(simulatedLotSize) 
     : truncateTo2Decimals(effectiveAccountValue / 980);
+  const effectiveTotalDeposits = simulatedTotalDeposits !== null
+    ? simulatedTotalDeposits
+    : (summary?.total_deposits || 0);
+  const effectiveTotalProfit = simulatedTotalProfit !== null
+    ? simulatedTotalProfit
+    : (summary?.total_actual_profit || 0);
   
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
