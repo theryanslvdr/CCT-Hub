@@ -1354,15 +1354,15 @@ export const ProfitTrackerPage = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg bg-zinc-900/50">
                 <div>
                   <p className="text-xs text-zinc-500">Current Balance</p>
-                  <p className="font-mono text-lg text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
+                  <p className="font-mono text-lg text-white">{formatLargeNumber(effectiveAccountValue)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">LOT Size</p>
-                  <p className="font-mono text-lg text-purple-400">{truncateTo2Decimals((summary?.account_value || 0) / 980).toFixed(2)}</p>
+                  <p className="font-mono text-lg text-purple-400">{effectiveLotSize.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">Daily Profit (×15)</p>
-                  <p className="font-mono text-lg text-emerald-400">{formatMoney(((summary?.account_value || 0) / 980) * 15)}</p>
+                  <p className="font-mono text-lg text-emerald-400">{formatMoney(effectiveLotSize * 15)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500">Formula</p>
