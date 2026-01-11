@@ -353,8 +353,9 @@ class TestAPICenterEndpoint:
         assert response.status_code == 200, f"Failed to get API connections: {response.text}"
         data = response.json()
         
-        assert "connections" in data, "Response should contain 'connections' key"
-        print(f"✓ Test 13 PASSED: API Center endpoint works - {len(data['connections'])} connections found")
+        # API returns a list directly
+        assert isinstance(data, list), "Response should be a list"
+        print(f"✓ Test 13 PASSED: API Center endpoint works - {len(data)} connections found")
 
 
 if __name__ == "__main__":
