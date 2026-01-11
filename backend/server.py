@@ -256,6 +256,38 @@ class LicenseResponse(BaseModel):
     created_at: str
     created_by: str
 
+# License Invite Models
+class LicenseInviteCreate(BaseModel):
+    license_type: str  # extended or honorary
+    starting_amount: float
+    valid_duration: str  # 3_months, 6_months, 1_year, indefinite
+    max_uses: int = 1
+    notes: Optional[str] = None
+    invitee_email: Optional[str] = None
+    invitee_name: Optional[str] = None
+
+class LicenseInviteUpdate(BaseModel):
+    valid_duration: Optional[str] = None
+    max_uses: Optional[int] = None
+    notes: Optional[str] = None
+    invitee_email: Optional[str] = None
+    invitee_name: Optional[str] = None
+
+# Email Template Models
+class EmailTemplateType(str, Enum):
+    WELCOME = "welcome"
+    FORGOT_PASSWORD = "forgot_password"
+    TRADE_NOTIFICATION = "trade_notification"
+    MISSED_TRADE = "missed_trade"
+    LICENSE_INVITE = "license_invite"
+    ADMIN_NOTIFICATION = "admin_notification"
+    SUPER_ADMIN_NOTIFICATION = "super_admin_notification"
+
+class EmailTemplateUpdate(BaseModel):
+    subject: str
+    body: str
+    variables: Optional[List[str]] = None  # Available template variables like {{name}}, {{link}}
+
 class NotificationCreate(BaseModel):
     type: str  # deposit, withdrawal, trade_underperform
     title: str
