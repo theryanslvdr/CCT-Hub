@@ -117,8 +117,24 @@ export const DashboardLayout = () => {
   const [platformSettings, setPlatformSettings] = useState(null);
   const [missingKeys, setMissingKeys] = useState([]);
   const [showMissingKeysModal, setShowMissingKeysModal] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState(() => {
+    // Load dismissed announcements from localStorage
+    const saved = localStorage.getItem('dismissedAnnouncements');
+    return saved ? JSON.parse(saved) : [];
+  });
   const location = useLocation();
   const { showTour, completeTour, resetTour } = useOnboarding();
+
+  const handleDismissAnnouncement = (id) => {
+    const newDismissed = [...dismissedAnnouncements, id];
+    setDismissedAnnouncements(newDismissed);
+    localStorage.setItem('dismissedAnnouncements', JSON.stringify(newDismissed));
+  };
+
+  const visibleAnnouncements = announcements.filter(
+    a => a.active && !dismissedAnnouncements.includes(a.id)
+  );
 
   // Load platform settings and check for missing API keys
   useEffect(() => {
