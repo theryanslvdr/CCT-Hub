@@ -628,16 +628,6 @@ export const AdminMembersPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="text-zinc-300">LOT Size</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={editForm.lot_size}
-                onChange={(e) => setEditForm({ ...editForm, lot_size: e.target.value })}
-                className="input-dark mt-1"
-              />
-            </div>
             <Button onClick={handleSaveEdit} className="w-full btn-primary" data-testid="save-edit-button">
               Save Changes
             </Button>
