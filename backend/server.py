@@ -1411,6 +1411,10 @@ async def get_members(
     elif status == "active":
         query["is_suspended"] = {"$ne": True}
     
+    # IMPORTANT: Exclude licensees from standard member list
+    # Licensees should be managed through the Licenses page, not Member Management
+    query["license_type"] = {"$exists": False}
+    
     total = await db.users.count_documents(query)
     skip = (page - 1) * limit
     users_cursor = await db.users.find(query, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
