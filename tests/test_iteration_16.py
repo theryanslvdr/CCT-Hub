@@ -198,7 +198,7 @@ class TestTeamAnalytics:
     def test_team_analytics_excludes_licensed_users(self, auth_token):
         """Test 8: Team Analytics excludes both extended AND honorary licensees"""
         response = requests.get(
-            f"{BASE_URL}/api/admin/team-analytics",
+            f"{BASE_URL}/api/admin/analytics/team",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
         assert response.status_code == 200, f"Team analytics failed: {response.text}"
