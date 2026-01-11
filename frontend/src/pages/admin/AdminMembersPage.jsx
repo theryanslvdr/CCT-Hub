@@ -11,7 +11,8 @@ import { toast } from 'sonner';
 import { 
   Users, ShieldCheck, ShieldAlert, Search, UserCog, Eye, Ban, 
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
-  Activity, DollarSign, TrendingUp, Calendar, Crown, Play
+  Activity, DollarSign, TrendingUp, Calendar, Crown, Play,
+  Award, FileCheck, AlertTriangle
 } from 'lucide-react';
 import api, { adminAPI } from '@/lib/api';
 
@@ -33,9 +34,21 @@ export const AdminMembersPage = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [tempPasswordDialogOpen, setTempPasswordDialogOpen] = useState(false);
   const [simulateDialogOpen, setSimulateDialogOpen] = useState(false);
+  const [licenseDialogOpen, setLicenseDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [memberDetails, setMemberDetails] = useState(null);
   const [simulationData, setSimulationData] = useState(null);
+  
+  // License state
+  const [licenses, setLicenses] = useState([]);
+  const [memberLicense, setMemberLicense] = useState(null);
+  const [licenseForm, setLicenseForm] = useState({
+    license_type: 'extended',
+    starting_amount: '',
+    start_date: new Date().toISOString().split('T')[0],
+    notes: ''
+  });
+  const [licenseLoading, setLicenseLoading] = useState(false);
   
   // Form states
   const [newRole, setNewRole] = useState('admin');
@@ -69,9 +82,20 @@ export const AdminMembersPage = () => {
     }
   }, [currentPage, searchQuery, roleFilter, statusFilter]);
 
+  const loadLicenses = useCallback(async () => {
+    if (!isMasterAdmin()) return;
+    try {
+      const res = await adminAPI.getLicenses();
+      setLicenses(res.data.licenses || []);
+    } catch (error) {
+      console.error('Failed to load licenses:', error);
+    }
+  }, [isMasterAdmin]);
+
   useEffect(() => {
     loadMembers();
-  }, [loadMembers]);
+    loadLicenses();
+  }, [loadMembers, loadLicenses]);
 
   // Debounced search
   useEffect(() => {
@@ -80,6 +104,11 @@ export const AdminMembersPage = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Get license for a member
+  const getMemberLicense = (memberId) => {
+    return licenses.find(l => l.user_id === memberId && l.is_active);
+  };
 
   // Simulate member view
   const handleSimulateMember = async (member) => {
@@ -194,6 +223,64 @@ export const AdminMembersPage = () => {
     }
   };
 
+  // License management
+  const handleOpenLicenseDialog = (member) => {
+    setSelectedMember(member);
+    const existingLicense = getMemberLicense(member.id);
+    setMemberLicense(existingLicense);
+    if (!existingLicense) {
+      setLicenseForm({
+        license_type: 'extended',
+        starting_amount: member.account_value?.toString() || '',
+        start_date: new Date().toISOString().split('T')[0],
+        notes: ''
+      });
+    }
+    setLicenseDialogOpen(true);
+  };
+
+  const handleCreateLicense = async () => {
+    if (!licenseForm.starting_amount || parseFloat(licenseForm.starting_amount) <= 0) {
+      toast.error('Please enter a valid starting amount');
+      return;
+    }
+    setLicenseLoading(true);
+    try {
+      await adminAPI.createLicense({
+        user_id: selectedMember.id,
+        license_type: licenseForm.license_type,
+        starting_amount: parseFloat(licenseForm.starting_amount),
+        start_date: licenseForm.start_date,
+        notes: licenseForm.notes
+      });
+      toast.success(`${licenseForm.license_type === 'extended' ? 'Extended' : 'Honorary'} License assigned to ${selectedMember.full_name}`);
+      setLicenseDialogOpen(false);
+      loadLicenses();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to create license');
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
+
+  const handleRemoveLicense = async () => {
+    if (!memberLicense) return;
+    if (!window.confirm(`Remove ${memberLicense.license_type} license from ${selectedMember.full_name}? This will revert them to standard calculations.`)) return;
+    
+    setLicenseLoading(true);
+    try {
+      await adminAPI.deleteLicense(memberLicense.id);
+      toast.success('License removed successfully');
+      setLicenseDialogOpen(false);
+      setMemberLicense(null);
+      loadLicenses();
+    } catch (error) {
+      toast.error('Failed to remove license');
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
+
   const getRoleIcon = (role) => {
     switch (role) {
       case 'super_admin': return <ShieldAlert className="w-4 h-4 text-amber-400" />;
@@ -208,6 +295,27 @@ export const AdminMembersPage = () => {
       case 'admin': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       default: return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
     }
+  };
+
+  const getLicenseBadge = (memberId) => {
+    const license = getMemberLicense(memberId);
+    if (!license) return null;
+    
+    if (license.license_type === 'extended') {
+      return (
+        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+          EXT
+        </span>
+      );
+    }
+    if (license.license_type === 'honorary') {
+      return (
+        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          HON
+        </span>
+      );
+    }
+    return null;
   };
 
   const userCount = members.filter(m => m.role === 'user').length;
@@ -264,11 +372,13 @@ export const AdminMembersPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Super Admins</p>
-                <p className="text-3xl font-bold font-mono text-amber-400 mt-2">{superAdminCount}</p>
+                <p className="text-sm text-zinc-400">Licensed Users</p>
+                <p className="text-3xl font-bold font-mono text-purple-400 mt-2">
+                  {licenses.filter(l => l.is_active).length}
+                </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                <ShieldAlert className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Award className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>
@@ -343,7 +453,10 @@ export const AdminMembersPage = () => {
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-medium">
                               {member.full_name?.charAt(0) || 'U'}
                             </div>
-                            <span className="font-medium text-white">{member.full_name}</span>
+                            <span className="font-medium text-white">
+                              {member.full_name}
+                              {getLicenseBadge(member.id)}
+                            </span>
                           </div>
                         </td>
                         <td className="text-zinc-400">{member.email}</td>
@@ -389,6 +502,19 @@ export const AdminMembersPage = () => {
                               >
                                 <UserCog className="w-4 h-4" />
                               </Button>
+                              {/* License Button - Master Admin only */}
+                              {isMasterAdmin() && member.role === 'user' && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleOpenLicenseDialog(member)}
+                                  className={`${getMemberLicense(member.id) ? 'text-purple-400 hover:text-purple-300' : 'text-zinc-400 hover:text-purple-400'}`}
+                                  data-testid={`license-${member.id}`}
+                                  title="Manage License"
+                                >
+                                  <Award className="w-4 h-4" />
+                                </Button>
+                              )}
                               {member.role === 'user' && (
                                 <Button
                                   variant="ghost"
@@ -720,6 +846,180 @@ export const AdminMembersPage = () => {
               Set Temporary Password
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* License Management Dialog */}
+      <Dialog open={licenseDialogOpen} onOpenChange={setLicenseDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Award className="w-5 h-5 text-purple-400" /> 
+              {memberLicense ? 'Manage License' : 'Assign License'} - {selectedMember?.full_name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {memberLicense ? (
+            // View/Remove existing license
+            <div className="space-y-4 mt-4">
+              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileCheck className="w-5 h-5 text-purple-400" />
+                  <span className="text-purple-400 font-medium">
+                    {memberLicense.license_type === 'extended' ? 'Extended Licensee' : 'Honorary Licensee'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-zinc-500">Starting Amount</p>
+                    <p className="text-white font-mono">${memberLicense.starting_amount?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Current Amount</p>
+                    <p className="text-emerald-400 font-mono">${memberLicense.current_amount?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Start Date</p>
+                    <p className="text-white">{memberLicense.start_date}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Status</p>
+                    <p className="text-emerald-400">Active</p>
+                  </div>
+                </div>
+                {memberLicense.notes && (
+                  <div className="mt-3 pt-3 border-t border-purple-500/20">
+                    <p className="text-zinc-500 text-xs">Notes</p>
+                    <p className="text-zinc-300 text-sm">{memberLicense.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {memberLicense.license_type === 'extended' && (
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+                  <p className="text-blue-400 font-medium mb-1">Extended License Calculation</p>
+                  <p className="text-zinc-400">
+                    Daily profit is fixed per quarter: <span className="text-white font-mono">(Balance ÷ 980) × 15</span>
+                  </p>
+                  <p className="text-zinc-400 mt-1">
+                    Recalculated at the start of each new quarter based on ending balance.
+                  </p>
+                </div>
+              )}
+
+              {memberLicense.license_type === 'honorary' && (
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                  <p className="text-amber-400 font-medium mb-1">Honorary License</p>
+                  <p className="text-zinc-400">
+                    Standard profit calculations apply. Funds are <strong>excluded</strong> from team analytics totals.
+                  </p>
+                </div>
+              )}
+
+              <Button 
+                onClick={handleRemoveLicense}
+                variant="outline"
+                className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10"
+                disabled={licenseLoading}
+              >
+                {licenseLoading ? 'Removing...' : 'Remove License'}
+              </Button>
+            </div>
+          ) : (
+            // Create new license
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label className="text-zinc-300">License Type</Label>
+                <Select 
+                  value={licenseForm.license_type} 
+                  onValueChange={(v) => setLicenseForm({ ...licenseForm, license_type: v })}
+                >
+                  <SelectTrigger className="input-dark mt-1" data-testid="license-type-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="extended">
+                      <div className="flex items-center gap-2">
+                        <span className="text-purple-400">Extended Licensee</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="honorary">
+                      <div className="flex items-center gap-2">
+                        <span className="text-amber-400">Honorary Licensee</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {licenseForm.license_type === 'extended' && (
+                <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
+                  <p className="text-purple-400 font-medium mb-1">Extended License</p>
+                  <p className="text-zinc-400">
+                    Daily profit is fixed for entire quarters. Formula: <span className="text-white font-mono">(Balance ÷ 980) × 15</span>
+                  </p>
+                </div>
+              )}
+
+              {licenseForm.license_type === 'honorary' && (
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                  <p className="text-amber-400 font-medium mb-1">Honorary License</p>
+                  <p className="text-zinc-400">
+                    Standard calculations, but funds excluded from team totals.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-zinc-300">Starting Amount (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={licenseForm.starting_amount}
+                    onChange={(e) => setLicenseForm({ ...licenseForm, starting_amount: e.target.value })}
+                    placeholder="0.00"
+                    className="input-dark pl-7"
+                    data-testid="license-starting-amount"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Current account value: ${selectedMember?.account_value?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Start Date</Label>
+                <Input
+                  type="date"
+                  value={licenseForm.start_date}
+                  onChange={(e) => setLicenseForm({ ...licenseForm, start_date: e.target.value })}
+                  className="input-dark mt-1"
+                  data-testid="license-start-date"
+                />
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Notes (optional)</Label>
+                <Input
+                  value={licenseForm.notes}
+                  onChange={(e) => setLicenseForm({ ...licenseForm, notes: e.target.value })}
+                  placeholder="Any additional notes..."
+                  className="input-dark mt-1"
+                  data-testid="license-notes"
+                />
+              </div>
+
+              <Button 
+                onClick={handleCreateLicense}
+                className="w-full btn-primary"
+                disabled={licenseLoading}
+                data-testid="assign-license-button"
+              >
+                {licenseLoading ? 'Assigning...' : `Assign ${licenseForm.license_type === 'extended' ? 'Extended' : 'Honorary'} License`}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
