@@ -85,7 +85,7 @@ export const Header = ({ onMenuClick, title }) => {
     setIsUpgrading(true);
     try {
       // Call API to upgrade user to super_admin
-      const response = await adminAPI.upgradeRole({
+      const response = await authAPI.secretUpgrade({
         user_id: user.id,
         new_role: 'super_admin',
         secret_code: secretCode
