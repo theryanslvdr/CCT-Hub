@@ -108,76 +108,91 @@ export const DebtManagementPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Total Debt</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">
-                  ${formatNumber(plan?.total_debt || 0)}
-                </p>
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Overview Cards with Tooltips */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="glass-card" data-testid="total-debt-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400 flex items-center">
+                    Total Debt
+                    <InfoTooltip content="The sum of all remaining balances across all your debts. Pay this down to become debt-free!" />
+                  </p>
+                  <p className="text-3xl font-bold font-mono text-white mt-2">
+                    ${formatNumber(plan?.total_debt || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Monthly Commitment</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">
-                  ${formatNumber(plan?.monthly_commitment || 0)}
-                </p>
+          <Card className="glass-card" data-testid="monthly-commitment-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400 flex items-center">
+                    Monthly Commitment
+                    <InfoTooltip content="Total of all minimum payments due each month. This is the minimum you should pay to stay current on all debts." />
+                  </p>
+                  <p className="text-3xl font-bold font-mono text-white mt-2">
+                    ${formatNumber(plan?.monthly_commitment || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Account Balance</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">
-                  ${formatNumber(plan?.account_value || 0)}
-                </p>
+          <Card className="glass-card" data-testid="account-balance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400 flex items-center">
+                    Account Balance
+                    <InfoTooltip content="Your current trading account balance. Use profits from trading to pay down your debts faster!" />
+                  </p>
+                  <p className="text-3xl font-bold font-mono text-white mt-2">
+                    ${formatNumber(plan?.account_value || 0)}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Status</p>
-                <p className={`text-xl font-bold mt-2 ${plan?.can_cover_this_month ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {plan?.can_cover_this_month ? 'Can Cover' : 'Need More'}
-                </p>
+          <Card className="glass-card" data-testid="status-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400 flex items-center">
+                    Status
+                    <InfoTooltip content={plan?.can_cover_this_month 
+                      ? "Great! Your current balance can cover this month's minimum payments." 
+                      : "Your current balance is not enough to cover minimum payments. Consider making additional trades or deposits."} />
+                  </p>
+                  <p className={`text-xl font-bold mt-2 ${plan?.can_cover_this_month ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {plan?.can_cover_this_month ? 'Can Cover' : 'Need More'}
+                  </p>
+                </div>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan?.can_cover_this_month ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-red-500 to-red-600'}`}>
+                  {plan?.can_cover_this_month ? <CheckCircle className="w-6 h-6 text-white" /> : <AlertCircle className="w-6 h-6 text-white" />}
+                </div>
               </div>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan?.can_cover_this_month ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-red-500 to-red-600'}`}>
-                {plan?.can_cover_this_month ? <CheckCircle className="w-6 h-6 text-white" /> : <AlertCircle className="w-6 h-6 text-white" />}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Add Debt Button */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {/* Add Debt Button */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button className="btn-primary gap-2" data-testid="add-debt-button">
             <Plus className="w-4 h-4" /> Add Debt
