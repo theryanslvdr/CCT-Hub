@@ -1,87 +1,122 @@
+"""Common Pydantic models (deposits, debts, goals, notifications, etc.)"""
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 from datetime import datetime
+
 
 class DepositCreate(BaseModel):
     amount: float
-    type: str = "deposit"
+    product: str = "MOIL10"
+    currency: str = "USDT"
     notes: Optional[str] = None
+
 
 class DepositResponse(BaseModel):
     id: str
     user_id: str
     amount: float
-    type: str
-    notes: Optional[str] = None
+    product: Optional[str] = "MOIL10"  # Made optional with default for withdrawals
+    currency: str
+    notes: Optional[str]
     created_at: datetime
 
+
+class WithdrawalRequest(BaseModel):
+    amount: float
+    notes: Optional[str] = ""
+
+
+class WithdrawalSimulation(BaseModel):
+    amount: float
+    from_currency: str = "USDT"
+    to_currency: str = "USD"
+
+
+class ConfirmReceiptRequest(BaseModel):
+    confirmed_at: str
+
+
 class DebtCreate(BaseModel):
-    creditor: str
-    original_amount: float
-    current_balance: float
-    interest_rate: float = 0
-    due_date: Optional[str] = None
-    notes: Optional[str] = None
+    name: str
+    total_amount: float
+    minimum_payment: float
+    due_day: int
+    interest_rate: Optional[float] = 0
+    currency: str = "USD"
+
 
 class DebtResponse(BaseModel):
     id: str
     user_id: str
-    creditor: str
-    original_amount: float
-    current_balance: float
+    name: str
+    total_amount: float
+    remaining_amount: float
+    minimum_payment: float
+    due_day: int
     interest_rate: float
-    due_date: Optional[str] = None
-    notes: Optional[str] = None
-    created_at: str
-    payments: list = []
+    currency: str
+    created_at: datetime
+
 
 class GoalCreate(BaseModel):
-    title: str
+    name: str
     target_amount: float
-    target_date: Optional[str] = None
-    notes: Optional[str] = None
+    current_amount: Optional[float] = 0
+    target_date: Optional[datetime] = None
+    price_type: str = "fixed"  # fixed or market
+    market_item: Optional[str] = None
+    currency: str = "USD"
+
 
 class GoalResponse(BaseModel):
     id: str
     user_id: str
-    title: str
+    name: str
     target_amount: float
-    current_amount: float = 0
-    target_date: Optional[str] = None
-    notes: Optional[str] = None
-    created_at: str
-    is_achieved: bool = False
+    current_amount: float
+    target_date: Optional[datetime]
+    price_type: str
+    market_item: Optional[str]
+    currency: str
+    progress_percentage: float
+    created_at: datetime
+
 
 class NotificationCreate(BaseModel):
+    type: str  # deposit, withdrawal, trade_underperform
     title: str
     message: str
-    type: str
-    user_id: Optional[str] = None
-    metadata: Optional[dict] = None
+    user_id: str  # The user who triggered the notification
+    user_name: str
+    amount: Optional[float] = None
+    metadata: Optional[Dict] = None
+
 
 class NotificationResponse(BaseModel):
     id: str
+    type: str
     title: str
     message: str
-    type: str
-    created_at: str
+    user_id: str
+    user_name: str
+    amount: Optional[float] = None
+    metadata: Optional[Dict] = None
     is_read: bool = False
-    user_id: Optional[str] = None
-    metadata: Optional[dict] = None
+    created_at: datetime
+
 
 class APIConnectionCreate(BaseModel):
-    provider: str
+    name: str
     endpoint_url: str
     api_key: Optional[str] = None
-    additional_config: Optional[dict] = None
+    headers: Optional[Dict[str, str]] = None
+    is_active: bool = True
+
 
 class APIConnectionResponse(BaseModel):
     id: str
-    provider: str
+    name: str
     endpoint_url: str
-    is_connected: bool
-    last_checked: Optional[str] = None
-
-class WithdrawalSimulation(BaseModel):
-    amount: float
-    to_currency: str = "USD"
+    is_active: bool
+    created_at: datetime
+    last_used: Optional[datetime]
