@@ -778,10 +778,10 @@ export const ProfitTrackerPage = () => {
                   </Select>
                 </div>
                 <p className="text-3xl font-bold font-mono text-white mt-2">
-                  {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(summary?.total_deposits || 0, selectedCurrency))}
+                  {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}
                 </p>
                 <p className="text-xs text-zinc-500 mt-1">
-                  ≈ {formatMoney(summary?.total_deposits || 0)} USDT
+                  ≈ {formatMoney(effectiveTotalDeposits)} USDT
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center ml-3">
@@ -796,8 +796,8 @@ export const ProfitTrackerPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Total Profit</p>
-                <p className={`text-3xl font-bold font-mono mt-2 ${(summary?.total_actual_profit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {(summary?.total_actual_profit || 0) >= 0 ? '+' : ''}{formatLargeNumber(summary?.total_actual_profit || 0)}
+                <p className={`text-3xl font-bold font-mono mt-2 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
