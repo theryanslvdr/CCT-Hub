@@ -243,6 +243,39 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  const handleOpenResetBalance = (license) => {
+    setSelectedLicense(license);
+    setResetBalanceForm({
+      new_amount: license.current_amount?.toString() || license.starting_amount?.toString() || '',
+      notes: '',
+      record_as_deposit: true
+    });
+    setResetBalanceDialogOpen(true);
+  };
+
+  const handleResetBalance = async () => {
+    if (!resetBalanceForm.new_amount || parseFloat(resetBalanceForm.new_amount) < 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    setResettingBalance(true);
+    try {
+      await adminAPI.resetLicenseBalance(selectedLicense.id, {
+        new_amount: parseFloat(resetBalanceForm.new_amount),
+        notes: resetBalanceForm.notes,
+        record_as_deposit: resetBalanceForm.record_as_deposit
+      });
+      toast.success('License balance reset successfully');
+      setResetBalanceDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reset balance');
+    } finally {
+      setResettingBalance(false);
+    }
+  };
+
   const handleViewDetails = (invite) => {
     setSelectedInvite(invite);
     setViewDialogOpen(true);
