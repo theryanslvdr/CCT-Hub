@@ -43,7 +43,23 @@ export const LicenseRegistrationPage = () => {
           setForm(f => ({ ...f, full_name: res.data.invitee_name }));
         }
       } catch (err) {
-        setError(err.response?.data?.detail || 'Invalid or expired invite code');
+        // Handle different error formats
+        const errorData = err.response?.data;
+        if (typeof errorData === 'string') {
+          setError(errorData);
+        } else if (errorData?.detail) {
+          // FastAPI HTTPException format
+          if (typeof errorData.detail === 'string') {
+            setError(errorData.detail);
+          } else if (Array.isArray(errorData.detail)) {
+            // Pydantic validation error format
+            setError(errorData.detail.map(e => e.msg).join(', '));
+          } else {
+            setError('Invalid invite code');
+          }
+        } else {
+          setError('Invalid or expired invite code');
+        }
       } finally {
         setValidating(false);
       }
