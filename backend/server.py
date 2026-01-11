@@ -106,6 +106,7 @@ class UserResponse(BaseModel):
     lot_size: Optional[float] = None
     timezone: Optional[str] = "UTC"
     allowed_dashboards: Optional[List[str]] = None  # For normal members - modular access
+    license_type: Optional[str] = None  # For licensees: "extended" or "honorary"
 
 class TokenResponse(BaseModel):
     access_token: str
