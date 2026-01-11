@@ -934,15 +934,28 @@ export const AdminMembersPage = () => {
                             </p>
                           </div>
                         </div>
-                        <Button
-                          onClick={() => {
-                            setViewDialogOpen(false);
-                            handleOpenLicenseDialog(selectedMember);
-                          }}
-                          className={memberLicense ? 'btn-secondary' : 'btn-primary'}
-                        >
-                          <Award className="w-4 h-4 mr-1" /> {memberLicense ? 'Manage' : 'Assign'}
-                        </Button>
+                        <div className="flex gap-2">
+                          {memberLicense && (
+                            <Button
+                              onClick={handleOpenChangeLicense}
+                              variant="outline"
+                              size="sm"
+                              className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                            >
+                              <RefreshCw className="w-4 h-4 mr-1" /> Change Type
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => {
+                              setViewDialogOpen(false);
+                              handleOpenLicenseDialog(selectedMember);
+                            }}
+                            className={memberLicense ? 'btn-secondary' : 'btn-primary'}
+                            size="sm"
+                          >
+                            <Award className="w-4 h-4 mr-1" /> {memberLicense ? 'Manage' : 'Assign'}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
