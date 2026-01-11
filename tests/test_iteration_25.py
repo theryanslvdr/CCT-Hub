@@ -48,7 +48,8 @@ class TestMemberManagementExcludesLicensees:
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200, f"Failed to get licenses: {response.text}"
         
-        licenses = response.json()
+        data = response.json()
+        licenses = data.get("licenses", []) if isinstance(data, dict) else data
         active_licenses = [l for l in licenses if l.get("is_active")]
         
         print(f"✓ Found {len(active_licenses)} active licenses in the system")
