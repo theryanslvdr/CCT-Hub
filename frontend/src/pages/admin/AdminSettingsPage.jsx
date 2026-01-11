@@ -345,48 +345,55 @@ export const AdminSettingsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-7 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
           <TabsTrigger 
             value="seo" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-seo"
           >
-            <Globe className="w-4 h-4 mr-2" /> SEO
+            <Globe className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">SEO</span>
           </TabsTrigger>
           <TabsTrigger 
             value="branding" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-branding"
           >
-            <Image className="w-4 h-4 mr-2" /> Branding
+            <Image className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Branding</span>
           </TabsTrigger>
           <TabsTrigger 
             value="ui" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-ui"
           >
-            <Palette className="w-4 h-4 mr-2" /> UI
+            <Palette className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">UI</span>
           </TabsTrigger>
           <TabsTrigger 
             value="integrations" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-integrations"
           >
-            <Plug className="w-4 h-4 mr-2" /> Integrations
+            <Plug className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">API</span>
           </TabsTrigger>
           <TabsTrigger 
             value="links" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-links"
           >
-            <ExternalLink className="w-4 h-4 mr-2" /> Links
+            <ExternalLink className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Links</span>
           </TabsTrigger>
           <TabsTrigger 
             value="emails" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
             data-testid="tab-emails"
           >
-            <Mail className="w-4 h-4 mr-2" /> Emails
+            <Mail className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Emails</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="maintenance" 
+            className="data-[state=active]:bg-amber-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
+            data-testid="tab-maintenance"
+          >
+            <Wrench className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Maint.</span>
           </TabsTrigger>
         </TabsList>
 
