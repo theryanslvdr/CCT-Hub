@@ -6,8 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Settings, Upload, Globe, Image, Palette, RefreshCw, Crown } from 'lucide-react';
+import { 
+  Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
+  Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2
+} from 'lucide-react';
 
 export const AdminSettingsPage = () => {
   const { isMasterAdmin } = useAuth();
@@ -20,9 +24,24 @@ export const AdminSettingsPage = () => {
     primary_color: '#3B82F6',
     accent_color: '#06B6D4',
     hide_emergent_badge: false,
+    // Integration API Keys
+    emailit_api_key: '',
+    cloudinary_cloud_name: '',
+    cloudinary_api_key: '',
+    cloudinary_api_secret: '',
+    heartbeat_api_key: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('seo');
+  
+  // Visibility toggles for sensitive fields
+  const [showKeys, setShowKeys] = useState({
+    emailit: false,
+    cloudinary_key: false,
+    cloudinary_secret: false,
+    heartbeat: false
+  });
 
   useEffect(() => {
     loadSettings();
@@ -30,7 +49,6 @@ export const AdminSettingsPage = () => {
 
   // Apply settings to document
   useEffect(() => {
-    // Update favicon
     if (settings.favicon_url) {
       const favicon = document.querySelector("link[rel~='icon']") || document.createElement('link');
       favicon.rel = 'icon';
@@ -38,7 +56,6 @@ export const AdminSettingsPage = () => {
       document.head.appendChild(favicon);
     }
     
-    // Update title
     if (settings.site_title) {
       document.title = settings.site_title;
     }
@@ -61,7 +78,6 @@ export const AdminSettingsPage = () => {
       await settingsAPI.updatePlatform(settings);
       toast.success('Settings saved! Refreshing page...');
       
-      // Auto-refresh after 1.5 seconds
       setTimeout(() => {
         window.location.reload();
       }, 1500);
@@ -97,216 +113,434 @@ export const AdminSettingsPage = () => {
     }
   };
 
+  const toggleKeyVisibility = (key) => {
+    setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const maskValue = (value) => {
+    if (!value) return '';
+    if (value.length <= 8) return '••••••••';
+    return value.slice(0, 4) + '••••••••' + value.slice(-4);
+  };
+
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* SEO Settings */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Globe className="w-5 h-5" /> SEO & Meta Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="text-zinc-300">Site Title (Browser Tab)</Label>
-            <Input
-              value={settings.site_title}
-              onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
-              className="input-dark mt-1"
-              placeholder="CrossCurrent Finance Center"
-              data-testid="site-title-input"
-            />
-            <p className="text-xs text-zinc-500 mt-1">This appears in the browser tab</p>
-          </div>
-          <div>
-            <Label className="text-zinc-300">Site Description</Label>
-            <Input
-              value={settings.site_description}
-              onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
-              className="input-dark mt-1"
-              data-testid="site-description-input"
-            />
-          </div>
-          <div>
-            <Label className="text-zinc-300">OG Image URL (for social sharing)</Label>
-            <Input
-              value={settings.og_image_url}
-              onChange={(e) => setSettings({ ...settings, og_image_url: e.target.value })}
-              placeholder="https://example.com/og-image.png"
-              className="input-dark mt-1"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Branding */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Image className="w-5 h-5" /> Branding
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Logo */}
-          <div>
-            <Label className="text-zinc-300">Logo (replaces "CrossCurrent" text in sidebar)</Label>
-            <div className="mt-2 flex items-center gap-4">
-              {settings.logo_url ? (
-                <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden">
-                  <img src={settings.logo_url} alt="Logo" className="max-w-full max-h-full object-contain" />
-                </div>
-              ) : (
-                <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
-                  <span className="text-zinc-500 text-sm">No logo</span>
-                </div>
-              )}
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  id="logo-upload"
-                />
-                <label htmlFor="logo-upload">
-                  <Button asChild variant="outline" className="btn-secondary cursor-pointer">
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" /> Upload Logo
-                    </span>
-                  </Button>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Favicon */}
-          <div>
-            <Label className="text-zinc-300">Favicon (browser tab icon)</Label>
-            <div className="mt-2 flex items-center gap-4">
-              {settings.favicon_url ? (
-                <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden">
-                  <img src={settings.favicon_url} alt="Favicon" className="w-8 h-8 object-contain" />
-                </div>
-              ) : (
-                <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
-                  <span className="text-zinc-500 text-xs">None</span>
-                </div>
-              )}
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFaviconUpload}
-                  className="hidden"
-                  id="favicon-upload"
-                />
-                <label htmlFor="favicon-upload">
-                  <Button asChild variant="outline" className="btn-secondary cursor-pointer">
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" /> Upload Favicon
-                    </span>
-                  </Button>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Hide Emergent Badge Toggle - Master Admin Only */}
-          {isMasterAdmin() && (
-            <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-purple-500/20">
-              <div className="flex items-center gap-3">
-                <Crown className="w-5 h-5 text-purple-400" />
-                <div>
-                  <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
-                  <p className="text-xs text-zinc-500 mt-1">Master Admin only - Toggle to show/hide the Emergent branding badge</p>
-                </div>
-              </div>
-              <Switch
-                checked={settings.hide_emergent_badge}
-                onCheckedChange={(v) => setSettings({ ...settings, hide_emergent_badge: v })}
-                data-testid="hide-badge-toggle"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Colors */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Palette className="w-5 h-5" /> UI Customization
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-zinc-300">Primary Color</Label>
-              <div className="flex items-center gap-3 mt-1">
-                <input
-                  type="color"
-                  value={settings.primary_color}
-                  onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                  className="w-12 h-10 rounded cursor-pointer bg-transparent"
-                />
-                <Input
-                  value={settings.primary_color}
-                  onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                  className="input-dark flex-1"
-                  data-testid="primary-color-input"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-zinc-300">Accent Color</Label>
-              <div className="flex items-center gap-3 mt-1">
-                <input
-                  type="color"
-                  value={settings.accent_color}
-                  onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
-                  className="w-12 h-10 rounded cursor-pointer bg-transparent"
-                />
-                <Input
-                  value={settings.accent_color}
-                  onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
-                  className="input-dark flex-1"
-                  data-testid="accent-color-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Preview */}
-          <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-3">Preview:</p>
-            <div className="flex gap-4">
-              <Button style={{ backgroundColor: settings.primary_color }} className="text-white">
-                Primary Button
-              </Button>
-              <Button style={{ backgroundColor: settings.accent_color }} className="text-white">
-                Accent Button
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Settings className="w-6 h-6" /> Platform Settings
+        </h1>
         <Button onClick={handleSave} className="btn-primary gap-2" disabled={saving} data-testid="save-settings-button">
           {saving ? (
             <>
-              <RefreshCw className="w-4 h-4 animate-spin" /> Saving & Refreshing...
+              <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
             </>
           ) : (
-            <>Save Settings</>
+            <>
+              <CheckCircle2 className="w-4 h-4" /> Save All Settings
+            </>
           )}
         </Button>
       </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
+          <TabsTrigger 
+            value="seo" 
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            data-testid="tab-seo"
+          >
+            <Globe className="w-4 h-4 mr-2" /> SEO & Meta
+          </TabsTrigger>
+          <TabsTrigger 
+            value="branding" 
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            data-testid="tab-branding"
+          >
+            <Image className="w-4 h-4 mr-2" /> Branding
+          </TabsTrigger>
+          <TabsTrigger 
+            value="ui" 
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            data-testid="tab-ui"
+          >
+            <Palette className="w-4 h-4 mr-2" /> UI Customization
+          </TabsTrigger>
+          <TabsTrigger 
+            value="integrations" 
+            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md"
+            data-testid="tab-integrations"
+          >
+            <Plug className="w-4 h-4 mr-2" /> Integrations
+          </TabsTrigger>
+        </TabsList>
+
+        {/* SEO & Meta Tab */}
+        <TabsContent value="seo" className="mt-6">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-400" /> SEO & Meta Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-zinc-300">Site Title (Browser Tab)</Label>
+                <Input
+                  value={settings.site_title}
+                  onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
+                  className="input-dark mt-1"
+                  placeholder="CrossCurrent Finance Center"
+                  data-testid="site-title-input"
+                />
+                <p className="text-xs text-zinc-500 mt-1">This appears in the browser tab</p>
+              </div>
+              <div>
+                <Label className="text-zinc-300">Site Description</Label>
+                <Input
+                  value={settings.site_description}
+                  onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
+                  className="input-dark mt-1"
+                  data-testid="site-description-input"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Used for SEO and social sharing</p>
+              </div>
+              <div>
+                <Label className="text-zinc-300">OG Image URL (Social Sharing)</Label>
+                <Input
+                  value={settings.og_image_url}
+                  onChange={(e) => setSettings({ ...settings, og_image_url: e.target.value })}
+                  placeholder="https://example.com/og-image.png"
+                  className="input-dark mt-1"
+                  data-testid="og-image-input"
+                />
+                <p className="text-xs text-zinc-500 mt-1">Image displayed when sharing on social media</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Branding Tab */}
+        <TabsContent value="branding" className="mt-6">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Image className="w-5 h-5 text-purple-400" /> Branding
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Logo */}
+              <div>
+                <Label className="text-zinc-300">Logo (replaces "CrossCurrent" text in sidebar)</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  {settings.logo_url ? (
+                    <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                      <img src={settings.logo_url} alt="Logo" className="max-w-full max-h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                      <span className="text-zinc-500 text-sm">No logo</span>
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                      id="logo-upload"
+                    />
+                    <label htmlFor="logo-upload">
+                      <Button asChild variant="outline" className="btn-secondary cursor-pointer">
+                        <span>
+                          <Upload className="w-4 h-4 mr-2" /> Upload Logo
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Favicon */}
+              <div>
+                <Label className="text-zinc-300">Favicon (browser tab icon)</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  {settings.favicon_url ? (
+                    <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                      <img src={settings.favicon_url} alt="Favicon" className="w-8 h-8 object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                      <span className="text-zinc-500 text-xs">None</span>
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFaviconUpload}
+                      className="hidden"
+                      id="favicon-upload"
+                    />
+                    <label htmlFor="favicon-upload">
+                      <Button asChild variant="outline" className="btn-secondary cursor-pointer">
+                        <span>
+                          <Upload className="w-4 h-4 mr-2" /> Upload Favicon
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hide Emergent Badge Toggle - Master Admin Only */}
+              {isMasterAdmin() && (
+                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-purple-500/20">
+                  <div className="flex items-center gap-3">
+                    <Crown className="w-5 h-5 text-purple-400" />
+                    <div>
+                      <Label className="text-zinc-300">Hide "Made with Emergent" Badge</Label>
+                      <p className="text-xs text-zinc-500 mt-1">Master Admin only - Toggle to show/hide the Emergent branding badge</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={settings.hide_emergent_badge}
+                    onCheckedChange={(v) => setSettings({ ...settings, hide_emergent_badge: v })}
+                    data-testid="hide-badge-toggle"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* UI Customization Tab */}
+        <TabsContent value="ui" className="mt-6">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Palette className="w-5 h-5 text-cyan-400" /> UI Customization
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-zinc-300">Primary Color</Label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <input
+                      type="color"
+                      value={settings.primary_color}
+                      onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
+                    />
+                    <Input
+                      value={settings.primary_color}
+                      onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
+                      className="input-dark flex-1"
+                      data-testid="primary-color-input"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Accent Color</Label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <input
+                      type="color"
+                      value={settings.accent_color}
+                      onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
+                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
+                    />
+                    <Input
+                      value={settings.accent_color}
+                      onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
+                      className="input-dark flex-1"
+                      data-testid="accent-color-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <p className="text-xs text-zinc-500 mb-3">Preview:</p>
+                <div className="flex gap-4">
+                  <Button style={{ backgroundColor: settings.primary_color }} className="text-white">
+                    Primary Button
+                  </Button>
+                  <Button style={{ backgroundColor: settings.accent_color }} className="text-white">
+                    Accent Button
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Integrations Tab */}
+        <TabsContent value="integrations" className="mt-6 space-y-6">
+          {/* Emailit */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Mail className="w-5 h-5 text-emerald-400" /> Emailit
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Email notification service for trade signals and alerts</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-zinc-300">API Key</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="relative flex-1">
+                    <Input
+                      type={showKeys.emailit ? 'text' : 'password'}
+                      value={settings.emailit_api_key || ''}
+                      onChange={(e) => setSettings({ ...settings, emailit_api_key: e.target.value })}
+                      placeholder="em_xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="emailit-api-key"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('emailit')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.emailit ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Get your API key from <a href="https://emailit.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">emailit.com</a>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cloudinary */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-blue-400" /> Cloudinary
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Image and file upload service for logos and profile pictures</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-zinc-300">Cloud Name</Label>
+                <Input
+                  value={settings.cloudinary_cloud_name || ''}
+                  onChange={(e) => setSettings({ ...settings, cloudinary_cloud_name: e.target.value })}
+                  placeholder="your-cloud-name"
+                  className="input-dark mt-1"
+                  data-testid="cloudinary-cloud-name"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-zinc-300">API Key</Label>
+                  <div className="relative mt-1">
+                    <Input
+                      type={showKeys.cloudinary_key ? 'text' : 'password'}
+                      value={settings.cloudinary_api_key || ''}
+                      onChange={(e) => setSettings({ ...settings, cloudinary_api_key: e.target.value })}
+                      placeholder="xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="cloudinary-api-key"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('cloudinary_key')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.cloudinary_key ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">API Secret</Label>
+                  <div className="relative mt-1">
+                    <Input
+                      type={showKeys.cloudinary_secret ? 'text' : 'password'}
+                      value={settings.cloudinary_api_secret || ''}
+                      onChange={(e) => setSettings({ ...settings, cloudinary_api_secret: e.target.value })}
+                      placeholder="xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="cloudinary-api-secret"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('cloudinary_secret')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.cloudinary_secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-zinc-500">
+                Get your credentials from <a href="https://cloudinary.com/console" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">cloudinary.com/console</a>
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Heartbeat */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Heart className="w-5 h-5 text-red-400" /> Heartbeat
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Community membership verification for user registration</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-zinc-300">API Key</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="relative flex-1">
+                    <Input
+                      type={showKeys.heartbeat ? 'text' : 'password'}
+                      value={settings.heartbeat_api_key || ''}
+                      onChange={(e) => setSettings({ ...settings, heartbeat_api_key: e.target.value })}
+                      placeholder="hb:xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="heartbeat-api-key"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('heartbeat')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.heartbeat ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Get your API key from <a href="https://heartbeat.chat" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">heartbeat.chat</a> dashboard
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Info Box */}
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <div className="flex items-start gap-3">
+              <Key className="w-5 h-5 text-amber-400 mt-0.5" />
+              <div>
+                <p className="text-amber-400 font-medium">Security Note</p>
+                <p className="text-sm text-zinc-400 mt-1">
+                  API keys are stored securely and are only visible to admin users. 
+                  Changes to integration settings will take effect after saving.
+                </p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
