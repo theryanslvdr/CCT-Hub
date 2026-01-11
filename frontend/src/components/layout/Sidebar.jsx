@@ -5,7 +5,8 @@ import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
-  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award
+  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
