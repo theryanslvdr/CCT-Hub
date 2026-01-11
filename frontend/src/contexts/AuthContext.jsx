@@ -59,14 +59,21 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const response = await api.post('/auth/login', { email, password });
-    const { access_token, user: userData } = response.data;
-    
-    storage.set('token', access_token);
-    storage.set('user', userData);
-    setUser(userData);
-    
-    return userData;
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { access_token, user: userData } = response.data;
+      
+      storage.set('token', access_token);
+      storage.set('user', userData);
+      setUser(userData);
+      
+      return { success: true, user: userData };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || 'Login failed. Please check your credentials.' 
+      };
+    }
   }, []);
 
   const register = useCallback(async (email, password, fullName, heartbeatEmail, secretCode) => {
