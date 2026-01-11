@@ -5,7 +5,7 @@ import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
-  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet
+  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,13 +47,11 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/debt-management', icon: CreditCard, label: 'Debt Management', id: 'debt_management', hidden: true },
   ];
 
-  // Admin navigation items - basic admin
+  // Admin navigation items - kept in sidebar (removed Settings & API Center - moved to profile popover)
   const adminNavItems = [
     { path: '/admin/members', icon: Users, label: 'Members' },
     { path: '/admin/signals', icon: Radio, label: 'Trading Signals' },
     { path: '/admin/analytics', icon: BarChart3, label: 'Team Analytics' },
-    { path: '/admin/settings', icon: Cog, label: 'Settings' },
-    { path: '/admin/api-center', icon: FlaskConical, label: 'API Center' },
   ];
 
   // Super/Master Admin only items
@@ -100,6 +98,16 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
   const handleProfileClick = () => {
     navigate('/profile');
+    handleNavClick();
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/admin/settings');
+    handleNavClick();
+  };
+
+  const handleApiCenterClick = () => {
+    navigate('/admin/api-center');
     handleNavClick();
   };
 
@@ -171,7 +179,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         </div>
       )}
 
-      {/* Navigation - Scrollable */}
+      {/* Navigation - Main Member Items */}
       <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
         {/* Regular menu items */}
         {getVisibleMemberItems().map((item) => (
@@ -214,13 +222,15 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             ))}
           </>
         )}
+      </nav>
 
-        {/* Admin Section */}
-        {isAdmin() && !simulatedView && (
-          <>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider mt-5 mb-2 px-3">
-              {!collapsed && 'Admin Section'}
-            </p>
+      {/* Admin Section - Anchored at bottom, above user profile */}
+      {isAdmin() && !simulatedView && (
+        <div className="px-3 pb-2 border-t border-zinc-800/50 pt-3">
+          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-3">
+            {!collapsed && 'Admin Section'}
+          </p>
+          <div className="space-y-1">
             {adminNavItems.map((item) => (
               <NavLink 
                 key={item.path} 
@@ -247,12 +257,12 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 {!collapsed && <span className="text-sm">{item.label}</span>}
               </NavLink>
             ))}
-          </>
-        )}
-      </nav>
+          </div>
+        </div>
+      )}
 
       {/* User Profile Section - Fixed at Bottom */}
-      <div className="p-3 border-t border-zinc-800 mt-auto">
+      <div className="p-3 border-t border-zinc-800">
         {!collapsed ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -282,6 +292,28 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
+              
+              {/* Admin-only items: Platform Settings & API Center */}
+              {isAdmin() && (
+                <>
+                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuItem 
+                    onClick={handleSettingsClick}
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                  >
+                    <Cog className="w-4 h-4 mr-2" />
+                    Platform Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleApiCenterClick}
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                  >
+                    <Plug className="w-4 h-4 mr-2" />
+                    API Center
+                  </DropdownMenuItem>
+                </>
+              )}
+              
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 
                 onClick={handleLogout}
@@ -317,6 +349,28 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
+              
+              {/* Admin-only items: Platform Settings & API Center */}
+              {isAdmin() && (
+                <>
+                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuItem 
+                    onClick={handleSettingsClick}
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                  >
+                    <Cog className="w-4 h-4 mr-2" />
+                    Platform Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleApiCenterClick}
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                  >
+                    <Plug className="w-4 h-4 mr-2" />
+                    API Center
+                  </DropdownMenuItem>
+                </>
+              )}
+              
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 
                 onClick={handleLogout}
