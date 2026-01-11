@@ -677,6 +677,8 @@ export const DashboardPage = () => {
           )}
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 };
