@@ -198,7 +198,7 @@ class TestLicenseeFeatures:
     def test_licensee_account_endpoint(self, auth_token):
         """Test licensee account endpoint"""
         response = requests.get(
-            f"{BASE_URL}/api/licensee/my-transactions",
+            f"{BASE_URL}/api/profit/licensee/transactions",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
         # Should return 200 with is_licensee flag
