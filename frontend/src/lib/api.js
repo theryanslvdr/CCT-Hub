@@ -47,6 +47,13 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
   verifyPassword: (password) => api.post('/auth/verify-password', { password }),
   secretUpgrade: (data) => api.post('/auth/secret-upgrade', data),
+  // License registration
+  validateLicenseInvite: (code) => api.get(`/auth/license-invite/${code}`),
+  registerWithLicense: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => formData.append(key, data[key]));
+    return api.post('/auth/register-with-license', formData);
+  },
 };
 
 // User APIs
