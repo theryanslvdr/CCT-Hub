@@ -5,7 +5,7 @@ import { settingsAPI } from '@/lib/api';
 import { 
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
-  FlaskConical, Crown, LogOut, User, ChevronUp
+  FlaskConical, Crown, LogOut, User, ChevronUp, Wallet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
-  const { user, isAdmin, isMasterAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation, logout } = useAuth();
+  const { user, isAdmin, isMasterAdmin, isSuperAdmin, canAccessHiddenFeatures, simulatedView, simulateMemberView, exitSimulation, logout } = useAuth();
   const [platformSettings, setPlatformSettings] = useState(null);
   const navigate = useNavigate();
 
@@ -47,13 +47,18 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/debt-management', icon: CreditCard, label: 'Debt Management', id: 'debt_management', hidden: true },
   ];
 
-  // Admin navigation items
+  // Admin navigation items - basic admin
   const adminNavItems = [
     { path: '/admin/members', icon: Users, label: 'Members' },
     { path: '/admin/signals', icon: Radio, label: 'Trading Signals' },
     { path: '/admin/analytics', icon: BarChart3, label: 'Team Analytics' },
     { path: '/admin/settings', icon: Cog, label: 'Settings' },
     { path: '/admin/api-center', icon: FlaskConical, label: 'API Center' },
+  ];
+
+  // Super/Master Admin only items
+  const superAdminItems = [
+    { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
   ];
 
   // Filter nav items based on user's allowed dashboards (if member)
