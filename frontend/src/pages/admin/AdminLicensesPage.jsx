@@ -57,6 +57,15 @@ export const AdminLicensesPage = () => {
   });
   const [changingLicense, setChangingLicense] = useState(false);
   
+  // Reset balance dialog state
+  const [resetBalanceDialogOpen, setResetBalanceDialogOpen] = useState(false);
+  const [resetBalanceForm, setResetBalanceForm] = useState({
+    new_amount: '',
+    notes: '',
+    record_as_deposit: true
+  });
+  const [resettingBalance, setResettingBalance] = useState(false);
+  
   // Feedback form state
   const [feedbackForm, setFeedbackForm] = useState({
     message: '',
