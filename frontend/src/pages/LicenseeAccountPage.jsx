@@ -237,7 +237,8 @@ export const LicenseeAccountPage = () => {
     );
   }
 
-  if (!isLicensee) {
+  // Allow access if user is licensee OR if simulating a licensee
+  if (!isLicensee && !isSimulatingLicensee) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <Wallet className="w-16 h-16 text-zinc-600 mb-4" />
