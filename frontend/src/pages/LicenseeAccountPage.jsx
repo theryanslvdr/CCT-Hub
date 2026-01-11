@@ -84,7 +84,14 @@ export const LicenseeAccountPage = () => {
         setTransactions(txRes.data.transactions || []);
         setIsLicensee(txRes.data.is_licensee);
         setLicense(txRes.data.license || null);
-        setAccountSummary(summaryRes.data);
+        
+        // For licensees, use license.current_amount as the balance
+        // For non-licensees, use profit tracker summary
+        if (txRes.data.is_licensee && txRes.data.license) {
+          setAccountSummary({ current_balance: txRes.data.license.current_amount || 0 });
+        } else {
+          setAccountSummary(summaryRes.data);
+        }
       }
     } catch (error) {
       console.error('Failed to load data:', error);
