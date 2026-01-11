@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { MobileNotice } from '@/components/MobileNotice';
 import { 
   Users, ShieldCheck, ShieldAlert, Search, UserCog, Eye, Ban, 
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
