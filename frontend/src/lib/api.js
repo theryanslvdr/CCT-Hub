@@ -196,16 +196,6 @@ export const settingsAPI = {
   testHeartbeat: () => api.post('/settings/test-heartbeat'),
 };
 
-// Auth APIs for license registration
-export const authAPI = {
-  validateLicenseInvite: (code) => api.get(`/auth/license-invite/${code}`),
-  registerWithLicense: (data) => {
-    const formData = new FormData();
-    Object.keys(data).forEach(key => formData.append(key, data[key]));
-    return api.post('/auth/register-with-license', formData);
-  },
-};
-
 // API Center APIs
 export const apiCenterAPI = {
   createConnection: (data) => api.post('/api-center/connections', data),
