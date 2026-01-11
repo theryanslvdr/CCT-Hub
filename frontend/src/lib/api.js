@@ -93,6 +93,13 @@ export const adminAPI = {
   getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
+  // Analytics
+  getTeamAnalytics: () => api.get('/admin/analytics/team'),
+  getMissedTrades: () => api.get('/admin/analytics/missed-trades'),
+  notifyMissedTrade: (userId) => api.post('/admin/analytics/notify-missed', { user_id: userId }),
+  getGrowthData: () => api.get('/admin/analytics/growth-data'),
+  getRecentTeamTrades: (page = 1, pageSize = 20) => api.get('/admin/analytics/recent-trades', { params: { page, page_size: pageSize } }),
+  archiveTrades: () => api.post('/admin/analytics/archive-trades'),
 };
 
 // Debt Management APIs
