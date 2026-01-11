@@ -4,6 +4,18 @@ from typing import Optional, List
 from enum import Enum
 
 
+class AnnouncementModel(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = None
+    message: str
+    link_url: Optional[str] = None
+    link_text: Optional[str] = None
+    type: str = "info"  # info, warning, success
+    sticky: bool = False
+    active: bool = True
+    created_at: Optional[str] = None
+
+
 class PlatformSettings(BaseModel):
     platform_name: str = "CrossCurrent"
     tagline: str = "Finance Center"
@@ -32,6 +44,11 @@ class PlatformSettings(BaseModel):
     # Footer Settings
     footer_copyright: str = "© 2024 CrossCurrent Finance Center. All rights reserved."
     footer_links: Optional[List[dict]] = None  # [{label: "Privacy", url: "/privacy"}, ...]
+    # Maintenance Settings
+    maintenance_mode: bool = False
+    maintenance_message: str = "Our services are undergoing maintenance, and will be back soon!"
+    # Announcements
+    announcements: Optional[List[dict]] = None  # List of AnnouncementModel dicts
 
 
 class EmailTemplateType(str, Enum):
