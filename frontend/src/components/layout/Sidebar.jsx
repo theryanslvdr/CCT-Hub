@@ -67,19 +67,19 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
   // Filter nav items based on user's allowed dashboards (if member)
   const getVisibleMemberItems = () => {
-    if (isAdmin() && !simulatedView) {
-      return memberNavItems;
-    }
-    
     // For members or simulated view, filter based on allowed dashboards
     // Always include licensee_account for all members (access controlled on the page)
     const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'];
     const dashboardsWithLicensee = [...effectiveDashboards, 'licensee_account'];
     
     return memberNavItems.filter(item => {
-      // Hide Trade Monitor for licensees
+      // Hide Trade Monitor for licensees (both simulated and actual)
       if (item.hideForLicensee && isLicenseeView) {
         return false;
+      }
+      // For admins NOT in simulation, show all items
+      if (isAdmin() && !simulatedView) {
+        return true;
       }
       return dashboardsWithLicensee.includes(item.id);
     });
