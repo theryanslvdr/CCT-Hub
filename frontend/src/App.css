@@ -212,7 +212,31 @@
     animation: tour-pulse 2s ease-in-out infinite;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
     border-radius: 12px;
-    z-index: 10;
+    z-index: 10000 !important;
+    position: relative !important;
+    cursor: pointer !important;
+}
+
+.tour-highlight::after {
+    content: 'Click to continue';
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 10001;
+    animation: bounce-hint 1s ease-in-out infinite;
+}
+
+@keyframes bounce-hint {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
 }
 
 @keyframes tour-pulse {
