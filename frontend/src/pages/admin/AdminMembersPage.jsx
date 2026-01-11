@@ -605,49 +605,175 @@ export const AdminMembersPage = () => {
         </CardContent>
       </Card>
 
-      {/* View Member Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+      {/* View Member Dialog - Enhanced with Edit, License, Simulate, Upgrade */}
+      <Dialog open={viewDialogOpen} onOpenChange={(open) => { setViewDialogOpen(open); if (!open) setIsEditingProfile(false); }}>
+        <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Eye className="w-5 h-5" /> Member Details
+              <Eye className="w-5 h-5" /> Member Details - {selectedMember?.full_name}
+              {getLicenseBadge(selectedMember?.id)}
             </DialogTitle>
           </DialogHeader>
           {memberDetails ? (
             <Tabs defaultValue="profile" className="mt-4">
-              <TabsList className="grid w-full grid-cols-3 bg-zinc-900">
+              <TabsList className="grid w-full grid-cols-4 bg-zinc-900">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="stats">Statistics</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value="actions">Actions</TabsTrigger>
               </TabsList>
+              
+              {/* Profile Tab - Editable */}
               <TabsContent value="profile" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">Full Name</p>
-                    <p className="text-white font-medium">{memberDetails.user.full_name}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">Email</p>
-                    <p className="text-white font-medium">{memberDetails.user.email}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">Role</p>
-                    <p className="text-white font-medium capitalize">{memberDetails.user.role?.replace('_', ' ')}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">Timezone</p>
-                    <p className="text-white font-medium">{memberDetails.user.timezone || 'UTC'}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">LOT Size</p>
-                    <p className="text-white font-medium">{memberDetails.user.lot_size || 0.01}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50">
-                    <p className="text-xs text-zinc-500">Joined</p>
-                    <p className="text-white font-medium">{new Date(memberDetails.user.created_at).toLocaleDateString()}</p>
-                  </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-zinc-400">Profile Information</h4>
+                  {!isEditingProfile ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setViewEditForm({
+                          full_name: memberDetails.user.full_name || '',
+                          timezone: memberDetails.user.timezone || 'UTC'
+                        });
+                        setIsEditingProfile(true);
+                      }}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      <UserCog className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingProfile(false)}
+                        className="text-zinc-400 hover:text-white"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveViewEdit}
+                        className="btn-primary"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  )}
                 </div>
+                
+                {isEditingProfile ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-zinc-300">Full Name</Label>
+                      <Input
+                        value={viewEditForm.full_name}
+                        onChange={(e) => setViewEditForm({ ...viewEditForm, full_name: e.target.value })}
+                        className="input-dark mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Email</Label>
+                      <Input
+                        value={memberDetails.user.email}
+                        disabled
+                        className="input-dark mt-1 opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Timezone</Label>
+                      <Select value={viewEditForm.timezone} onValueChange={(v) => setViewEditForm({ ...viewEditForm, timezone: v })}>
+                        <SelectTrigger className="input-dark mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Manila">Philippines (GMT+8)</SelectItem>
+                          <SelectItem value="Asia/Singapore">Singapore (GMT+8)</SelectItem>
+                          <SelectItem value="Asia/Taipei">Taiwan (GMT+8)</SelectItem>
+                          <SelectItem value="UTC">UTC</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg bg-zinc-900/50">
+                        <p className="text-xs text-zinc-500">Role</p>
+                        <p className="text-white font-medium capitalize">{memberDetails.user.role?.replace('_', ' ')}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-zinc-900/50">
+                        <p className="text-xs text-zinc-500">LOT Size</p>
+                        <p className="text-white font-medium">{memberDetails.user.lot_size || 0.01}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">Full Name</p>
+                      <p className="text-white font-medium">{memberDetails.user.full_name}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">Email</p>
+                      <p className="text-white font-medium">{memberDetails.user.email}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">Role</p>
+                      <p className="text-white font-medium capitalize">{memberDetails.user.role?.replace('_', ' ')}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">Timezone</p>
+                      <p className="text-white font-medium">{memberDetails.user.timezone || 'UTC'}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">LOT Size</p>
+                      <p className="text-white font-medium">{memberDetails.user.lot_size || 0.01}</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <p className="text-xs text-zinc-500">Joined</p>
+                      <p className="text-white font-medium">{new Date(memberDetails.user.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* License Info in Profile */}
+                {memberLicense && (
+                  <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-5 h-5 text-purple-400" />
+                        <span className="text-purple-400 font-medium">
+                          {memberLicense.license_type === 'extended' ? 'Extended Licensee' : 'Honorary Licensee'}
+                        </span>
+                      </div>
+                      {isMasterAdmin() && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            handleOpenLicenseDialog(selectedMember);
+                          }}
+                          className="text-purple-400 hover:text-purple-300"
+                        >
+                          Manage
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-zinc-500">Starting Amount</p>
+                        <p className="text-white font-mono">${memberLicense.starting_amount?.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-zinc-500">Current Amount</p>
+                        <p className="text-emerald-400 font-mono">${memberLicense.current_amount?.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </TabsContent>
+              
+              {/* Stats Tab */}
               <TabsContent value="stats" className="mt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
