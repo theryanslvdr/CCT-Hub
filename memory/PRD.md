@@ -255,7 +255,52 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 8 - Latest)
+## Completed Work (2026-01-11 Session 9 - Latest)
+
+### Bug Fixes ✅ COMPLETE
+
+1. **Heartbeat API Fixed**
+   - Changed API endpoint from `/byEmail/{email}` (404) to `?email=` query param (200)
+   - Works with real Heartbeat emails like `hello@hyperdrivemg.co`
+   - Both verify-heartbeat and set-password endpoints updated
+
+2. **License Type in User Response**
+   - Added `license_type` field to `UserResponse` model
+   - Login, /me, and register endpoints now return `license_type`
+   - Frontend can now properly detect licensees
+
+3. **Trade Monitor Hidden for Licensees**
+   - Fixed sidebar logic: checks `isLicenseeView` BEFORE admin check
+   - Works for both actual licensee login AND admin simulation
+   - Added fallback "Access Restricted" message on the page itself
+
+4. **Profit Tracker Buttons Hidden for Licensees**
+   - Wrapped action buttons in `{!isLicensee && (...)}` conditional
+   - Hidden: Simulate Deposit/Withdrawal, Deposit/Withdrawal Records, Reset Tracker
+   - Works for both actual licensees and simulated licensee view
+
+5. **Admin Member Simulation Includes License Type**
+   - AdminMembersPage now passes `license_type` when calling `simulateMemberView()`
+   - Simulation properly reflects licensee status
+
+### Test Credentials
+- **Master Admin**: `iam@ryansalvador.com` / `admin123`
+- **Extended Licensee**: `hello@hyperdrivemg.co` / `test123` (Heartbeat verified)
+
+### Testing Results (iteration_22.json)
+- Backend: 100% pass rate (11/11 tests)
+- Frontend: 100% pass rate
+- All features verified working
+
+### Files Modified This Session
+- `/app/backend/server.py` - Heartbeat API fix, UserResponse model, login/me/register endpoints
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Licensee check logic
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - isLicensee conditional
+- `/app/frontend/src/pages/TradeMonitorPage.jsx` - Licensee restriction
+- `/app/frontend/src/pages/DashboardPage.jsx` - simulatedView dependency
+- `/app/frontend/src/pages/admin/AdminMembersPage.jsx` - Pass license_type in simulation
+
+## Completed Work (2026-01-11 Session 8 - Previous)
 
 ### P0 - Critical Bug Fixes ✅ COMPLETE
 
