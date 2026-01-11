@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [platformSettings, setPlatformSettings] = useState(null);
   
   // No account dialog states
   const [noAccountOpen, setNoAccountOpen] = useState(false);
@@ -27,6 +28,19 @@ export const LoginPage = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [customLink, setCustomLink] = useState('');
   const [creating, setCreating] = useState(false);
+
+  // Load platform settings for logo
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsAPI.getPlatform();
+        setPlatformSettings(res.data);
+      } catch (error) {
+        console.error('Failed to load platform settings');
+      }
+    };
+    loadSettings();
+  }, []);
 
   if (isAuthenticated && !loading) {
     return <Navigate to="/dashboard" replace />;
