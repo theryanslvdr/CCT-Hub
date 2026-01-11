@@ -19,6 +19,7 @@ import { AdminSignalsPage } from "./pages/admin/AdminSignalsPage";
 import { AdminMembersPage } from "./pages/admin/AdminMembersPage";
 import { AdminAPICenterPage } from "./pages/admin/AdminAPICenterPage";
 import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
+import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
