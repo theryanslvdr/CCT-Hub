@@ -132,9 +132,17 @@ export const AdminMembersPage = () => {
   const handleViewMember = async (member) => {
     setSelectedMember(member);
     setViewDialogOpen(true);
+    setIsEditingProfile(false);
+    setViewEditForm({
+      full_name: member.full_name || '',
+      timezone: member.timezone || 'UTC'
+    });
     try {
       const res = await api.get(`/admin/members/${member.id}`);
       setMemberDetails(res.data);
+      // Also load license info
+      const memberLic = licenses.find(l => l.user_id === member.id && l.is_active);
+      setMemberLicense(memberLic || null);
     } catch (error) {
       toast.error('Failed to load member details');
     }
