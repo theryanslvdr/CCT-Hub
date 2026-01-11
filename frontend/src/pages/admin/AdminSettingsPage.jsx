@@ -713,6 +713,46 @@ export const AdminSettingsPage = () => {
           </div>
         </TabsContent>
 
+        {/* Custom Links Tab */}
+        <TabsContent value="links" className="mt-6">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Link className="w-5 h-5 text-blue-400" /> Custom Links
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Configure custom links used throughout the platform</p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Registration Link */}
+              <div>
+                <Label className="text-zinc-300">External Registration Link</Label>
+                <p className="text-xs text-zinc-500 mt-1 mb-2">
+                  Link to external registration page (e.g., Heartbeat signup). Shown to non-members on the login page.
+                </p>
+                <div className="relative">
+                  <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                  <Input
+                    value={settings.custom_registration_link || ''}
+                    onChange={(e) => setSettings({ ...settings, custom_registration_link: e.target.value })}
+                    placeholder="https://heartbeat.chat/join/crosscurrent"
+                    className="input-dark pl-10"
+                  />
+                </div>
+                {settings.custom_registration_link && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(settings.custom_registration_link, '_blank')}
+                    className="text-blue-400 hover:text-blue-300 mt-2"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-1" /> Test Link
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Email Templates Tab */}
         <TabsContent value="emails" className="mt-6">
           <Card className="glass-card">
