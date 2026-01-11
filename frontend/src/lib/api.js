@@ -97,7 +97,10 @@ export const adminAPI = {
   getTeamAnalytics: () => api.get('/admin/analytics/team'),
   getMissedTrades: () => api.get('/admin/analytics/missed-trades'),
   notifyMissedTrade: (userId) => api.post('/admin/analytics/notify-missed', { user_id: userId }),
-  getGrowthData: () => api.get('/admin/analytics/growth-data'),
+  getGrowthData: (startDate, endDate) => api.get('/admin/analytics/growth-data', { 
+    params: { start_date: startDate, end_date: endDate } 
+  }),
+  getMemberAnalytics: (userId) => api.get(`/admin/analytics/member/${userId}`),
   getRecentTeamTrades: (page = 1, pageSize = 20) => api.get('/admin/analytics/recent-trades', { params: { page, page_size: pageSize } }),
   archiveTrades: () => api.post('/admin/analytics/archive-trades'),
 };
