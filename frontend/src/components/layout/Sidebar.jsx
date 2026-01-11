@@ -233,6 +233,20 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 {!collapsed && <span className="text-sm">{item.label}</span>}
               </NavLink>
             ))}
+            
+            {/* Super/Master Admin only items */}
+            {(isSuperAdmin() || isMasterAdmin()) && superAdminItems.map((item) => (
+              <NavLink 
+                key={item.path} 
+                to={item.path} 
+                className={navLinkClass}
+                onClick={handleNavClick}
+                title={collapsed ? item.label : undefined}
+              >
+                <item.icon className="w-4 h-4" />
+                {!collapsed && <span className="text-sm">{item.label}</span>}
+              </NavLink>
+            ))}
           </>
         )}
       </nav>
