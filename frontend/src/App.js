@@ -45,6 +45,7 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
             <Route path="/admin/members" element={<AdminMembersPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/admin/api-center" element={<AdminAPICenterPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
           </Route>
