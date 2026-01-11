@@ -255,7 +255,50 @@ CROSSCURRENT2024
 - Emailit: em_8CTRD13gKPSo8dnC6xzYT93DA1tiiPBm
 - Cloudinary: crosscurrent / 387887783889587 / 97bu1ngM6OYE6VKGRId9Fh9802E
 
-## Completed Work (2026-01-11 Session 9 - Latest)
+## Completed Work (2026-01-11 Session 10 - Latest)
+
+### Bug Fixes & Features ✅ COMPLETE
+
+1. **Set-Password Creates Account**
+   - Fixed variable shadowing bug where `data` was overwritten by Heartbeat API response
+   - Now properly stores password before making API call
+   - Creates new user account if email not in database
+
+2. **Licensee Simulation Dialog**
+   - Added dialog when clicking Honorary/Extended Licensee View in sidebar
+   - Options: "Demo Mode (Dummy Values)" with $5,000 placeholder OR select specific licensee
+   - Shows licensee details (name, email, balance) in dropdown
+
+3. **Balance Logic Fixed**
+   - **Withdrawal**: Immediately deducts from `licenses.current_amount` and `users.account_value`
+   - **Deposit**: Only updates balance when admin marks transaction "completed"
+   - Added `balance_before` and `balance_after` to withdrawal transactions
+
+4. **Initial Balance as Deposit**
+   - License creation now records starting_amount as a deposit transaction
+   - Transaction has `is_initial_balance: true` flag for identification
+   - Sets `current_amount` = `starting_amount` on license creation
+
+### Additional Bug Fixed by Testing Agent
+- **LicenseeAccountPage.jsx**: Withdrawal dialog was showing $0 available balance
+- Fix: Changed to use `license.current_amount` for licensees instead of `profitAPI.getSummary()`
+
+### Testing Results (iteration_23.json)
+- Backend: 100% pass rate (14 tests, 4 skipped due to no test data)
+- Frontend: 100% pass rate
+- All 4 major features verified working
+
+### Test Credentials
+- **Master Admin**: `iam@ryansalvador.com` / `admin123`
+- **Heartbeat User**: `hello@hyperdrivemg.co` / `testpass123`
+- **Licensee**: `iamryan@ryansalvador.me` / `test123`
+
+### Files Modified This Session
+- `/app/backend/server.py` - set-password fix, license creation with deposit, withdrawal deduction
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Licensee simulation dialog
+- `/app/frontend/src/pages/LicenseeAccountPage.jsx` - Balance display fix (by testing agent)
+
+## Completed Work (2026-01-11 Session 9 - Previous)
 
 ### Bug Fixes ✅ COMPLETE
 
