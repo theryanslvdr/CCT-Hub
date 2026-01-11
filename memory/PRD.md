@@ -1,18 +1,23 @@
 # CrossCurrent Finance Center - PRD
 
 ## Original Problem Statement
-Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monitor, Debt Management, Profit Planner, and Admin Dashboard. Features include JWT authentication with Heartbeat verification, role-based access (User/Admin/Super Admin), and API Center for external app communication.
+Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monitor, Debt Management, Profit Planner, and Admin Dashboard. Features include JWT authentication with Heartbeat verification, role-based access, and API Center for external app communication.
 
 ## Architecture
 - **Backend**: FastAPI (Python) with MongoDB
 - **Frontend**: React with Tailwind CSS + Shadcn UI
 - **Auth**: JWT with Heartbeat API verification gatekeeper
-- **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion)
+- **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion), Merin Trading Platform (embedded iframe)
 
-## User Personas
-1. **Traders** - Track profits, monitor trades, manage debts, plan financial goals
-2. **Admins** - Manage trading signals, members, platform settings
-3. **Super Admins** - Full platform control including role management
+## User Personas & Role Hierarchy (2026-01-11)
+1. **Normal Member** (role: `member`) - Modular dashboard access assigned by Super Admin
+   - Default dashboards: Dashboard, Profit Tracker, Trade Monitor, Profile
+2. **Basic Admin** (role: `basic_admin`) - Manage members, trading signals, assist with resets
+3. **Super Admin** (role: `super_admin`) - Full access except hidden/upcoming features
+   - Secret code for registration: `CROSSCURRENT2024`
+4. **Master Admin** (role: `master_admin`) - Full access including hidden features + simulate member view
+   - Secret code for registration: `CrossCurrentGODSEYE`
+   - Current Master Admin: iam@ryansalvador.com
 
 ## Core Requirements (Static)
 - [x] Heartbeat community verification for registration
