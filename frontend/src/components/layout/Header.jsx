@@ -248,11 +248,13 @@ export const Header = ({ onMenuClick, title }) => {
                 data-testid="notification-bell"
               >
                 <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
+                {(unreadCount + wsUnreadCount) > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-medium">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {(unreadCount + wsUnreadCount) > 9 ? '9+' : (unreadCount + wsUnreadCount)}
                   </span>
                 )}
+                {/* WebSocket connection indicator */}
+                <span className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-zinc-950 ${wsConnected ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
               </Button>
 
               {/* Notifications Dropdown */}
