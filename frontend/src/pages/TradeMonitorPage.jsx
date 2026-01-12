@@ -353,9 +353,24 @@ export const TradeMonitorPage = () => {
   }, []);
 
   // Calculate exit value when lot size or multiplier changes
+  // Use truncateTo2Decimals for consistency with ProfitTrackerPage
   useEffect(() => {
-    setExitValue(lotSize * profitMultiplier);
+    setExitValue(truncateTo2Decimals(lotSize * profitMultiplier));
   }, [lotSize, profitMultiplier]);
+
+  // Stop audio immediately when sound is disabled
+  useEffect(() => {
+    if (!soundEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (beepRef.current) {
+        beepRef.current.pause();
+        beepRef.current.currentTime = 0;
+      }
+    }
+  }, [soundEnabled]);
 
   // Cleanup on unmount
   useEffect(() => {
