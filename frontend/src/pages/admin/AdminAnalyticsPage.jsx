@@ -13,12 +13,13 @@ import { toast } from 'sonner';
 import { 
   DollarSign, TrendingUp, Users, Target, Bell, Archive,
   ChevronLeft, ChevronRight, AlertTriangle, BarChart3,
-  Activity, Trophy, Calendar, User, Filter, X
+  Activity, Trophy, Calendar, User, Filter, X, Image, Download, Loader2, Eye
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, AreaChart, Area, BarChart, Bar 
 } from 'recharts';
+import api from '@/lib/api';
 
 export const AdminAnalyticsPage = () => {
   const { isSuperAdmin } = useAuth();
@@ -35,6 +36,12 @@ export const AdminAnalyticsPage = () => {
   const [selectedMember, setSelectedMember] = useState('all');
   const [memberAnalytics, setMemberAnalytics] = useState(null);
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  
+  // Team Report state
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportPeriod, setReportPeriod] = useState('monthly');
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportPreview, setReportPreview] = useState(null);
   
   // Date range filter state
   const [startDate, setStartDate] = useState('');
