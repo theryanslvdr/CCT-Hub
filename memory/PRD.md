@@ -45,6 +45,14 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Frontend: Top Performers card on Admin Analytics page
 - "Active traders only" checkbox to toggle filter
 
+#### P2: Image-Based Performance Report ✅
+- Created `/app/backend/services/report_generator.py` using PIL/Pillow
+- Dark-themed 800x600 PNG with account stats, profit, trades, win rate
+- `GET /api/profit/report/image` - Downloads PNG file
+- `GET /api/profit/report/base64` - Returns base64 for preview
+- Frontend: "Generate Report" button and dialog on ProfitTrackerPage
+- Supports Daily, Weekly, Monthly periods
+
 #### P2: BVE Signal Update ✅
 - Added `PUT /api/bve/signals/{id}` endpoint
 - Allows deactivating/updating BVE signals
