@@ -768,3 +768,56 @@ def get_weekly_summary_email(
         "text": text
     }
 
+
+async def send_registration_notification_to_admins(user_name: str, user_email: str):
+    """Send email notification to all admins when a new user registers"""
+    from motor.motor_asyncio import AsyncIOMotorClient
+    import os
+    
+    # Get database connection
+    mongo_url = os.environ.get("MONGO_URL")
+    db_name = os.environ.get("DB_NAME", "crosscurrent")
+    
+    if not mongo_url:
+        logger.warning("MongoDB URL not configured")
+        return
+    
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+    
+    try:
+        # Get all admin emails
+        admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
+        admins = await db.users.find(
+            {"role": {"$in": admin_roles}},
+            {"email": 1, "full_name": 1}
+        ).to_list(100)
+        
+        if not admins:
+            logger.info("No admins found to notify")
+            return
+        
+        # Generate email content
+        email_content = get_admin_notification_email(
+            notification_type="new_member",
+            user_name=user_name,
+            message=f"A new member has registered with email: {user_email}"
+        )
+        
+        # Send to each admin
+        for admin in admins:
+            await send_email(
+                db=db,
+                to_email=admin.get("email"),
+                subject=email_content["subject"],
+                html_content=email_content["html"],
+                text_content=email_content["text"],
+                template_type="admin_notification",
+                metadata={"new_user_email": user_email, "new_user_name": user_name}
+            )
+            logger.info(f"Sent registration notification to admin: {admin.get('email')}")
+    
+    except Exception as e:
+        logger.error(f"Failed to send registration notifications: {e}")
+    finally:
+        client.close()
