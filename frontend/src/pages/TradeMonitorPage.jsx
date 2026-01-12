@@ -414,6 +414,14 @@ export const TradeMonitorPage = () => {
       tradeTime.setDate(tradeTime.getDate() + 1);
     }
 
+    // Save check-in state to localStorage for persistence
+    localStorage.setItem('trade_check_in', JSON.stringify({
+      targetTime: tradeTime.toISOString(),
+      signalId: signal.id,
+      signalInfo: { product: signal.product, direction: signal.direction },
+      checkedInAt: now.toISOString()
+    }));
+
     // Start global countdown for floating popup when navigating away
     startGlobalCountdown(tradeTime, { product: signal.product, direction: signal.direction });
 
