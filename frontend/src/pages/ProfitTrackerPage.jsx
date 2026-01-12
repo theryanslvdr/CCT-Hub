@@ -376,6 +376,12 @@ export const ProfitTrackerPage = () => {
   const [dreamProfitDialogOpen, setDreamProfitDialogOpen] = useState(false);
   const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   
+  // Performance Report states
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportPeriod, setReportPeriod] = useState('monthly');
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportPreview, setReportPreview] = useState(null);
+  
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
   const [depositNotes, setDepositNotes] = useState('');
