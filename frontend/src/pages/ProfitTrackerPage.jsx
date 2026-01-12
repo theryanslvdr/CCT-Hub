@@ -1351,6 +1351,73 @@ export const ProfitTrackerPage = () => {
             <Award className="w-4 h-4" /> Commission Records
           </Button>
 
+          {/* Generate Report Button */}
+          <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="btn-secondary gap-2 text-cyan-400 hover:text-cyan-300" data-testid="generate-report-button">
+                <Image className="w-4 h-4" /> Generate Report
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Image className="w-5 h-5 text-cyan-400" /> Performance Report
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label className="text-zinc-300">Report Period</Label>
+                  <Select value={reportPeriod} onValueChange={setReportPeriod}>
+                    <SelectTrigger className="input-dark mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800">
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly (Last 7 days)</SelectItem>
+                      <SelectItem value="monthly">Monthly (Last 30 days)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {reportPreview && (
+                  <div className="rounded-lg border border-zinc-800 overflow-hidden">
+                    <img 
+                      src={`data:image/png;base64,${reportPreview.image_base64}`} 
+                      alt="Performance Report Preview" 
+                      className="w-full"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleGenerateReport} 
+                    disabled={reportLoading}
+                    className="flex-1 btn-secondary"
+                  >
+                    {reportLoading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+                    ) : (
+                      <><Eye className="w-4 h-4 mr-2" /> Preview Report</>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={handleDownloadReport} 
+                    disabled={reportLoading}
+                    className="flex-1 btn-primary"
+                  >
+                    {reportLoading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Downloading...</>
+                    ) : (
+                      <><Download className="w-4 h-4 mr-2" /> Download PNG</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           {/* Reset Button */}
           <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
             <DialogTrigger asChild>
