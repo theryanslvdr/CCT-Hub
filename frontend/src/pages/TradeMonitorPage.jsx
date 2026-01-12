@@ -1011,14 +1011,27 @@ export const TradeMonitorPage = () => {
               </p>
             </div>
 
-            <Button
-              onClick={() => forwardToProfit(lastTrade?.id)}
-              className="btn-primary gap-2 w-full"
-              data-testid="forward-to-profit-button"
-            >
-              <Send className="w-4 h-4" /> Forward to Profit Tracker
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => forwardToProfit(lastTrade?.id)}
+                className="btn-primary gap-2 w-full"
+                data-testid="forward-to-profit-button"
+              >
+                <Send className="w-4 h-4" /> Forward to Profit Tracker
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCelebration(false);
+                  window.location.href = '/profit-tracker';
+                }}
+                className="gap-2 w-full text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                data-testid="view-daily-projection-button"
+              >
+                <Eye className="w-4 h-4" /> View Daily Projection
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
