@@ -377,10 +377,24 @@ export const TradeMonitorPage = () => {
     }
   }, [soundEnabled]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - ensure all intervals and audio are stopped
   useEffect(() => {
     return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (beepRef.current) {
+        beepRef.current.pause();
+        beepRef.current.currentTime = 0;
+      }
+      // Dismiss any active toasts
+      toast.dismiss('trade-alert');
+      toast.dismiss('trade-alert-restore');
     };
   }, []);
 
