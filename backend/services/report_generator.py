@@ -32,7 +32,7 @@ def get_font(size: int, bold: bool = False):
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
         if os.path.exists(font_path):
             return ImageFont.truetype(font_path, size)
-    except:
+    except Exception:
         pass
     return ImageFont.load_default()
 
