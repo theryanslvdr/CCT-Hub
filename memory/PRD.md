@@ -11,105 +11,68 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 31 (2026-01-12) - Major Feature Batch ✅
+### Session 31 Part 2 (2026-01-12) - Bug Fixes & Email History ✅
 
-#### 1. Fee Restructuring ✅
+#### Bug Fix 1: Deactivate Signal Button ✅
+- **Issue:** Deactivate button on active signals wasn't working
+- **Root Cause:** Missing `adminAPI.updateSignal` method in api.js
+- **Fix:** Added `updateSignal: (id, data) => api.put(/admin/signals/${id}, data)` to adminAPI
+
+#### Bug Fix 2: Daily Projection Accuracy ✅ (CRITICAL)
+- **Issue:** After recording a trade, the LOT size and Projected Profit were changing
+- **User Example:** LOT was 15.28, Projected was 229.20, but after trade they showed 15.52 and changed values
+- **Root Cause:** Frontend was recalculating LOT and Projected values from current balance instead of using stored values
+- **Fix:** Modified `generateDailyProjectionForMonth` to use stored `lot_size` and `projected_profit` from trade logs for completed trades
+- **Result:** LOT (15.28) and Target Profit ($229.20) now remain fixed after trade is recorded
+
+#### Feature: Email History Frontend ✅
+- Added `/settings/email-history` GET endpoint (admin only)
+- Added `/settings/email-history` DELETE endpoint (master admin only)
+- Added Email History card to Admin Settings → Emails tab
+- Shows: Status (with colored badges), Recipient, Subject, Type, Sent At
+- Includes pagination for large email histories
+- Clear History button for Master Admin
+
+### Session 31 Part 1 - Major Feature Batch ✅
+
+#### Fee Restructuring ✅
 - Moved $1 Binance fee from Withdrawal to Deposit
-- Deposit now shows: Binance USDT, 1% fee, $1 Binance fee, Receive Amount
-- Withdrawal only shows: Gross, 3% Merin fee, Net Amount
 
-#### 2. Commission System ✅
-- Added "Simulate Commission" button in Profit Tracker
-- Commission dialog with USDT Amount and Traders Count fields
-- New "Commission Records" button to view history
-- Backend API endpoints: POST /api/profit/commission, GET /api/profit/commissions
+#### Commission System ✅
+- "Simulate Commission" button + Commission Records popup
 
-#### 3. Monthly Table Simplification ✅
-- Removed "Daily Profit" and "Lot Size" columns from monthly table
-- Now shows only: Month, Trading Days, Final Balance, Actions
+#### Monthly Table Simplification ✅
+- Removed "Daily Profit" and "Lot Size" columns
 
-#### 4. Navigation Improvements ✅
-- "Trade Now" in daily projection navigates to /trade-monitor (not /trade)
-- "Enter the Trade Now!" renamed to "I'm Ready to Trade"
+#### Navigation Improvements ✅
+- "Trade Now" → /trade-monitor, "I'm Ready to Trade" button text
 
-#### 5. Dream Daily Profit Calculator ✅
-- Replaced "Exit Value Calculator" with "Dream Daily Profit"
-- Shows: Target daily profit → Required balance → Amount to add
-- Formula: Balance = (Target ÷ 15) × 980
+#### Dream Daily Profit Calculator ✅
+- Replaced "Exit Value Calculator" with new profit goal calculator
 
-#### 6. Quick Signal Actions ✅
-- Added "Deactivate" button on active signal card
-- One-click signal deactivation for admins
+#### Quick Signal Actions ✅
+- "Deactivate" button on active signal card
 
-#### 7. Merin Iframe Refresh ✅
-- Added refresh icon button in Merin Trading Platform section
-- Reloads iframe on click
+#### Merin Iframe Refresh ✅
+- Added refresh icon button
 
-#### 8. Admin Role Dropdown Fix ✅
-- Removed plain "Admin" option from role upgrade dropdown
-- Options now: Basic Admin, Super Admin, Master Admin
+#### Admin Role Dropdown Fix ✅
+- Removed "Admin", kept Basic Admin, Super Admin, Master Admin
 
-#### 9. Daily Projection Balance Bug Fix ✅
-- Fixed: balanceBefore now shows balance BEFORE today's profit, not after
-- Account value adjustment for current month's trade logs
+#### Trade Time Restrictions ✅
+- Button locked until 20 min before trade time
 
-#### 10. Post-Trade Navigation ✅
-- Added "View Daily Projection" button in celebration popup
-- "Forward to Profit Tracker" now redirects to profit tracker
-
-#### 11. Live Registration Notifications ✅
-- WebSocket notification to all admins when new user registers
-- Email notification sent to all admin users
-
-#### 12. Simulation Accuracy Fix ✅
-- Fixed: Master Admin simulation now fetches complete member data
-- Trade logs, deposits, withdrawals all fetched for simulated member
-- New API endpoints: GET /api/admin/members/{id}/deposits, GET /api/admin/members/{id}/withdrawals
-
-#### 13. Trade Time Restrictions ✅
-- "I'm Ready to Trade" button disabled until 20 minutes before trade time
-- Shows countdown: "Trading window opens in: X minutes"
-- Helpful text explaining the 20-minute window
-
-#### 14. Floating Trade Countdown ✅
-- Created TradeCountdownContext for global countdown state
-- When checked in and navigating away, floating popup appears
-- Shows countdown with "Go to Trade Monitor" button
-- Beeping sound in last 30 seconds (5-second burst)
-
-### Session 30 (2026-01-11) - Maintenance & Mobile ✅
-- Maintenance Tab with mode toggle and custom message
-- Announcements System (Info/Warning/Success types)
-- Maintenance Landing Page with hidden admin override
-- Mobile-Friendly Notices on complex pages
-
-### Session 29 - P2 Tasks ✅
-- Debt Management Tooltips
-- Shared Admin Components
-- Backend Route Structure
-- Additional Email Templates
-
-### Session 28 - P1 Features ✅
-- Backend Services Package
-- WebSocket real-time notifications
-- File upload endpoints
-
-### Session 27 - P0 Features ✅
-- Dashboard tabs for members
-- API key security modal
-- Persistent footer
-- Login customization
+#### Floating Trade Countdown ✅
+- Popup when navigating away during trade (with beeping)
 
 ## Pending Tasks
 
 ### P0 - High Priority
 - Email Template Testing with Variables Preview
-- Automated "Missed Trade" Email System
-- Email History Frontend Table
+- Automated "Missed Trade" Email System (scheduler)
 
 ### P1 - Medium Priority
 - WebSocket "Offline" Icon indicator
-- Announcement Display Options (more control)
 - Off-Canvas Notification Panel (slide-out style)
 - Backend Route Migration (server.py → /routes/)
 
@@ -117,16 +80,15 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Exclude Non-Traders from Top Performers
 - Generate Image Recap Report (16:9 landscape)
 - Admin Email Recap Summary
-- Frontend Component Refactoring
 
 ## Key API Endpoints
 - POST /api/profit/commission - Record referral commission
 - GET /api/profit/commissions - Get user's commission history
 - GET /api/admin/members/{id}/deposits - Get member deposits (admin)
 - GET /api/admin/members/{id}/withdrawals - Get member withdrawals (admin)
-- POST /api/settings/test-emailit - Test Emailit API key
-- POST /api/settings/test-heartbeat - Test Heartbeat API key
-- WS /ws/{client_id} - WebSocket connection
+- GET /api/settings/email-history - Get email logs (admin)
+- DELETE /api/settings/email-history - Clear email logs (master admin)
+- PUT /api/admin/signals/{id} - Update signal (admin)
 
 ## Test Credentials
 - Master Admin: iam@ryansalvador.com / admin123
@@ -135,3 +97,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Backend: FastAPI, Motor (async MongoDB), PyJWT, Pydantic
 - Frontend: React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
 - State: React Context (AuthContext, WebSocketContext, TradeCountdownContext)
+
+## Critical Business Logic
+
+### Daily Projection Calculation
+For **completed trades**, the system now uses STORED values from trade logs:
+- `lot_size` - Locked at trade time (e.g., 15.28)
+- `projected_profit` - Locked at trade time (e.g., 229.20)
+- These values DO NOT change after the trade is recorded
+
+For **pending/future trades**, values are calculated dynamically:
+- `lot_size = running_balance / 980`
+- `projected_profit = lot_size * 15`
+
+### Fee Structure
+- **Deposit:** 1% fee + $1 Binance fee
+- **Withdrawal:** 3% Merin fee only (no Binance fee)
