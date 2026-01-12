@@ -509,14 +509,9 @@ export const ProfitTrackerPage = () => {
     }
     
     const amount = parseFloat(depositAmount);
-    const depositFee = amount * 0.01;
-    const receiveAmount = amount - depositFee;
+    const fees = calculateDepositFees(amount);
     
-    setDepositSimulation({
-      binanceAmount: amount,
-      depositFee: depositFee,
-      receiveAmount: receiveAmount,
-    });
+    setDepositSimulation(fees);
     setDepositStep('simulate');
   };
 
