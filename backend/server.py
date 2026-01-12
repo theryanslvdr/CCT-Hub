@@ -1566,12 +1566,41 @@ async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
         "stats": {
             "total_trades": total_trades,
             "total_profit": round(total_profit, 2),
+            "total_actual_profit": round(total_profit, 2),
             "total_deposits": round(total_deposits, 2),
             "account_value": account_value
         },
         "recent_trades": trades[:10],
         "recent_deposits": deposits[:10]
     }
+
+@admin_router.get("/members/{user_id}/deposits")
+async def get_member_deposits(user_id: str, user: dict = Depends(require_admin)):
+    """Get all deposits for a specific member (admin only)"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    deposits = await db.deposits.find(
+        {"user_id": user_id, "is_withdrawal": {"$ne": True}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    
+    return deposits
+
+@admin_router.get("/members/{user_id}/withdrawals")
+async def get_member_withdrawals(user_id: str, user: dict = Depends(require_admin)):
+    """Get all withdrawals for a specific member (admin only)"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    withdrawals = await db.deposits.find(
+        {"user_id": user_id, "is_withdrawal": True},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(200)
+    
+    return withdrawals
 
 class AdminUserUpdate(BaseModel):
     full_name: Optional[str] = None
