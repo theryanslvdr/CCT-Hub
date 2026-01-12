@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBVE } from '@/contexts/BVEContext';
 import { profitAPI, tradeAPI, currencyAPI, adminAPI } from '@/lib/api';
+import api from '@/lib/api';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 export const DashboardPage = () => {
@@ -20,6 +22,7 @@ export const DashboardPage = () => {
     getSimulatedMemberName,
     getSimulatedMemberId
   } = useAuth();
+  const { isInBVE } = useBVE();
   const [summary, setSummary] = useState(null);
   const [trades, setTrades] = useState([]);
   const [signal, setSignal] = useState(null);
