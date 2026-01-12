@@ -379,18 +379,21 @@ export const TradeMonitorPage = () => {
 
   // Cleanup on unmount - ensure all intervals and audio are stopped
   useEffect(() => {
+    const audioElement = audioRef.current;
+    const beepElement = beepRef.current;
+    
     return () => {
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
         countdownRef.current = null;
       }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
       }
-      if (beepRef.current) {
-        beepRef.current.pause();
-        beepRef.current.currentTime = 0;
+      if (beepElement) {
+        beepElement.pause();
+        beepElement.currentTime = 0;
       }
       // Dismiss any active toasts
       toast.dismiss('trade-alert');
