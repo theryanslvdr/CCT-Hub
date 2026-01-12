@@ -26,6 +26,8 @@ export const AdminAnalyticsPage = () => {
   const [missedTrades, setMissedTrades] = useState(null);
   const [recentTrades, setRecentTrades] = useState([]);
   const [growthData, setGrowthData] = useState([]);
+  const [topPerformers, setTopPerformers] = useState([]);
+  const [excludeNonTraders, setExcludeNonTraders] = useState(true);
   const [loading, setLoading] = useState(true);
   const [notifyingUser, setNotifyingUser] = useState(null);
   
