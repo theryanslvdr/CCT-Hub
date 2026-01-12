@@ -29,16 +29,30 @@ export function calculateExitValue(lotSize) {
 // Calculate withdrawal fees
 export function calculateWithdrawalFees(amount) {
   const merinFee = amount * 0.03;
-  const binanceFee = 1;
-  const totalFees = merinFee + binanceFee;
+  const totalFees = merinFee;
   const netAmount = amount - totalFees;
   
   return {
     grossAmount: amount,
     merinFee: Math.round(merinFee * 100) / 100,
-    binanceFee,
     totalFees: Math.round(totalFees * 100) / 100,
     netAmount: Math.round(netAmount * 100) / 100,
+  };
+}
+
+// Calculate deposit fees (1% + $1 Binance fee)
+export function calculateDepositFees(amount) {
+  const depositFee = amount * 0.01;
+  const binanceFee = 1;
+  const totalFees = depositFee + binanceFee;
+  const receiveAmount = amount - totalFees;
+  
+  return {
+    binanceAmount: amount,
+    depositFee: Math.round(depositFee * 100) / 100,
+    binanceFee,
+    totalFees: Math.round(totalFees * 100) / 100,
+    receiveAmount: Math.round(receiveAmount * 100) / 100,
   };
 }
 
