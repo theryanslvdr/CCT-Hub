@@ -179,6 +179,17 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* BVE Mode Banner */}
+      {isInBVE && (
+        <div className="p-4 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center gap-3" data-testid="bve-banner">
+          <FlaskConical className="w-6 h-6 text-purple-400 animate-pulse" />
+          <div>
+            <h3 className="text-purple-300 font-semibold">Beta Virtual Environment Active</h3>
+            <p className="text-purple-400/70 text-sm">All data shown is from BVE. Actions won't affect real data.</p>
+          </div>
+        </div>
+      )}
+      
       {/* Simulation Banner */}
       {isSimulating && (
         <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
