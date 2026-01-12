@@ -139,10 +139,11 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       // This ensures the projected values don't change after the trade is recorded
       let lotSize, targetProfit;
       
-      if (hasTraded && tradeLog?.trade) {
+      if (hasTraded && tradeLog) {
         // Use stored values from the trade log - these are locked at trade time
-        lotSize = tradeLog.trade.lot_size || (runningBalance / 980);
-        targetProfit = tradeLog.trade.projected_profit || (lotSize * 15);
+        // The trade log itself contains lot_size and projected_profit
+        lotSize = tradeLog.lot_size || (runningBalance / 980);
+        targetProfit = tradeLog.projected_profit || (lotSize * 15);
       } else {
         // For pending/future trades, calculate from running balance
         lotSize = runningBalance / 980;
