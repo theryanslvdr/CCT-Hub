@@ -72,6 +72,13 @@ export const AdminSettingsPage = () => {
   const [testingHeartbeat, setTestingHeartbeat] = useState(false);
   const [testResults, setTestResults] = useState({});
   
+  // Email history state
+  const [emailHistory, setEmailHistory] = useState([]);
+  const [emailHistoryPage, setEmailHistoryPage] = useState(1);
+  const [emailHistoryTotal, setEmailHistoryTotal] = useState(0);
+  const [emailHistoryLoading, setEmailHistoryLoading] = useState(false);
+  const [clearingHistory, setClearingHistory] = useState(false);
+  
   // Visibility toggles for sensitive fields
   const [showKeys, setShowKeys] = useState({
     emailit: false,
