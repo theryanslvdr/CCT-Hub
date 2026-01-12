@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBVE } from '@/contexts/BVEContext';
 import { formatNumber } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const tradingTimezones = [
 
 export const AdminSignalsPage = () => {
   const { isSuperAdmin } = useAuth();
+  const { isInBVE } = useBVE();
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
