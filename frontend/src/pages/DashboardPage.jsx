@@ -42,13 +42,16 @@ export const DashboardPage = () => {
 
   const loadDashboardData = useCallback(async () => {
     try {
+      // Determine which signal endpoint to use
+      const signalEndpoint = isInBVE ? api.get('/bve/active-signal') : tradeAPI.getActiveSignal();
+      
       // If simulating a specific member, fetch their data from API
       if (isSimulating && simulatedMemberId) {
         // Fetch the simulated member's data - API returns license.current_amount for licensees
         const [memberRes, tradesRes, signalRes, ratesRes] = await Promise.all([
           adminAPI.getMemberDetails(simulatedMemberId),
           tradeAPI.getLogs(10, simulatedMemberId),
-          tradeAPI.getActiveSignal(),
+          signalEndpoint,
           currencyAPI.getRates('USDT'),
         ]);
 
@@ -71,7 +74,7 @@ export const DashboardPage = () => {
         // Role-based simulation (demo mode) - use demo values
         const [tradesRes, signalRes, ratesRes] = await Promise.all([
           tradeAPI.getLogs(10),
-          tradeAPI.getActiveSignal(),
+          signalEndpoint,
           currencyAPI.getRates('USDT'),
         ]);
 
@@ -87,10 +90,13 @@ export const DashboardPage = () => {
         setRates(ratesRes.data.rates || {});
       } else {
         // Normal flow - load current user's data
+        // In BVE mode, use BVE summary
+        const summaryEndpoint = isInBVE ? api.get('/bve/summary') : profitAPI.getSummary();
+        
         const [summaryRes, tradesRes, signalRes, ratesRes] = await Promise.all([
-          profitAPI.getSummary(),
+          summaryEndpoint,
           tradeAPI.getLogs(10),
-          tradeAPI.getActiveSignal(),
+          signalEndpoint,
           currencyAPI.getRates('USDT'),
         ]);
 
