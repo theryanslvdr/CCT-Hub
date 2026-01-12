@@ -474,6 +474,23 @@ export const AdminSignalsPage = () => {
                 <p className="text-2xl font-mono font-bold text-purple-400">×{activeSignal.profit_points || 15}</p>
               </div>
               <div className="flex gap-2 ml-auto">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={async () => {
+                    try {
+                      await adminAPI.updateSignal(activeSignal.id, { is_active: false });
+                      toast.success('Signal deactivated');
+                      loadSignals();
+                    } catch (error) {
+                      toast.error('Failed to deactivate signal');
+                    }
+                  }} 
+                  className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10"
+                  data-testid="deactivate-signal-btn"
+                >
+                  <Zap className="w-4 h-4 mr-1" /> Deactivate
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => handleEditSignal(activeSignal)} className="btn-secondary">
                   <Edit className="w-4 h-4" />
                 </Button>
