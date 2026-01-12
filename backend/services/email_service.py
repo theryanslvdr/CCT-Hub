@@ -149,14 +149,20 @@ async def send_email(
             
             if response.status_code in [200, 201, 202]:
                 logger.info(f"Email sent successfully to {to_email}")
-                return {"success": True, "message": "Email sent successfully"}
+                if email_id:
+                    await update_email_status(db, email_id, "sent")
+                return {"success": True, "message": "Email sent successfully", "email_id": email_id}
             else:
                 error_detail = response.text
                 logger.error(f"Emailit API error: {response.status_code} - {error_detail}")
+                if email_id:
+                    await update_email_status(db, email_id, "error", error_detail[:500])
                 return {"success": False, "error": f"Failed to send email: {error_detail}"}
     
     except Exception as e:
         logger.error(f"Email sending error: {str(e)}")
+        if email_id:
+            await update_email_status(db, email_id, "error", str(e)[:500])
         return {"success": False, "error": str(e)}
 
 
