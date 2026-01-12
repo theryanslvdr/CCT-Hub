@@ -3920,6 +3920,38 @@ async def test_heartbeat_connection(user: dict = Depends(require_admin)):
     except Exception as e:
         return {"success": False, "message": f"Connection failed: {str(e)}"}
 
+@settings_router.get("/email-history")
+async def get_email_history(
+    page: int = 1, 
+    page_size: int = 20,
+    user: dict = Depends(require_admin)
+):
+    """Get paginated email history (admin only)"""
+    skip = (page - 1) * page_size
+    
+    # Get total count
+    total = await db.email_history.count_documents({})
+    
+    # Get paginated emails
+    emails = await db.email_history.find(
+        {}, 
+        {"_id": 0}
+    ).sort("sent_at", -1).skip(skip).limit(page_size).to_list(page_size)
+    
+    return {
+        "emails": emails,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": (total + page_size - 1) // page_size if total > 0 else 1
+    }
+
+@settings_router.delete("/email-history")
+async def clear_email_history(user: dict = Depends(require_master_admin)):
+    """Clear all email history (master admin only)"""
+    result = await db.email_history.delete_many({})
+    return {"message": f"Cleared {result.deleted_count} email records"}
+
 # User endpoint to get their own license projections
 @profit_router.get("/license-projections")
 async def get_my_license_projections(user: dict = Depends(get_current_user)):
