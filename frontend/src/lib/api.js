@@ -224,6 +224,9 @@ export const settingsAPI = {
   // Email Templates
   getEmailTemplates: () => api.get('/settings/email-templates'),
   updateEmailTemplate: (type, data) => api.put(`/settings/email-templates/${type}`, data),
+  // Email History
+  getEmailHistory: (page = 1, pageSize = 20) => api.get('/settings/email-history', { params: { page, page_size: pageSize } }),
+  clearEmailHistory: () => api.delete('/settings/email-history'),
   // Integration Tests
   testEmailit: () => api.post('/settings/test-emailit'),
   testCloudinary: () => api.post('/settings/test-cloudinary'),
