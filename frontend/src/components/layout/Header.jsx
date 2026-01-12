@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBVE } from '@/contexts/BVEContext';
 import { adminAPI } from '@/lib/api';
-import { Settings, Menu, Bell, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Check, ExternalLink, Wifi, WifiOff } from 'lucide-react';
+import { Settings, Menu, Bell, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Check, ExternalLink, Wifi, WifiOff, FlaskConical, RotateCcw, LogOut as ExitIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ const CLICKS_REQUIRED = 10;
 
 export const Header = ({ onMenuClick, title }) => {
   const { user, updateUser, isSuperAdmin, isMasterAdmin } = useAuth();
+  const { isInBVE, canAccessBVE, enterBVE, exitBVE, rewindBVE, loading: bveLoading } = useBVE();
   const { connected: wsConnected, notifications: wsNotifications, unreadCount: wsUnreadCount, markAllAsRead: wsMarkAllRead } = useWebSocket();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
