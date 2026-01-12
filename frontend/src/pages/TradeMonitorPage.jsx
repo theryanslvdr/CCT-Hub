@@ -752,7 +752,21 @@ export const TradeMonitorPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            onClick={() => {
+              const newSoundEnabled = !soundEnabled;
+              setSoundEnabled(newSoundEnabled);
+              // If muting, stop any currently playing audio immediately
+              if (!newSoundEnabled) {
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                }
+                if (beepRef.current) {
+                  beepRef.current.pause();
+                  beepRef.current.currentTime = 0;
+                }
+              }
+            }}
             className="text-zinc-400"
             data-testid="sound-toggle"
           >
