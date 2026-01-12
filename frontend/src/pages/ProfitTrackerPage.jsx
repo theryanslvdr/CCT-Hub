@@ -104,41 +104,29 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   
-  // For current month, we need to adjust the start balance because
-  // the account value already includes all actual profits from trades this month
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   
-  // Calculate total actual profit from all trades in this month that are already recorded
-  let actualProfitInMonth = 0;
-  if (isCurrentMonth) {
-    // Sum up all actual profits from trades already made this month
-    Object.entries(tradeLogs).forEach(([dateKey, log]) => {
-      const logDate = new Date(dateKey);
-      logDate.setHours(0, 0, 0, 0);
-      
-      // Only count trades from this month that have already happened (up to and including today)
-      if (logDate.getFullYear() === year && 
-          logDate.getMonth() === month && 
-          logDate <= today &&
-          log.has_traded && 
-          log.actual_profit !== undefined) {
-        actualProfitInMonth += log.actual_profit;
-      }
-    });
+  // For current month, start from today (don't show past days)
+  // The startBalance passed is the current account value
+  // If user has already traded today, the account value INCLUDES today's profit
+  // So we need to subtract today's actual profit to get "balance before"
+  
+  let runningBalance = startBalance;
+  
+  // Check if today has been traded
+  const todayKey = today.toISOString().split('T')[0];
+  const todayTradeLog = tradeLogs[todayKey];
+  const todayHasTraded = todayTradeLog?.has_traded;
+  const todayActualProfit = todayTradeLog?.actual_profit;
+  
+  // If today has been traded, account value includes today's profit
+  // Subtract it to get the "balance before" for today
+  if (isCurrentMonth && todayHasTraded && todayActualProfit !== undefined) {
+    runningBalance = startBalance - todayActualProfit;
   }
   
-  // Adjust start balance by removing all actual profits already included in account value
-  // This gives us the balance at the START of the month (before any trades)
-  let adjustedStartBalance = startBalance;
-  if (isCurrentMonth && actualProfitInMonth !== 0) {
-    adjustedStartBalance = startBalance - actualProfitInMonth;
-  }
-  
-  let runningBalance = adjustedStartBalance;
-  let currentDate = new Date(firstDay);
-  
-  // For current month, start from the 1st to show the full month history
-  // (Previously started from today, but that hides past days)
+  // For current month, start from today
+  let currentDate = isCurrentMonth ? new Date(today) : new Date(firstDay);
   
   while (currentDate <= lastDay) {
     if (isTradingDay(currentDate)) {
@@ -147,12 +135,11 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       const hasTraded = tradeLog?.has_traded;
       const actualProfit = tradeLog?.actual_profit;
       
-      // For completed trades, use the STORED lot_size and projected_profit from the trade log
-      // This ensures the projected values don't change after the trade is recorded
+      // Calculate lot size and target profit based on current running balance
       let lotSize, targetProfit;
       
       if (hasTraded && tradeLog) {
-        // Use stored values from the trade log - these are locked at trade time
+        // Use stored values from the trade log
         lotSize = tradeLog.lot_size || truncateTo2Decimals(runningBalance / 980);
         targetProfit = tradeLog.projected_profit || truncateTo2Decimals(lotSize * 15);
       } else {
@@ -162,19 +149,16 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       }
       
       // Determine status
-      let status = 'pending'; // Default: Pending Trade
+      let status = 'pending';
       const isToday = currentDate.toDateString() === today.toDateString();
       const isFuture = currentDate > today;
-      const isPast = currentDate < today;
       
       if (hasTraded && actualProfit !== undefined) {
         status = 'completed';
       } else if (isToday && activeSignal) {
-        status = 'active'; // Trade Now
+        status = 'active';
       } else if (isFuture) {
         status = 'future';
-      } else if (isPast && !hasTraded) {
-        status = 'missed'; // Past day with no trade
       }
       
       days.push({
@@ -191,10 +175,9 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         actualProfit: actualProfit,
         status: status,
         isToday: isToday,
-        isPast: isPast,
       });
       
-      // Add actual profit if completed, otherwise target (for projection)
+      // Add profit to running balance for next day's calculation
       if (hasTraded && actualProfit !== undefined) {
         runningBalance += actualProfit;
       } else {
