@@ -131,6 +131,43 @@ export const AdminAnalyticsPage = () => {
     }
   };
 
+  // Team Report handlers
+  const handleGenerateReport = async () => {
+    setReportLoading(true);
+    try {
+      const res = await api.get('/profit/report/base64', { params: { period: reportPeriod } });
+      setReportPreview(res.data);
+      toast.success('Report generated successfully!');
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+      toast.error('Failed to generate report');
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    setReportLoading(true);
+    try {
+      const res = await api.get('/profit/report/image', { params: { period: reportPeriod }, responseType: 'blob' });
+      const blob = res.data;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `team_performance_report_${reportPeriod}_${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('Report downloaded!');
+    } catch (error) {
+      console.error('Failed to download report:', error);
+      toast.error('Failed to download report');
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const handleNotify = async (userId, userName) => {
     setNotifyingUser(userId);
     try {
