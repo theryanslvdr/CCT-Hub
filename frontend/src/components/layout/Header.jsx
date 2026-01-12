@@ -240,97 +240,9 @@ export const Header = ({ onMenuClick, title }) => {
             </div>
           </div>
 
-          {/* Notification Bell - Only for Super/Master Admin */}
+          {/* Notification Sheet - Off-Canvas Panel - Only for Super/Master Admin */}
           {canSeeNotifications && (
-            <div className="relative" ref={notificationRef}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="text-zinc-400 hover:text-white hover:bg-white/5 relative"
-                data-testid="notification-bell"
-              >
-                <Bell className="w-5 h-5" />
-                {(unreadCount + wsUnreadCount) > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-medium">
-                    {(unreadCount + wsUnreadCount) > 9 ? '9+' : (unreadCount + wsUnreadCount)}
-                  </span>
-                )}
-                {/* WebSocket connection indicator */}
-                <span className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-zinc-950 ${wsConnected ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
-              </Button>
-
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 top-12 w-80 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
-                  <div className="p-3 border-b border-zinc-800 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white">Notifications</h3>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={handleMarkAllRead}
-                        className="text-xs text-blue-400 hover:text-blue-300"
-                      >
-                        Mark all read
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.length > 0 ? (
-                      notifications.map((notification) => (
-                        <button
-                          key={notification.id}
-                          onClick={() => handleNotificationClick(notification)}
-                          className={`w-full p-3 flex items-start gap-3 hover:bg-zinc-800/50 transition-colors text-left border-b border-zinc-800/50 last:border-0 ${
-                            !notification.is_read ? 'bg-blue-500/5' : ''
-                          }`}
-                        >
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-medium text-white truncate">
-                                {notification.title}
-                              </p>
-                              {!notification.is_read && (
-                                <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                              )}
-                            </div>
-                            <p className="text-xs text-zinc-400 truncate">{notification.message}</p>
-                            <p className="text-xs text-zinc-500 mt-1">{formatTimeAgo(notification.created_at)}</p>
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="p-8 text-center text-zinc-500 text-sm">
-                        No notifications yet
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-2 border-t border-zinc-800">
-                    <div className="flex items-center justify-between px-2 py-1 text-xs text-zinc-500 mb-2">
-                      <span className="flex items-center gap-1">
-                        {wsConnected ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-zinc-500" />}
-                        {wsConnected ? 'Real-time connected' : 'Offline'}
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setShowNotifications(false);
-                        navigate('/admin/transactions');
-                      }}
-                      className="w-full text-xs text-zinc-400 hover:text-white"
-                    >
-                      View Team Transactions <ExternalLink className="w-3 h-3 ml-1" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationSheet />
           )}
 
           {/* BVE Toggle - Only for Super/Master Admin */}
