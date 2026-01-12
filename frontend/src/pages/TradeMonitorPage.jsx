@@ -281,6 +281,64 @@ export const TradeMonitorPage = () => {
     loadTradeHistory();
   }, [historyPage]);
 
+  // Restore check-in state from localStorage on mount
+  useEffect(() => {
+    const savedCheckIn = localStorage.getItem('trade_check_in');
+    if (savedCheckIn && !checkInRestored) {
+      try {
+        const checkInData = JSON.parse(savedCheckIn);
+        const targetTime = new Date(checkInData.targetTime);
+        const now = new Date();
+        
+        // Check if the saved check-in is still valid (not expired - within 30 min after trade time)
+        const thirtyMinAfterTrade = new Date(targetTime.getTime() + 30 * 60 * 1000);
+        
+        if (now < thirtyMinAfterTrade && checkInData.signalId) {
+          // Restore the check-in state and resume countdown
+          setIsTrading(true);
+          setCheckInRestored(true);
+          
+          // Start the countdown from saved target time
+          startGlobalCountdown(targetTime, checkInData.signalInfo);
+          
+          // Resume countdown interval
+          countdownRef.current = setInterval(() => {
+            const currentNow = new Date();
+            const diff = targetTime - currentNow;
+
+            if (diff <= 0) {
+              // Trade time reached
+              setShowExitAlert(true);
+              setTradeEnded(true);
+              setCountdown(null);
+              if (countdownRef.current) clearInterval(countdownRef.current);
+              if (soundEnabled && audioRef.current) {
+                audioRef.current.play().catch(() => {});
+              }
+            } else {
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              setCountdown({ hours, minutes, seconds, total: diff });
+              
+              // Beep in last 5 seconds
+              if (diff <= 5000 && diff > 0) {
+                if (soundEnabled && beepRef.current) {
+                  beepRef.current.play().catch(() => {});
+                }
+              }
+            }
+          }, 1000);
+        } else {
+          // Expired check-in, clear it
+          localStorage.removeItem('trade_check_in');
+        }
+      } catch (e) {
+        localStorage.removeItem('trade_check_in');
+      }
+    }
+  }, [signal, checkInRestored, soundEnabled, startGlobalCountdown]);
+
   // World clock
   useEffect(() => {
     const timer = setInterval(() => setWorldTime(new Date()), 1000);
