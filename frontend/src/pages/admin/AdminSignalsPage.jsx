@@ -64,7 +64,7 @@ export const AdminSignalsPage = () => {
 
   useEffect(() => {
     loadSignals();
-  }, [currentPage]);
+  }, [currentPage, isInBVE]);
 
   const loadSignals = async () => {
     try {
