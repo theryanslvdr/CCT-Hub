@@ -1080,6 +1080,55 @@ async def confirm_withdrawal_receipt(
     
     return {"message": "Receipt confirmed", "confirmed_at": data.confirmed_at}
 
+# Commission Model
+class CommissionCreate(BaseModel):
+    amount: float
+    traders_count: int
+    notes: Optional[str] = None
+
+@profit_router.post("/commission")
+async def record_commission(data: CommissionCreate, user: dict = Depends(get_current_user)):
+    """Record a commission from referral trades"""
+    commission = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "amount": data.amount,
+        "traders_count": data.traders_count,
+        "notes": data.notes or f"Commission from {data.traders_count} referral trades",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.commissions.insert_one(commission)
+    
+    # Also record as a deposit (commission adds to account balance)
+    deposit = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "amount": data.amount,
+        "product": "COMMISSION",
+        "currency": "USDT",
+        "notes": f"Referral commission ({data.traders_count} traders)",
+        "is_commission": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.deposits.insert_one(deposit)
+    
+    return {
+        "message": "Commission recorded successfully",
+        "commission_id": commission["id"],
+        "amount": data.amount,
+        "traders_count": data.traders_count
+    }
+
+@profit_router.get("/commissions")
+async def get_commissions(user: dict = Depends(get_current_user)):
+    """Get all commissions for the current user"""
+    commissions = await db.commissions.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return commissions
+
 
 # ==================== TRADE MONITOR ROUTES ====================
 
