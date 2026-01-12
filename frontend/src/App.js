@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { TradeCountdownProvider } from "./contexts/TradeCountdownContext";
+import { BVEProvider } from "./contexts/BVEContext";
 import { Toaster } from "./components/ui/sonner";
 
 // Pages
@@ -35,6 +36,7 @@ function App() {
     <AuthProvider>
       <WebSocketProvider>
         <BrowserRouter>
+          <BVEProvider>
           <TradeCountdownProvider>
           <Routes>
             {/* Public routes */}
