@@ -5142,6 +5142,167 @@ async def get_bve_summary(user: dict = Depends(require_super_or_master_admin)):
         "is_bve": True
     }
 
+# ==================== SCHEDULED TASKS ====================
+
+async def check_missed_trades():
+    """Check for users who missed today's trade and send email notifications"""
+    try:
+        # Get today's date range
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+        
+        # Get today's active signal
+        signal = await db.trading_signals.find_one(
+            {
+                "is_active": True,
+                "created_at": {"$gte": today_start, "$lt": today_end}
+            },
+            {"_id": 0}
+        )
+        
+        if not signal:
+            logger.info("No active signal found for missed trade check")
+            return
+        
+        # Get all active members (users who should be trading)
+        active_members = await db.users.find(
+            {
+                "role": "member",
+                "is_active": True,
+                "email_notifications_enabled": {"$ne": False}  # Not explicitly disabled
+            },
+            {"_id": 0, "id": 1, "email": 1, "full_name": 1}
+        ).to_list(1000)
+        
+        # Get users who logged a trade today
+        traded_users = await db.trade_logs.distinct(
+            "user_id",
+            {"created_at": {"$gte": today_start, "$lt": today_end}}
+        )
+        
+        # Find members who missed the trade
+        missed_members = [m for m in active_members if m["id"] not in traded_users]
+        
+        # Get email template
+        template = await db.email_templates.find_one({"type": "missed_trade"}, {"_id": 0})
+        
+        if not template:
+            template = {
+                "subject": "You missed today's trading signal",
+                "body": "Hi {{name}},\n\nWe noticed you didn't participate in today's trading signal.\n\nProduct: {{product}}\nDirection: {{direction}}\nTime: {{trade_time}}\n\nDon't miss tomorrow's opportunity!\n\nBest regards,\nCrossCurrent Team"
+            }
+        
+        # Send emails to missed members
+        for member in missed_members:
+            try:
+                subject = template["subject"]
+                body = template["body"]
+                
+                # Replace variables
+                body = body.replace("{{name}}", member.get("full_name", "Trader"))
+                body = body.replace("{{product}}", signal.get("product", ""))
+                body = body.replace("{{direction}}", signal.get("direction", ""))
+                body = body.replace("{{trade_time}}", signal.get("trade_time", ""))
+                
+                from services.email_service import send_email
+                await send_email(
+                    to=member["email"],
+                    subject=subject,
+                    body=body
+                )
+                
+                # Log the email
+                await db.email_history.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "to": member["email"],
+                    "subject": subject,
+                    "template_type": "missed_trade",
+                    "status": "sent",
+                    "sent_at": datetime.now(timezone.utc)
+                })
+                
+                logger.info(f"Sent missed trade email to {member['email']}")
+                
+            except Exception as e:
+                logger.error(f"Failed to send missed trade email to {member.get('email')}: {e}")
+        
+        logger.info(f"Missed trade check complete. Notified {len(missed_members)} members.")
+        
+    except Exception as e:
+        logger.error(f"Missed trade scheduler error: {e}")
+
+# ==================== TOP PERFORMERS ====================
+
+@admin_router.get("/top-performers")
+async def get_top_performers(
+    limit: int = 10,
+    exclude_non_traders: bool = True,
+    user: dict = Depends(require_admin)
+):
+    """Get top performing members based on total profit"""
+    try:
+        # Get date range for "active" traders (traded in last 30 days)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        
+        # Get users who have traded recently (if excluding non-traders)
+        recent_traders = set()
+        if exclude_non_traders:
+            recent_traders = set(await db.trade_logs.distinct(
+                "user_id",
+                {"created_at": {"$gte": thirty_days_ago}}
+            ))
+        
+        # Get all active members with their stats
+        pipeline = [
+            {"$match": {"role": "member", "is_active": True}},
+            {"$lookup": {
+                "from": "trade_logs",
+                "localField": "id",
+                "foreignField": "user_id",
+                "as": "trades"
+            }},
+            {"$addFields": {
+                "total_profit": {"$sum": "$trades.actual_profit"},
+                "total_trades": {"$size": "$trades"},
+                "avg_profit_per_trade": {
+                    "$cond": [
+                        {"$gt": [{"$size": "$trades"}, 0]},
+                        {"$divide": [{"$sum": "$trades.actual_profit"}, {"$size": "$trades"}]},
+                        0
+                    ]
+                }
+            }},
+            {"$sort": {"total_profit": -1}},
+            {"$project": {
+                "_id": 0,
+                "id": 1,
+                "full_name": 1,
+                "email": 1,
+                "total_profit": 1,
+                "total_trades": 1,
+                "avg_profit_per_trade": 1
+            }}
+        ]
+        
+        performers = await db.users.aggregate(pipeline).to_list(100)
+        
+        # Filter to only include recent traders if requested
+        if exclude_non_traders and recent_traders:
+            performers = [p for p in performers if p["id"] in recent_traders]
+        
+        # Limit results
+        performers = performers[:limit]
+        
+        # Add rank
+        for i, p in enumerate(performers, 1):
+            p["rank"] = i
+        
+        return {"performers": performers, "total": len(performers)}
+        
+    except Exception as e:
+        logger.error(f"Failed to get top performers: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
