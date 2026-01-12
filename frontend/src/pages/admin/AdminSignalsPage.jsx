@@ -69,10 +69,18 @@ export const AdminSignalsPage = () => {
   const loadSignals = async () => {
     try {
       setLoading(true);
-      const res = await adminAPI.getSignalsHistory(currentPage, pageSize);
-      setSignals(res.data.signals);
-      setTotalPages(res.data.total_pages);
-      setTotalSignals(res.data.total);
+      // In BVE mode, load from BVE signals collection
+      if (isInBVE) {
+        const res = await api.get('/bve/signals');
+        setSignals(res.data);
+        setTotalPages(1);
+        setTotalSignals(res.data.length);
+      } else {
+        const res = await adminAPI.getSignalsHistory(currentPage, pageSize);
+        setSignals(res.data.signals);
+        setTotalPages(res.data.total_pages);
+        setTotalSignals(res.data.total);
+      }
     } catch (error) {
       console.error('Failed to load signals:', error);
       // Fallback to old method
