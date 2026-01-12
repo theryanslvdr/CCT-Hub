@@ -52,6 +52,12 @@ cloudinary.config(
 # Emailit Config
 EMAILIT_API_KEY = os.environ.get('EMAILIT_API_KEY', '')
 
+# APScheduler for background tasks
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+scheduler = AsyncIOScheduler()
+
 # Super Admin Secret Code
 SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', 'CROSSCURRENT2024')
 
