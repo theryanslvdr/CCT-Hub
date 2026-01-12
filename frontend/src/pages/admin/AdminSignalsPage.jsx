@@ -131,11 +131,20 @@ export const AdminSignalsPage = () => {
     }
     
     try {
-      await adminAPI.createSignal({
-        ...newSignal,
-        profit_points: parseFloat(newSignal.profit_points) || 15,
-      });
-      toast.success('Trading signal created!');
+      // In BVE mode, create signal in BVE collection
+      if (isInBVE) {
+        await api.post('/bve/signals', {
+          ...newSignal,
+          profit_multiplier: parseFloat(newSignal.profit_points) || 15,
+        });
+        toast.success('BVE signal created!');
+      } else {
+        await adminAPI.createSignal({
+          ...newSignal,
+          profit_points: parseFloat(newSignal.profit_points) || 15,
+        });
+        toast.success('Trading signal created!');
+      }
       setDialogOpen(false);
       setNewSignal({
         product: 'MOIL10',
