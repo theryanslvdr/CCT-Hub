@@ -745,14 +745,28 @@ export const TradeMonitorPage = () => {
           ) : (
             <div className="text-center space-y-6">
               <p className="text-zinc-400">Ready to trade? Check in when you're ready.</p>
+              {!tradeWindowInfo.canTrade && signal && (
+                <div className="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+                  <p className="text-amber-400 text-sm mb-2">Trading window opens in:</p>
+                  <p className="text-2xl font-mono font-bold text-amber-300">
+                    {tradeWindowInfo.minutesUntilOpen > 60 
+                      ? `${Math.floor(tradeWindowInfo.minutesUntilOpen / 60)}h ${tradeWindowInfo.minutesUntilOpen % 60}m`
+                      : `${tradeWindowInfo.minutesUntilOpen} minutes`}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-2">You can check in 20 minutes before the scheduled trade time</p>
+                </div>
+              )}
               <Button
                 onClick={startTrade}
-                className="exit-button idle py-8 text-2xl w-full max-w-md"
-                disabled={!signal}
+                className={`exit-button idle py-8 text-2xl w-full max-w-md ${!tradeWindowInfo.canTrade ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!signal || !tradeWindowInfo.canTrade}
                 data-testid="check-in-button"
               >
                 <Play className="w-8 h-8 mr-3" /> I'm Ready to Trade
               </Button>
+              {!tradeWindowInfo.canTrade && signal && (
+                <p className="text-xs text-zinc-500 mt-2">Button will be enabled 20 minutes before trade time</p>
+              )}
             </div>
           )}
         </CardContent>
