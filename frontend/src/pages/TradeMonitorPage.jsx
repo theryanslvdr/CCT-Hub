@@ -145,8 +145,8 @@ export const TradeMonitorPage = () => {
   const [lastTrade, setLastTrade] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState('');
-  const [showExitCalculator, setShowExitCalculator] = useState(false);
-  const [customLotSize, setCustomLotSize] = useState('');
+  const [showDreamProfit, setShowDreamProfit] = useState(false);
+  const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
   
   // Trade History state
