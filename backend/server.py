@@ -497,15 +497,13 @@ def calculate_exit_value(lot_size: float) -> float:
     return lot_size * 15
 
 def calculate_withdrawal_fees(amount: float) -> dict:
-    """Calculate withdrawal fees: 3% Merin + $1 Binance"""
+    """Calculate withdrawal fees: 3% Merin only (Binance fee moved to deposit)"""
     merin_fee = amount * 0.03
-    binance_fee = 1.0
-    total_fees = merin_fee + binance_fee
+    total_fees = merin_fee
     net_amount = amount - total_fees
     return {
         "gross_amount": amount,
         "merin_fee": round(merin_fee, 2),
-        "binance_fee": binance_fee,
         "total_fees": round(total_fees, 2),
         "net_amount": round(net_amount, 2),
         "processing_days": "1-2 business days"
