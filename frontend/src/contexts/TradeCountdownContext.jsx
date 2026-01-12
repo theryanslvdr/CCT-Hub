@@ -52,6 +52,8 @@ export const TradeCountdownProvider = ({ children }) => {
       clearInterval(beepIntervalRef.current);
       beepIntervalRef.current = null;
     }
+    // Also clear the localStorage check-in to prevent restoring an expired countdown
+    localStorage.removeItem('trade_check_in');
   }, []);
 
   // Update countdown every second
