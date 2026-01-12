@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/api';
 import { useWebSocket } from '@/contexts/WebSocketContext';
+import { NotificationSheet } from '@/components/NotificationSheet';
 
 const SECRET_CODE = 'SUPER_ADMIN_BYPASS';
 const CLICKS_REQUIRED = 10;
