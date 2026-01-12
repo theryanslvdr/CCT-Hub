@@ -399,12 +399,12 @@ export const TradeMonitorPage = () => {
   };
 
   // Play beep sound for countdown
-  const playBeep = () => {
+  const playBeep = useCallback(() => {
     if (beepRef.current && soundEnabled) {
       beepRef.current.currentTime = 0;
       beepRef.current.play().catch(console.error);
     }
-  };
+  }, [soundEnabled]);
 
   const startTrade = useCallback(() => {
     if (!signal) {
