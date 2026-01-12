@@ -233,6 +233,19 @@ export const settingsAPI = {
   testHeartbeat: () => api.post('/settings/test-heartbeat'),
 };
 
+// BVE (Beta Virtual Environment) APIs
+export const bveAPI = {
+  enter: () => api.post('/bve/enter'),
+  exit: (sessionId) => api.post('/bve/exit', { session_id: sessionId }),
+  rewind: (sessionId) => api.post('/bve/rewind', { session_id: sessionId }),
+  getSignals: () => api.get('/bve/signals'),
+  createSignal: (data) => api.post('/bve/signals', data),
+  updateSignal: (id, data) => api.put(`/bve/signals/${id}`, data),
+  getActiveSignal: () => api.get('/bve/active-signal'),
+  getSummary: () => api.get('/bve/summary'),
+  logTrade: (data) => api.post('/bve/trade/log', data),
+};
+
 // API Center APIs
 export const apiCenterAPI = {
   createConnection: (data) => api.post('/api-center/connections', data),
