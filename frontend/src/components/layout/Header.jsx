@@ -332,6 +332,60 @@ export const Header = ({ onMenuClick, title }) => {
             </div>
           )}
 
+          {/* BVE Toggle - Only for Super/Master Admin */}
+          {canAccessBVE && (
+            <div className="flex items-center gap-2">
+              {isInBVE ? (
+                <>
+                  {/* BVE Active Badge */}
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                    <FlaskConical className="w-4 h-4 text-purple-400 animate-pulse" />
+                    <span className="text-xs font-medium text-purple-300">BVE Active</span>
+                  </div>
+                  
+                  {/* Rewind Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={rewindBVE}
+                    disabled={bveLoading}
+                    className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                    title="Rewind to entry point"
+                    data-testid="bve-rewind"
+                  >
+                    {bveLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <RotateCcw className="w-5 h-5" />}
+                  </Button>
+                  
+                  {/* Exit BVE Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={exitBVE}
+                    disabled={bveLoading}
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    title="Exit Beta Virtual Environment"
+                    data-testid="bve-exit"
+                  >
+                    <ExitIcon className="w-5 h-5" />
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={enterBVE}
+                  disabled={bveLoading}
+                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 gap-2"
+                  title="Enter Beta Virtual Environment"
+                  data-testid="bve-enter"
+                >
+                  {bveLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlaskConical className="w-4 h-4" />}
+                  <span className="hidden sm:inline">BVE</span>
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Settings Button with Secret Feature */}
           <Button
             variant="ghost"
