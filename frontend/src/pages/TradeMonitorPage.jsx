@@ -150,6 +150,7 @@ export const TradeMonitorPage = () => {
   const [showDreamProfit, setShowDreamProfit] = useState(false);
   const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
+  const [checkInRestored, setCheckInRestored] = useState(false);
   
   // Trade History state
   const [tradeHistory, setTradeHistory] = useState([]);
