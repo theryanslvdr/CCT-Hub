@@ -5347,7 +5347,19 @@ async def startup_db():
     await db.debts.create_index("user_id")
     await db.goals.create_index("user_id")
     logger.info("Database indexes created")
+    
+    # Start the scheduler for missed trade emails
+    # Run at 11 PM UTC every day (after typical trading hours)
+    scheduler.add_job(
+        check_missed_trades,
+        CronTrigger(hour=23, minute=0),
+        id="missed_trade_check",
+        replace_existing=True
+    )
+    scheduler.start()
+    logger.info("Scheduler started for missed trade notifications")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    scheduler.shutdown()
     client.close()
