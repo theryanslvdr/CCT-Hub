@@ -1058,10 +1058,6 @@ export const ProfitTrackerPage = () => {
                     <span>Merin Fee (3%)</span>
                     <span className="font-mono">-{formatMoney(withdrawalResult.merinFee)}</span>
                   </div>
-                  <div className="flex justify-between text-amber-400">
-                    <span>Binance Fee</span>
-                    <span className="font-mono">-$1.00</span>
-                  </div>
                   <div className="border-t border-zinc-700 pt-3 flex justify-between">
                     <span className="text-zinc-300 font-medium">Net Amount (to Binance)</span>
                     <span className="font-mono font-bold text-emerald-400">{formatMoney(withdrawalResult.netAmount)}</span>
