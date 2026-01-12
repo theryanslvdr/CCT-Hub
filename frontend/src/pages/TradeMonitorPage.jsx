@@ -246,10 +246,14 @@ export const TradeMonitorPage = () => {
   // Data loading functions
   const loadData = async () => {
     try {
+      // If in BVE mode, fetch signal from BVE endpoints
+      const signalEndpoint = isInBVE ? api.get('/bve/active-signal') : tradeAPI.getActiveSignal();
+      const summaryEndpoint = isInBVE ? api.get('/bve/summary') : profitAPI.getSummary();
+      
       const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
-        tradeAPI.getActiveSignal(),
+        signalEndpoint,
         tradeAPI.getDailySummary(),
-        profitAPI.getSummary(),
+        summaryEndpoint,
         tradeAPI.getStreak(),
       ]);
       setSignal(signalRes.data.signal);
