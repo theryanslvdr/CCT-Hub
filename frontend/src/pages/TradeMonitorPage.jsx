@@ -190,6 +190,53 @@ export const TradeMonitorPage = () => {
     });
   };
 
+  // Calculate time until trade and whether trading window is open (20 min before trade time)
+  const getTradeWindowInfo = useCallback(() => {
+    if (!signal?.trade_time) return { canTrade: false, minutesUntilOpen: null, isTradeTime: false };
+    
+    const [hours, minutes] = signal.trade_time.split(':').map(Number);
+    const signalTz = signal.trade_timezone || 'Asia/Manila';
+    
+    const now = new Date();
+    const tradeTime = new Date();
+    
+    // Convert signal time to UTC for comparison
+    const tzOffset = getTimezoneOffset(signalTz);
+    tradeTime.setUTCHours(hours - tzOffset, minutes, 0, 0);
+    
+    // If trade time has passed for today, check if within 30 min post-trade window
+    if (tradeTime <= now) {
+      const timeSinceTrade = now - tradeTime;
+      const thirtyMinutesMs = 30 * 60 * 1000;
+      if (timeSinceTrade <= thirtyMinutesMs) {
+        return { canTrade: true, minutesUntilOpen: 0, isTradeTime: true, isPostTrade: true };
+      }
+      // Trade window closed for today
+      tradeTime.setDate(tradeTime.getDate() + 1);
+    }
+    
+    const timeUntilTrade = tradeTime - now;
+    const twentyMinutesMs = 20 * 60 * 1000;
+    const minutesUntilOpen = Math.ceil((timeUntilTrade - twentyMinutesMs) / (60 * 1000));
+    
+    return {
+      canTrade: timeUntilTrade <= twentyMinutesMs,
+      minutesUntilOpen: minutesUntilOpen > 0 ? minutesUntilOpen : 0,
+      isTradeTime: timeUntilTrade <= 0,
+      timeUntilTrade
+    };
+  }, [signal]);
+
+  // Update trade window info every second
+  const [tradeWindowInfo, setTradeWindowInfo] = useState({ canTrade: false, minutesUntilOpen: null });
+  
+  useEffect(() => {
+    const updateTradeWindow = () => setTradeWindowInfo(getTradeWindowInfo());
+    updateTradeWindow();
+    const interval = setInterval(updateTradeWindow, 1000);
+    return () => clearInterval(interval);
+  }, [getTradeWindowInfo]);
+
   // Data loading functions
   const loadData = async () => {
     try {
