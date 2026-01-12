@@ -265,7 +265,7 @@ export const TradeMonitorPage = () => {
     }
   }, [isInBVE]);
 
-  const loadTradeHistory = async () => {
+  const loadTradeHistory = useCallback(async () => {
     try {
       const res = await tradeAPI.getHistory(historyPage, 10);
       setTradeHistory(res.data.trades);
@@ -274,7 +274,7 @@ export const TradeMonitorPage = () => {
     } catch (error) {
       console.error('Failed to load trade history:', error);
     }
-  };
+  }, [historyPage]);
 
   // Load data
   useEffect(() => {
@@ -286,7 +286,7 @@ export const TradeMonitorPage = () => {
   // Load trade history when page changes
   useEffect(() => {
     loadTradeHistory();
-  }, [historyPage]);
+  }, [loadTradeHistory]);
 
   // Restore check-in state from localStorage on mount
   useEffect(() => {
