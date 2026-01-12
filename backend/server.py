@@ -3798,18 +3798,35 @@ async def test_heartbeat_connection(user: dict = Depends(require_admin)):
     if not heartbeat_key:
         return {"success": False, "message": "Heartbeat API key not configured"}
     
+    # Validate key format (should start with 'hb:')
+    if not heartbeat_key.startswith("hb:"):
+        return {"success": False, "message": "Invalid Heartbeat API key format. Key should start with 'hb:'"}
+    
     try:
-        # Test Heartbeat connection
-        response = requests.get(
-            "https://api.heartbeat.chat/v0/community",
-            headers={"Authorization": f"Bearer {heartbeat_key}"},
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            return {"success": True, "message": "Heartbeat connection successful!", "data": response.json()}
-        else:
-            return {"success": False, "message": f"Heartbeat returned status {response.status_code}"}
+        # Test Heartbeat connection using the /users endpoint
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://api.heartbeat.chat/v0/users",
+                headers={
+                    "Authorization": f"Bearer {heartbeat_key}",
+                    "Accept": "application/json"
+                },
+                timeout=10.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                user_count = len(data) if isinstance(data, list) else 0
+                return {
+                    "success": True, 
+                    "message": f"Heartbeat connection successful! Found {user_count} community members."
+                }
+            elif response.status_code == 401:
+                return {"success": False, "message": "Invalid API key - authentication failed"}
+            elif response.status_code == 403:
+                return {"success": False, "message": "API key doesn't have permission to access users"}
+            else:
+                return {"success": False, "message": f"Heartbeat returned status {response.status_code}: {response.text[:200]}"}
     except Exception as e:
         return {"success": False, "message": f"Connection failed: {str(e)}"}
 
