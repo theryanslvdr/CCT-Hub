@@ -950,6 +950,10 @@ export const ProfitTrackerPage = () => {
                     <span>Deposit Fee (1%)</span>
                     <span className="font-mono">-{formatMoney(depositSimulation.depositFee)}</span>
                   </div>
+                  <div className="flex justify-between text-amber-400">
+                    <span>Binance Fee</span>
+                    <span className="font-mono">-$1.00</span>
+                  </div>
                   <div className="border-t border-zinc-700 pt-3 flex justify-between">
                     <span className="text-zinc-300 font-medium">Receive Amount</span>
                     <span className="font-mono font-bold text-emerald-400">{formatMoney(depositSimulation.receiveAmount)}</span>
