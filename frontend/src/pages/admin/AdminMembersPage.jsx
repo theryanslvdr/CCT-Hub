@@ -981,7 +981,7 @@ export const AdminMembersPage = () => {
                           </div>
                           <div>
                             <p className="text-white font-medium">Upgrade Role</p>
-                            <p className="text-xs text-zinc-500">Promote to Admin or Super Admin</p>
+                            <p className="text-xs text-zinc-500">Promote to Basic Admin, Super Admin, or Master Admin</p>
                           </div>
                         </div>
                         <Button
