@@ -56,15 +56,17 @@ export const AdminAnalyticsPage = () => {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      const [teamRes, missedRes, growthRes] = await Promise.all([
+      const [teamRes, missedRes, growthRes, performersRes] = await Promise.all([
         adminAPI.getTeamAnalytics(),
         adminAPI.getMissedTrades(),
         adminAPI.getGrowthData(),
+        adminAPI.getTopPerformers(10, excludeNonTraders),
       ]);
       
       setTeamStats(teamRes.data);
       setMissedTrades(missedRes.data);
       setGrowthData(growthRes.data.chart_data || []);
+      setTopPerformers(performersRes.data.performers || []);
     } catch (error) {
       console.error('Failed to load analytics:', error);
       toast.error('Failed to load analytics');
