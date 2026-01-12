@@ -110,11 +110,11 @@ export const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [isSimulating, simulatedMemberId, simulatedAccountValue, simulatedTotalProfit]);
+  }, [isSimulating, simulatedMemberId, simulatedAccountValue, simulatedTotalProfit, isInBVE]);
 
   useEffect(() => {
     loadDashboardData();
-  }, [loadDashboardData, simulatedView]); // Also re-run when simulatedView changes
+  }, [loadDashboardData, simulatedView, isInBVE]); // Also re-run when simulatedView or BVE mode changes
 
   const kpiCards = [
     {
