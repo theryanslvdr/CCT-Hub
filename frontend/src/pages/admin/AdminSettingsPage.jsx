@@ -1244,10 +1244,11 @@ export const AdminSettingsPage = () => {
                                 className="prose prose-sm max-w-none"
                                 style={{ whiteSpace: 'pre-wrap', fontFamily: 'system-ui, -apple-system, sans-serif' }}
                               >
-                                {editingTemplate.body.split('\n').map((line, i) => (
+                                {getPreviewContent(editingTemplate.body, testVariableValues).split('\n').map((line, i) => (
                                   <p key={i} className="mb-2">{line || '\u00A0'}</p>
                                 ))}
                               </div>
+                              <p className="text-xs text-zinc-500 mt-3 italic">Variables are replaced with sample values. Click &quot;Test&quot; to customize values.</p>
                             </div>
                           ) : (
                             <Textarea
