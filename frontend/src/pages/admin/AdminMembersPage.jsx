@@ -1086,8 +1086,8 @@ export const AdminMembersPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="basic_admin">Basic Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
                   {(isSuperAdmin() || isMasterAdmin()) && <SelectItem value="super_admin">Super Admin</SelectItem>}
+                  {isMasterAdmin() && <SelectItem value="master_admin">Master Admin</SelectItem>}
                 </SelectContent>
               </Select>
             </div>

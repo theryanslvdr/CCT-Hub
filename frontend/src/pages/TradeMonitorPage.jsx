@@ -631,7 +631,7 @@ export const TradeMonitorPage = () => {
               <div className="animate-bounce">
                 <div className="text-6xl">🚨</div>
               </div>
-              <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">ENTER THE TRADE NOW!</h2>
+              <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">ENTER YOUR TRADE NOW!</h2>
               <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">{formatLargeNumber(exitValue)}</span></p>
               <div className="flex gap-4 justify-center">
                 <Button onClick={endTrade} className="btn-primary text-xl py-6 px-8" data-testid="end-trade-button">
@@ -702,7 +702,7 @@ export const TradeMonitorPage = () => {
                 disabled={!signal}
                 data-testid="check-in-button"
               >
-                <Play className="w-8 h-8 mr-3" /> Enter the Trade Now!
+                <Play className="w-8 h-8 mr-3" /> I'm Ready to Trade
               </Button>
             </div>
           )}
