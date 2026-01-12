@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, bveAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBVE } from '@/contexts/BVEContext';
 import { formatNumber } from '@/lib/utils';
