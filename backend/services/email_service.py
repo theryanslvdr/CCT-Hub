@@ -2,6 +2,7 @@
 import os
 import httpx
 import logging
+import uuid
 from typing import Optional, List, Dict
 from datetime import datetime, timezone
 
@@ -20,6 +21,45 @@ async def get_emailit_api_key(db) -> Optional[str]:
         api_key = os.environ.get("EMAILIT_API_KEY")
     
     return api_key
+
+
+async def log_email(
+    db,
+    to_email: str,
+    subject: str,
+    template_type: str,
+    status: str = "pending",
+    error_message: Optional[str] = None,
+    metadata: Optional[Dict] = None
+) -> str:
+    """Log an email to the email_history collection"""
+    email_id = str(uuid.uuid4())
+    
+    email_record = {
+        "id": email_id,
+        "to_email": to_email,
+        "subject": subject,
+        "template_type": template_type,
+        "status": status,
+        "error_message": error_message,
+        "metadata": metadata or {},
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "sent_at": datetime.now(timezone.utc).isoformat() if status == "sent" else None
+    }
+    
+    await db.email_history.insert_one(email_record)
+    return email_id
+
+
+async def update_email_status(db, email_id: str, status: str, error_message: Optional[str] = None):
+    """Update the status of a logged email"""
+    update_data = {"status": status}
+    if status == "sent":
+        update_data["sent_at"] = datetime.now(timezone.utc).isoformat()
+    if error_message:
+        update_data["error_message"] = error_message
+    
+    await db.email_history.update_one({"id": email_id}, {"$set": update_data})
 
 
 async def send_email(
