@@ -560,43 +560,6 @@ export const ProfitTrackerPage = () => {
     setDailyProjectionOpen(true);
   };
 
-  // Performance Report handlers
-  const handleGenerateReport = async () => {
-    setReportLoading(true);
-    try {
-      const res = await profitAPI.getReportBase64(reportPeriod);
-      setReportPreview(res.data);
-      toast.success('Report generated successfully!');
-    } catch (error) {
-      console.error('Failed to generate report:', error);
-      toast.error('Failed to generate report');
-    } finally {
-      setReportLoading(false);
-    }
-  };
-
-  const handleDownloadReport = async () => {
-    setReportLoading(true);
-    try {
-      const res = await profitAPI.getReportImage(reportPeriod);
-      const blob = res.data;
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `performance_report_${reportPeriod}_${new Date().toISOString().split('T')[0]}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      toast.success('Report downloaded!');
-    } catch (error) {
-      console.error('Failed to download report:', error);
-      toast.error('Failed to download report');
-    } finally {
-      setReportLoading(false);
-    }
-  };
-
   // Get daily projection data for selected month
   const getDailyProjectionForSelectedMonth = useMemo(() => {
     if (!selectedMonth) return [];
@@ -607,6 +570,7 @@ export const ProfitTrackerPage = () => {
       activeSignal
     );
   }, [selectedMonth, tradeLogs, activeSignal]);
+
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
