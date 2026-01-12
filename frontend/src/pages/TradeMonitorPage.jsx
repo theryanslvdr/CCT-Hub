@@ -511,13 +511,18 @@ export const TradeMonitorPage = () => {
     setActualExitValue('');
     stopGlobalCountdown(); // Stop global countdown when trade is stopped
     localStorage.removeItem('trade_check_in'); // Clear persisted check-in state
+    // Clear the interval ref completely
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
+      countdownRef.current = null;
     }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    // Dismiss any active trade alert toasts
+    toast.dismiss('trade-alert');
+    toast.dismiss('trade-alert-restore');
   };
 
   const submitActualProfit = async () => {
