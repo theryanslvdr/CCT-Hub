@@ -185,7 +185,7 @@ export const DashboardPage = () => {
           <FlaskConical className="w-6 h-6 text-purple-400 animate-pulse" />
           <div>
             <h3 className="text-purple-300 font-semibold">Beta Virtual Environment Active</h3>
-            <p className="text-purple-400/70 text-sm">All data shown is from BVE. Actions won't affect real data.</p>
+            <p className="text-purple-400/70 text-sm">All data shown is from BVE. Actions won&apos;t affect real data.</p>
           </div>
         </div>
       )}
