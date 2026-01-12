@@ -11,36 +11,77 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 31 (2026-01-12) - Major Feature Batch ✅
+
+#### 1. Fee Restructuring ✅
+- Moved $1 Binance fee from Withdrawal to Deposit
+- Deposit now shows: Binance USDT, 1% fee, $1 Binance fee, Receive Amount
+- Withdrawal only shows: Gross, 3% Merin fee, Net Amount
+
+#### 2. Commission System ✅
+- Added "Simulate Commission" button in Profit Tracker
+- Commission dialog with USDT Amount and Traders Count fields
+- New "Commission Records" button to view history
+- Backend API endpoints: POST /api/profit/commission, GET /api/profit/commissions
+
+#### 3. Monthly Table Simplification ✅
+- Removed "Daily Profit" and "Lot Size" columns from monthly table
+- Now shows only: Month, Trading Days, Final Balance, Actions
+
+#### 4. Navigation Improvements ✅
+- "Trade Now" in daily projection navigates to /trade-monitor (not /trade)
+- "Enter the Trade Now!" renamed to "I'm Ready to Trade"
+
+#### 5. Dream Daily Profit Calculator ✅
+- Replaced "Exit Value Calculator" with "Dream Daily Profit"
+- Shows: Target daily profit → Required balance → Amount to add
+- Formula: Balance = (Target ÷ 15) × 980
+
+#### 6. Quick Signal Actions ✅
+- Added "Deactivate" button on active signal card
+- One-click signal deactivation for admins
+
+#### 7. Merin Iframe Refresh ✅
+- Added refresh icon button in Merin Trading Platform section
+- Reloads iframe on click
+
+#### 8. Admin Role Dropdown Fix ✅
+- Removed plain "Admin" option from role upgrade dropdown
+- Options now: Basic Admin, Super Admin, Master Admin
+
+#### 9. Daily Projection Balance Bug Fix ✅
+- Fixed: balanceBefore now shows balance BEFORE today's profit, not after
+- Account value adjustment for current month's trade logs
+
+#### 10. Post-Trade Navigation ✅
+- Added "View Daily Projection" button in celebration popup
+- "Forward to Profit Tracker" now redirects to profit tracker
+
+#### 11. Live Registration Notifications ✅
+- WebSocket notification to all admins when new user registers
+- Email notification sent to all admin users
+
+#### 12. Simulation Accuracy Fix ✅
+- Fixed: Master Admin simulation now fetches complete member data
+- Trade logs, deposits, withdrawals all fetched for simulated member
+- New API endpoints: GET /api/admin/members/{id}/deposits, GET /api/admin/members/{id}/withdrawals
+
+#### 13. Trade Time Restrictions ✅
+- "I'm Ready to Trade" button disabled until 20 minutes before trade time
+- Shows countdown: "Trading window opens in: X minutes"
+- Helpful text explaining the 20-minute window
+
+#### 14. Floating Trade Countdown ✅
+- Created TradeCountdownContext for global countdown state
+- When checked in and navigating away, floating popup appears
+- Shows countdown with "Go to Trade Monitor" button
+- Beeping sound in last 30 seconds (5-second burst)
+
 ### Session 30 (2026-01-11) - Maintenance & Mobile ✅
-
-#### 1. Maintenance Tab in Admin Settings ✅
-- New "Maint." tab in Settings with amber highlight
-- **Maintenance Mode Toggle**: Blocks all users except Master Admin
-- **Maintenance Message**: Customizable message displayed on maintenance page
-- Warning banner when maintenance mode is active
-
-#### 2. Announcements System ✅
-- Add announcements with: Title, Message, Link URL, Link Text
-- Three types: Info (blue), Warning (amber), Success (green)
-- Sticky option (can't be dismissed by users)
-- Active/Inactive toggle per announcement
-- Announcements display as banners in dashboard
-
-#### 3. Maintenance Landing Page ✅
-- Shows when `maintenance_mode=true`
-- Displays: Logo, Wrench icon, "Under Maintenance" title
-- Custom maintenance message from settings
-- Footer copyright at bottom
-- **Hidden Master Admin Override**: Click "soon" 5 times to reveal login
-
-#### 4. Mobile-Friendly Notices ✅
-- Created `MobileNotice` component at `/app/frontend/src/components/MobileNotice.jsx`
-- Shows "Better on Desktop" notice on mobile viewports (<768px)
-- Applied to complex pages:
-  - TradeMonitorPage
-  - AdminMembersPage  
-  - AdminLicensesPage
-- Option for `showOnMobile={true}` to show notice + content
+- Maintenance Tab with mode toggle and custom message
+- Announcements System (Info/Warning/Success types)
+- Maintenance Landing Page with hidden admin override
+- Mobile-Friendly Notices on complex pages
 
 ### Session 29 - P2 Tasks ✅
 - Debt Management Tooltips
@@ -49,7 +90,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Additional Email Templates
 
 ### Session 28 - P1 Features ✅
-- Backend Services Package (email, file, websocket)
+- Backend Services Package
 - WebSocket real-time notifications
 - File upload endpoints
 
@@ -59,78 +100,38 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Persistent footer
 - Login customization
 
-## Backend Structure
+## Pending Tasks
 
-### Platform Settings Fields
-```python
-# Maintenance Settings (NEW)
-maintenance_mode: bool = False
-maintenance_message: str = "Our services are undergoing maintenance..."
-announcements: Optional[List[dict]] = None
+### P0 - High Priority
+- Email Template Testing with Variables Preview
+- Automated "Missed Trade" Email System
+- Email History Frontend Table
 
-# Existing fields
-platform_name, tagline, site_title, site_description
-favicon_url, logo_url, og_image_url
-primary_color, accent_color, hide_emergent_badge
-login_title, login_tagline, login_notice
-production_site_url
-emailit_api_key, cloudinary_*, heartbeat_api_key
-custom_registration_link
-footer_copyright, footer_links
-```
+### P1 - Medium Priority
+- WebSocket "Offline" Icon indicator
+- Announcement Display Options (more control)
+- Off-Canvas Notification Panel (slide-out style)
+- Backend Route Migration (server.py → /routes/)
 
-### Services Package
-```
-/app/backend/services/
-├── email_service.py - 8 email templates
-├── file_service.py - Cloudinary uploads
-└── websocket_service.py - Real-time notifications
-```
+### P2 - Lower Priority
+- Exclude Non-Traders from Top Performers
+- Generate Image Recap Report (16:9 landscape)
+- Admin Email Recap Summary
+- Frontend Component Refactoring
 
-### Models Package
-```
-/app/backend/models/
-├── user.py, trade.py, common.py
-├── license.py, settings.py
-```
-
-### Routes Package (Structure Ready)
-```
-/app/backend/routes/
-├── auth.py, admin.py, trade.py
-├── profit.py, settings.py
-```
-
-## Frontend Components
-
-### New Components
-- `MobileNotice.jsx` - Mobile viewport notice
-- `SharedComponents.jsx` - Reusable admin components
-- `NotificationPanel.jsx` - Real-time notifications
-
-### Updated Pages
-- `LoginPage.jsx` - Maintenance mode handling + override
-- `AdminSettingsPage.jsx` - Maintenance tab + announcements
-- `DashboardLayout.jsx` - Announcement banner display
-- `DebtManagementPage.jsx` - Tooltips added
-- `TradeMonitorPage.jsx` - MobileNotice wrapper
-- `AdminMembersPage.jsx` - MobileNotice wrapper
-- `AdminLicensesPage.jsx` - MobileNotice wrapper
-
-## Test Results
-- **Iteration 30**: 12/12 backend tests passed (100%)
-- **Iteration 29**: 13/13 backend tests passed (100%)
-- **Iteration 28**: 16/16 backend tests passed (100%)
+## Key API Endpoints
+- POST /api/profit/commission - Record referral commission
+- GET /api/profit/commissions - Get user's commission history
+- GET /api/admin/members/{id}/deposits - Get member deposits (admin)
+- GET /api/admin/members/{id}/withdrawals - Get member withdrawals (admin)
+- POST /api/settings/test-emailit - Test Emailit API key
+- POST /api/settings/test-heartbeat - Test Heartbeat API key
+- WS /ws/{client_id} - WebSocket connection
 
 ## Test Credentials
-- **Master Admin**: iam@ryansalvador.com / admin123
+- Master Admin: iam@ryansalvador.com / admin123
 
-## Next Action Items
-1. Actually migrate routes from server.py to /routes/ modules
-2. Break down AdminMembersPage (~1553 lines) using SharedComponents
-3. Break down AdminLicensesPage (~1507 lines) using SharedComponents
-
-## Future Tasks
-- Add Alarm Music Selection for Trade Monitor
-- Implement automated email notifications on transactions
-- Complete route migration from monolithic server.py
+## Tech Stack
+- Backend: FastAPI, Motor (async MongoDB), PyJWT, Pydantic
+- Frontend: React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
+- State: React Context (AuthContext, WebSocketContext, TradeCountdownContext)
