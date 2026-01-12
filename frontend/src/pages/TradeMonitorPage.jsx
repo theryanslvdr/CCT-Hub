@@ -440,6 +440,9 @@ export const TradeMonitorPage = () => {
       setLastTrade(result);
       setTradeEnded(false);
       setIsTrading(false);
+      
+      // Stop global countdown
+      stopGlobalCountdown();
 
       // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
