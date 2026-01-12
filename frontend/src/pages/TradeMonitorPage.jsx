@@ -325,8 +325,8 @@ export const TradeMonitorPage = () => {
               if (soundEnabled && audioRef.current) {
                 audioRef.current.play().catch(() => {});
               }
-              // Use unique id to prevent duplicate toasts
-              toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000, id: 'trade-alert-restore' });
+              // Use unique id to prevent duplicate toasts - but don't make it persistent
+              toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
             } else {
               const hours = Math.floor(diff / (1000 * 60 * 60));
               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -485,8 +485,8 @@ export const TradeMonitorPage = () => {
           audioRef.current.play().catch(console.error);
         }
         
-        // Only show toast once - check if showExitAlert is not already true
-        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000, id: 'trade-alert' });
+        // Only show toast once - don't use id to avoid persistence issues
+        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
