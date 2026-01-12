@@ -355,6 +355,9 @@ export const TradeMonitorPage = () => {
       tradeTime.setDate(tradeTime.getDate() + 1);
     }
 
+    // Start global countdown for floating popup when navigating away
+    startGlobalCountdown(tradeTime, { product: signal.product, direction: signal.direction });
+
     // Start countdown
     countdownRef.current = setInterval(() => {
       const now = new Date();
