@@ -1005,15 +1005,52 @@ export const ProfitTrackerPage = () => {
       {/* Actions - Hidden for licensees who have their own Deposit/Withdrawal page */}
       {!isLicensee && (
       <div className="flex flex-wrap items-center gap-4">
-        {/* Left side - Simulate buttons */}
+        {/* Left side - Simulate Actions Button */}
         <div className="flex flex-wrap gap-4 flex-1">
-        {/* Simulate Deposit Dialog */}
-        <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
+        
+        {/* Simulate Actions Popup */}
+        <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
           <DialogTrigger asChild>
-            <Button className="btn-primary gap-2" data-testid="simulate-deposit-button">
-              <Plus className="w-4 h-4" /> Simulate Deposit
+            <Button className="btn-primary gap-2" data-testid="simulate-actions-button">
+              <Calculator className="w-4 h-4" /> Simulate Actions
             </Button>
           </DialogTrigger>
+          <DialogContent className="glass-card border-zinc-800 max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-blue-400" /> Simulate Actions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 mt-4">
+              <Button 
+                className="w-full btn-primary gap-2 justify-start" 
+                onClick={() => { setSimulateActionsOpen(false); setDepositDialogOpen(true); }}
+                data-testid="simulate-deposit-button"
+              >
+                <Plus className="w-4 h-4" /> Simulate Deposit
+              </Button>
+              <Button 
+                variant="outline"
+                className="w-full btn-secondary gap-2 justify-start" 
+                onClick={() => { setSimulateActionsOpen(false); setWithdrawalDialogOpen(true); }}
+                data-testid="simulate-withdrawal-button"
+              >
+                <ArrowUpFromLine className="w-4 h-4" /> Simulate Withdrawal
+              </Button>
+              <Button 
+                variant="outline"
+                className="w-full btn-secondary gap-2 justify-start" 
+                onClick={() => { setSimulateActionsOpen(false); setCommissionDialogOpen(true); }}
+                data-testid="simulate-commission-button"
+              >
+                <Award className="w-4 h-4" /> Simulate Commission
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Simulate Deposit Dialog - Now triggered from popup */}
+        <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
           <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
