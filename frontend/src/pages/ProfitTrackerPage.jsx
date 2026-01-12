@@ -362,6 +362,10 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
+  // Access Records Dialog (combined deposit, withdrawal, commission records)
+  const [accessRecordsOpen, setAccessRecordsOpen] = useState(false);
+  const [activeRecordTab, setActiveRecordTab] = useState('deposits');
+  
   // Commission Dialog states
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false);
   const [commissionStep, setCommissionStep] = useState('input');
@@ -374,11 +378,8 @@ export const ProfitTrackerPage = () => {
   const [dreamProfitDialogOpen, setDreamProfitDialogOpen] = useState(false);
   const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   
-  // Performance Report states
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [reportPeriod, setReportPeriod] = useState('monthly');
-  const [reportLoading, setReportLoading] = useState(false);
-  const [reportPreview, setReportPreview] = useState(null);
+  // Simulate Actions Dialog (combined simulate deposit, withdrawal, commission)
+  const [simulateActionsOpen, setSimulateActionsOpen] = useState(false);
   
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
