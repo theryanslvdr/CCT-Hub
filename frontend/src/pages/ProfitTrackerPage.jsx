@@ -1486,7 +1486,7 @@ export const ProfitTrackerPage = () => {
                     <tr key={w.id}>
                       <td className="font-mono">{new Date(w.created_at).toLocaleDateString()}</td>
                       <td className="font-mono text-red-400">{formatMoney(Math.abs(w.gross_amount || w.amount))}</td>
-                      <td className="font-mono text-emerald-400">{formatMoney(w.net_amount || (Math.abs(w.amount) * 0.97 - 1))}</td>
+                      <td className="font-mono text-emerald-400">{formatMoney(w.net_amount || (Math.abs(w.amount) * 0.97))}</td>
                       <td className="font-mono text-zinc-400">
                         {w.estimated_arrival || addBusinessDays(new Date(w.created_at), 2).toLocaleDateString()}
                       </td>
