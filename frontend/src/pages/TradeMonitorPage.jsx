@@ -243,8 +243,8 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(interval);
   }, [getTradeWindowInfo]);
 
-  // Data loading functions
-  const loadData = async () => {
+  // Data loading functions - use useCallback to capture isInBVE correctly
+  const loadData = useCallback(async () => {
     try {
       // If in BVE mode, fetch signal from BVE endpoints
       const signalEndpoint = isInBVE ? api.get('/bve/active-signal') : tradeAPI.getActiveSignal();
@@ -263,7 +263,7 @@ export const TradeMonitorPage = () => {
     } catch (error) {
       console.error('Failed to load trade data:', error);
     }
-  };
+  }, [isInBVE]);
 
   const loadTradeHistory = async () => {
     try {
