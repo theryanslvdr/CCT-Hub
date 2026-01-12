@@ -395,9 +395,7 @@ export const TradeMonitorPage = () => {
         beepElement.pause();
         beepElement.currentTime = 0;
       }
-      // Dismiss any active toasts
-      toast.dismiss('trade-alert');
-      toast.dismiss('trade-alert-restore');
+      // Dismiss any active toasts - not needed since we don't use IDs anymore
     };
   }, []);
 
@@ -537,9 +535,7 @@ export const TradeMonitorPage = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    // Dismiss any active trade alert toasts
-    toast.dismiss('trade-alert');
-    toast.dismiss('trade-alert-restore');
+    // No need to dismiss toasts since we don't use IDs
   };
 
   const submitActualProfit = async () => {
