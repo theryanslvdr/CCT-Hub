@@ -90,6 +90,7 @@ export const AdminSettingsPage = () => {
   useEffect(() => {
     loadSettings();
     loadEmailTemplates();
+    loadEmailHistory();
   }, []);
 
   // Apply settings to document
@@ -123,6 +124,35 @@ export const AdminSettingsPage = () => {
       setEmailTemplates(res.data.templates || []);
     } catch (error) {
       console.error('Failed to load email templates:', error);
+    }
+  };
+
+  const loadEmailHistory = async (page = 1) => {
+    setEmailHistoryLoading(true);
+    try {
+      const res = await settingsAPI.getEmailHistory(page);
+      setEmailHistory(res.data.emails || []);
+      setEmailHistoryTotal(res.data.total || 0);
+      setEmailHistoryPage(page);
+    } catch (error) {
+      console.error('Failed to load email history:', error);
+    } finally {
+      setEmailHistoryLoading(false);
+    }
+  };
+
+  const handleClearEmailHistory = async () => {
+    if (!window.confirm('Are you sure you want to clear all email history? This cannot be undone.')) return;
+    
+    setClearingHistory(true);
+    try {
+      await settingsAPI.clearEmailHistory();
+      toast.success('Email history cleared');
+      loadEmailHistory();
+    } catch (error) {
+      toast.error('Failed to clear email history');
+    } finally {
+      setClearingHistory(false);
     }
   };
 
