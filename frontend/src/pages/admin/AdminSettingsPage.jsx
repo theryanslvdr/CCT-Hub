@@ -180,6 +180,64 @@ export const AdminSettingsPage = () => {
     }
   };
 
+  // Open test email dialog and initialize sample values
+  const handleOpenTestEmail = () => {
+    if (!editingTemplate) return;
+    
+    // Initialize test variable values with sample data
+    const sampleValues = {};
+    (editingTemplate.variables || []).forEach(v => {
+      // Provide intelligent sample values based on variable name
+      if (v.includes('name')) sampleValues[v] = 'John Doe';
+      else if (v.includes('email')) sampleValues[v] = 'john@example.com';
+      else if (v.includes('amount') || v.includes('balance')) sampleValues[v] = '$1,250.00';
+      else if (v.includes('date')) sampleValues[v] = new Date().toLocaleDateString();
+      else if (v.includes('link') || v.includes('url')) sampleValues[v] = 'https://example.com/action';
+      else if (v.includes('code')) sampleValues[v] = 'ABC123';
+      else if (v.includes('profit')) sampleValues[v] = '$150.00';
+      else if (v.includes('product')) sampleValues[v] = 'MOIL10';
+      else if (v.includes('direction')) sampleValues[v] = 'BUY';
+      else if (v.includes('time')) sampleValues[v] = '14:00 PHT';
+      else sampleValues[v] = `Sample ${v}`;
+    });
+    setTestVariableValues(sampleValues);
+    setTestEmailAddress(user?.email || '');
+    setTestEmailDialogOpen(true);
+  };
+
+  // Replace variables in template with actual values
+  const getPreviewContent = (content, variables = {}) => {
+    let result = content;
+    Object.entries(variables).forEach(([key, value]) => {
+      result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+    });
+    return result;
+  };
+
+  // Send test email
+  const handleSendTestEmail = async () => {
+    if (!editingTemplate || !testEmailAddress) return;
+    
+    setSendingTestEmail(true);
+    try {
+      const processedSubject = getPreviewContent(editingTemplate.subject, testVariableValues);
+      const processedBody = getPreviewContent(editingTemplate.body, testVariableValues);
+      
+      await settingsAPI.sendTestEmail({
+        to: testEmailAddress,
+        subject: processedSubject,
+        body: processedBody,
+        template_type: editingTemplate.type
+      });
+      toast.success('Test email sent successfully!');
+      setTestEmailDialogOpen(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to send test email');
+    } finally {
+      setSendingTestEmail(false);
+    }
+  };
+
   const handleTestEmailit = async () => {
     setTestingEmailit(true);
     try {
