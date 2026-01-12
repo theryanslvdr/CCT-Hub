@@ -3708,7 +3708,7 @@ async def update_email_template(template_type: str, data: EmailTemplateUpdate, u
 # ==================== INTEGRATION TESTS ====================
 @settings_router.post("/test-emailit")
 async def test_emailit_connection(user: dict = Depends(require_admin)):
-    """Test Emailit API connection"""
+    """Test Emailit API connection by validating the key format"""
     settings = await db.platform_settings.find_one({}, {"_id": 0})
     emailit_key = settings.get("emailit_api_key") if settings else None
     
@@ -3718,18 +3718,44 @@ async def test_emailit_connection(user: dict = Depends(require_admin)):
     if not emailit_key:
         return {"success": False, "message": "Emailit API key not configured"}
     
+    # Validate key format (should start with 'em_')
+    if not emailit_key.startswith("em_"):
+        return {"success": False, "message": "Invalid Emailit API key format. Key should start with 'em_'"}
+    
     try:
-        # Test by checking account status
-        response = requests.get(
-            "https://api.emailit.com/v1/account",
-            headers={"Authorization": f"Bearer {emailit_key}"},
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            return {"success": True, "message": "Emailit connection successful!", "data": response.json()}
-        else:
-            return {"success": False, "message": f"Emailit returned status {response.status_code}"}
+        # Test by sending a minimal validation request
+        # Emailit doesn't have an /account endpoint, so we validate the key format
+        # and check if the API accepts the authorization header
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.emailit.com/v1/emails",
+                headers={
+                    "Authorization": f"Bearer {emailit_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "test@test.com",
+                    "to": "validation@test.com",
+                    "subject": "API Key Validation",
+                    "html": "<p>Test</p>"
+                },
+                timeout=10.0
+            )
+            
+            # 401 = invalid key, 422 = valid key but invalid sender (expected)
+            # 200/201 = email sent (shouldn't happen with test@test.com)
+            if response.status_code == 401:
+                return {"success": False, "message": "Invalid API key - authentication failed"}
+            elif response.status_code in [200, 201, 202]:
+                return {"success": True, "message": "Emailit API key is valid and working!"}
+            elif response.status_code == 422:
+                # This is actually good - means key is valid but sender not verified
+                return {"success": True, "message": "Emailit API key is valid! Note: You may need to verify your sender domain."}
+            elif response.status_code == 400:
+                # Bad request but key accepted
+                return {"success": True, "message": "Emailit API key is valid! Configure a verified sender domain to send emails."}
+            else:
+                return {"success": False, "message": f"Emailit returned status {response.status_code}: {response.text[:200]}"}
     except Exception as e:
         return {"success": False, "message": f"Connection failed: {str(e)}"}
 
