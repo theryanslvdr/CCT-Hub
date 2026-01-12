@@ -515,7 +515,12 @@ export const AdminSignalsPage = () => {
                   size="sm" 
                   onClick={async () => {
                     try {
-                      await adminAPI.updateSignal(activeSignal.id, { is_active: false });
+                      // Use BVE API when in BVE mode, otherwise use regular admin API
+                      if (isInBVE) {
+                        await bveAPI.updateSignal(activeSignal.id, { is_active: false });
+                      } else {
+                        await adminAPI.updateSignal(activeSignal.id, { is_active: false });
+                      }
                       toast.success('Signal deactivated');
                       loadSignals();
                     } catch (error) {
