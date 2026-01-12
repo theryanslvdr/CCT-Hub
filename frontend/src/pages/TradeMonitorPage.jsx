@@ -281,7 +281,7 @@ export const TradeMonitorPage = () => {
     loadData();
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isInBVE]); // Reload when BVE mode changes
 
   // Load trade history when page changes
   useEffect(() => {
