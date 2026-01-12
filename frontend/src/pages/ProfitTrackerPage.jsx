@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { profitAPI, currencyAPI, adminAPI } from '@/lib/api';
-import { formatNumber, calculateWithdrawalFees } from '@/lib/utils';
+import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
