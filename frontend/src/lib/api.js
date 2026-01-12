@@ -133,6 +133,7 @@ export const adminAPI = {
   archiveTrades: () => api.post('/admin/analytics/archive-trades'),
   // Notifications
   getNotifications: (limit = 50, unreadOnly = false) => api.get('/admin/notifications', { params: { limit, unread_only: unreadOnly } }),
+  getTopPerformers: (limit = 10, excludeNonTraders = true) => api.get('/admin/top-performers', { params: { limit, exclude_non_traders: excludeNonTraders } }),
   markNotificationRead: (notificationId) => api.put(`/admin/notifications/${notificationId}/read`),
   markAllNotificationsRead: () => api.put('/admin/notifications/read-all'),
   // Team Transactions
