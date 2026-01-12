@@ -434,9 +434,6 @@ export const TradeMonitorPage = () => {
     setEditTimeValue('');
   };
 
-  // Calculate custom exit value
-  const customExitValue = customLotSize ? parseFloat(customLotSize) * profitMultiplier : 0;
-
   // Performance message for today's summary
   const getDailyPerformanceMessage = () => {
     const diff = dailySummary?.difference || 0;
