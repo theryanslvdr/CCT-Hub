@@ -11,6 +11,23 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 33 (2026-01-12) - BVE Bug Fixes ✅
+
+#### Bug Fix 1: BVE Signal Not Appearing on Dashboard/Trade Monitor ✅
+- **Root Cause**: `loadData` function used stale closure for `isInBVE` state
+- **Fix**: Wrapped `loadData` in `useCallback` with `isInBVE` as dependency
+- **Files Modified**: `TradeMonitorPage.jsx`, `DashboardPage.jsx`
+
+#### Bug Fix 2: Mute Button Not Stopping Active Alarm ✅
+- **Root Cause**: Audio continued playing after `soundEnabled` was set to false
+- **Fix**: Added `useEffect` to immediately stop audio when `soundEnabled` becomes false
+- **File Modified**: `TradeMonitorPage.jsx`
+
+#### Bug Fix 3: Projection Value Mismatch ✅
+- **Root Cause**: Inconsistent use of `truncateTo2Decimals` for exit value calculation
+- **Fix**: Applied `truncateTo2Decimals` to `exitValue` calculation (LOT × profitMultiplier)
+- **File Modified**: `TradeMonitorPage.jsx`
+
 ### Session 31 Part 3 (2026-01-12) - BVE & Trade Persistence ✅
 
 #### Feature 1: Trade Check-in State Persistence ✅
