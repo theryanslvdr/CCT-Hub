@@ -556,6 +556,23 @@ async def register(data: UserCreate):
     
     await db.users.insert_one(user)
     
+    # Send notification to all admins about new registration
+    await create_admin_notification(
+        notification_type="new_user",
+        title="New User Registered",
+        message=f"{data.full_name} has joined the platform",
+        user_id=user_id,
+        user_name=data.full_name,
+        metadata={"email": data.email.lower(), "role": role}
+    )
+    
+    # Send email notification to admins
+    try:
+        from services.email_service import send_registration_notification_to_admins
+        await send_registration_notification_to_admins(data.full_name, data.email)
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
+    
     token = create_token(user_id, data.email, role)
     
     return TokenResponse(
