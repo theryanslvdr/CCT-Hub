@@ -84,6 +84,7 @@ goals_router = APIRouter(prefix="/goals", tags=["Profit Planner"])
 currency_router = APIRouter(prefix="/currency", tags=["Currency"])
 settings_router = APIRouter(prefix="/settings", tags=["Settings"])
 api_center_router = APIRouter(prefix="/api-center", tags=["API Center"])
+bve_router = APIRouter(prefix="/bve", tags=["Beta Virtual Environment"])
 
 security = HTTPBearer()
 
