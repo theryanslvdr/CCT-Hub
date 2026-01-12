@@ -1247,13 +1247,17 @@ export const ProfitTrackerPage = () => {
         </div>
 
         {/* Right side - Records and Reset Buttons */}
-        <div className="flex gap-2 ml-auto">
+        <div className="flex flex-wrap gap-2 ml-auto">
           <Button variant="outline" className="btn-secondary gap-2" onClick={() => setDepositRecordsOpen(true)} data-testid="view-deposits-button">
             <FileText className="w-4 h-4" /> Deposit Records
           </Button>
           
           <Button variant="outline" className="btn-secondary gap-2" onClick={() => setWithdrawalRecordsOpen(true)} data-testid="view-withdrawals-button">
             <Receipt className="w-4 h-4" /> Withdrawal Records
+          </Button>
+          
+          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setCommissionRecordsOpen(true)} data-testid="view-commissions-button">
+            <Award className="w-4 h-4" /> Commission Records
           </Button>
 
           {/* Reset Button */}
