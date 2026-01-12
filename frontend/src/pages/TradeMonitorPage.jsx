@@ -480,7 +480,7 @@ export const TradeMonitorPage = () => {
         setCountdown({ hours, minutes, seconds, total: diff });
       }
     }, 1000);
-  }, [signal, soundEnabled]);
+  }, [signal, soundEnabled, startGlobalCountdown]);
 
   const endTrade = () => {
     setShowExitAlert(false);
