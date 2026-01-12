@@ -1548,8 +1548,6 @@ export const ProfitTrackerPage = () => {
                               <th>Month</th>
                               <th>Trading Days</th>
                               <th>Final Balance</th>
-                              <th>LOT Size</th>
-                              <th>Daily Profit</th>
                               <th>Actions</th>
                             </tr>
                           </thead>
@@ -1564,8 +1562,6 @@ export const ProfitTrackerPage = () => {
                                 </td>
                                 <td className="font-mono text-zinc-400">{m.tradingDays} days</td>
                                 <td className="font-mono text-white">{formatLargeNumber(m.endBalance)}</td>
-                                <td className="font-mono text-purple-400">{truncateTo2Decimals(m.lotSize).toFixed(2)}</td>
-                                <td className="font-mono text-emerald-400">{formatLargeNumber(m.dailyProfit)}</td>
                                 <td>
                                   <Button
                                     size="sm"
@@ -1647,7 +1643,7 @@ export const ProfitTrackerPage = () => {
                             <Button
                               size="sm"
                               className="h-6 text-xs btn-primary"
-                              onClick={() => window.location.href = '/trade'}
+                              onClick={() => window.location.href = '/trade-monitor'}
                               data-testid="trade-now-daily"
                             >
                               Trade Now
