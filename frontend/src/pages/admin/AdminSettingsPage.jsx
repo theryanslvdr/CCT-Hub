@@ -1241,6 +1241,127 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
+          
+          {/* Email History Card */}
+          <Card className="glass-card mt-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-blue-400" /> Email History
+                  </CardTitle>
+                  <p className="text-sm text-zinc-500">View sent email status and delivery logs</p>
+                </div>
+                {isMasterAdmin() && emailHistory.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleClearEmailHistory}
+                    disabled={clearingHistory}
+                    className="text-red-400 border-red-400/30 hover:bg-red-400/10"
+                    data-testid="clear-email-history"
+                  >
+                    {clearingHistory ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <><Trash2 className="w-4 h-4 mr-1" /> Clear History</>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {emailHistoryLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+                </div>
+              ) : emailHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <Mail className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-zinc-500">No emails sent yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full data-table text-sm">
+                      <thead>
+                        <tr>
+                          <th>Status</th>
+                          <th>Recipient</th>
+                          <th>Subject</th>
+                          <th>Type</th>
+                          <th>Sent At</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {emailHistory.map((email) => (
+                          <tr key={email.id || email.email_id}>
+                            <td>
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
+                                email.status === 'sent' || email.status === 'success' 
+                                  ? 'bg-emerald-500/20 text-emerald-400' 
+                                  : email.status === 'failed' || email.status === 'error'
+                                  ? 'bg-red-500/20 text-red-400'
+                                  : 'bg-amber-500/20 text-amber-400'
+                              }`}>
+                                {email.status === 'sent' || email.status === 'success' ? (
+                                  <CheckCircle2 className="w-3 h-3" />
+                                ) : email.status === 'failed' || email.status === 'error' ? (
+                                  <XCircle className="w-3 h-3" />
+                                ) : (
+                                  <Loader2 className="w-3 h-3" />
+                                )}
+                                {email.status}
+                              </span>
+                            </td>
+                            <td className="font-mono text-xs text-zinc-400 max-w-[150px] truncate">
+                              {email.recipient || email.to_email}
+                            </td>
+                            <td className="max-w-[200px] truncate">
+                              {email.subject}
+                            </td>
+                            <td className="text-zinc-500 text-xs capitalize">
+                              {(email.template_type || email.type || 'general').replace(/_/g, ' ')}
+                            </td>
+                            <td className="font-mono text-xs text-zinc-500">
+                              {new Date(email.sent_at || email.created_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination */}
+                  {emailHistoryTotal > 20 && (
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-zinc-800">
+                      <p className="text-sm text-zinc-500">
+                        Showing {((emailHistoryPage - 1) * 20) + 1} - {Math.min(emailHistoryPage * 20, emailHistoryTotal)} of {emailHistoryTotal}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={emailHistoryPage <= 1}
+                          onClick={() => loadEmailHistory(emailHistoryPage - 1)}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={emailHistoryPage * 20 >= emailHistoryTotal}
+                          onClick={() => loadEmailHistory(emailHistoryPage + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Maintenance Tab */}
