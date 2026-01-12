@@ -1521,6 +1521,45 @@ export const ProfitTrackerPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Commission Records Dialog */}
+      <Dialog open={commissionRecordsOpen} onOpenChange={setCommissionRecordsOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Award className="w-5 h-5 text-purple-400" /> Commission Records
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 max-h-[400px] overflow-y-auto">
+            {commissions.length > 0 ? (
+              <table className="w-full data-table text-sm">
+                <thead className="sticky top-0 bg-zinc-900">
+                  <tr>
+                    <th>Date</th>
+                    <th>Amount (USDT)</th>
+                    <th>Traders</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {commissions.map((c) => (
+                    <tr key={c.id}>
+                      <td className="font-mono">{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td className="font-mono text-purple-400">+{formatMoney(c.amount)}</td>
+                      <td className="font-mono text-zinc-400">{c.traders_count}</td>
+                      <td className="text-zinc-500 max-w-[200px] truncate">{c.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-zinc-500">
+                No commissions recorded yet.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Projection Vision Card */}
       <Card className="glass-highlight border-blue-500/30">
         <CardHeader className="flex flex-row items-center justify-between">
