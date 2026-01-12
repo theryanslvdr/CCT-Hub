@@ -190,6 +190,35 @@ export const TradeMonitorPage = () => {
     });
   };
 
+  // Data loading functions
+  const loadData = async () => {
+    try {
+      const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
+        tradeAPI.getActiveSignal(),
+        tradeAPI.getDailySummary(),
+        profitAPI.getSummary(),
+        tradeAPI.getStreak(),
+      ]);
+      setSignal(signalRes.data.signal);
+      setDailySummary(summaryRes.data);
+      setProfitSummary(profitRes.data);
+      setStreak(streakRes.data);
+    } catch (error) {
+      console.error('Failed to load trade data:', error);
+    }
+  };
+
+  const loadTradeHistory = async () => {
+    try {
+      const res = await tradeAPI.getHistory(historyPage, 10);
+      setTradeHistory(res.data.trades);
+      setHistoryTotalPages(res.data.total_pages);
+      setHistoryTotal(res.data.total);
+    } catch (error) {
+      console.error('Failed to load trade history:', error);
+    }
+  };
+
   // Load data
   useEffect(() => {
     loadData();
@@ -219,34 +248,6 @@ export const TradeMonitorPage = () => {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
-
-  const loadData = async () => {
-    try {
-      const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
-        tradeAPI.getActiveSignal(),
-        tradeAPI.getDailySummary(),
-        profitAPI.getSummary(),
-        tradeAPI.getStreak(),
-      ]);
-      setSignal(signalRes.data.signal);
-      setDailySummary(summaryRes.data);
-      setProfitSummary(profitRes.data);
-      setStreak(streakRes.data);
-    } catch (error) {
-      console.error('Failed to load trade data:', error);
-    }
-  };
-
-  const loadTradeHistory = async () => {
-    try {
-      const res = await tradeAPI.getHistory(historyPage, 10);
-      setTradeHistory(res.data.trades);
-      setHistoryTotalPages(res.data.total_pages);
-      setHistoryTotal(res.data.total);
-    } catch (error) {
-      console.error('Failed to load trade history:', error);
-    }
-  };
 
   const formatTimeForTimezone = (date, tz = 'UTC') => {
     try {
