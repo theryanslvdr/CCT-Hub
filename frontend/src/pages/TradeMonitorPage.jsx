@@ -914,37 +914,60 @@ export const TradeMonitorPage = () => {
         </CardContent>
       </Card>
 
-      {/* Exit Value Calculator Popup */}
-      <Dialog open={showExitCalculator} onOpenChange={setShowExitCalculator}>
+      {/* Dream Daily Profit Calculator */}
+      <Dialog open={showDreamProfit} onOpenChange={setShowDreamProfit}>
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-blue-400" /> Exit Value Calculator
+              <Sparkles className="w-5 h-5 text-purple-400" /> Dream Daily Profit
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
+            <p className="text-sm text-zinc-400">
+              Enter your target daily profit to see how much you need to add to your account.
+            </p>
             <div>
-              <Label className="text-zinc-300">Custom LOT Size</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={customLotSize}
-                onChange={(e) => setCustomLotSize(e.target.value)}
-                placeholder="Enter LOT size"
-                className="input-dark mt-1 text-xl font-mono"
-                data-testid="custom-lot-input"
-              />
+              <Label className="text-zinc-300">Target Daily Profit (USDT)</Label>
+              <div className="relative mt-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={dreamDailyProfit}
+                  onChange={(e) => setDreamDailyProfit(e.target.value)}
+                  placeholder="Enter your dream daily profit"
+                  className="input-dark pl-7 text-xl font-mono"
+                  data-testid="dream-profit-input"
+                />
+              </div>
             </div>
-            <div className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-center">
-              <p className="text-sm text-zinc-400 mb-2">Exit Value (LOT × {profitMultiplier})</p>
-              <p className="text-5xl font-mono font-bold text-gradient" data-testid="custom-exit-value">
-                {formatLargeNumber(customExitValue)}
-              </p>
-            </div>
+            
+            {dreamDailyProfit && parseFloat(dreamDailyProfit) > 0 && (
+              <>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                  <p className="text-sm text-zinc-400 mb-2">Required Account Balance</p>
+                  <p className="text-4xl font-mono font-bold text-purple-400" data-testid="required-balance">
+                    {formatLargeNumber((parseFloat(dreamDailyProfit) * 980) / 15)}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">Formula: (Target ÷ 15) × 980</p>
+                </div>
+                
+                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-zinc-400 mb-2">Amount You Need to Add</p>
+                  <p className={`text-4xl font-mono font-bold ${Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue) > 0 ? 'text-emerald-400' : 'text-blue-400'}`} data-testid="amount-to-add">
+                    {Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue) > 0 
+                      ? `+${formatLargeNumber(Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue))}`
+                      : 'You already have enough!'}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-1">Current Balance: {formatLargeNumber(accountValue)}</p>
+                </div>
+              </>
+            )}
+            
             <div className="p-3 rounded-lg bg-zinc-900/50 text-sm text-zinc-400">
-              <p>• Current LOT from Profit Tracker: <span className="text-purple-400 font-mono">{lotSize.toFixed(2)}</span></p>
-              <p>• Profit Multiplier: <span className="text-cyan-400 font-mono">×{profitMultiplier}</span></p>
-              <p>• Formula: LOT Size × {profitMultiplier} = Exit Value</p>
+              <p>• Current Balance: <span className="text-white font-mono">{formatLargeNumber(accountValue)}</span></p>
+              <p>• Current Daily Profit: <span className="text-emerald-400 font-mono">{formatLargeNumber(exitValue)}</span></p>
+              <p>• Formula: Balance ÷ 980 × 15 = Daily Profit</p>
             </div>
           </div>
         </DialogContent>
