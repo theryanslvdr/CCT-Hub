@@ -4726,6 +4726,314 @@ async def test_email_service(
     else:
         raise HTTPException(status_code=500, detail=result.get("error", "Failed to send test email"))
 
+# ==================== BETA VIRTUAL ENVIRONMENT (BVE) ====================
+
+class BVESessionCreate(BaseModel):
+    pass
+
+class BVESessionExit(BaseModel):
+    session_id: str
+
+class BVERewind(BaseModel):
+    session_id: str
+
+async def require_super_or_master_admin(user: dict = Depends(get_current_user)):
+    """Require super admin or master admin role for BVE access"""
+    if user["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Beta Virtual Environment requires Super Admin or Master Admin access")
+    return user
+
+@bve_router.post("/enter")
+async def enter_bve(user: dict = Depends(require_super_or_master_admin)):
+    """Enter the Beta Virtual Environment - creates a snapshot and session"""
+    session_id = str(uuid.uuid4())
+    
+    # Create snapshot of current state for this user
+    # We'll snapshot: trading_signals, trade_logs (user's), and their account data
+    
+    # Get current active signal
+    active_signal = await db.trading_signals.find_one(
+        {"is_active": True},
+        {"_id": 0}
+    )
+    
+    # Get user's trade logs
+    user_trade_logs = await db.trade_logs.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Get user's deposits
+    user_deposits = await db.deposits.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Get user profile
+    user_profile = await db.users.find_one(
+        {"id": user["id"]},
+        {"_id": 0, "password": 0}
+    )
+    
+    # Store snapshot
+    snapshot = {
+        "id": session_id,
+        "user_id": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "snapshot_data": {
+            "active_signal": active_signal,
+            "trade_logs": user_trade_logs,
+            "deposits": user_deposits,
+            "user_profile": user_profile
+        }
+    }
+    
+    await db.bve_sessions.insert_one(snapshot)
+    
+    # Initialize BVE collections with cloned data
+    # Clone signals to bve_trading_signals
+    if active_signal:
+        bve_signal = {**active_signal, "bve_session_id": session_id}
+        await db.bve_trading_signals.delete_many({"bve_session_id": session_id})
+        await db.bve_trading_signals.insert_one(bve_signal)
+    
+    # Clone trade logs to bve_trade_logs
+    await db.bve_trade_logs.delete_many({"bve_session_id": session_id})
+    for log in user_trade_logs:
+        bve_log = {**log, "bve_session_id": session_id}
+        await db.bve_trade_logs.insert_one(bve_log)
+    
+    # Clone deposits to bve_deposits
+    await db.bve_deposits.delete_many({"bve_session_id": session_id})
+    for dep in user_deposits:
+        bve_dep = {**dep, "bve_session_id": session_id}
+        await db.bve_deposits.insert_one(bve_dep)
+    
+    return {
+        "session_id": session_id,
+        "message": "Entered Beta Virtual Environment",
+        "snapshot": {
+            "signals_count": 1 if active_signal else 0,
+            "trade_logs_count": len(user_trade_logs),
+            "deposits_count": len(user_deposits)
+        }
+    }
+
+@bve_router.post("/exit")
+async def exit_bve(data: BVESessionExit, user: dict = Depends(require_super_or_master_admin)):
+    """Exit the Beta Virtual Environment - cleans up BVE data"""
+    session_id = data.session_id
+    
+    # Clean up BVE collections for this session
+    await db.bve_trading_signals.delete_many({"bve_session_id": session_id})
+    await db.bve_trade_logs.delete_many({"bve_session_id": session_id})
+    await db.bve_deposits.delete_many({"bve_session_id": session_id})
+    
+    # Mark session as ended
+    await db.bve_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"ended_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Exited Beta Virtual Environment", "session_id": session_id}
+
+@bve_router.post("/rewind")
+async def rewind_bve(data: BVERewind, user: dict = Depends(require_super_or_master_admin)):
+    """Rewind BVE to the initial snapshot state"""
+    session_id = data.session_id
+    
+    # Get the snapshot
+    session = await db.bve_sessions.find_one({"id": session_id, "user_id": user["id"]})
+    if not session:
+        raise HTTPException(status_code=404, detail="BVE session not found")
+    
+    snapshot_data = session.get("snapshot_data", {})
+    
+    # Clear current BVE data
+    await db.bve_trading_signals.delete_many({"bve_session_id": session_id})
+    await db.bve_trade_logs.delete_many({"bve_session_id": session_id})
+    await db.bve_deposits.delete_many({"bve_session_id": session_id})
+    
+    # Restore from snapshot
+    active_signal = snapshot_data.get("active_signal")
+    if active_signal:
+        bve_signal = {**active_signal, "bve_session_id": session_id}
+        await db.bve_trading_signals.insert_one(bve_signal)
+    
+    for log in snapshot_data.get("trade_logs", []):
+        bve_log = {**log, "bve_session_id": session_id}
+        await db.bve_trade_logs.insert_one(bve_log)
+    
+    for dep in snapshot_data.get("deposits", []):
+        bve_dep = {**dep, "bve_session_id": session_id}
+        await db.bve_deposits.insert_one(bve_dep)
+    
+    return {
+        "message": "BVE state rewound to entry point",
+        "session_id": session_id,
+        "restored": {
+            "signals": 1 if active_signal else 0,
+            "trade_logs": len(snapshot_data.get("trade_logs", [])),
+            "deposits": len(snapshot_data.get("deposits", []))
+        }
+    }
+
+@bve_router.get("/signals")
+async def get_bve_signals(user: dict = Depends(require_super_or_master_admin)):
+    """Get signals in BVE mode"""
+    # Get session from header or query
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+    
+    signals = await db.bve_trading_signals.find(
+        {"bve_session_id": session["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return signals
+
+@bve_router.post("/signals")
+async def create_bve_signal(data: SignalCreate, user: dict = Depends(require_super_or_master_admin)):
+    """Create a new signal in BVE mode (does not affect real data)"""
+    # Get active BVE session
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+    
+    # Deactivate other BVE signals
+    await db.bve_trading_signals.update_many(
+        {"bve_session_id": session["id"], "is_active": True},
+        {"$set": {"is_active": False, "status": "completed"}}
+    )
+    
+    # Create new BVE signal
+    signal = {
+        "id": str(uuid.uuid4()),
+        "bve_session_id": session["id"],
+        "product": data.product,
+        "direction": data.direction,
+        "trade_time": data.trade_time,
+        "trade_timezone": data.trade_timezone,
+        "profit_multiplier": data.profit_multiplier,
+        "is_active": True,
+        "is_simulated": True,
+        "status": "active",
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.bve_trading_signals.insert_one(signal)
+    
+    return {"message": "BVE signal created", "signal": {k: v for k, v in signal.items() if k != "_id"}}
+
+@bve_router.get("/active-signal")
+async def get_bve_active_signal(user: dict = Depends(require_super_or_master_admin)):
+    """Get active signal in BVE mode"""
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        return {"signal": None}
+    
+    signal = await db.bve_trading_signals.find_one(
+        {"bve_session_id": session["id"], "is_active": True},
+        {"_id": 0}
+    )
+    
+    return {"signal": signal}
+
+@bve_router.post("/trade/log")
+async def log_bve_trade(data: TradeLogCreate, user: dict = Depends(require_super_or_master_admin)):
+    """Log a trade in BVE mode (does not affect real data)"""
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+    
+    # Get current BVE account value
+    bve_deposits = await db.bve_deposits.find(
+        {"bve_session_id": session["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    bve_trade_logs = await db.bve_trade_logs.find(
+        {"bve_session_id": session["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_deposits = sum(d.get("amount", 0) for d in bve_deposits if d.get("amount", 0) > 0)
+    total_profit = sum(t.get("actual_profit", 0) for t in bve_trade_logs)
+    account_value = total_deposits + total_profit
+    
+    # Calculate projected profit
+    lot_size = account_value / 980 if account_value > 0 else 0
+    projected_profit = lot_size * 15
+    profit_difference = data.actual_profit - projected_profit
+    
+    # Create BVE trade log
+    trade_log = {
+        "id": str(uuid.uuid4()),
+        "bve_session_id": session["id"],
+        "user_id": user["id"],
+        "lot_size": data.lot_size or lot_size,
+        "direction": data.direction,
+        "actual_profit": data.actual_profit,
+        "projected_profit": projected_profit,
+        "profit_difference": profit_difference,
+        "performance": "above" if profit_difference > 0 else "below" if profit_difference < 0 else "target",
+        "notes": data.notes,
+        "is_simulated": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.bve_trade_logs.insert_one(trade_log)
+    
+    return {k: v for k, v in trade_log.items() if k != "_id"}
+
+@bve_router.get("/summary")
+async def get_bve_summary(user: dict = Depends(require_super_or_master_admin)):
+    """Get profit summary in BVE mode"""
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+    
+    # Calculate BVE summary
+    bve_deposits = await db.bve_deposits.find(
+        {"bve_session_id": session["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    bve_trade_logs = await db.bve_trade_logs.find(
+        {"bve_session_id": session["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_deposits = sum(d.get("amount", 0) for d in bve_deposits if d.get("amount", 0) > 0)
+    total_profit = sum(t.get("actual_profit", 0) for t in bve_trade_logs)
+    account_value = total_deposits + total_profit
+    lot_size = account_value / 980 if account_value > 0 else 0
+    
+    return {
+        "account_value": account_value,
+        "total_deposits": total_deposits,
+        "total_profit": total_profit,
+        "current_lot_size": lot_size,
+        "is_bve": True
+    }
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
