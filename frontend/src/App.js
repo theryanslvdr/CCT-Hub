@@ -35,6 +35,7 @@ function App() {
     <AuthProvider>
       <WebSocketProvider>
         <BrowserRouter>
+          <TradeCountdownProvider>
           <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
