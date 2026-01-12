@@ -1184,6 +1184,66 @@ export const ProfitTrackerPage = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Commission Dialog */}
+        <Dialog open={commissionDialogOpen} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
+          <DialogTrigger asChild>
+            <Button className="btn-secondary gap-2" data-testid="simulate-commission-button">
+              <Award className="w-4 h-4" /> Simulate Commission
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="glass-card border-zinc-800 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-purple-400" /> Simulate Commission
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-zinc-400">
+                Record commission earnings from your referrals' trades.
+              </p>
+              <div>
+                <Label className="text-zinc-300">Commission Amount (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={commissionAmount}
+                    onChange={(e) => setCommissionAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="input-dark pl-7"
+                    data-testid="commission-amount-input"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-zinc-300">Number of Traders</Label>
+                <Input
+                  type="number"
+                  value={commissionTradersCount}
+                  onChange={(e) => setCommissionTradersCount(e.target.value)}
+                  placeholder="How many referrals traded?"
+                  className="input-dark mt-1"
+                  data-testid="commission-traders-input"
+                />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Notes (optional)</Label>
+                <Input
+                  value={commissionNotes}
+                  onChange={(e) => setCommissionNotes(e.target.value)}
+                  placeholder="Add notes..."
+                  className="input-dark mt-1"
+                />
+              </div>
+              <Button onClick={handleSimulateCommission} className="w-full btn-primary" data-testid="confirm-commission-button">
+                <Award className="w-4 h-4 mr-2" /> Record Commission
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
         </div>
 
         {/* Right side - Records and Reset Buttons */}
