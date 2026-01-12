@@ -1149,13 +1149,8 @@ export const ProfitTrackerPage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Withdrawal Dialog */}
+        {/* Withdrawal Dialog - Now triggered from popup */}
         <Dialog open={withdrawalDialogOpen} onOpenChange={(open) => { if (!open) resetWithdrawalDialog(); else setWithdrawalDialogOpen(true); }}>
-          <DialogTrigger asChild>
-            <Button className="btn-secondary gap-2" data-testid="simulate-withdrawal-button">
-              <ArrowUpFromLine className="w-4 h-4" /> Simulate Withdrawal
-            </Button>
-          </DialogTrigger>
           <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
