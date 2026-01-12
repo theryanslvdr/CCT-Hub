@@ -115,6 +115,7 @@ export const adminAPI = {
   getSignalsArchive: () => api.get('/admin/signals/archive'),
   archiveMonth: () => api.post('/admin/signals/archive-month'),
   deleteSignal: (id) => api.delete(`/admin/signals/${id}`),
+  updateSignal: (id, data) => api.put(`/admin/signals/${id}`, data),
   getMembers: () => api.get('/admin/members'),
   getMemberDetails: (userId) => api.get(`/admin/members/${userId}`),
   getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
