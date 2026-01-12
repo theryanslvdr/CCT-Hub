@@ -11,59 +11,54 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 31 Part 2 (2026-01-12) - Bug Fixes & Email History ✅
+### Session 31 Part 3 (2026-01-12) - BVE & Trade Persistence ✅
 
-#### Bug Fix 1: Deactivate Signal Button ✅
-- **Issue:** Deactivate button on active signals wasn't working
-- **Root Cause:** Missing `adminAPI.updateSignal` method in api.js
-- **Fix:** Added `updateSignal: (id, data) => api.put(/admin/signals/${id}, data)` to adminAPI
+#### Feature 1: Trade Check-in State Persistence ✅
+- Trade check-in state now persists across navigation
+- Stored in localStorage with key `trade_check_in`
+- Contains: targetTime, signalId, signalInfo, checkedInAt
+- Automatically restores countdown on page return
+- Clears on trade completion or manual stop
 
-#### Bug Fix 2: Daily Projection Accuracy ✅ (CRITICAL)
-- **Issue:** After recording a trade, the LOT size and Projected Profit were changing
-- **User Example:** LOT was 15.28, Projected was 229.20, but after trade they showed 15.52 and changed values
-- **Root Cause:** Frontend was recalculating LOT and Projected values from current balance instead of using stored values
-- **Fix:** Modified `generateDailyProjectionForMonth` to use stored `lot_size` and `projected_profit` from trade logs for completed trades
-- **Result:** LOT (15.28) and Target Profit ($229.20) now remain fixed after trade is recorded
+#### Feature 2: Beta Virtual Environment (BVE) ✅
+A sandboxed environment for Super/Master Admins to test without affecting real data.
 
-#### Feature: Email History Frontend ✅
-- Added `/settings/email-history` GET endpoint (admin only)
-- Added `/settings/email-history` DELETE endpoint (master admin only)
-- Added Email History card to Admin Settings → Emails tab
-- Shows: Status (with colored badges), Recipient, Subject, Type, Sent At
-- Includes pagination for large email histories
-- Clear History button for Master Admin
+**Backend:**
+- `POST /api/bve/enter` - Creates BVE session, snapshots current data
+- `GET /api/bve/signals` - Get signals in BVE mode
+- `POST /api/bve/signals` - Create signal in BVE (isolated)
+- `POST /api/bve/rewind` - Restore to entry snapshot
+- `POST /api/bve/exit` - Exit BVE, cleanup data
+
+**Frontend:**
+- **BVE Button** in header for Super/Master Admin (flask icon)
+- **BVE Active Badge** shows when in BVE mode
+- **Rewind Button** - Restores to entry point
+- **Exit Button** - Exits BVE mode
+- **Purple Banner** on Admin Signals page when in BVE
+- **Title Change** - "BVE Trading Signals" instead of "Trading Signals"
+
+**Data Collections:**
+- `bve_sessions` - Stores session snapshots
+- `bve_trading_signals` - Isolated signals
+- `bve_trade_logs` - Isolated trade logs
+- `bve_deposits` - Isolated deposits
+
+### Session 31 Part 2 - Bug Fixes & Email History ✅
+- Fixed Deactivate Signal button (missing API method)
+- Fixed Daily Projection accuracy (uses stored LOT/Projected values)
+- Added Email History frontend in Admin Settings
 
 ### Session 31 Part 1 - Major Feature Batch ✅
-
-#### Fee Restructuring ✅
-- Moved $1 Binance fee from Withdrawal to Deposit
-
-#### Commission System ✅
-- "Simulate Commission" button + Commission Records popup
-
-#### Monthly Table Simplification ✅
-- Removed "Daily Profit" and "Lot Size" columns
-
-#### Navigation Improvements ✅
-- "Trade Now" → /trade-monitor, "I'm Ready to Trade" button text
-
-#### Dream Daily Profit Calculator ✅
-- Replaced "Exit Value Calculator" with new profit goal calculator
-
-#### Quick Signal Actions ✅
-- "Deactivate" button on active signal card
-
-#### Merin Iframe Refresh ✅
-- Added refresh icon button
-
-#### Admin Role Dropdown Fix ✅
-- Removed "Admin", kept Basic Admin, Super Admin, Master Admin
-
-#### Trade Time Restrictions ✅
-- Button locked until 20 min before trade time
-
-#### Floating Trade Countdown ✅
-- Popup when navigating away during trade (with beeping)
+- Fee restructuring ($1 Binance fee moved to deposit)
+- Commission system (Simulate Commission + Commission Records)
+- Monthly table simplification (removed Daily Profit & LOT columns)
+- Dream Daily Profit calculator
+- Quick signal deactivation
+- Merin iframe refresh button
+- Admin role dropdown fix
+- Trade time restrictions (20 min before trade)
+- Floating countdown popup
 
 ## Pending Tasks
 
@@ -82,13 +77,21 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Admin Email Recap Summary
 
 ## Key API Endpoints
-- POST /api/profit/commission - Record referral commission
-- GET /api/profit/commissions - Get user's commission history
-- GET /api/admin/members/{id}/deposits - Get member deposits (admin)
-- GET /api/admin/members/{id}/withdrawals - Get member withdrawals (admin)
-- GET /api/settings/email-history - Get email logs (admin)
-- DELETE /api/settings/email-history - Clear email logs (master admin)
-- PUT /api/admin/signals/{id} - Update signal (admin)
+
+### BVE (Beta Virtual Environment)
+- `POST /api/bve/enter` - Enter BVE, create session
+- `GET /api/bve/signals` - Get BVE signals
+- `POST /api/bve/signals` - Create BVE signal
+- `GET /api/bve/active-signal` - Get active BVE signal
+- `POST /api/bve/trade/log` - Log trade in BVE
+- `GET /api/bve/summary` - Get BVE profit summary
+- `POST /api/bve/rewind` - Rewind to entry snapshot
+- `POST /api/bve/exit` - Exit BVE, cleanup
+
+### Other Key Endpoints
+- `POST /api/profit/commission` - Record commission
+- `GET /api/settings/email-history` - Email logs
+- `PUT /api/admin/signals/{id}` - Update/deactivate signal
 
 ## Test Credentials
 - Master Admin: iam@ryansalvador.com / admin123
@@ -96,20 +99,30 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 ## Tech Stack
 - Backend: FastAPI, Motor (async MongoDB), PyJWT, Pydantic
 - Frontend: React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts
-- State: React Context (AuthContext, WebSocketContext, TradeCountdownContext)
+- State: React Context (AuthContext, WebSocketContext, TradeCountdownContext, BVEContext)
 
 ## Critical Business Logic
 
+### Trade Check-in Persistence
+```javascript
+// Stored in localStorage
+{
+  targetTime: "2026-01-12T14:00:00.000Z",
+  signalId: "signal-uuid",
+  signalInfo: { product: "MOIL10", direction: "BUY" },
+  checkedInAt: "2026-01-12T13:40:00.000Z"
+}
+```
+- Restores countdown on page return
+- Valid for 30 minutes after trade time
+- Clears on trade completion
+
+### BVE Data Isolation
+- All BVE data stored in separate collections (bve_*)
+- bve_session_id links data to session
+- Rewind deletes current BVE data and restores from snapshot
+- Exit cleans up all BVE collections for session
+
 ### Daily Projection Calculation
-For **completed trades**, the system now uses STORED values from trade logs:
-- `lot_size` - Locked at trade time (e.g., 15.28)
-- `projected_profit` - Locked at trade time (e.g., 229.20)
-- These values DO NOT change after the trade is recorded
-
-For **pending/future trades**, values are calculated dynamically:
-- `lot_size = running_balance / 980`
-- `projected_profit = lot_size * 15`
-
-### Fee Structure
-- **Deposit:** 1% fee + $1 Binance fee
-- **Withdrawal:** 3% Merin fee only (no Binance fee)
+For **completed trades**: Uses stored `lot_size` and `projected_profit` from trade logs
+For **pending trades**: Calculated as `balance / 980` and `lot_size * 15`
