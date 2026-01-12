@@ -431,29 +431,49 @@ export const ProfitTrackerPage = () => {
       }
       
       if (isSpecificMemberSimulation) {
-        // For specific member simulation, fetch their data from API
-        // The API returns license.current_amount for licensees
-        const [memberRes, ratesRes, signalRes] = await Promise.all([
-          adminAPI.getMemberDetails(simulatedView.memberId),
+        // For specific member simulation, fetch their complete data from API
+        const memberId = simulatedView.memberId;
+        const [memberRes, ratesRes, signalRes, memberTradeLogsRes, memberDepositsRes, memberWithdrawalsRes] = await Promise.all([
+          adminAPI.getMemberDetails(memberId),
           currencyAPI.getRates('USDT'),
           api.get('/trade/active-signal').catch(() => ({ data: null })),
+          api.get(`/trade/logs?user_id=${memberId}`).catch(() => ({ data: [] })),
+          api.get(`/admin/members/${memberId}/deposits`).catch(() => ({ data: [] })),
+          api.get(`/admin/members/${memberId}/withdrawals`).catch(() => ({ data: [] })),
         ]);
         
         const stats = memberRes.data.stats || {};
         setSummary({
-          account_value: stats.account_value || 0,  // Authoritative value from license.current_amount
+          account_value: stats.account_value || 0,
           total_deposits: stats.total_deposits || 0,
           total_profit: stats.total_profit || 0,
+          total_actual_profit: stats.total_actual_profit || 0,
           current_lot_size: memberRes.data.user?.lot_size || 0.01
         });
-        setDeposits(memberRes.data.recent_deposits || []);
-        setWithdrawals([]);
-        setTradeLogs({});
+        setDeposits(memberDepositsRes.data || memberRes.data.recent_deposits || []);
+        setWithdrawals(memberWithdrawalsRes.data || []);
+        
+        // Process trade logs to get the date-keyed format
+        const tradeLogsData = memberTradeLogsRes.data || [];
+        const logsMap = {};
+        tradeLogsData.forEach(trade => {
+          const dateKey = trade.created_at?.split('T')[0] || '';
+          if (dateKey) {
+            logsMap[dateKey] = {
+              actual_profit: trade.actual_profit,
+              has_traded: true,
+              trade
+            };
+          }
+        });
+        setTradeLogs(logsMap);
+        
         setIsFirstTime(false);
         setRates(ratesRes.data.rates || {});
         if (signalRes.data?.signal) {
           setActiveSignal(signalRes.data.signal);
         }
+        setCommissions([]);
         setLoading(false);
         return;
       }
