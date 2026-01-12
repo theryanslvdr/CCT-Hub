@@ -4940,6 +4940,56 @@ async def create_bve_signal(data: BVESignalCreate, user: dict = Depends(require_
     
     return {"message": "BVE signal created", "signal": {k: v for k, v in signal.items() if k != "_id"}}
 
+@bve_router.put("/signals/{signal_id}")
+async def update_bve_signal(signal_id: str, data: TradingSignalUpdate, user: dict = Depends(require_super_or_master_admin)):
+    """Update a BVE signal (deactivate, change direction, etc.)"""
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+    
+    # Find the signal
+    signal = await db.bve_trading_signals.find_one(
+        {"id": signal_id, "bve_session_id": session["id"]},
+        {"_id": 0}
+    )
+    if not signal:
+        raise HTTPException(status_code=404, detail="BVE signal not found")
+    
+    update_data = {}
+    if data.trade_time is not None:
+        update_data["trade_time"] = data.trade_time
+    if data.trade_timezone is not None:
+        update_data["trade_timezone"] = data.trade_timezone
+    if data.direction is not None:
+        update_data["direction"] = data.direction
+    if data.profit_points is not None:
+        update_data["profit_points"] = data.profit_points
+    if data.notes is not None:
+        update_data["notes"] = data.notes
+    if data.is_active is not None:
+        if data.is_active:
+            # Deactivate all other signals in this BVE session first
+            await db.bve_trading_signals.update_many(
+                {"bve_session_id": session["id"], "id": {"$ne": signal_id}},
+                {"$set": {"is_active": False}}
+            )
+        update_data["is_active"] = data.is_active
+    
+    if update_data:
+        await db.bve_trading_signals.update_one(
+            {"id": signal_id, "bve_session_id": session["id"]},
+            {"$set": update_data}
+        )
+    
+    updated = await db.bve_trading_signals.find_one(
+        {"id": signal_id, "bve_session_id": session["id"]},
+        {"_id": 0}
+    )
+    return {"message": "BVE signal updated", "signal": updated}
+
 @bve_router.get("/active-signal")
 async def get_bve_active_signal(user: dict = Depends(require_super_or_master_admin)):
     """Get active signal in BVE mode"""
