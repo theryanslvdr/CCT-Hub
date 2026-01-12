@@ -454,6 +454,7 @@ export const TradeMonitorPage = () => {
 
       if (diff <= 0) {
         clearInterval(countdownRef.current);
+        countdownRef.current = null; // Clear the ref to prevent duplicate triggers
         setShowExitAlert(true);
         setCountdown(null);
         setPreTradeCountdown(null);
@@ -462,7 +463,8 @@ export const TradeMonitorPage = () => {
           audioRef.current.play().catch(console.error);
         }
         
-        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+        // Only show toast once - check if showExitAlert is not already true
+        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000, id: 'trade-alert' });
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
