@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
-  const { isMasterAdmin, isSuperAdmin } = useAuth();
+  const { user, isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
     platform_name: 'CrossCurrent',
     tagline: 'Finance Center',
