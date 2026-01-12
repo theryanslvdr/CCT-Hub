@@ -69,6 +69,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
         </TradeCountdownProvider>
+        </BVEProvider>
         </BrowserRouter>
         <Toaster position="top-right" richColors theme="dark" />
       </WebSocketProvider>
