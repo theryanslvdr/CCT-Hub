@@ -1300,83 +1300,46 @@ export const ProfitTrackerPage = () => {
         </Dialog>
         </div>
 
-        {/* Right side - Records and Reset Buttons */}
+        {/* Right side - Access Records and Reset Buttons */}
         <div className="flex flex-wrap gap-2 ml-auto">
-          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setDepositRecordsOpen(true)} data-testid="view-deposits-button">
-            <FileText className="w-4 h-4" /> Deposit Records
-          </Button>
-          
-          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setWithdrawalRecordsOpen(true)} data-testid="view-withdrawals-button">
-            <Receipt className="w-4 h-4" /> Withdrawal Records
-          </Button>
-          
-          <Button variant="outline" className="btn-secondary gap-2" onClick={() => setCommissionRecordsOpen(true)} data-testid="view-commissions-button">
-            <Award className="w-4 h-4" /> Commission Records
-          </Button>
-
-          {/* Generate Report Button */}
-          <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+          {/* Access Records Button - Combined Popup */}
+          <Dialog open={accessRecordsOpen} onOpenChange={setAccessRecordsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="btn-secondary gap-2 text-cyan-400 hover:text-cyan-300" data-testid="generate-report-button">
-                <Image className="w-4 h-4" /> Generate Report
+              <Button variant="outline" className="btn-secondary gap-2" data-testid="access-records-button">
+                <FolderOpen className="w-4 h-4" /> Access Records
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+            <DialogContent className="glass-card border-zinc-800 max-w-sm">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
-                  <Image className="w-5 h-5 text-cyan-400" /> Performance Report
+                  <FolderOpen className="w-5 h-5 text-blue-400" /> Access Records
                 </DialogTitle>
               </DialogHeader>
-              
-              <div className="space-y-4 mt-4">
-                <div>
-                  <Label className="text-zinc-300">Report Period</Label>
-                  <Select value={reportPeriod} onValueChange={setReportPeriod}>
-                    <SelectTrigger className="input-dark mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800">
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly (Last 7 days)</SelectItem>
-                      <SelectItem value="monthly">Monthly (Last 30 days)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {reportPreview && (
-                  <div className="rounded-lg border border-zinc-800 overflow-hidden">
-                    <img 
-                      src={`data:image/png;base64,${reportPreview.image_base64}`} 
-                      alt="Performance Report Preview" 
-                      className="w-full"
-                    />
-                  </div>
-                )}
-                
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={handleGenerateReport} 
-                    disabled={reportLoading}
-                    className="flex-1 btn-secondary"
-                  >
-                    {reportLoading ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
-                    ) : (
-                      <><Eye className="w-4 h-4 mr-2" /> Preview Report</>
-                    )}
-                  </Button>
-                  <Button 
-                    onClick={handleDownloadReport} 
-                    disabled={reportLoading}
-                    className="flex-1 btn-primary"
-                  >
-                    {reportLoading ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Downloading...</>
-                    ) : (
-                      <><Download className="w-4 h-4 mr-2" /> Download PNG</>
-                    )}
-                  </Button>
-                </div>
+              <div className="space-y-3 mt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full btn-secondary gap-2 justify-start" 
+                  onClick={() => { setAccessRecordsOpen(false); setDepositRecordsOpen(true); }}
+                  data-testid="view-deposits-button"
+                >
+                  <FileText className="w-4 h-4 text-emerald-400" /> Deposit Records
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full btn-secondary gap-2 justify-start" 
+                  onClick={() => { setAccessRecordsOpen(false); setWithdrawalRecordsOpen(true); }}
+                  data-testid="view-withdrawals-button"
+                >
+                  <Receipt className="w-4 h-4 text-amber-400" /> Withdrawal Records
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full btn-secondary gap-2 justify-start" 
+                  onClick={() => { setAccessRecordsOpen(false); setCommissionRecordsOpen(true); }}
+                  data-testid="view-commissions-button"
+                >
+                  <Award className="w-4 h-4 text-purple-400" /> Commission Records
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
