@@ -1003,11 +1003,27 @@ export const TradeMonitorPage = () => {
       <div className="lg:w-[400px] xl:w-[450px] flex-shrink-0" data-testid="merin-panel">
         <Card className="glass-card h-full sticky top-0">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white flex items-center gap-2">
-              <ExternalLink className="w-5 h-5 text-blue-400" />
-              Merin Trading Platform
-            </CardTitle>
-            <p className="text-xs text-zinc-500">Trade directly from here</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <ExternalLink className="w-5 h-5 text-blue-400" />
+                  Merin Trading Platform
+                </CardTitle>
+                <p className="text-xs text-zinc-500">Trade directly from here</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const iframe = document.querySelector('[data-testid="merin-iframe"]');
+                  if (iframe) iframe.src = iframe.src;
+                }}
+                className="text-zinc-400 hover:text-blue-400"
+                data-testid="merin-refresh-button"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="relative w-full bg-zinc-900 rounded-b-xl overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: 'calc(100vh - 200px)' }}>
