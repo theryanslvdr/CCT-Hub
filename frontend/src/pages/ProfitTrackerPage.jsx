@@ -725,6 +725,51 @@ export const ProfitTrackerPage = () => {
     setResetPassword('');
   };
 
+  // Commission handlers
+  const handleSimulateCommission = async () => {
+    if (!commissionAmount || parseFloat(commissionAmount) <= 0) {
+      toast.error('Please enter a valid commission amount');
+      return;
+    }
+    if (!commissionTradersCount || parseInt(commissionTradersCount) <= 0) {
+      toast.error('Please enter the number of traders');
+      return;
+    }
+    
+    try {
+      await api.post('/profit/commission', {
+        amount: parseFloat(commissionAmount),
+        traders_count: parseInt(commissionTradersCount),
+        notes: commissionNotes || `Commission from ${commissionTradersCount} referral trades`
+      });
+      toast.success('Commission recorded successfully!');
+      resetCommissionDialog();
+      loadData();
+    } catch (error) {
+      toast.error('Failed to record commission');
+    }
+  };
+
+  const resetCommissionDialog = () => {
+    setCommissionDialogOpen(false);
+    setCommissionStep('input');
+    setCommissionAmount('');
+    setCommissionTradersCount('');
+    setCommissionNotes('');
+  };
+
+  // Dream Daily Profit Calculator
+  const calculateRequiredBalance = (targetDailyProfit) => {
+    if (!targetDailyProfit || parseFloat(targetDailyProfit) <= 0) return 0;
+    // Formula: Target Daily Profit = (Balance / 980) * 15
+    // So: Balance = Target Daily Profit * 980 / 15
+    const requiredBalance = (parseFloat(targetDailyProfit) * 980) / 15;
+    return requiredBalance;
+  };
+
+  const dreamProfitRequired = calculateRequiredBalance(dreamDailyProfit);
+  const dreamProfitAmountToAdd = Math.max(0, dreamProfitRequired - effectiveAccountValue);
+
   const convertAmount = (amount, toCurrency) => {
     const rate = rates[toCurrency] || 1;
     return amount * rate;
