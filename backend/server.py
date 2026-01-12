@@ -4904,7 +4904,7 @@ async def get_bve_signals(user: dict = Depends(require_super_or_master_admin)):
     return signals
 
 @bve_router.post("/signals")
-async def create_bve_signal(data: SignalCreate, user: dict = Depends(require_super_or_master_admin)):
+async def create_bve_signal(data: BVESignalCreate, user: dict = Depends(require_super_or_master_admin)):
     """Create a new signal in BVE mode (does not affect real data)"""
     # Get active BVE session
     session = await db.bve_sessions.find_one(
