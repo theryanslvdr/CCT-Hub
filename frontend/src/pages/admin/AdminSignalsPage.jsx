@@ -249,25 +249,42 @@ export const AdminSignalsPage = () => {
 
   return (
     <div className="space-y-6">
+      {/* BVE Mode Banner */}
+      {isInBVE && (
+        <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-4 flex items-center gap-3">
+          <FlaskConical className="w-6 h-6 text-purple-400 animate-pulse" />
+          <div>
+            <h3 className="text-purple-300 font-semibold">Beta Virtual Environment Active</h3>
+            <p className="text-purple-400/70 text-sm">All actions here are isolated and won't affect real data. Use "Rewind" to reset.</p>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Trading Signals</h1>
-          <p className="text-zinc-400">Manage daily trading signals for members</p>
+          <h1 className="text-2xl font-bold text-white">
+            {isInBVE ? 'BVE Trading Signals' : 'Trading Signals'}
+          </h1>
+          <p className="text-zinc-400">
+            {isInBVE ? 'Simulated signals in Beta Virtual Environment' : 'Manage daily trading signals for members'}
+          </p>
         </div>
         <div className="flex gap-2">
-          {/* Archive Button */}
-          <Button 
-            variant="outline" 
-            onClick={handleOpenArchive} 
-            className="btn-secondary gap-2"
-            data-testid="open-archive-btn"
-          >
-            <Archive className="w-4 h-4" /> Monthly Archive
-          </Button>
+          {/* Archive Button - Hide in BVE mode */}
+          {!isInBVE && (
+            <Button 
+              variant="outline" 
+              onClick={handleOpenArchive} 
+              className="btn-secondary gap-2"
+              data-testid="open-archive-btn"
+            >
+              <Archive className="w-4 h-4" /> Monthly Archive
+            </Button>
+          )}
           
-          {/* Simulate Button (Super Admin Only) */}
-          {isSuperAdmin() && (
+          {/* Simulate Button - Show as "Simulate New Signal" in BVE mode */}
+          {(isSuperAdmin() || isInBVE) && !isInBVE && (
             <Dialog open={simulateDialogOpen} onOpenChange={setSimulateDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="btn-secondary gap-2" data-testid="simulate-signal-btn">
