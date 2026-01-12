@@ -1279,17 +1279,27 @@ export const AdminSettingsPage = () => {
                           </div>
                         )}
 
-                        <Button 
-                          onClick={handleSaveTemplate}
-                          disabled={savingTemplate}
-                          className="btn-primary w-full"
-                        >
-                          {savingTemplate ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
-                          ) : (
-                            <><CheckCircle2 className="w-4 h-4 mr-2" /> Save Template</>
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={handleSaveTemplate}
+                            disabled={savingTemplate}
+                            className="btn-primary flex-1"
+                          >
+                            {savingTemplate ? (
+                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                            ) : (
+                              <><CheckCircle2 className="w-4 h-4 mr-2" /> Save Template</>
+                            )}
+                          </Button>
+                          <Button 
+                            onClick={handleOpenTestEmail}
+                            variant="outline"
+                            className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+                            data-testid="send-test-email-btn"
+                          >
+                            <Send className="w-4 h-4 mr-2" /> Test
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-full min-h-[300px] text-center">
@@ -1304,6 +1314,85 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
+          
+          {/* Test Email Dialog */}
+          <Dialog open={testEmailDialogOpen} onOpenChange={setTestEmailDialogOpen}>
+            <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Send className="w-5 h-5 text-cyan-400" /> Send Test Email
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label className="text-zinc-300">Recipient Email</Label>
+                  <Input
+                    type="email"
+                    value={testEmailAddress}
+                    onChange={(e) => setTestEmailAddress(e.target.value)}
+                    placeholder="Enter email address"
+                    className="input-dark mt-1"
+                    data-testid="test-email-address-input"
+                  />
+                </div>
+                
+                {editingTemplate?.variables?.length > 0 && (
+                  <div className="space-y-3">
+                    <Label className="text-zinc-300">Variable Values</Label>
+                    <p className="text-xs text-zinc-500">Customize the sample values for variables:</p>
+                    <div className="max-h-[200px] overflow-y-auto space-y-2 pr-2">
+                      {editingTemplate.variables.map((v) => (
+                        <div key={v} className="flex items-center gap-2">
+                          <code className="px-2 py-1 bg-zinc-800 rounded text-xs text-cyan-400 min-w-[100px]">{`{{${v}}}`}</code>
+                          <Input
+                            value={testVariableValues[v] || ''}
+                            onChange={(e) => setTestVariableValues(prev => ({ ...prev, [v]: e.target.value }))}
+                            className="input-dark text-sm"
+                            placeholder={`Value for ${v}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div>
+                  <Label className="text-zinc-300 mb-2 block">Preview</Label>
+                  <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                    <p className="text-sm text-white font-medium mb-2">
+                      Subject: {editingTemplate ? getPreviewContent(editingTemplate.subject, testVariableValues) : ''}
+                    </p>
+                    <div className="text-xs text-zinc-400 whitespace-pre-wrap max-h-[150px] overflow-y-auto">
+                      {editingTemplate ? getPreviewContent(editingTemplate.body, testVariableValues) : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setTestEmailDialogOpen(false)}
+                  className="border-zinc-700 text-zinc-300"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSendTestEmail}
+                  disabled={sendingTestEmail || !testEmailAddress}
+                  className="btn-primary"
+                  data-testid="confirm-send-test-email-btn"
+                >
+                  {sendingTestEmail ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+                  ) : (
+                    <><Send className="w-4 h-4 mr-2" /> Send Test Email</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           
           {/* Email History Card */}
           <Card className="glass-card mt-6">
