@@ -128,6 +128,7 @@ const getUserTimezone = () => {
 
 export const TradeMonitorPage = () => {
   const { user, simulatedView, getSimulatedAccountValue, getSimulatedLotSize, getSimulatedMemberName } = useAuth();
+  const { startCountdown: startGlobalCountdown, stopCountdown: stopGlobalCountdown } = useTradeCountdown();
   
   // Check if user is a licensee - redirect them away
   const isLicensee = simulatedView?.license_type || user?.license_type;
