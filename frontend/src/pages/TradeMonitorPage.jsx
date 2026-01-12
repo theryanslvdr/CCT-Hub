@@ -413,6 +413,7 @@ export const TradeMonitorPage = () => {
     setPreTradeCountdown(null);
     setLastTrade(null);
     setActualExitValue('');
+    stopGlobalCountdown(); // Stop global countdown when trade is stopped
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
