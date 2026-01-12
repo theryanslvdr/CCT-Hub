@@ -106,11 +106,24 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   // Get last day of month
   const lastDay = new Date(year, month + 1, 0);
   
-  let runningBalance = startBalance;
+  // For current month, we need to adjust startBalance to exclude today's profit
+  // since the account value might already include it
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  const todayKey = today.toISOString().split('T')[0];
+  const todayActualProfit = tradeLogs[todayKey]?.actual_profit;
+  const todayHasTraded = tradeLogs[todayKey]?.has_traded;
+  
+  // Adjust start balance if today's profit is already included in account value
+  let adjustedStartBalance = startBalance;
+  if (isCurrentMonth && todayHasTraded && todayActualProfit !== undefined) {
+    // Account value already includes today's profit, so subtract it to get the "before" value
+    adjustedStartBalance = startBalance - todayActualProfit;
+  }
+  
+  let runningBalance = adjustedStartBalance;
   let currentDate = new Date(firstDay);
   
   // For current month, start from today if we're past the 1st
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   if (isCurrentMonth && today.getDate() > 1) {
     currentDate = new Date(today);
   }
