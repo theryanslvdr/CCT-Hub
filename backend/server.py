@@ -4737,6 +4737,13 @@ class BVESessionExit(BaseModel):
 class BVERewind(BaseModel):
     session_id: str
 
+class BVESignalCreate(BaseModel):
+    product: str = "MOIL10"
+    direction: str = "BUY"
+    trade_time: str
+    trade_timezone: str = "Asia/Manila"
+    profit_multiplier: float = 15
+
 async def require_super_or_master_admin(user: dict = Depends(get_current_user)):
     """Require super admin or master admin role for BVE access"""
     if user["role"] not in ["super_admin", "master_admin"]:
