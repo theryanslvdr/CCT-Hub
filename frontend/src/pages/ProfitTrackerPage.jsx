@@ -334,8 +334,21 @@ export const ProfitTrackerPage = () => {
   const [resetStep, setResetStep] = useState('confirm');
   const [depositRecordsOpen, setDepositRecordsOpen] = useState(false);
   const [withdrawalRecordsOpen, setWithdrawalRecordsOpen] = useState(false);
+  const [commissionRecordsOpen, setCommissionRecordsOpen] = useState(false);
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
+  
+  // Commission Dialog states
+  const [commissionDialogOpen, setCommissionDialogOpen] = useState(false);
+  const [commissionStep, setCommissionStep] = useState('input');
+  const [commissionAmount, setCommissionAmount] = useState('');
+  const [commissionTradersCount, setCommissionTradersCount] = useState('');
+  const [commissionNotes, setCommissionNotes] = useState('');
+  const [commissions, setCommissions] = useState([]);
+  
+  // Dream Daily Profit Dialog states
+  const [dreamProfitDialogOpen, setDreamProfitDialogOpen] = useState(false);
+  const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
