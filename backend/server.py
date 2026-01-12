@@ -1006,10 +1006,9 @@ def add_business_days(start_date, days):
 @profit_router.post("/withdrawal")
 async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_current_user)):
     """Record a withdrawal from the Merin account"""
-    # Calculate fees
-    merin_fee = data.amount * 0.03  # 3% Merin fee
-    binance_fee = 1.0  # $1 Binance fee
-    net_amount = data.amount - merin_fee - binance_fee
+    # Calculate fees (Binance fee moved to deposit)
+    merin_fee = data.amount * 0.03  # 3% Merin fee only
+    net_amount = data.amount - merin_fee
     
     # Calculate estimated arrival date (2 business days)
     estimated_arrival = add_business_days(datetime.now(timezone.utc), 2)
@@ -1025,7 +1024,6 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "is_withdrawal": True,
         "gross_amount": data.amount,
         "merin_fee": merin_fee,
-        "binance_fee": binance_fee,
         "net_amount": net_amount,
         "estimated_arrival": estimated_arrival.strftime("%Y-%m-%d"),
         "confirmed_at": None,
@@ -1042,7 +1040,7 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         user_id=user["id"],
         user_name=user["full_name"],
         amount=data.amount,
-        metadata={"net_amount": net_amount, "merin_fee": merin_fee, "binance_fee": binance_fee}
+        metadata={"net_amount": net_amount, "merin_fee": merin_fee}
     )
     
     return {
@@ -1050,7 +1048,6 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "withdrawal_id": withdrawal["id"],
         "gross_amount": data.amount,
         "merin_fee": round(merin_fee, 2),
-        "binance_fee": binance_fee,
         "net_amount": round(net_amount, 2)
     }
 
