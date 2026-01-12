@@ -1271,13 +1271,8 @@ export const ProfitTrackerPage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Commission Dialog */}
+        {/* Commission Dialog - Now triggered from popup */}
         <Dialog open={commissionDialogOpen} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
-          <DialogTrigger asChild>
-            <Button className="btn-secondary gap-2" data-testid="simulate-commission-button">
-              <Award className="w-4 h-4" /> Simulate Commission
-            </Button>
-          </DialogTrigger>
           <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
@@ -1287,7 +1282,7 @@ export const ProfitTrackerPage = () => {
             
             <div className="space-y-4 mt-4">
               <p className="text-sm text-zinc-400">
-                Record commission earnings from your referrals' trades.
+                Record commission earnings from your referrals&apos; trades.
               </p>
               <div>
                 <Label className="text-zinc-300">Commission Amount (USDT)</Label>
