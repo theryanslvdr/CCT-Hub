@@ -599,11 +599,11 @@ export const TradeMonitorPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowExitCalculator(true)}
-                  className="text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
-                  data-testid="open-exit-calculator"
+                  onClick={() => setShowDreamProfit(true)}
+                  className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10"
+                  data-testid="open-dream-profit"
                 >
-                  <Calculator className="w-4 h-4 mr-1" /> Calculator
+                  <Sparkles className="w-4 h-4 mr-1" /> Dream Profit
                 </Button>
               </div>
             </div>
