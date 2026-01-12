@@ -7,9 +7,52 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Backend**: FastAPI (Python) with MongoDB
 - **Frontend**: React with Tailwind CSS + Shadcn UI
 - **Auth**: JWT with Heartbeat API verification
-- **Integrations**: Cloudinary, Emailit, ExchangeRate-API
+- **Integrations**: Cloudinary, Emailit, ExchangeRate-API, APScheduler
 
 ## Completed Work
+
+### Session 34 (2026-01-12) - P1 & P2 Features ✅
+
+#### P1: Off-Canvas Notification Panel ✅
+- Created `NotificationSheet.jsx` component using Shadcn Sheet
+- Slides in from right side with full notification list
+- Shows connection status with "Live updates active" or "Disconnected"
+- Reconnect button available when disconnected
+
+#### P1: WebSocket Offline Indicator ✅
+- Added prominent "Connection lost" banner with WifiOff icon
+- Red pulsing indicator on notification bell when disconnected
+- Reconnect button to manually reconnect WebSocket
+
+#### P1: Automated Missed Trade Email ✅
+- Added APScheduler for background tasks
+- `check_missed_trades()` runs at 11 PM UTC daily
+- Sends email to members who didn't log a trade that day
+- Uses customizable "missed_trade" email template
+- Logs all sent emails to `email_history` collection
+
+#### P1: Email Template Testing ✅
+- Added "Test" button to Email Template editor
+- Dialog with recipient email and variable value inputs
+- Live preview showing variables replaced with test values
+- Sends test email with "[TEST]" prefix in subject
+
+#### P2: Top Performers Feature ✅
+- Backend: `GET /api/admin/top-performers` endpoint
+- Supports `exclude_non_traders` parameter (default true)
+- Filters to traders who traded in last 30 days
+- Returns ranked list with total_profit, total_trades, avg_profit_per_trade
+- Frontend: Top Performers card on Admin Analytics page
+- "Active traders only" checkbox to toggle filter
+
+#### P2: BVE Signal Update ✅
+- Added `PUT /api/bve/signals/{id}` endpoint
+- Allows deactivating/updating BVE signals
+- Fixed "Deactivate" button not working in BVE mode
+
+#### Bug Fixes ✅
+- Fixed toast notification persistence issue
+- Fixed notification flood when trade alarm triggers
 
 ### Session 33 (2026-01-12) - BVE Bug Fixes ✅
 
