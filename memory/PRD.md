@@ -1,159 +1,136 @@
 # CrossCurrent Finance Center - PRD
 
 ## Original Problem Statement
-Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monitor, Debt Management, Profit Planner, and Admin Dashboard. Features include JWT authentication with Heartbeat verification, role-based access, and API Center for external app communication.
+Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monitor, Debt Management, Profit Planner, and Admin Dashboard.
 
 ## Architecture
 - **Backend**: FastAPI (Python) with MongoDB
 - **Frontend**: React with Tailwind CSS + Shadcn UI
-- **Auth**: JWT with Heartbeat API verification gatekeeper
-- **Integrations**: Cloudinary (file uploads), Emailit (emails), ExchangeRate-API (currency conversion)
-
-## User Personas & Role Hierarchy
-1. **Normal Member** (role: `member`) - Modular dashboard with tabs
-2. **Basic Admin** (role: `basic_admin`) - Manage members, signals
-3. **Super Admin** (role: `super_admin`) - Full access except hidden features
-4. **Master Admin** (role: `master_admin`) - Full access including hidden features
-5. **Extended/Honorary Licensee** - Special member types
+- **Auth**: JWT with Heartbeat API verification
+- **Integrations**: Cloudinary, Emailit, ExchangeRate-API
 
 ## Completed Work
 
-### Session 29 (2026-01-11) - P2 Complete ✅
+### Session 30 (2026-01-11) - Maintenance & Mobile ✅
 
-#### 1. Debt Management Tooltips ✅
-- Added `TooltipProvider` wrapper to DebtManagementPage
-- Created `InfoTooltip` component with HelpCircle icon
-- Added tooltips to all 4 overview cards:
-  - **Total Debt**: "The sum of all remaining balances..."
-  - **Monthly Commitment**: "Total of all minimum payments due..."
-  - **Account Balance**: "Your current trading account balance..."
-  - **Status**: Context-aware based on can_cover_this_month
-- Added tooltips to Add Debt form fields:
-  - Debt Name, Total Amount, Minimum Payment, Due Day, Interest Rate
+#### 1. Maintenance Tab in Admin Settings ✅
+- New "Maint." tab in Settings with amber highlight
+- **Maintenance Mode Toggle**: Blocks all users except Master Admin
+- **Maintenance Message**: Customizable message displayed on maintenance page
+- Warning banner when maintenance mode is active
 
-#### 2. Shared Admin Components ✅
-Created `/app/frontend/src/components/admin/SharedComponents.jsx`:
-- `StatsCard` - Displays metric with icon
-- `SearchFilterBar` - Search input with filters
-- `Pagination` - Page navigation controls
-- `RoleBadge` - Role display with icon
-- `LicenseBadge` - License type badge
-- `StatusBadge` - Transaction/status badge
-- `LoadingSpinner` - Loading indicator
-- `EmptyState` - No data placeholder
-- `ActionButtons` - Action button group
+#### 2. Announcements System ✅
+- Add announcements with: Title, Message, Link URL, Link Text
+- Three types: Info (blue), Warning (amber), Success (green)
+- Sticky option (can't be dismissed by users)
+- Active/Inactive toggle per announcement
+- Announcements display as banners in dashboard
 
-#### 3. Backend Route Structure ✅
-Created modular route files in `/app/backend/routes/`:
-- `auth.py` - Authentication routes structure
-- `admin.py` - Admin management routes structure
-- `trade.py` - Trading routes structure
-- `profit.py` - Financial routes structure
-- `settings.py` - Settings routes structure
-- `__init__.py` - Package exports with migration docs
+#### 3. Maintenance Landing Page ✅
+- Shows when `maintenance_mode=true`
+- Displays: Logo, Wrench icon, "Under Maintenance" title
+- Custom maintenance message from settings
+- Footer copyright at bottom
+- **Hidden Master Admin Override**: Click "soon" 5 times to reveal login
 
-#### 4. Additional Email Templates ✅
-Added 4 new templates to `/app/backend/services/email_service.py`:
-- `get_welcome_email()` - New user welcome with feature list
-- `get_transaction_update_email()` - Transaction status updates
-- `get_missed_trade_email()` - Missed trade notifications
-- `get_weekly_summary_email()` - Weekly performance summary
+#### 4. Mobile-Friendly Notices ✅
+- Created `MobileNotice` component at `/app/frontend/src/components/MobileNotice.jsx`
+- Shows "Better on Desktop" notice on mobile viewports (<768px)
+- Applied to complex pages:
+  - TradeMonitorPage
+  - AdminMembersPage  
+  - AdminLicensesPage
+- Option for `showOnMobile={true}` to show notice + content
 
-### Session 28 - P1 Complete ✅
+### Session 29 - P2 Tasks ✅
+- Debt Management Tooltips
+- Shared Admin Components
+- Backend Route Structure
+- Additional Email Templates
+
+### Session 28 - P1 Features ✅
 - Backend Services Package (email, file, websocket)
 - WebSocket real-time notifications
 - File upload endpoints
-- Email test endpoint
 
-### Session 27 - P0 Complete ✅
+### Session 27 - P0 Features ✅
 - Dashboard tabs for members
 - API key security modal
 - Persistent footer
 - Login customization
-- Production URL setting
-- CrossCurrent branding
 
 ## Backend Structure
 
-### Models (`/app/backend/models/`)
-```
-models/
-├── __init__.py - Exports all models
-├── user.py - User, Auth, Profile models
-├── trade.py - Trade, Signal models
-├── common.py - Deposit, Debt, Goal, Notification models
-├── license.py - License, Invite, Transaction models
-└── settings.py - Platform, Email template models
+### Platform Settings Fields
+```python
+# Maintenance Settings (NEW)
+maintenance_mode: bool = False
+maintenance_message: str = "Our services are undergoing maintenance..."
+announcements: Optional[List[dict]] = None
+
+# Existing fields
+platform_name, tagline, site_title, site_description
+favicon_url, logo_url, og_image_url
+primary_color, accent_color, hide_emergent_badge
+login_title, login_tagline, login_notice
+production_site_url
+emailit_api_key, cloudinary_*, heartbeat_api_key
+custom_registration_link
+footer_copyright, footer_links
 ```
 
-### Utils (`/app/backend/utils/`)
+### Services Package
 ```
-utils/
-├── __init__.py - Exports all utilities
-├── auth.py - Password, JWT, role functions
-└── calculations.py - LOT, profit, fee calculations
-```
-
-### Services (`/app/backend/services/`)
-```
-services/
-├── __init__.py - Exports all services
-├── email_service.py - Emailit + 8 templates
+/app/backend/services/
+├── email_service.py - 8 email templates
 ├── file_service.py - Cloudinary uploads
 └── websocket_service.py - Real-time notifications
 ```
 
-### Routes (`/app/backend/routes/`)
+### Models Package
 ```
-routes/
-├── __init__.py - Package with migration docs
-├── auth.py - Auth routes structure
-├── admin.py - Admin routes structure
-├── trade.py - Trade routes structure
-├── profit.py - Financial routes structure
-└── settings.py - Settings routes structure
+/app/backend/models/
+├── user.py, trade.py, common.py
+├── license.py, settings.py
 ```
 
-## Frontend Structure
-
-### Admin Components (`/app/frontend/src/components/admin/`)
+### Routes Package (Structure Ready)
 ```
-admin/
-└── SharedComponents.jsx - 9 reusable components
+/app/backend/routes/
+├── auth.py, admin.py, trade.py
+├── profit.py, settings.py
 ```
 
-## API Endpoints Summary
+## Frontend Components
 
-### Core APIs
-- `POST /api/auth/login` - Login
-- `POST /api/auth/register` - Register
-- `GET /api/profit/summary` - Profit summary
-- `GET /api/trade/logs` - Trade history
-- `GET /api/debt` - Get debts
-- `GET /api/debt/plan` - Debt repayment plan
+### New Components
+- `MobileNotice.jsx` - Mobile viewport notice
+- `SharedComponents.jsx` - Reusable admin components
+- `NotificationPanel.jsx` - Real-time notifications
 
-### Admin APIs
-- `GET /api/admin/members` - Member list
-- `GET /api/admin/notifications` - Notifications
-- `GET /api/admin/licenses` - License management
+### Updated Pages
+- `LoginPage.jsx` - Maintenance mode handling + override
+- `AdminSettingsPage.jsx` - Maintenance tab + announcements
+- `DashboardLayout.jsx` - Announcement banner display
+- `DebtManagementPage.jsx` - Tooltips added
+- `TradeMonitorPage.jsx` - MobileNotice wrapper
+- `AdminMembersPage.jsx` - MobileNotice wrapper
+- `AdminLicensesPage.jsx` - MobileNotice wrapper
 
-### Integration APIs
-- `POST /api/email/test` - Test email service
-- `POST /api/upload/profile-picture` - Upload profile pic
-- `GET /api/ws/status` - WebSocket stats
-- `WS /ws/{user_id}` - Real-time notifications
+## Test Results
+- **Iteration 30**: 12/12 backend tests passed (100%)
+- **Iteration 29**: 13/13 backend tests passed (100%)
+- **Iteration 28**: 16/16 backend tests passed (100%)
 
 ## Test Credentials
 - **Master Admin**: iam@ryansalvador.com / admin123
-- **Regular Member**: jaspersalvador9413@gmail.com / test123
 
-## Testing Summary
-- **Iteration 29**: 13/13 backend tests passed (100%)
-- **Iteration 28**: 16/16 backend tests passed (100%)
-- **Iteration 27**: All P0 features tested (100%)
+## Next Action Items
+1. Actually migrate routes from server.py to /routes/ modules
+2. Break down AdminMembersPage (~1553 lines) using SharedComponents
+3. Break down AdminLicensesPage (~1507 lines) using SharedComponents
 
 ## Future Tasks
-- [ ] Implement actual route migration from server.py
-- [ ] Add Alarm Music Selection for Trade Monitor
-- [ ] Break down AdminMembersPage.jsx into smaller components
-- [ ] Break down AdminLicensesPage.jsx into smaller components
+- Add Alarm Music Selection for Trade Monitor
+- Implement automated email notifications on transactions
+- Complete route migration from monolithic server.py
