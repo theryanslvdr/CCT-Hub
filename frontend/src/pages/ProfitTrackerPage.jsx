@@ -8,13 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 import { 
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
   TrendingUp, Wallet, RotateCcw, Rocket, Calendar,
   Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
   ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
-  Radio, EyeOff, Award, Download, Image, Loader2
+  Radio, EyeOff, Award, FolderOpen, MoreHorizontal
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
