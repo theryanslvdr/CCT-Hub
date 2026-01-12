@@ -445,13 +445,14 @@ export const ProfitTrackerPage = () => {
         return;
       }
       
-      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes] = await Promise.all([
+      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes, commissionsRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
         currencyAPI.getRates('USDT'),
         api.get('/profit/withdrawals').catch(() => ({ data: [] })),
         api.get('/trade/active-signal').catch(() => ({ data: null })),
         api.get('/trade/logs').catch(() => ({ data: [] })),
+        api.get('/profit/commissions').catch(() => ({ data: [] })),
       ]);
       setSummary(summaryRes.data);
       
@@ -463,6 +464,9 @@ export const ProfitTrackerPage = () => {
       // Get withdrawals from dedicated endpoint or filter
       const withdrawalData = withdrawalsRes.data || allDeposits.filter(d => d.amount < 0 || d.is_withdrawal);
       setWithdrawals(withdrawalData);
+      
+      // Set commissions
+      setCommissions(commissionsRes.data || []);
       
       setRates(ratesRes.data.rates || {});
       
