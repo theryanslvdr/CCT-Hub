@@ -5303,6 +5303,237 @@ async def get_top_performers(
         logger.error(f"Failed to get top performers: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ==================== PERFORMANCE REPORT ====================
+
+from fastapi.responses import Response
+
+@profit_router.get("/report/image")
+async def generate_performance_report_image(
+    period: str = "monthly",  # daily, weekly, monthly
+    user: dict = Depends(get_current_user)
+):
+    """Generate an image-based performance report for the current user"""
+    from services.report_generator import generate_performance_report
+    
+    try:
+        # Calculate date range based on period
+        now = datetime.now(timezone.utc)
+        if period == "daily":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == "weekly":
+            start_date = now - timedelta(days=7)
+        else:  # monthly
+            start_date = now - timedelta(days=30)
+        
+        # Get user's trades for the period
+        trades_cursor = db.trade_logs.find(
+            {
+                "user_id": user["id"],
+                "created_at": {"$gte": start_date}
+            },
+            {"_id": 0}
+        ).sort("created_at", -1)
+        trades = await trades_cursor.to_list(100)
+        
+        # Calculate statistics
+        total_profit = sum(t.get("actual_profit", 0) for t in trades)
+        total_trades = len(trades)
+        
+        winning_trades = [t for t in trades if t.get("actual_profit", 0) > 0]
+        win_rate = (len(winning_trades) / total_trades * 100) if total_trades > 0 else 0
+        
+        avg_profit = total_profit / total_trades if total_trades > 0 else 0
+        
+        profits = [t.get("actual_profit", 0) for t in trades]
+        best_trade = max(profits) if profits else 0
+        worst_trade = min(profits) if profits else 0
+        
+        # Get account value from latest deposit summary
+        summary = await db.deposits.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        
+        deposits_total = summary[0]["total"] if summary else 0
+        
+        withdrawals = await db.withdrawals.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        
+        withdrawals_total = withdrawals[0]["total"] if withdrawals else 0
+        
+        all_time_profit = await db.trade_logs.aggregate([
+            {"$match": {"user_id": user["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
+        ]).to_list(1)
+        
+        all_profit = all_time_profit[0]["total"] if all_time_profit else 0
+        account_value = deposits_total - withdrawals_total + all_profit
+        
+        # Calculate streak
+        streak = 0
+        for trade in trades:
+            profit = trade.get("actual_profit", 0)
+            if profit > 0:
+                if streak >= 0:
+                    streak += 1
+                else:
+                    break
+            elif profit < 0:
+                if streak <= 0:
+                    streak -= 1
+                else:
+                    break
+        
+        stats = {
+            "account_value": account_value,
+            "total_profit": total_profit,
+            "total_trades": total_trades,
+            "win_rate": win_rate,
+            "avg_profit_per_trade": avg_profit,
+            "best_trade": best_trade,
+            "worst_trade": worst_trade,
+            "streak": streak
+        }
+        
+        # Format trades for report
+        formatted_trades = []
+        for t in trades[:5]:
+            formatted_trades.append({
+                "date": t.get("created_at", "").strftime("%Y-%m-%d") if hasattr(t.get("created_at", ""), "strftime") else str(t.get("created_at", ""))[:10],
+                "direction": t.get("direction", "-"),
+                "lot_size": t.get("lot_size", 0),
+                "actual_profit": t.get("actual_profit", 0)
+            })
+        
+        # Get platform name from settings
+        settings = await db.settings.find_one({}, {"_id": 0, "site_name": 1})
+        platform_name = settings.get("site_name", "CrossCurrent") if settings else "CrossCurrent"
+        
+        # Generate the image
+        image_bytes = await generate_performance_report(
+            user_name=user.get("full_name", user.get("email", "Trader")),
+            period=period,
+            stats=stats,
+            trades=formatted_trades,
+            platform_name=platform_name
+        )
+        
+        return Response(
+            content=image_bytes,
+            media_type="image/png",
+            headers={
+                "Content-Disposition": f'attachment; filename="performance_report_{period}_{now.strftime("%Y%m%d")}.png"'
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to generate performance report: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@profit_router.get("/report/base64")
+async def generate_performance_report_base64(
+    period: str = "monthly",
+    user: dict = Depends(get_current_user)
+):
+    """Generate a performance report and return as base64 for embedding"""
+    from services.report_generator import generate_report_base64
+    
+    try:
+        # Use the same logic as above but return base64
+        now = datetime.now(timezone.utc)
+        if period == "daily":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif period == "weekly":
+            start_date = now - timedelta(days=7)
+        else:
+            start_date = now - timedelta(days=30)
+        
+        trades_cursor = db.trade_logs.find(
+            {"user_id": user["id"], "created_at": {"$gte": start_date}},
+            {"_id": 0}
+        ).sort("created_at", -1)
+        trades = await trades_cursor.to_list(100)
+        
+        total_profit = sum(t.get("actual_profit", 0) for t in trades)
+        total_trades = len(trades)
+        winning_trades = [t for t in trades if t.get("actual_profit", 0) > 0]
+        win_rate = (len(winning_trades) / total_trades * 100) if total_trades > 0 else 0
+        avg_profit = total_profit / total_trades if total_trades > 0 else 0
+        profits = [t.get("actual_profit", 0) for t in trades]
+        best_trade = max(profits) if profits else 0
+        worst_trade = min(profits) if profits else 0
+        
+        summary = await db.deposits.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        deposits_total = summary[0]["total"] if summary else 0
+        
+        withdrawals = await db.withdrawals.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        withdrawals_total = withdrawals[0]["total"] if withdrawals else 0
+        
+        all_time_profit = await db.trade_logs.aggregate([
+            {"$match": {"user_id": user["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
+        ]).to_list(1)
+        all_profit = all_time_profit[0]["total"] if all_time_profit else 0
+        account_value = deposits_total - withdrawals_total + all_profit
+        
+        streak = 0
+        for trade in trades:
+            profit = trade.get("actual_profit", 0)
+            if profit > 0:
+                if streak >= 0: streak += 1
+                else: break
+            elif profit < 0:
+                if streak <= 0: streak -= 1
+                else: break
+        
+        stats = {
+            "account_value": account_value,
+            "total_profit": total_profit,
+            "total_trades": total_trades,
+            "win_rate": win_rate,
+            "avg_profit_per_trade": avg_profit,
+            "best_trade": best_trade,
+            "worst_trade": worst_trade,
+            "streak": streak
+        }
+        
+        formatted_trades = [{
+            "date": t.get("created_at", "").strftime("%Y-%m-%d") if hasattr(t.get("created_at", ""), "strftime") else str(t.get("created_at", ""))[:10],
+            "direction": t.get("direction", "-"),
+            "lot_size": t.get("lot_size", 0),
+            "actual_profit": t.get("actual_profit", 0)
+        } for t in trades[:5]]
+        
+        settings = await db.settings.find_one({}, {"_id": 0, "site_name": 1})
+        platform_name = settings.get("site_name", "CrossCurrent") if settings else "CrossCurrent"
+        
+        base64_image = await generate_report_base64(
+            user_name=user.get("full_name", user.get("email", "Trader")),
+            period=period,
+            stats=stats,
+            trades=formatted_trades,
+            platform_name=platform_name
+        )
+        
+        return {
+            "image_base64": base64_image,
+            "period": period,
+            "generated_at": now.isoformat(),
+            "stats": stats
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to generate base64 report: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
