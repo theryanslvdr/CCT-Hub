@@ -70,7 +70,10 @@ async def send_email(
     text_content: Optional[str] = None,
     from_email: Optional[str] = None,
     reply_to: Optional[str] = None,
-    attachments: Optional[List[Dict]] = None
+    attachments: Optional[List[Dict]] = None,
+    template_type: str = "general",
+    log_email_record: bool = True,
+    metadata: Optional[Dict] = None
 ) -> Dict:
     """
     Send an email using Emailit API
@@ -83,22 +86,33 @@ async def send_email(
         text_content: Plain text content (optional)
         from_email: Sender email address (optional, uses default if not provided)
         reply_to: Reply-to email address (optional)
-        attachments: List of attachments [{"filename": "...", "content": "...", "content_type": "..."}]
+        attachments: List of attachments
+        template_type: Type of email template for logging
+        log_email_record: Whether to log the email to history
+        metadata: Additional metadata to store with the email log
     
     Returns:
         Dict with status and message
     """
+    email_id = None
+    
+    # Log email as pending if tracking enabled
+    if log_email_record:
+        email_id = await log_email(db, to_email, subject, template_type, "pending", metadata=metadata)
+    
     api_key = await get_emailit_api_key(db)
     
     if not api_key:
         logger.warning("Emailit API key not configured")
+        if email_id:
+            await update_email_status(db, email_id, "error", "Email service not configured")
         return {"success": False, "error": "Email service not configured"}
     
     # Get platform settings for sender info
     settings = await db.platform_settings.find_one({}, {"_id": 0})
     platform_name = settings.get("platform_name", "CrossCurrent") if settings else "CrossCurrent"
     
-    # Default from email
+    # Default from email - use a generic sender that should be verified
     if not from_email:
         from_email = f"{platform_name} <noreply@crosscurrent.com>"
     
