@@ -314,14 +314,19 @@ export const TradeMonitorPage = () => {
             const diff = targetTime - currentNow;
 
             if (diff <= 0) {
-              // Trade time reached
+              // Trade time reached - clear interval immediately
+              if (countdownRef.current) {
+                clearInterval(countdownRef.current);
+                countdownRef.current = null;
+              }
               setShowExitAlert(true);
               setTradeEnded(true);
               setCountdown(null);
-              if (countdownRef.current) clearInterval(countdownRef.current);
               if (soundEnabled && audioRef.current) {
                 audioRef.current.play().catch(() => {});
               }
+              // Use unique id to prevent duplicate toasts
+              toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000, id: 'trade-alert-restore' });
             } else {
               const hours = Math.floor(diff / (1000 * 60 * 60));
               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
