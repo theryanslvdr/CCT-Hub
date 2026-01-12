@@ -474,7 +474,9 @@ export const ProfitTrackerPage = () => {
             logsMap[dateKey] = {
               actual_profit: trade.actual_profit,
               has_traded: true,
-              trade
+              lot_size: trade.lot_size,
+              projected_profit: trade.projected_profit,
+              ...trade
             };
           }
         });
