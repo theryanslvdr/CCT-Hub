@@ -63,6 +63,10 @@ export const AdminSettingsPage = () => {
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [editorMode, setEditorMode] = useState('code'); // 'code' or 'preview'
+  const [testEmailDialogOpen, setTestEmailDialogOpen] = useState(false);
+  const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [sendingTestEmail, setSendingTestEmail] = useState(false);
+  const [testVariableValues, setTestVariableValues] = useState({});
   
   // Footer links management
   const [newFooterLink, setNewFooterLink] = useState({ label: '', url: '' });
