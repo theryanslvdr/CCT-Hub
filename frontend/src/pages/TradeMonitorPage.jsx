@@ -481,6 +481,7 @@ export const TradeMonitorPage = () => {
     setLastTrade(null);
     setActualExitValue('');
     stopGlobalCountdown(); // Stop global countdown when trade is stopped
+    localStorage.removeItem('trade_check_in'); // Clear persisted check-in state
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
@@ -509,8 +510,9 @@ export const TradeMonitorPage = () => {
       setTradeEnded(false);
       setIsTrading(false);
       
-      // Stop global countdown
+      // Stop global countdown and clear persisted state
       stopGlobalCountdown();
+      localStorage.removeItem('trade_check_in');
 
       // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
