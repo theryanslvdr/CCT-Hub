@@ -704,7 +704,7 @@ export const TradeMonitorPage = () => {
           <CardContent className="p-6">
             <div className="flex items-center gap-4 text-zinc-500">
               <AlertTriangle className="w-6 h-6" />
-              <p>No active trading signal. Wait for admin to post today's signal.</p>
+              <p>No active trading signal. Wait for admin to post today&apos;s signal.</p>
             </div>
           </CardContent>
         </Card>
@@ -858,7 +858,7 @@ export const TradeMonitorPage = () => {
             </div>
           ) : (
             <div className="text-center space-y-6">
-              <p className="text-zinc-400">Ready to trade? Check in when you're ready.</p>
+              <p className="text-zinc-400">Ready to trade? Check in when you&apos;re ready.</p>
               {!tradeWindowInfo.canTrade && signal && (
                 <div className="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
                   <p className="text-amber-400 text-sm mb-2">Trading window opens in:</p>
@@ -876,7 +876,7 @@ export const TradeMonitorPage = () => {
                 disabled={!signal || !tradeWindowInfo.canTrade}
                 data-testid="check-in-button"
               >
-                <Play className="w-8 h-8 mr-3" /> I'm Ready to Trade
+                <Play className="w-8 h-8 mr-3" /> I&apos;m Ready to Trade
               </Button>
               {!tradeWindowInfo.canTrade && signal && (
                 <p className="text-xs text-zinc-500 mt-2">Button will be enabled 20 minutes before trade time</p>
@@ -923,7 +923,7 @@ export const TradeMonitorPage = () => {
         {/* Today's Summary - Simplified: Only Actual Total & P/L Difference + Encouragement */}
         <Card className="glass-card" data-testid="todays-summary-card">
           <CardHeader>
-            <CardTitle className="text-white">Today's Summary</CardTitle>
+            <CardTitle className="text-white">Today&apos;s Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
