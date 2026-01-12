@@ -530,6 +530,78 @@ export const AdminAnalyticsPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Top Performers Card */}
+        <Card className="glass-card">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                Top Performers
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={excludeNonTraders}
+                    onChange={(e) => {
+                      setExcludeNonTraders(e.target.checked);
+                      // Reload performers with new filter
+                      adminAPI.getTopPerformers(10, e.target.checked)
+                        .then(res => setTopPerformers(res.data.performers || []))
+                        .catch(() => {});
+                    }}
+                    className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-blue-500 focus:ring-blue-500"
+                  />
+                  Active traders only
+                </label>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {topPerformers.length > 0 ? (
+              <div className="space-y-3">
+                {topPerformers.map((performer, index) => (
+                  <div 
+                    key={performer.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30 hover:bg-zinc-800/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                        index === 0 ? 'bg-amber-500/20 text-amber-400' :
+                        index === 1 ? 'bg-zinc-400/20 text-zinc-300' :
+                        index === 2 ? 'bg-orange-600/20 text-orange-400' :
+                        'bg-zinc-700/50 text-zinc-400'
+                      }`}>
+                        {performer.rank}
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">{performer.full_name}</p>
+                        <p className="text-xs text-zinc-500">{performer.total_trades} trades</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-mono font-medium ${performer.total_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {performer.total_profit >= 0 ? '+' : ''}${formatNumber(performer.total_profit, 2)}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Avg: ${formatNumber(performer.avg_profit_per_trade, 2)}/trade
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Trophy className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+                <p className="text-zinc-500">No performers found</p>
+                <p className="text-zinc-600 text-sm mt-1">
+                  {excludeNonTraders ? 'Try unchecking "Active traders only"' : 'No trade data available'}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Team Trades */}
