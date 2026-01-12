@@ -3796,6 +3796,51 @@ async def update_email_template(template_type: str, data: EmailTemplateUpdate, u
     
     return {"message": "Email template updated successfully"}
 
+class TestEmailRequest(BaseModel):
+    to: str
+    subject: str
+    body: str
+    template_type: str = "test"
+
+@settings_router.post("/email-templates/test")
+async def send_test_email(data: TestEmailRequest, user: dict = Depends(require_admin)):
+    """Send a test email with the provided template content"""
+    from services.email_service import send_email
+    
+    try:
+        # Send the email
+        result = await send_email(
+            to=data.to,
+            subject=f"[TEST] {data.subject}",
+            body=data.body
+        )
+        
+        # Log to email history
+        await db.email_history.insert_one({
+            "id": str(uuid.uuid4()),
+            "to": data.to,
+            "subject": f"[TEST] {data.subject}",
+            "template_type": f"test_{data.template_type}",
+            "status": "sent" if result else "failed",
+            "sent_at": datetime.now(timezone.utc),
+            "sent_by": user["id"]
+        })
+        
+        return {"success": True, "message": "Test email sent successfully"}
+    except Exception as e:
+        # Log failed attempt
+        await db.email_history.insert_one({
+            "id": str(uuid.uuid4()),
+            "to": data.to,
+            "subject": f"[TEST] {data.subject}",
+            "template_type": f"test_{data.template_type}",
+            "status": "failed",
+            "error": str(e),
+            "sent_at": datetime.now(timezone.utc),
+            "sent_by": user["id"]
+        })
+        raise HTTPException(status_code=500, detail=f"Failed to send test email: {str(e)}")
+
 # ==================== INTEGRATION TESTS ====================
 @settings_router.post("/test-emailit")
 async def test_emailit_connection(user: dict = Depends(require_admin)):
