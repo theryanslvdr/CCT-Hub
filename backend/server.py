@@ -4747,6 +4747,7 @@ api_router.include_router(goals_router)
 api_router.include_router(currency_router)
 api_router.include_router(settings_router)
 api_router.include_router(api_center_router)
+api_router.include_router(bve_router)
 
 app.include_router(api_router)
 
