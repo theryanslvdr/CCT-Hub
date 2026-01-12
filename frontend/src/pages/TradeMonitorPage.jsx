@@ -409,6 +409,10 @@ export const TradeMonitorPage = () => {
       setLastTrade(null);
       setShowCelebration(false);
       loadData();
+      // Redirect to profit tracker after a brief delay
+      setTimeout(() => {
+        window.location.href = '/profit-tracker';
+      }, 500);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to forward trade');
     }
