@@ -486,8 +486,11 @@ export const TradeMonitorPage = () => {
           audioRef.current.play().catch(console.error);
         }
         
-        // Only show toast once - don't use id to avoid persistence issues
-        toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+        // Only show toast once using ref to prevent flood
+        if (!tradeNotifiedRef.current) {
+          tradeNotifiedRef.current = true;
+          toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+        }
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
