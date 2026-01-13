@@ -89,8 +89,8 @@ export const profitAPI = {
   simulateWithdrawal: (data) => api.post('/profit/simulate-withdrawal', data),
   getRates: () => api.get('/profit/rates'),
   getLicenseProjections: () => api.get('/profit/license-projections'),
-  getReportImage: (period = 'monthly') => api.get(`/profit/report/image`, { params: { period }, responseType: 'blob' }),
-  getReportBase64: (period = 'monthly') => api.get('/profit/report/base64', { params: { period } }),
+  getReportImage: (period = 'monthly', userId = null) => api.get(`/admin/analytics/report/image`, { params: { period, user_id: userId }, responseType: 'blob' }),
+  getReportBase64: (period = 'monthly', userId = null) => api.get('/admin/analytics/report/base64', { params: { period, user_id: userId } }),
 };
 
 // Trade Monitor APIs
