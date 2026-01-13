@@ -1498,7 +1498,7 @@ async def log_missed_trade(
     projected_profit = round(lot_size * 15, 2)
     profit_difference = round(actual_profit - projected_profit, 2)
     
-    # Create the trade log
+    # Create the trade log with all required fields
     trade_id = str(uuid.uuid4())
     trade_log = {
         "id": trade_id,
@@ -1509,6 +1509,7 @@ async def log_missed_trade(
         "actual_profit": actual_profit,
         "profit_difference": profit_difference,
         "performance": "target" if actual_profit >= projected_profit else ("above" if actual_profit > 0 else "below"),
+        "signal_id": None,  # No signal for retroactive trades
         "notes": notes or "Retroactively logged trade",
         "is_retroactive": True,
         "created_at": trade_date.isoformat()
