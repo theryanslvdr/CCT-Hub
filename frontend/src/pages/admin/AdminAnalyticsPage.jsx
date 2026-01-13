@@ -135,7 +135,7 @@ export const AdminAnalyticsPage = () => {
   const handleGenerateReport = async () => {
     setReportLoading(true);
     try {
-      const res = await api.get('/profit/report/base64', { params: { period: reportPeriod } });
+      const res = await api.get('/admin/analytics/report/base64', { params: { period: reportPeriod } });
       setReportPreview(res.data);
       toast.success('Report generated successfully!');
     } catch (error) {
