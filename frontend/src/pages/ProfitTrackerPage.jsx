@@ -581,6 +581,50 @@ export const ProfitTrackerPage = () => {
     );
   }, [selectedMonth, tradeLogs, activeSignal]);
 
+  // Handle opening Enter AP dialog for a specific date
+  const handleOpenEnterAP = (day) => {
+    setEnterAPDate(day);
+    setEnterAPValue('');
+    setEnterAPDialogOpen(true);
+  };
+
+  // Handle submitting the missed trade actual profit
+  const handleSubmitEnterAP = async () => {
+    if (!enterAPValue || parseFloat(enterAPValue) < 0) {
+      toast.error('Please enter a valid actual profit value');
+      return;
+    }
+    
+    if (!enterAPDate) {
+      toast.error('No date selected');
+      return;
+    }
+
+    setEnterAPLoading(true);
+    try {
+      await tradeAPI.logMissedTrade({
+        date: enterAPDate.dateKey,
+        actual_profit: parseFloat(enterAPValue),
+        lot_size: enterAPDate.lotSize,
+        direction: activeSignal?.direction || 'BUY',
+        notes: 'Retroactively logged via Enter AP'
+      });
+      
+      toast.success('Trade logged successfully!');
+      setEnterAPDialogOpen(false);
+      setEnterAPValue('');
+      setEnterAPDate(null);
+      
+      // Reload data to reflect the new trade
+      loadData();
+    } catch (error) {
+      console.error('Failed to log trade:', error);
+      toast.error(error.response?.data?.detail || 'Failed to log trade');
+    } finally {
+      setEnterAPLoading(false);
+    }
+  };
+
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
