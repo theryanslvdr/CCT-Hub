@@ -11,6 +11,29 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 35 (2026-01-13) - Security Fix & BVE Bug Fix ✅
+
+#### P0: Security Fix - Report Generation Endpoint ✅
+- **Issue**: Report generation endpoints (`/api/profit/report/*`) were accessible to any authenticated user
+- **Fix**: Moved endpoints to admin-protected routes (`/api/admin/analytics/report/*`)
+- **Endpoints Changed**:
+  - `GET /api/profit/report/image` → `GET /api/admin/analytics/report/image`
+  - `GET /api/profit/report/base64` → `GET /api/admin/analytics/report/base64`
+- **Additional**: Added `user_id` parameter for admins to generate reports for specific users
+- **Files Modified**: `server.py`, `api.js`, `AdminAnalyticsPage.jsx`
+
+#### Bug Fix: BVE Trade Notification Flood ✅
+- **Issue**: When trade time was reached in BVE mode, push notifications were flooding and the alarm wouldn't stop
+- **Root Cause**: The interval firing toast notifications multiple times before `clearInterval` took effect
+- **Fix**: Added `tradeNotifiedRef` to track if notification has been shown, preventing duplicates
+- **Files Modified**: `TradeMonitorPage.jsx`
+
+#### Manual Deposit Override Feature ✅
+- **Status**: USER VERIFICATION PENDING
+- **Feature**: Text link "Wrong Calculations? Enter your total deposit manually" in Simulate Deposit dialog
+- **Allows**: Users to bypass automatic fee calculations and enter exact deposit amounts
+- **Files**: `ProfitTrackerPage.jsx`
+
 ### Session 34 (2026-01-12) - P1 & P2 Features ✅
 
 #### P1: Off-Canvas Notification Panel ✅
