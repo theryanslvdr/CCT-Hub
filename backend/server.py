@@ -5797,26 +5797,53 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_db():
-    # Create indexes
-    await db.users.create_index("email", unique=True)
-    await db.users.create_index("id", unique=True)
-    await db.deposits.create_index("user_id")
-    await db.trade_logs.create_index("user_id")
-    await db.trading_signals.create_index("is_active")
-    await db.debts.create_index("user_id")
-    await db.goals.create_index("user_id")
-    logger.info("Database indexes created")
+    import asyncio
+    
+    # Retry logic for database connection (important for Atlas)
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            # Test the connection first
+            await client.admin.command('ping')
+            logger.info(f"Successfully connected to MongoDB (attempt {attempt + 1})")
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"MongoDB connection attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                logger.error(f"Failed to connect to MongoDB after {max_retries} attempts: {e}")
+                raise
+    
+    # Create indexes with error handling
+    try:
+        await db.users.create_index("email", unique=True)
+        await db.users.create_index("id", unique=True)
+        await db.deposits.create_index("user_id")
+        await db.trade_logs.create_index("user_id")
+        await db.trading_signals.create_index("is_active")
+        await db.debts.create_index("user_id")
+        await db.goals.create_index("user_id")
+        logger.info("Database indexes created")
+    except Exception as e:
+        logger.warning(f"Index creation warning (may already exist): {e}")
     
     # Start the scheduler for missed trade emails
     # Run at 11 PM UTC every day (after typical trading hours)
-    scheduler.add_job(
-        check_missed_trades,
-        CronTrigger(hour=23, minute=0),
-        id="missed_trade_check",
-        replace_existing=True
-    )
-    scheduler.start()
-    logger.info("Scheduler started for missed trade notifications")
+    try:
+        scheduler.add_job(
+            check_missed_trades,
+            CronTrigger(hour=23, minute=0),
+            id="missed_trade_check",
+            replace_existing=True
+        )
+        scheduler.start()
+        logger.info("Scheduler started for missed trade notifications")
+    except Exception as e:
+        logger.warning(f"Scheduler startup warning: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
