@@ -908,6 +908,7 @@ export const TradeMonitorPage = () => {
         </CardHeader>
         <CardContent>
           {showExitAlert ? (
+            // Step 1: Alarm is ringing - show "Trade Entered" button
             <div className="text-center space-y-6">
               <div className="animate-bounce">
                 <div className="text-6xl">🚨</div>
@@ -915,12 +916,28 @@ export const TradeMonitorPage = () => {
               <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">ENTER YOUR TRADE NOW!</h2>
               <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">{formatLargeNumber(exitValue)}</span></p>
               <div className="flex gap-4 justify-center">
-                <Button onClick={endTrade} className="btn-primary text-xl py-6 px-8" data-testid="end-trade-button">
-                  <Square className="w-6 h-6 mr-2" /> End Trade
+                <Button onClick={confirmTradeEntered} className="btn-primary text-xl py-6 px-8" data-testid="trade-entered-button">
+                  <Check className="w-6 h-6 mr-2" /> Trade Entered
                 </Button>
               </div>
             </div>
+          ) : tradeEntered ? (
+            // Step 2: User entered trade - show "Exit Trade" button
+            <div className="text-center space-y-6">
+              <div className="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+                <p className="text-emerald-400 text-lg font-semibold">✓ Trade Active</p>
+                <p className="text-zinc-400 text-sm mt-1">Click "Exit Trade" when you&apos;ve closed your position</p>
+              </div>
+              <div className="p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-sm text-zinc-400">Target Exit Value</p>
+                <p className="text-3xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
+              </div>
+              <Button onClick={confirmTradeExited} className="btn-primary text-xl py-6 px-8" data-testid="exit-trade-button">
+                <ArrowRight className="w-6 h-6 mr-2" /> Exit Trade
+              </Button>
+            </div>
           ) : tradeEnded ? (
+            // Step 3: User exited trade - show actual profit input
             <div className="text-center space-y-6">
               <h3 className="text-2xl font-bold text-white">Enter Your Actual Profit</h3>
               <p className="text-zinc-400">How much did you actually make from this trade?</p>
