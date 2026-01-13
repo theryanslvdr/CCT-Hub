@@ -1354,8 +1354,6 @@ async def get_daily_summary(user: dict = Depends(get_current_user)):
 @trade_router.get("/missed-trade-status")
 async def check_missed_trade_status(user: dict = Depends(get_current_user)):
     """Check if the current user has missed today's trade"""
-    from datetime import time as datetime_time
-    import pytz
     
     # Get today's date range
     today = datetime.now(timezone.utc).date()
