@@ -599,7 +599,10 @@ export const TradeMonitorPage = () => {
       const result = response.data;
       setLastTrade(result);
       setTradeEnded(false);
+      setTradeEntered(false);
       setIsTrading(false);
+      setShowMissedTradePopup(false);
+      setMissedTradeChecked(true); // Mark as checked for this signal
       
       // Stop global countdown and clear persisted state
       stopGlobalCountdown();
