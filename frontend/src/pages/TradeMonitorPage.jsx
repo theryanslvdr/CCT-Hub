@@ -141,6 +141,7 @@ export const TradeMonitorPage = () => {
   const [profitSummary, setProfitSummary] = useState(null);
   const [isTrading, setIsTrading] = useState(false);
   const [tradeEnded, setTradeEnded] = useState(false);
+  const [tradeEntered, setTradeEntered] = useState(false); // New: Track if user has entered the trade
   const [countdown, setCountdown] = useState(null);
   const [showExitAlert, setShowExitAlert] = useState(false);
   const [exitValue, setExitValue] = useState(0);
@@ -154,6 +155,10 @@ export const TradeMonitorPage = () => {
   const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
   const [checkInRestored, setCheckInRestored] = useState(false);
+  
+  // Missed Trade Popup state
+  const [showMissedTradePopup, setShowMissedTradePopup] = useState(false);
+  const [missedTradeChecked, setMissedTradeChecked] = useState(false);
   
   // Trade History state
   const [tradeHistory, setTradeHistory] = useState([]);
