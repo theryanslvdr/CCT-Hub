@@ -2058,8 +2058,26 @@ export const ProfitTrackerPage = () => {
                             </Button>
                           ) : day.status === 'future' ? (
                             <span className="text-zinc-500 text-xs">-</span>
+                          ) : day.isToday ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                              onClick={() => handleOpenEnterAP(day)}
+                              data-testid={`enter-ap-${day.dateKey}`}
+                            >
+                              <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                            </Button>
                           ) : (
-                            <span className="text-amber-400 text-xs">Pending Trade</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                              onClick={() => handleOpenEnterAP(day)}
+                              data-testid={`enter-ap-${day.dateKey}`}
+                            >
+                              <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                            </Button>
                           )}
                         </td>
                         <td>
