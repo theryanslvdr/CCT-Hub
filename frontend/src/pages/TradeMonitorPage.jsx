@@ -289,6 +289,37 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(interval);
   }, [loadData]); // Reload when loadData changes (which depends on isInBVE)
 
+  // Check for missed trade - show popup if trade window passed and user hasn't traded
+  useEffect(() => {
+    if (!signal || isTrading || tradeEnded || tradeEntered || missedTradeChecked || showCelebration) {
+      return;
+    }
+
+    const checkMissedTrade = () => {
+      const info = getTradeWindowInfo();
+      // If post-trade window (within 30 min after trade time) and user hasn't checked in
+      if (info.isPostTrade && !isTrading && !tradeEnded && !missedTradeChecked) {
+        // Check if user has already traded today
+        const today = new Date().toISOString().split('T')[0];
+        const hasTradedToday = dailySummary?.trades_count > 0;
+        
+        if (!hasTradedToday) {
+          setShowMissedTradePopup(true);
+        }
+      }
+    };
+
+    // Check after a short delay to allow data to load
+    const timeout = setTimeout(checkMissedTrade, 2000);
+    return () => clearTimeout(timeout);
+  }, [signal, isTrading, tradeEnded, tradeEntered, missedTradeChecked, showCelebration, getTradeWindowInfo, dailySummary]);
+
+  // Reset missed trade check when signal changes
+  useEffect(() => {
+    setMissedTradeChecked(false);
+    setShowMissedTradePopup(false);
+  }, [signal?.id]);
+
   // Load trade history when page changes
   useEffect(() => {
     loadTradeHistory();
