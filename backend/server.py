@@ -30,13 +30,38 @@ from services import (
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection with Atlas-compatible settings
+mongo_url = os.environ.get('MONGO_URL')
+if not mongo_url:
+    raise ValueError("MONGO_URL environment variable is required")
 
-# JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'crosscurrent-finance-secret-key-2024')
+# Configure MongoDB client with proper settings for Atlas
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=30000,  # 30 second timeout
+    connectTimeoutMS=30000,
+    socketTimeoutMS=30000,
+    retryWrites=True,
+    w='majority'
+)
+
+# Get database name from environment or parse from connection string
+db_name = os.environ.get('DB_NAME')
+if not db_name:
+    # Try to extract from connection string (mongodb+srv://.../<dbname>?...)
+    import re
+    match = re.search(r'/([^/?]+)\?', mongo_url)
+    if match:
+        db_name = match.group(1)
+    else:
+        db_name = 'crosscurrent_finance'  # Fallback only if not in URL
+
+db = client[db_name]
+
+# JWT Config - No fallback in production
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    raise ValueError("JWT_SECRET environment variable is required")
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
@@ -45,7 +70,7 @@ HEARTBEAT_API_KEY = os.environ.get('HEARTBEAT_API_KEY', '')
 
 # Cloudinary Config
 cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', 'crosscurrent'),
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
     api_key=os.environ.get('CLOUDINARY_API_KEY', ''),
     api_secret=os.environ.get('CLOUDINARY_API_SECRET', '')
 )
@@ -59,14 +84,14 @@ from apscheduler.triggers.cron import CronTrigger
 
 scheduler = AsyncIOScheduler()
 
-# Super Admin Secret Code
-SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', 'CROSSCURRENT2024')
+# Super Admin Secret Code - No insecure fallback
+SUPER_ADMIN_SECRET = os.environ.get('SUPER_ADMIN_SECRET', '')
 
-# Master Admin Secret Code
-MASTER_ADMIN_SECRET = os.environ.get('MASTER_ADMIN_SECRET', 'CrossCurrentGODSEYE')
+# Master Admin Secret Code - No insecure fallback
+MASTER_ADMIN_SECRET = os.environ.get('MASTER_ADMIN_SECRET', '')
 
-# Super Admin Bypass Code (for hidden settings click feature)
-SUPER_ADMIN_BYPASS = os.environ.get('SUPER_ADMIN_BYPASS', 'SUPER_ADMIN_BYPASS')
+# Super Admin Bypass Code (for hidden settings click feature) - No insecure fallback
+SUPER_ADMIN_BYPASS = os.environ.get('SUPER_ADMIN_BYPASS', '')
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
