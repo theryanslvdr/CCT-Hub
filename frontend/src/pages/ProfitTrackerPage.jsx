@@ -397,6 +397,10 @@ export const ProfitTrackerPage = () => {
   const [resetReason, setResetReason] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   
+  // Manual deposit override
+  const [manualDepositMode, setManualDepositMode] = useState(false);
+  const [manualDepositAmount, setManualDepositAmount] = useState('');
+  
   // Check if user is a licensee (hide simulation/record buttons)
   const isLicensee = simulatedView?.license_type || user?.license_type;
   
