@@ -362,6 +362,12 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
+  // Enter AP (Actual Profit) Dialog for missed trades
+  const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
+  const [enterAPDate, setEnterAPDate] = useState(null);
+  const [enterAPValue, setEnterAPValue] = useState('');
+  const [enterAPLoading, setEnterAPLoading] = useState(false);
+  
   // Access Records Dialog (combined deposit, withdrawal, commission records)
   const [accessRecordsOpen, setAccessRecordsOpen] = useState(false);
   const [activeRecordTab, setActiveRecordTab] = useState('deposits');
