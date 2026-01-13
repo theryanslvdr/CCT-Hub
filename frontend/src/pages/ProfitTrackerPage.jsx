@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import api, { profitAPI, currencyAPI, adminAPI } from '@/lib/api';
+import api, { profitAPI, currencyAPI, adminAPI, tradeAPI } from '@/lib/api';
 import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   TrendingUp, Wallet, RotateCcw, Rocket, Calendar,
   Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
   ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
-  Radio, EyeOff, Award, FolderOpen, MoreHorizontal
+  Radio, EyeOff, Award, FolderOpen, MoreHorizontal, Edit3
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
