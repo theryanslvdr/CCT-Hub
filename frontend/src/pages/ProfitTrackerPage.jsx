@@ -611,6 +611,8 @@ export const ProfitTrackerPage = () => {
     setDepositAmount('');
     setDepositNotes('');
     setDepositSimulation(null);
+    setManualDepositMode(false);
+    setManualDepositAmount('');
   };
 
   // Withdrawal flow handlers
