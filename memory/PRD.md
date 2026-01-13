@@ -36,13 +36,18 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   3. Click "Exit Trade" → Shows actual profit input form
 - **Files Modified**: `TradeMonitorPage.jsx`
 
-#### Missed Trade Popup ✅
-- **Feature**: When trade window passes and user hasn't traded, popup asks "Did you miss the trade?"
-- **Buttons**:
-  - "Yes, I missed it" → Marks trade as missed, closes popup
-  - "No, I traded" → Shows actual profit entry form
-- **Auto-detection**: Checks if user is in post-trade window without having logged a trade
-- **Files Modified**: `TradeMonitorPage.jsx`
+#### Missed Trade Popup Enhancement ✅
+- **Feature 1**: Auto-show popup when trade window passes via backend API check (`/api/trade/missed-trade-status`)
+- **Feature 2**: Auto-show popup when signal is marked completed and user hasn't traded
+- **Feature 3**: "Enter AP" button in Daily Projection Table for missed trades
+  - Shows in Profit Tracker → Month card → Daily Projection dialog
+  - Allows users to retroactively log actual profit for missed trades
+  - Calculates and displays P/L difference
+  - Updates the trade log with `is_retroactive: true` flag
+- **New Endpoints**:
+  - `GET /api/trade/missed-trade-status` - Check if user should see missed trade popup
+  - `POST /api/trade/log-missed-trade` - Log a trade retroactively
+- **Files Modified**: `server.py`, `api.js`, `TradeMonitorPage.jsx`, `ProfitTrackerPage.jsx`
 
 #### Manual Deposit Override Feature ✅
 - **Status**: USER VERIFICATION PENDING
