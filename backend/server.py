@@ -5542,7 +5542,7 @@ async def generate_performance_report_base64(
         platform_name = settings.get("site_name", "CrossCurrent") if settings else "CrossCurrent"
         
         base64_image = await generate_report_base64(
-            user_name=user.get("full_name", user.get("email", "Trader")),
+            user_name=user_name,
             period=period,
             stats=stats,
             trades=formatted_trades,
