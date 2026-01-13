@@ -107,6 +107,8 @@ export const tradeAPI = {
   getActiveSignal: () => api.get('/trade/active-signal'),
   getDailySummary: () => api.get('/trade/daily-summary'),
   forwardToProfit: (tradeId) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId } }),
+  getMissedTradeStatus: () => api.get('/trade/missed-trade-status'),
+  logMissedTrade: (data) => api.post('/trade/log-missed-trade', null, { params: data }),
 };
 
 // Admin APIs
