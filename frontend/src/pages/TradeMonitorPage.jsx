@@ -1345,6 +1345,57 @@ export const TradeMonitorPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Missed Trade Popup - Shows when user misses the trade window */}
+      <Dialog open={showMissedTradePopup} onOpenChange={setShowMissedTradePopup}>
+        <DialogContent className="glass-card border-zinc-800 border-amber-500/30">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" /> Did you miss the trade?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="text-zinc-400 text-center">
+              The trading window for today&apos;s signal has passed. Did you miss the trade?
+            </p>
+            
+            <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400">Signal</span>
+                <span className="font-mono text-white">{signal?.product || 'MOIL10'}</span>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-zinc-400">Direction</span>
+                <span className={`font-bold ${signal?.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {signal?.direction || 'BUY'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-zinc-400">Trade Time</span>
+                <span className="font-mono text-blue-400">{signal?.trade_time}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button 
+                onClick={handleConfirmMissedTrade} 
+                variant="outline"
+                className="w-full btn-secondary gap-2"
+                data-testid="confirm-missed-trade-button"
+              >
+                <X className="w-4 h-4" /> Yes, I missed it
+              </Button>
+              <Button 
+                onClick={handleDidNotMissTrade} 
+                className="w-full btn-primary gap-2"
+                data-testid="did-not-miss-trade-button"
+              >
+                <Check className="w-4 h-4" /> No, I traded
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
 
       {/* Right Panel - Merin Trading Platform */}
