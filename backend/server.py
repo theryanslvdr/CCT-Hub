@@ -5477,7 +5477,7 @@ async def generate_performance_report_base64(
             start_date = now - timedelta(days=30)
         
         trades_cursor = db.trade_logs.find(
-            {"user_id": user["id"], "created_at": {"$gte": start_date}},
+            {"user_id": target_user_id, "created_at": {"$gte": start_date}},
             {"_id": 0}
         ).sort("created_at", -1)
         trades = await trades_cursor.to_list(100)
@@ -5492,19 +5492,19 @@ async def generate_performance_report_base64(
         worst_trade = min(profits) if profits else 0
         
         summary = await db.deposits.aggregate([
-            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$match": {"user_id": target_user_id, "status": "completed"}},
             {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
         ]).to_list(1)
         deposits_total = summary[0]["total"] if summary else 0
         
         withdrawals = await db.withdrawals.aggregate([
-            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$match": {"user_id": target_user_id, "status": "completed"}},
             {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
         ]).to_list(1)
         withdrawals_total = withdrawals[0]["total"] if withdrawals else 0
         
         all_time_profit = await db.trade_logs.aggregate([
-            {"$match": {"user_id": user["id"]}},
+            {"$match": {"user_id": target_user_id}},
             {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
         ]).to_list(1)
         all_profit = all_time_profit[0]["total"] if all_time_profit else 0
