@@ -149,7 +149,7 @@ export const AdminAnalyticsPage = () => {
   const handleDownloadReport = async () => {
     setReportLoading(true);
     try {
-      const res = await api.get('/profit/report/image', { params: { period: reportPeriod }, responseType: 'blob' });
+      const res = await api.get('/admin/analytics/report/image', { params: { period: reportPeriod }, responseType: 'blob' });
       const blob = res.data;
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
