@@ -11,7 +11,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 35 (2026-01-13) - Security Fix & BVE Bug Fix ✅
+### Session 35 (2026-01-13) - Security Fix & Trade Flow Improvements ✅
 
 #### P0: Security Fix - Report Generation Endpoint ✅
 - **Issue**: Report generation endpoints (`/api/profit/report/*`) were accessible to any authenticated user
@@ -26,6 +26,22 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Issue**: When trade time was reached in BVE mode, push notifications were flooding and the alarm wouldn't stop
 - **Root Cause**: The interval firing toast notifications multiple times before `clearInterval` took effect
 - **Fix**: Added `tradeNotifiedRef` to track if notification has been shown, preventing duplicates
+- **Files Modified**: `TradeMonitorPage.jsx`
+
+#### Trade Flow Improvements ✅
+- **Issue**: Trade flow was confusing - "End Trade" button unclear, alarm didn't stop properly
+- **New Flow**:
+  1. Alarm rings → Button shows "Trade Entered" 
+  2. Click "Trade Entered" → Alarm stops, button changes to "Exit Trade"
+  3. Click "Exit Trade" → Shows actual profit input form
+- **Files Modified**: `TradeMonitorPage.jsx`
+
+#### Missed Trade Popup ✅
+- **Feature**: When trade window passes and user hasn't traded, popup asks "Did you miss the trade?"
+- **Buttons**:
+  - "Yes, I missed it" → Marks trade as missed, closes popup
+  - "No, I traded" → Shows actual profit entry form
+- **Auto-detection**: Checks if user is in post-trade window without having logged a trade
 - **Files Modified**: `TradeMonitorPage.jsx`
 
 #### Manual Deposit Override Feature ✅
