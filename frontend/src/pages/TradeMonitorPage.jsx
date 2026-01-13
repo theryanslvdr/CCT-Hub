@@ -659,6 +659,20 @@ export const TradeMonitorPage = () => {
     setEditTimeValue('');
   };
 
+  // Missed trade handlers
+  const handleConfirmMissedTrade = () => {
+    setShowMissedTradePopup(false);
+    setMissedTradeChecked(true);
+    toast.info('Trade marked as missed. You can still log it manually from your trade history.');
+  };
+
+  const handleDidNotMissTrade = () => {
+    // User says they did trade - show the actual profit entry form
+    setShowMissedTradePopup(false);
+    setTradeEnded(true);
+    setIsTrading(true);
+  };
+
   // Performance message for today's summary
   const getDailyPerformanceMessage = () => {
     const diff = dailySummary?.difference || 0;
