@@ -558,6 +558,7 @@ export const TradeMonitorPage = () => {
     setIsTrading(false);
     setShowExitAlert(false);
     setTradeEnded(false);
+    setTradeEntered(false);
     setCountdown(null);
     setPreTradeCountdown(null);
     setLastTrade(null);
@@ -573,6 +574,10 @@ export const TradeMonitorPage = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+    }
+    if (beepRef.current) {
+      beepRef.current.pause();
+      beepRef.current.currentTime = 0;
     }
     // No need to dismiss toasts since we don't use IDs
   };
