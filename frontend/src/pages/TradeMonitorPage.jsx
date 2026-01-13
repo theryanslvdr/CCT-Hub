@@ -289,30 +289,35 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(interval);
   }, [loadData]); // Reload when loadData changes (which depends on isInBVE)
 
-  // Check for missed trade - show popup if trade window passed and user hasn't traded
+  // Check for missed trade from backend - auto-show popup if needed
   useEffect(() => {
-    if (!signal || isTrading || tradeEnded || tradeEntered || missedTradeChecked || showCelebration) {
+    if (isTrading || tradeEnded || tradeEntered || missedTradeChecked || showCelebration) {
       return;
     }
 
-    const checkMissedTrade = () => {
-      const info = getTradeWindowInfo();
-      // If post-trade window (within 30 min after trade time) and user hasn't checked in
-      if (info.isPostTrade && !isTrading && !tradeEnded && !missedTradeChecked) {
-        // Check if user has already traded today
-        const today = new Date().toISOString().split('T')[0];
-        const hasTradedToday = dailySummary?.trades_count > 0;
+    const checkMissedTradeFromBackend = async () => {
+      try {
+        const response = await tradeAPI.getMissedTradeStatus();
+        const status = response.data;
         
-        if (!hasTradedToday) {
+        // Show popup if backend says user should see it
+        if (status.should_show_missed_popup && !missedTradeChecked) {
+          setShowMissedTradePopup(true);
+        }
+      } catch (error) {
+        console.error('Failed to check missed trade status:', error);
+        // Fallback to local check if backend fails
+        const info = getTradeWindowInfo();
+        if (info.isPostTrade && dailySummary?.trades_count === 0) {
           setShowMissedTradePopup(true);
         }
       }
     };
 
     // Check after a short delay to allow data to load
-    const timeout = setTimeout(checkMissedTrade, 2000);
+    const timeout = setTimeout(checkMissedTradeFromBackend, 2000);
     return () => clearTimeout(timeout);
-  }, [signal, isTrading, tradeEnded, tradeEntered, missedTradeChecked, showCelebration, getTradeWindowInfo, dailySummary]);
+  }, [isTrading, tradeEnded, tradeEntered, missedTradeChecked, showCelebration, getTradeWindowInfo, dailySummary]);
 
   // Reset missed trade check when signal changes
   useEffect(() => {
