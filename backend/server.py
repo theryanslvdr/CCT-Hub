@@ -5341,7 +5341,7 @@ async def generate_performance_report_image(
         # Get user's trades for the period
         trades_cursor = db.trade_logs.find(
             {
-                "user_id": user["id"],
+                "user_id": target_user_id,
                 "created_at": {"$gte": start_date}
             },
             {"_id": 0}
