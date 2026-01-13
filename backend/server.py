@@ -5426,7 +5426,7 @@ async def generate_performance_report_image(
         
         # Generate the image
         image_bytes = await generate_performance_report(
-            user_name=user.get("full_name", user.get("email", "Trader")),
+            user_name=user_name,
             period=period,
             stats=stats,
             trades=formatted_trades,
