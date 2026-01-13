@@ -2102,10 +2102,89 @@ export const ProfitTrackerPage = () => {
           </div>
           <div className="mt-4 p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
             <p>• Weekends and holidays are excluded from projections</p>
-            <p>• <span className="text-amber-400">Pending Trade</span> = No trade recorded yet</p>
+            <p>• <span className="text-amber-400">Enter AP</span> = Click to enter your actual profit for missed trades</p>
             <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
             <p>• Actual profits update your Account Value when recorded</p>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enter AP Dialog - For logging missed trades */}
+      <Dialog open={enterAPDialogOpen} onOpenChange={setEnterAPDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Edit3 className="w-5 h-5 text-amber-400" /> Enter Actual Profit
+            </DialogTitle>
+          </DialogHeader>
+          {enterAPDate && (
+            <div className="space-y-6 py-4">
+              <p className="text-zinc-400 text-sm">
+                Log your actual profit for the trade you made on <span className="text-white font-medium">{enterAPDate.dateStr}</span>
+              </p>
+              
+              <div className="p-4 rounded-lg bg-zinc-900/50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400 text-sm">Balance Before</span>
+                  <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400 text-sm">Lot Size</span>
+                  <span className="font-mono text-purple-400">{truncateTo2Decimals(enterAPDate.lotSize).toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400 text-sm">Target Profit</span>
+                  <span className="font-mono text-zinc-400">{formatMoney(enterAPDate.targetProfit)}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Actual Profit (USD)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={enterAPValue}
+                  onChange={(e) => setEnterAPValue(e.target.value)}
+                  placeholder="Enter your actual profit"
+                  className="input-dark text-lg font-mono"
+                  data-testid="enter-ap-input"
+                />
+                <p className="text-xs text-zinc-500">
+                  Enter a positive number for profit, negative for loss
+                </p>
+              </div>
+
+              {enterAPValue && (
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 text-sm">P/L Difference</span>
+                    <span className={`font-mono font-bold ${(parseFloat(enterAPValue) - enterAPDate.targetProfit) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {(parseFloat(enterAPValue) - enterAPDate.targetProfit) >= 0 ? '+' : ''}
+                      {formatMoney(parseFloat(enterAPValue) - enterAPDate.targetProfit)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 btn-secondary"
+                  onClick={() => setEnterAPDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 btn-primary"
+                  onClick={handleSubmitEnterAP}
+                  disabled={enterAPLoading || !enterAPValue}
+                  data-testid="submit-enter-ap"
+                >
+                  {enterAPLoading ? 'Saving...' : 'Save Trade'}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
