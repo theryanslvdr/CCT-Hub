@@ -567,6 +567,7 @@ export const TradeMonitorPage = () => {
       // Stop global countdown and clear persisted state
       stopGlobalCountdown();
       localStorage.removeItem('trade_check_in');
+      tradeNotifiedRef.current = false; // Reset notification ref
 
       // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
