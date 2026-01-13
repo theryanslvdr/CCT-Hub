@@ -926,7 +926,7 @@ export const TradeMonitorPage = () => {
             <div className="text-center space-y-6">
               <div className="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
                 <p className="text-emerald-400 text-lg font-semibold">✓ Trade Active</p>
-                <p className="text-zinc-400 text-sm mt-1">Click "Exit Trade" when you&apos;ve closed your position</p>
+                <p className="text-zinc-400 text-sm mt-1">Click &quot;Exit Trade&quot; when you&apos;ve closed your position</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-sm text-zinc-400">Target Exit Value</p>
