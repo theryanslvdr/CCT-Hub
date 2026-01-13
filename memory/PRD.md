@@ -44,9 +44,17 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - Allows users to retroactively log actual profit for missed trades
   - Calculates and displays P/L difference
   - Updates the trade log with `is_retroactive: true` flag
+  - **Fixed**: After submission, button hides and values update correctly
+  - **Fixed**: User removed from Missed Trade list in Team Analytics
+- **Feature 4**: Daily Projection now uses latest account value for current month
+  - Ensures newly logged trades are immediately reflected
 - **New Endpoints**:
   - `GET /api/trade/missed-trade-status` - Check if user should see missed trade popup
   - `POST /api/trade/log-missed-trade` - Log a trade retroactively
+- **Bug Fixes**:
+  - Fixed timezone handling in trade dates (now always includes +00:00)
+  - Fixed missing `signal_id` field in retroactive trades
+  - Fixed `profit_difference` calculation in retroactive trades
 - **Files Modified**: `server.py`, `api.js`, `TradeMonitorPage.jsx`, `ProfitTrackerPage.jsx`
 
 #### Manual Deposit Override Feature ✅
