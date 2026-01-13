@@ -571,15 +571,26 @@ export const ProfitTrackerPage = () => {
   };
 
   // Get daily projection data for selected month
+  // Note: For current month, always use the latest effectiveAccountValue to ensure
+  // the projection reflects any newly logged trades
   const getDailyProjectionForSelectedMonth = useMemo(() => {
     if (!selectedMonth) return [];
+    
+    // For current month, use the latest effectiveAccountValue
+    // For other months, use the selectedMonth's startBalance
+    const today = new Date();
+    const isCurrentMonth = selectedMonth.monthDate.getFullYear() === today.getFullYear() &&
+                           selectedMonth.monthDate.getMonth() === today.getMonth();
+    
+    const startBalance = isCurrentMonth ? effectiveAccountValue : selectedMonth.startBalance;
+    
     return generateDailyProjectionForMonth(
-      selectedMonth.startBalance,
+      startBalance,
       selectedMonth.monthDate,
       tradeLogs,
       activeSignal
     );
-  }, [selectedMonth, tradeLogs, activeSignal]);
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue]);
 
   // Handle opening Enter AP dialog for a specific date
   const handleOpenEnterAP = (day) => {
