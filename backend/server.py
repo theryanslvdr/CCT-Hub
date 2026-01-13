@@ -678,7 +678,7 @@ class VerifyPasswordRequest(BaseModel):
     password: str
 
 @auth_router.post("/verify-password")
-async def verify_password(data: VerifyPasswordRequest, user: dict = Depends(get_current_user)):
+async def verify_user_password(data: VerifyPasswordRequest, user: dict = Depends(get_current_user)):
     """Verify the current user's password"""
     db_user = await db.users.find_one({"id": user["id"]})
     if not db_user:
