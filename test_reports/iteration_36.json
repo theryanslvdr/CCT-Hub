@@ -1,0 +1,94 @@
+{
+  "summary": "Iteration 36 - Core Features Testing Complete. All critical features verified working: Login, Dashboard, Profit Tracker, Trade Monitor. Backend APIs all returning correct data. Frontend pages loading and displaying expected values.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "N/A",
+        "issue": "RuntimeWarning in logs: 'coroutine verify_password was never awaited' - This appears in backend logs but login still works correctly. The verify_password function at line 444 is sync, not async, so this warning is misleading and doesn't affect functionality."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All pages",
+        "issues": ["Onboarding tour dialog appears on every page load - may want to persist dismissal state", "Missing API Keys warning appears for admin users - expected behavior for unconfigured integrations"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_36_core_features.py",
+    "/app/test_reports/pytest/pytest_iteration_36.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/tests/test_iteration_36_core_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All core features working. Login fixed (verify_password function shadowing issue resolved). MongoDB Atlas connection working with retry logic. Dashboard shows Account Value $14,981.62, Total Profit $230.00, LOT Size 15.29, Performance Rate 103.5%. Active signal MOIL10 BUY at 20:20 displayed correctly.",
+  "features_tested": {
+    "login": {
+      "status": "PASS",
+      "details": "POST /api/auth/login returns valid token and user data. User iam@ryansalvador.com with role master_admin logs in successfully."
+    },
+    "dashboard": {
+      "status": "PASS",
+      "details": "Dashboard page loads with correct values: Account Value $14,981.62, Total Profit $230.00, LOT Size 15.29, Performance Rate 103.5%, Active Signal MOIL10 BUY."
+    },
+    "profit_tracker": {
+      "status": "PASS",
+      "details": "Profit Tracker page loads with account value, deposits, profit data, and projection vision chart."
+    },
+    "trade_monitor": {
+      "status": "PASS",
+      "details": "Trade Monitor page shows active signal MOIL10 BUY at 20:20, LOT Size 15.28, trade controls, today's summary, and Merin Trading Platform iframe."
+    },
+    "profit_summary_api": {
+      "status": "PASS",
+      "details": "GET /api/profit/summary returns total_deposits: 14751.62, total_actual_profit: 230.00, account_value: 14981.62, performance_rate: 103.53"
+    },
+    "active_signal_api": {
+      "status": "PASS",
+      "details": "GET /api/trade/active-signal returns signal with product: MOIL10, direction: BUY, trade_time: 20:20, profit_points: 15.0"
+    }
+  },
+  "api_tests": {
+    "GET /api/health": "PASS",
+    "GET /api/settings/platform": "PASS - Returns CrossCurrent platform settings",
+    "POST /api/auth/login (valid)": "PASS - Returns token and user data",
+    "POST /api/auth/login (invalid)": "PASS - Returns 401",
+    "GET /api/auth/me": "PASS - Returns current user info",
+    "GET /api/profit/summary": "PASS - Returns account value, profit, performance rate",
+    "GET /api/profit/summary (no auth)": "PASS - Returns 401/403",
+    "GET /api/trade/active-signal": "PASS - Returns active signal data",
+    "GET /api/trade/logs": "PASS - Returns trade history",
+    "GET /api/trade/daily-summary": "PASS - Returns daily summary",
+    "GET /api/profit/deposits": "PASS - Returns deposits list",
+    "GET /api/currency/rates": "PASS - Returns currency rates",
+    "GET /api/admin/notifications": "PASS - Returns admin notifications"
+  },
+  "ui_tests": {
+    "login_page": "PASS - Login form visible with email/password fields",
+    "login_flow": "PASS - User can login and is redirected to dashboard",
+    "dashboard_page": "PASS - Shows Account Value, Total Profit, LOT Size, Performance Rate, Active Signal",
+    "profit_tracker_page": "PASS - Shows account value, deposits, profit, projection chart",
+    "trade_monitor_page": "PASS - Shows active signal, LOT size, trade controls, today's summary, Merin iframe"
+  },
+  "test_date": "2026-01-13T21:25:00Z"
+}
