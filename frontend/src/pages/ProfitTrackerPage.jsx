@@ -1168,22 +1168,36 @@ export const ProfitTrackerPage = () => {
             {depositStep === 'simulate' && depositSimulation && (
               <div className="space-y-4 mt-4">
                 <div className="space-y-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Binance USDT</span>
-                    <span className="font-mono text-white">{formatMoney(depositSimulation.binanceAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-amber-400">
-                    <span>Deposit Fee (1%)</span>
-                    <span className="font-mono">-{formatMoney(depositSimulation.depositFee)}</span>
-                  </div>
-                  <div className="flex justify-between text-amber-400">
-                    <span>Binance Fee</span>
-                    <span className="font-mono">-$1.00</span>
-                  </div>
-                  <div className="border-t border-zinc-700 pt-3 flex justify-between">
-                    <span className="text-zinc-300 font-medium">Receive Amount</span>
-                    <span className="font-mono font-bold text-emerald-400">{formatMoney(depositSimulation.receiveAmount)}</span>
-                  </div>
+                  {depositSimulation.isManualOverride ? (
+                    <>
+                      <div className="p-2 rounded bg-blue-500/10 border border-blue-500/30 mb-3">
+                        <p className="text-xs text-blue-400 text-center">Manual Override - No fees applied</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-300 font-medium">Deposit Amount</span>
+                        <span className="font-mono font-bold text-emerald-400">{formatMoney(depositSimulation.receiveAmount)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-zinc-400">Binance USDT</span>
+                        <span className="font-mono text-white">{formatMoney(depositSimulation.binanceAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-amber-400">
+                        <span>Deposit Fee (1%)</span>
+                        <span className="font-mono">-{formatMoney(depositSimulation.depositFee)}</span>
+                      </div>
+                      <div className="flex justify-between text-amber-400">
+                        <span>Binance Fee</span>
+                        <span className="font-mono">-$1.00</span>
+                      </div>
+                      <div className="border-t border-zinc-700 pt-3 flex justify-between">
+                        <span className="text-zinc-300 font-medium">Receive Amount</span>
+                        <span className="font-mono font-bold text-emerald-400">{formatMoney(depositSimulation.receiveAmount)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => setDepositStep('input')}>
