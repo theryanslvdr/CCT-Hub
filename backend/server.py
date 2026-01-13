@@ -1350,6 +1350,170 @@ async def get_daily_summary(user: dict = Depends(get_current_user)):
         "trades": trades
     }
 
+@trade_router.get("/missed-trade-status")
+async def check_missed_trade_status(user: dict = Depends(get_current_user)):
+    """Check if the current user has missed today's trade"""
+    from datetime import time as datetime_time
+    import pytz
+    
+    # Get today's date range
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_end = datetime.combine(today, datetime.max.time()).replace(tzinfo=timezone.utc)
+    
+    # Check if user has traded today
+    today_trade = await db.trade_logs.find_one({
+        "user_id": user["id"],
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0})
+    
+    has_traded_today = today_trade is not None
+    
+    # Get active signal and check if trade window has passed
+    signal = await db.trading_signals.find_one({"is_active": True}, {"_id": 0})
+    
+    signal_completed = False
+    is_post_trade_window = False
+    trade_window_passed = False
+    
+    if signal:
+        # Parse trade time
+        trade_time_str = signal.get("trade_time", "12:00")
+        trade_tz_str = signal.get("trade_timezone", "Asia/Manila")
+        
+        try:
+            tz = pytz.timezone(trade_tz_str)
+            now = datetime.now(tz)
+            
+            # Parse trade time (e.g., "12:00" or "20:20")
+            parts = trade_time_str.split(":")
+            trade_hour = int(parts[0])
+            trade_minute = int(parts[1]) if len(parts) > 1 else 0
+            
+            # Create trade time for today in the signal's timezone
+            trade_time_today = now.replace(hour=trade_hour, minute=trade_minute, second=0, microsecond=0)
+            
+            # Check if trade window has passed (trade time + 30 minutes buffer)
+            trade_window_end = trade_time_today + timedelta(minutes=30)
+            
+            if now > trade_window_end:
+                trade_window_passed = True
+            
+            # Post-trade window is 30 minutes after trade time
+            if now > trade_time_today and now <= trade_window_end:
+                is_post_trade_window = True
+                
+        except Exception as e:
+            print(f"Error parsing trade time: {e}")
+    else:
+        # No active signal means the signal has been deactivated (completed)
+        # Check if there was a signal today that's now inactive
+        inactive_signal = await db.trading_signals.find_one(
+            {
+                "is_active": False,
+                "created_at": {"$gte": today_start.isoformat()}
+            },
+            {"_id": 0},
+            sort=[("created_at", -1)]
+        )
+        if inactive_signal:
+            signal_completed = True
+    
+    # User should see missed trade popup if:
+    # 1. Signal is completed (deactivated) and user hasn't traded today
+    # 2. OR trade window has passed and user hasn't traded today
+    should_show_missed_popup = (not has_traded_today) and (signal_completed or trade_window_passed)
+    
+    return {
+        "has_traded_today": has_traded_today,
+        "signal_completed": signal_completed,
+        "is_post_trade_window": is_post_trade_window,
+        "trade_window_passed": trade_window_passed,
+        "should_show_missed_popup": should_show_missed_popup,
+        "active_signal": signal is not None
+    }
+
+@trade_router.post("/log-missed-trade")
+async def log_missed_trade(
+    date: str,  # ISO date string for which trade was missed
+    actual_profit: float,
+    lot_size: Optional[float] = None,
+    direction: Optional[str] = "BUY",
+    notes: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """Log a trade that was missed but user wants to record retroactively"""
+    
+    # Parse the date
+    try:
+        trade_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+    except:
+        trade_date = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    
+    # Check if user already has a trade for this date
+    date_start = trade_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_end = trade_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    existing_trade = await db.trade_logs.find_one({
+        "user_id": user["id"],
+        "created_at": {
+            "$gte": date_start.isoformat(),
+            "$lte": date_end.isoformat()
+        }
+    })
+    
+    if existing_trade:
+        raise HTTPException(status_code=400, detail="Trade already exists for this date")
+    
+    # Get user's current balance to calculate lot size if not provided
+    if lot_size is None:
+        deposits = await db.deposits.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        withdrawals = await db.withdrawals.aggregate([
+            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        profits = await db.trade_logs.aggregate([
+            {"$match": {"user_id": user["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
+        ]).to_list(1)
+        
+        balance = (deposits[0]["total"] if deposits else 0) - \
+                  (withdrawals[0]["total"] if withdrawals else 0) + \
+                  (profits[0]["total"] if profits else 0)
+        
+        lot_size = round(balance / 980, 2)
+    
+    # Calculate projected profit
+    projected_profit = round(lot_size * 15, 2)
+    
+    # Create the trade log
+    trade_id = str(uuid.uuid4())
+    trade_log = {
+        "id": trade_id,
+        "user_id": user["id"],
+        "lot_size": lot_size,
+        "direction": direction,
+        "projected_profit": projected_profit,
+        "actual_profit": actual_profit,
+        "performance": "target" if actual_profit >= projected_profit else ("above" if actual_profit > 0 else "below"),
+        "notes": notes or "Retroactively logged trade",
+        "is_retroactive": True,
+        "created_at": trade_date.isoformat()
+    }
+    
+    await db.trade_logs.insert_one(trade_log)
+    
+    return {
+        "message": "Trade logged successfully",
+        "trade": {k: v for k, v in trade_log.items() if k != "_id"}
+    }
+
 @trade_router.post("/forward-to-profit")
 async def forward_trade_to_profit(trade_id: str, user: dict = Depends(get_current_user)):
     """Forward trade profit to profit tracker by creating a deposit entry"""
