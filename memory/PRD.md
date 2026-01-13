@@ -153,21 +153,24 @@ A sandboxed environment for Super/Master Admins to test without affecting real d
 
 ## Pending Tasks
 
-### P0 - High Priority
-- Email Template Testing with Variables Preview
-- Automated "Missed Trade" Email System (scheduler)
+### P0 - Critical (NONE REMAINING)
+- ~~Security vulnerability in report generation endpoint~~ ✅ FIXED
 
-### P1 - Medium Priority
-- WebSocket "Offline" Icon indicator
-- Off-Canvas Notification Panel (slide-out style)
-- Backend Route Migration (server.py → /routes/)
+### P1 - High Priority
+- **Profit Tracker Calculation Discrepancy**: User reported balance calculations don't match live data
+- **User-configurable announcement display**: Allow users to hide/show global announcements
+- **Backend Route Migration**: server.py → /routes/ directory
 
-### P2 - Lower Priority
-- Exclude Non-Traders from Top Performers
-- Generate Image Recap Report (16:9 landscape)
-- Admin Email Recap Summary
+### P2 - Medium Priority
+- **Admin Daily Email Recap**: Scheduled daily summary to admins
+- Frontend Refactoring: Break down large admin components
+- Mobile responsiveness improvements
 
 ## Key API Endpoints
+
+### Performance Reports (Admin Protected)
+- `GET /api/admin/analytics/report/image` - Download PNG report (Admin only)
+- `GET /api/admin/analytics/report/base64` - Get base64 report for preview (Admin only)
 
 ### BVE (Beta Virtual Environment)
 - `POST /api/bve/enter` - Enter BVE, create session
