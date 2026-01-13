@@ -1068,33 +1068,100 @@ export const ProfitTrackerPage = () => {
             
             {depositStep === 'input' && (
               <div className="space-y-4 mt-4">
-                <div>
-                  <Label className="text-zinc-300">Binance USDT Amount</Label>
-                  <div className="relative mt-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
-                    <Input
-                      type="number"
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="input-dark pl-7"
-                      data-testid="deposit-amount-input"
-                    />
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-1">Amount you're sending from Binance</p>
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Notes (optional)</Label>
-                  <Input
-                    value={depositNotes}
-                    onChange={(e) => setDepositNotes(e.target.value)}
-                    placeholder="Add notes..."
-                    className="input-dark mt-1"
-                  />
-                </div>
-                <Button onClick={handleSimulateDeposit} className="w-full btn-primary" data-testid="calculate-deposit-button">
-                  <Calculator className="w-4 h-4 mr-2" /> Calculate Deposit
-                </Button>
+                {!manualDepositMode ? (
+                  <>
+                    <div>
+                      <Label className="text-zinc-300">Binance USDT Amount</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                        <Input
+                          type="number"
+                          value={depositAmount}
+                          onChange={(e) => setDepositAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="input-dark pl-7"
+                          data-testid="deposit-amount-input"
+                        />
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1">Amount you&apos;re sending from Binance</p>
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Notes (optional)</Label>
+                      <Input
+                        value={depositNotes}
+                        onChange={(e) => setDepositNotes(e.target.value)}
+                        placeholder="Add notes..."
+                        className="input-dark mt-1"
+                      />
+                    </div>
+                    <Button onClick={handleSimulateDeposit} className="w-full btn-primary" data-testid="calculate-deposit-button">
+                      <Calculator className="w-4 h-4 mr-2" /> Calculate Deposit
+                    </Button>
+                    <button 
+                      onClick={() => setManualDepositMode(true)}
+                      className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                      data-testid="manual-deposit-link"
+                    >
+                      Wrong Calculations? Enter your total deposit manually
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                      <p className="text-sm text-blue-400">Manual Override Mode</p>
+                      <p className="text-xs text-zinc-400 mt-1">Enter the exact amount that will be added to your Merin balance.</p>
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Total Deposit Amount (USDT)</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                        <Input
+                          type="number"
+                          value={manualDepositAmount}
+                          onChange={(e) => setManualDepositAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="input-dark pl-7"
+                          data-testid="manual-deposit-amount-input"
+                        />
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1">This exact amount will be added to your balance (no fee calculations)</p>
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Notes (optional)</Label>
+                      <Input
+                        value={depositNotes}
+                        onChange={(e) => setDepositNotes(e.target.value)}
+                        placeholder="Add notes..."
+                        className="input-dark mt-1"
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        if (!manualDepositAmount || parseFloat(manualDepositAmount) <= 0) {
+                          toast.error('Please enter a valid amount');
+                          return;
+                        }
+                        setDepositSimulation({
+                          binanceAmount: parseFloat(manualDepositAmount),
+                          depositFee: 0,
+                          receiveAmount: parseFloat(manualDepositAmount),
+                          isManualOverride: true
+                        });
+                        setDepositStep('simulate');
+                      }} 
+                      className="w-full btn-primary" 
+                      data-testid="manual-deposit-button"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Amount
+                    </Button>
+                    <button 
+                      onClick={() => setManualDepositMode(false)}
+                      className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                    >
+                      Back to automatic calculation
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
