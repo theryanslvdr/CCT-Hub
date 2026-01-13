@@ -5303,19 +5303,32 @@ async def get_top_performers(
         logger.error(f"Failed to get top performers: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==================== PERFORMANCE REPORT ====================
+# ==================== PERFORMANCE REPORT (ADMIN PROTECTED) ====================
 
 from fastapi.responses import Response
 
-@profit_router.get("/report/image")
+@admin_router.get("/analytics/report/image")
 async def generate_performance_report_image(
     period: str = "monthly",  # daily, weekly, monthly
-    user: dict = Depends(get_current_user)
+    user_id: Optional[str] = None,  # Admin can generate for specific user
+    user: dict = Depends(require_admin)  # Changed to require admin
 ):
-    """Generate an image-based performance report for the current user"""
+    """Generate an image-based performance report (Admin only)"""
     from services.report_generator import generate_performance_report
     
     try:
+        # Use provided user_id or default to current admin's id
+        target_user_id = user_id if user_id else user["id"]
+        
+        # Get target user details if generating for another user
+        if user_id:
+            target_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+            if not target_user:
+                raise HTTPException(status_code=404, detail="User not found")
+            user_name = target_user.get("full_name", target_user.get("email", "Trader"))
+        else:
+            user_name = user.get("full_name", user.get("email", "Trader"))
+        
         # Calculate date range based on period
         now = datetime.now(timezone.utc)
         if period == "daily":
