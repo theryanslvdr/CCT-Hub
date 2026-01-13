@@ -1446,11 +1446,17 @@ async def log_missed_trade(
 ):
     """Log a trade that was missed but user wants to record retroactively"""
     
-    # Parse the date
+    # Parse the date - set to noon UTC to avoid timezone edge cases
     try:
-        trade_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
-    except:
-        trade_date = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        if 'T' in date:
+            trade_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+        else:
+            # Just a date string (YYYY-MM-DD) - set to noon UTC
+            trade_date = datetime.strptime(date, "%Y-%m-%d").replace(
+                hour=12, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+            )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
     
     # Check if user already has a trade for this date
     date_start = trade_date.replace(hour=0, minute=0, second=0, microsecond=0)
