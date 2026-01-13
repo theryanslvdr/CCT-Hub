@@ -5363,21 +5363,21 @@ async def generate_performance_report_image(
         
         # Get account value from latest deposit summary
         summary = await db.deposits.aggregate([
-            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$match": {"user_id": target_user_id, "status": "completed"}},
             {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
         ]).to_list(1)
         
         deposits_total = summary[0]["total"] if summary else 0
         
         withdrawals = await db.withdrawals.aggregate([
-            {"$match": {"user_id": user["id"], "status": "completed"}},
+            {"$match": {"user_id": target_user_id, "status": "completed"}},
             {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
         ]).to_list(1)
         
         withdrawals_total = withdrawals[0]["total"] if withdrawals else 0
         
         all_time_profit = await db.trade_logs.aggregate([
-            {"$match": {"user_id": user["id"]}},
+            {"$match": {"user_id": target_user_id}},
             {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
         ]).to_list(1)
         
