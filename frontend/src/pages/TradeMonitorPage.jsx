@@ -516,9 +516,35 @@ export const TradeMonitorPage = () => {
     }, 1000);
   }, [signal, soundEnabled, startGlobalCountdown, playBeep]);
 
+  // User clicked "Trade Entered" - they have entered the trade, stop alarm
+  const confirmTradeEntered = () => {
+    setTradeEntered(true);
+    setShowExitAlert(false);
+    // Stop the alarm
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (beepRef.current) {
+      beepRef.current.pause();
+      beepRef.current.currentTime = 0;
+    }
+  };
+
+  // User clicked "Exit Trade" - they have exited and need to enter actual profit
+  const confirmTradeExited = () => {
+    setTradeEntered(false);
+    setTradeEnded(true);
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+  };
+
   const endTrade = () => {
     setShowExitAlert(false);
     setTradeEnded(true);
+    setTradeEntered(false);
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
