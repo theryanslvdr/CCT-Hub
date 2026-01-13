@@ -321,13 +321,15 @@ export const TradeMonitorPage = () => {
                 countdownRef.current = null;
               }
               setShowExitAlert(true);
-              setTradeEnded(true);
               setCountdown(null);
               if (soundEnabled && audioRef.current) {
                 audioRef.current.play().catch(() => {});
               }
-              // Use unique id to prevent duplicate toasts - but don't make it persistent
-              toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+              // Only show toast once using ref to prevent flood
+              if (!tradeNotifiedRef.current) {
+                tradeNotifiedRef.current = true;
+                toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+              }
             } else {
               const hours = Math.floor(diff / (1000 * 60 * 60));
               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
