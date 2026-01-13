@@ -5445,15 +5445,28 @@ async def generate_performance_report_image(
         logger.error(f"Failed to generate performance report: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@profit_router.get("/report/base64")
+@admin_router.get("/analytics/report/base64")
 async def generate_performance_report_base64(
     period: str = "monthly",
-    user: dict = Depends(get_current_user)
+    user_id: Optional[str] = None,  # Admin can generate for specific user
+    user: dict = Depends(require_admin)  # Changed to require admin
 ):
-    """Generate a performance report and return as base64 for embedding"""
+    """Generate a performance report and return as base64 for embedding (Admin only)"""
     from services.report_generator import generate_report_base64
     
     try:
+        # Use provided user_id or default to current admin's id
+        target_user_id = user_id if user_id else user["id"]
+        
+        # Get target user details if generating for another user
+        if user_id:
+            target_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+            if not target_user:
+                raise HTTPException(status_code=404, detail="User not found")
+            user_name = target_user.get("full_name", target_user.get("email", "Trader"))
+        else:
+            user_name = user.get("full_name", user.get("email", "Trader"))
+        
         # Use the same logic as above but return base64
         now = datetime.now(timezone.utc)
         if period == "daily":
