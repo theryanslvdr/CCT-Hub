@@ -1500,6 +1500,11 @@ async def log_missed_trade(
     
     # Create the trade log with all required fields
     trade_id = str(uuid.uuid4())
+    # Ensure created_at has timezone info
+    created_at_str = trade_date.isoformat()
+    if '+' not in created_at_str and not created_at_str.endswith('Z'):
+        created_at_str = created_at_str + "+00:00"
+    
     trade_log = {
         "id": trade_id,
         "user_id": user["id"],
@@ -1512,7 +1517,7 @@ async def log_missed_trade(
         "signal_id": None,  # No signal for retroactive trades
         "notes": notes or "Retroactively logged trade",
         "is_retroactive": True,
-        "created_at": trade_date.isoformat()
+        "created_at": created_at_str
     }
     
     await db.trade_logs.insert_one(trade_log)
