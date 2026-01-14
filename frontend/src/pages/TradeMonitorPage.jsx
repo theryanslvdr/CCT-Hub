@@ -482,11 +482,13 @@ export const TradeMonitorPage = () => {
 
     setIsTrading(true);
     setTradeEnded(false);
+    setTradeEntered(false);
     setShowExitAlert(false);
     setLastTrade(null);
     setShowCelebration(false);
     setPreTradeCountdown(null);
     tradeNotifiedRef.current = false; // Reset notification ref for new trade
+    tradeEnteredRef.current = false; // Reset trade entered ref for new trade
 
     // Parse trade time based on signal timezone
     const [hours, minutes] = signal.trade_time.split(':').map(Number);
