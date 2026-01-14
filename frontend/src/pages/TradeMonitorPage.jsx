@@ -592,12 +592,27 @@ export const TradeMonitorPage = () => {
 
   // User clicked "Exit Trade" - they have exited and need to enter actual profit
   const confirmTradeExited = () => {
-    setTradeEntered(false);
-    setTradeEnded(true);
+    // Keep tradeEnteredRef true to prevent alarm from re-triggering
+    tradeEnteredRef.current = true;
+    
+    // Clear interval
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
       countdownRef.current = null;
     }
+    
+    // Stop any audio just in case
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (beepRef.current) {
+      beepRef.current.pause();
+      beepRef.current.currentTime = 0;
+    }
+    
+    setTradeEntered(false);
+    setTradeEnded(true);
   };
 
   const endTrade = () => {
