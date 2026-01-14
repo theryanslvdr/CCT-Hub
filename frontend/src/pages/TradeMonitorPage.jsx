@@ -363,9 +363,7 @@ export const TradeMonitorPage = () => {
                 countdownRef.current = null;
               }
               // Only show exit alert if user hasn't already confirmed trade entry
-              // Use a check against the DOM or a ref since state might be stale in closure
-              const tradeEnteredState = document.querySelector('[data-testid="exit-trade-button"]');
-              if (!tradeEnteredState) {
+              if (!tradeEnteredRef.current) {
                 setShowExitAlert(true);
                 setCountdown(null);
                 if (soundEnabled && audioRef.current) {
