@@ -554,9 +554,16 @@ export const TradeMonitorPage = () => {
 
   // User clicked "Trade Entered" - they have entered the trade, stop alarm
   const confirmTradeEntered = () => {
+    // Clear the interval first to prevent state reset
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    
     setTradeEntered(true);
     setShowExitAlert(false);
-    // Stop the alarm
+    
+    // Stop all audio
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -565,6 +572,9 @@ export const TradeMonitorPage = () => {
       beepRef.current.pause();
       beepRef.current.currentTime = 0;
     }
+    
+    // Clear localStorage check-in since user has confirmed entry
+    // But keep isTrading true so they can proceed to exit
   };
 
   // User clicked "Exit Trade" - they have exited and need to enter actual profit
