@@ -602,6 +602,7 @@ export const TradeMonitorPage = () => {
     setShowExitAlert(false);
     setTradeEnded(true);
     setTradeEntered(false);
+    tradeEnteredRef.current = false;
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
@@ -623,6 +624,7 @@ export const TradeMonitorPage = () => {
     stopGlobalCountdown(); // Stop global countdown when trade is stopped
     localStorage.removeItem('trade_check_in'); // Clear persisted check-in state
     tradeNotifiedRef.current = false; // Reset notification ref
+    tradeEnteredRef.current = false; // Reset trade entered ref
     // Clear the interval ref completely
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
