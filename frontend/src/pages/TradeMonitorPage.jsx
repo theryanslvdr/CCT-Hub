@@ -524,18 +524,22 @@ export const TradeMonitorPage = () => {
       if (diff <= 0) {
         clearInterval(countdownRef.current);
         countdownRef.current = null; // Clear the ref to prevent duplicate triggers
-        setShowExitAlert(true);
-        setCountdown(null);
-        setPreTradeCountdown(null);
         
-        if (soundEnabled && audioRef.current) {
-          audioRef.current.play().catch(console.error);
-        }
-        
-        // Only show toast once using ref to prevent flood
-        if (!tradeNotifiedRef.current) {
-          tradeNotifiedRef.current = true;
-          toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+        // Only show exit alert if user hasn't already confirmed trade entry
+        if (!tradeEnteredRef.current) {
+          setShowExitAlert(true);
+          setCountdown(null);
+          setPreTradeCountdown(null);
+          
+          if (soundEnabled && audioRef.current) {
+            audioRef.current.play().catch(console.error);
+          }
+          
+          // Only show toast once using ref to prevent flood
+          if (!tradeNotifiedRef.current) {
+            tradeNotifiedRef.current = true;
+            toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+          }
         }
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
