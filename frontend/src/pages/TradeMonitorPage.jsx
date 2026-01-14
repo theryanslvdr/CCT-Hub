@@ -658,18 +658,39 @@ export const TradeMonitorPage = () => {
       });
 
       const result = response.data;
-      setLastTrade(result);
-      setTradeEnded(false);
-      setTradeEntered(false);
-      setIsTrading(false);
-      setShowMissedTradePopup(false);
-      setMissedTradeChecked(true); // Mark as checked for this signal
+      
+      // IMPORTANT: Clear interval FIRST before any state changes
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      
+      // Stop all audio immediately
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (beepRef.current) {
+        beepRef.current.pause();
+        beepRef.current.currentTime = 0;
+      }
       
       // Stop global countdown and clear persisted state
       stopGlobalCountdown();
       localStorage.removeItem('trade_check_in');
-      tradeNotifiedRef.current = false; // Reset notification ref
-      tradeEnteredRef.current = false; // Reset trade entered ref
+      
+      // Keep tradeEnteredRef true to prevent any stray triggers
+      // It will be reset on next startTrade
+      tradeEnteredRef.current = true;
+      tradeNotifiedRef.current = true; // Prevent any new notifications
+      
+      setLastTrade(result);
+      setTradeEnded(false);
+      setTradeEntered(false);
+      setIsTrading(false);
+      setShowExitAlert(false);
+      setShowMissedTradePopup(false);
+      setMissedTradeChecked(true); // Mark as checked for this signal
 
       // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
