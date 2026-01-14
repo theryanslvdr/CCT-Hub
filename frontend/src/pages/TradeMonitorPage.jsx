@@ -560,7 +560,10 @@ export const TradeMonitorPage = () => {
 
   // User clicked "Trade Entered" - they have entered the trade, stop alarm
   const confirmTradeEntered = () => {
-    // Clear the interval first to prevent state reset
+    // Set ref FIRST to prevent any interval from re-triggering
+    tradeEnteredRef.current = true;
+    
+    // Clear the interval to prevent state reset
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
       countdownRef.current = null;
