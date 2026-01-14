@@ -397,6 +397,14 @@ export const TradeMonitorPage = () => {
         localStorage.removeItem('trade_check_in');
       }
     }
+    
+    // Cleanup function to clear interval when component unmounts or deps change
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
   }, [signal, checkInRestored, soundEnabled, startGlobalCountdown]);
 
   // World clock
