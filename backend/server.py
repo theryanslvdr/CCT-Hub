@@ -19,6 +19,10 @@ import cloudinary
 import cloudinary.uploader
 import pytz
 
+# Set up logging early
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Import services
 from services import (
     send_email, get_license_invite_email, get_admin_notification_email,
