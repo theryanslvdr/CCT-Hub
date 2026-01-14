@@ -361,15 +361,20 @@ export const TradeMonitorPage = () => {
                 clearInterval(countdownRef.current);
                 countdownRef.current = null;
               }
-              setShowExitAlert(true);
-              setCountdown(null);
-              if (soundEnabled && audioRef.current) {
-                audioRef.current.play().catch(() => {});
-              }
-              // Only show toast once using ref to prevent flood
-              if (!tradeNotifiedRef.current) {
-                tradeNotifiedRef.current = true;
-                toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+              // Only show exit alert if user hasn't already confirmed trade entry
+              // Use a check against the DOM or a ref since state might be stale in closure
+              const tradeEnteredState = document.querySelector('[data-testid="exit-trade-button"]');
+              if (!tradeEnteredState) {
+                setShowExitAlert(true);
+                setCountdown(null);
+                if (soundEnabled && audioRef.current) {
+                  audioRef.current.play().catch(() => {});
+                }
+                // Only show toast once using ref to prevent flood
+                if (!tradeNotifiedRef.current) {
+                  tradeNotifiedRef.current = true;
+                  toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+                }
               }
             } else {
               const hours = Math.floor(diff / (1000 * 60 * 60));
