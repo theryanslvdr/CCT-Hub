@@ -48,15 +48,20 @@ client = AsyncIOMotorClient(
 # Get database name from environment or parse from connection string
 db_name = os.environ.get('DB_NAME')
 if not db_name:
-    # Try to extract from connection string (mongodb+srv://.../<dbname>?...)
+    # Try to extract from connection string (mongodb+srv://.../<dbname>?... or mongodb+srv://.../<dbname>)
     import re
+    # First try with query parameters
     match = re.search(r'/([^/?]+)\?', mongo_url)
+    if not match:
+        # Try without query parameters (end of string or just the dbname)
+        match = re.search(r'/([^/?]+)$', mongo_url)
     if match:
         db_name = match.group(1)
     else:
         db_name = 'crosscurrent_finance'  # Fallback only if not in URL
 
 db = client[db_name]
+logger.info(f"Using database: {db_name}")
 
 # JWT Config - No fallback in production
 JWT_SECRET = os.environ.get('JWT_SECRET')
