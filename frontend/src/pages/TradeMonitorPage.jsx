@@ -669,6 +669,7 @@ export const TradeMonitorPage = () => {
       stopGlobalCountdown();
       localStorage.removeItem('trade_check_in');
       tradeNotifiedRef.current = false; // Reset notification ref
+      tradeEnteredRef.current = false; // Reset trade entered ref
 
       // Show celebration popup based on performance
       const message = getPerformanceMessage(result.performance);
