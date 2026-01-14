@@ -173,6 +173,7 @@ export const TradeMonitorPage = () => {
   const beepRef = useRef(null);
   const countdownRef = useRef(null);
   const tradeNotifiedRef = useRef(false); // Track if trade notification has been shown
+  const tradeEnteredRef = useRef(false); // Track if user has clicked "Trade Entered"
 
   // Get LOT size - use simulated value if in simulation mode, otherwise from profit tracker
   const simulatedAccountValue = getSimulatedAccountValue();
