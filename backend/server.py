@@ -129,9 +129,8 @@ bve_router = APIRouter(prefix="/bve", tags=["Beta Virtual Environment"])
 
 security = HTTPBearer()
 
-# Configure logging
+# Update logging format (logger already defined at top)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 # ==================== MODELS ====================
 
