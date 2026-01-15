@@ -11,6 +11,32 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 42 (2026-01-15) - Licensee Calculation & Synchronization Fixes ✅
+
+#### Issue 1: Remove Ability for Honorary Member to Set Starting Value ✅
+- **Fix**: Frontend now hides "Starting Amount" input for honorary licensees
+- **Logic**: Honorary licensees start with $0, use standard calculations (deposits + profits - withdrawals)
+- **Files Modified**: `AdminLicensesPage.jsx` (lines 922-946, 110-151)
+
+#### Issue 2: Synchronize Dashboard/Profit Tracker/Deposit-Withdrawal Pages ✅
+- **Fix**: LicenseeAccountPage now uses `profitAPI.getSummary` as single source of truth
+- **Ensures**: All three pages show the same `account_value`
+- **Files Modified**: `LicenseeAccountPage.jsx` (lines 79-99)
+
+#### Issue 3: Notice for Licensees When License is Revoked ✅
+- **Fix**: Login endpoint checks for active license when user has `license_type`
+- **Response**: Returns 403 with message "Your license has been revoked or expired. Please contact the administrator to renew your license."
+- **Files Modified**: `server.py` (lines 645-661)
+
+#### Issue 4: Extended Licensee Lot Size Should Be Fixed Per Quarter ✅
+- **Bug**: Lot size was growing daily instead of being fixed per quarter
+- **Fix**: Updated `calculate_extended_license_projections` to:
+  - Calculate `quarter_lot_size` once per quarter (starting_amount / 980)
+  - Calculate `quarter_daily_profit` once per quarter (lot_size × 15)
+  - Both values stay FIXED for entire quarter, only recalculate on first trading day of new quarter
+- **Verified**: Tested with actual data showing 6 quarters with fixed values
+- **Files Modified**: `server.py` (lines 2949-3003), `ProfitTrackerPage.jsx` (lines 619-658)
+
 ### Session 41 (2026-01-15) - Licensee Authentication & Daily Projection Enhancements ✅
 
 #### Feature 1: Licensees Bypass Heartbeat Membership ✅
