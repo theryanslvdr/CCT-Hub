@@ -745,9 +745,10 @@ export const TradeMonitorPage = () => {
         beepRef.current.currentTime = 0;
       }
       
-      // Stop global countdown and clear persisted state
+      // Stop global countdown and clear ALL persisted state
       stopGlobalCountdown();
       localStorage.removeItem('trade_check_in');
+      localStorage.removeItem('trade_entered_state');
       
       // Keep tradeEnteredRef true to prevent any stray triggers
       // It will be reset on next startTrade
