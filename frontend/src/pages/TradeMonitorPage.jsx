@@ -1294,6 +1294,7 @@ export const TradeMonitorPage = () => {
                       <th>Projected</th>
                       <th>Actual</th>
                       <th>P/L Diff</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
