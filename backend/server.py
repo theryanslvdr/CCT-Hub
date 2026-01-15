@@ -1337,23 +1337,33 @@ async def update_trade_time_entered(
 
 @trade_router.get("/streak")
 async def get_trade_streak(user: dict = Depends(get_current_user)):
-    """Calculate current streak of 'exceeded' or 'perfect' trades"""
+    """Calculate current streak of consecutive trading days with positive profit"""
     # Get all trades ordered by date descending
     trades = await db.trade_logs.find(
         {"user_id": user["id"]}, 
-        {"_id": 0, "performance": 1, "created_at": 1}
+        {"_id": 0, "performance": 1, "actual_profit": 1, "created_at": 1}
     ).sort("created_at", -1).to_list(1000)
     
     if not trades:
         return {"streak": 0, "streak_type": None}
     
-    # Calculate streak
+    # Calculate streak based on consecutive days with positive profit
+    # The streak counts consecutive trades where actual_profit > 0
     streak = 0
     streak_type = None
     
     for trade in trades:
-        perf = trade.get("performance")
-        if perf in ["exceeded", "perfect"]:
+        # Check performance field (supports both old and new formats)
+        perf = trade.get("performance", "")
+        actual_profit = trade.get("actual_profit", 0)
+        
+        # A successful trade: positive profit OR performance indicates success
+        is_successful = (
+            actual_profit > 0 or  # Has positive profit
+            perf in ["exceeded", "perfect", "target", "above"]  # Performance-based success
+        )
+        
+        if is_successful:
             if streak == 0:
                 streak_type = "winning"
             streak += 1
@@ -1552,6 +1562,14 @@ async def log_missed_trade(
     if '+' not in created_at_str and not created_at_str.endswith('Z'):
         created_at_str = created_at_str + "+00:00"
     
+    # Determine performance category (consistent with regular trade logging)
+    if actual_profit >= projected_profit:
+        performance = "exceeded" if actual_profit > projected_profit else "perfect"
+    elif actual_profit > 0:
+        performance = "below"
+    else:
+        performance = "below"
+    
     trade_log = {
         "id": trade_id,
         "user_id": user["id"],
@@ -1560,10 +1578,11 @@ async def log_missed_trade(
         "projected_profit": projected_profit,
         "actual_profit": actual_profit,
         "profit_difference": profit_difference,
-        "performance": "target" if actual_profit >= projected_profit else ("above" if actual_profit > 0 else "below"),
+        "performance": performance,
         "signal_id": None,  # No signal for retroactive trades
         "notes": notes or "Retroactively logged trade",
         "is_retroactive": True,
+        "is_manual_adjustment": True,  # Flag for manually adjusted trades
         "created_at": created_at_str
     }
     
