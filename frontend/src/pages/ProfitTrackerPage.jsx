@@ -947,19 +947,12 @@ export const ProfitTrackerPage = () => {
       // Reset tracker
       await api.delete('/profit/reset');
       
-      // Add new initial balance if > 0 (limited to 2 decimals)
-      const amount = truncateTo2Decimals(parseFloat(newAccountValue));
-      if (amount > 0) {
-        await profitAPI.createDeposit({
-          amount: amount,
-          currency: 'USDT',
-          notes: `Reset: ${resetReason}`,
-        });
-      }
-      
-      toast.success('Profit tracker has been reset with new balance!');
+      toast.success('Profit tracker has been reset!');
       resetResetDialog();
-      loadData();
+      
+      // Open the onboarding wizard for reset flow
+      setIsResetOnboarding(true);
+      setOnboardingWizardOpen(true);
     } catch (error) {
       if (error.response?.status === 401) {
         toast.error('Invalid password. Please try again.');
