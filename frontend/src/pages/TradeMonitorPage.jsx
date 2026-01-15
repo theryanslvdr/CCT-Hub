@@ -1493,8 +1493,6 @@ export const TradeMonitorPage = () => {
                       <th>Product</th>
                       <th>Direction</th>
                       <th>LOT Size</th>
-                      <th>Time Set</th>
-                      <th>Time Entered</th>
                       <th>Projected</th>
                       <th>Actual</th>
                       <th>P/L Diff</th>
@@ -1516,48 +1514,6 @@ export const TradeMonitorPage = () => {
                           </span>
                         </td>
                         <td className="font-mono text-purple-400">{trade.lot_size?.toFixed(2)}</td>
-                        <td className="font-mono text-zinc-400">
-                          {trade.signal_details?.trade_time || '-'}
-                        </td>
-                        <td>
-                          {editingTimeId === trade.id ? (
-                            <div className="flex items-center gap-1">
-                              <Input
-                                type="time"
-                                value={editTimeValue}
-                                onChange={(e) => setEditTimeValue(e.target.value)}
-                                className="input-dark w-24 h-8 text-sm"
-                              />
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleSaveTimeEntered(trade.id)}
-                                className="h-8 w-8 text-emerald-400 hover:text-emerald-300"
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleCancelEditTime}
-                                className="h-8 w-8 text-red-400 hover:text-red-300"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1">
-                              <span className="font-mono text-cyan-400">
-                                {trade.time_entered || '-'}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleEditTimeEntered(trade.id, trade.time_entered)}
-                                className="h-6 w-6 text-zinc-500 hover:text-blue-400"
-                                data-testid={`edit-time-${trade.id}`}
-                              >
-                                <Edit2 className="w-3 h-3" />
                               </Button>
                             </div>
                           )}
