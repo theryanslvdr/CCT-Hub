@@ -1251,6 +1251,23 @@ export const TradeMonitorPage = () => {
             <div className="text-center space-y-6">
               <p className="text-zinc-400">Time until trade:</p>
               
+              {/* Countdown stall warning */}
+              {countdownStalled && (
+                <div className="p-3 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
+                  <span className="text-amber-400 text-sm">Countdown may have stalled</span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={restartCountdown}
+                    className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10"
+                    data-testid="restart-countdown-btn"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+                  </Button>
+                </div>
+              )}
+              
               {/* Pre-trade countdown beep indicator */}
               {preTradeCountdown && (
                 <div className="animate-pulse p-4 rounded-xl bg-red-500/20 border border-red-500/50">
@@ -1262,8 +1279,8 @@ export const TradeMonitorPage = () => {
               
               <div className="flex justify-center gap-4">
                 {['hours', 'minutes', 'seconds'].map((unit) => (
-                  <div key={unit} className={`glass-card p-4 min-w-[100px] ${preTradeCountdown ? 'border-red-500/50 animate-pulse' : ''}`}>
-                    <p className={`text-4xl font-mono font-bold ${preTradeCountdown ? 'text-red-400' : 'text-white'}`}>
+                  <div key={unit} className={`glass-card p-4 min-w-[100px] ${preTradeCountdown ? 'border-red-500/50 animate-pulse' : ''} ${countdownStalled ? 'border-amber-500/50' : ''}`}>
+                    <p className={`text-4xl font-mono font-bold ${preTradeCountdown ? 'text-red-400' : countdownStalled ? 'text-amber-400' : 'text-white'}`}>
                       {String(countdown[unit]).padStart(2, '0')}
                     </p>
                     <p className="text-xs text-zinc-500 uppercase">{unit}</p>
@@ -1273,9 +1290,20 @@ export const TradeMonitorPage = () => {
               <div className="text-zinc-400">
                 Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
               </div>
-              <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
-                <Square className="w-5 h-5 mr-2" /> Cancel
-              </Button>
+              <div className="flex gap-3 justify-center">
+                <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
+                  <Square className="w-5 h-5 mr-2" /> Cancel
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={restartCountdown}
+                  className="text-zinc-400 hover:text-white"
+                  data-testid="refresh-countdown-btn"
+                >
+                  <RefreshCw className="w-4 h-4 mr-1" /> Refresh Timer
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="text-center space-y-6">
