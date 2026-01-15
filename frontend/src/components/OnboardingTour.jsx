@@ -198,15 +198,18 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay - Less blur, lighter background */}
+      {/* Overlay - Click to dismiss and save tour state */}
       <div 
         className="fixed inset-0 bg-black/40 z-[10000]" 
-        onClick={(e) => e.stopPropagation()}
+        onClick={handleSkip}
       />
       
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-[10001] p-4">
-        <div className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-700 rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95 duration-300">
+      <div className="fixed inset-0 flex items-center justify-center z-[10001] p-4 pointer-events-none">
+        <div 
+          className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-700 rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="flex items-start gap-4 mb-4">
             <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
