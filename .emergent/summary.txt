@@ -1,193 +1,195 @@
 <analysis>**original_problem_statement:**
-The user wants to build a Finance Center for CrossCurrent traders. This is a comprehensive full-stack application with a dashboard and login.
+The user is building a Finance Center for CrossCurrent traders. This session focused on fixing a series of critical production and workflow bugs reported by the user.
 
-**PRODUCT REQUIREMENTS:**
-- **Authentication:** A 4-tier role system: , , , and .
-- **Admin Dashboards:** Dashboards for Team Analytics, Team Transactions, and Member Management.
-- **Notifications:** Admins receive popups for key member activities. A real-time WebSocket system has been added.
-- **Settings & UI:** A reorganized  with tabs for SEO, Branding, UI, Integrations, Custom Links, Email Templates, and a new **Maintenance** tab.
-- **Custom License System:** A full license invite and management system.
-- **Complex Licensee Transaction Workflow:** Multi-step deposit/withdrawal processes with admin approval.
-- **Email Template Editor:** Admins must be able to edit email templates with a Code/Preview mode.
-- **Onboarding Tour:** An interactive tour for new users and a simpler one for licensees.
-- **Login Flow:** Customizable login page (, , ) and a verification flow for new members. A maintenance mode can now block logins for non-master admins.
-- **Security:** Checks for missing integration API keys on startup.
-- **Layout:** A persistent footer with custom links and a system for displaying global announcements.
-- **Mobile Friendliness:** A pass to ensure the app is mobile-friendly, with notices on complex pages.
-- **Trade Time Restrictions:** Limit user access to trading features to a specific time window before the official trade time.
-- **Email System:** Automated emails for trade reminders and missed trades, plus an email history log in the admin settings.
-- **Reporting:** Ability to generate and export image-based performance recap reports.
+Key requirements addressed in this session:
+- **Production Bug Fixes:**
+    - Resolve MongoDB Atlas connection errors causing deployment failures.
+    - Fix a critical login failure and a bug causing dashboard values to appear as /bin/bash.
+    - Investigate why branding settings (logo) were resetting after deployment.
+- **Trade Workflow & Alarm Bugs:**
+    - Fix an issue where Beta Virtual Environment (BVE) trades were being recorded in the production Profit Tracker.
+    - Resolve a bug where the trade alarm would get stuck in a loop, preventing users from entering their actual profit.
+    - Ensure the Trade Entered state is persistent across page refreshes to prevent users from missing trades.
+- **New Feature Requests:**
+    - Implement a Missed Trade popup that automatically appears and allows users to log their trade details.
+    - Add an Enter AP (Actual Profit) button to the Daily Trade Projection table for manual entry.
+    - Implement role-based actions in the trade history: a Reset Trade button for  and a Request Change button for other users.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A feature-rich full-stack application with a FastAPI backend and a React frontend. In this session, the agent completed a batch of 6 critical P0 features, including adding dashboard tabs for members, a persistent footer, and a security check for missing API keys.
-
-Following that, the agent implemented several P1 and P2 tasks, most notably a WebSocket service for real-time notifications, a full maintenance mode feature with announcement banners, tooltips on the Debt Management page, and a mobile-friendly pass that adds notices to complex pages.
-
-The backend refactoring continued with the creation of a  directory and empty files in the  directory, preparing for the migration of logic out of the monolithic . The last action was responding to a large new list of 12 user requests. The agent has already fixed the API key validation issues for Emailit and Heartbeat and started implementing an email history tracking system.
+A complex full-stack financial application. In this session, the agent successfully addressed numerous critical bugs and implemented several user-requested features. The agent fixed deployment-blocking issues related to MongoDB Atlas connectivity and resolved a severe login bug caused by function shadowing in the backend. The notoriously buggy trade alarm and state management flow on the  was significantly reworked with multiple fixes to prevent alarm loops and state loss on refresh. The agent also implemented a complete Missed Trade workflow, allowing users to log trades post-factum from both the  and . The backend and frontend logic was updated to prevent BVE trades from leaking into the production database.
 
 **Last working item**:
-- **Last item agent was working:** The agent was working through a new list of 12 feature requests. It successfully fixed the API key validation for Emailit and Heartbeat (Item #2). It then began implementing the email history tracking system (part of Item #5) by modifying  to log email sending attempts to a new MongoDB collection and add new email templates. The work involved updating the  function to create and update records in the  collection.
+- **Last item agent was working:** Implementing role-based actions in the trade history. The agent created the backend endpoints for Reset Trade (master admin) and Request Change (other users) and added the corresponding API methods in the frontend. The UI implementation is the next step.
 - **Status:** IN PROGRESS
-- **Agent Testing Done:** Y (for the API key fix, via curl)
-- **Which testing method agent to use?** both
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** frontend testing agent
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Trade Time Restrictions & Notifications (User Request #1)** (Priority: P0)
-- **Issue 2: Email Template Testing & Variables (User Request #3)** (Priority: P0)
-- **Issue 3: Automated Missed Trade Email (User Request #4)** (Priority: P0)
-- **Issue 4: Email History Frontend (User Request #5)** (Priority: P0)
-- **Issue 5: WebSocket Offline Icon (User Request #6)** (Priority: P1)
-- **Issue 6: Real-time Member Notifications (User Request #7)** (Priority: P1)
-- **Issue 7: Announcement Display Options (User Request #8)** (Priority: P1)
-- **Issue 8: Off-Canvas Notification Panel (User Request #9)** (Priority: P1)
-- **Issue 9: Exclude Non-Traders from Top Performers (User Request #10)** (Priority: P2)
-- **Issue 10: Generate Image Recap Report (User Request #11)** (Priority: P2)
-- **Issue 11: Admin Email Recap (User Request #12)** (Priority: P2)
+- **Issue 1: Calculation discrepancy in Profit Tracker (Priority: P1)**
+- **Issue 2: Persistent Onboarding Tour blocks UI (Priority: P2)**
+- **Issue 3: Data integrity issue with  in deposits (Priority: P2)**
+- **Issue 4: Inconsistent  calculation in backend (Priority: P2)**
 
 **Issues Detail:**
-- **Issue 1: Trade Time Restrictions & Notifications (User Request #1)**
-    - **Attempted fixes:** None yet.
+- **Issue 1: Calculation discrepancy in Profit Tracker**
+    - **Attempted fixes:** The agent fixed an issue where the daily projection table wasn't updating its start balance after a new trade was logged. The fix involved using the most current  for the calculation. This needs user verification to confirm it resolves their complaint about profits being added to the same day's balance.
     - **Next debug checklist:**
-        1.  Backend: Add logic to  or a trade route to check if the current time (in Philippine Time) is within 20 minutes of the signal's trade time.
-        2.  Frontend: In , add a countdown timer component to display the time remaining until the trade starts.
-        3.  Backend: Implement a scheduled task (e.g., using APScheduler) to trigger the  function for the trade reminder 20 minutes before the trade time for all relevant users.
-    - **Why fix this issue and what will be achieved with the fix?** To enforce a specific trading window and keep users informed, as requested.
+        1.  Present the fixed flow to the user for testing.
+        2.  Ask the user to perform the Enter AP action and verify that the Balance Before for the current day is correct and the profit is reflected in the next day's balance.
+    - **Why fix this issue and what will be achieved with the fix?** This is a recurring source of user frustration. Fixing it is critical for trust in the platform's core profit-tracking feature.
+    - **Status:** USER VERIFICATION PENDING
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Frontend
+    - **Blocked on other issue:** None
+
+- **Issue 2: Persistent Onboarding Tour blocks UI**
+    - **Attempted fixes:** None.
+    - **Next debug checklist:**
+        1.  Investigate .
+        2.  Ensure that completing the tour or clicking skip sets a flag in  (e.g., ).
+        3.  The component should not render if this flag is true.
+    - **Why fix this issue and what will be achieved with the fix?** The tour modal appears on every page load, frustrating the user and significantly hindering testing and normal use of the application.
+    - **Status:** NOT STARTED
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Frontend
+    - **Blocked on other issue:** None
+
+- **Issue 3: Data integrity issue with  in deposits**
+    - **Attempted fixes:** None. This was an observation made by the agent.
+    - **Next debug checklist:**
+        1.  Review the deposit creation flow in  to see why some records are created with .
+        2.  Ensure a default status (e.g.,  or ) is always set.
+        3.  Write a migration script to fix existing records in the database.
+    - **Why fix this issue and what will be achieved with the fix?** Null statuses can lead to incorrect financial calculations and unpredictable behavior in the future.
     - **Status:** NOT STARTED
     - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Both
+    - **Should Test frontend/backend/both after fix?** Backend
+    - **Blocked on other issue:** None
 
-- **Issue 4: Email History Frontend (User Request #5)**
-    - **Attempted fixes:** The backend service in  has been updated to log email records to the  collection in MongoDB.
+- **Issue 4: Inconsistent  calculation in backend**
+    - **Attempted fixes:** None. This was an observation.
     - **Next debug checklist:**
-        1.  Backend: Create a new API endpoint (e.g., ) to fetch paginated email logs from the database. Add an endpoint to clear the history.
-        2.  Frontend: In the Emails tab of , add a data table to display the email history, including status, recipient, subject, and timestamp.
-        3.  Frontend: Add pagination controls and a Clear History button to the table.
-    - **Why fix this issue and what will be achieved with the fix?** To provide admins with visibility into email delivery status.
-    - **Status:** IN PROGRESS
+        1.  Search for all occurrences of  calculation in .
+        2.  Create a single, reusable utility function (e.g., in ) that takes a user ID and calculates the account value consistently ().
+        3.  Refactor all endpoints to use this single utility function.
+    - **Why fix this issue and what will be achieved with the fix?** Unifies business logic, reduces the chance of bugs, and makes the code easier to maintain.
+    - **Status:** NOT STARTED
     - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Both
+    - **Should Test frontend/backend/both after fix?** Backend
+    - **Blocked on other issue:** None
 
 **In progress Task List**:
-- **Task 1: Complete the list of 12 new user requests** (Priority: P0)
-    - **Where to resume:** The agent needs to complete the backend logic for the email history feature. The next step is to finish the  function in  to correctly update the status after the API call to Emailit. After that, create the corresponding frontend table. Then, proceed to the next item on the user's list.
-    - **What will be achieved with this?** This will deliver a large batch of highly requested features and bug fixes.
+- **Task 1: Implement UI for Reset Trade & Request Change (Priority: P0)**
+
+**Task Detail:**
+- **Task 1:**
+    - **Where to resume:** In , modify the  component.
+    - **What will be achieved:** In the trade history list, a new Actions column will be added. Master admins will see a Reset Trade button. All other users will see a Request Change button.
     - **Status:** IN PROGRESS
     - **Should Test frontend/backend/both after fix?** Both
-    - **Blocked on something:** None.
+    - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **P0:** Implement remaining 10 tasks from the user's list of 12.
-    - **P1:** Complete Backend Refactoring: Migrate all route handlers from  into the respective files in the  directory and update  to use the new routers.
+    - **P1:** User-configurable display options for announcements.
+    - **P1:** Admin Daily Email Recap.
+    - **P1:** Backend Refactoring: Migrate route handlers from  into the  directory.
 - **Future Tasks:**
-    - **P2:** Refactor large frontend components like  and  into smaller, more manageable pieces.
-    - **P2:** Fully activate and test the Cloudinary integration for storing uploaded files (e.g., deposit screenshots).
+    - **P2:** Frontend Refactoring: Break down large components like  and .
+    - **P2:** Mobile responsiveness improvements.
 
 **Completed work in this session**
-- **P0 Feature Batch:**
-    - Implemented dashboard tabs for regular members.
-    - Added a security check for missing API keys, displaying a modal for admins.
-    - Integrated a persistent, customizable footer across the application.
-    - Verified login page customization and branding text fixes.
-- **P1/P2 Features:**
-    - **WebSocket Integration:** Implemented a full real-time notification system with a backend service and a frontend context provider.
-    - **Maintenance Mode:** Added a Maintenance tab in settings to enable a site-wide maintenance page, with a hidden override for the master admin.
-    - **Announcement System:** Created functionality for admins to post global announcements displayed as banners on the dashboard.
-    - **Mobile-Friendly Pass:** Added a  component to complex pages (, , ) to inform users of limited mobile functionality.
-    - **Tooltips:** Added tooltips to the  for improved usability.
-- **API Fixes:**
-    - Corrected the backend API key validation logic for both **Emailit** and **Heartbeat**, resolving 404 errors.
-- **Backend Refactoring (In Progress):**
-    - Moved all Pydantic models from  into a structured  directory.
-    - Moved utility functions into .
-    - Created a  directory for Email, File, and WebSocket services.
-    - Created empty route files in  in preparation for migrating endpoints.
+- **Deployment Fixes:**
+    - Fixed MongoDB Atlas connection by adding  and  to the connection string.
+    - Added retry logic for database connection on startup.
+- **Critical Bug Fixes:**
+    - **Login Failure:** Resolved a bug preventing login, caused by function shadowing () in .
+    - **Alarm Loop:** Fixed multiple bugs in  that caused the trade alarm to get stuck in a loop.
+    - **BVE Trade Leak:** Prevented BVE trades from being saved to the production database by using BVE-specific endpoints.
+    - **State Persistence:** Ensured the Trade Entered state persists on page refresh using .
+- **Feature Implementation:**
+    - **Enter AP:** Added a button on the  for users to manually enter profit for missed trades.
+    - **Missed Trade Popup:** Created a dialog that automatically appears on the  if a user has missed a trade.
+- **Security:**
+    - Secured the report generation endpoint by moving it to an admin-only route.
 
 **Earlier issues found/mentioned but not fixed**
-- None. The agent has addressed all user-provided issues in a timely manner.
+- See All Pending/In progress Issue list.
 
 **Known issue recurrence from previous fork**
-- None.
+- **Calculation discrepancy in Profit Tracker:** This remains a sensitive area, with the user reporting multiple related issues. The latest fixes have been applied but require user validation.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI, Motor (async MongoDB), PyJWT, Pydantic, WebSockets.
-- **Frontend:** React, React Router, Axios, TailwindCSS, Shadcn/UI, Recharts.
-- **State Management:** React Context API (, ) and component-level state.
-- **Integrations:** Emailit (for emails), Cloudinary (for files), Heartbeat (for user verification).
+- **State Persistence:** Using  to maintain UI state () across page refreshes.
+- **Refs for State Control:** Using  to reliably track state within  callbacks to prevent race conditions and unwanted re-renders (e.g., ).
+- **MongoDB Atlas Connectivity:** Modifying the Motor connection string with  and .
+- **Function Shadowing:** Debugged and fixed a critical bug where a FastAPI endpoint function name conflicted with a utility function name.
 
 **key DB schema**
-- **platform_settings:** Extended to include , , and .
-- **email_history:** New collection to log status and details of all sent emails: .
+- No new collections were added.  and  were fixed to ensure  and timezone-aware  fields are always present.
+
+**changes in tech stack**
+- None.
 
 **All files of reference**
-- **/app/backend/server.py**: Heavily modified to add WebSockets, maintenance mode logic, and fixed API test endpoints. Still the target for route refactoring.
-- **/app/backend/services/email_service.py**: New file, updated to log email history.
-- **/app/backend/services/websocket_service.py**: New file for real-time notifications.
-- **/app/backend/models/settings.py**: Updated with  and  fields.
-- **/app/frontend/src/pages/admin/AdminSettingsPage.jsx**: Heavily modified to add the Maintenance tab and UI for managing announcements.
-- **/app/frontend/src/pages/LoginPage.jsx**: Updated to handle maintenance mode.
-- **/app/frontend/src/components/layout/DashboardLayout.jsx**: Updated to display global announcements.
-- **/app/frontend/src/contexts/WebSocketContext.jsx**: New file to manage WebSocket connection and messages.
-- **/app/frontend/src/components/layout/Header.jsx**: Updated to integrate real-time notifications from the WebSocket context.
-- **/app/frontend/src/pages/DebtManagementPage.jsx**: Updated to include tooltips.
-- **/app/frontend/src/components/MobileNotice.jsx**: New component to display on non-mobile-friendly pages.
+- **/app/backend/server.py**: Major changes for deployment fixes, login bug, alarm logic, and new endpoints for trade reset/request.
+- **/app/frontend/src/pages/TradeMonitorPage.jsx**: Major changes to fix alarm loops, implement state persistence, and handle BVE-specific API calls.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: Major changes to add the Enter AP feature and fix related balance calculation bugs.
+- **/app/frontend/src/lib/api.js**: Updated with new API calls for resetting trades, requesting changes, and BVE-aware forwarding.
+- **/app/backend/.env**:  was updated to support Atlas connections.
 
 **Areas that need refactoring**:
-- **/app/backend/server.py**: **Top Priority.** The route handlers need to be migrated to the files in .
-- **/app/frontend/src/pages/admin/AdminMembersPage.jsx**: A very large component that should be broken down into smaller, reusable parts.
-- **/app/frontend/src/pages/admin/AdminLicensesPage.jsx**: Another large component that would benefit from refactoring.
+- **/app/backend/server.py**: **CRITICAL**. This monolithic file is now over 6,000 lines and is a major source of bugs (like the function shadowing). It must be broken down.
+- **/app/frontend/src/pages/TradeMonitorPage.jsx**: This file has become extremely complex (over 1,300 lines) due to intricate state management for timers and alarms. It should be refactored into smaller components and custom hooks.
 
 **key api endpoints**
-- : Logic fixed to correctly validate the API key.
-- : Logic fixed to correctly validate the API key.
-- : New endpoint for WebSocket connections.
+- : (New) Master admin endpoint to reset a trade.
+- : (New) User endpoint to request a change to a trade.
+- : (New) Checks if the current user missed the day's trade.
+- : (New) Logs a trade for a user, e.g., from the Enter AP dialog.
+- : (Renamed) Corrected from  to fix a shadowing bug.
 
 **Critical Info for New Agent**
-- **Your top priority is the user's list of 12 requests.**
-    - Item #2 (API key validation) is **RESOLVED**.
-    - Item #5 (Email history) is **IN PROGRESS** (backend logging started).
-    - You should resume by completing the email history feature (backend and frontend) and then systematically work through the rest of the list. Refer to the user's clarifications in Chat Message 366.
-- After completing the 12 tasks, you **must continue the backend refactoring** by migrating routes from  to the  directory.
-- The user has approved an off-canvas style for the notification panel (Item #9). You will need to refactor the current notification popover in the .
+- Your immediate task is to implement the UI for the Reset Trade (master admin) and Request Change (other users) buttons in the trade history on . The backend endpoints are already created.
+- The  is extremely sensitive to changes. The alarm and state-refresh logic has been fixed multiple times. Test any changes thoroughly, especially the  state and interval clearing.
+- Be aware of the distinction between the local development DB and the production Atlas DB. The user's reports of reset data (like branding) were likely due to the preview environment having a clean database. The connection fix for Atlas is in .
+- The monolithic  is a significant liability. The backend refactoring task is a high-priority upcoming item to improve stability.
 
 **documents and test reports created in this job**
-- /app/test_reports/iteration_27.json
-- /app/test_reports/iteration_28.json
-- /app/test_reports/iteration_29.json
-- /app/test_reports/iteration_30.json
+- /app/test_reports/iteration_36.json
 - /app/memory/PRD.md (updated multiple times)
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User (LATEST - PENDING):** Provided a comprehensive list of 12 new features and bug fixes, including trade time restrictions, email enhancements, notification improvements, and a reporting feature. (IN PROGRESS)
-9. **Agent:** Finished implementing maintenance mode and mobile-friendly notices. Summarized work and asked for next steps. (Completed)
-8. **User:** Requested a new Maintenance Tab feature and a pass to make the application mobile-friendly. (Completed)
-7. **Agent:** Finished implementing tooltips, adding email templates, and preparing backend route files. Summarized work and proposed refactoring the large admin pages. (Completed)
-6. **User:** Provided the next set of P2 tasks: Refactor frontend pages, add tooltips, complete route migration, and add more email templates. (Completed)
-5. **Agent:** Finished implementing WebSockets and placeholder integration services. Summarized work and asked for next steps. (Completed)
-4. **User:** Instructed the agent to prioritize WebSockets and activating Emailit/Cloudinary integrations over continuing the backend refactoring. (Completed)
-3. **Agent:** Finished the batch of 6 P0 features and started the backend refactoring of models and utils. Summarized work. (Completed)
-2. **User:** Confirmed the agent's plan to complete all P0 features and then automatically proceed to P1 tasks (backend refactoring). (Completed)
-1. **Agent:** Proposed a plan to complete the 6 pending features and then continue with backend refactoring. (Completed)
+- **10.** User reported BVE notification flood and being unable to exit trade. (Addressed)
+- **9.** User provided deployment error logs. (Addressed)
+- **8.** After deployment fixes, user reported new issues: login failure, /bin/bash dashboard values. (Addressed; was a function shadowing bug)
+- **7.** User reported branding/logo reset and errors after manual deposit. (Investigated; likely a prod vs. preview DB issue. Confirmed preview works.)
+- **6.** User reported trade alarm kept ringing after clicking Trade Entered. (Addressed)
+- **5.** User reported alarm sets off again after submitting actual profit. (Addressed)
+- **4. (LATEST - PRODUCTION BUG)** User reported two production bugs: 1. BVE trades leaking to production profit tracker. 2. Trade alarm getting stuck and state being lost on refresh. (Addressed)
+- **3. (LATEST - FEATURE REQUEST)** User requested Reset Trade for master admins and Request Change for other users. (In Progress)
 
 **Project Health Check:**
-- **Broken:** None.
-- **Mocked:** Emailit and Cloudinary integrations are partially implemented. The API connections are verified, and placeholder services exist, but they are not yet fully integrated into the application's core workflows (e.g., sending transaction emails, storing deposit screenshots).
+- **Broken:** None. All user-reported blocking bugs have been addressed.
+- **Mocked:** Cloudinary integration is still a placeholder.
+- **Vulnerable:** The previous report generation vulnerability was fixed. No new vulnerabilities were introduced.
 
 **3rd Party Integrations**
-- **Heartbeat:** API key validation fixed and working.
-- **Emailit:** (In Progress) API key validation fixed. Service created for sending emails. Needs full integration into workflows.
-- **Cloudinary:** (Planned) Placeholder service created. Awaiting full implementation for file storage.
+- Heartbeat (API for service monitoring)
+- Emailit (Service for sending emails)
+- APScheduler (Backend scheduled jobs)
+- Cloudinary (Placeholder for image hosting)
 
 **Testing status**
-- **Testing agent used after significant changes:** YES. The agent ran the testing agent four times in this session, achieving a 100% pass rate after each major feature batch.
+- **Testing agent used after significant changes:** YES. A full test suite was run via  after the critical login bug was fixed, confirming all major endpoints and pages were functional.
 - **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** None by the main agent. Testing agent has been updating its own tests.
+- **Test files created:** None.
 - **Known regressions:** None.
 
 **Credentials to test flow:**
@@ -196,4 +198,5 @@ The backend refactoring continued with the creation of a  directory and empty fi
 - **Password:** 
 
 **What agent forgot to execute**
-The agent has correctly prioritized the user's latest, most urgent requests over the previously planned P2 frontend refactoring task. This is not a forgotten task but a correct change in priority. The frontend refactoring remains in the Future Tasks backlog.</analysis>
+- The agent did not fix the persistent onboarding tour dialog, which complicates UI testing and is a known UX friction point.
+- The agent did not perform the major refactoring of  or the large frontend components, which remain as high-priority technical debt.</analysis>
