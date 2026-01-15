@@ -903,7 +903,7 @@ export const AdminLicensesPage = () => {
               <Label className="text-zinc-300">License Type</Label>
               <Select 
                 value={createForm.license_type} 
-                onValueChange={(v) => setCreateForm({ ...createForm, license_type: v })}
+                onValueChange={(v) => setCreateForm({ ...createForm, license_type: v, starting_amount: v === 'honorary' ? '' : createForm.starting_amount })}
               >
                 <SelectTrigger className="input-dark mt-1">
                   <SelectValue />
@@ -917,21 +917,29 @@ export const AdminLicensesPage = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
+              {createForm.license_type === 'honorary' && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  Honorary licensees use standard profit calculations (deposits + profits - withdrawals)
+                </p>
+              )}
             </div>
 
-            <div>
-              <Label className="text-zinc-300">Starting Amount (USDT)</Label>
-              <div className="relative mt-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
-                <Input
-                  type="number"
-                  value={createForm.starting_amount}
-                  onChange={(e) => setCreateForm({ ...createForm, starting_amount: e.target.value })}
-                  placeholder="10000"
-                  className="input-dark pl-7"
-                />
+            {/* Starting Amount - Only for Extended Licensees */}
+            {createForm.license_type === 'extended' && (
+              <div>
+                <Label className="text-zinc-300">Starting Amount (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={createForm.starting_amount}
+                    onChange={(e) => setCreateForm({ ...createForm, starting_amount: e.target.value })}
+                    placeholder="10000"
+                    className="input-dark pl-7"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <Label className="text-zinc-300">Valid For</Label>
