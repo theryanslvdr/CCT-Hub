@@ -11,6 +11,31 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 39 (2026-01-15) - Licensee Management Enhancements ✅
+
+#### Feature 1: Licensees Cannot Set Starting Balance ✅
+- **Status**: Already implemented correctly
+- **Details**: Starting balance can only be set by admin via license invite creation or reset-balance endpoint. No endpoint exists for licensees to set their own balance.
+- **Files**: All balance-setting endpoints are admin-protected in `server.py`
+
+#### Feature 2: Master Admin Can Edit Licensee Profiles ✅
+- **Implementation**: Added "Edit Profile" dialog to `AdminLicensesPage.jsx`
+- **Features**:
+  - UserCog icon button in Actions column
+  - Dialog with Full Name and Timezone fields
+  - Uses `PUT /api/admin/members/{user_id}` endpoint
+- **Backend**: Updated `GET /api/admin/licenses` to return `user_timezone` field
+- **Files Modified**: `AdminLicensesPage.jsx`, `api.js`, `server.py`
+
+#### Feature 3: License Balance Syncs Across All Pages ✅
+- **Implementation**: Updated profit-related endpoints to check for licensees
+- **Changes**:
+  - `GET /api/profit/summary` returns `license.current_amount` for licensees
+  - `POST /api/profit/simulate-withdrawal` uses license balance for licensees
+  - `POST /api/admin/licenses/{id}/reset-balance` updates both `license.current_amount` and `user.account_value`
+  - Team analytics uses license balance for licensee account values
+- **Files Modified**: `server.py` (lines 1017-1042, 1044-1070, 2363-2370)
+
 ### Session 38 (2026-01-15) - Bug Fixes ✅
 
 #### Bug Fix 1: Countdown Timer Stops Under a Minute ✅
