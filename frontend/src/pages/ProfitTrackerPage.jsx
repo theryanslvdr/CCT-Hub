@@ -106,28 +106,31 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   const lastDay = new Date(year, month + 1, 0);
   
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  const isPastMonth = (year < today.getFullYear()) || (year === today.getFullYear() && month < today.getMonth());
   
-  // For current month, start from today (don't show past days)
-  // The startBalance passed is the current account value
-  // If user has already traded today, the account value INCLUDES today's profit
-  // So we need to subtract today's actual profit to get "balance before"
-  
+  // Always start from the first day of the month to show all trade history
   let runningBalance = startBalance;
   
-  // Check if today has been traded
-  const todayKey = today.toISOString().split('T')[0];
-  const todayTradeLog = tradeLogs[todayKey];
-  const todayHasTraded = todayTradeLog?.has_traded;
-  const todayActualProfit = todayTradeLog?.actual_profit;
+  // For current/past months, we need to reconstruct the balance progression
+  // Start with the month's starting balance and add profits day by day
+  let currentDate = new Date(firstDay);
   
-  // If today has been traded, account value includes today's profit
-  // Subtract it to get the "balance before" for today
-  if (isCurrentMonth && todayHasTraded && todayActualProfit !== undefined) {
-    runningBalance = startBalance - todayActualProfit;
+  // If we're viewing past month or current month, we need to calculate backwards
+  // to find what the balance was at the start of the month
+  if (isCurrentMonth || isPastMonth) {
+    // Get all trades for this month to calculate starting balance
+    const monthTrades = Object.entries(tradeLogs)
+      .filter(([key, _]) => key.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`))
+      .sort(([a], [b]) => a.localeCompare(b));
+    
+    // Sum up all profits in this month
+    const totalMonthProfit = monthTrades.reduce((sum, [_, log]) => {
+      return sum + (log?.actual_profit || 0);
+    }, 0);
+    
+    // Starting balance for the month = current balance - total month profit
+    runningBalance = startBalance - totalMonthProfit;
   }
-  
-  // For current month, start from today
-  let currentDate = isCurrentMonth ? new Date(today) : new Date(firstDay);
   
   while (currentDate <= lastDay) {
     if (isTradingDay(currentDate)) {
@@ -153,9 +156,12 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       let status = 'pending';
       const isToday = currentDate.toDateString() === today.toDateString();
       const isFuture = currentDate > today;
+      const isPast = currentDate < today;
       
       if (hasTraded && actualProfit !== undefined) {
         status = 'completed';
+      } else if (isPast) {
+        status = 'missed'; // Past day without trade
       } else if (isToday && activeSignal) {
         status = 'active';
       } else if (isFuture) {
