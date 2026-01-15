@@ -409,6 +409,11 @@ export const ProfitTrackerPage = () => {
   
   // Check if user is a licensee (hide simulation/record buttons)
   const isLicensee = simulatedView?.license_type || user?.license_type;
+  const isExtendedLicensee = (simulatedView?.license_type || user?.license_type) === 'extended';
+  const isHonoraryLicensee = (simulatedView?.license_type || user?.license_type) === 'honorary';
+  
+  // Master admin trades for extended licensees (profit credited tracking)
+  const [masterAdminTrades, setMasterAdminTrades] = useState({});
   
   // Projection states
   const [selectedYears, setSelectedYears] = useState(1);
