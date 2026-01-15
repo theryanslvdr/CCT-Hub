@@ -75,6 +75,10 @@ export const AdminLicensesPage = () => {
   });
   const [savingProfile, setSavingProfile] = useState(false);
   
+  // Delete license dialog state
+  const [deleteLicenseDialogOpen, setDeleteLicenseDialogOpen] = useState(false);
+  const [deletingLicense, setDeletingLicense] = useState(false);
+  
   // Feedback form state
   const [feedbackForm, setFeedbackForm] = useState({
     message: '',
