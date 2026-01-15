@@ -822,6 +822,56 @@ export const TradeMonitorPage = () => {
     setEditTimeValue('');
   };
 
+  // Trade action handlers (Reset / Request Change)
+  const isMasterAdmin = user?.role === 'master_admin';
+
+  const handleResetTrade = async (tradeId) => {
+    if (!window.confirm('Are you sure you want to reset this trade? This action cannot be undone.')) {
+      return;
+    }
+    
+    setResetTradeLoading(tradeId);
+    try {
+      await tradeAPI.resetTrade(tradeId);
+      toast.success('Trade has been reset successfully');
+      loadTradeHistory();
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reset trade');
+    } finally {
+      setResetTradeLoading(null);
+    }
+  };
+
+  const openRequestChangeDialog = (trade) => {
+    setSelectedTradeForChange(trade);
+    setChangeRequestReason('');
+    setShowRequestChangeDialog(true);
+  };
+
+  const handleRequestChange = async () => {
+    if (!changeRequestReason.trim()) {
+      toast.error('Please provide a reason for the change request');
+      return;
+    }
+
+    setRequestChangeLoading(selectedTradeForChange?.id);
+    try {
+      await tradeAPI.requestTradeChange({
+        trade_id: selectedTradeForChange.id,
+        reason: changeRequestReason.trim()
+      });
+      toast.success('Change request submitted to admin');
+      setShowRequestChangeDialog(false);
+      setSelectedTradeForChange(null);
+      setChangeRequestReason('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to submit change request');
+    } finally {
+      setRequestChangeLoading(null);
+    }
+  };
+
   // Missed trade handlers
   const handleConfirmMissedTrade = () => {
     setShowMissedTradePopup(false);
