@@ -125,6 +125,7 @@ export const adminAPI = {
   getMembers: () => api.get('/admin/members'),
   getMemberDetails: (userId) => api.get(`/admin/members/${userId}`),
   getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
+  updateMember: (userId, data) => api.put(`/admin/members/${userId}`, data),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
   // Analytics
