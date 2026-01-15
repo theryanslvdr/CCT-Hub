@@ -369,6 +369,10 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
+  // Onboarding Wizard states
+  const [onboardingWizardOpen, setOnboardingWizardOpen] = useState(false);
+  const [isResetOnboarding, setIsResetOnboarding] = useState(false);
+  
   // Adjust Trade Dialog for past trades (renamed from Adjust Trade)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
   const [enterAPDate, setEnterAPDate] = useState(null);
