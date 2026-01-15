@@ -562,6 +562,26 @@ export const ProfitTrackerPage = () => {
         setIsFirstTime(true);
         setInitialBalanceDialogOpen(true);
       }
+      
+      // Load master admin trades for extended licensees
+      const licenseType = simulatedView?.license_type || user?.license_type;
+      if (licenseType === 'extended') {
+        try {
+          // Get trades for the current year
+          const startDate = new Date();
+          startDate.setMonth(0, 1); // January 1st of current year
+          const endDate = new Date();
+          endDate.setMonth(11, 31); // December 31st of current year
+          
+          const tradesRes = await profitAPI.getMasterAdminTrades(
+            startDate.toISOString().split('T')[0],
+            endDate.toISOString().split('T')[0]
+          );
+          setMasterAdminTrades(tradesRes.data?.trading_dates || {});
+        } catch (error) {
+          console.error('Failed to load master admin trades:', error);
+        }
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
