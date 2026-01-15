@@ -746,12 +746,21 @@ export const AdminLicensesPage = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                onClick={() => handleOpenEditProfile(license)}
+                                className="text-zinc-400 hover:text-blue-400"
+                                title="Edit Profile"
+                                data-testid={`edit-profile-${license.id}`}
+                              >
+                                <UserCog className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => handleOpenChangeLicense(license)}
                                 className="text-zinc-400 hover:text-purple-400"
                                 title="Change License Type"
                               >
-                                <RefreshCw className="w-4 h-4 mr-1" />
-                                Change
+                                <RefreshCw className="w-4 h-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -760,8 +769,7 @@ export const AdminLicensesPage = () => {
                                 className="text-zinc-400 hover:text-emerald-400"
                                 title="Reset Balance"
                               >
-                                <RotateCcw className="w-4 h-4 mr-1" />
-                                Reset
+                                <RotateCcw className="w-4 h-4" />
                               </Button>
                             </div>
                           </td>
