@@ -11,6 +11,35 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 41 (2026-01-15) - Licensee Authentication & Daily Projection Enhancements ✅
+
+#### Feature 1: Licensees Bypass Heartbeat Membership ✅
+- **Issue**: Licensees registering via invite link couldn't login - "not a heartbeat member" error
+- **Fix**: Updated login endpoint to check `license_type` and skip Heartbeat verification for licensees
+- **Code**: `server.py` lines 643-653 - Added `is_licensee = user.get("license_type") is not None`
+- **Files Modified**: `server.py`
+
+#### Feature 2: Extended Licensee Profit Calculation Clarification ✅
+- **Status**: Already correctly implemented
+- **Logic**: Quarterly compounding - daily profit stays same within quarter, recalculates on first trading day of each new quarter
+- **Function**: `calculate_extended_license_projections()` in `server.py` (lines 2949-2994)
+
+#### Feature 3: Extended Licensee Daily Projection UI ✅
+- **Changes**:
+  - Removed "Actual Profit" column for extended licensees
+  - Removed "P/L Diff" column for extended licensees
+  - Added "Profit Credited" column showing:
+    - ✓ (green checkmark) when Master Admin traded that day
+    - ✗ (red X) when Master Admin did not trade
+- **Files Modified**: `ProfitTrackerPage.jsx`
+
+#### Feature 4: Master Admin Trades API ✅
+- **New Endpoint**: `GET /api/profit/master-admin-trades`
+- **Purpose**: Returns master admin's trading status by date for extended licensees
+- **Access**: Licensees only (returns 403 for non-licensees)
+- **Response**: `{ trading_dates: { "2026-01-15": { traded: true, actual_profit: 285.57 } } }`
+- **Files Modified**: `server.py`, `api.js`
+
 ### Session 40 (2026-01-15) - Backend Refactoring ✅
 
 #### Task 1: Data Integrity Check (status: None) ✅
