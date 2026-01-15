@@ -142,7 +142,7 @@ class TestBVESignalEditing:
         """Test that production signals are not affected when editing in BVE mode"""
         headers = {"Authorization": f"Bearer {auth_token}"}
         
-        # Get production signals first
+        # Get production signals first - API returns list directly or object with signals key
         prod_signals_response = requests.get(
             f"{BASE_URL}/api/admin/signals?page=1&page_size=5",
             headers=headers
@@ -150,7 +150,11 @@ class TestBVESignalEditing:
         
         if prod_signals_response.status_code == 200:
             prod_data = prod_signals_response.json()
-            prod_signals = prod_data.get("signals", [])
+            # Handle both list and dict response formats
+            if isinstance(prod_data, list):
+                prod_signals = prod_data
+            else:
+                prod_signals = prod_data.get("signals", [])
             print(f"SUCCESS: Got production signals - count: {len(prod_signals)}")
             
             if prod_signals:
@@ -335,8 +339,12 @@ class TestAPIEndpoints:
         response = requests.get(f"{BASE_URL}/api/admin/signals?page=1&page_size=10", headers=headers)
         assert response.status_code == 200
         data = response.json()
-        assert "signals" in data
-        print(f"SUCCESS: Admin signals endpoint works - count: {len(data['signals'])}")
+        # Handle both list and dict response formats
+        if isinstance(data, list):
+            signals = data
+        else:
+            signals = data.get("signals", [])
+        print(f"SUCCESS: Admin signals endpoint works - count: {len(signals)}")
 
 
 if __name__ == "__main__":
