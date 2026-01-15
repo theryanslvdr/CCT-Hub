@@ -2054,8 +2054,9 @@ export const ProfitTrackerPage = () => {
                     <th>Balance Before</th>
                     <th>LOT Size</th>
                     <th>Target Profit</th>
-                    <th>Actual Profit</th>
-                    <th>P/L Diff</th>
+                    {!isExtendedLicensee && <th>Actual Profit</th>}
+                    {!isExtendedLicensee && <th>P/L Diff</th>}
+                    {isExtendedLicensee && <th>Profit Credited</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -2063,6 +2064,9 @@ export const ProfitTrackerPage = () => {
                     const plDiff = day.status === 'completed' && day.actualProfit !== undefined 
                       ? day.actualProfit - day.targetProfit 
                       : null;
+                    
+                    // For extended licensees: check if master admin traded on this day
+                    const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
                     return (
                       <tr 
@@ -2078,53 +2082,78 @@ export const ProfitTrackerPage = () => {
                         <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
                         <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
                         <td className="font-mono text-zinc-400">{formatMoney(day.targetProfit)}</td>
-                        <td>
-                          {day.status === 'completed' ? (
-                            <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
-                            </span>
-                          ) : day.status === 'active' ? (
-                            <Button
-                              size="sm"
-                              className="h-6 text-xs btn-primary"
-                              onClick={() => window.location.href = '/trade-monitor'}
-                              data-testid="trade-now-daily"
-                            >
-                              Trade Now
-                            </Button>
-                          ) : day.status === 'future' ? (
-                            <span className="text-zinc-500 text-xs">-</span>
-                          ) : day.isToday ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-                              onClick={() => handleOpenEnterAP(day)}
-                              data-testid={`enter-ap-${day.dateKey}`}
-                            >
-                              <Edit3 className="w-3 h-3 mr-1" /> Enter AP
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-                              onClick={() => handleOpenEnterAP(day)}
-                              data-testid={`enter-ap-${day.dateKey}`}
-                            >
-                              <Edit3 className="w-3 h-3 mr-1" /> Enter AP
-                            </Button>
-                          )}
-                        </td>
-                        <td>
-                          {plDiff !== null ? (
-                            <span className={`font-mono ${plDiff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {plDiff >= 0 ? '+' : ''}{formatMoney(plDiff)}
-                            </span>
-                          ) : (
-                            <span className="text-zinc-500 text-xs">-</span>
-                          )}
-                        </td>
+                        
+                        {/* Actual Profit column - hidden for extended licensees */}
+                        {!isExtendedLicensee && (
+                          <td>
+                            {day.status === 'completed' ? (
+                              <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
+                              </span>
+                            ) : day.status === 'active' ? (
+                              <Button
+                                size="sm"
+                                className="h-6 text-xs btn-primary"
+                                onClick={() => window.location.href = '/trade-monitor'}
+                                data-testid="trade-now-daily"
+                              >
+                                Trade Now
+                              </Button>
+                            ) : day.status === 'future' ? (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            ) : day.isToday ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                                onClick={() => handleOpenEnterAP(day)}
+                                data-testid={`enter-ap-${day.dateKey}`}
+                              >
+                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                                onClick={() => handleOpenEnterAP(day)}
+                                data-testid={`enter-ap-${day.dateKey}`}
+                              >
+                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                              </Button>
+                            )}
+                          </td>
+                        )}
+                        
+                        {/* P/L Diff column - hidden for extended licensees */}
+                        {!isExtendedLicensee && (
+                          <td>
+                            {plDiff !== null ? (
+                              <span className={`font-mono ${plDiff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {plDiff >= 0 ? '+' : ''}{formatMoney(plDiff)}
+                              </span>
+                            ) : (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            )}
+                          </td>
+                        )}
+                        
+                        {/* Profit Credited column - only for extended licensees */}
+                        {isExtendedLicensee && (
+                          <td className="text-center">
+                            {day.status === 'future' ? (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            ) : masterTraded ? (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20" title="Profit credited">
+                                <Check className="w-4 h-4 text-emerald-400" />
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20" title="Not credited - Master Admin did not trade">
+                                <X className="w-4 h-4 text-red-400" />
+                              </span>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
