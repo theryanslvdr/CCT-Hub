@@ -176,7 +176,10 @@ export const TradeMonitorPage = () => {
   const [showRequestChangeDialog, setShowRequestChangeDialog] = useState(false);
   const [selectedTradeForChange, setSelectedTradeForChange] = useState(null);
   const [changeRequestReason, setChangeRequestReason] = useState('');
-  const audioRef = useRef(null);
+  
+  // Countdown stall detection state
+  const [countdownStalled, setCountdownStalled] = useState(false);
+  const lastCountdownUpdateRef = useRef(Date.now());  const audioRef = useRef(null);
   const beepRef = useRef(null);
   const countdownRef = useRef(null);
   const tradeNotifiedRef = useRef(false); // Track if trade notification has been shown
