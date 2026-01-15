@@ -1,0 +1,97 @@
+{
+  "summary": "Iteration 40 - Backend Refactoring Tests Complete. All 16 tests passed. Verified: 1) GET /api/profit/summary uses unified get_user_financial_summary() utility, 2) POST /api/profit/simulate-withdrawal uses unified calculate_account_value() utility, 3) Licensee account_value comes from license.current_amount, 4) Regular user account_value is calculated as deposits - withdrawals + profits, 5) All existing functionality still works after refactoring (no regression).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_40_refactoring.py",
+    "/app/test_reports/pytest/pytest_iteration_40.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "calculate_account_value() (lines 6-54 in calculations.py) correctly handles both licensees and regular users",
+    "get_user_financial_summary() (lines 57-117 in calculations.py) provides comprehensive financial data",
+    "GET /api/profit/summary (lines 991-1008 in server.py) correctly uses get_user_financial_summary()",
+    "POST /api/profit/simulate-withdrawal (lines 1019-1036 in server.py) correctly uses calculate_account_value()",
+    "database.py module created for future route migration (not yet integrated - as expected)",
+    "Import statements use relative imports from utils.calculations which is correct"
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_40_refactoring.py"
+  ],
+  "success_rate": {
+    "backend": "100% (16/16 tests passed)",
+    "frontend": "N/A (backend only testing)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend refactoring complete. Unified calculation utilities in /app/backend/utils/calculations.py. database.py module created but not yet integrated into server.py (preparation for future route migration). All profit-related endpoints verified working correctly.",
+  "features_tested": {
+    "profit_summary_unified_calculation": {
+      "status": "PASS",
+      "details": "GET /api/profit/summary uses get_user_financial_summary() utility. Returns correct structure with total_deposits, total_projected_profit, total_actual_profit, profit_difference, account_value, total_trades, performance_rate, is_licensee, license_type."
+    },
+    "simulate_withdrawal_unified_calculation": {
+      "status": "PASS",
+      "details": "POST /api/profit/simulate-withdrawal uses calculate_account_value() utility. Returns correct fee calculations (3% Merin fee) and balance information."
+    },
+    "licensee_account_value_from_license": {
+      "status": "PASS",
+      "details": "Licensee account_value correctly comes from license.current_amount. Verified via code review and license data inspection."
+    },
+    "regular_user_account_value_calculation": {
+      "status": "PASS",
+      "details": "Regular user account_value correctly calculated as deposits - withdrawals + profits. Verified: 18252.24 + 299.9 = 18552.14"
+    },
+    "account_value_consistency": {
+      "status": "PASS",
+      "details": "account_value is consistent between profit summary (18552.14) and withdrawal simulation current_balance (18552.14)"
+    },
+    "existing_functionality_regression": {
+      "status": "PASS",
+      "details": "All existing endpoints still work: /api/auth/me, /api/profit/deposits, /api/trade/logs, /api/profit/withdrawals, /api/profit/calculate-exit"
+    }
+  },
+  "api_tests": {
+    "GET /api/profit/summary": "PASS - Returns correct structure with unified calculation",
+    "POST /api/profit/simulate-withdrawal": "PASS - Uses unified account_value, correct fee calculation",
+    "POST /api/profit/simulate-withdrawal (insufficient)": "PASS - Returns 400 for excessive amount",
+    "GET /api/admin/licenses": "PASS - Returns licenses with current_amount",
+    "GET /api/auth/me": "PASS - Regression test passed",
+    "GET /api/profit/deposits": "PASS - Regression test passed",
+    "GET /api/trade/logs": "PASS - Regression test passed",
+    "GET /api/profit/withdrawals": "PASS - Regression test passed",
+    "POST /api/profit/calculate-exit": "PASS - Regression test passed"
+  },
+  "verified_calculations": {
+    "master_admin_account_value": {
+      "total_deposits": 18252.24,
+      "total_actual_profit": 299.9,
+      "total_withdrawals": 0,
+      "calculated_account_value": 18552.14,
+      "api_returned_account_value": 18552.14,
+      "match": true
+    },
+    "withdrawal_fee_calculation": {
+      "gross_amount": 100,
+      "merin_fee_3_percent": 3,
+      "total_fees": 3,
+      "net_amount": 97,
+      "correct": true
+    }
+  },
+  "test_date": "2026-01-15T06:00:00Z"
+}
