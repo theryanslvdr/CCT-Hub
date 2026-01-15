@@ -800,6 +800,16 @@ export const AdminLicensesPage = () => {
                               >
                                 <RotateCcw className="w-4 h-4" />
                               </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenDeleteLicense(license)}
+                                className="text-zinc-400 hover:text-red-400"
+                                title="Delete License"
+                                data-testid={`delete-license-${license.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </td>
                         </tr>
