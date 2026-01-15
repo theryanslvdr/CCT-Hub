@@ -641,7 +641,22 @@ async def login(data: UserLogin):
     # Skip Heartbeat verification for admins and licensees
     admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
     is_licensee = user.get("license_type") is not None
-    if user.get("role") not in admin_roles and not is_licensee:
+    
+    # For licensees, check if their license is still active
+    if is_licensee:
+        active_license = await db.licenses.find_one({
+            "user_id": user["id"], 
+            "is_active": True
+        }, {"_id": 0})
+        
+        if not active_license:
+            # License has been revoked or deleted
+            raise HTTPException(
+                status_code=403, 
+                detail="Your license has been revoked or expired. Please contact the administrator to renew your license."
+            )
+    elif user.get("role") not in admin_roles:
+        # Non-admin, non-licensee - check Heartbeat membership
         heartbeat_email = user.get("heartbeat_email", user["email"])
         is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
         if not is_heartbeat_user:
