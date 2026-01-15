@@ -368,11 +368,16 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
-  // Enter AP (Actual Profit) Dialog for missed trades
+  // Adjust Trade Dialog for past trades (renamed from Enter AP)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
   const [enterAPDate, setEnterAPDate] = useState(null);
   const [enterAPValue, setEnterAPValue] = useState('');
   const [enterAPLoading, setEnterAPLoading] = useState(false);
+  
+  // Adjustment options for past trades
+  const [adjustmentType, setAdjustmentType] = useState('profit_only'); // 'profit_only', 'with_deposit', 'with_withdrawal'
+  const [adjustmentAmount, setAdjustmentAmount] = useState(''); // deposit/withdrawal amount
+  const [adjustedBalance, setAdjustedBalance] = useState(''); // manually adjusted balance before trade
   
   // Access Records Dialog (combined deposit, withdrawal, commission records)
   const [accessRecordsOpen, setAccessRecordsOpen] = useState(false);
