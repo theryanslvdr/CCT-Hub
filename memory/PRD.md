@@ -11,6 +11,23 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 44 (2026-01-15) - Daily Projection History Fix ✅
+
+#### Feature: Keep Past Trade Dates in Daily Projection
+- **Issue**: When a new day came, previous day's trade data disappeared from Daily Projection
+- **Fix**: Updated `generateDailyProjectionForMonth` to always start from first day of month
+- **Changes**:
+  - Removed filter that hid past dates for current month
+  - Added "missed" status for past days without trades
+  - Added visual indicators: ✓ checkmark for completed trades, dimmed styling for missed days
+  - Running balance now calculated correctly from month start
+- **Result**: Users can now see full trade history for the month including:
+  - Past dates with completed trades (green highlight, ✓ badge)
+  - Past dates with missed trades ("Enter AP" button available)
+  - Today's date (blue highlight, "TODAY" badge)
+  - Future dates
+- **Files Modified**: `ProfitTrackerPage.jsx` (lines 98-195, 630-665, 2120-2195)
+
 ### Session 43 (2026-01-15) - Delete Licensee Feature ✅
 
 #### Feature: Delete License from Admin Panel
