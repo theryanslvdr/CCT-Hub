@@ -4631,6 +4631,184 @@ async def get_master_admin_trades(
     }
 
 
+# Onboarding Models
+class OnboardingTransaction(BaseModel):
+    type: str  # 'deposit' or 'withdrawal'
+    amount: float
+    date: str  # ISO date string
+
+class OnboardingTradeEntry(BaseModel):
+    date: str  # YYYY-MM-DD
+    actual_profit: Optional[float] = None
+    missed: bool = False
+
+class OnboardingData(BaseModel):
+    user_type: str  # 'new' or 'experienced'
+    starting_balance: float
+    start_date: Optional[str] = None  # ISO date string for experienced traders
+    transactions: Optional[List[OnboardingTransaction]] = []
+    trade_entries: Optional[List[OnboardingTradeEntry]] = []
+
+@profit_router.post("/complete-onboarding")
+async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_current_user)):
+    """
+    Complete the onboarding process for new or experienced traders.
+    Creates initial deposits, withdrawals, and trade logs based on user input.
+    """
+    try:
+        # Track which deposits and trades we create
+        created_deposits = []
+        created_trades = []
+        
+        # 1. Create the initial deposit (starting balance)
+        initial_deposit_id = str(uuid.uuid4())
+        start_date = data.start_date if data.start_date else datetime.now(timezone.utc).isoformat()
+        
+        # Parse start date for ordering
+        if isinstance(start_date, str):
+            if 'T' in start_date:
+                start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            else:
+                start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        else:
+            start_dt = start_date
+        
+        initial_deposit = {
+            "id": initial_deposit_id,
+            "user_id": user["id"],
+            "amount": data.starting_balance,
+            "product": "MOIL10",
+            "currency": "USDT",
+            "notes": f"Initial balance - Onboarding ({data.user_type} trader)",
+            "type": "initial",
+            "created_at": start_dt.isoformat()
+        }
+        await db.deposits.insert_one(initial_deposit)
+        created_deposits.append(initial_deposit_id)
+        
+        # 2. Create additional deposits/withdrawals for experienced traders
+        if data.user_type == 'experienced' and data.transactions:
+            for tx in data.transactions:
+                tx_id = str(uuid.uuid4())
+                tx_date = datetime.fromisoformat(tx.date.replace('Z', '+00:00')) if 'T' in tx.date else datetime.strptime(tx.date[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                
+                deposit_entry = {
+                    "id": tx_id,
+                    "user_id": user["id"],
+                    "amount": tx.amount if tx.type == 'deposit' else -tx.amount,
+                    "product": "MOIL10",
+                    "currency": "USDT",
+                    "type": tx.type,
+                    "notes": f"Onboarding {tx.type}",
+                    "is_withdrawal": tx.type == 'withdrawal',
+                    "created_at": tx_date.isoformat()
+                }
+                await db.deposits.insert_one(deposit_entry)
+                created_deposits.append(tx_id)
+        
+        # 3. Create trade logs for experienced traders
+        if data.user_type == 'experienced' and data.trade_entries:
+            # Calculate running balance for each trade
+            running_balance = data.starting_balance
+            
+            # Add initial transactions to running balance calculation
+            tx_by_date = {}
+            if data.transactions:
+                for tx in data.transactions:
+                    tx_date_key = tx.date[:10]
+                    if tx_date_key not in tx_by_date:
+                        tx_by_date[tx_date_key] = 0
+                    tx_by_date[tx_date_key] += tx.amount if tx.type == 'deposit' else -tx.amount
+            
+            # Sort trade entries by date
+            sorted_entries = sorted(data.trade_entries, key=lambda e: e.date)
+            
+            for entry in sorted_entries:
+                if entry.missed:
+                    continue  # Skip missed days
+                
+                # Apply any transactions for this date BEFORE calculating lot size
+                if entry.date in tx_by_date:
+                    running_balance += tx_by_date[entry.date]
+                
+                # Calculate lot size and projected profit
+                lot_size = round(running_balance / 980, 2)
+                projected_profit = round(lot_size * 15, 2)
+                actual_profit = entry.actual_profit or 0
+                profit_difference = round(actual_profit - projected_profit, 2)
+                
+                # Determine performance
+                if actual_profit >= projected_profit:
+                    performance = "exceeded" if actual_profit > projected_profit else "perfect"
+                elif actual_profit > 0:
+                    performance = "below"
+                else:
+                    performance = "below"
+                
+                # Create trade log
+                trade_id = str(uuid.uuid4())
+                trade_date = datetime.strptime(entry.date, "%Y-%m-%d").replace(hour=12, minute=0, second=0, tzinfo=timezone.utc)
+                
+                trade_log = {
+                    "id": trade_id,
+                    "user_id": user["id"],
+                    "lot_size": lot_size,
+                    "direction": "BUY",  # Default direction for onboarding
+                    "projected_profit": projected_profit,
+                    "actual_profit": actual_profit,
+                    "profit_difference": profit_difference,
+                    "performance": performance,
+                    "signal_id": None,
+                    "notes": "Imported via onboarding",
+                    "is_retroactive": True,
+                    "is_onboarding_import": True,
+                    "created_at": trade_date.isoformat()
+                }
+                await db.trade_logs.insert_one(trade_log)
+                created_trades.append(trade_id)
+                
+                # Update running balance for next iteration
+                running_balance += actual_profit
+        
+        # 4. Update user's onboarding status
+        await db.users.update_one(
+            {"id": user["id"]},
+            {
+                "$set": {
+                    "onboarding_completed": True,
+                    "trading_type": data.user_type,
+                    "trading_start_date": data.start_date,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Onboarding completed successfully",
+            "deposits_created": len(created_deposits),
+            "trades_created": len(created_trades),
+            "starting_balance": data.starting_balance,
+            "user_type": data.user_type
+        }
+        
+    except Exception as e:
+        logger.error(f"Onboarding failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Onboarding failed: {str(e)}")
+
+@profit_router.get("/onboarding-status")
+async def get_onboarding_status(user: dict = Depends(get_current_user)):
+    """Check if user has completed onboarding and their trading type"""
+    return {
+        "onboarding_completed": user.get("onboarding_completed", False),
+        "trading_type": user.get("trading_type"),  # 'new' or 'experienced'
+        "trading_start_date": user.get("trading_start_date"),
+        "has_deposits": bool(await db.deposits.find_one({"user_id": user["id"]})),
+        "has_trades": bool(await db.trade_logs.find_one({"user_id": user["id"]}))
+    }
+
+
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
