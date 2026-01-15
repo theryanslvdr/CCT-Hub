@@ -108,16 +108,19 @@ export const AdminLicensesPage = () => {
   }, [loadData]);
 
   const handleCreateInvite = async () => {
-    if (!createForm.starting_amount || parseFloat(createForm.starting_amount) <= 0) {
-      toast.error('Please enter a valid starting amount');
-      return;
+    // Only validate starting amount for extended licensees
+    if (createForm.license_type === 'extended') {
+      if (!createForm.starting_amount || parseFloat(createForm.starting_amount) <= 0) {
+        toast.error('Please enter a valid starting amount for Extended Licensee');
+        return;
+      }
     }
 
     setCreating(true);
     try {
       const res = await adminAPI.createLicenseInvite({
         license_type: createForm.license_type,
-        starting_amount: parseFloat(createForm.starting_amount),
+        starting_amount: createForm.license_type === 'extended' ? parseFloat(createForm.starting_amount) : 0,
         valid_duration: createForm.valid_duration,
         max_uses: parseInt(createForm.max_uses),
         invitee_name: createForm.invitee_name || null,
