@@ -760,33 +760,50 @@ export const TradeMonitorPage = () => {
     // Get target time from localStorage
     const savedCheckIn = localStorage.getItem('trade_check_in');
     if (!savedCheckIn) {
-      toast.error('No active countdown to restart');
-      return;
+      // If no localStorage but we're in trading state, recreate it from signal
+      if (isTrading && signal) {
+        // Recreate the check-in data
+        const [hours, minutes] = signal.trade_time.split(':').map(Number);
+        const signalTz = signal.trade_timezone || 'Asia/Manila';
+        const now = new Date();
+        const tradeTime = new Date();
+        const tzOffset = getTimezoneOffset(signalTz);
+        tradeTime.setUTCHours(hours - tzOffset, minutes, 0, 0);
+        
+        if (tradeTime <= now) {
+          tradeTime.setDate(tradeTime.getDate() + 1);
+        }
+        
+        localStorage.setItem('trade_check_in', JSON.stringify({
+          targetTime: tradeTime.toISOString(),
+          signalId: signal.id,
+          signalInfo: { product: signal.product, direction: signal.direction },
+          checkedInAt: now.toISOString()
+        }));
+        
+        toast.success('Countdown restored from signal');
+      } else {
+        toast.error('No active countdown to restart');
+        return;
+      }
     }
     
-    try {
-      const checkInData = JSON.parse(savedCheckIn);
-      const targetTime = new Date(checkInData.targetTime);
-      const now = new Date();
-      
-      if (targetTime <= now) {
-        // Trade time has passed
-        if (!tradeEnteredRef.current) {
-          setShowExitAlert(true);
-          setCountdown(null);
-          if (soundEnabled && audioRef.current) {
-            audioRef.current.play().catch(() => {});
-          }
-        }
+    // Reset stall state
+    setCountdownStalled(false);
+    lastCountdownUpdateRef.current = Date.now();
+    
+    // Start fresh countdown that reads from localStorage each tick
+    const updateFromStorage = () => {
+      const checkInStr = localStorage.getItem('trade_check_in');
+      if (!checkInStr) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
         return;
       }
       
-      // Reset stall state
-      setCountdownStalled(false);
-      lastCountdownUpdateRef.current = Date.now();
-      
-      // Start fresh countdown
-      countdownRef.current = setInterval(() => {
+      try {
+        const checkInData = JSON.parse(checkInStr);
+        const targetTime = new Date(checkInData.targetTime);
         const currentNow = new Date();
         const diff = targetTime - currentNow;
         
@@ -810,9 +827,15 @@ export const TradeMonitorPage = () => {
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((diff % (1000 * 60)) / 1000);
           
-          if (diff <= 5000 && diff > 0) {
-            setPreTradeCountdown(Math.ceil(diff / 1000));
-            playBeep();
+          // Show active countdown in last 30 seconds
+          if (diff <= 30000 && diff > 0) {
+            const secondsLeft = Math.ceil(diff / 1000);
+            setPreTradeCountdown(secondsLeft);
+            if (diff <= 5000) {
+              playBeep();
+            } else if (secondsLeft % 5 === 0) {
+              playBeep();
+            }
           } else {
             setPreTradeCountdown(null);
           }
@@ -820,13 +843,19 @@ export const TradeMonitorPage = () => {
           lastCountdownUpdateRef.current = Date.now();
           setCountdown({ hours, minutes, seconds, total: diff });
         }
-      }, 1000);
-      
-      toast.success('Countdown restarted');
-    } catch (e) {
-      toast.error('Failed to restart countdown');
-    }
-  }, [soundEnabled, playBeep]);
+      } catch (e) {
+        console.error('Failed to parse check-in data:', e);
+      }
+    };
+    
+    // Run immediately
+    updateFromStorage();
+    
+    // Then every 500ms
+    countdownRef.current = setInterval(updateFromStorage, 500);
+    
+    toast.success('Countdown restarted');
+  }, [soundEnabled, playBeep, isTrading, signal]);
 
   // User clicked "Trade Entered" - they have entered the trade, stop alarm
   const confirmTradeEntered = () => {
