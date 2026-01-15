@@ -1514,10 +1514,6 @@ export const TradeMonitorPage = () => {
                           </span>
                         </td>
                         <td className="font-mono text-purple-400">{trade.lot_size?.toFixed(2)}</td>
-                              </Button>
-                            </div>
-                          )}
-                        </td>
                         <td className="font-mono text-blue-400">${formatNumber(trade.projected_profit || 0)}</td>
                         <td className="font-mono text-emerald-400">${formatNumber(trade.actual_profit || 0)}</td>
                         <td className={`font-mono font-bold ${(trade.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
