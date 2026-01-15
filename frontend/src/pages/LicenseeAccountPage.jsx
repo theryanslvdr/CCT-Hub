@@ -70,12 +70,17 @@ export const LicenseeAccountPage = () => {
           setTransactions(memberTx);
           setIsLicensee(true);
           setLicense(memberLicense);
-          setAccountSummary({ current_balance: memberLicense.current_amount || 0 });
+          // Use license.current_amount as it's synced with profit tracker
+          setAccountSummary({ 
+            current_balance: memberLicense.current_amount || 0,
+            account_value: memberLicense.current_amount || 0
+          });
         } else {
           setIsLicensee(false);
         }
       } else {
         // Normal flow - load current user's data
+        // Use profitAPI.getSummary as the single source of truth for balance
         const [txRes, summaryRes] = await Promise.all([
           licenseeAPI.getMyTransactions(),
           profitAPI.getSummary()
@@ -85,13 +90,14 @@ export const LicenseeAccountPage = () => {
         setIsLicensee(txRes.data.is_licensee);
         setLicense(txRes.data.license || null);
         
-        // For licensees, use license.current_amount as the balance
-        // For non-licensees, use profit tracker summary
-        if (txRes.data.is_licensee && txRes.data.license) {
-          setAccountSummary({ current_balance: txRes.data.license.current_amount || 0 });
-        } else {
-          setAccountSummary(summaryRes.data);
-        }
+        // Use the unified profit summary for account_value (works for both licensees and regular users)
+        // This ensures synchronization with Dashboard and Profit Tracker
+        setAccountSummary({ 
+          current_balance: summaryRes.data.account_value || 0,
+          account_value: summaryRes.data.account_value || 0,
+          is_licensee: summaryRes.data.is_licensee,
+          license_type: summaryRes.data.license_type
+        });
       }
     } catch (error) {
       console.error('Failed to load data:', error);
