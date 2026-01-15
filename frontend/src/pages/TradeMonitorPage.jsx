@@ -529,6 +529,18 @@ export const TradeMonitorPage = () => {
               lastCountdownUpdateRef.current = Date.now();
               setCountdownStalled(false);
               setCountdown({ hours, minutes, seconds, total: diff });
+            } else {
+              // Trade time has passed - show the "Trade Entered" button if not already clicked
+              if (!tradeEnteredRef.current) {
+                setShowExitAlert(true);
+                setCountdown(null);
+                setPreTradeCountdown(null);
+                setCountdownStalled(false);
+                
+                if (soundEnabled && audioRef.current) {
+                  audioRef.current.play().catch(console.error);
+                }
+              }
             }
           } catch (e) {
             // Ignore errors
@@ -540,7 +552,7 @@ export const TradeMonitorPage = () => {
     }, 1000);
 
     return () => clearInterval(stallChecker);
-  }, [isTrading, countdown]);
+  }, [isTrading, countdown, soundEnabled]);
 
   // Calculate exit value when lot size or multiplier changes
   // Use truncateTo2Decimals for consistency with ProfitTrackerPage
