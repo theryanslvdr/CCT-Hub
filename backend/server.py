@@ -2353,7 +2353,13 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         # Get trades
         trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
         user_profit = sum(t.get("actual_profit", 0) for t in trades)
-        user_account_value = total_deposits - total_withdrawals + user_profit
+        
+        # For licensees, use license.current_amount as account value
+        if is_licensed:
+            license = next((lic for lic in all_licenses if lic["user_id"] == user_id), None)
+            user_account_value = license.get("current_amount", license.get("starting_amount", 0)) if license else 0
+        else:
+            user_account_value = total_deposits - total_withdrawals + user_profit
         
         # Only add to team totals if NOT a licensed user (both extended and honorary are excluded)
         if not is_licensed:
