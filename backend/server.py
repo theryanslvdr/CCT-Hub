@@ -990,6 +990,31 @@ async def get_deposits(user: dict = Depends(get_current_user)):
 
 @profit_router.get("/summary")
 async def get_profit_summary(user: dict = Depends(get_current_user)):
+    # Check if user is a licensee first
+    if user.get("license_type"):
+        license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+        if license:
+            # For licensees, return license-based values
+            trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
+            total_projected = sum(t.get("projected_profit", 0) for t in trades)
+            total_actual = sum(t.get("actual_profit", 0) for t in trades)
+            
+            # Use license.current_amount as the authoritative balance
+            license_balance = license.get("current_amount", license.get("starting_amount", 0))
+            
+            return {
+                "total_deposits": round(license.get("starting_amount", 0), 2),
+                "total_projected_profit": round(total_projected, 2),
+                "total_actual_profit": round(total_actual, 2),
+                "profit_difference": round(total_actual - total_projected, 2),
+                "account_value": round(license_balance, 2),
+                "total_trades": len(trades),
+                "performance_rate": round((total_actual / total_projected * 100) if total_projected > 0 else 0, 2),
+                "is_licensee": True,
+                "license_type": license.get("license_type")
+            }
+    
+    # Regular user flow
     deposits = await db.deposits.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
     
