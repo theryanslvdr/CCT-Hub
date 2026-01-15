@@ -1671,6 +1671,78 @@ export const AdminLicensesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete License Confirmation Dialog */}
+      <Dialog open={deleteLicenseDialogOpen} onOpenChange={setDeleteLicenseDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-400" /> Delete License
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedLicense && (
+              <>
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                  <p className="text-red-400 font-medium mb-2">⚠️ Warning: This action cannot be undone</p>
+                  <p className="text-zinc-400 text-sm">
+                    Deleting this license will:
+                  </p>
+                  <ul className="text-zinc-400 text-sm list-disc list-inside mt-2">
+                    <li>Remove the license from the system</li>
+                    <li>Prevent the licensee from accessing the platform</li>
+                    <li>Preserve the user account (they can be re-licensed later)</li>
+                  </ul>
+                </div>
+                
+                <div className="p-3 rounded-lg bg-zinc-900/50 text-sm">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-zinc-400">Licensee:</span>
+                    <span className="text-white">{selectedLicense.user_name}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-zinc-400">Email:</span>
+                    <span className="text-white">{selectedLicense.user_email}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-zinc-400">License Type:</span>
+                    <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}>
+                      {selectedLicense.license_type}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Current Balance:</span>
+                    <span className="text-emerald-400">${selectedLicense.current_amount?.toLocaleString()}</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteLicenseDialogOpen(false)}
+                className="flex-1 btn-secondary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteLicense}
+                disabled={deletingLicense}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                data-testid="confirm-delete-license"
+              >
+                {deletingLicense ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                Delete License
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
