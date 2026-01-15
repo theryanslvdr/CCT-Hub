@@ -452,6 +452,26 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Countdown stall detection - check if countdown hasn't updated in 3 seconds
+  useEffect(() => {
+    if (!isTrading || !countdown) {
+      setCountdownStalled(false);
+      return;
+    }
+
+    const stallChecker = setInterval(() => {
+      const timeSinceLastUpdate = Date.now() - lastCountdownUpdateRef.current;
+      // If countdown hasn't updated in 3 seconds, mark as stalled
+      if (timeSinceLastUpdate > 3000) {
+        setCountdownStalled(true);
+      } else {
+        setCountdownStalled(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(stallChecker);
+  }, [isTrading, countdown]);
+
   // Calculate exit value when lot size or multiplier changes
   // Use truncateTo2Decimals for consistency with ProfitTrackerPage
   useEffect(() => {
