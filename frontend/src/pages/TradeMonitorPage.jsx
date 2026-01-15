@@ -1618,6 +1618,74 @@ export const TradeMonitorPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Request Change Dialog */}
+      <Dialog open={showRequestChangeDialog} onOpenChange={setShowRequestChangeDialog}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-amber-400" /> Request Trade Change
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedTradeForChange && (
+              <div className="p-3 rounded-lg bg-zinc-900/50 text-sm">
+                <div className="flex justify-between mb-1">
+                  <span className="text-zinc-400">Trade Date:</span>
+                  <span className="text-white font-mono">
+                    {new Date(selectedTradeForChange.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-zinc-400">Actual Profit:</span>
+                  <span className="text-emerald-400 font-mono">${formatNumber(selectedTradeForChange.actual_profit || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Direction:</span>
+                  <span className={selectedTradeForChange.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}>
+                    {selectedTradeForChange.direction}
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            <div>
+              <Label className="text-zinc-300">Reason for Change Request</Label>
+              <textarea
+                value={changeRequestReason}
+                onChange={(e) => setChangeRequestReason(e.target.value)}
+                placeholder="Please explain why you need this trade modified..."
+                className="w-full mt-2 p-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white placeholder-zinc-500 resize-none focus:outline-none focus:border-amber-500/50"
+                rows={4}
+                data-testid="change-request-reason"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRequestChangeDialog(false)}
+                className="flex-1 btn-secondary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRequestChange}
+                disabled={!changeRequestReason.trim() || requestChangeLoading}
+                className="flex-1 btn-primary"
+                data-testid="submit-change-request"
+              >
+                {requestChangeLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
 
       {/* Right Panel - Merin Trading Platform */}
