@@ -175,15 +175,28 @@ export const AdminSignalsPage = () => {
 
   const handleSaveEdit = async () => {
     try {
-      await api.put(`/admin/signals/${selectedSignal.id}`, {
-        trade_time: editForm.trade_time,
-        trade_timezone: editForm.trade_timezone,
-        direction: editForm.direction,
-        profit_points: parseFloat(editForm.profit_points) || 15,
-        notes: editForm.notes,
-        is_active: editForm.is_active,
-      });
-      toast.success('Signal updated!');
+      // Use BVE API when in BVE mode, otherwise use regular admin API
+      if (isInBVE) {
+        await bveAPI.updateSignal(selectedSignal.id, {
+          trade_time: editForm.trade_time,
+          trade_timezone: editForm.trade_timezone,
+          direction: editForm.direction,
+          profit_points: parseFloat(editForm.profit_points) || 15,
+          notes: editForm.notes,
+          is_active: editForm.is_active,
+        });
+        toast.success('BVE signal updated!');
+      } else {
+        await api.put(`/admin/signals/${selectedSignal.id}`, {
+          trade_time: editForm.trade_time,
+          trade_timezone: editForm.trade_timezone,
+          direction: editForm.direction,
+          profit_points: parseFloat(editForm.profit_points) || 15,
+          notes: editForm.notes,
+          is_active: editForm.is_active,
+        });
+        toast.success('Signal updated!');
+      }
       setEditDialogOpen(false);
       loadSignals();
     } catch (error) {
