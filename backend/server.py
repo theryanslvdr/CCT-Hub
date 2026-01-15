@@ -1018,22 +1018,13 @@ async def calculate_exit(lot_size: float):
 
 @profit_router.post("/simulate-withdrawal")
 async def simulate_withdrawal(data: WithdrawalSimulation, user: dict = Depends(get_current_user)):
+    """Simulate withdrawal with fee calculation - uses unified account value calculation"""
+    from utils.calculations import calculate_account_value
+    
     fees = calculate_withdrawal_fees(data.amount)
     
-    # Get current account value - check for licensees first
-    account_value = 0
-    if user.get("license_type"):
-        license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
-        if license:
-            account_value = license.get("current_amount", license.get("starting_amount", 0))
-    else:
-        # Regular user flow
-        deposits = await db.deposits.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-        trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-        
-        total_deposits = sum(d["amount"] for d in deposits)
-        total_profit = sum(t["actual_profit"] for t in trades)
-        account_value = total_deposits + total_profit
+    # Get current account value using unified calculation
+    account_value = await calculate_account_value(db, user["id"], user)
     
     if data.amount > account_value:
         raise HTTPException(status_code=400, detail="Insufficient balance")
