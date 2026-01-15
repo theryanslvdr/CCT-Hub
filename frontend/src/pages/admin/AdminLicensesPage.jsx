@@ -285,6 +285,37 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  const handleOpenEditProfile = (license) => {
+    setSelectedLicense(license);
+    setEditProfileForm({
+      full_name: license.user_name || '',
+      timezone: license.user_timezone || 'Asia/Manila'
+    });
+    setEditProfileDialogOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editProfileForm.full_name.trim()) {
+      toast.error('Please enter a name');
+      return;
+    }
+
+    setSavingProfile(true);
+    try {
+      await adminAPI.updateMember(selectedLicense.user_id, {
+        full_name: editProfileForm.full_name,
+        timezone: editProfileForm.timezone
+      });
+      toast.success('Profile updated successfully');
+      setEditProfileDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update profile');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const handleViewDetails = (invite) => {
     setSelectedInvite(invite);
     setViewDialogOpen(true);
