@@ -100,8 +100,14 @@ export const TradeCountdownProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [activeCountdown, isBeeping, playBeep, stopCountdown]);
 
-  // Check if on trade monitor page
+  // Check if on trade monitor page or pages with iframes (like Merin)
   const isOnTradeMonitor = location.pathname === '/trade-monitor';
+  const isOnMerinPage = location.pathname === '/merin' || location.pathname.includes('merin');
+  const isOnProfilePage = location.pathname === '/profile';
+  const isOnAdminPage = location.pathname.startsWith('/admin');
+  
+  // Hide floating popup on trade monitor (main timer is there), merin pages (has iframe), and admin pages
+  const shouldHideFloatingPopup = isOnTradeMonitor || isOnMerinPage || isOnProfilePage || isOnAdminPage;
 
   // Format countdown
   const formatCountdown = () => {
@@ -120,8 +126,8 @@ export const TradeCountdownProvider = ({ children }) => {
     <TradeCountdownContext.Provider value={{ startCountdown, stopCountdown, activeCountdown, soundEnabled, setSoundEnabled }}>
       {children}
       
-      {/* Floating countdown popup - only show when NOT on trade monitor and countdown is active */}
-      {activeCountdown && countdown && !isOnTradeMonitor && (
+      {/* Floating countdown popup - only show when NOT on trade monitor/merin/admin and countdown is active */}
+      {activeCountdown && countdown && !shouldHideFloatingPopup && (
         <div 
           className={`fixed bottom-6 right-6 z-50 bg-zinc-900/95 border ${countdown.total <= 30000 ? 'border-red-500 animate-pulse' : 'border-blue-500/50'} rounded-xl shadow-2xl p-4 max-w-sm backdrop-blur-lg`}
           data-testid="floating-countdown"
