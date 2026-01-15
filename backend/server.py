@@ -990,46 +990,21 @@ async def get_deposits(user: dict = Depends(get_current_user)):
 
 @profit_router.get("/summary")
 async def get_profit_summary(user: dict = Depends(get_current_user)):
-    # Check if user is a licensee first
-    if user.get("license_type"):
-        license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
-        if license:
-            # For licensees, return license-based values
-            trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-            total_projected = sum(t.get("projected_profit", 0) for t in trades)
-            total_actual = sum(t.get("actual_profit", 0) for t in trades)
-            
-            # Use license.current_amount as the authoritative balance
-            license_balance = license.get("current_amount", license.get("starting_amount", 0))
-            
-            return {
-                "total_deposits": round(license.get("starting_amount", 0), 2),
-                "total_projected_profit": round(total_projected, 2),
-                "total_actual_profit": round(total_actual, 2),
-                "profit_difference": round(total_actual - total_projected, 2),
-                "account_value": round(license_balance, 2),
-                "total_trades": len(trades),
-                "performance_rate": round((total_actual / total_projected * 100) if total_projected > 0 else 0, 2),
-                "is_licensee": True,
-                "license_type": license.get("license_type")
-            }
+    """Get financial summary for the current user - uses unified calculation utility"""
+    from utils.calculations import get_user_financial_summary
     
-    # Regular user flow
-    deposits = await db.deposits.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-    trades = await db.trade_logs.find({"user_id": user["id"]}, {"_id": 0}).to_list(1000)
-    
-    total_deposits = sum(d["amount"] for d in deposits)
-    total_projected = sum(t["projected_profit"] for t in trades)
-    total_actual = sum(t["actual_profit"] for t in trades)
+    summary = await get_user_financial_summary(db, user["id"], user)
     
     return {
-        "total_deposits": round(total_deposits, 2),
-        "total_projected_profit": round(total_projected, 2),
-        "total_actual_profit": round(total_actual, 2),
-        "profit_difference": round(total_actual - total_projected, 2),
-        "account_value": round(total_deposits + total_actual, 2),
-        "total_trades": len(trades),
-        "performance_rate": round((total_actual / total_projected * 100) if total_projected > 0 else 0, 2)
+        "total_deposits": summary["total_deposits"],
+        "total_projected_profit": summary["total_projected_profit"],
+        "total_actual_profit": summary["total_profit"],
+        "profit_difference": round(summary["total_profit"] - summary["total_projected_profit"], 2),
+        "account_value": summary["account_value"],
+        "total_trades": summary["total_trades"],
+        "performance_rate": summary["performance_rate"],
+        "is_licensee": summary.get("is_licensee", False),
+        "license_type": summary.get("license_type")
     }
 
 @profit_router.post("/calculate-exit")
