@@ -779,7 +779,8 @@ export const TradeMonitorPage = () => {
 
   const forwardToProfit = async (tradeId) => {
     try {
-      await tradeAPI.forwardToProfit(tradeId);
+      // Pass BVE mode to prevent BVE trades from being forwarded to production
+      await tradeAPI.forwardToProfit(tradeId, isInBVE);
       toast.success('Trade profit forwarded to Profit Tracker!');
       setLastTrade(null);
       setShowCelebration(false);
