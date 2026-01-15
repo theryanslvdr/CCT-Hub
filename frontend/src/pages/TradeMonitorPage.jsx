@@ -16,7 +16,8 @@ import {
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
   TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
   Sparkles, ExternalLink, Rocket, Radio, FlaskConical, Flame,
-  ChevronLeft, ChevronRight, Edit2, Check, X, Calendar, Eye, RefreshCw
+  ChevronLeft, ChevronRight, Edit2, Check, X, Calendar, Eye, RefreshCw,
+  RotateCcw, MessageSquare, Loader2
 } from 'lucide-react';
 
 // Truncate to 2 decimal places without rounding
