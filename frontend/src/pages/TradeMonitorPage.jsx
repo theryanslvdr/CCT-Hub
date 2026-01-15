@@ -331,6 +331,35 @@ export const TradeMonitorPage = () => {
     loadTradeHistory();
   }, [loadTradeHistory]);
 
+  // Restore trade entered state from localStorage on mount
+  useEffect(() => {
+    const savedTradeState = localStorage.getItem('trade_entered_state');
+    if (savedTradeState) {
+      try {
+        const tradeState = JSON.parse(savedTradeState);
+        const savedTime = new Date(tradeState.timestamp);
+        const now = new Date();
+        
+        // Check if saved state is still valid (within 30 minutes)
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (now - savedTime < thirtyMinutes && tradeState.signalId === signal?.id) {
+          // Restore the trade entered state
+          setTradeEntered(true);
+          setIsTrading(true);
+          tradeEnteredRef.current = true;
+          tradeNotifiedRef.current = true;
+          // Don't show exit alert since user already entered trade
+          setShowExitAlert(false);
+        } else {
+          // Expired or different signal, clear it
+          localStorage.removeItem('trade_entered_state');
+        }
+      } catch (e) {
+        localStorage.removeItem('trade_entered_state');
+      }
+    }
+  }, [signal?.id]);
+
   // Restore check-in state from localStorage on mount
   useEffect(() => {
     const savedCheckIn = localStorage.getItem('trade_check_in');
