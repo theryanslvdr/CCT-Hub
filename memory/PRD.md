@@ -11,6 +11,56 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 46 (2026-01-15) - 6 Bug Fixes ✅
+
+#### Bug Fix 1: Trade Streak Calculation ✅
+- **Issue**: Streak counter was not counting trades correctly
+- **Root Cause**: Only checked for "exceeded" and "perfect" performance, but retroactive trades used "target" and "above"
+- **Fix**: Updated `/api/trade/streak` to count consecutive trades with:
+  - actual_profit > 0 OR
+  - performance in ['exceeded', 'perfect', 'target', 'above']
+- **Files Modified**: `server.py` (lines 1338-1377)
+
+#### Bug Fix 2: Floating Countdown Popup Blocking Merin Iframe ✅
+- **Issue**: Floating countdown timer appeared over all pages including pages with iframes
+- **Fix**: Added visibility logic to hide popup on:
+  - `/trade-monitor` (main timer is there)
+  - `/merin` pages (has iframe)
+  - `/profile` page
+  - `/admin/*` pages
+- **Files Modified**: `TradeCountdownContext.jsx` (lines 103-110)
+
+#### Bug Fix 3: Simplified 30-Second Countdown ✅
+- **Issue**: User found the long countdown timer buggy and confusing
+- **Fix**: Simplified countdown to show:
+  - Regular countdown display when > 30 seconds
+  - Active pulsing countdown only in last 30 seconds before trade time
+  - Beeps every 5 seconds, more frequent in last 5 seconds
+  - Info message: "Active countdown will appear 30 seconds before trade time"
+- **Files Modified**: `TradeMonitorPage.jsx` (lines 603-704, 1322-1395)
+
+#### Bug Fix 4: Trade Entered Button Not Appearing ✅
+- **Issue**: After countdown ended, "Trade Entered" button sometimes didn't appear
+- **Root Cause**: Visibility change handler and stall detector didn't trigger showExitAlert when countdown reached zero
+- **Fix**: Added showExitAlert trigger in both:
+  - `visibilitychange` handler when diff <= 0
+  - Stall detection handler when diff <= 0
+- **Files Modified**: `TradeMonitorPage.jsx` (lines 458-545)
+
+#### Bug Fix 5: Manual Adjustment Indicator ✅
+- **Issue**: No visual indication for trades that were manually adjusted/retroactively logged
+- **Fix**: 
+  - Added `is_manual_adjustment: true` flag to retroactively logged trades in backend
+  - Added ✎ badge indicator in Daily Projection table for adjusted trades
+  - Used consistent "exceeded" / "perfect" / "below" performance categories
+- **Files Modified**: `server.py` (lines 1548-1586), `ProfitTrackerPage.jsx` (lines 2185-2200)
+
+#### Bug Fix 6: Onboarding Tour Persistence ✅
+- **Status**: Verified working correctly
+- **Implementation**: Tour completion saved to `localStorage` with key `crosscurrent_tour_completed`
+- **Dismissal Options**: Skip Tour button, X button, or clicking overlay background
+- **Files**: `OnboardingTour.jsx` (lines 177-179, 202-205), `DashboardLayout.jsx` (line 243)
+
 ### Session 45 (2026-01-15) - Adjust Trade & Timer Fix ✅
 
 #### Feature 1: Adjust Trade Dialog (Renamed from Enter AP) ✅
