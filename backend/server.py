@@ -2949,7 +2949,7 @@ def get_first_trading_day_of_quarter(year: int, quarter: int) -> datetime:
 def calculate_extended_license_projections(starting_amount: float, start_date: datetime, days_to_project: int = 365) -> List[Dict]:
     """
     Calculate projections for Extended Licensee using quarterly compounding.
-    Daily profit is fixed within each quarter and recalculated at quarter start.
+    Daily profit AND lot size are fixed within each quarter and recalculated at quarter start.
     """
     projections = []
     current_date = start_date
@@ -2957,8 +2957,9 @@ def calculate_extended_license_projections(starting_amount: float, start_date: d
     current_quarter = get_quarter(start_date)
     current_year = start_date.year
     
-    # Calculate initial quarter's daily profit
-    quarter_daily_profit = round((current_amount / 980) * 15, 2)
+    # Calculate initial quarter's values (FIXED for entire quarter)
+    quarter_lot_size = round(current_amount / 980, 2)
+    quarter_daily_profit = round(quarter_lot_size * 15, 2)
     quarter_start_amount = current_amount
     
     trading_days_processed = 0
@@ -2969,8 +2970,9 @@ def calculate_extended_license_projections(starting_amount: float, start_date: d
         new_year = current_date.year
         
         if new_year != current_year or new_quarter != current_quarter:
-            # Recalculate daily profit for new quarter using last amount
-            quarter_daily_profit = round((current_amount / 980) * 15, 2)
+            # Recalculate lot size and daily profit for new quarter using accumulated amount
+            quarter_lot_size = round(current_amount / 980, 2)
+            quarter_daily_profit = round(quarter_lot_size * 15, 2)
             quarter_start_amount = current_amount
             current_quarter = new_quarter
             current_year = new_year
@@ -2981,7 +2983,8 @@ def calculate_extended_license_projections(starting_amount: float, start_date: d
             projections.append({
                 "date": current_date.strftime("%Y-%m-%d"),
                 "quarter": f"Q{current_quarter} {current_year}",
-                "daily_profit": quarter_daily_profit,
+                "lot_size": quarter_lot_size,  # FIXED for entire quarter
+                "daily_profit": quarter_daily_profit,  # FIXED for entire quarter
                 "account_value": current_amount,
                 "cumulative_profit": round(current_amount - starting_amount, 2),
                 "is_trading_day": True
