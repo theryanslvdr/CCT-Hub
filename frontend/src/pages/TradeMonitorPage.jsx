@@ -584,6 +584,14 @@ export const TradeMonitorPage = () => {
     setTradeEntered(true);
     setShowExitAlert(false);
     
+    // Persist trade entered state to localStorage for refresh resilience
+    const tradeState = {
+      tradeEntered: true,
+      signalId: signal?.id,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('trade_entered_state', JSON.stringify(tradeState));
+    
     // Stop all audio
     if (audioRef.current) {
       audioRef.current.pause();
