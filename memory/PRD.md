@@ -11,6 +11,39 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 40 (2026-01-15) - Backend Refactoring ✅
+
+#### Task 1: Data Integrity Check (status: None) ✅
+- **Status**: Verified - No deposits with `status: None` found
+- **Details**: Checked licensee_transactions collection - all 9 transactions have valid status fields
+
+#### Task 2: Unified Account Value Calculation ✅
+- **Implementation**: Created utility functions in `/app/backend/utils/calculations.py`
+- **New Functions**:
+  - `calculate_account_value(db, user_id, user, include_licensee_check)` - Unified account value calculation
+  - `get_user_financial_summary(db, user_id, user)` - Comprehensive financial summary
+- **Refactored Endpoints**:
+  - `GET /api/profit/summary` - Now uses `get_user_financial_summary()`
+  - `POST /api/profit/simulate-withdrawal` - Now uses `calculate_account_value()`
+- **Benefits**: 
+  - Single source of truth for account value calculation
+  - Consistent handling of licensees vs regular users
+  - Easier maintenance and testing
+- **Files Modified**: `utils/calculations.py`, `utils/__init__.py`, `server.py`
+
+#### Task 3: Database Module for Route Migration ✅
+- **Created**: `/app/backend/database.py`
+- **Features**:
+  - Centralized database connection
+  - `Database` class with property accessors for all collections
+  - Ready for future route migration from monolithic `server.py`
+- **Status**: Module created but not yet integrated (preparation for future migration)
+
+#### Server.py Size Reduction
+- **Before**: 6130 lines
+- **After**: 6096 lines
+- **Note**: Major reduction will come when routes are migrated to `/routes/` directory
+
 ### Session 39 (2026-01-15) - Licensee Management Enhancements ✅
 
 #### Feature 1: Licensees Cannot Set Starting Balance ✅
