@@ -92,6 +92,9 @@ export const profitAPI = {
   getMasterAdminTrades: (startDate, endDate) => api.get('/profit/master-admin-trades', { params: { start_date: startDate, end_date: endDate } }),
   getReportImage: (period = 'monthly', userId = null) => api.get(`/admin/analytics/report/image`, { params: { period, user_id: userId }, responseType: 'blob' }),
   getReportBase64: (period = 'monthly', userId = null) => api.get('/admin/analytics/report/base64', { params: { period, user_id: userId } }),
+  // Onboarding
+  completeOnboarding: (data) => api.post('/profit/complete-onboarding', data),
+  getOnboardingStatus: () => api.get('/profit/onboarding-status'),
 };
 
 // Trade Monitor APIs
