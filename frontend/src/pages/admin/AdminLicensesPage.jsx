@@ -67,6 +67,14 @@ export const AdminLicensesPage = () => {
   });
   const [resettingBalance, setResettingBalance] = useState(false);
   
+  // Edit profile dialog state
+  const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
+  const [editProfileForm, setEditProfileForm] = useState({
+    full_name: '',
+    timezone: 'Asia/Manila'
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  
   // Feedback form state
   const [feedbackForm, setFeedbackForm] = useState({
     message: '',
