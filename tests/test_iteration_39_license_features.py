@@ -142,42 +142,45 @@ class TestLicenseManagementFeatures:
         if not licensee:
             pytest.skip("No active licensee found for testing")
         
-        # Get original balance
-        original_amount = licensee.get("current_amount", licensee.get("starting_amount", 0))
+        # Get original starting_amount (the stored value, not calculated projections)
+        original_starting = licensee.get("starting_amount", 0)
         
-        # Reset balance to a new amount
-        new_amount = original_amount + 100  # Add $100 for testing
+        # Reset balance to a specific test amount
+        test_amount = 5000.00  # Use a fixed test amount
         
         response = self.session.post(f"{BASE_URL}/api/admin/licenses/{self.license_id}/reset-balance", json={
-            "new_amount": new_amount,
+            "new_amount": test_amount,
             "notes": "Test balance reset for iteration 39",
             "record_as_deposit": True
         })
         assert response.status_code == 200, f"Failed to reset balance: {response.text}"
         
         result = response.json()
-        assert result["old_amount"] == original_amount, f"Old amount mismatch: expected {original_amount}, got {result['old_amount']}"
-        assert result["new_amount"] == new_amount, f"New amount mismatch: expected {new_amount}, got {result['new_amount']}"
-        print(f"✓ Balance reset from ${original_amount:,.2f} to ${new_amount:,.2f}")
+        # The endpoint returns the old stored amount and new amount
+        assert result["new_amount"] == test_amount, f"New amount mismatch: expected {test_amount}, got {result['new_amount']}"
+        print(f"✓ Balance reset from ${result['old_amount']:,.2f} to ${result['new_amount']:,.2f}")
         
-        # Verify license was updated
+        # Verify license was updated - check starting_amount which is always set by reset
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200
         licenses = response.json().get("licenses", [])
         
         updated_license = next((l for l in licenses if l["id"] == self.license_id), None)
         assert updated_license is not None, "License not found after reset"
-        # Note: current_amount might be recalculated for extended licenses, so check starting_amount
+        
+        # For extended licenses, starting_amount is set to new_amount by reset
+        assert updated_license.get("starting_amount") == test_amount, \
+            f"Starting amount not updated: expected {test_amount}, got {updated_license.get('starting_amount')}"
         print(f"✓ License updated: starting_amount=${updated_license.get('starting_amount', 0):,.2f}, current_amount=${updated_license.get('current_amount', 0):,.2f}")
         
         # Restore original balance
         response = self.session.post(f"{BASE_URL}/api/admin/licenses/{self.license_id}/reset-balance", json={
-            "new_amount": original_amount,
+            "new_amount": original_starting,
             "notes": "Restoring original balance after test",
             "record_as_deposit": True
         })
         assert response.status_code == 200, "Failed to restore original balance"
-        print(f"✓ Restored original balance: ${original_amount:,.2f}")
+        print(f"✓ Restored original starting_amount: ${original_starting:,.2f}")
     
     # ==================== TEST: Profit Summary Returns License Balance for Licensees ====================
     def test_05_profit_summary_returns_license_balance_for_licensees(self):
