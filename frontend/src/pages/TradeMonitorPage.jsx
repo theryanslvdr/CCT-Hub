@@ -1363,6 +1363,45 @@ export const TradeMonitorPage = () => {
                         <td className={`font-mono font-bold ${(trade.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {(trade.profit_difference || 0) >= 0 ? '+' : ''}${formatNumber(trade.profit_difference || (trade.actual_profit - trade.projected_profit) || 0)}
                         </td>
+                        <td>
+                          {isMasterAdmin ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleResetTrade(trade.id)}
+                              disabled={resetTradeLoading === trade.id}
+                              className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              data-testid={`reset-trade-${trade.id}`}
+                            >
+                              {resetTradeLoading === trade.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <>
+                                  <RotateCcw className="w-3 h-3 mr-1" />
+                                  Reset
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openRequestChangeDialog(trade)}
+                              disabled={requestChangeLoading === trade.id}
+                              className="h-7 px-2 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                              data-testid={`request-change-${trade.id}`}
+                            >
+                              {requestChangeLoading === trade.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <>
+                                  <MessageSquare className="w-3 h-3 mr-1" />
+                                  Request Change
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
