@@ -624,10 +624,91 @@ export const TradeMonitorPage = () => {
           setPreTradeCountdown(null);
         }
         
+        // Track last update time for stall detection
+        lastCountdownUpdateRef.current = Date.now();
         setCountdown({ hours, minutes, seconds, total: diff });
       }
     }, 1000);
   }, [signal, soundEnabled, startGlobalCountdown, playBeep]);
+
+  // Restart countdown if it stalls
+  const restartCountdown = useCallback(() => {
+    // Clear existing interval
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    
+    // Get target time from localStorage
+    const savedCheckIn = localStorage.getItem('trade_check_in');
+    if (!savedCheckIn) {
+      toast.error('No active countdown to restart');
+      return;
+    }
+    
+    try {
+      const checkInData = JSON.parse(savedCheckIn);
+      const targetTime = new Date(checkInData.targetTime);
+      const now = new Date();
+      
+      if (targetTime <= now) {
+        // Trade time has passed
+        if (!tradeEnteredRef.current) {
+          setShowExitAlert(true);
+          setCountdown(null);
+          if (soundEnabled && audioRef.current) {
+            audioRef.current.play().catch(() => {});
+          }
+        }
+        return;
+      }
+      
+      // Reset stall state
+      setCountdownStalled(false);
+      lastCountdownUpdateRef.current = Date.now();
+      
+      // Start fresh countdown
+      countdownRef.current = setInterval(() => {
+        const currentNow = new Date();
+        const diff = targetTime - currentNow;
+        
+        if (diff <= 0) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+          if (!tradeEnteredRef.current) {
+            setShowExitAlert(true);
+            setCountdown(null);
+            setPreTradeCountdown(null);
+            if (soundEnabled && audioRef.current) {
+              audioRef.current.play().catch(() => {});
+            }
+            if (!tradeNotifiedRef.current) {
+              tradeNotifiedRef.current = true;
+              toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+            }
+          }
+        } else {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+          if (diff <= 5000 && diff > 0) {
+            setPreTradeCountdown(Math.ceil(diff / 1000));
+            playBeep();
+          } else {
+            setPreTradeCountdown(null);
+          }
+          
+          lastCountdownUpdateRef.current = Date.now();
+          setCountdown({ hours, minutes, seconds, total: diff });
+        }
+      }, 1000);
+      
+      toast.success('Countdown restarted');
+    } catch (e) {
+      toast.error('Failed to restart countdown');
+    }
+  }, [soundEnabled, playBeep]);
 
   // User clicked "Trade Entered" - they have entered the trade, stop alarm
   const confirmTradeEntered = () => {
