@@ -605,17 +605,61 @@ export const ProfitTrackerPage = () => {
   };
 
   // Get daily projection data for selected month
-  // Note: For current month, always use the latest effectiveAccountValue to ensure
+  // Note: For extended licensees, use backend projections with FIXED lot size and daily profit per quarter
+  // For current month, always use the latest effectiveAccountValue to ensure
   // the projection reflects any newly logged trades
   const getDailyProjectionForSelectedMonth = useMemo(() => {
     if (!selectedMonth) return [];
     
-    // For current month, use the latest effectiveAccountValue
-    // For other months, use the selectedMonth's startBalance
     const today = new Date();
     const isCurrentMonth = selectedMonth.monthDate.getFullYear() === today.getFullYear() &&
                            selectedMonth.monthDate.getMonth() === today.getMonth();
     
+    // For extended licensees, use backend projections with fixed lot size
+    if (isExtendedLicensee && licenseProjections.length > 0) {
+      // Filter projections for selected month
+      const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
+      const monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
+      
+      // For current month, filter to show only today and future
+      const todayStr = today.toISOString().split('T')[0];
+      const filteredProjections = isCurrentMonth 
+        ? monthProjections.filter(p => p.date >= todayStr)
+        : monthProjections;
+      
+      return filteredProjections.map(p => {
+        const projDate = new Date(p.date);
+        const isToday = projDate.toDateString() === today.toDateString();
+        const isFuture = projDate > today;
+        const masterTraded = masterAdminTrades[p.date]?.traded;
+        
+        // Determine status
+        let status = 'pending';
+        if (masterTraded) {
+          status = 'completed';
+        } else if (isFuture) {
+          status = 'future';
+        }
+        
+        return {
+          date: projDate,
+          dateStr: projDate.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+          }),
+          dateKey: p.date,
+          balanceBefore: p.account_value - p.daily_profit,  // Balance before adding daily profit
+          lotSize: p.lot_size,  // FIXED from backend (quarterly)
+          targetProfit: p.daily_profit,  // FIXED from backend (quarterly)
+          actualProfit: masterTraded ? p.daily_profit : undefined,
+          status: status,
+          isToday: isToday,
+        };
+      });
+    }
+    
+    // For honorary licensees and regular users, use standard calculation
     const startBalance = isCurrentMonth ? effectiveAccountValue : selectedMonth.startBalance;
     
     return generateDailyProjectionForMonth(
@@ -624,7 +668,7 @@ export const ProfitTrackerPage = () => {
       tradeLogs,
       activeSignal
     );
-  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue]);
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades]);
 
   // Handle opening Enter AP dialog for a specific date
   const handleOpenEnterAP = (day) => {
