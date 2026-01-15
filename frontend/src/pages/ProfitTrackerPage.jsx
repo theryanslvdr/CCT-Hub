@@ -368,7 +368,7 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
-  // Adjust Trade Dialog for past trades (renamed from Enter AP)
+  // Adjust Trade Dialog for past trades (renamed from Adjust Trade)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
   const [enterAPDate, setEnterAPDate] = useState(null);
   const [enterAPValue, setEnterAPValue] = useState('');
@@ -2219,7 +2219,7 @@ export const ProfitTrackerPage = () => {
                                 onClick={() => handleOpenEnterAP(day)}
                                 data-testid={`enter-ap-${day.dateKey}`}
                               >
-                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
                               </Button>
                             ) : day.status === 'future' ? (
                               <span className="text-zinc-500 text-xs">-</span>
@@ -2231,7 +2231,7 @@ export const ProfitTrackerPage = () => {
                                 onClick={() => handleOpenEnterAP(day)}
                                 data-testid={`enter-ap-${day.dateKey}`}
                               >
-                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
                               </Button>
                             ) : (
                               <Button
@@ -2241,7 +2241,7 @@ export const ProfitTrackerPage = () => {
                                 onClick={() => handleOpenEnterAP(day)}
                                 data-testid={`enter-ap-${day.dateKey}`}
                               >
-                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
+                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
                               </Button>
                             )}
                           </td>
@@ -2297,7 +2297,7 @@ export const ProfitTrackerPage = () => {
               </>
             ) : (
               <>
-                <p>• <span className="text-amber-400">Enter AP</span> = Click to enter your actual profit for missed trades</p>
+                <p>• <span className="text-amber-400">Adjust Trade</span> = Click to enter your actual profit for missed trades</p>
                 <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
                 <p>• Actual profits update your Account Value when recorded</p>
               </>
@@ -2306,7 +2306,7 @@ export const ProfitTrackerPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Enter AP Dialog - For logging missed trades */}
+      {/* Adjust Trade Dialog - For logging missed trades */}
       <Dialog open={enterAPDialogOpen} onOpenChange={setEnterAPDialogOpen}>
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
