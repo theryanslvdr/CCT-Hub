@@ -11,6 +11,25 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 37 (2026-01-15) - Trade History Actions & Onboarding Fix ✅
+
+#### Trade History Role-Based Actions ✅
+- **Feature**: Added "Actions" column to Trade History table in Trade Monitor
+- **Master Admin**: Sees "Reset" button to delete trades (with confirmation dialog)
+- **Other Users**: See "Request Change" button to submit change requests to admin
+- **Endpoints Used**:
+  - `DELETE /api/trade/reset/{trade_id}` - Master admin only, deletes trade and creates audit trail
+  - `POST /api/trade/request-change` - Any user, creates pending change request
+- **UI Components**: Reset button (red), Request Change button (amber) with loading states
+- **Request Change Dialog**: Shows trade details and textarea for reason
+- **Files Modified**: `TradeMonitorPage.jsx`, `api.js`
+
+#### Onboarding Tour Persistence Fix ✅
+- **Issue**: Tour could not be dismissed by clicking the overlay background
+- **Fix**: Updated overlay to call `handleSkip` on click, properly saving state to localStorage
+- **Key**: `crosscurrent_tour_completed` in localStorage prevents tour from reappearing
+- **Files Modified**: `OnboardingTour.jsx`
+
 ### Session 35 (2026-01-13) - Security Fix & Trade Flow Improvements ✅
 
 #### P0: Security Fix - Report Generation Endpoint ✅
