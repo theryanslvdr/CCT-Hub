@@ -415,6 +415,9 @@ export const ProfitTrackerPage = () => {
   // Master admin trades for extended licensees (profit credited tracking)
   const [masterAdminTrades, setMasterAdminTrades] = useState({});
   
+  // License projections for extended licensees (fixed lot size and daily profit per quarter)
+  const [licenseProjections, setLicenseProjections] = useState([]);
+  
   // Projection states
   const [selectedYears, setSelectedYears] = useState(1);
   const [projectionView, setProjectionView] = useState('summary');
