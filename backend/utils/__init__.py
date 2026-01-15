@@ -21,6 +21,8 @@ from .auth import (
 )
 
 from .calculations import (
+    calculate_account_value,
+    get_user_financial_summary,
     calculate_lot_size,
     calculate_projected_profit,
     calculate_profit_difference,
@@ -40,6 +42,7 @@ __all__ = [
     "ROLE_HIERARCHY", "SECRET_KEY", "JWT_ALGORITHM", "ACCESS_TOKEN_EXPIRE_MINUTES",
     "SUPER_ADMIN_SECRET", "MASTER_ADMIN_SECRET", "SUPER_ADMIN_BYPASS",
     # Calculation utilities
+    "calculate_account_value", "get_user_financial_summary",
     "calculate_lot_size", "calculate_projected_profit", "calculate_profit_difference",
     "determine_performance", "calculate_performance_rate", "calculate_withdrawal_fees",
     "calculate_quarterly_profit", "format_currency", "get_trading_day_range",
