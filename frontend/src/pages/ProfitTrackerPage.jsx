@@ -2126,15 +2126,28 @@ export const ProfitTrackerPage = () => {
                     // For extended licensees: check if master admin traded on this day
                     const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
+                    // Determine row styling based on status
+                    let rowClass = '';
+                    if (day.isToday) {
+                      rowClass = 'bg-blue-500/20 border-l-2 border-l-blue-500';
+                    } else if (day.status === 'completed') {
+                      rowClass = 'bg-emerald-500/5';
+                    } else if (day.status === 'missed') {
+                      rowClass = 'bg-zinc-800/30 opacity-75';
+                    }
+                    
                     return (
                       <tr 
                         key={day.dateKey} 
-                        className={day.isToday ? 'bg-blue-500/20 border-l-2 border-l-blue-500' : ''}
+                        className={rowClass}
                       >
                         <td className="font-medium">
                           {day.dateStr}
                           {day.isToday && (
                             <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
+                          )}
+                          {day.status === 'completed' && !day.isToday && (
+                            <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">✓</span>
                           )}
                         </td>
                         <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
@@ -2156,6 +2169,16 @@ export const ProfitTrackerPage = () => {
                                 data-testid="trade-now-daily"
                               >
                                 Trade Now
+                              </Button>
+                            ) : day.status === 'missed' ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                                onClick={() => handleOpenEnterAP(day)}
+                                data-testid={`enter-ap-${day.dateKey}`}
+                              >
+                                <Edit3 className="w-3 h-3 mr-1" /> Enter AP
                               </Button>
                             ) : day.status === 'future' ? (
                               <span className="text-zinc-500 text-xs">-</span>
