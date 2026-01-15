@@ -2462,12 +2462,6 @@ export const ProfitTrackerPage = () => {
           )}
         </DialogContent>
       </Dialog>
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
