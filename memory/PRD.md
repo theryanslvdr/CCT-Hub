@@ -11,6 +11,26 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 38 (2026-01-15) - Bug Fixes ✅
+
+#### Bug Fix 1: Countdown Timer Stops Under a Minute ✅
+- **Issue**: Countdown timer would sometimes stop counting, especially under a minute
+- **Fix**: Added stall detection and manual refresh capability
+- **Implementation**:
+  - `lastCountdownUpdateRef` tracks when countdown was last updated
+  - `countdownStalled` state turns true if no update in 3 seconds
+  - Amber warning appears with "Countdown may have stalled" message
+  - "Refresh Timer" button available to manually restart countdown
+  - `restartCountdown` function clears interval and starts fresh from localStorage
+- **Files Modified**: `TradeMonitorPage.jsx`
+
+#### Bug Fix 2 & 3: BVE Signal Editing Issues ✅
+- **Issue 2**: When editing a signal from BVE, it said "signal not found"
+- **Issue 3**: When in BVE mode editing an active signal activated outside BVE, it affected actual signal
+- **Root Cause**: `handleSaveEdit` in AdminSignalsPage always called production endpoint `/admin/signals/{id}` regardless of BVE mode
+- **Fix**: Updated `handleSaveEdit` to check `isInBVE` and use `bveAPI.updateSignal` when in BVE mode
+- **Files Modified**: `AdminSignalsPage.jsx`
+
 ### Session 37 (2026-01-15) - Trade History Actions & Onboarding Fix ✅
 
 #### Trade History Role-Based Actions ✅
