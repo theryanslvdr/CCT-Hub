@@ -1601,6 +1601,230 @@ async def forward_trade_to_profit(trade_id: str, is_bve: bool = False, user: dic
         "amount": trade["actual_profit"]
     }
 
+# ==================== TRADE MANAGEMENT ====================
+
+class TradeChangeRequest(BaseModel):
+    trade_id: str
+    reason: str
+    requested_changes: Optional[str] = None
+
+@trade_router.delete("/reset/{trade_id}")
+async def reset_trade(trade_id: str, user: dict = Depends(require_master_admin)):
+    """Reset/delete a trade - Master Admin only. Allows trade to be re-entered."""
+    
+    # Find the trade
+    trade = await db.trade_logs.find_one({"id": trade_id}, {"_id": 0})
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    
+    # Store in reset_trades collection for audit trail
+    reset_record = {
+        "id": str(uuid.uuid4()),
+        "original_trade": trade,
+        "reset_by": user["id"],
+        "reset_by_name": user.get("full_name", user.get("email")),
+        "reset_at": datetime.now(timezone.utc).isoformat(),
+        "reason": "Master admin reset"
+    }
+    await db.reset_trades.insert_one(reset_record)
+    
+    # Delete the trade
+    await db.trade_logs.delete_one({"id": trade_id})
+    
+    # Also delete any associated deposit (if trade was forwarded to profit)
+    await db.deposits.delete_many({"trade_id": trade_id})
+    
+    # Notify the original user via WebSocket
+    try:
+        await websocket_manager.send_notification(
+            trade["user_id"],
+            {
+                "type": "trade_reset",
+                "title": "Trade Reset",
+                "message": f"Your trade from {trade['created_at'][:10]} has been reset by admin. You can re-enter it.",
+                "data": {"trade_date": trade["created_at"][:10]}
+            }
+        )
+    except:
+        pass
+    
+    return {
+        "message": "Trade reset successfully",
+        "trade_date": trade["created_at"][:10],
+        "user_id": trade["user_id"]
+    }
+
+@trade_router.post("/request-change")
+async def request_trade_change(data: TradeChangeRequest, user: dict = Depends(get_current_user)):
+    """Request a change to a trade - for non-master-admin users"""
+    
+    # Find the trade
+    trade = await db.trade_logs.find_one({"id": data.trade_id}, {"_id": 0})
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    
+    # Verify the trade belongs to the requesting user
+    if trade["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only request changes to your own trades")
+    
+    # Check if there's already a pending request for this trade
+    existing_request = await db.trade_change_requests.find_one({
+        "trade_id": data.trade_id,
+        "status": "pending"
+    })
+    if existing_request:
+        raise HTTPException(status_code=400, detail="A change request for this trade is already pending")
+    
+    # Create the change request
+    request_id = str(uuid.uuid4())
+    change_request = {
+        "id": request_id,
+        "trade_id": data.trade_id,
+        "user_id": user["id"],
+        "user_name": user.get("full_name", user.get("email")),
+        "trade_date": trade["created_at"][:10],
+        "original_profit": trade["actual_profit"],
+        "reason": data.reason,
+        "requested_changes": data.requested_changes,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.trade_change_requests.insert_one(change_request)
+    
+    # Notify all admins via WebSocket
+    try:
+        admins = await db.users.find(
+            {"role": {"$in": ["basic_admin", "admin", "super_admin", "master_admin"]}},
+            {"_id": 0, "id": 1}
+        ).to_list(100)
+        
+        for admin in admins:
+            await websocket_manager.send_notification(
+                admin["id"],
+                {
+                    "type": "trade_change_request",
+                    "title": "Trade Change Request",
+                    "message": f"{user.get('full_name', 'A user')} requested a change to their trade from {trade['created_at'][:10]}",
+                    "data": {"request_id": request_id}
+                }
+            )
+    except:
+        pass
+    
+    return {
+        "message": "Change request submitted successfully",
+        "request_id": request_id
+    }
+
+@admin_router.get("/trade-change-requests")
+async def get_trade_change_requests(
+    status: Optional[str] = None,
+    user: dict = Depends(require_admin)
+):
+    """Get all trade change requests - Admin only"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    requests = await db.trade_change_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"requests": requests}
+
+@admin_router.put("/trade-change-requests/{request_id}")
+async def handle_trade_change_request(
+    request_id: str,
+    action: str,  # "approve" or "reject"
+    admin_notes: Optional[str] = None,
+    user: dict = Depends(require_master_admin)
+):
+    """Handle a trade change request - Master Admin only"""
+    
+    request = await db.trade_change_requests.find_one({"id": request_id}, {"_id": 0})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    if request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Request has already been processed")
+    
+    if action == "approve":
+        # Reset the trade (same as reset_trade endpoint)
+        trade = await db.trade_logs.find_one({"id": request["trade_id"]}, {"_id": 0})
+        if trade:
+            # Store in reset_trades for audit
+            reset_record = {
+                "id": str(uuid.uuid4()),
+                "original_trade": trade,
+                "reset_by": user["id"],
+                "reset_by_name": user.get("full_name", user.get("email")),
+                "reset_at": datetime.now(timezone.utc).isoformat(),
+                "reason": f"Approved change request: {request['reason']}",
+                "request_id": request_id
+            }
+            await db.reset_trades.insert_one(reset_record)
+            
+            # Delete the trade
+            await db.trade_logs.delete_one({"id": request["trade_id"]})
+            await db.deposits.delete_many({"trade_id": request["trade_id"]})
+        
+        # Update request status
+        await db.trade_change_requests.update_one(
+            {"id": request_id},
+            {"$set": {
+                "status": "approved",
+                "handled_by": user["id"],
+                "handled_by_name": user.get("full_name", user.get("email")),
+                "handled_at": datetime.now(timezone.utc).isoformat(),
+                "admin_notes": admin_notes
+            }}
+        )
+        
+        # Notify the user
+        try:
+            await websocket_manager.send_notification(
+                request["user_id"],
+                {
+                    "type": "trade_change_approved",
+                    "title": "Change Request Approved",
+                    "message": f"Your trade change request for {request['trade_date']} has been approved. You can now re-enter the trade.",
+                    "data": {"trade_date": request["trade_date"]}
+                }
+            )
+        except:
+            pass
+        
+        return {"message": "Request approved and trade reset", "status": "approved"}
+    
+    elif action == "reject":
+        # Update request status
+        await db.trade_change_requests.update_one(
+            {"id": request_id},
+            {"$set": {
+                "status": "rejected",
+                "handled_by": user["id"],
+                "handled_by_name": user.get("full_name", user.get("email")),
+                "handled_at": datetime.now(timezone.utc).isoformat(),
+                "admin_notes": admin_notes
+            }}
+        )
+        
+        # Notify the user
+        try:
+            await websocket_manager.send_notification(
+                request["user_id"],
+                {
+                    "type": "trade_change_rejected",
+                    "title": "Change Request Rejected",
+                    "message": f"Your trade change request for {request['trade_date']} has been rejected." + (f" Reason: {admin_notes}" if admin_notes else ""),
+                    "data": {"trade_date": request["trade_date"]}
+                }
+            )
+        except:
+            pass
+        
+        return {"message": "Request rejected", "status": "rejected"}
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action. Use 'approve' or 'reject'")
+
 # ==================== ADMIN ROUTES ====================
 
 @admin_router.post("/signals", response_model=TradingSignalResponse)
