@@ -1561,11 +1561,19 @@ async def log_missed_trade(
     }
 
 @trade_router.post("/forward-to-profit")
-async def forward_trade_to_profit(trade_id: str, user: dict = Depends(get_current_user)):
+async def forward_trade_to_profit(trade_id: str, is_bve: bool = False, user: dict = Depends(get_current_user)):
     """Forward trade profit to profit tracker by creating a deposit entry"""
-    trade = await db.trade_logs.find_one({"id": trade_id, "user_id": user["id"]}, {"_id": 0})
+    
+    # Use BVE collection if in BVE mode
+    trade_collection = db.bve_trade_logs if is_bve else db.trade_logs
+    trade = await trade_collection.find_one({"id": trade_id, "user_id": user["id"]}, {"_id": 0})
+    
     if not trade:
         raise HTTPException(status_code=404, detail="Trade not found")
+    
+    # BVE trades should NOT be forwarded to production profit tracker
+    if is_bve:
+        raise HTTPException(status_code=400, detail="BVE trades cannot be forwarded to production profit tracker. Exit BVE mode to access real trades.")
     
     # Check if already forwarded
     existing = await db.deposits.find_one({"trade_id": trade_id, "user_id": user["id"]})
