@@ -11,57 +11,48 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 47 (2026-01-15) - Timer Fix, Streak Fix & Onboarding Wizard ✅
+
+#### Bug Fix 1: Timer Stalling at 8 Seconds ✅
+- **Issue**: 30-second countdown stalled around 8 seconds. Clicking "Refresh" showed "no active countdown to restart"
+- **Root Cause**: Countdown interval used a closure variable `targetTimeMs` that became stale when browser throttled the interval
+- **Fix**: Refactored countdown to read target time from localStorage on EVERY tick:
+  - `updateCountdown()` now reads from `localStorage.getItem('trade_check_in')` each tick
+  - Uses 500ms interval for more frequent updates
+  - `restartCountdown()` can now recreate check-in data from signal if localStorage is missing
+- **Files Modified**: `TradeMonitorPage.jsx` (lines 663-738, 755-845)
+
+#### Bug Fix 2: Streak Calculation - Count Trading Days, Not Profits ✅
+- **Issue**: Streak was counting consecutive trades with positive profit. User wants ANY consecutive trading days
+- **Fix**: Refactored `/api/trade/streak` to count consecutive trading days regardless of profit/loss:
+  - Uses date comparison to check for consecutive days
+  - Skips weekends (Saturday=5, Sunday=6)
+  - Returns `streak_type: "trading"` instead of `"winning"`
+- **Files Modified**: `server.py` (lines 1338-1399)
+
+#### Feature 1: Comprehensive Onboarding Wizard ✅
+- **Created**: `/app/frontend/src/components/OnboardingWizard.jsx`
+- **Triggers**: Opens for new users (no deposits) or after reset
+- **Flow for New Traders (2 steps)**:
+  1. Select "I'm New to Merin"
+  2. Enter starting balance → Complete
+- **Flow for Experienced Traders (5 steps)**:
+  1. Select "I'm Experienced"
+  2. Select start date (min: December 1, 2025, weekdays only)
+  3. Enter starting balance
+  4. Add deposits/withdrawals (accepts deposits from Nov 24, 2025)
+  5. Enter actual profits for each trading day (with "I Missed This Trade" option)
+- **Features**:
+  - Save & Continue Later (progress saved to localStorage)
+  - Remembers user type (new/experienced) after reset
+  - Shows running balance, lot size, and projected profit for each trade day
+  - Creates deposits and trade logs in backend on completion
+- **Backend Endpoints Added**:
+  - `POST /api/profit/complete-onboarding` - Processes onboarding data
+  - `GET /api/profit/onboarding-status` - Returns onboarding completion status
+- **Files Modified**: `server.py` (lines 4633-4808), `ProfitTrackerPage.jsx`, `api.js`
+
 ### Session 46 (2026-01-15) - 6 Bug Fixes ✅
-
-#### Bug Fix 1: Trade Streak Calculation ✅
-- **Issue**: Streak counter was not counting trades correctly
-- **Root Cause**: Only checked for "exceeded" and "perfect" performance, but retroactive trades used "target" and "above"
-- **Fix**: Updated `/api/trade/streak` to count consecutive trades with:
-  - actual_profit > 0 OR
-  - performance in ['exceeded', 'perfect', 'target', 'above']
-- **Files Modified**: `server.py` (lines 1338-1377)
-
-#### Bug Fix 2: Floating Countdown Popup Blocking Merin Iframe ✅
-- **Issue**: Floating countdown timer appeared over all pages including pages with iframes
-- **Fix**: Added visibility logic to hide popup on:
-  - `/trade-monitor` (main timer is there)
-  - `/merin` pages (has iframe)
-  - `/profile` page
-  - `/admin/*` pages
-- **Files Modified**: `TradeCountdownContext.jsx` (lines 103-110)
-
-#### Bug Fix 3: Simplified 30-Second Countdown ✅
-- **Issue**: User found the long countdown timer buggy and confusing
-- **Fix**: Simplified countdown to show:
-  - Regular countdown display when > 30 seconds
-  - Active pulsing countdown only in last 30 seconds before trade time
-  - Beeps every 5 seconds, more frequent in last 5 seconds
-  - Info message: "Active countdown will appear 30 seconds before trade time"
-- **Files Modified**: `TradeMonitorPage.jsx` (lines 603-704, 1322-1395)
-
-#### Bug Fix 4: Trade Entered Button Not Appearing ✅
-- **Issue**: After countdown ended, "Trade Entered" button sometimes didn't appear
-- **Root Cause**: Visibility change handler and stall detector didn't trigger showExitAlert when countdown reached zero
-- **Fix**: Added showExitAlert trigger in both:
-  - `visibilitychange` handler when diff <= 0
-  - Stall detection handler when diff <= 0
-- **Files Modified**: `TradeMonitorPage.jsx` (lines 458-545)
-
-#### Bug Fix 5: Manual Adjustment Indicator ✅
-- **Issue**: No visual indication for trades that were manually adjusted/retroactively logged
-- **Fix**: 
-  - Added `is_manual_adjustment: true` flag to retroactively logged trades in backend
-  - Added ✎ badge indicator in Daily Projection table for adjusted trades
-  - Used consistent "exceeded" / "perfect" / "below" performance categories
-- **Files Modified**: `server.py` (lines 1548-1586), `ProfitTrackerPage.jsx` (lines 2185-2200)
-
-#### Bug Fix 6: Onboarding Tour Persistence ✅
-- **Status**: Verified working correctly
-- **Implementation**: Tour completion saved to `localStorage` with key `crosscurrent_tour_completed`
-- **Dismissal Options**: Skip Tour button, X button, or clicking overlay background
-- **Files**: `OnboardingTour.jsx` (lines 177-179, 202-205), `DashboardLayout.jsx` (line 243)
-
-### Session 45 (2026-01-15) - Adjust Trade & Timer Fix ✅
 
 #### Feature 1: Adjust Trade Dialog (Renamed from Enter AP) ✅
 - **Issue**: Past trade adjustments didn't account for deposits/withdrawals on that day
