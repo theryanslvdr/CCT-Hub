@@ -11,6 +11,32 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 45 (2026-01-15) - Adjust Trade & Timer Fix ✅
+
+#### Feature 1: Adjust Trade Dialog (Renamed from Enter AP) ✅
+- **Issue**: Past trade adjustments didn't account for deposits/withdrawals on that day
+- **Solution**: Enhanced dialog with full adjustment options:
+  - **Deposit/Withdrawal Selection**: "Did you deposit or withdraw on this day?" dropdown
+    - "No, just enter profit"
+    - "Yes, I made a deposit"
+    - "Yes, I made a withdrawal"
+  - **Amount Input**: When deposit/withdrawal selected, shows input for the amount
+  - **Adjusted Balance**: Optional field to manually correct the balance before trade
+  - **Actual Profit**: Input for the actual profit made
+  - **Adjustment Summary**: Shows all adjustments being made
+- **Logic**: If deposit/withdrawal selected, records it first, then logs the trade with correct balance
+- **Files Modified**: `ProfitTrackerPage.jsx`
+
+#### Feature 2: Timer Stall Fix ✅
+- **Issue**: Trade countdown timer stopped/stalled every 2 minutes
+- **Root Cause**: Browser throttles setInterval in background tabs
+- **Fixes Applied**:
+  1. Reduced interval to 500ms (from 1000ms) for more frequent updates
+  2. Added `visibilitychange` event listener to force update when tab becomes visible
+  3. Auto-refresh countdown in stall detection (instead of just showing warning)
+  4. Countdown now recalculates from localStorage target time each tick
+- **Files Modified**: `TradeMonitorPage.jsx`
+
 ### Session 44 (2026-01-15) - Daily Projection History Fix ✅
 
 #### Feature: Keep Past Trade Dates in Daily Projection
