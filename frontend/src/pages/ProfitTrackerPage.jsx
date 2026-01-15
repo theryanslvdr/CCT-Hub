@@ -579,7 +579,9 @@ export const ProfitTrackerPage = () => {
       
       if (allDeposits.length === 0) {
         setIsFirstTime(true);
-        setInitialBalanceDialogOpen(true);
+        // Open the new onboarding wizard instead of the old dialog
+        setIsResetOnboarding(false);
+        setOnboardingWizardOpen(true);
       }
       
       // Load master admin trades for extended licensees
