@@ -2190,6 +2190,12 @@ export const ProfitTrackerPage = () => {
                           {day.status === 'completed' && !day.isToday && (
                             <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">✓</span>
                           )}
+                          {/* Show indicator for manually adjusted trades */}
+                          {tradeLogs[day.dateKey]?.is_manual_adjustment && (
+                            <span className="ml-1 text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded" title="Manually Adjusted">
+                              ✎
+                            </span>
+                          )}
                         </td>
                         <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
                         <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
