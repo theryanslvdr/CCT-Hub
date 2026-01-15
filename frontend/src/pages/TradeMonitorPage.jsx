@@ -169,7 +169,13 @@ export const TradeMonitorPage = () => {
   const [streak, setStreak] = useState({ streak: 0, streak_type: null });
   const [editingTimeId, setEditingTimeId] = useState(null);
   const [editTimeValue, setEditTimeValue] = useState('');
-
+  
+  // Trade action states
+  const [resetTradeLoading, setResetTradeLoading] = useState(null);
+  const [requestChangeLoading, setRequestChangeLoading] = useState(null);
+  const [showRequestChangeDialog, setShowRequestChangeDialog] = useState(false);
+  const [selectedTradeForChange, setSelectedTradeForChange] = useState(null);
+  const [changeRequestReason, setChangeRequestReason] = useState('');
   const audioRef = useRef(null);
   const beepRef = useRef(null);
   const countdownRef = useRef(null);
