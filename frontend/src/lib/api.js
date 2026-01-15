@@ -89,6 +89,7 @@ export const profitAPI = {
   simulateWithdrawal: (data) => api.post('/profit/simulate-withdrawal', data),
   getRates: () => api.get('/profit/rates'),
   getLicenseProjections: () => api.get('/profit/license-projections'),
+  getMasterAdminTrades: (startDate, endDate) => api.get('/profit/master-admin-trades', { params: { start_date: startDate, end_date: endDate } }),
   getReportImage: (period = 'monthly', userId = null) => api.get(`/admin/analytics/report/image`, { params: { period, user_id: userId }, responseType: 'blob' }),
   getReportBase64: (period = 'monthly', userId = null) => api.get('/admin/analytics/report/base64', { params: { period, user_id: userId } }),
 };
