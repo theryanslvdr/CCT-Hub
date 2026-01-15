@@ -673,12 +673,22 @@ export const TradeMonitorPage = () => {
     }
 
     try {
-      const response = await tradeAPI.logTrade({
-        lot_size: lotSize,
-        direction: signal?.direction || 'BUY',
-        actual_profit: parseFloat(actualExitValue),
-        notes: `Signal: ${signal?.product || 'MOIL10'}`,
-      });
+      // Use BVE endpoint if in BVE mode, otherwise use regular trade endpoint
+      const logTradeEndpoint = isInBVE 
+        ? api.post('/bve/trade/log', {
+            lot_size: lotSize,
+            direction: signal?.direction || 'BUY',
+            actual_profit: parseFloat(actualExitValue),
+            notes: `Signal: ${signal?.product || 'MOIL10'}`,
+          })
+        : tradeAPI.logTrade({
+            lot_size: lotSize,
+            direction: signal?.direction || 'BUY',
+            actual_profit: parseFloat(actualExitValue),
+            notes: `Signal: ${signal?.product || 'MOIL10'}`,
+          });
+      
+      const response = await logTradeEndpoint;
 
       const result = response.data;
       
