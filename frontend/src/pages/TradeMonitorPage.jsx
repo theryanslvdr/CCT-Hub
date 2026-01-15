@@ -588,14 +588,20 @@ export const TradeMonitorPage = () => {
     // Start global countdown for floating popup when navigating away
     startGlobalCountdown(tradeTime, { product: signal.product, direction: signal.direction });
 
-    // Start countdown
-    countdownRef.current = setInterval(() => {
-      const now = new Date();
-      const diff = tradeTime - now;
+    // Store target time for countdown calculations
+    const targetTimeMs = tradeTime.getTime();
+    
+    // Use a combination of setInterval and visibility-based refresh for reliability
+    // The countdown recalculates from scratch each tick using Date.now()
+    const updateCountdown = () => {
+      const nowMs = Date.now();
+      const diff = targetTimeMs - nowMs;
 
       if (diff <= 0) {
-        clearInterval(countdownRef.current);
-        countdownRef.current = null; // Clear the ref to prevent duplicate triggers
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
         
         // Only show exit alert if user hasn't already confirmed trade entry
         if (!tradeEnteredRef.current) {
@@ -631,7 +637,14 @@ export const TradeMonitorPage = () => {
         lastCountdownUpdateRef.current = Date.now();
         setCountdown({ hours, minutes, seconds, total: diff });
       }
-    }, 1000);
+    };
+
+    // Initial update
+    updateCountdown();
+    
+    // Use 500ms interval instead of 1000ms for more frequent updates
+    // This helps with browser throttling in background tabs
+    countdownRef.current = setInterval(updateCountdown, 500);
   }, [signal, soundEnabled, startGlobalCountdown, playBeep]);
 
   // Restart countdown if it stalls
