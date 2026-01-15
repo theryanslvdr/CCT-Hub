@@ -657,22 +657,40 @@ export const TradeMonitorPage = () => {
     }
 
     // Save check-in state to localStorage for persistence
-    localStorage.setItem('trade_check_in', JSON.stringify({
+    const checkInData = {
       targetTime: tradeTime.toISOString(),
       signalId: signal.id,
       signalInfo: { product: signal.product, direction: signal.direction },
       checkedInAt: now.toISOString()
-    }));
+    };
+    localStorage.setItem('trade_check_in', JSON.stringify(checkInData));
 
     // Start global countdown for floating popup when navigating away
     startGlobalCountdown(tradeTime, { product: signal.product, direction: signal.direction });
 
-    // Store target time for countdown calculations
-    const targetTimeMs = tradeTime.getTime();
-    
-    // Use a combination of setInterval and visibility-based refresh for reliability
-    // The countdown recalculates from scratch each tick using Date.now()
+    // The countdown always reads from localStorage to avoid stale closures
+    // This makes it resilient to browser throttling
     const updateCountdown = () => {
+      // Always read target time from localStorage to avoid stale closure issues
+      const savedCheckIn = localStorage.getItem('trade_check_in');
+      if (!savedCheckIn) {
+        // localStorage was cleared - stop the countdown
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
+        return;
+      }
+      
+      let targetTimeMs;
+      try {
+        const data = JSON.parse(savedCheckIn);
+        targetTimeMs = new Date(data.targetTime).getTime();
+      } catch (e) {
+        console.error('Failed to parse trade_check_in:', e);
+        return;
+      }
+      
       const nowMs = Date.now();
       const diff = targetTimeMs - nowMs;
 
@@ -707,11 +725,11 @@ export const TradeMonitorPage = () => {
         if (diff <= 30000 && diff > 0) {
           const secondsLeft = Math.ceil(diff / 1000);
           setPreTradeCountdown(secondsLeft);
-          // Play beep every second in the last 30 seconds
+          // Play beep every 5 seconds in the last 30 seconds, every second in last 5
           if (diff <= 5000) {
-            playBeep(); // More frequent beeps in last 5 seconds
-          } else if (seconds % 5 === 0) {
-            playBeep(); // Beep every 5 seconds in countdown
+            playBeep();
+          } else if (secondsLeft % 5 === 0) {
+            playBeep();
           }
         } else {
           setPreTradeCountdown(null);
@@ -726,8 +744,8 @@ export const TradeMonitorPage = () => {
     // Initial update
     updateCountdown();
     
-    // Use 500ms interval instead of 1000ms for more frequent updates
-    // This helps with browser throttling in background tabs
+    // Use 500ms interval for more frequent updates
+    // The function reads from localStorage each time, so it's resilient to throttling
     countdownRef.current = setInterval(updateCountdown, 500);
   }, [signal, soundEnabled, startGlobalCountdown, playBeep]);
 
