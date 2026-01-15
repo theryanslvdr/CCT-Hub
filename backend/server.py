@@ -638,9 +638,10 @@ async def login(data: UserLogin):
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Skip Heartbeat verification for admins and above
+    # Skip Heartbeat verification for admins and licensees
     admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
-    if user.get("role") not in admin_roles:
+    is_licensee = user.get("license_type") is not None
+    if user.get("role") not in admin_roles and not is_licensee:
         heartbeat_email = user.get("heartbeat_email", user["email"])
         is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
         if not is_heartbeat_user:
