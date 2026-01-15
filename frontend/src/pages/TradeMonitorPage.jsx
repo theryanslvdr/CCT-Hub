@@ -418,6 +418,9 @@ export const TradeMonitorPage = () => {
               const hours = Math.floor(diff / (1000 * 60 * 60));
               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
               const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              
+              // Track last update time for stall detection
+              lastCountdownUpdateRef.current = Date.now();
               setCountdown({ hours, minutes, seconds, total: diff });
               
               // Beep in last 5 seconds
