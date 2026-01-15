@@ -2167,9 +2167,19 @@ export const ProfitTrackerPage = () => {
           </div>
           <div className="mt-4 p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
             <p>• Weekends and holidays are excluded from projections</p>
-            <p>• <span className="text-amber-400">Enter AP</span> = Click to enter your actual profit for missed trades</p>
-            <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
-            <p>• Actual profits update your Account Value when recorded</p>
+            {isExtendedLicensee ? (
+              <>
+                <p>• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Profit credited (Master Admin traded)</p>
+                <p>• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Not credited (Master Admin did not trade, profit deducted)</p>
+                <p>• Your balance recalculates every quarter (every 3 months)</p>
+              </>
+            ) : (
+              <>
+                <p>• <span className="text-amber-400">Enter AP</span> = Click to enter your actual profit for missed trades</p>
+                <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
+                <p>• Actual profits update your Account Value when recorded</p>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
