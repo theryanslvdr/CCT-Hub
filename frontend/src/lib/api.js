@@ -109,6 +109,8 @@ export const tradeAPI = {
   forwardToProfit: (tradeId, isBve = false) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId, is_bve: isBve } }),
   getMissedTradeStatus: () => api.get('/trade/missed-trade-status'),
   logMissedTrade: (data) => api.post('/trade/log-missed-trade', null, { params: data }),
+  resetTrade: (tradeId) => api.delete(`/trade/reset/${tradeId}`),
+  requestTradeChange: (data) => api.post('/trade/request-change', data),
 };
 
 // Admin APIs
