@@ -4514,6 +4514,64 @@ def get_quarterly_summary(projections: List[Dict]) -> List[Dict]:
     
     return list(quarters.values())
 
+
+@profit_router.get("/master-admin-trades")
+async def get_master_admin_trades(
+    start_date: str = None,
+    end_date: str = None,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get master admin's trading status for each day in the date range.
+    Used by extended licensees to determine if profit was credited.
+    """
+    # Only licensees can access this endpoint
+    if not user.get("license_type"):
+        raise HTTPException(status_code=403, detail="This endpoint is for licensees only")
+    
+    # Get the master admin
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0})
+    if not master_admin:
+        return {"trades": [], "message": "No master admin found"}
+    
+    # Build date query
+    query = {"user_id": master_admin["id"]}
+    
+    if start_date:
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0, tzinfo=timezone.utc)
+        query["created_at"] = {"$gte": start_dt.isoformat()}
+    
+    if end_date:
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
+        if "created_at" in query:
+            query["created_at"]["$lte"] = end_dt.isoformat()
+        else:
+            query["created_at"] = {"$lte": end_dt.isoformat()}
+    
+    # Get master admin's trades
+    trades = await db.trade_logs.find(query, {"_id": 0}).to_list(1000)
+    
+    # Create a dictionary of dates with trades
+    trading_dates = {}
+    for trade in trades:
+        trade_date = trade.get("created_at", "")
+        if isinstance(trade_date, str):
+            date_key = trade_date[:10]  # Get YYYY-MM-DD
+        else:
+            date_key = trade_date.strftime("%Y-%m-%d")
+        
+        trading_dates[date_key] = {
+            "traded": True,
+            "actual_profit": trade.get("actual_profit", 0),
+            "projected_profit": trade.get("projected_profit", 0)
+        }
+    
+    return {
+        "trading_dates": trading_dates,
+        "total_trades": len(trades)
+    }
+
+
 @admin_router.post("/members/{user_id}/send-email")
 async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
