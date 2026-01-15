@@ -3034,8 +3034,8 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
     
     licenses = await db.licenses.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
-    # Enrich with user info
-    all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}).to_list(1000)
+    # Enrich with user info (including timezone for profile editing)
+    all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1, "timezone": 1}).to_list(1000)
     user_lookup = {u["id"]: u for u in all_users}
     
     enriched = []
@@ -3043,6 +3043,7 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
         user_info = user_lookup.get(lic["user_id"], {})
         lic["user_name"] = user_info.get("full_name", "Unknown")
         lic["user_email"] = user_info.get("email", "")
+        lic["user_timezone"] = user_info.get("timezone", "Asia/Manila")
         
         # Calculate current amount for extended licensees
         if lic["license_type"] == "extended" and lic.get("is_active"):
