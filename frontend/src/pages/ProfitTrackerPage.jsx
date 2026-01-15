@@ -680,14 +680,17 @@ export const ProfitTrackerPage = () => {
     );
   }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades]);
 
-  // Handle opening Enter AP dialog for a specific date
+  // Handle opening Adjust Trade dialog for a specific date
   const handleOpenEnterAP = (day) => {
     setEnterAPDate(day);
     setEnterAPValue('');
+    setAdjustmentType('profit_only');
+    setAdjustmentAmount('');
+    setAdjustedBalance(day.balanceBefore?.toString() || '');
     setEnterAPDialogOpen(true);
   };
 
-  // Handle submitting the missed trade actual profit
+  // Handle submitting the adjusted trade
   const handleSubmitEnterAP = async () => {
     if (!enterAPValue || parseFloat(enterAPValue) < 0) {
       toast.error('Please enter a valid actual profit value');
@@ -699,26 +702,59 @@ export const ProfitTrackerPage = () => {
       return;
     }
 
+    // Validate adjustment amount if deposit/withdrawal selected
+    if (adjustmentType !== 'profit_only' && (!adjustmentAmount || parseFloat(adjustmentAmount) <= 0)) {
+      toast.error('Please enter a valid deposit/withdrawal amount');
+      return;
+    }
+
     setEnterAPLoading(true);
     try {
+      // First, if there's a deposit or withdrawal, record it
+      if (adjustmentType === 'with_deposit' && adjustmentAmount) {
+        await profitAPI.createDeposit({
+          amount: parseFloat(adjustmentAmount),
+          date: enterAPDate.dateKey,
+          notes: `Retroactive deposit for ${enterAPDate.dateStr}`
+        });
+      } else if (adjustmentType === 'with_withdrawal') {
+        // Record as negative deposit or withdrawal
+        await profitAPI.recordWithdrawal({
+          amount: parseFloat(adjustmentAmount),
+          date: enterAPDate.dateKey,
+          notes: `Retroactive withdrawal for ${enterAPDate.dateStr}`
+        });
+      }
+
+      // Calculate the lot size based on adjusted balance if provided
+      const balanceForCalculation = adjustedBalance ? parseFloat(adjustedBalance) : enterAPDate.balanceBefore;
+      const calculatedLotSize = truncateTo2Decimals(balanceForCalculation / 980);
+
+      // Log the trade
       await tradeAPI.logMissedTrade({
         date: enterAPDate.dateKey,
         actual_profit: parseFloat(enterAPValue),
-        lot_size: enterAPDate.lotSize,
+        lot_size: calculatedLotSize,
         direction: activeSignal?.direction || 'BUY',
-        notes: 'Retroactively logged via Enter AP'
+        balance_before: balanceForCalculation,
+        notes: adjustmentType === 'profit_only' 
+          ? 'Retroactively logged via Adjust Trade'
+          : `Adjusted trade with ${adjustmentType === 'with_deposit' ? 'deposit' : 'withdrawal'} of $${adjustmentAmount}`
       });
       
-      toast.success('Trade logged successfully!');
+      toast.success('Trade adjusted successfully!');
       setEnterAPDialogOpen(false);
       setEnterAPValue('');
       setEnterAPDate(null);
+      setAdjustmentType('profit_only');
+      setAdjustmentAmount('');
+      setAdjustedBalance('');
       
       // Reload data to reflect the new trade
       loadData();
     } catch (error) {
-      console.error('Failed to log trade:', error);
-      toast.error(error.response?.data?.detail || 'Failed to log trade');
+      console.error('Failed to adjust trade:', error);
+      toast.error(error.response?.data?.detail || 'Failed to adjust trade');
     } finally {
       setEnterAPLoading(false);
     }
