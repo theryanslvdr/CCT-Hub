@@ -1337,42 +1337,64 @@ async def update_trade_time_entered(
 
 @trade_router.get("/streak")
 async def get_trade_streak(user: dict = Depends(get_current_user)):
-    """Calculate current streak of consecutive trading days with positive profit"""
+    """Calculate current streak of consecutive trading days (regardless of profit/loss)"""
     # Get all trades ordered by date descending
     trades = await db.trade_logs.find(
         {"user_id": user["id"]}, 
-        {"_id": 0, "performance": 1, "actual_profit": 1, "created_at": 1}
+        {"_id": 0, "created_at": 1}
     ).sort("created_at", -1).to_list(1000)
     
     if not trades:
-        return {"streak": 0, "streak_type": None}
+        return {"streak": 0, "streak_type": None, "total_trades": 0}
     
-    # Calculate streak based on consecutive days with positive profit
-    # The streak counts consecutive trades where actual_profit > 0
+    # Calculate streak based on consecutive trading days
+    # A streak counts consecutive days where the user traded, regardless of profit/loss
     streak = 0
-    streak_type = None
+    last_trade_date = None
     
     for trade in trades:
-        # Check performance field (supports both old and new formats)
-        perf = trade.get("performance", "")
-        actual_profit = trade.get("actual_profit", 0)
+        trade_date_str = trade.get("created_at", "")
+        if not trade_date_str:
+            continue
+            
+        # Parse the trade date
+        try:
+            if isinstance(trade_date_str, str):
+                trade_date = datetime.fromisoformat(trade_date_str.replace('Z', '+00:00')).date()
+            else:
+                trade_date = trade_date_str.date()
+        except:
+            continue
         
-        # A successful trade: positive profit OR performance indicates success
-        is_successful = (
-            actual_profit > 0 or  # Has positive profit
-            perf in ["exceeded", "perfect", "target", "above"]  # Performance-based success
-        )
-        
-        if is_successful:
-            if streak == 0:
-                streak_type = "winning"
-            streak += 1
+        if last_trade_date is None:
+            # First trade - start the streak
+            streak = 1
+            last_trade_date = trade_date
         else:
-            break  # Streak broken
+            # Check if this trade is on the previous trading day
+            # (Skip weekends - Saturday=5, Sunday=6)
+            expected_date = last_trade_date
+            days_back = 0
+            while days_back < 7:  # Look back up to a week
+                expected_date = expected_date - timedelta(days=1)
+                # Skip weekends
+                if expected_date.weekday() < 5:  # Monday=0 to Friday=4
+                    break
+                days_back += 1
+            
+            if trade_date == expected_date:
+                streak += 1
+                last_trade_date = trade_date
+            elif trade_date == last_trade_date:
+                # Same day - don't break streak but don't increment
+                continue
+            else:
+                # Gap in trading days - streak broken
+                break
     
     return {
         "streak": streak,
-        "streak_type": streak_type,  # "winning" if positive, None if no streak
+        "streak_type": "trading" if streak > 0 else None,
         "total_trades": len(trades)
     }
 
