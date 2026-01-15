@@ -106,7 +106,7 @@ export const tradeAPI = {
   getStreak: () => api.get('/trade/streak'),
   getActiveSignal: () => api.get('/trade/active-signal'),
   getDailySummary: () => api.get('/trade/daily-summary'),
-  forwardToProfit: (tradeId) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId } }),
+  forwardToProfit: (tradeId, isBve = false) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId, is_bve: isBve } }),
   getMissedTradeStatus: () => api.get('/trade/missed-trade-status'),
   logMissedTrade: (data) => api.post('/trade/log-missed-trade', null, { params: data }),
 };
