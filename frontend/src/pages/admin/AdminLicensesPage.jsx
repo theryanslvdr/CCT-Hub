@@ -323,6 +323,28 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  const handleOpenDeleteLicense = (license) => {
+    setSelectedLicense(license);
+    setDeleteLicenseDialogOpen(true);
+  };
+
+  const handleDeleteLicense = async () => {
+    if (!selectedLicense) return;
+    
+    setDeletingLicense(true);
+    try {
+      await adminAPI.deleteLicense(selectedLicense.id);
+      toast.success('License deleted successfully');
+      setDeleteLicenseDialogOpen(false);
+      setSelectedLicense(null);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete license');
+    } finally {
+      setDeletingLicense(false);
+    }
+  };
+
   const handleViewDetails = (invite) => {
     setSelectedInvite(invite);
     setViewDialogOpen(true);
