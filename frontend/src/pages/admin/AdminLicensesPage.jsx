@@ -1551,6 +1551,79 @@ export const AdminLicensesPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editProfileDialogOpen} onOpenChange={setEditProfileDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserCog className="w-5 h-5 text-blue-400" /> Edit Licensee Profile
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedLicense && (
+              <div className="p-3 rounded-lg bg-zinc-900/50 text-sm mb-4">
+                <p className="text-zinc-400">Email: <span className="text-white">{selectedLicense.user_email}</span></p>
+                <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}>{selectedLicense.license_type}</span></p>
+              </div>
+            )}
+            
+            <div>
+              <Label className="text-zinc-300">Full Name</Label>
+              <Input
+                value={editProfileForm.full_name}
+                onChange={(e) => setEditProfileForm({ ...editProfileForm, full_name: e.target.value })}
+                className="input-dark mt-1"
+                placeholder="Enter full name"
+                data-testid="edit-licensee-name"
+              />
+            </div>
+
+            <div>
+              <Label className="text-zinc-300">Timezone</Label>
+              <Select 
+                value={editProfileForm.timezone} 
+                onValueChange={(v) => setEditProfileForm({ ...editProfileForm, timezone: v })}
+              >
+                <SelectTrigger className="input-dark mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Asia/Manila">Philippines (GMT+8)</SelectItem>
+                  <SelectItem value="Asia/Singapore">Singapore (GMT+8)</SelectItem>
+                  <SelectItem value="Asia/Taipei">Taiwan (GMT+8)</SelectItem>
+                  <SelectItem value="Asia/Hong_Kong">Hong Kong (GMT+8)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Japan (GMT+9)</SelectItem>
+                  <SelectItem value="UTC">UTC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setEditProfileDialogOpen(false)}
+                className="flex-1 btn-secondary"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveProfile}
+                disabled={savingProfile || !editProfileForm.full_name.trim()}
+                className="flex-1 btn-primary"
+                data-testid="save-licensee-profile"
+              >
+                {savingProfile ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                )}
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
