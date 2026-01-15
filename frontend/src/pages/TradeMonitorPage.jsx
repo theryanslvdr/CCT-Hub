@@ -476,6 +476,17 @@ export const TradeMonitorPage = () => {
               lastCountdownUpdateRef.current = Date.now();
               setCountdownStalled(false);
               setCountdown({ hours, minutes, seconds, total: diff });
+            } else {
+              // Trade time has passed - show the "Trade Entered" button if not already clicked
+              if (!tradeEnteredRef.current) {
+                setShowExitAlert(true);
+                setCountdown(null);
+                setPreTradeCountdown(null);
+                
+                if (soundEnabled && audioRef.current) {
+                  audioRef.current.play().catch(console.error);
+                }
+              }
             }
           } catch (e) {
             console.error('Error restoring countdown on visibility change:', e);
@@ -486,7 +497,7 @@ export const TradeMonitorPage = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isTrading]);
+  }, [isTrading, soundEnabled]);
 
   // Countdown stall detection - check if countdown hasn't updated in 3 seconds
   useEffect(() => {
