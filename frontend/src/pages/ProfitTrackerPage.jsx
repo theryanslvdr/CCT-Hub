@@ -581,6 +581,12 @@ export const ProfitTrackerPage = () => {
             endDate.toISOString().split('T')[0]
           );
           setMasterAdminTrades(tradesRes.data?.trading_dates || {});
+          
+          // Load license projections for fixed lot size/daily profit
+          const projectionsRes = await profitAPI.getLicenseProjections();
+          if (projectionsRes.data?.monthly_projections) {
+            setLicenseProjections(projectionsRes.data.monthly_projections);
+          }
         } catch (error) {
           console.error('Failed to load master admin trades:', error);
         }
