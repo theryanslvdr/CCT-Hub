@@ -1773,7 +1773,20 @@ export const ProfitTrackerPage = () => {
       </div>
       )}
 
-      {/* Initial Balance Setup Dialog */}
+      {/* Onboarding Wizard */}
+      <OnboardingWizard
+        isOpen={onboardingWizardOpen}
+        onClose={() => setOnboardingWizardOpen(false)}
+        onComplete={(data) => {
+          setOnboardingWizardOpen(false);
+          setIsFirstTime(false);
+          loadData(); // Reload data after onboarding
+          toast.success('Your profit tracker is ready!');
+        }}
+        isReset={isResetOnboarding}
+      />
+
+      {/* Legacy Initial Balance Dialog - kept for backwards compatibility */}
       <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
@@ -1783,7 +1796,7 @@ export const ProfitTrackerPage = () => {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <p className="text-zinc-400">
-              Let's get started by setting your current Merin Trading Platform balance. 
+              Let&apos;s get started by setting your current Merin Trading Platform balance. 
               This is the amount you currently have in your trading account.
             </p>
             <div>
@@ -1799,7 +1812,7 @@ export const ProfitTrackerPage = () => {
                   data-testid="initial-balance-input"
                 />
               </div>
-              <p className="text-xs text-zinc-500 mt-1">Enter 0 if you haven't deposited yet</p>
+              <p className="text-xs text-zinc-500 mt-1">Enter 0 if you haven&apos;t deposited yet</p>
             </div>
             <Button onClick={handleInitialBalance} className="w-full btn-primary" data-testid="set-initial-balance-button">
               <Rocket className="w-4 h-4 mr-2" /> Start Tracking My Profits
