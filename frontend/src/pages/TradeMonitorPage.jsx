@@ -455,6 +455,39 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Handle visibility change - force countdown update when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isTrading) {
+        // Force immediate countdown update when tab becomes visible
+        const savedCheckIn = localStorage.getItem('trade_check_in');
+        if (savedCheckIn) {
+          try {
+            const checkInData = JSON.parse(savedCheckIn);
+            const targetTime = new Date(checkInData.targetTime);
+            const now = new Date();
+            const diff = targetTime - now;
+            
+            if (diff > 0) {
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              
+              lastCountdownUpdateRef.current = Date.now();
+              setCountdownStalled(false);
+              setCountdown({ hours, minutes, seconds, total: diff });
+            }
+          } catch (e) {
+            console.error('Error restoring countdown on visibility change:', e);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isTrading]);
+
   // Countdown stall detection - check if countdown hasn't updated in 3 seconds
   useEffect(() => {
     if (!isTrading || !countdown) {
@@ -467,6 +500,29 @@ export const TradeMonitorPage = () => {
       // If countdown hasn't updated in 3 seconds, mark as stalled
       if (timeSinceLastUpdate > 3000) {
         setCountdownStalled(true);
+        
+        // Auto-refresh countdown when stalled
+        const savedCheckIn = localStorage.getItem('trade_check_in');
+        if (savedCheckIn) {
+          try {
+            const checkInData = JSON.parse(savedCheckIn);
+            const targetTime = new Date(checkInData.targetTime);
+            const now = new Date();
+            const diff = targetTime - now;
+            
+            if (diff > 0) {
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              
+              lastCountdownUpdateRef.current = Date.now();
+              setCountdownStalled(false);
+              setCountdown({ hours, minutes, seconds, total: diff });
+            }
+          } catch (e) {
+            // Ignore errors
+          }
+        }
       } else {
         setCountdownStalled(false);
       }
