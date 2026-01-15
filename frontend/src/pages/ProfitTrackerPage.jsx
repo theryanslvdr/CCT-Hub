@@ -627,22 +627,21 @@ export const ProfitTrackerPage = () => {
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
       const monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
       
-      // For current month, filter to show only today and future
-      const todayStr = today.toISOString().split('T')[0];
-      const filteredProjections = isCurrentMonth 
-        ? monthProjections.filter(p => p.date >= todayStr)
-        : monthProjections;
-      
-      return filteredProjections.map(p => {
+      // Show ALL days for the month (including past days with trade history)
+      // Don't filter out past days anymore
+      return monthProjections.map(p => {
         const projDate = new Date(p.date);
         const isToday = projDate.toDateString() === today.toDateString();
         const isFuture = projDate > today;
+        const isPast = projDate < today;
         const masterTraded = masterAdminTrades[p.date]?.traded;
         
         // Determine status
         let status = 'pending';
         if (masterTraded) {
           status = 'completed';
+        } else if (isPast) {
+          status = 'missed'; // Past day without master admin trade
         } else if (isFuture) {
           status = 'future';
         }
