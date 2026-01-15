@@ -680,11 +680,16 @@ export const TradeMonitorPage = () => {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         
-        // 5-second countdown beep before trade time
-        if (diff <= 5000 && diff > 0) {
+        // Show active countdown only in the last 30 seconds (user requested simplification)
+        if (diff <= 30000 && diff > 0) {
           const secondsLeft = Math.ceil(diff / 1000);
           setPreTradeCountdown(secondsLeft);
-          playBeep();
+          // Play beep every second in the last 30 seconds
+          if (diff <= 5000) {
+            playBeep(); // More frequent beeps in last 5 seconds
+          } else if (seconds % 5 === 0) {
+            playBeep(); // Beep every 5 seconds in countdown
+          }
         } else {
           setPreTradeCountdown(null);
         }
