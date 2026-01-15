@@ -3,6 +3,120 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
 
 
+async def calculate_account_value(
+    db,
+    user_id: str,
+    user: Optional[Dict] = None,
+    include_licensee_check: bool = True
+) -> float:
+    """
+    Calculate account value for a user.
+    
+    For licensees: Returns license.current_amount
+    For regular users: Returns total_deposits - total_withdrawals + total_profit
+    
+    Args:
+        db: Database connection
+        user_id: User's ID
+        user: Optional user dict (to avoid extra DB lookup)
+        include_licensee_check: Whether to check if user is a licensee
+    
+    Returns:
+        Account value as float
+    """
+    # Check if user is a licensee
+    if include_licensee_check:
+        if user is None:
+            user = await db.users.find_one({"id": user_id}, {"_id": 0})
+        
+        if user and user.get("license_type"):
+            license = await db.licenses.find_one(
+                {"user_id": user_id, "is_active": True},
+                {"_id": 0}
+            )
+            if license:
+                return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
+    
+    # Regular user calculation: deposits - withdrawals + profits
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    total_deposits = sum(
+        d.get("amount", 0) for d in deposits 
+        if d.get("type") not in ["profit", "withdrawal"] and not d.get("is_withdrawal")
+    )
+    total_withdrawals = sum(
+        abs(d.get("amount", 0)) for d in deposits 
+        if d.get("type") == "withdrawal" or d.get("is_withdrawal")
+    )
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    
+    return round(total_deposits - total_withdrawals + total_profit, 2)
+
+
+async def get_user_financial_summary(
+    db,
+    user_id: str,
+    user: Optional[Dict] = None
+) -> Dict[str, Any]:
+    """
+    Get comprehensive financial summary for a user.
+    
+    Returns:
+        Dict with total_deposits, total_withdrawals, total_profit, account_value, is_licensee
+    """
+    is_licensee = False
+    license_info = None
+    
+    # Check for licensee
+    if user is None:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    
+    if user and user.get("license_type"):
+        license = await db.licenses.find_one(
+            {"user_id": user_id, "is_active": True},
+            {"_id": 0}
+        )
+        if license:
+            is_licensee = True
+            license_info = license
+    
+    # Get deposits and trades
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    total_deposits = sum(
+        d.get("amount", 0) for d in deposits 
+        if d.get("type") not in ["profit", "withdrawal"] and not d.get("is_withdrawal")
+    )
+    total_withdrawals = sum(
+        abs(d.get("amount", 0)) for d in deposits 
+        if d.get("type") == "withdrawal" or d.get("is_withdrawal")
+    )
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_projected = sum(t.get("projected_profit", 0) for t in trades)
+    
+    # Calculate account value
+    if is_licensee and license_info:
+        account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
+        # For licensees, total_deposits is the starting amount
+        total_deposits = license_info.get("starting_amount", 0)
+    else:
+        account_value = round(total_deposits - total_withdrawals + total_profit, 2)
+    
+    return {
+        "total_deposits": round(total_deposits, 2),
+        "total_withdrawals": round(total_withdrawals, 2),
+        "total_profit": round(total_profit, 2),
+        "total_projected_profit": round(total_projected, 2),
+        "account_value": account_value,
+        "total_trades": len(trades),
+        "is_licensee": is_licensee,
+        "license_type": license_info.get("license_type") if license_info else None,
+        "performance_rate": round((total_profit / total_projected * 100) if total_projected > 0 else 0, 2)
+    }
+
+
 def calculate_lot_size(account_value: float, lot_divisor: float = 980) -> float:
     """Calculate LOT size from account value
     
