@@ -11,6 +11,36 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 48 (2026-01-16) - Notification Engine & Reset Flow Fix ✅
+
+#### Bug Fix 1: Notification Engine "Connection Lost" ✅
+- **Issue**: WebSocket showed "Connection lost" and reconnect didn't work, no past notifications
+- **Root Cause**: 
+  1. Token wasn't exposed in AuthContext value
+  2. WebSocket path `/ws/` wasn't routed through ingress (only `/api/` is routed)
+  3. Notifications weren't persisted to database
+- **Fix**:
+  1. Added `token` to AuthContext value export
+  2. Added `/api/ws/{user_id}` WebSocket endpoint for ingress routing
+  3. Added notification persistence to MongoDB via `set_database()` in websocket_service
+  4. Added CRUD endpoints: `GET /api/notifications`, `POST /api/notifications/mark-read`, `DELETE /api/notifications`
+  5. Updated WebSocketContext to fetch past notifications on connect
+- **Files Modified**: 
+  - `server.py` (lines 5380-5460: notification endpoints, 5338-5408: dual WebSocket endpoints)
+  - `services/websocket_service.py` (notification persistence with set_database)
+  - `contexts/WebSocketContext.jsx` (API calls, /api/ws/ path)
+  - `contexts/AuthContext.jsx` (token in value)
+
+#### Feature: Reset Tracker → Onboarding Wizard Flow ✅
+- **Change**: Simplified reset dialog to skip "new balance" step
+- **New Flow**: Warning → Password Verification → Onboarding Wizard opens
+- **Files Modified**: `ProfitTrackerPage.jsx` (handleResetConfirm, handleResetWithPassword)
+
+#### Feature: Onboarding Wizard Text Update ✅
+- **Change**: Renamed "I'm New to Merin" to "New Trader / Start Fresh"
+- **Dynamic Description**: Shows "Start over with a clean slate" during reset flow
+- **Files Modified**: `OnboardingWizard.jsx` (line 387)
+
 ### Session 47 (2026-01-15) - Timer Fix, Streak Fix & Onboarding Wizard ✅
 
 #### Bug Fix 1: Timer Stalling at 8 Seconds ✅
