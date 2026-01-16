@@ -109,12 +109,16 @@ export const WebSocketProvider = ({ children }) => {
   const connect = useCallback(() => {
     if (!isAuthenticated || !user || !token) return;
     
+    // Fetch past notifications first
+    fetchNotifications();
+    
     // Close existing connection
     if (wsRef.current) {
       wsRef.current.close();
     }
 
     // Get WebSocket URL from backend URL
+    // The WebSocket endpoint is NOT prefixed with /api - it's directly on /ws/
     const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
     const wsProtocol = backendUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = backendUrl.replace(/^https?:\/\//, '');
@@ -174,7 +178,7 @@ export const WebSocketProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
     }
-  }, [isAuthenticated, user, token, handleNotification]);
+  }, [isAuthenticated, user, token, handleNotification, fetchNotifications]);
 
   // Keep connectFnRef in sync with connect
   useEffect(() => {
