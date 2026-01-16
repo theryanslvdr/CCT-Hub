@@ -199,14 +199,34 @@ export const WebSocketProvider = ({ children }) => {
     setConnected(false);
   }, []);
 
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
     setUnreadCount(0);
-  }, []);
+    // Mark as read in backend
+    if (token) {
+      try {
+        await axios.post(`${BACKEND_URL}/api/notifications/mark-read`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.error('Failed to mark notifications as read:', error);
+      }
+    }
+  }, [token]);
 
-  const clearNotifications = useCallback(() => {
+  const clearNotifications = useCallback(async () => {
     setNotifications([]);
     setUnreadCount(0);
-  }, []);
+    // Delete in backend
+    if (token) {
+      try {
+        await axios.delete(`${BACKEND_URL}/api/notifications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.error('Failed to clear notifications:', error);
+      }
+    }
+  }, [token]);
 
   // Connect when authenticated
   useEffect(() => {
