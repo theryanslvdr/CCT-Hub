@@ -5377,6 +5377,52 @@ async def get_websocket_status(user: dict = Depends(require_admin)):
     """Get WebSocket connection statistics (admin only)"""
     return websocket_manager.get_connection_count()
 
+
+@api_router.get("/notifications")
+async def get_notifications(
+    limit: int = 50,
+    skip: int = 0,
+    unread_only: bool = False,
+    user: dict = Depends(get_current_user)
+):
+    """Get notifications for the current user"""
+    query = {"recipient_id": user["id"]}
+    if unread_only:
+        query["read"] = False
+    
+    notifications = await db.notifications.find(
+        query,
+        {"_id": 0}
+    ).sort("timestamp", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Get unread count
+    unread_count = await db.notifications.count_documents({
+        "recipient_id": user["id"],
+        "read": False
+    })
+    
+    return {
+        "notifications": notifications,
+        "unread_count": unread_count,
+        "total": await db.notifications.count_documents({"recipient_id": user["id"]})
+    }
+
+@api_router.post("/notifications/mark-read")
+async def mark_notifications_read(user: dict = Depends(get_current_user)):
+    """Mark all notifications as read for the current user"""
+    result = await db.notifications.update_many(
+        {"recipient_id": user["id"], "read": False},
+        {"$set": {"read": True}}
+    )
+    return {"marked_read": result.modified_count}
+
+@api_router.delete("/notifications")
+async def clear_notifications(user: dict = Depends(get_current_user)):
+    """Delete all notifications for the current user"""
+    result = await db.notifications.delete_many({"recipient_id": user["id"]})
+    return {"deleted": result.deleted_count}
+
+
 # ==================== FILE UPLOAD ROUTES ====================
 
 @api_router.post("/upload/profile-picture")
