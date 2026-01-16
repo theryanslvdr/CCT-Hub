@@ -259,9 +259,10 @@ class TestOnboardingWizard:
         assert response.status_code == 200, f"Onboarding status failed: {response.text}"
         
         data = response.json()
-        assert "has_completed_onboarding" in data, "Response should contain 'has_completed_onboarding'"
+        # Field is 'onboarding_completed' not 'has_completed_onboarding'
+        assert "onboarding_completed" in data, "Response should contain 'onboarding_completed'"
         
-        print(f"✓ Onboarding status: completed={data['has_completed_onboarding']}")
+        print(f"✓ Onboarding status: completed={data['onboarding_completed']}")
 
 
 class TestHolidayHandling:
