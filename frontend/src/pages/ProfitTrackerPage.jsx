@@ -719,13 +719,21 @@ export const ProfitTrackerPage = () => {
     // For honorary licensees and regular users, use standard calculation
     const startBalance = isCurrentMonth ? effectiveAccountValue : selectedMonth.startBalance;
     
+    // Combine deposits and withdrawals for accurate balance tracking
+    // Deposits is positive, withdrawals are stored separately
+    const allTransactions = [
+      ...deposits.map(d => ({ ...d, is_withdrawal: false })),
+      ...withdrawals.map(w => ({ ...w, is_withdrawal: true }))
+    ];
+    
     return generateDailyProjectionForMonth(
       startBalance,
       selectedMonth.monthDate,
       tradeLogs,
-      activeSignal
+      activeSignal,
+      allTransactions
     );
-  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades]);
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, deposits, withdrawals]);
 
   // Handle opening Adjust Trade dialog for a specific date
   const handleOpenEnterAP = (day) => {
