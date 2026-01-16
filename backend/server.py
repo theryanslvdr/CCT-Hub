@@ -6368,9 +6368,15 @@ async def startup_db():
         await db.trading_signals.create_index("is_active")
         await db.debts.create_index("user_id")
         await db.goals.create_index("user_id")
+        await db.notifications.create_index("recipient_id")
+        await db.notifications.create_index([("recipient_id", 1), ("timestamp", -1)])
         logger.info("Database indexes created")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
+    
+    # Initialize websocket service with database reference
+    set_websocket_database(db)
+    logger.info("WebSocket service initialized with database")
     
     # Start the scheduler for missed trade emails
     # Run at 11 PM UTC every day (after typical trading hours)
