@@ -1,0 +1,103 @@
+{
+  "summary": "Iteration 45 - Notification Engine and Reset Tracker Fixes. All 11 backend tests passed. Frontend tests verified: 1) WebSocket connection shows 'Live updates active' in notification sheet, 2) Notification CRUD endpoints work correctly (GET, POST mark-read, DELETE), 3) Reset tracker flow is simplified (warning -> password -> onboarding wizard, skipping newBalance step), 4) Onboarding wizard shows 'New Trader / Start Fresh' instead of 'I'm New to Merin'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Dashboard/Profit Tracker charts",
+        "issues": ["Console warning: 'The width(-1) and height(-1) of chart should be greater than 0' - chart container sizing issue"]
+      },
+      {
+        "screen": "Dialog components",
+        "issues": ["Console warning: 'Missing Description or aria-describedby for DialogContent' - accessibility improvement needed"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_45_notifications_reset.py",
+    "/app/test_reports/pytest/pytest_iteration_45.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "WebSocket connection (WebSocketContext.jsx): Properly connects via /api/ws/{user_id} endpoint with token authentication. Shows 'Live updates active' when connected.",
+    "Notification endpoints (server.py lines 5419-5461): GET /api/notifications returns notifications with unread_count, POST /api/notifications/mark-read marks all as read, DELETE /api/notifications clears all.",
+    "Reset flow (ProfitTrackerPage.jsx lines 914-956): Simplified to warning -> password -> onboarding wizard. handleResetConfirm sets resetStep to 'password' directly, skipping 'newBalance' step.",
+    "Onboarding wizard (OnboardingWizard.jsx line 387): Shows 'New Trader / Start Fresh' text as required."
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_45_notifications_reset.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests passed)",
+    "frontend": "100% (all UI tests passed)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "None - used existing test data",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 2 user-reported issues have been fixed: 1) Notification engine - WebSocket connection now shows 'Live updates active' instead of 'Connection lost', notifications are persisted to MongoDB and fetched on connect. 2) Reset tracker - simplified flow (warning -> password -> onboarding wizard), and onboarding wizard shows 'New Trader / Start Fresh' instead of 'I'm New to Merin'. Minor console warnings exist for chart sizing and dialog accessibility but don't affect functionality.",
+  "features_tested": {
+    "websocket_connection": {
+      "status": "PASS",
+      "details": "WebSocket connects successfully via /api/ws/{user_id} endpoint. Console shows 'WebSocket connected'. Notification sheet shows 'Live updates active'."
+    },
+    "notification_get_endpoint": {
+      "status": "PASS",
+      "details": "GET /api/notifications returns notifications array, unread_count, and total. Supports limit and unread_only params."
+    },
+    "notification_mark_read_endpoint": {
+      "status": "PASS",
+      "details": "POST /api/notifications/mark-read marks all notifications as read. Returns marked_read count."
+    },
+    "notification_clear_endpoint": {
+      "status": "PASS",
+      "details": "DELETE /api/notifications clears all notifications for user. Returns deleted count."
+    },
+    "reset_tracker_simplified_flow": {
+      "status": "PASS",
+      "details": "Reset dialog flow: Step 1 (Warning) -> Step 2 (Password) -> Onboarding Wizard. No 'newBalance' step."
+    },
+    "onboarding_wizard_new_trader_text": {
+      "status": "PASS",
+      "details": "Onboarding wizard Step 1 shows 'New Trader / Start Fresh' instead of 'I'm New to Merin'."
+    },
+    "verify_password_endpoint": {
+      "status": "PASS",
+      "details": "POST /api/auth/verify-password correctly validates user password for reset flow."
+    }
+  },
+  "api_tests": {
+    "POST /api/auth/login": "PASS - Master admin login works",
+    "GET /api/notifications": "PASS - Returns notifications with unread_count",
+    "GET /api/notifications?unread_only=true": "PASS - Filters unread notifications",
+    "POST /api/notifications/mark-read": "PASS - Marks all as read",
+    "DELETE /api/notifications": "PASS - Clears all notifications",
+    "GET /api/ws/status": "PASS - Returns WebSocket connection stats",
+    "POST /api/auth/verify-password": "PASS - Validates password correctly",
+    "DELETE /api/profit/reset": "PASS - Endpoint exists and requires auth",
+    "GET /api/profit/onboarding-status": "PASS - Returns onboarding status",
+    "POST /api/profit/complete-onboarding": "PASS - Endpoint exists",
+    "GET /api/profit/summary": "PASS - Returns account value and profit data"
+  },
+  "ui_tests": {
+    "login_flow": "PASS - Master admin can login successfully",
+    "notification_bell_click": "PASS - Opens notification sheet",
+    "notification_sheet_websocket_status": "PASS - Shows 'Live updates active'",
+    "profit_tracker_navigation": "PASS - Can navigate to Profit Tracker page",
+    "reset_tracker_dialog_step1": "PASS - Shows warning with list of data to be deleted",
+    "reset_tracker_dialog_step2": "PASS - Goes directly to password verification (simplified)",
+    "onboarding_wizard_after_reset": "PASS - Opens after password verification",
+    "onboarding_wizard_new_trader_text": "PASS - Shows 'New Trader / Start Fresh'"
+  },
+  "test_date": "2026-01-16T00:20:00Z"
+}
