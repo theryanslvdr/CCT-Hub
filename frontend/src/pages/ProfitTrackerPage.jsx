@@ -97,7 +97,7 @@ const isTradingDay = (date) => {
 
 // Generate daily projection for a specific month
 // Now accepts deposits array to properly calculate running balance
-const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allDeposits = []) => {
+const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allTransactions = []) => {
   const days = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -111,17 +111,17 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   const isPastMonth = (year < today.getFullYear()) || (year === today.getFullYear() && month < today.getMonth());
   
   // Create a map of deposits/withdrawals by date for quick lookup
+  // Note: Withdrawals already have NEGATIVE amounts in the database
   const transactionsByDate = {};
-  if (allDeposits && allDeposits.length > 0) {
-    allDeposits.forEach(dep => {
-      const depDate = dep.created_at ? dep.created_at.split('T')[0] : null;
-      if (depDate) {
-        if (!transactionsByDate[depDate]) {
-          transactionsByDate[depDate] = 0;
+  if (allTransactions && allTransactions.length > 0) {
+    allTransactions.forEach(tx => {
+      const txDate = tx.created_at ? tx.created_at.split('T')[0] : null;
+      if (txDate) {
+        if (!transactionsByDate[txDate]) {
+          transactionsByDate[txDate] = 0;
         }
-        // Positive for deposits, negative for withdrawals
-        const amount = dep.is_withdrawal ? -(dep.amount || 0) : (dep.amount || 0);
-        transactionsByDate[depDate] += amount;
+        // The amount is already negative for withdrawals, so just add it
+        transactionsByDate[txDate] += (tx.amount || 0);
       }
     });
   }
@@ -162,8 +162,9 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       
       // Apply any deposits/withdrawals for this date BEFORE calculating lot size
       // (deposits should affect the balance BEFORE the day's trade)
-      if (transactionsByDate[dateKey]) {
-        runningBalance += transactionsByDate[dateKey];
+      const dayTransaction = transactionsByDate[dateKey] || 0;
+      if (dayTransaction !== 0) {
+        runningBalance += dayTransaction;
       }
       
       // Calculate lot size and target profit based on current running balance
@@ -221,8 +222,8 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         performance: performance,
         status: status,
         isToday: isToday,
-        hasTransaction: !!transactionsByDate[dateKey],
-        transactionAmount: transactionsByDate[dateKey] || 0,
+        hasTransaction: dayTransaction !== 0,
+        transactionAmount: dayTransaction,
       });
       
       // Add profit to running balance for next day's calculation
