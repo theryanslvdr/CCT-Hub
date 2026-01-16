@@ -1675,44 +1675,6 @@ export const ProfitTrackerPage = () => {
               </div>
             )}
 
-            {resetStep === 'newBalance' && (
-              <div className="space-y-4 mt-4">
-                <p className="text-zinc-400 text-sm">Enter your new account value and the reason for this reset.</p>
-                <div>
-                  <Label className="text-zinc-300">New Account Value (USDT)</Label>
-                  <div className="relative mt-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
-                    <Input
-                      type="number"
-                      value={newAccountValue}
-                      onChange={(e) => setNewAccountValue(e.target.value)}
-                      placeholder="0.00"
-                      className="input-dark pl-7"
-                      data-testid="new-account-value-input"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Reason for Reset</Label>
-                  <Input
-                    value={resetReason}
-                    onChange={(e) => setResetReason(e.target.value)}
-                    placeholder="e.g., Starting fresh, Account correction..."
-                    className="input-dark mt-1"
-                    data-testid="reset-reason-input"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('confirm')}>
-                    Back
-                  </Button>
-                  <Button className="flex-1 btn-primary" onClick={handleResetNewBalance}>
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
             {resetStep === 'password' && (
               <div className="space-y-4 mt-4">
                 <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
@@ -1721,16 +1683,10 @@ export const ProfitTrackerPage = () => {
                     <div>
                       <p className="text-amber-400 font-medium">Security Verification Required</p>
                       <p className="text-sm text-zinc-400 mt-1">
-                        Please enter your password to confirm this action.
+                        Please enter your password to confirm the reset. You&apos;ll be guided through setting up your new tracker.
                       </p>
                     </div>
                   </div>
-                </div>
-                <div className="p-3 rounded-lg bg-zinc-900/50">
-                  <p className="text-xs text-zinc-500">New Balance</p>
-                  <p className="font-mono text-white">{formatMoney(truncateTo2Decimals(parseFloat(newAccountValue) || 0))}</p>
-                  <p className="text-xs text-zinc-500 mt-2">Reason</p>
-                  <p className="text-zinc-300 text-sm">{resetReason}</p>
                 </div>
                 <div>
                   <Label className="text-zinc-300">Password</Label>
@@ -1744,7 +1700,7 @@ export const ProfitTrackerPage = () => {
                   />
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('newBalance')}>
+                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('confirm')}>
                     Back
                   </Button>
                   <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetWithPassword} data-testid="confirm-reset-button">
