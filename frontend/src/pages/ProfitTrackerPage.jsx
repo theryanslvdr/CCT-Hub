@@ -96,7 +96,8 @@ const isTradingDay = (date) => {
 };
 
 // Generate daily projection for a specific month
-const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null) => {
+// Now accepts deposits array to properly calculate running balance
+const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allDeposits = []) => {
   const days = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -109,29 +110,48 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   const isPastMonth = (year < today.getFullYear()) || (year === today.getFullYear() && month < today.getMonth());
   
-  // Always start from the first day of the month to show all trade history
+  // Create a map of deposits/withdrawals by date for quick lookup
+  const transactionsByDate = {};
+  if (allDeposits && allDeposits.length > 0) {
+    allDeposits.forEach(dep => {
+      const depDate = dep.created_at ? dep.created_at.split('T')[0] : null;
+      if (depDate) {
+        if (!transactionsByDate[depDate]) {
+          transactionsByDate[depDate] = 0;
+        }
+        // Positive for deposits, negative for withdrawals
+        const amount = dep.is_withdrawal ? -(dep.amount || 0) : (dep.amount || 0);
+        transactionsByDate[depDate] += amount;
+      }
+    });
+  }
+  
+  // Calculate the starting balance for this month by working backwards
   let runningBalance = startBalance;
   
-  // For current/past months, we need to reconstruct the balance progression
-  // Start with the month's starting balance and add profits day by day
-  let currentDate = new Date(firstDay);
-  
-  // If we're viewing past month or current month, we need to calculate backwards
-  // to find what the balance was at the start of the month
   if (isCurrentMonth || isPastMonth) {
-    // Get all trades for this month to calculate starting balance
-    const monthTrades = Object.entries(tradeLogs)
-      .filter(([key, _]) => key.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`))
-      .sort(([a], [b]) => a.localeCompare(b));
+    // Get all trades and transactions for this month
+    const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
     
     // Sum up all profits in this month
+    const monthTrades = Object.entries(tradeLogs)
+      .filter(([key, _]) => key.startsWith(monthPrefix))
+      .sort(([a], [b]) => a.localeCompare(b));
+    
     const totalMonthProfit = monthTrades.reduce((sum, [_, log]) => {
       return sum + (log?.actual_profit || 0);
     }, 0);
     
-    // Starting balance for the month = current balance - total month profit
-    runningBalance = startBalance - totalMonthProfit;
+    // Sum up all deposits/withdrawals in this month
+    const totalMonthTransactions = Object.entries(transactionsByDate)
+      .filter(([dateKey, _]) => dateKey.startsWith(monthPrefix))
+      .reduce((sum, [_, amount]) => sum + amount, 0);
+    
+    // Starting balance for the month = current balance - total month profit - total month transactions
+    runningBalance = startBalance - totalMonthProfit - totalMonthTransactions;
   }
+  
+  let currentDate = new Date(firstDay);
   
   while (currentDate <= lastDay) {
     if (isTradingDay(currentDate)) {
@@ -140,18 +160,17 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       const hasTraded = tradeLog?.has_traded;
       const actualProfit = tradeLog?.actual_profit;
       
-      // Calculate lot size and target profit based on current running balance
-      let lotSize, targetProfit;
-      
-      if (hasTraded && tradeLog) {
-        // Use stored values from the trade log
-        lotSize = tradeLog.lot_size || truncateTo2Decimals(runningBalance / 980);
-        targetProfit = tradeLog.projected_profit || truncateTo2Decimals(lotSize * 15);
-      } else {
-        // For pending/future trades, calculate from running balance
-        lotSize = truncateTo2Decimals(runningBalance / 980);
-        targetProfit = truncateTo2Decimals(lotSize * 15);
+      // Apply any deposits/withdrawals for this date BEFORE calculating lot size
+      // (deposits should affect the balance BEFORE the day's trade)
+      if (transactionsByDate[dateKey]) {
+        runningBalance += transactionsByDate[dateKey];
       }
+      
+      // Calculate lot size and target profit based on current running balance
+      // ALWAYS recalculate based on the running balance, don't use stored values
+      // This ensures consistency with the daily projection view
+      const lotSize = truncateTo2Decimals(runningBalance / 980);
+      const targetProfit = truncateTo2Decimals(lotSize * 15);
       
       // Determine status
       let status = 'pending';
@@ -169,6 +188,23 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         status = 'future';
       }
       
+      // Calculate P/L difference based on recalculated projected profit
+      const plDiff = hasTraded && actualProfit !== undefined 
+        ? truncateTo2Decimals(actualProfit - targetProfit)
+        : null;
+      
+      // Determine performance based on recalculated values
+      let performance = null;
+      if (hasTraded && actualProfit !== undefined) {
+        if (actualProfit >= targetProfit) {
+          performance = actualProfit > targetProfit ? 'exceeded' : 'perfect';
+        } else if (actualProfit > 0) {
+          performance = 'below';
+        } else {
+          performance = 'below';
+        }
+      }
+      
       days.push({
         date: new Date(currentDate),
         dateStr: currentDate.toLocaleDateString('en-US', { 
@@ -181,8 +217,12 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         lotSize: lotSize,
         targetProfit: targetProfit,
         actualProfit: actualProfit,
+        plDiff: plDiff,
+        performance: performance,
         status: status,
         isToday: isToday,
+        hasTransaction: !!transactionsByDate[dateKey],
+        transactionAmount: transactionsByDate[dateKey] || 0,
       });
       
       // Add profit to running balance for next day's calculation
