@@ -246,6 +246,8 @@ export const WebSocketProvider = ({ children }) => {
     markAllAsRead,
     clearNotifications,
     reconnect: connect,
+    loading,
+    refetch: fetchNotifications,
   };
 
   return (
