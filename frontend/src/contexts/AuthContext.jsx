@@ -253,8 +253,12 @@ export const AuthProvider = ({ children }) => {
     return user?.allowed_dashboards;
   }, [user, simulatedView]);
 
+  // Get token from storage
+  const token = storage.get('token');
+
   const value = {
     user,
+    token,
     loading,
     login,
     register,
