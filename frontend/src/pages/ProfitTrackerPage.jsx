@@ -74,19 +74,40 @@ const addBusinessDays = (date, days) => {
   return result;
 };
 
-// Common holidays (can be expanded)
+// Common holidays (Merin non-trading days)
 const isHoliday = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  
+  // Holiday list - add more as needed
   const holidays = [
-    // US Holidays
-    { month: 0, day: 1 },   // New Year's Day
-    { month: 0, day: 2 },   // New Year's Day observed
-    { month: 6, day: 4 },   // Independence Day
-    { month: 11, day: 25 }, // Christmas
-    { month: 11, day: 26 }, // Christmas observed
-    // Add more as needed
+    // 2025 holidays
+    { year: 2025, month: 11, day: 25 },  // Christmas
+    { year: 2025, month: 11, day: 26 },  // Boxing Day
+    { year: 2025, month: 11, day: 31 },  // New Year's Eve
+    // 2026 holidays
+    { year: 2026, month: 0, day: 1 },    // New Year's Day
+    { year: 2026, month: 0, day: 2 },    // New Year Holiday
+    // Generic annual holidays (checked every year)
+    // Note: These are fallback - prefer year-specific dates above
   ];
   
-  return holidays.some(h => h.month === date.getMonth() && h.day === date.getDate());
+  // Check year-specific holidays first
+  const isYearSpecificHoliday = holidays.some(h => 
+    h.year === year && h.month === month && h.day === day
+  );
+  
+  if (isYearSpecificHoliday) return true;
+  
+  // Generic annual holidays (applied to all years not covered above)
+  const genericHolidays = [
+    { month: 0, day: 1 },   // New Year's Day
+    { month: 11, day: 25 }, // Christmas
+    { month: 11, day: 26 }, // Boxing Day
+  ];
+  
+  return genericHolidays.some(h => h.month === month && h.day === day);
 };
 
 // Check if date is a trading day (weekday and not holiday)
