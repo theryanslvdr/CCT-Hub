@@ -1,0 +1,93 @@
+{
+  "summary": "Iteration 46 - Lot Size and Streak Calculation Bug Fixes. All 14 backend tests passed. Frontend tests verified: 1) Daily Projection table correctly recalculates LOT Size based on running balance (Balance ÷ 980), 2) P/L Diff is calculated as (actual_profit - recalculated_target_profit), 3) Streak API returns correct streak count (9 days), 4) Holidays are properly defined in backend (HOLIDAYS set) and frontend (isHoliday function, OnboardingWizard HOLIDAYS Set).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_46_lot_size_streak_fixes.py",
+    "/app/test_reports/pytest/pytest_iteration_46.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend streak calculation (server.py lines 1338-1427): Correctly implements HOLIDAYS set with Christmas (Dec 25), Boxing Day (Dec 26), New Year's Eve (Dec 31), New Year's Day (Jan 1), and Jan 2. The is_trading_day() function checks both weekends and holidays.",
+    "Frontend isHoliday function (ProfitTrackerPage.jsx lines 77-111): Properly defines year-specific holidays and generic annual holidays. Uses JavaScript month indexing (0-11).",
+    "Frontend generateDailyProjectionForMonth (ProfitTrackerPage.jsx lines 119-262): Correctly recalculates LOT size based on running balance using formula: truncateTo2Decimals(runningBalance / 980). Target profit is calculated as lotSize * 15.",
+    "OnboardingWizard holidays (OnboardingWizard.jsx lines 26-34): HOLIDAYS Set includes all required dates in 'YYYY-MM-DD' format.",
+    "Trade History vs Daily Projection: Trade History shows stored LOT sizes from when trades were logged, while Daily Projection shows recalculated LOT sizes based on running balance. This is the expected behavior."
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_46_lot_size_streak_fixes.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "100% (all UI tests passed)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "None - used existing test data",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Bug fixes verified: 1) Streak calculation now skips holidays (Christmas, Boxing Day, New Year) in addition to weekends - HOLIDAYS set defined in backend server.py lines 1343-1351. 2) Daily Projection table recalculates LOT Size based on running balance (Balance ÷ 980), not using stored values from trade logs. 3) Withdrawals (negative amounts in DB) are correctly applied to balance calculations. 4) P/L Difference is calculated as (actual_profit - recalculated_target_profit). 5) OnboardingWizard skips holidays when generating trading days list.",
+  "features_tested": {
+    "streak_api": {
+      "status": "PASS",
+      "details": "GET /api/trade/streak returns streak=9, streak_type='trading', total_trades=30. Streak calculation correctly skips weekends and holidays."
+    },
+    "daily_projection_table": {
+      "status": "PASS",
+      "details": "Daily Projection - January 2026 shows recalculated LOT sizes based on running balance. Example: Jan 5 Balance $12,978.90 → LOT 13.24, Jan 16 Balance $18,738.19 → LOT 19.12."
+    },
+    "lot_size_calculation": {
+      "status": "PASS",
+      "details": "LOT Size formula verified: floor((balance / 980) * 100) / 100. Current LOT Size 19.32 matches Balance $18,941.87 ÷ 980."
+    },
+    "pl_diff_calculation": {
+      "status": "PASS",
+      "details": "P/L Diff correctly shows difference between actual profit and recalculated target profit. Green for positive, red for negative."
+    },
+    "holiday_handling": {
+      "status": "PASS",
+      "details": "Holidays defined in backend HOLIDAYS set, frontend isHoliday function, and OnboardingWizard HOLIDAYS Set. Includes: Christmas (Dec 25), Boxing Day (Dec 26), New Year's Eve (Dec 31), New Year's Day (Jan 1), Jan 2."
+    },
+    "withdrawal_handling": {
+      "status": "PASS",
+      "details": "Withdrawals endpoint returns list with negative amounts. Withdrawal simulation correctly calculates 3% Merin fee."
+    },
+    "trade_history": {
+      "status": "PASS",
+      "details": "Trade History shows stored LOT sizes from when trades were logged. Streak badge shows '9 streak'."
+    }
+  },
+  "api_tests": {
+    "POST /api/auth/login": "PASS - Master admin login works",
+    "GET /api/trade/streak": "PASS - Returns streak=9, streak_type='trading', total_trades=30",
+    "GET /api/profit/summary": "PASS - Returns account_value=$18,941.87, total_trades=30",
+    "GET /api/profit/deposits": "PASS - Returns deposit list",
+    "GET /api/profit/withdrawals": "PASS - Returns withdrawals with negative amounts",
+    "GET /api/trade/logs": "PASS - Returns trade history with LOT sizes",
+    "POST /api/profit/calculate-exit": "PASS - Returns correct exit value (LOT × 15)",
+    "POST /api/profit/simulate-withdrawal": "PASS - Returns correct fee calculation (3% Merin fee)",
+    "GET /api/profit/onboarding-status": "PASS - Returns onboarding_completed=true",
+    "GET /api/trade/active-signal": "PASS - Returns active SELL signal for MOIL10"
+  },
+  "ui_tests": {
+    "login_flow": "PASS - Master admin can login successfully",
+    "dashboard_display": "PASS - Shows Account Value $18,941.87, LOT SIZE 19.33, PROJECTED DAILY $289.93",
+    "profit_tracker_navigation": "PASS - Can navigate to Profit Tracker page",
+    "monthly_table_tab": "PASS - Monthly Table tab shows yearly projections with expandable months",
+    "daily_projection_modal": "PASS - Daily View shows table with Date, Balance Before, LOT Size, Target Profit, Actual Profit, P/L Diff columns",
+    "trade_monitor_page": "PASS - Shows Current LOT Size 19.32, Projected Exit Value $289.80, Streak 9",
+    "trade_history_table": "PASS - Shows trade history with stored LOT sizes and P/L Diff"
+  },
+  "test_date": "2026-01-16T23:00:00Z"
+}
