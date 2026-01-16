@@ -62,4 +62,5 @@ __all__ = [
     "notify_user_transaction_status",
     "notify_trade_signal",
     "notify_system_announcement",
+    "set_websocket_database",
 ]
