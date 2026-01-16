@@ -81,13 +81,15 @@ async def get_user_financial_summary(
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
+    # Calculate total deposits (positive amounts only)
     total_deposits = sum(
         d.get("amount", 0) for d in deposits 
-        if d.get("type") not in ["profit", "withdrawal"] and not d.get("is_withdrawal")
+        if d.get("amount", 0) > 0 and d.get("type") not in ["profit"]
     )
+    # Calculate total withdrawals (negative amounts - take absolute value)
     total_withdrawals = sum(
         abs(d.get("amount", 0)) for d in deposits 
-        if d.get("type") == "withdrawal" or d.get("is_withdrawal")
+        if d.get("amount", 0) < 0 or d.get("is_withdrawal")
     )
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_projected = sum(t.get("projected_profit", 0) for t in trades)
@@ -98,7 +100,9 @@ async def get_user_financial_summary(
         # For licensees, total_deposits is the starting amount
         total_deposits = license_info.get("starting_amount", 0)
     else:
-        account_value = round(total_deposits - total_withdrawals + total_profit, 2)
+        # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
+        net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
+        account_value = round(net_deposits + total_profit, 2)
     
     return {
         "total_deposits": round(total_deposits, 2),
