@@ -912,18 +912,11 @@ export const ProfitTrackerPage = () => {
 
   // Reset handlers
   const handleResetConfirm = () => {
-    setResetStep('newBalance');
+    setResetStep('password');
   };
 
   const handleResetNewBalance = () => {
-    if (!newAccountValue || parseFloat(newAccountValue) < 0) {
-      toast.error('Please enter a valid account value');
-      return;
-    }
-    if (!resetReason.trim()) {
-      toast.error('Please provide a reason for the reset');
-      return;
-    }
+    // This step is now handled by the onboarding wizard
     setResetStep('password');
   };
 
