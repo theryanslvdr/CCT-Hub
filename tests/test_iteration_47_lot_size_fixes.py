@@ -347,10 +347,14 @@ class TestLotSizeCalculationFixes:
         calculated_account_value = round(net_deposits + total_profit, 2)
         
         api_account_value = summary["account_value"]
+        api_total_deposits = summary["total_deposits"]
+        api_total_profit = summary["total_actual_profit"]
         
         print(f"✓ Account Value Verification:")
         print(f"  Net Deposits (sum of all amounts): ${net_deposits}")
+        print(f"  API Total Deposits: ${api_total_deposits}")
         print(f"  Total Profit (from trades): ${total_profit}")
+        print(f"  API Total Profit: ${api_total_profit}")
         print(f"  Calculated Account Value: ${calculated_account_value}")
         print(f"  API Account Value: ${api_account_value}")
         
