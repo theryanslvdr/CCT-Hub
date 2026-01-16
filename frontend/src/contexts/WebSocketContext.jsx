@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const WebSocketContext = createContext(null);
 
@@ -15,6 +18,7 @@ export const useWebSocket = () => {
       markAllAsRead: () => {},
       clearNotifications: () => {},
       reconnect: () => {},
+      loading: false,
     };
   }
   return context;
@@ -25,14 +29,36 @@ export const WebSocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const pingIntervalRef = useRef(null);
   const connectFnRef = useRef(null);
 
+  // Fetch past notifications from API
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    
+    setLoading(true);
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { limit: 50 }
+      });
+      
+      const data = response.data;
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unread_count || 0);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
   // Handle incoming notification
   const handleNotification = useCallback((notification) => {
-    // Add to notifications list
+    // Add to notifications list (at the beginning)
     setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50
     setUnreadCount(prev => prev + 1);
 
