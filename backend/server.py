@@ -5372,6 +5372,44 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
         logger.error(f"WebSocket error for user {user_id}: {e}")
         websocket_manager.disconnect(websocket, user_id, role)
 
+# Add a second WebSocket endpoint under /api/ for ingress routing
+@app.websocket("/api/ws/{user_id}")
+async def api_websocket_endpoint(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint for real-time notifications (via /api/ route)"""
+    # Get user info from token in query param
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=4001)
+        return
+    
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("sub") != user_id:
+            await websocket.close(code=4003)
+            return
+        role = payload.get("role", "member")
+    except jwt.ExpiredSignatureError:
+        await websocket.close(code=4002)
+        return
+    except jwt.InvalidTokenError:
+        await websocket.close(code=4001)
+        return
+    
+    await websocket_manager.connect(websocket, user_id, role)
+    
+    try:
+        while True:
+            # Keep connection alive and handle incoming messages
+            data = await websocket.receive_text()
+            # Handle ping/pong for keepalive
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(websocket, user_id, role)
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id}: {e}")
+        websocket_manager.disconnect(websocket, user_id, role)
+
 @api_router.get("/ws/status")
 async def get_websocket_status(user: dict = Depends(require_admin)):
     """Get WebSocket connection statistics (admin only)"""
