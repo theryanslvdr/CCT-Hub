@@ -11,6 +11,33 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 50 (2026-01-16) - Lot Size Calculation Synchronization Fix ✅
+
+#### Bug Fix: Account Value & LOT Size Calculation ✅
+- **Issue**: Discrepancy between Trade History (20.67), Daily Projection (19.12), and Dashboard (19.32) LOT sizes
+- **Root Cause**:
+  1. `calculate_account_value` was using separate deposit/withdrawal logic, but withdrawals already have NEGATIVE amounts in DB
+  2. `DepositResponse` model was missing `is_withdrawal` and `type` fields
+  3. `/profit/withdrawals` endpoint wasn't returning records with negative amounts (only `is_withdrawal: True`)
+- **Fix**:
+  1. Simplified `calculate_account_value`: `net_deposits = sum(all_deposit_amounts) + total_profit` (negative amounts ARE withdrawals)
+  2. Added `is_withdrawal` and `type` fields to `DepositResponse` model
+  3. Updated `/profit/withdrawals` to use `$or: [is_withdrawal: True, amount: {$lt: 0}]`
+- **Files Modified**: 
+  - `utils/calculations.py` (calculate_account_value, get_user_financial_summary)
+  - `server.py` (DepositResponse model, withdrawals endpoint)
+
+#### Clarification: Expected LOT Size Differences ✅
+After fixing, the system now correctly shows:
+- **Dashboard LOT (19.32)**: Based on CURRENT account value ($18,941.87)
+- **Daily Projection LOT (19.12)**: Based on "Balance Before" each day's trade ($18,738.19)
+- **Trade History LOT (stored values)**: Historical values from when trades were logged
+
+**This is EXPECTED BEHAVIOR** - different views show different points in time:
+- Dashboard = NOW
+- Daily Projection = START of each trading day
+- Trade History = WHEN the trade was made
+
 ### Session 49 (2026-01-16) - Lot Size & Streak Calculation Fixes ✅
 
 #### Bug Fix 1: Daily Projection Wrong Lot Sizes ✅
