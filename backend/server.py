@@ -28,7 +28,7 @@ from services import (
     send_email, get_license_invite_email, get_admin_notification_email,
     upload_file, upload_profile_picture, upload_deposit_screenshot,
     websocket_manager, notify_admins_deposit_request, notify_admins_withdrawal_request,
-    notify_user_transaction_status, notify_trade_signal
+    notify_user_transaction_status, notify_trade_signal, set_websocket_database
 )
 
 ROOT_DIR = Path(__file__).parent
