@@ -118,11 +118,11 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     // Get WebSocket URL from backend URL
-    // The WebSocket endpoint is NOT prefixed with /api - it's directly on /ws/
+    // The WebSocket endpoint is at /api/ws/ to work with ingress routing
     const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
     const wsProtocol = backendUrl.startsWith('https') ? 'wss' : 'ws';
     const wsHost = backendUrl.replace(/^https?:\/\//, '');
-    const wsUrl = `${wsProtocol}://${wsHost}/ws/${user.id}?token=${token}`;
+    const wsUrl = `${wsProtocol}://${wsHost}/api/ws/${user.id}?token=${token}`;
 
     try {
       const ws = new WebSocket(wsUrl);
