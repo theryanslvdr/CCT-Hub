@@ -22,10 +22,28 @@ const MIN_START_DATE = new Date(2025, 11, 1); // December 1, 2025
 // Minimum deposit date (a week before December 1, 2025)
 const MIN_DEPOSIT_DATE = new Date(2025, 10, 24); // November 24, 2025
 
-// Check if a date is a trading day (Mon-Fri)
+// Holiday list (Merin non-trading days)
+const HOLIDAYS = new Set([
+  // 2025 holidays
+  '2025-12-25',  // Christmas
+  '2025-12-26',  // Boxing Day
+  '2025-12-31',  // New Year's Eve
+  // 2026 holidays
+  '2026-01-01',  // New Year's Day
+  '2026-01-02',  // New Year Holiday
+]);
+
+// Check if a date is a holiday
+const isHoliday = (date) => {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  return HOLIDAYS.has(dateKey);
+};
+
+// Check if a date is a trading day (Mon-Fri and not a holiday)
 const isTradingDay = (date) => {
   const day = date.getDay();
-  return day !== 0 && day !== 6; // Not Sunday (0) or Saturday (6)
+  if (day === 0 || day === 6) return false; // Weekend
+  return !isHoliday(date);
 };
 
 // Get trading days between two dates
