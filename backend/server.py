@@ -1338,6 +1338,38 @@ async def update_trade_time_entered(
 @trade_router.get("/streak")
 async def get_trade_streak(user: dict = Depends(get_current_user)):
     """Calculate current streak of consecutive trading days (regardless of profit/loss)"""
+    # Define known holidays (Merin non-trading days)
+    # These are dates when the market is closed
+    HOLIDAYS = {
+        # 2025 holidays
+        (2025, 12, 25),  # Christmas
+        (2025, 12, 26),  # Boxing Day
+        (2025, 12, 31),  # New Year's Eve
+        # 2026 holidays  
+        (2026, 1, 1),    # New Year's Day
+        (2026, 1, 2),    # New Year Holiday
+        # Add more holidays as needed
+    }
+    
+    def is_trading_day(d):
+        """Check if a date is a trading day (not weekend, not holiday)"""
+        # Skip weekends
+        if d.weekday() >= 5:  # Saturday=5, Sunday=6
+            return False
+        # Skip holidays
+        if (d.year, d.month, d.day) in HOLIDAYS:
+            return False
+        return True
+    
+    def get_previous_trading_day(d):
+        """Get the previous trading day, skipping weekends and holidays"""
+        prev = d - timedelta(days=1)
+        attempts = 0
+        while not is_trading_day(prev) and attempts < 14:  # Look back up to 2 weeks
+            prev = prev - timedelta(days=1)
+            attempts += 1
+        return prev if attempts < 14 else None
+    
     # Get all trades ordered by date descending
     trades = await db.trade_logs.find(
         {"user_id": user["id"]}, 
@@ -1348,7 +1380,7 @@ async def get_trade_streak(user: dict = Depends(get_current_user)):
         return {"streak": 0, "streak_type": None, "total_trades": 0}
     
     # Calculate streak based on consecutive trading days
-    # A streak counts consecutive days where the user traded, regardless of profit/loss
+    # A streak counts consecutive TRADING days where the user traded
     streak = 0
     last_trade_date = None
     
@@ -1372,15 +1404,11 @@ async def get_trade_streak(user: dict = Depends(get_current_user)):
             last_trade_date = trade_date
         else:
             # Check if this trade is on the previous trading day
-            # (Skip weekends - Saturday=5, Sunday=6)
-            expected_date = last_trade_date
-            days_back = 0
-            while days_back < 7:  # Look back up to a week
-                expected_date = expected_date - timedelta(days=1)
-                # Skip weekends
-                if expected_date.weekday() < 5:  # Monday=0 to Friday=4
-                    break
-                days_back += 1
+            expected_date = get_previous_trading_day(last_trade_date)
+            
+            if expected_date is None:
+                # Couldn't find a previous trading day
+                break
             
             if trade_date == expected_date:
                 streak += 1
