@@ -721,11 +721,8 @@ export const ProfitTrackerPage = () => {
     const startBalance = isCurrentMonth ? effectiveAccountValue : selectedMonth.startBalance;
     
     // Combine deposits and withdrawals for accurate balance tracking
-    // Deposits is positive, withdrawals are stored separately
-    const allTransactions = [
-      ...deposits.map(d => ({ ...d, is_withdrawal: false })),
-      ...withdrawals.map(w => ({ ...w, is_withdrawal: true }))
-    ];
+    // Note: Withdrawals already have NEGATIVE amounts stored in the database
+    const allTransactions = [...deposits, ...withdrawals];
     
     return generateDailyProjectionForMonth(
       startBalance,
