@@ -1125,9 +1125,15 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
 
 @profit_router.get("/withdrawals")
 async def get_withdrawals(user: dict = Depends(get_current_user)):
-    """Get all withdrawals for the current user"""
+    """Get all withdrawals for the current user (includes is_withdrawal=True OR negative amounts)"""
     withdrawals = await db.deposits.find(
-        {"user_id": user["id"], "is_withdrawal": True},
+        {
+            "user_id": user["id"], 
+            "$or": [
+                {"is_withdrawal": True},
+                {"amount": {"$lt": 0}}  # Also include negative amounts
+            ]
+        },
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
     return withdrawals
