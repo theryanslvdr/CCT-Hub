@@ -9,6 +9,14 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+# Database reference (will be set by server.py)
+_db = None
+
+def set_database(db):
+    """Set the database reference for notifications storage"""
+    global _db
+    _db = db
+
 
 class ConnectionManager:
     """Manages WebSocket connections for real-time notifications"""
@@ -64,13 +72,24 @@ class ConnectionManager:
         
         logger.info(f"WebSocket disconnected: user={user_id}")
     
-    async def send_personal_message(self, message: dict, user_id: str):
-        """Send a message to a specific user (all their connections)"""
+    async def send_notification(self, notification: dict, user_id: str, persist: bool = True):
+        """Send a notification to a specific user and optionally persist to database"""
+        # Persist to database first
+        if persist and _db is not None:
+            try:
+                notification_copy = notification.copy()
+                notification_copy["recipient_id"] = user_id
+                notification_copy["read"] = False
+                await _db.notifications.insert_one(notification_copy)
+            except Exception as e:
+                logger.error(f"Failed to persist notification: {e}")
+        
+        # Send via WebSocket if connected
         if user_id in self.active_connections:
             disconnected = []
             for websocket in self.active_connections[user_id]:
                 try:
-                    await websocket.send_json(message)
+                    await websocket.send_json(notification)
                 except Exception as e:
                     logger.error(f"Error sending to user {user_id}: {e}")
                     disconnected.append(websocket)
@@ -79,21 +98,25 @@ class ConnectionManager:
             for ws in disconnected:
                 self.active_connections[user_id].remove(ws)
     
+    async def send_personal_message(self, message: dict, user_id: str):
+        """Send a message to a specific user (all their connections) - legacy method"""
+        await self.send_notification(message, user_id, persist=True)
+    
     async def broadcast_to_admins(self, message: dict):
-        """Broadcast a message to all connected admin users"""
+        """Broadcast a message to all connected admin users and persist for each"""
         for user_id in self.admin_users.copy():
-            await self.send_personal_message(message, user_id)
+            await self.send_notification(message, user_id, persist=True)
     
     async def broadcast_to_role(self, message: dict, role: str):
         """Broadcast a message to all users with a specific role"""
         if role in self.role_connections:
             for user_id in self.role_connections[role].copy():
-                await self.send_personal_message(message, user_id)
+                await self.send_notification(message, user_id, persist=True)
     
     async def broadcast_to_all(self, message: dict):
         """Broadcast a message to all connected users"""
         for user_id in list(self.active_connections.keys()):
-            await self.send_personal_message(message, user_id)
+            await self.send_notification(message, user_id, persist=True)
     
     def get_connection_count(self) -> Dict[str, int]:
         """Get count of connections by role"""
