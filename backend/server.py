@@ -175,6 +175,8 @@ class DepositResponse(BaseModel):
     product: Optional[str] = "MOIL10"  # Made optional with default for withdrawals
     currency: str
     notes: Optional[str]
+    type: Optional[str] = None
+    is_withdrawal: Optional[bool] = False
     created_at: datetime
 
 class TradeLogCreate(BaseModel):
