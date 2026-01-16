@@ -11,6 +11,34 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 49 (2026-01-16) - Lot Size & Streak Calculation Fixes ✅
+
+#### Bug Fix 1: Daily Projection Wrong Lot Sizes ✅
+- **Issue**: Trade History and Daily Projection Table displayed wrong Lot Sizes, causing incorrect P/L Diff and Performance Data
+- **Root Cause**: 
+  1. Daily Projection was using stored lot_size from trade logs instead of recalculating based on running balance
+  2. Starting balance calculation didn't account for deposits/withdrawals
+  3. Withdrawal amounts were being double-negated (withdrawals already have negative amounts in DB)
+- **Fix**:
+  1. Refactored `generateDailyProjectionForMonth()` to ALWAYS recalculate lot size: `truncateTo2Decimals(runningBalance / 980)`
+  2. Added proper transaction tracking by date with deposits/withdrawals
+  3. Fixed withdrawal handling - just add the amount directly (already negative)
+  4. Calculate starting balance by subtracting month's profit AND transactions from current balance
+- **Files Modified**: `ProfitTrackerPage.jsx` (lines 98-220)
+
+#### Bug Fix 2: Streak Counting Holidays ✅
+- **Issue**: Streaks counted holidays as trading days (should skip them)
+- **Fix**: Added HOLIDAYS set in backend with:
+  - Christmas (Dec 25)
+  - Boxing Day (Dec 26)
+  - New Year's Eve (Dec 31)
+  - New Year's Day (Jan 1)
+  - Jan 2 (New Year Holiday)
+- **Files Modified**: 
+  - `server.py` (lines 1338-1427: HOLIDAYS set, is_trading_day(), get_previous_trading_day())
+  - `ProfitTrackerPage.jsx` (lines 77-111: isHoliday function)
+  - `OnboardingWizard.jsx` (lines 26-48: HOLIDAYS Set for trading days)
+
 ### Session 48 (2026-01-16) - Notification Engine & Reset Flow Fix ✅
 
 #### Bug Fix 1: Notification Engine "Connection Lost" ✅
