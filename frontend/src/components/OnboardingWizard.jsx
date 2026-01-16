@@ -384,9 +384,9 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
                     <User className="w-8 h-8 text-emerald-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">I&apos;m New to Merin</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">New Trader / Start Fresh</h3>
                   <p className="text-sm text-zinc-400">
-                    Just starting my trading journey. Set up a fresh tracker.
+                    {isReset ? 'Start over with a clean slate.' : 'Just starting my trading journey.'} Set up a fresh tracker.
                   </p>
                   {userType === 'new' && (
                     <div className="mt-4">
@@ -404,7 +404,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center">
                     <TrendingUp className="w-8 h-8 text-purple-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">I&apos;m Experienced</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">Experienced Trader</h3>
                   <p className="text-sm text-zinc-400">
                     Already trading on Merin. Import my trading history.
                   </p>
