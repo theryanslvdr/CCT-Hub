@@ -31,6 +31,7 @@ from .websocket_service import (
     notify_user_transaction_status,
     notify_trade_signal,
     notify_system_announcement,
+    set_database as set_websocket_database,
 )
 
 __all__ = [
