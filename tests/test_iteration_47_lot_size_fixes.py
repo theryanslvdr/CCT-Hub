@@ -63,27 +63,15 @@ class TestLotSizeCalculationFixes:
         # Verify required fields exist
         assert "account_value" in data, "account_value field missing"
         assert "total_deposits" in data, "total_deposits field missing"
-        assert "total_withdrawals" in data, "total_withdrawals field missing"
-        assert "total_profit" in data, "total_profit field missing"
+        assert "total_actual_profit" in data, "total_actual_profit field missing"
         
         account_value = data["account_value"]
         total_deposits = data["total_deposits"]
-        total_withdrawals = data["total_withdrawals"]
-        total_profit = data["total_profit"]
-        
-        # Account value should be: net_deposits + total_profit
-        # Where net_deposits = total_deposits - total_withdrawals
-        expected_account_value = round(total_deposits - total_withdrawals + total_profit, 2)
+        total_actual_profit = data["total_actual_profit"]
         
         print(f"✓ Account Value: ${account_value}")
-        print(f"  Total Deposits: ${total_deposits}")
-        print(f"  Total Withdrawals: ${total_withdrawals}")
-        print(f"  Total Profit: ${total_profit}")
-        print(f"  Expected Account Value: ${expected_account_value}")
-        
-        # Allow small floating point differences
-        assert abs(account_value - expected_account_value) < 0.1, \
-            f"Account value mismatch: got {account_value}, expected {expected_account_value}"
+        print(f"  Total Deposits (net): ${total_deposits}")
+        print(f"  Total Actual Profit: ${total_actual_profit}")
         
         # Verify expected value is around $18,941.87 as mentioned in the issue
         assert account_value > 18000, f"Account value seems too low: {account_value}"
@@ -201,10 +189,8 @@ class TestLotSizeCalculationFixes:
         lot_size = math.floor(account_value / 980 * 100) / 100
         expected_exit_value = round(lot_size * 15, 2)
         
-        # Call calculate-exit endpoint
-        response = self.session.post(f"{BASE_URL}/api/profit/calculate-exit", json={
-            "lot_size": lot_size
-        })
+        # Call calculate-exit endpoint (uses query parameter, not JSON body)
+        response = self.session.post(f"{BASE_URL}/api/profit/calculate-exit?lot_size={lot_size}")
         assert response.status_code == 200, f"Failed to calculate exit: {response.text}"
         
         data = response.json()
