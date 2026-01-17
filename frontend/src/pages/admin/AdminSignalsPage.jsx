@@ -513,6 +513,11 @@ export const AdminSignalsPage = () => {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> Active Signal
+              {activeSignal.is_official && (
+                <span className="ml-2 px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> OFFICIAL
+                </span>
+              )}
               {activeSignal.is_simulated && (
                 <span className="ml-2 px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
                   <FlaskConical className="w-3 h-3" /> SIMULATED
