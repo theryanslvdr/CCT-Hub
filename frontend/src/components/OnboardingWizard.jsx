@@ -60,7 +60,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   // Trade profits entry
   const [tradingDays, setTradingDays] = useState([]);
   const [currentTradeIndex, setCurrentTradeIndex] = useState(0);
-  const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { actualProfit: number, commission: number, lotSize: number, missed: boolean, product: string, direction: string } }
+  const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { balance: number, actualProfit: number, missed: boolean, product: string, direction: string } }
   
   // Global trading settings from backend
   const [globalHolidays, setGlobalHolidays] = useState([]);
