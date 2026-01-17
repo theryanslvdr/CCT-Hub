@@ -518,6 +518,16 @@ export const ProfitTrackerPage = () => {
   const [selectedYears, setSelectedYears] = useState(1);
   const [projectionView, setProjectionView] = useState('summary');
   
+  // Undo Trade & Holiday states
+  const [undoTradeDialogOpen, setUndoTradeDialogOpen] = useState(false);
+  const [undoTradeDate, setUndoTradeDate] = useState(null);
+  const [undoTradeLoading, setUndoTradeLoading] = useState(false);
+  const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
+  const [holidayDate, setHolidayDate] = useState(null);
+  const [holidayReason, setHolidayReason] = useState('Personal holiday');
+  const [holidayLoading, setHolidayLoading] = useState(false);
+  const [userHolidays, setUserHolidays] = useState([]);
+  
   const userTimezone = user?.timezone || 'Asia/Manila';
 
   useEffect(() => {
