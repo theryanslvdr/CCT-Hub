@@ -788,7 +788,7 @@ export const ProfitTrackerPage = () => {
       isCurrentMonth ? effectiveAccountValue : null,  // Only pass live value for current month
       globalHolidayDates
     );
-  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, deposits, withdrawals]);
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, deposits, withdrawals, globalHolidays]);
 
   // Handle opening Adjust Trade dialog for a specific date
   const handleOpenEnterAP = (day) => {
