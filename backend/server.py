@@ -180,7 +180,7 @@ class DepositResponse(BaseModel):
     created_at: datetime
 
 class TradeLogCreate(BaseModel):
-    lot_size: float
+    lot_size: Optional[float] = None  # Optional - backend will recalculate
     direction: str  # BUY or SELL
     actual_profit: float
     notes: Optional[str] = None
