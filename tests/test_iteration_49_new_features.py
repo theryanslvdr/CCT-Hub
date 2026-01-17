@@ -63,38 +63,45 @@ class TestUndoTradeByDate:
     
     def test_undo_trade_flow(self, auth_headers):
         """Test complete undo trade flow: create trade, then undo it"""
-        # First, create a trade for today
-        today = datetime.now().strftime("%Y-%m-%d")
+        # Use a past date that's unlikely to have a trade
+        # We'll use a date 60 days ago
+        test_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
         
-        # Log a trade
+        # First, try to log a missed trade for that date
         trade_response = requests.post(
-            f"{BASE_URL}/api/trade/log",
+            f"{BASE_URL}/api/trade/log-missed-trade",
             headers=auth_headers,
-            json={
+            params={
+                "date": test_date,
+                "actual_profit": 50.00,
                 "direction": "BUY",
-                "actual_profit": 100.00,
                 "notes": "Test trade for undo"
             }
         )
         
-        # If trade already exists for today, skip this test
+        # If trade already exists for this date, skip this test
         if trade_response.status_code == 400 and "already exists" in trade_response.text.lower():
-            pytest.skip("Trade already exists for today - cannot test undo flow")
+            pytest.skip(f"Trade already exists for {test_date} - cannot test undo flow")
         
         if trade_response.status_code == 200:
-            trade_id = trade_response.json().get("id")
+            trade_data = trade_response.json()
+            trade_id = trade_data.get("trade", {}).get("id")
             
             # Now undo the trade
             undo_response = requests.delete(
-                f"{BASE_URL}/api/trade/undo-by-date/{today}",
+                f"{BASE_URL}/api/trade/undo-by-date/{test_date}",
                 headers=auth_headers
             )
             
             assert undo_response.status_code == 200
             data = undo_response.json()
             assert data.get("message") == "Trade undone successfully"
-            assert data.get("trade_date") == today
+            assert data.get("trade_date") == test_date
+            # The trade_id should match what we created
             assert data.get("trade_id") == trade_id
+        else:
+            # If we couldn't create a trade, just verify the endpoint works
+            pytest.skip(f"Could not create test trade: {trade_response.status_code} - {trade_response.text}")
 
 
 class TestUserHolidays:
