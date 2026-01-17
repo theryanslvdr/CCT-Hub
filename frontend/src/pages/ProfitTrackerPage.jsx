@@ -868,20 +868,6 @@ export const ProfitTrackerPage = () => {
     }
   };
 
-  // Load global holidays on mount
-  const loadUserHolidays = async () => {
-    try {
-      const response = await tradeAPI.getHolidays();
-      setUserHolidays(response.data.holidays || []);
-    } catch (error) {
-      console.error('Failed to load holidays:', error);
-    }
-  };
-
-  useEffect(() => {
-    loadUserHolidays();
-  }, []);
-
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
