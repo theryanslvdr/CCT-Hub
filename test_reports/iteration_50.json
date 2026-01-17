@@ -1,0 +1,110 @@
+{
+  "summary": "Iteration 50 - Undo/Holiday Buttons in Onboarding Wizard and Global Holidays API Testing Complete. All 13 backend API tests passed. Frontend verified: Undo and Holiday buttons are ONLY in OnboardingWizard component, NOT in Daily Projection table.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Profit Tracker - Projection Vision chart",
+        "issues": ["Console warning about chart width/height being -1 - minor rendering issue that doesn't affect functionality"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_50_undo_holiday_buttons.py",
+    "/app/test_reports/pytest/pytest_iteration_50.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "OnboardingWizard.jsx: Lines 840-872 contain Undo button (data-testid='undo-missed-trade-btn') and Holiday button (data-testid='mark-holiday-btn') with TreePine icon",
+    "OnboardingWizard.jsx: Undo button appears when currentEntry?.missed or currentEntry?.holiday is true (replacing 'I Missed This Trade' button)",
+    "OnboardingWizard.jsx: Holiday badge shows with TreePine icon when day is marked as holiday (line 777)",
+    "ProfitTrackerPage.jsx: Daily Projection table does NOT have Undo/Holiday buttons - only has 'Adjust Trade' button for missed days",
+    "Backend: Global holidays endpoints at /api/admin/global-holidays work correctly for Master Admin (GET, POST, DELETE)",
+    "Backend: User holidays endpoints at /api/trade/holidays work correctly for personal holidays"
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_50_undo_holiday_buttons.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 tests passed)",
+    "frontend": "100% (all requirements verified)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Test global holidays created for dates 60-62 days in future, then removed during cleanup",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Undo/Holiday buttons are ONLY in OnboardingWizard (Step 5 - Enter Your Trade Profits). Daily Projection table in ProfitTrackerPage does NOT have these buttons - it only has 'Adjust Trade' button for missed days. Global holidays API endpoints work correctly for Master Admin.",
+  "features_tested": {
+    "feature_1_undo_button_in_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx lines 840-859",
+      "details": "Undo button (data-testid='undo-missed-trade-btn') appears when a day is marked as missed, replacing 'I Missed This Trade' button"
+    },
+    "feature_2_holiday_button_in_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx lines 861-872",
+      "details": "TreePine holiday icon button (data-testid='mark-holiday-btn') is visible and clickable for personal holidays"
+    },
+    "feature_3_holiday_badge_in_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx lines 776-779, 828-835",
+      "details": "Holiday badge with TreePine icon shows when day is marked as holiday"
+    },
+    "feature_4_daily_projection_no_actions": {
+      "status": "PASS",
+      "location": "ProfitTrackerPage.jsx lines 2216-2364",
+      "details": "Daily Projection table does NOT have Undo/Holiday buttons - only has 'Adjust Trade' button for missed days"
+    },
+    "feature_5_global_holidays_get": {
+      "status": "PASS",
+      "endpoint": "GET /api/admin/global-holidays",
+      "details": "Returns list of global holidays for admins"
+    },
+    "feature_6_global_holidays_post": {
+      "status": "PASS",
+      "endpoint": "POST /api/admin/global-holidays",
+      "details": "Master Admin can add global holidays with date and reason"
+    },
+    "feature_7_global_holidays_delete": {
+      "status": "PASS",
+      "endpoint": "DELETE /api/admin/global-holidays/{date}",
+      "details": "Master Admin can remove global holidays"
+    }
+  },
+  "api_tests": {
+    "GET /api/admin/global-holidays": "PASS - Returns list of global holidays",
+    "POST /api/admin/global-holidays": "PASS - Adds global holiday (Master Admin only)",
+    "POST /api/admin/global-holidays (invalid date)": "PASS - Returns 400 for invalid date format",
+    "POST /api/admin/global-holidays (duplicate)": "PASS - Returns 400 for duplicate date",
+    "DELETE /api/admin/global-holidays/{date}": "PASS - Removes global holiday",
+    "DELETE /api/admin/global-holidays/{date} (not found)": "PASS - Returns 404 for non-existent date",
+    "GET /api/trade/global-holidays": "PASS - Any authenticated user can view global holidays",
+    "GET /api/trade/holidays": "PASS - Returns user's personal holidays",
+    "POST /api/trade/holidays": "PASS - Adds personal holiday",
+    "DELETE /api/trade/holidays/{date}": "PASS - Removes personal holiday",
+    "Authentication tests": "PASS - All endpoints require authentication"
+  },
+  "code_verification": {
+    "onboarding_wizard_buttons": {
+      "undo_button": "Line 846: data-testid='undo-missed-trade-btn'",
+      "holiday_button": "Line 868: data-testid='mark-holiday-btn'",
+      "tree_pine_icon": "Lines 777, 831, 870: TreePine icon for holiday"
+    },
+    "profit_tracker_page": {
+      "no_undo_button": "Verified: No 'undo-missed-trade-btn' data-testid",
+      "no_holiday_button": "Verified: No 'mark-holiday-btn' data-testid",
+      "adjust_trade_only": "Lines 2296-2326: Only 'Adjust Trade' button for missed days"
+    }
+  },
+  "test_date": "2026-01-17T04:50:00Z"
+}
