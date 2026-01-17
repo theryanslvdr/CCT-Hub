@@ -99,13 +99,22 @@ export const AdminSettingsPage = () => {
   const [holidaysLoading, setHolidaysLoading] = useState(false);
   const [selectedHolidayMonth, setSelectedHolidayMonth] = useState(new Date());
   const [savingHoliday, setSavingHoliday] = useState(false);
+  
+  // Trading products state
+  const [tradingProducts, setTradingProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
+  const [savingProduct, setSavingProduct] = useState(false);
 
   useEffect(() => {
     loadSettings();
     loadEmailTemplates();
     loadEmailHistory();
-    loadGlobalHolidays();
-  }, []);
+    if (isMasterAdmin) {
+      loadGlobalHolidays();
+      loadTradingProducts();
+    }
+  }, [isMasterAdmin]);
 
   // Apply settings to document
   useEffect(() => {
