@@ -763,12 +763,15 @@ export const ProfitTrackerPage = () => {
     // Note: Withdrawals already have NEGATIVE amounts stored in the database
     const allTransactions = [...deposits, ...withdrawals];
     
+    // Pass effectiveAccountValue as liveAccountValue to synchronize today's balance
+    // with the live dashboard value
     return generateDailyProjectionForMonth(
       startBalance,
       selectedMonth.monthDate,
       tradeLogs,
       activeSignal,
-      allTransactions
+      allTransactions,
+      isCurrentMonth ? effectiveAccountValue : null  // Only pass live value for current month
     );
   }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, deposits, withdrawals]);
 
