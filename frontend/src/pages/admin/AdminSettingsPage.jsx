@@ -693,10 +693,10 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* Branding Tab */}
-        <TabsContent value="branding" className="mt-6">
+        {activeTab === 'branding' && (
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
@@ -823,10 +823,10 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* UI Customization Tab */}
-        <TabsContent value="ui" className="mt-6 space-y-6">
+        {activeTab === 'ui' && (
           {/* Login Page Settings */}
           <Card className="glass-card">
             <CardHeader>
@@ -943,10 +943,10 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* Integrations Tab */}
-        <TabsContent value="integrations" className="mt-6 space-y-6">
+        {activeTab === 'integrations' && (
           {/* Emailit */}
           <Card className="glass-card">
             <CardHeader>
@@ -1158,10 +1158,10 @@ export const AdminSettingsPage = () => {
               </div>
             </div>
           </div>
-        </TabsContent>
+        )}
 
         {/* Custom Links Tab */}
-        <TabsContent value="links" className="mt-6 space-y-6">
+        {activeTab === 'links' && (
           {/* Registration Link */}
           <Card className="glass-card">
             <CardHeader>
@@ -1279,10 +1279,10 @@ export const AdminSettingsPage = () => {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
+        )}
 
         {/* Email Templates Tab */}
-        <TabsContent value="emails" className="mt-6">
+        {activeTab === 'emails' && (
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
@@ -1668,10 +1668,10 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* Global Holidays Tab */}
-        <TabsContent value="holidays" className="mt-6 space-y-6">
+        {activeTab === 'holidays' && (
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
@@ -1782,10 +1782,10 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
         {/* Maintenance Tab */}
-        <TabsContent value="maintenance" className="mt-6 space-y-6">
+        {activeTab === 'maintenance' && (
           {/* Maintenance Mode Card */}
           <Card className={`glass-card ${settings.maintenance_mode ? 'border-amber-500/50' : ''}`}>
             <CardHeader>
@@ -2002,7 +2002,7 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
       </Tabs>
     </div>
   );
