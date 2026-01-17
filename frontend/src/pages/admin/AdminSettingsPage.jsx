@@ -1792,6 +1792,7 @@ export const AdminSettingsPage = () => {
 
         {/* Maintenance Tab */}
         {activeTab === 'maintenance' && (
+          <div className="space-y-6">
           {/* Maintenance Mode Card */}
           <Card className={`glass-card ${settings.maintenance_mode ? 'border-amber-500/50' : ''}`}>
             <CardHeader>
