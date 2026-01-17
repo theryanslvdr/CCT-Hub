@@ -12,7 +12,7 @@ import { format, addDays, isWeekend, isBefore, isAfter, startOfDay, eachDayOfInt
 import { 
   ChevronRight, ChevronLeft, User, Calendar as CalendarIcon, 
   DollarSign, ArrowDownCircle, ArrowUpCircle, Check, Loader2,
-  Sparkles, TrendingUp, Plus, Trash2, Save, X, RotateCcw, TreePine
+  Sparkles, TrendingUp, Plus, Trash2, Save, X, RotateCcw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { profitAPI, tradeAPI } from '@/lib/api';
