@@ -778,13 +778,15 @@ export const ProfitTrackerPage = () => {
     
     // Pass effectiveAccountValue as liveAccountValue to synchronize today's balance
     // with the live dashboard value
+    const globalHolidayDates = new Set(globalHolidays.map(h => h.date));
     return generateDailyProjectionForMonth(
       startBalance,
       selectedMonth.monthDate,
       tradeLogs,
       activeSignal,
       allTransactions,
-      isCurrentMonth ? effectiveAccountValue : null  // Only pass live value for current month
+      isCurrentMonth ? effectiveAccountValue : null,  // Only pass live value for current month
+      globalHolidayDates
     );
   }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, deposits, withdrawals]);
 
