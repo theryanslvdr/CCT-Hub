@@ -1214,8 +1214,8 @@ export const ProfitTrackerPage = () => {
   
   const monthlyProjection = useMemo(() => {
     const globalHolidayDates = new Set(globalHolidays.map(h => h.date));
-    return generateMonthlyProjection(effectiveAccountValue, tradeLogs, globalHolidayDates);
-  }, [effectiveAccountValue, tradeLogs, globalHolidays]);
+    return generateMonthlyProjection(effectiveAccountValue, tradeLogs, globalHolidayDates, deposits);
+  }, [effectiveAccountValue, tradeLogs, globalHolidays, deposits]);
   
   const yearlyGroupedProjection = useMemo(() => 
     groupMonthsByYear(monthlyProjection),
