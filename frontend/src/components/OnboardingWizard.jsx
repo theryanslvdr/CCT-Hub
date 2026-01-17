@@ -34,10 +34,10 @@ const STATIC_HOLIDAYS = new Set([
 ]);
 
 
-// Check if a date is a holiday
-const isHoliday = (date) => {
+// Check if a date is a static holiday (used for initial calculations before global holidays load)
+const isStaticHoliday = (date) => {
   const dateKey = format(date, 'yyyy-MM-dd');
-  return HOLIDAYS.has(dateKey);
+  return STATIC_HOLIDAYS.has(dateKey);
 };
 
 // Check if a date is a trading day (Mon-Fri and not a holiday)
