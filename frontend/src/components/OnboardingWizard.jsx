@@ -40,17 +40,17 @@ const isStaticHoliday = (date) => {
   return STATIC_HOLIDAYS.has(dateKey);
 };
 
-// Check if a date is a trading day (Mon-Fri and not a holiday)
-const isTradingDay = (date) => {
+// Check if a date is a trading day (Mon-Fri and not a static holiday)
+const isStaticTradingDay = (date) => {
   const day = date.getDay();
   if (day === 0 || day === 6) return false; // Weekend
-  return !isHoliday(date);
+  return !isStaticHoliday(date);
 };
 
-// Get trading days between two dates
-const getTradingDays = (startDate, endDate) => {
+// Get trading days between two dates (using static holidays only - component version uses global holidays)
+const getStaticTradingDays = (startDate, endDate) => {
   const days = eachDayOfInterval({ start: startDate, end: endDate });
-  return days.filter(isTradingDay);
+  return days.filter(isStaticTradingDay);
 };
 
 // Format currency
