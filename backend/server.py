@@ -5120,8 +5120,12 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 if entry.date in tx_by_date:
                     running_balance += tx_by_date[entry.date]
                 
-                # Calculate lot size and projected profit
-                lot_size = round(running_balance / 980, 2)
+                # Use user-entered balance if provided, otherwise use running balance
+                # This ensures Trade History matches Daily Projection when users enter custom balances
+                effective_balance = entry.balance if entry.balance else running_balance
+                
+                # Calculate lot size and projected profit from effective balance
+                lot_size = round(effective_balance / 980, 2)
                 projected_profit = round(lot_size * 15, 2)
                 actual_profit = entry.actual_profit or 0
                 profit_difference = round(actual_profit - projected_profit, 2)
@@ -5138,11 +5142,16 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 trade_id = str(uuid.uuid4())
                 trade_date = datetime.strptime(entry.date, "%Y-%m-%d").replace(hour=12, minute=0, second=0, tzinfo=timezone.utc)
                 
+                # Get product and direction from entry or use defaults
+                product = getattr(entry, 'product', 'MOIL10') or 'MOIL10'
+                direction = getattr(entry, 'direction', 'BUY') or 'BUY'
+                
                 trade_log = {
                     "id": trade_id,
                     "user_id": user["id"],
                     "lot_size": lot_size,
-                    "direction": "BUY",  # Default direction for onboarding
+                    "direction": direction,
+                    "product": product,
                     "projected_profit": projected_profit,
                     "actual_profit": actual_profit,
                     "profit_difference": profit_difference,
