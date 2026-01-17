@@ -387,6 +387,27 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     }
   };
   
+  // Handle restart - clear all wizard data and start fresh
+  const handleRestart = () => {
+    // Clear all state
+    setCurrentStep(1);
+    setUserType(null);
+    setStartDate(null);
+    setStartingBalance('');
+    setTransactions([]);
+    setTradeEntries({});
+    setTradingDays([]);
+    setCurrentTradeIndex(0);
+    setNewTransactionAmount('');
+    setNewTransactionDate(null);
+    setNewTransactionType('deposit');
+    
+    // Clear saved progress
+    localStorage.removeItem('onboarding_wizard_progress');
+    
+    toast.success('Wizard restarted. Enter your data again.');
+  };
+  
   // Handle next step
   const handleNext = () => {
     if (currentStep === 1) {
