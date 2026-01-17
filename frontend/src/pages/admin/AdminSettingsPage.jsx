@@ -944,6 +944,7 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
+          </div>
         )}
 
         {/* Integrations Tab */}
