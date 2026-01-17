@@ -557,68 +557,101 @@ export const AdminSettingsPage = () => {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-8 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
-          <TabsTrigger 
-            value="seo" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-seo"
-          >
-            <Globe className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">SEO</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="branding" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-branding"
-          >
-            <Image className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Branding</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="ui" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-ui"
-          >
-            <Palette className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">UI</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="integrations" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-integrations"
-          >
-            <Plug className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">API</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="links" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-links"
-          >
-            <ExternalLink className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Links</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="emails" 
-            className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-emails"
-          >
-            <Mail className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Emails</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="holidays" 
-            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-holidays"
-          >
-            <TreePine className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Holidays</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="maintenance" 
-            className="data-[state=active]:bg-amber-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
-            data-testid="tab-maintenance"
-          >
-            <Wrench className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Maint.</span>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* SEO & Meta Tab */}
-        <TabsContent value="seo" className="mt-6">
+      {/* Sidebar + Content Layout */}
+      <div className="flex gap-6">
+        {/* Sidebar Navigation */}
+        <div className="w-56 flex-shrink-0">
+          <div className="sticky top-4 space-y-1 bg-zinc-900/50 rounded-lg border border-zinc-800 p-2">
+            {/* Regular Settings */}
+            <button
+              onClick={() => setActiveTab('seo')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'seo' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-seo"
+            >
+              <Globe className="w-4 h-4" /> SEO & Meta
+            </button>
+            <button
+              onClick={() => setActiveTab('branding')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'branding' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-branding"
+            >
+              <Image className="w-4 h-4" /> Branding
+            </button>
+            <button
+              onClick={() => setActiveTab('ui')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'ui' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-ui"
+            >
+              <Palette className="w-4 h-4" /> UI Settings
+            </button>
+            <button
+              onClick={() => setActiveTab('integrations')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'integrations' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-integrations"
+            >
+              <Plug className="w-4 h-4" /> API Keys
+            </button>
+            <button
+              onClick={() => setActiveTab('links')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'links' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-links"
+            >
+              <ExternalLink className="w-4 h-4" /> Links
+            </button>
+            <button
+              onClick={() => setActiveTab('emails')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'emails' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-emails"
+            >
+              <Mail className="w-4 h-4" /> Emails
+            </button>
+            <button
+              onClick={() => setActiveTab('maintenance')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'maintenance' ? 'bg-amber-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-maintenance"
+            >
+              <Wrench className="w-4 h-4" /> Maintenance
+            </button>
+            
+            {/* Master Admin Only Section */}
+            {isMasterAdmin && (
+              <>
+                <div className="my-3 border-t border-zinc-700" />
+                <p className="px-3 py-1 text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+                  <Crown className="w-3 h-3" /> Master Admin
+                </p>
+                <button
+                  onClick={() => setActiveTab('trading')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    activeTab === 'trading' ? 'bg-emerald-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  }`}
+                  data-testid="tab-trading"
+                >
+                  <TreePine className="w-4 h-4" /> Global Trading
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Content Area */}
+        <div className="flex-1 min-w-0">
+          {/* SEO & Meta */}
+          {activeTab === 'seo' && (
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
