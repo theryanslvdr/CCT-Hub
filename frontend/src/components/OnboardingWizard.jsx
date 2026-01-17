@@ -198,13 +198,22 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       }
     }
     
-    // Add profits from previous days
+    // Add profits and commissions from previous days
     for (let i = 0; i < dayIndex; i++) {
       const prevDay = tradingDays[i];
       const dateKey = format(prevDay, 'yyyy-MM-dd');
       const entry = tradeEntries[dateKey];
-      if (entry && !entry.missed && entry.actualProfit) {
-        balance += parseFloat(entry.actualProfit) || 0;
+      if (entry && !entry.missed) {
+        // If user set a custom LOT size, calculate balance from that LOT
+        if (entry.lotSize) {
+          // Use the balance from custom LOT for next day's calculation
+          const customBalance = calculateBalanceFromLot(entry.lotSize);
+          // Add actual profit and commission on top
+          balance = customBalance + (parseFloat(entry.actualProfit) || 0) + (parseFloat(entry.commission) || 0);
+        } else {
+          // Standard calculation: add profit and commission
+          balance += (parseFloat(entry.actualProfit) || 0) + (parseFloat(entry.commission) || 0);
+        }
       }
     }
     
