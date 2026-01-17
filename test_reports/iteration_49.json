@@ -1,0 +1,123 @@
+{
+  "summary": "Iteration 49 - Three New Features Testing Complete. All 20 backend API tests passed. Frontend UI verified: Undo Trade button, Holiday button, and Official Trading Signal toggle all working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Profit Tracker - Projection Vision chart",
+        "issues": ["Console warning about chart width/height being -1 - minor rendering issue that doesn't affect functionality"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_49_new_features.py",
+    "/app/test_reports/pytest/pytest_iteration_49.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Feature 1 (Undo Trade): DELETE /api/trade/undo-by-date/{date} correctly deletes trade and stores audit trail in reset_trades collection",
+    "Feature 2 (User Holidays): GET/POST/DELETE /api/trade/holidays CRUD operations work correctly with proper validation",
+    "Feature 3 (Official Signal): is_official field properly handled in TradingSignalCreate/Update models and persisted in database",
+    "Frontend: Daily Projection table correctly shows Undo button for completed trades and Holiday button for missed/future days",
+    "Frontend: Admin Signals page correctly shows Official Trading Signal toggle in create/edit dialogs and OFFICIAL badge on active signal"
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_49_new_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Test holiday created for date 30 days in future, then removed during cleanup",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Three new features fully tested and working: 1) Undo Trade by Date endpoint and UI button, 2) User Holidays CRUD endpoints and UI button, 3) Official Trading Signal toggle in Admin Signals. All backend APIs return correct responses. Frontend Daily Projection table shows Actions column with Undo/Holiday buttons based on trade status.",
+  "features_tested": {
+    "feature_1_undo_trade": {
+      "status": "PASS",
+      "backend_tests": [
+        "DELETE /api/trade/undo-by-date/{date} - Invalid date format returns 400",
+        "DELETE /api/trade/undo-by-date/{date} - Non-existent trade returns 404",
+        "DELETE /api/trade/undo-by-date/{date} - Successfully undoes trade and returns 200"
+      ],
+      "frontend_tests": [
+        "Undo button visible in Daily Projection table for completed trades",
+        "Undo button has correct styling and placement in Actions column"
+      ]
+    },
+    "feature_2_user_holidays": {
+      "status": "PASS",
+      "backend_tests": [
+        "GET /api/trade/holidays - Returns list of user holidays",
+        "POST /api/trade/holidays - Invalid date returns 400",
+        "POST /api/trade/holidays - Successfully adds holiday",
+        "POST /api/trade/holidays - Duplicate holiday returns 400",
+        "DELETE /api/trade/holidays/{date} - Successfully removes holiday",
+        "DELETE /api/trade/holidays/{date} - Non-existent holiday returns 404"
+      ],
+      "frontend_tests": [
+        "Holiday button visible in Daily Projection table for missed/future days",
+        "Holiday button has correct styling and placement in Actions column"
+      ]
+    },
+    "feature_3_official_signal": {
+      "status": "PASS",
+      "backend_tests": [
+        "POST /api/admin/signals - Creates signal with is_official=true",
+        "POST /api/admin/signals - Creates signal with is_official=false",
+        "POST /api/admin/signals - Creates signal without is_official (defaults to false)",
+        "PUT /api/admin/signals/{id} - Updates is_official field",
+        "GET /api/trade/active-signal - Returns is_official field in response"
+      ],
+      "frontend_tests": [
+        "Official Trading Signal toggle visible in Create Signal dialog",
+        "Official Trading Signal toggle visible in Edit Signal dialog",
+        "OFFICIAL badge visible on active signal when is_official=true"
+      ]
+    },
+    "authentication_tests": {
+      "status": "PASS",
+      "tests": [
+        "All new endpoints require authentication (return 401/403 without token)"
+      ]
+    }
+  },
+  "api_tests": {
+    "DELETE /api/trade/undo-by-date/{date}": "PASS - All scenarios tested",
+    "GET /api/trade/holidays": "PASS - Returns user holidays list",
+    "POST /api/trade/holidays": "PASS - Creates holiday with validation",
+    "DELETE /api/trade/holidays/{date}": "PASS - Removes holiday",
+    "POST /api/admin/signals (is_official)": "PASS - Creates signal with official flag",
+    "PUT /api/admin/signals/{id} (is_official)": "PASS - Updates official flag"
+  },
+  "ui_tests": {
+    "daily_projection_table": {
+      "status": "PASS",
+      "details": "Actions column visible with Undo button for completed trades, Holiday button for missed/future days, Adjust Trade button for missed days"
+    },
+    "admin_signals_create_dialog": {
+      "status": "PASS",
+      "details": "Official Trading Signal toggle visible with description text"
+    },
+    "admin_signals_edit_dialog": {
+      "status": "PASS",
+      "details": "Official Trading Signal toggle visible in edit form"
+    },
+    "active_signal_badge": {
+      "status": "PASS",
+      "details": "OFFICIAL badge displayed on active signal card when is_official=true"
+    }
+  },
+  "test_date": "2026-01-17T04:19:00Z"
+}
