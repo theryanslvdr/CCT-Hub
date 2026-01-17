@@ -1284,6 +1284,7 @@ export const AdminSettingsPage = () => {
               </CardContent>
             </Card>
           )}
+          </div>
         )}
 
         {/* Email Templates Tab */}
