@@ -856,22 +856,12 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                       </div>
                     </div>
                   )}
-                  
-                  {/* Show holiday badge */}
-                  {currentEntry?.holiday && (
-                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                      <div className="flex items-center gap-2 text-emerald-400 text-sm">
-                        <TreePine className="w-4 h-4" />
-                        <span>Marked as Personal Holiday</span>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
                 <CardFooter className="flex flex-col gap-3">
                   {/* Action buttons row */}
                   <div className="flex items-center justify-between w-full gap-2">
-                    {/* Undo button - shown when entry exists (missed or holiday) */}
-                    {(currentEntry?.missed || currentEntry?.holiday) ? (
+                    {/* Undo button - shown when entry is marked as missed */}
+                    {currentEntry?.missed ? (
                       <Button
                         variant="outline"
                         onClick={handleUndoMissedTrade}
@@ -890,18 +880,6 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                         <X className="w-4 h-4 mr-2" /> I Missed This Trade
                       </Button>
                     )}
-                    
-                    {/* Holiday tree icon button */}
-                    <Button
-                      variant="ghost"
-                      onClick={handleMarkAsHoliday}
-                      className="h-10 w-10 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-                      disabled={currentEntry?.holiday || currentEntry?.actualProfit !== undefined}
-                      title="Mark as Personal Holiday"
-                      data-testid="mark-holiday-btn"
-                    >
-                      <TreePine className="w-5 h-5" />
-                    </Button>
                   </div>
                   
                   {/* Navigation row */}
@@ -915,7 +893,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                       <Button 
                         onClick={handleNextTrade}
                         className="btn-primary"
-                        disabled={!currentEntry || (!currentEntry.missed && !currentEntry.holiday && currentEntry.actualProfit === undefined)}
+                        disabled={!currentEntry || (!currentEntry.missed && currentEntry.actualProfit === undefined)}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
