@@ -2003,7 +2003,206 @@ export const AdminSettingsPage = () => {
             </CardContent>
           </Card>
         )}
-      </Tabs>
+
+          {/* Global Trading Settings (Master Admin Only) */}
+          {activeTab === 'trading' && isMasterAdmin && (
+            <div className="space-y-6">
+              {/* Trading Products Card */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-blue-400" /> 
+                    Trading Products
+                  </CardTitle>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Manage the list of tradeable products available to all users.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add new product */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newProductName}
+                      onChange={(e) => setNewProductName(e.target.value.toUpperCase())}
+                      placeholder="Enter product name (e.g., BTCUSD)"
+                      className="input-dark flex-1"
+                      data-testid="new-product-input"
+                    />
+                    <Button
+                      onClick={handleAddProduct}
+                      disabled={savingProduct || !newProductName.trim()}
+                      className="btn-primary gap-2"
+                      data-testid="add-product-btn"
+                    >
+                      {savingProduct ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {/* Products list */}
+                  {productsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {tradingProducts.map((product) => (
+                        <div 
+                          key={product.id}
+                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                            product.is_active 
+                              ? 'bg-zinc-900/50 border-zinc-700' 
+                              : 'bg-zinc-900/30 border-zinc-800 opacity-60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`font-mono text-lg ${product.is_active ? 'text-white' : 'text-zinc-500'}`}>
+                              {product.name}
+                            </span>
+                            {!product.is_active && (
+                              <span className="text-xs bg-zinc-700 text-zinc-400 px-2 py-0.5 rounded">Disabled</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleToggleProduct(product)}
+                              className={`h-8 ${product.is_active ? 'text-amber-400 hover:bg-amber-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                            >
+                              {product.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleRemoveProduct(product.id)}
+                              className="h-8 text-red-400 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Global Holidays Card */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <TreePine className="w-5 h-5 text-emerald-400" /> 
+                    Global Trading Holidays
+                  </CardTitle>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Set market holidays that apply to ALL users. Click on a date to toggle it as a holiday.
+                    These holidays will also be excluded from the onboarding wizard.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Calendar with holiday picker */}
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="flex-1">
+                      <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
+                        <Calendar
+                          mode="single"
+                          selected={null}
+                          onSelect={(date) => date && toggleHoliday(date)}
+                          month={selectedHolidayMonth}
+                          onMonthChange={setSelectedHolidayMonth}
+                          className="rounded-md"
+                          modifiers={{
+                            holiday: (date) => isHoliday(date),
+                          }}
+                          modifiersClassNames={{
+                            holiday: 'bg-emerald-500/20 text-emerald-400 font-bold relative',
+                          }}
+                          components={{
+                            DayContent: ({ date }) => {
+                              const isHol = isHoliday(date);
+                              return (
+                                <div className="relative flex items-center justify-center w-full h-full">
+                                  {isHol ? (
+                                    <TreePine className="w-4 h-4 text-emerald-400" />
+                                  ) : (
+                                    date.getDate()
+                                  )}
+                                </div>
+                              );
+                            }
+                          }}
+                          disabled={savingHoliday}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Holiday list */}
+                    <div className="flex-1">
+                      <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
+                        <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                          <CalendarIcon className="w-4 h-4" /> 
+                          Scheduled Holidays ({globalHolidays.length})
+                        </h3>
+                        {holidaysLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+                          </div>
+                        ) : globalHolidays.length === 0 ? (
+                          <p className="text-zinc-500 text-sm py-4 text-center">
+                            No holidays scheduled. Click on dates in the calendar to add holidays.
+                          </p>
+                        ) : (
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {globalHolidays
+                              .sort((a, b) => new Date(a.date) - new Date(b.date))
+                              .map((holiday) => (
+                                <div 
+                                  key={holiday.id} 
+                                  className="flex items-center justify-between p-2 rounded bg-zinc-800/50 hover:bg-zinc-800"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <TreePine className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-white text-sm">
+                                      {new Date(holiday.date + 'T00:00:00').toLocaleDateString('en-US', {
+                                        weekday: 'short',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                      })}
+                                    </span>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => toggleHoliday(new Date(holiday.date + 'T00:00:00'))}
+                                    className="h-6 w-6 p-0 text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
+                                    disabled={savingHoliday}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Info box */}
+                      <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                        <p className="text-emerald-400 text-sm">
+                          <TreePine className="w-4 h-4 inline mr-1" />
+                          Global holidays will automatically appear as "HOLIDAY" rows in all users' Daily Projection tables
+                          and will be skipped in the onboarding wizard.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
