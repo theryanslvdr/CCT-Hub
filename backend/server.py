@@ -1946,8 +1946,8 @@ async def add_global_holiday(
     }
 
 @admin_router.delete("/global-holidays/{date}")
-async def remove_global_holiday(date: str, user: dict = Depends(require_master_admin)):
-    """Remove a global holiday (Master Admin only)"""
+async def remove_global_holiday(date: str, user: dict = Depends(require_super_or_master_admin)):
+    """Remove a global holiday (Super Admin or Master Admin only)"""
     
     result = await db.global_holidays.delete_one({"date": date})
     
