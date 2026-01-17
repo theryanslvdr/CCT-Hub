@@ -807,7 +807,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                     </div>
                   )}
                   
-                  {currentEntry?.actualProfit !== undefined && !currentEntry?.missed && (
+                  {currentEntry?.actualProfit !== undefined && !currentEntry?.missed && !currentEntry?.holiday && (
                     <div className="p-3 rounded-lg bg-zinc-900/50">
                       <div className="flex justify-between text-sm">
                         <span className="text-zinc-400">P/L Difference:</span>
@@ -818,18 +818,56 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                       </div>
                     </div>
                   )}
-                </CardContent>
-                <CardFooter className="flex justify-between gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleMissedTrade}
-                    className="flex-1"
-                    disabled={currentEntry?.missed}
-                  >
-                    <X className="w-4 h-4 mr-2" /> I Missed This Trade
-                  </Button>
                   
-                  <div className="flex gap-2">
+                  {/* Show holiday badge */}
+                  {currentEntry?.holiday && (
+                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                      <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                        <TreePine className="w-4 h-4" />
+                        <span>Marked as Personal Holiday</span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="flex flex-col gap-3">
+                  {/* Action buttons row */}
+                  <div className="flex items-center justify-between w-full gap-2">
+                    {/* Undo button - shown when entry exists (missed or holiday) */}
+                    {(currentEntry?.missed || currentEntry?.holiday) ? (
+                      <Button
+                        variant="outline"
+                        onClick={handleUndoMissedTrade}
+                        className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        data-testid="undo-missed-trade-btn"
+                      >
+                        <RotateCcw className="w-4 h-4 mr-2" /> Undo
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={handleMissedTrade}
+                        className="flex-1"
+                        disabled={currentEntry?.actualProfit !== undefined}
+                      >
+                        <X className="w-4 h-4 mr-2" /> I Missed This Trade
+                      </Button>
+                    )}
+                    
+                    {/* Holiday tree icon button */}
+                    <Button
+                      variant="ghost"
+                      onClick={handleMarkAsHoliday}
+                      className="h-10 w-10 p-0 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                      disabled={currentEntry?.holiday || currentEntry?.actualProfit !== undefined}
+                      title="Mark as Personal Holiday"
+                      data-testid="mark-holiday-btn"
+                    >
+                      <TreePine className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  
+                  {/* Navigation row */}
+                  <div className="flex justify-end gap-2 w-full">
                     {currentTradeIndex > 0 && (
                       <Button variant="outline" onClick={handlePrevTrade}>
                         <ChevronLeft className="w-4 h-4" />
@@ -839,7 +877,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                       <Button 
                         onClick={handleNextTrade}
                         className="btn-primary"
-                        disabled={!currentEntry || (!currentEntry.missed && currentEntry.actualProfit === undefined)}
+                        disabled={!currentEntry || (!currentEntry.missed && !currentEntry.holiday && currentEntry.actualProfit === undefined)}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
