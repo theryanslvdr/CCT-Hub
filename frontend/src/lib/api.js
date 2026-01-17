@@ -115,6 +115,12 @@ export const tradeAPI = {
   logMissedTrade: (data) => api.post('/trade/log-missed-trade', null, { params: data }),
   resetTrade: (tradeId) => api.delete(`/trade/reset/${tradeId}`),
   requestTradeChange: (data) => api.post('/trade/request-change', data),
+  // Undo trade by date
+  undoTradeByDate: (date) => api.delete(`/trade/undo-by-date/${date}`),
+  // User holidays
+  getHolidays: () => api.get('/trade/holidays'),
+  addHoliday: (date, reason) => api.post('/trade/holidays', null, { params: { date, reason } }),
+  removeHoliday: (date) => api.delete(`/trade/holidays/${date}`),
 };
 
 // Admin APIs
