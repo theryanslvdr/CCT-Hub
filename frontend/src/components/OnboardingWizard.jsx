@@ -90,9 +90,57 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   const [currentTradeIndex, setCurrentTradeIndex] = useState(0);
   const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { actualProfit: number, missed: boolean, product: string, direction: string } }
   
-  // Default trade settings
-  const PRODUCTS = ['MOIL10', 'XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY'];
+  // Global trading settings from backend
+  const [globalHolidays, setGlobalHolidays] = useState([]);
+  const [tradingProducts, setTradingProducts] = useState([]);
+  
+  // Default products and directions (fallback)
+  const defaultProducts = ['MOIL10', 'XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY'];
   const DIRECTIONS = ['BUY', 'SELL'];
+  
+  // Get active products (from backend or fallback)
+  const PRODUCTS = tradingProducts.length > 0 
+    ? tradingProducts.filter(p => p.is_active).map(p => p.name) 
+    : defaultProducts;
+  
+  // Combined holidays (static + global from backend)
+  const allHolidays = new Set([
+    ...STATIC_HOLIDAYS,
+    ...globalHolidays.map(h => h.date)
+  ]);
+  
+  // Check if a date is a holiday (including global holidays)
+  const isHolidayDate = useCallback((date) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    return allHolidays.has(dateKey);
+  }, [allHolidays]);
+  
+  // Check if a date is a trading day
+  const isTradingDayCheck = useCallback((date) => {
+    const day = date.getDay();
+    if (day === 0 || day === 6) return false; // Weekend
+    return !isHolidayDate(date);
+  }, [isHolidayDate]);
+  
+  // Load global holidays and trading products
+  useEffect(() => {
+    const loadGlobalSettings = async () => {
+      try {
+        const [holidaysRes, productsRes] = await Promise.all([
+          tradeAPI.getGlobalHolidays(),
+          tradeAPI.getTradingProducts()
+        ]);
+        setGlobalHolidays(holidaysRes.data.holidays || []);
+        setTradingProducts(productsRes.data.products || []);
+      } catch (error) {
+        console.error('Failed to load global trading settings:', error);
+      }
+    };
+    
+    if (isOpen) {
+      loadGlobalSettings();
+    }
+  }, [isOpen]);
   
   // Load saved progress on mount
   useEffect(() => {
