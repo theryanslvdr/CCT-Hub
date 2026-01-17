@@ -2236,7 +2236,7 @@ export const ProfitTrackerPage = () => {
               Daily Projection - {selectedMonth?.monthName}
               {selectedMonth?.isCurrentMonth && (
                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full ml-2">
-                  {getDailyProjectionForSelectedMonth.length} Remaining Days
+                  {getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Remaining Days
                 </span>
               )}
             </DialogTitle>
