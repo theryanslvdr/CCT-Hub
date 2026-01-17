@@ -420,8 +420,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         })),
         trade_entries: Object.entries(tradeEntries).map(([dateKey, entry]) => ({
           date: dateKey,
-          actual_profit: entry.actualProfit,
-          missed: entry.missed
+          actual_profit: entry.actualProfit ? parseFloat(entry.actualProfit) : null,
+          missed: entry.missed || false,
+          balance: entry.balance ? parseFloat(entry.balance) : null,  // Include user-entered balance
+          product: entry.product || 'MOIL10',
+          direction: entry.direction || 'BUY'
         }))
       };
       
