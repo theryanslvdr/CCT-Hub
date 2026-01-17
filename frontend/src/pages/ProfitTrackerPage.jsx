@@ -2230,19 +2230,40 @@ export const ProfitTrackerPage = () => {
                     // For extended licensees: check if master admin traded on this day
                     const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
-                    // Check if this date is a user holiday or global holiday
-                    const isUserHoliday = userHolidays.some(h => h.date === day.dateKey);
+                    // Check if this date is a global holiday
+                    const isGlobalHoliday = globalHolidays.some(h => h.date === day.dateKey);
                     
                     // Determine row styling based on status
                     let rowClass = '';
-                    if (isUserHoliday) {
-                      rowClass = 'bg-amber-500/10 border-l-2 border-l-amber-500';
+                    if (isGlobalHoliday) {
+                      rowClass = 'bg-emerald-500/10 border-l-2 border-l-emerald-500';
                     } else if (day.isToday) {
                       rowClass = 'bg-blue-500/20 border-l-2 border-l-blue-500';
                     } else if (day.status === 'completed') {
                       rowClass = 'bg-emerald-500/5';
                     } else if (day.status === 'missed') {
                       rowClass = 'bg-zinc-800/30 opacity-75';
+                    }
+                    
+                    // If this is a global holiday, show special HOLIDAY row
+                    if (isGlobalHoliday) {
+                      return (
+                        <tr key={day.dateKey} className={rowClass}>
+                          <td className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <TreePine className="w-4 h-4 text-emerald-400" />
+                              {day.dateStr}
+                            </div>
+                          </td>
+                          <td colSpan={isExtendedLicensee ? 4 : 5} className="text-center">
+                            <span className="text-emerald-400 font-medium flex items-center justify-center gap-2">
+                              <TreePine className="w-4 h-4" />
+                              HOLIDAY
+                              <TreePine className="w-4 h-4" />
+                            </span>
+                          </td>
+                        </tr>
+                      );
                     }
                     
                     return (
@@ -2252,13 +2273,10 @@ export const ProfitTrackerPage = () => {
                       >
                         <td className="font-medium">
                           {day.dateStr}
-                          {isUserHoliday && (
-                            <span className="ml-2 text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">HOLIDAY</span>
-                          )}
-                          {day.isToday && !isUserHoliday && (
+                          {day.isToday && (
                             <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
                           )}
-                          {day.status === 'completed' && !day.isToday && !isUserHoliday && (
+                          {day.status === 'completed' && !day.isToday && (
                             <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">✓</span>
                           )}
                           {/* Show indicator for manually adjusted trades */}
