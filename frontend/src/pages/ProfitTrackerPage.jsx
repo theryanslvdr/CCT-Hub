@@ -228,6 +228,21 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         }
       }
       
+      // CRITICAL: For the current day, always use the live account value from profitSummary
+      // This ensures synchronization between the dashboard and daily projection table
+      // Past days' balanceBefore values remain immutable (calculated from historical data)
+      const effectiveBalanceBefore = isToday && liveAccountValue !== null 
+        ? liveAccountValue 
+        : runningBalance;
+      
+      // Recalculate lot size and target profit for today based on live account value
+      const effectiveLotSize = isToday && liveAccountValue !== null 
+        ? truncateTo2Decimals(liveAccountValue / 980)
+        : lotSize;
+      const effectiveTargetProfit = isToday && liveAccountValue !== null 
+        ? truncateTo2Decimals(effectiveLotSize * 15)
+        : targetProfit;
+      
       days.push({
         date: new Date(currentDate),
         dateStr: currentDate.toLocaleDateString('en-US', { 
@@ -236,11 +251,13 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
           day: 'numeric' 
         }),
         dateKey: dateKey,
-        balanceBefore: runningBalance,
-        lotSize: lotSize,
-        targetProfit: targetProfit,
+        balanceBefore: effectiveBalanceBefore,
+        lotSize: effectiveLotSize,
+        targetProfit: effectiveTargetProfit,
         actualProfit: actualProfit,
-        plDiff: plDiff,
+        plDiff: hasTraded && actualProfit !== undefined 
+          ? truncateTo2Decimals(actualProfit - effectiveTargetProfit)
+          : null,
         performance: performance,
         status: status,
         isToday: isToday,
