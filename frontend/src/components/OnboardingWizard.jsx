@@ -296,14 +296,23 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     // Get current balance for this day to store with the entry
     const currentBalance = getBalanceForDay(currentTradeIndex);
     
+    // Process the value based on field type
+    let processedValue = value;
+    if (field === 'actualProfit') {
+      processedValue = truncateTo2Decimals(parseFloat(value) || 0);
+    } else if (field === 'balance') {
+      // Truncate balance to 2 decimals, no rounding
+      processedValue = truncateTo2Decimals(parseFloat(value) || 0);
+    }
+    
     setTradeEntries({
       ...tradeEntries,
       [dateKey]: { 
         ...currentData,
-        [field]: field === 'actualProfit' ? (parseFloat(value) || 0) : value,
+        [field]: processedValue,
         missed: false,
         // Always store the balance (use user-entered if field is 'balance', otherwise use calculated)
-        balance: field === 'balance' ? parseFloat(value) : (currentData.balance || currentBalance)
+        balance: field === 'balance' ? processedValue : (currentData.balance || truncateTo2Decimals(currentBalance))
       }
     });
   };
