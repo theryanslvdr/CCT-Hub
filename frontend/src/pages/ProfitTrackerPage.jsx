@@ -2428,6 +2428,55 @@ export const ProfitTrackerPage = () => {
                             )}
                           </td>
                         )}
+                        
+                        {/* Actions column - Undo Trade & Mark as Holiday */}
+                        {!isExtendedLicensee && (
+                          <td className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {/* Undo Trade button - only for completed trades */}
+                              {day.status === 'completed' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                                  onClick={() => handleOpenUndoTrade(day)}
+                                  title="Undo this trade"
+                                  data-testid={`undo-trade-${day.dateKey}`}
+                                >
+                                  <RotateCcw className="w-3 h-3 mr-1" /> Undo
+                                </Button>
+                              )}
+                              
+                              {/* Mark as Holiday button - only for missed or future days */}
+                              {(day.status === 'missed' || day.status === 'future') && !isUserHoliday && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-500/20"
+                                  onClick={() => handleOpenMarkHoliday(day)}
+                                  title="Mark as holiday"
+                                  data-testid={`mark-holiday-${day.dateKey}`}
+                                >
+                                  <Calendar className="w-3 h-3 mr-1" /> Holiday
+                                </Button>
+                              )}
+                              
+                              {/* Remove Holiday button - for user holidays */}
+                              {isUserHoliday && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs text-zinc-400 hover:text-zinc-300 hover:bg-zinc-500/20"
+                                  onClick={() => handleRemoveHoliday(day.dateKey)}
+                                  title="Remove holiday"
+                                  data-testid={`remove-holiday-${day.dateKey}`}
+                                >
+                                  <X className="w-3 h-3 mr-1" /> Remove
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
