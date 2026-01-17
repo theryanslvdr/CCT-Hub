@@ -1365,25 +1365,28 @@ async def update_trade_time_entered(
 @trade_router.get("/streak")
 async def get_trade_streak(user: dict = Depends(get_current_user)):
     """Calculate current streak of consecutive trading days (regardless of profit/loss)"""
-    # Define known holidays (Merin non-trading days)
-    # These are dates when the market is closed
-    HOLIDAYS = {
-        # 2025 holidays
-        (2025, 12, 25),  # Christmas
-        (2025, 12, 26),  # Boxing Day
-        (2025, 12, 31),  # New Year's Eve
-        # 2026 holidays  
-        (2026, 1, 1),    # New Year's Day
-        (2026, 1, 2),    # New Year Holiday
-        # Add more holidays as needed
-    }
+    
+    # Fetch global holidays from database instead of hardcoded list
+    global_holidays_cursor = db.global_holidays.find({}, {"_id": 0, "date": 1})
+    global_holidays_list = await global_holidays_cursor.to_list(1000)
+    HOLIDAYS = set()
+    for h in global_holidays_list:
+        try:
+            # Parse date string to tuple (year, month, day)
+            date_str = h.get("date", "")
+            if date_str:
+                parts = date_str.split("-")
+                if len(parts) == 3:
+                    HOLIDAYS.add((int(parts[0]), int(parts[1]), int(parts[2])))
+        except:
+            continue
     
     def is_trading_day(d):
         """Check if a date is a trading day (not weekend, not holiday)"""
         # Skip weekends
         if d.weekday() >= 5:  # Saturday=5, Sunday=6
             return False
-        # Skip holidays
+        # Skip holidays - holidays are treated like weekends (don't break streak)
         if (d.year, d.month, d.day) in HOLIDAYS:
             return False
         return True
@@ -1408,6 +1411,7 @@ async def get_trade_streak(user: dict = Depends(get_current_user)):
     
     # Calculate streak based on consecutive trading days
     # A streak counts consecutive TRADING days where the user traded
+    # Holidays and weekends are skipped (don't break the streak)
     streak = 0
     last_trade_date = None
     
