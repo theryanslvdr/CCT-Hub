@@ -1789,6 +1789,7 @@ export const AdminSettingsPage = () => {
               </div>
             </CardContent>
           </Card>
+          </div>
         )}
 
         {/* Maintenance Tab */}
