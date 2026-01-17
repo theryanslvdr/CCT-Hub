@@ -409,17 +409,31 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
 };
 
 // Group months by year for accordion
-// Year 0 = "History" (past months with trade data)
+// Year 0 = "History" (past months with trade data) - should appear FIRST
 const groupMonthsByYear = (monthlyData) => {
   const years = {};
   monthlyData.forEach(m => {
-    const yearKey = m.year === 0 ? 'History' : m.year;
+    const yearKey = m.year === 0 ? 'History' : `Year ${m.year}`;
     if (!years[yearKey]) {
       years[yearKey] = [];
     }
     years[yearKey].push(m);
   });
-  return years;
+  
+  // Return as array of [yearKey, months] sorted so History comes first
+  const sortedYears = Object.entries(years).sort(([a], [b]) => {
+    if (a === 'History') return -1;
+    if (b === 'History') return 1;
+    return parseInt(a.replace('Year ', '')) - parseInt(b.replace('Year ', ''));
+  });
+  
+  // Convert back to object but maintain order
+  const orderedYears = {};
+  sortedYears.forEach(([key, value]) => {
+    orderedYears[key] = value;
+  });
+  
+  return orderedYears;
 };
 
 // Generate projection for specific periods
