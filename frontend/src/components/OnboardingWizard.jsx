@@ -1072,6 +1072,15 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                 <ChevronLeft className="w-4 h-4 mr-2" /> Back
               </Button>
             )}
+            {currentStep > 1 && (
+              <Button 
+                variant="ghost" 
+                onClick={handleRestart} 
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" /> Restart
+              </Button>
+            )}
             <Button variant="ghost" onClick={handleSaveForLater} className="text-zinc-400">
               <Save className="w-4 h-4 mr-2" /> Save & Continue Later
             </Button>
