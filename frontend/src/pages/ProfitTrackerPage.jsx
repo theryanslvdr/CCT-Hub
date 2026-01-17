@@ -2225,17 +2225,24 @@ export const ProfitTrackerPage = () => {
               </p>
               <div className="max-h-[500px] overflow-y-auto">
                 <Accordion type="multiple" className="space-y-2">
-                  {Object.entries(yearlyGroupedProjection).map(([year, months]) => (
+                  {Object.entries(yearlyGroupedProjection).map(([yearKey, months]) => (
                     <AccordionItem 
-                      key={year} 
-                      value={`year-${year}`}
+                      key={yearKey} 
+                      value={`year-${yearKey}`}
                       className="border border-zinc-800 rounded-lg overflow-hidden"
                     >
                       <AccordionTrigger className="px-4 py-3 bg-zinc-900/50 hover:bg-zinc-900 text-white">
                         <div className="flex items-center justify-between w-full pr-4">
-                          <span className="font-medium">Year {year}</span>
+                          <span className="font-medium">
+                            {yearKey === 'History' ? (
+                              <span className="text-amber-400">📜 History</span>
+                            ) : yearKey}
+                          </span>
                           <span className="font-mono text-emerald-400">
-                            {formatLargeNumber(months[months.length - 1]?.endBalance || 0)}
+                            {months[0]?.isPastMonth 
+                              ? `${months.length} month${months.length > 1 ? 's' : ''} with data`
+                              : formatLargeNumber(months[months.length - 1]?.endBalance || 0)
+                            }
                           </span>
                         </div>
                       </AccordionTrigger>
@@ -2244,8 +2251,8 @@ export const ProfitTrackerPage = () => {
                           <thead>
                             <tr>
                               <th>Month</th>
-                              <th>Trading Days</th>
-                              <th>Final Balance</th>
+                              <th>{months[0]?.isPastMonth ? 'Trades' : 'Trading Days'}</th>
+                              <th>{months[0]?.isPastMonth ? 'Total Profit' : 'Final Balance'}</th>
                               <th>Actions</th>
                             </tr>
                           </thead>
@@ -2258,8 +2265,18 @@ export const ProfitTrackerPage = () => {
                                     <span className="ml-2 text-xs text-blue-400">(Current)</span>
                                   )}
                                 </td>
-                                <td className="font-mono text-zinc-400">{m.tradingDays} days</td>
-                                <td className="font-mono text-white">{formatLargeNumber(m.endBalance)}</td>
+                                <td className="font-mono text-zinc-400">
+                                  {m.isPastMonth 
+                                    ? `${m.tradesCount || 0} trades`
+                                    : `${m.tradingDays} days`
+                                  }
+                                </td>
+                                <td className="font-mono text-white">
+                                  {m.isPastMonth 
+                                    ? <span className={m.totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>{formatLargeNumber(m.totalProfit || 0)}</span>
+                                    : formatLargeNumber(m.endBalance)
+                                  }
+                                </td>
                                 <td>
                                   <Button
                                     size="sm"
