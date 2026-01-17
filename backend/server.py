@@ -2083,6 +2083,7 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
         "profit_points": data.profit_points,
         "notes": data.notes,
         "is_active": True,
+        "is_official": data.is_official,  # Official trading signal flag
         "is_simulated": False,
         "created_by": user["id"],
         "created_at": datetime.now(timezone.utc).isoformat()
@@ -2113,6 +2114,8 @@ async def update_signal(signal_id: str, data: TradingSignalUpdate, user: dict = 
             # Deactivate all other signals first
             await db.trading_signals.update_many({"id": {"$ne": signal_id}}, {"$set": {"is_active": False}})
         update_data["is_active"] = data.is_active
+    if data.is_official is not None:
+        update_data["is_official"] = data.is_official
     
     if update_data:
         await db.trading_signals.update_one({"id": signal_id}, {"$set": update_data})
