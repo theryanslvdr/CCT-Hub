@@ -772,6 +772,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                     {currentEntry?.missed && (
                       <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Missed</span>
                     )}
+                    {currentEntry?.holiday && (
+                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded flex items-center gap-1">
+                        <TreePine className="w-3 h-3" /> Holiday
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -790,7 +795,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                     </div>
                   </div>
                   
-                  {!currentEntry?.missed && (
+                  {!currentEntry?.missed && !currentEntry?.holiday && (
                     <div>
                       <Label className="text-zinc-300">Actual Profit (USDT)</Label>
                       <div className="relative mt-2">
