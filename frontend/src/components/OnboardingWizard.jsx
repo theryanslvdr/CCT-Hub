@@ -312,7 +312,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     toast.success('Entry cleared - you can now re-enter this trade');
   };
   
-  // Handle next trade entry
+  // Handle next trade entry - IMPORTANT: Save balance before moving to next day
   const handleNextTrade = () => {
     const day = tradingDays[currentTradeIndex];
     const dateKey = format(day, 'yyyy-MM-dd');
@@ -321,6 +321,19 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     if (!entry || (!entry.missed && entry.actualProfit === undefined)) {
       toast.error('Please enter your actual profit or mark as missed');
       return;
+    }
+    
+    // CRITICAL: Always save the balance for this day before moving to next
+    // This ensures the lot_size is calculated correctly when submitted
+    if (!entry.missed && !entry.balance) {
+      const currentBalance = getBalanceForDay(currentTradeIndex);
+      setTradeEntries(prev => ({
+        ...prev,
+        [dateKey]: {
+          ...prev[dateKey],
+          balance: currentBalance
+        }
+      }));
     }
     
     if (currentTradeIndex < tradingDays.length - 1) {
