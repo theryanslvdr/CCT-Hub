@@ -99,15 +99,18 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   const DIRECTIONS = ['BUY', 'SELL'];
   
   // Get active products (from backend or fallback)
-  const PRODUCTS = tradingProducts.length > 0 
-    ? tradingProducts.filter(p => p.is_active).map(p => p.name) 
-    : defaultProducts;
+  const PRODUCTS = useMemo(() => 
+    tradingProducts.length > 0 
+      ? tradingProducts.filter(p => p.is_active).map(p => p.name) 
+      : defaultProducts,
+    [tradingProducts]
+  );
   
-  // Combined holidays (static + global from backend)
-  const allHolidays = new Set([
+  // Combined holidays (static + global from backend) - memoized to prevent infinite loops
+  const allHolidays = useMemo(() => new Set([
     ...STATIC_HOLIDAYS,
     ...globalHolidays.map(h => h.date)
-  ]);
+  ]), [globalHolidays]);
   
   // Check if a date is a holiday (including global holidays)
   const isHolidayDate = useCallback((date) => {
