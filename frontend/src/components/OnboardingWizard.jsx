@@ -236,6 +236,36 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     }
   };
   
+  // Handle undo missed trade (clear the entry)
+  const handleUndoMissedTrade = () => {
+    const day = tradingDays[currentTradeIndex];
+    if (!day) return;
+    
+    const dateKey = format(day, 'yyyy-MM-dd');
+    const newEntries = { ...tradeEntries };
+    delete newEntries[dateKey];
+    setTradeEntries(newEntries);
+    toast.success('Entry cleared - you can now re-enter this trade');
+  };
+  
+  // Handle marking day as holiday
+  const handleMarkAsHoliday = () => {
+    const day = tradingDays[currentTradeIndex];
+    if (!day) return;
+    
+    const dateKey = format(day, 'yyyy-MM-dd');
+    setTradeEntries({
+      ...tradeEntries,
+      [dateKey]: { holiday: true, actualProfit: 0 }
+    });
+    
+    // Move to next day
+    if (currentTradeIndex < tradingDays.length - 1) {
+      setCurrentTradeIndex(currentTradeIndex + 1);
+    }
+    toast.success('Day marked as personal holiday');
+  };
+  
   // Handle next trade entry
   const handleNextTrade = () => {
     const day = tradingDays[currentTradeIndex];
