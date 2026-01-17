@@ -35,6 +35,7 @@ const formatMoney = (amount) => {
 
 // Calculate LOT size and projected profit
 const calculateLotSize = (balance) => Math.floor((balance / 980) * 100) / 100;
+const calculateBalanceFromLot = (lotSize) => Math.round(lotSize * 980 * 100) / 100;
 const calculateProjectedProfit = (lotSize) => Math.floor(lotSize * 15 * 100) / 100;
 
 export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false }) => {
