@@ -2009,6 +2009,7 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
+          </div>
         )}
 
           {/* Global Trading Settings (Master Admin Only) */}
