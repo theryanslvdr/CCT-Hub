@@ -87,7 +87,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   // Trade profits entry
   const [tradingDays, setTradingDays] = useState([]);
   const [currentTradeIndex, setCurrentTradeIndex] = useState(0);
-  const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { actualProfit: number, missed: boolean } }
+  const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { actualProfit: number, missed: boolean, product: string, direction: string } }
+  
+  // Default trade settings
+  const PRODUCTS = ['MOIL10', 'XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY'];
+  const DIRECTIONS = ['BUY', 'SELL'];
   
   // Load saved progress on mount
   useEffect(() => {
