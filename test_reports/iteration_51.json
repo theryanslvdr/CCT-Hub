@@ -1,0 +1,120 @@
+{
+  "summary": "Iteration 51 - Product/Direction Selection in Onboarding and Global Holidays Features Testing Complete. All 14 backend API tests passed. Frontend verified: Product dropdown (MOIL10, XAUUSD, etc.) and Direction dropdown (BUY, SELL) are present in Onboarding Wizard Step 5. Holiday button (TreePine icon) is correctly REMOVED from Onboarding Wizard. Settings page has Holidays tab with calendar date picker and scheduled holidays list. Global holidays (Jan 20, 2026 and Apr 17, 2026) are configured and show tree icons in calendar.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_51_product_direction_holidays.py",
+    "/app/test_reports/pytest/pytest_iteration_51.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "OnboardingWizard.jsx: Lines 93-94 define PRODUCTS=['MOIL10','XAUUSD','EURUSD','GBPUSD','USDJPY'] and DIRECTIONS=['BUY','SELL']",
+    "OnboardingWizard.jsx: Lines 793-827 render Product and Direction Select dropdowns in Step 5",
+    "OnboardingWizard.jsx: TreePine/Holiday button has been REMOVED - only 'I Missed This Trade' button remains",
+    "AdminSettingsPage.jsx: Lines 541-547 define Holidays tab trigger with TreePine icon",
+    "AdminSettingsPage.jsx: Lines 1577-1689 render Holidays tab content with Calendar and scheduled holidays list",
+    "ProfitTrackerPage.jsx: Lines 2233-2267 render global holiday rows with TreePine icons and 'HOLIDAY' text",
+    "Backend server.py: Lines 1906-1974 define global holidays endpoints for admin and user access"
+  ],
+  "updated_files": [
+    "/app/tests/test_iteration_51_product_direction_holidays.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "100% (all requirements verified)"
+  },
+  "test_credentials": {
+    "master_admin": {
+      "email": "iam@ryansalvador.com",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Global holidays exist for Jan 20, 2026 and Apr 17, 2026",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Product and Direction dropdowns are in OnboardingWizard Step 5 (Enter Your Trade Profits). Holiday button (TreePine) has been removed from OnboardingWizard - holidays are now admin-only via Settings > Holidays tab. Global holidays API endpoints work correctly for Super/Master Admin.",
+  "features_tested": {
+    "feature_1_product_dropdown_in_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx lines 793-808",
+      "details": "Product dropdown with options: MOIL10, XAUUSD, EURUSD, GBPUSD, USDJPY"
+    },
+    "feature_2_direction_dropdown_in_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx lines 809-827",
+      "details": "Direction dropdown with options: BUY, SELL"
+    },
+    "feature_3_holiday_button_removed_from_onboarding": {
+      "status": "PASS",
+      "location": "OnboardingWizard.jsx",
+      "details": "TreePine/Holiday button has been REMOVED - only 'I Missed This Trade' button remains"
+    },
+    "feature_4_settings_holidays_tab": {
+      "status": "PASS",
+      "location": "AdminSettingsPage.jsx lines 541-547, 1577-1689",
+      "details": "Holidays tab exists with calendar date picker and scheduled holidays list"
+    },
+    "feature_5_calendar_date_picker_with_tree_icons": {
+      "status": "PASS",
+      "location": "AdminSettingsPage.jsx lines 1595-1623",
+      "details": "Calendar shows tree icons for holiday dates, clicking toggles holiday status"
+    },
+    "feature_6_scheduled_holidays_list_with_delete": {
+      "status": "PASS",
+      "location": "AdminSettingsPage.jsx lines 1627-1675",
+      "details": "Shows scheduled holidays (Jan 20, 2026 and Apr 17, 2026) with delete buttons"
+    },
+    "feature_7_global_holidays_api": {
+      "status": "PASS",
+      "endpoints": [
+        "GET /api/admin/global-holidays",
+        "POST /api/admin/global-holidays",
+        "DELETE /api/admin/global-holidays/{date}",
+        "GET /api/trade/global-holidays"
+      ],
+      "details": "Super Admin and Master Admin can add/remove global holidays"
+    },
+    "feature_8_daily_projection_holiday_row": {
+      "status": "PASS",
+      "location": "ProfitTrackerPage.jsx lines 2233-2267",
+      "details": "Global holidays show as 'HOLIDAY' row with tree icons in Daily Projection table"
+    }
+  },
+  "api_tests": {
+    "GET /api/admin/global-holidays": "PASS - Returns list of global holidays for admins",
+    "GET /api/trade/global-holidays": "PASS - Returns list of global holidays for users",
+    "POST /api/admin/global-holidays": "PASS - Adds global holiday (Super/Master Admin only)",
+    "POST /api/admin/global-holidays (invalid date)": "PASS - Returns 400 for invalid date format",
+    "DELETE /api/admin/global-holidays/{date}": "PASS - Removes global holiday",
+    "DELETE /api/admin/global-holidays/{date} (not found)": "PASS - Returns 404 for non-existent date",
+    "GET /api/profit/summary": "PASS - Returns profit summary",
+    "GET /api/trade/logs": "PASS - Returns trade logs",
+    "GET /api/trade/active-signal": "PASS - Returns active trading signal",
+    "GET /api/trade/holidays": "PASS - Returns user personal holidays",
+    "Authentication tests": "PASS - All endpoints require authentication"
+  },
+  "ui_verification": {
+    "onboarding_wizard_step5": {
+      "product_dropdown": "MOIL10 selected by default, dropdown arrow visible",
+      "direction_dropdown": "BUY selected by default, dropdown arrow visible",
+      "holiday_button": "NOT PRESENT (correctly removed)",
+      "missed_trade_button": "Present with X icon",
+      "actual_profit_input": "Present with $ prefix"
+    },
+    "settings_holidays_tab": {
+      "tab_visible": "Yes, with TreePine icon",
+      "calendar": "Present, showing January 2026",
+      "holiday_indicators": "Tree icons on Jan 20, 2026",
+      "scheduled_holidays_list": "Shows 2 holidays with delete buttons",
+      "info_box": "Present explaining global holidays behavior"
+    }
+  },
+  "test_date": "2026-01-17T05:18:00Z"
+}
