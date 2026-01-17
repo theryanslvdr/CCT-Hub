@@ -865,6 +865,83 @@ export const ProfitTrackerPage = () => {
     }
   };
 
+  // Undo Trade handlers
+  const handleOpenUndoTrade = (day) => {
+    setUndoTradeDate(day);
+    setUndoTradeDialogOpen(true);
+  };
+
+  const handleUndoTrade = async () => {
+    if (!undoTradeDate) return;
+    
+    setUndoTradeLoading(true);
+    try {
+      await tradeAPI.undoTradeByDate(undoTradeDate.dateKey);
+      toast.success('Trade undone successfully!');
+      setUndoTradeDialogOpen(false);
+      setUndoTradeDate(null);
+      loadData();
+    } catch (error) {
+      console.error('Failed to undo trade:', error);
+      toast.error(error.response?.data?.detail || 'Failed to undo trade');
+    } finally {
+      setUndoTradeLoading(false);
+    }
+  };
+
+  // Holiday handlers
+  const handleOpenMarkHoliday = (day) => {
+    setHolidayDate(day);
+    setHolidayReason('Personal holiday');
+    setHolidayDialogOpen(true);
+  };
+
+  const handleMarkHoliday = async () => {
+    if (!holidayDate) return;
+    
+    setHolidayLoading(true);
+    try {
+      await tradeAPI.addHoliday(holidayDate.dateKey, holidayReason);
+      toast.success('Day marked as holiday!');
+      setHolidayDialogOpen(false);
+      setHolidayDate(null);
+      setHolidayReason('Personal holiday');
+      // Reload user holidays
+      loadUserHolidays();
+      loadData();
+    } catch (error) {
+      console.error('Failed to mark holiday:', error);
+      toast.error(error.response?.data?.detail || 'Failed to mark as holiday');
+    } finally {
+      setHolidayLoading(false);
+    }
+  };
+
+  const handleRemoveHoliday = async (date) => {
+    try {
+      await tradeAPI.removeHoliday(date);
+      toast.success('Holiday removed');
+      loadUserHolidays();
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to remove holiday');
+    }
+  };
+
+  const loadUserHolidays = async () => {
+    try {
+      const response = await tradeAPI.getHolidays();
+      setUserHolidays(response.data.holidays || []);
+    } catch (error) {
+      console.error('Failed to load user holidays:', error);
+    }
+  };
+
+  // Load user holidays on mount
+  useEffect(() => {
+    loadUserHolidays();
+  }, []);
+
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
