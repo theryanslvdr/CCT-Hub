@@ -949,6 +949,7 @@ export const AdminSettingsPage = () => {
 
         {/* Integrations Tab */}
         {activeTab === 'integrations' && (
+          <div className="space-y-6">
           {/* Emailit */}
           <Card className="glass-card">
             <CardHeader>
