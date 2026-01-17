@@ -31,27 +31,38 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Location**: ONLY in Onboarding Wizard (Step 5 - Enter Trade Profits)
 - **Purpose**: Undo accidental "I Missed This Trade" clicks during onboarding
 - **UI**: Red "Undo" button replaces "I Missed This Trade" when day is marked as missed
-- **Behavior**: Clears the missed/holiday entry, allowing user to re-enter
+- **Behavior**: Clears the missed entry, allowing user to re-enter
 - **Testing**: All tests passed
 
-#### Feature: Mark as Holiday Button ✅
-- **Location**: ONLY in Onboarding Wizard (Step 5 - Enter Trade Profits)
-- **UI**: TreePine icon (emerald green) for marking personal holidays
-- **Badge**: Green "Holiday" badge with tree icon shows when day is marked
-- **Behavior**: Holiday days are excluded from projections and don't count as missed
+#### Feature: Product and Direction Selection in Onboarding ✅
+- **Location**: Onboarding Wizard Step 5 (Enter Trade Profits)
+- **Products**: MOIL10, XAUUSD, EURUSD, GBPUSD, USDJPY
+- **Directions**: BUY, SELL
+- **UI**: Two dropdown selects for each trade entry
 
-#### Feature: Global Holidays (Master Admin) ✅
+#### Feature: Global Holidays (Admin Settings) ✅
+- **Location**: Admin Settings > Holidays tab
+- **Access**: Super Admin AND Master Admin can manage
+- **UI**: 
+  - Calendar date picker - click to toggle holiday status
+  - Selected dates show **tree icon** (🌲) instead of number
+  - Scheduled holidays list with delete buttons
 - **Endpoints**: 
-  - `GET /api/admin/global-holidays` - List all global holidays
-  - `POST /api/admin/global-holidays?date=YYYY-MM-DD&reason=...` - Add global holiday
-  - `DELETE /api/admin/global-holidays/{date}` - Remove global holiday
-- **Purpose**: Master Admin can set holidays that apply to ALL users
-- **Collection**: `global_holidays` stores system-wide holidays
+  - `GET /api/admin/global-holidays` - List all global holidays (admin)
+  - `POST /api/admin/global-holidays?date=YYYY-MM-DD&reason=...` - Add
+  - `DELETE /api/admin/global-holidays/{date}` - Remove
+  - `GET /api/trade/global-holidays` - List for all users (read-only)
+- **Collection**: `global_holidays`
 
-#### NOTE: Daily Projection Table Changes
-- **Actions Column REMOVED** - Undo/Holiday buttons are NOT in the Daily Projection table
-- This is intentional - these buttons are only needed during onboarding setup
-- Only "Adjust Trade" button remains for completed trades
+#### Daily Projection Holiday Display ✅
+- Global holidays show as special **"HOLIDAY"** row:
+  - Date column shows tree icon (🌲) + date
+  - All other columns merge into centered "🌲 HOLIDAY 🌲"
+  - Row has emerald/green highlight
+
+#### NOTE: Personal Holidays REMOVED from Onboarding
+- Tree icon / holiday button is NO LONGER in Onboarding Wizard
+- Holidays are now managed globally by admins only from Settings
 
 #### Feature: Official Trading Signal Toggle ✅
 - **Backend**: Added `is_official` field to `TradingSignalCreate`, `TradingSignalUpdate`, `TradingSignalResponse` models
