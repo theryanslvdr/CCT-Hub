@@ -1755,6 +1755,143 @@ async def reset_trade(trade_id: str, user: dict = Depends(require_master_admin))
         "user_id": trade["user_id"]
     }
 
+@trade_router.delete("/undo-by-date/{date}")
+async def undo_trade_by_date(date: str, user: dict = Depends(get_current_user)):
+    """Undo/delete a trade by date - Users can undo their own trades from the Daily Projection table"""
+    
+    # Parse the date
+    try:
+        trade_date = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format. Use YYYY-MM-DD: {str(e)}")
+    
+    # Find the trade for this user on this date
+    date_start = trade_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_end = trade_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    trade = await db.trade_logs.find_one({
+        "user_id": user["id"],
+        "created_at": {
+            "$gte": date_start.isoformat(),
+            "$lte": date_end.isoformat()
+        }
+    }, {"_id": 0})
+    
+    if not trade:
+        raise HTTPException(status_code=404, detail="No trade found for this date")
+    
+    # Store in reset_trades collection for audit trail
+    reset_record = {
+        "id": str(uuid.uuid4()),
+        "original_trade": trade,
+        "reset_by": user["id"],
+        "reset_by_name": user.get("full_name", user.get("email")),
+        "reset_at": datetime.now(timezone.utc).isoformat(),
+        "reason": "User undo from Daily Projection"
+    }
+    await db.reset_trades.insert_one(reset_record)
+    
+    # Delete the trade
+    await db.trade_logs.delete_one({"id": trade["id"]})
+    
+    # Also delete any associated deposit (if trade was forwarded to profit)
+    await db.deposits.delete_many({"trade_id": trade["id"]})
+    
+    logger.info(f"Trade undone: user={user['id']}, date={date}, trade_id={trade['id']}")
+    
+    return {
+        "message": "Trade undone successfully",
+        "trade_date": date,
+        "trade_id": trade["id"]
+    }
+
+# ==================== USER HOLIDAYS ====================
+
+@trade_router.get("/holidays")
+async def get_user_holidays(user: dict = Depends(get_current_user)):
+    """Get user-specific holidays"""
+    holidays = await db.user_holidays.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("date", 1).to_list(100)
+    return {"holidays": holidays}
+
+@trade_router.post("/holidays")
+async def add_user_holiday(
+    date: str,
+    reason: Optional[str] = "Personal holiday",
+    user: dict = Depends(get_current_user)
+):
+    """Mark a date as a user-specific holiday"""
+    
+    # Parse and validate the date
+    try:
+        holiday_date = datetime.strptime(date, "%Y-%m-%d")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format. Use YYYY-MM-DD: {str(e)}")
+    
+    # Check if this date is already marked as a holiday
+    existing = await db.user_holidays.find_one({
+        "user_id": user["id"],
+        "date": date
+    })
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="This date is already marked as a holiday")
+    
+    # Check if there's already a trade logged for this date
+    date_start = holiday_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+    date_end = holiday_date.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc)
+    
+    existing_trade = await db.trade_logs.find_one({
+        "user_id": user["id"],
+        "created_at": {
+            "$gte": date_start.isoformat(),
+            "$lte": date_end.isoformat()
+        }
+    })
+    
+    if existing_trade:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot mark as holiday - a trade already exists for this date. Undo the trade first."
+        )
+    
+    # Create the holiday record
+    holiday_id = str(uuid.uuid4())
+    holiday = {
+        "id": holiday_id,
+        "user_id": user["id"],
+        "date": date,
+        "reason": reason,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.user_holidays.insert_one(holiday)
+    
+    logger.info(f"User holiday added: user={user['id']}, date={date}")
+    
+    return {
+        "message": "Holiday marked successfully",
+        "holiday": {k: v for k, v in holiday.items() if k != "_id"}
+    }
+
+@trade_router.delete("/holidays/{date}")
+async def remove_user_holiday(date: str, user: dict = Depends(get_current_user)):
+    """Remove a user-specific holiday"""
+    
+    result = await db.user_holidays.delete_one({
+        "user_id": user["id"],
+        "date": date
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Holiday not found for this date")
+    
+    logger.info(f"User holiday removed: user={user['id']}, date={date}")
+    
+    return {"message": "Holiday removed successfully", "date": date}
+
 @trade_router.post("/request-change")
 async def request_trade_change(data: TradeChangeRequest, user: dict = Depends(get_current_user)):
     """Request a change to a trade - for non-master-admin users"""
