@@ -219,6 +219,60 @@ export const AdminSettingsPage = () => {
     const dateStr = date.toISOString().split('T')[0];
     return globalHolidays.some(h => h.date === dateStr);
   };
+  
+  // Trading Products functions
+  const loadTradingProducts = async () => {
+    setProductsLoading(true);
+    try {
+      const res = await adminAPI.getTradingProducts();
+      setTradingProducts(res.data.products || []);
+    } catch (error) {
+      console.error('Failed to load trading products:', error);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+  
+  const handleAddProduct = async () => {
+    if (!newProductName.trim()) {
+      toast.error('Please enter a product name');
+      return;
+    }
+    
+    setSavingProduct(true);
+    try {
+      await adminAPI.addTradingProduct(newProductName.trim());
+      toast.success('Product added');
+      setNewProductName('');
+      loadTradingProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to add product');
+    } finally {
+      setSavingProduct(false);
+    }
+  };
+  
+  const handleRemoveProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to remove this product?')) return;
+    
+    try {
+      await adminAPI.removeTradingProduct(productId);
+      toast.success('Product removed');
+      loadTradingProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to remove product');
+    }
+  };
+  
+  const handleToggleProduct = async (product) => {
+    try {
+      await adminAPI.updateTradingProduct(product.id, { is_active: !product.is_active });
+      toast.success(`Product ${product.is_active ? 'disabled' : 'enabled'}`);
+      loadTradingProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update product');
+    }
+  };
 
   const handleSaveTemplate = async () => {
     if (!editingTemplate) return;
