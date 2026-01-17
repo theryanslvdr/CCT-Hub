@@ -1973,6 +1973,124 @@ async def get_global_holidays_for_user(user: dict = Depends(get_current_user)):
     ).sort("date", 1).to_list(100)
     return {"holidays": holidays}
 
+# ==================== TRADING PRODUCTS MANAGEMENT ====================
+
+@admin_router.get("/trading-products")
+async def get_trading_products(user: dict = Depends(require_admin)):
+    """Get all trading products"""
+    products = await db.trading_products.find({}, {"_id": 0}).sort("order", 1).to_list(50)
+    
+    # If no products exist, return default products
+    if not products:
+        default_products = [
+            {"id": str(uuid.uuid4()), "name": "MOIL10", "is_active": True, "order": 0},
+            {"id": str(uuid.uuid4()), "name": "XAUUSD", "is_active": True, "order": 1},
+            {"id": str(uuid.uuid4()), "name": "EURUSD", "is_active": True, "order": 2},
+            {"id": str(uuid.uuid4()), "name": "GBPUSD", "is_active": True, "order": 3},
+            {"id": str(uuid.uuid4()), "name": "USDJPY", "is_active": True, "order": 4},
+        ]
+        # Insert default products
+        for product in default_products:
+            product["created_at"] = datetime.now(timezone.utc).isoformat()
+            await db.trading_products.insert_one(product)
+        products = default_products
+    
+    return {"products": products}
+
+@admin_router.post("/trading-products")
+async def add_trading_product(
+    name: str,
+    user: dict = Depends(require_master_admin)
+):
+    """Add a new trading product (Master Admin only)"""
+    
+    # Check if product already exists
+    existing = await db.trading_products.find_one({"name": name.upper()})
+    if existing:
+        raise HTTPException(status_code=400, detail="Product already exists")
+    
+    # Get the highest order number
+    last_product = await db.trading_products.find_one({}, sort=[("order", -1)])
+    next_order = (last_product.get("order", 0) + 1) if last_product else 0
+    
+    product_id = str(uuid.uuid4())
+    product = {
+        "id": product_id,
+        "name": name.upper(),
+        "is_active": True,
+        "order": next_order,
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.trading_products.insert_one(product)
+    
+    logger.info(f"Trading product added: {name.upper()}, by={user['id']}")
+    
+    return {
+        "message": "Product added successfully",
+        "product": {k: v for k, v in product.items() if k != "_id"}
+    }
+
+@admin_router.delete("/trading-products/{product_id}")
+async def remove_trading_product(product_id: str, user: dict = Depends(require_master_admin)):
+    """Remove a trading product (Master Admin only)"""
+    
+    result = await db.trading_products.delete_one({"id": product_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    logger.info(f"Trading product removed: {product_id}, by={user['id']}")
+    
+    return {"message": "Product removed successfully"}
+
+@admin_router.put("/trading-products/{product_id}")
+async def update_trading_product(
+    product_id: str,
+    name: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    user: dict = Depends(require_master_admin)
+):
+    """Update a trading product (Master Admin only)"""
+    
+    product = await db.trading_products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    update_data = {}
+    if name is not None:
+        update_data["name"] = name.upper()
+    if is_active is not None:
+        update_data["is_active"] = is_active
+    
+    if update_data:
+        await db.trading_products.update_one({"id": product_id}, {"$set": update_data})
+    
+    updated = await db.trading_products.find_one({"id": product_id}, {"_id": 0})
+    
+    return {"message": "Product updated successfully", "product": updated}
+
+@trade_router.get("/trading-products")
+async def get_trading_products_for_user(user: dict = Depends(get_current_user)):
+    """Get active trading products (for any authenticated user)"""
+    products = await db.trading_products.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).sort("order", 1).to_list(50)
+    
+    # If no products exist, return default products
+    if not products:
+        products = [
+            {"id": "default-1", "name": "MOIL10", "is_active": True},
+            {"id": "default-2", "name": "XAUUSD", "is_active": True},
+            {"id": "default-3", "name": "EURUSD", "is_active": True},
+            {"id": "default-4", "name": "GBPUSD", "is_active": True},
+            {"id": "default-5", "name": "USDJPY", "is_active": True},
+        ]
+    
+    return {"products": products}
+
 @trade_router.post("/request-change")
 async def request_trade_change(data: TradeChangeRequest, user: dict = Depends(get_current_user)):
     """Request a change to a trade - for non-master-admin users"""
