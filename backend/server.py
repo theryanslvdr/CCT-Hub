@@ -1910,9 +1910,9 @@ async def get_global_holidays(user: dict = Depends(require_admin)):
 async def add_global_holiday(
     date: str,
     reason: Optional[str] = "Market holiday",
-    user: dict = Depends(require_master_admin)
+    user: dict = Depends(require_super_or_master_admin)
 ):
-    """Add a global holiday for all users (Master Admin only)"""
+    """Add a global holiday for all users (Super Admin or Master Admin only)"""
     
     # Parse and validate the date
     try:
