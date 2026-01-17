@@ -270,15 +270,21 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       product: 'MOIL10', 
       direction: 'BUY', 
       actualProfit: undefined, 
-      missed: false 
+      missed: false,
+      balance: null
     };
+    
+    // Get current balance for this day to store with the entry
+    const currentBalance = getBalanceForDay(currentTradeIndex);
     
     setTradeEntries({
       ...tradeEntries,
       [dateKey]: { 
         ...currentData,
         [field]: field === 'actualProfit' ? (parseFloat(value) || 0) : value,
-        missed: false 
+        missed: false,
+        // Always store the balance (use user-entered if field is 'balance', otherwise use calculated)
+        balance: field === 'balance' ? parseFloat(value) : (currentData.balance || currentBalance)
       }
     });
   };
