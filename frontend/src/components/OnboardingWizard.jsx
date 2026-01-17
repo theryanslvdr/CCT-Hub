@@ -780,28 +780,15 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         );
       
       case 5:
-        // Enter actual profits for each trading day
+        // Enter actual profits for each trading day - Balance is source of truth
         const currentDay = tradingDays[currentTradeIndex];
         const currentDateKey = currentDay ? format(currentDay, 'yyyy-MM-dd') : '';
         const currentEntry = tradeEntries[currentDateKey];
-        const currentBalance = getBalanceForDay(currentTradeIndex);
-        const defaultLotSize = calculateLotSize(currentBalance);
-        // Use custom LOT if set, otherwise use calculated
-        const currentLotSize = currentEntry?.lotSize ? parseFloat(currentEntry.lotSize) : defaultLotSize;
-        const currentLotBalance = currentEntry?.lotSize ? calculateBalanceFromLot(parseFloat(currentEntry.lotSize)) : currentBalance;
+        const defaultBalance = getBalanceForDay(currentTradeIndex);
+        // Use entered balance if set, otherwise use calculated default
+        const currentBalance = currentEntry?.balance ? parseFloat(currentEntry.balance) : defaultBalance;
+        const currentLotSize = calculateLotSize(currentBalance);
         const currentProjected = calculateProjectedProfit(currentLotSize);
-        
-        // Calculate commission: (Next Day Balance - Current Day Balance) - Current Day Actual Profit
-        // Commission is auto-calculated based on next day's LOT entry
-        const nextDay = tradingDays[currentTradeIndex + 1];
-        const nextDateKey = nextDay ? format(nextDay, 'yyyy-MM-dd') : '';
-        const nextEntry = tradeEntries[nextDateKey];
-        let calculatedCommission = null;
-        if (nextEntry?.lotSize && currentEntry?.actualProfit !== undefined) {
-          const nextDayBalance = calculateBalanceFromLot(parseFloat(nextEntry.lotSize));
-          const balanceDiff = nextDayBalance - currentLotBalance;
-          calculatedCommission = balanceDiff - (parseFloat(currentEntry.actualProfit) || 0);
-        }
         
         // Calculate progress
         const completedDays = Object.keys(tradeEntries).length;
@@ -810,10 +797,13 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         
         return (
           <div className="space-y-4">
-            {/* Header */}
+            {/* Header with disclaimer */}
             <div className="text-center">
-              <h2 className="text-lg font-bold text-white">Enter Your Trade Profits</h2>
-              <div className="flex items-center justify-center gap-2 mt-1">
+              <h2 className="text-lg font-bold text-white">Enter Your Daily Trades</h2>
+              <p className="text-[11px] text-zinc-500 mt-1 max-w-sm mx-auto">
+                The goal is to catch up to your current account value with granular daily trade estimates. Commissions are totaled at the end.
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-2">
                 <Progress value={progressPercent} className="h-1.5 w-32" />
                 <span className="text-xs text-zinc-500">{completedDays}/{totalDays}</span>
               </div>
@@ -831,22 +821,25 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                 </div>
                 
                 <CardContent className="p-3 space-y-3">
-                  {/* Row 1: LOT, Balance, Projected */}
+                  {/* Row 1: Balance (primary), LOT (derived), Projected */}
                   <div className="grid grid-cols-3 gap-2">
                     <div className="bg-zinc-900/50 rounded p-2">
-                      <p className="text-[10px] text-zinc-500 uppercase">LOT Size</p>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={currentEntry?.lotSize ?? defaultLotSize.toFixed(2)}
-                        onChange={(e) => handleTradeEntry('lotSize', e.target.value)}
-                        className="h-7 px-2 mt-0.5 input-dark font-mono text-purple-400 text-sm text-center"
-                        disabled={currentEntry?.missed}
-                      />
+                      <p className="text-[10px] text-zinc-500 uppercase">Balance</p>
+                      <div className="relative mt-0.5">
+                        <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={currentEntry?.balance ?? defaultBalance.toFixed(2)}
+                          onChange={(e) => handleTradeEntry('balance', e.target.value)}
+                          className="h-7 pl-5 pr-1 input-dark font-mono text-white text-sm"
+                          disabled={currentEntry?.missed}
+                        />
+                      </div>
                     </div>
                     <div className="bg-zinc-900/50 rounded p-2">
-                      <p className="text-[10px] text-zinc-500 uppercase">Balance</p>
-                      <p className="font-mono text-white text-sm mt-1">{formatMoney(currentLotBalance)}</p>
+                      <p className="text-[10px] text-zinc-500 uppercase">LOT Size</p>
+                      <p className="font-mono text-purple-400 text-sm mt-1">{currentLotSize.toFixed(2)}</p>
                     </div>
                     <div className="bg-zinc-900/50 rounded p-2">
                       <p className="text-[10px] text-zinc-500 uppercase">Projected</p>
@@ -908,23 +901,15 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                         </div>
                       </div>
                       
-                      {/* Row 3: Summary - P/L Diff and Commission */}
+                      {/* Row 3: P/L Difference */}
                       {currentEntry?.actualProfit !== undefined && (
-                        <div className="bg-zinc-900/50 rounded p-2 grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-zinc-900/50 rounded p-2 text-xs">
                           <div className="flex justify-between">
-                            <span className="text-zinc-500">P/L Diff:</span>
+                            <span className="text-zinc-500">P/L Difference:</span>
                             <span className={`font-mono ${(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? '+' : ''}
                               {formatMoney(parseFloat(currentEntry.actualProfit) - currentProjected)}
                             </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-zinc-500">Commission:</span>
-                            {calculatedCommission !== null ? (
-                              <span className="font-mono text-amber-400">{formatMoney(calculatedCommission)}</span>
-                            ) : (
-                              <span className="text-zinc-600 italic">Enter next LOT</span>
-                            )}
                           </div>
                         </div>
                       )}
