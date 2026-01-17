@@ -332,11 +332,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       const allEntered = tradingDays.every(day => {
         const dateKey = format(day, 'yyyy-MM-dd');
         const entry = tradeEntries[dateKey];
-        return entry && (entry.missed || entry.holiday || entry.actualProfit !== undefined);
+        return entry && (entry.missed || entry.actualProfit !== undefined);
       });
       
       if (!allEntered) {
-        toast.error('Please enter all trade profits or mark missed/holiday days');
+        toast.error('Please enter all trade profits or mark missed days');
         return;
       }
       
