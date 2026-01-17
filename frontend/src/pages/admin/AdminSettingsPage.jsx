@@ -827,6 +827,7 @@ export const AdminSettingsPage = () => {
 
         {/* UI Customization Tab */}
         {activeTab === 'ui' && (
+          <div className="space-y-6">
           {/* Login Page Settings */}
           <Card className="glass-card">
             <CardHeader>
