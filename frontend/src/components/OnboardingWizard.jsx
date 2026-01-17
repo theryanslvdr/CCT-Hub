@@ -181,22 +181,19 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   
   // Calculate running balance for a specific day
   const getBalanceForDay = (dayIndex) => {
-    // For experienced traders, LOT size is the source of truth
-    // Balance = LOT × 980
-    // If LOT is set for this day, use it; otherwise calculate from running balance
-    
+    // Balance-first approach: if user has entered a balance for this day, use it
     const dayDate = tradingDays[dayIndex];
     if (!dayDate) return parseFloat(startingBalance) || 0;
     
     const dateKey = format(dayDate, 'yyyy-MM-dd');
     const entry = tradeEntries[dateKey];
     
-    // If user has entered a LOT size for this day, derive balance from it
-    if (entry?.lotSize) {
-      return calculateBalanceFromLot(parseFloat(entry.lotSize));
+    // If user has entered a balance for this day, use it directly
+    if (entry?.balance) {
+      return parseFloat(entry.balance);
     }
     
-    // Otherwise, calculate running balance from start
+    // Otherwise, calculate default balance from start
     let balance = parseFloat(startingBalance) || 0;
     
     // Add deposits/withdrawals up to this day
@@ -211,18 +208,15 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       }
     }
     
-    // For days without LOT entry, use previous day's LOT balance + profit
-    // This gives a reasonable default before user enters their actual LOT
+    // For days without balance entry, use previous day's balance + profit as estimate
     for (let i = 0; i < dayIndex; i++) {
       const prevDay = tradingDays[i];
       const prevDateKey = format(prevDay, 'yyyy-MM-dd');
       const prevEntry = tradeEntries[prevDateKey];
       if (prevEntry && !prevEntry.missed) {
-        if (prevEntry.lotSize) {
-          // Previous day had a LOT, so use that as base
-          balance = calculateBalanceFromLot(parseFloat(prevEntry.lotSize));
+        if (prevEntry.balance) {
+          balance = parseFloat(prevEntry.balance);
         }
-        // Add actual profit (commission is captured in next day's LOT balance)
         balance += parseFloat(prevEntry.actualProfit) || 0;
       }
     }
