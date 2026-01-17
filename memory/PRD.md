@@ -28,19 +28,30 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Fix**: `generateDailyProjectionForMonth` now uses live account_value for today's row
 
 #### Feature: Undo Trade Button ✅
-- **Endpoint**: `DELETE /api/trade/undo-by-date/{date}`
-- **UI**: "Undo" button appears in Daily Projection table Actions column for completed trades
-- **Behavior**: Deletes trade record, stores audit trail in `reset_trades` collection
-- **Testing**: 20/20 backend tests passed
+- **Location**: ONLY in Onboarding Wizard (Step 5 - Enter Trade Profits)
+- **Purpose**: Undo accidental "I Missed This Trade" clicks during onboarding
+- **UI**: Red "Undo" button replaces "I Missed This Trade" when day is marked as missed
+- **Behavior**: Clears the missed/holiday entry, allowing user to re-enter
+- **Testing**: All tests passed
 
 #### Feature: Mark as Holiday Button ✅
+- **Location**: ONLY in Onboarding Wizard (Step 5 - Enter Trade Profits)
+- **UI**: TreePine icon (emerald green) for marking personal holidays
+- **Badge**: Green "Holiday" badge with tree icon shows when day is marked
+- **Behavior**: Holiday days are excluded from projections and don't count as missed
+
+#### Feature: Global Holidays (Master Admin) ✅
 - **Endpoints**: 
-  - `GET /api/trade/holidays` - Get user's holidays
-  - `POST /api/trade/holidays?date=YYYY-MM-DD&reason=...` - Mark a day as holiday
-  - `DELETE /api/trade/holidays/{date}` - Remove holiday
-- **UI**: "Holiday" button appears for missed/future days, "HOLIDAY" badge shown on marked days
-- **Behavior**: Holiday days are excluded from projections and don't count as missed trades
-- **Collection**: `user_holidays` stores user-specific holidays
+  - `GET /api/admin/global-holidays` - List all global holidays
+  - `POST /api/admin/global-holidays?date=YYYY-MM-DD&reason=...` - Add global holiday
+  - `DELETE /api/admin/global-holidays/{date}` - Remove global holiday
+- **Purpose**: Master Admin can set holidays that apply to ALL users
+- **Collection**: `global_holidays` stores system-wide holidays
+
+#### NOTE: Daily Projection Table Changes
+- **Actions Column REMOVED** - Undo/Holiday buttons are NOT in the Daily Projection table
+- This is intentional - these buttons are only needed during onboarding setup
+- Only "Adjust Trade" button remains for completed trades
 
 #### Feature: Official Trading Signal Toggle ✅
 - **Backend**: Added `is_official` field to `TradingSignalCreate`, `TradingSignalUpdate`, `TradingSignalResponse` models
