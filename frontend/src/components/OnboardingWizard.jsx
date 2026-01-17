@@ -784,7 +784,19 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         const defaultLotSize = calculateLotSize(currentBalance);
         // Use custom LOT if set, otherwise use calculated
         const currentLotSize = currentEntry?.lotSize ? parseFloat(currentEntry.lotSize) : defaultLotSize;
+        const currentLotBalance = currentEntry?.lotSize ? calculateBalanceFromLot(parseFloat(currentEntry.lotSize)) : currentBalance;
         const currentProjected = calculateProjectedProfit(currentLotSize);
+        
+        // Calculate commission: Next Day Balance - Current Day Balance
+        // Commission is auto-calculated based on next day's LOT entry
+        const nextDay = tradingDays[currentTradeIndex + 1];
+        const nextDateKey = nextDay ? format(nextDay, 'yyyy-MM-dd') : '';
+        const nextEntry = tradeEntries[nextDateKey];
+        let calculatedCommission = null;
+        if (nextEntry?.lotSize) {
+          const nextDayBalance = calculateBalanceFromLot(parseFloat(nextEntry.lotSize));
+          calculatedCommission = nextDayBalance - currentLotBalance;
+        }
         
         // Calculate progress
         const completedDays = Object.keys(tradeEntries).length;
@@ -792,192 +804,173 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         const progressPercent = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
         
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-white mb-2">Enter Your Trade Profits</h2>
-              <p className="text-zinc-400 text-sm">
-                Day {currentTradeIndex + 1} of {tradingDays.length}
-              </p>
-            </div>
-            
-            {/* Progress bar */}
-            <div className="max-w-lg mx-auto">
-              <Progress value={progressPercent} className="h-2" />
-              <p className="text-xs text-zinc-500 mt-1 text-center">
-                {completedDays} of {totalDays} days completed
-              </p>
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="text-center">
+              <h2 className="text-lg font-bold text-white">Enter Your Trade Profits</h2>
+              <div className="flex items-center justify-center gap-2 mt-1">
+                <Progress value={progressPercent} className="h-1.5 w-32" />
+                <span className="text-xs text-zinc-500">{completedDays}/{totalDays}</span>
+              </div>
             </div>
             
             {currentDay && (
-              <Card className="max-w-lg mx-auto glass-card">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center justify-between">
-                    <span>{format(currentDay, 'EEEE, MMMM d, yyyy')}</span>
-                    {currentEntry?.missed && (
-                      <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Missed</span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* LOT Size and Balance - Editable */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-lg bg-zinc-900/50">
-                      <Label className="text-xs text-zinc-400">LOT Size</Label>
+              <Card className="max-w-md mx-auto glass-card">
+                {/* Compact Header */}
+                <div className="px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
+                  <span className="text-white font-medium text-sm">{format(currentDay, 'EEE, MMM d, yyyy')}</span>
+                  <span className="text-xs text-zinc-500">Day {currentTradeIndex + 1}/{totalDays}</span>
+                  {currentEntry?.missed && (
+                    <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">Missed</span>
+                  )}
+                </div>
+                
+                <CardContent className="p-3 space-y-3">
+                  {/* Row 1: LOT, Balance, Projected */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-zinc-900/50 rounded p-2">
+                      <p className="text-[10px] text-zinc-500 uppercase">LOT Size</p>
                       <Input
                         type="number"
                         step="0.01"
                         value={currentEntry?.lotSize ?? defaultLotSize.toFixed(2)}
                         onChange={(e) => handleTradeEntry('lotSize', e.target.value)}
-                        className="mt-1 input-dark font-mono text-purple-400 text-center h-8"
+                        className="h-7 px-2 mt-0.5 input-dark font-mono text-purple-400 text-sm text-center"
                         disabled={currentEntry?.missed}
                       />
-                      <p className="text-xs text-zinc-500 mt-1">
-                        Balance: {formatMoney(currentEntry?.lotSize ? calculateBalanceFromLot(parseFloat(currentEntry.lotSize)) : currentBalance)}
-                      </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-zinc-900/50">
-                      <p className="text-xs text-zinc-400">Projected Profit</p>
-                      <p className="font-mono text-blue-400 text-lg mt-1">{formatMoney(currentProjected)}</p>
-                      <p className="text-xs text-zinc-500 mt-1">LOT × $15</p>
+                    <div className="bg-zinc-900/50 rounded p-2">
+                      <p className="text-[10px] text-zinc-500 uppercase">Balance</p>
+                      <p className="font-mono text-white text-sm mt-1">{formatMoney(currentLotBalance)}</p>
+                    </div>
+                    <div className="bg-zinc-900/50 rounded p-2">
+                      <p className="text-[10px] text-zinc-500 uppercase">Projected</p>
+                      <p className="font-mono text-blue-400 text-sm mt-1">{formatMoney(currentProjected)}</p>
                     </div>
                   </div>
                   
                   {!currentEntry?.missed && (
                     <>
-                      {/* Product and Direction Selection */}
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* Row 2: Product, Direction, Actual Profit */}
+                      <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <Label className="text-zinc-300 text-sm">Product</Label>
+                          <p className="text-[10px] text-zinc-500 uppercase mb-1">Product</p>
                           <Select
                             value={currentEntry?.product || 'MOIL10'}
                             onValueChange={(value) => handleTradeEntry('product', value)}
                           >
-                            <SelectTrigger className="mt-1 input-dark">
+                            <SelectTrigger className="h-8 input-dark text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-zinc-900 border-zinc-700">
                               {PRODUCTS.map(p => (
-                                <SelectItem key={p} value={p} className="text-white">{p}</SelectItem>
+                                <SelectItem key={p} value={p} className="text-white text-xs">{p}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label className="text-zinc-300 text-sm">Direction</Label>
+                          <p className="text-[10px] text-zinc-500 uppercase mb-1">Direction</p>
                           <Select
                             value={currentEntry?.direction || 'BUY'}
                             onValueChange={(value) => handleTradeEntry('direction', value)}
                           >
-                            <SelectTrigger className="mt-1 input-dark">
+                            <SelectTrigger className="h-8 input-dark text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-zinc-900 border-zinc-700">
                               {DIRECTIONS.map(d => (
-                                <SelectItem key={d} value={d} className={`text-white ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                <SelectItem key={d} value={d} className={`text-xs ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
                                   {d}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                      </div>
-                      
-                      {/* Actual Profit and Commission Inputs */}
-                      <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-zinc-300">Actual Profit (USDT)</Label>
-                          <div className="relative mt-2">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                          <p className="text-[10px] text-zinc-500 uppercase mb-1">Actual Profit</p>
+                          <div className="relative">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
                             <Input
                               type="number"
                               step="0.01"
                               value={currentEntry?.actualProfit ?? ''}
                               onChange={(e) => handleTradeEntry('actualProfit', e.target.value)}
                               placeholder="0.00"
-                              className="pl-8 input-dark font-mono"
+                              className="h-8 pl-5 input-dark font-mono text-sm"
                             />
                           </div>
                         </div>
-                        <div>
-                          <Label className="text-zinc-300">Commission (USDT)</Label>
-                          <div className="relative mt-2">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={currentEntry?.commission ?? ''}
-                              onChange={(e) => handleTradeEntry('commission', e.target.value)}
-                              placeholder="0.00"
-                              className="pl-8 input-dark font-mono"
-                            />
+                      </div>
+                      
+                      {/* Row 3: Summary - P/L Diff and Commission */}
+                      {currentEntry?.actualProfit !== undefined && (
+                        <div className="bg-zinc-900/50 rounded p-2 grid grid-cols-2 gap-2 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">P/L Diff:</span>
+                            <span className={`font-mono ${(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? '+' : ''}
+                              {formatMoney(parseFloat(currentEntry.actualProfit) - currentProjected)}
+                            </span>
                           </div>
-                          <p className="text-xs text-zinc-500 mt-1">Referral earnings</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  {currentEntry?.actualProfit !== undefined && !currentEntry?.missed && !currentEntry?.holiday && (
-                    <div className="p-3 rounded-lg bg-zinc-900/50 space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-zinc-400">P/L Difference:</span>
-                        <span className={`font-mono ${(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? '+' : ''}
-                          {formatMoney(parseFloat(currentEntry.actualProfit) - currentProjected)}
-                        </span>
-                      </div>
-                      {(currentEntry?.commission && parseFloat(currentEntry.commission) > 0) && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-zinc-400">Total Earnings:</span>
-                          <span className="font-mono text-emerald-400">
-                            {formatMoney((parseFloat(currentEntry.actualProfit) || 0) + (parseFloat(currentEntry.commission) || 0))}
-                          </span>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">Commission:</span>
+                            {calculatedCommission !== null ? (
+                              <span className="font-mono text-amber-400">{formatMoney(calculatedCommission)}</span>
+                            ) : (
+                              <span className="text-zinc-600 italic">Enter next LOT</span>
+                            )}
+                          </div>
                         </div>
                       )}
-                    </div>
+                    </>
                   )}
                 </CardContent>
-                <CardFooter className="flex flex-col gap-3">
-                  {/* Action buttons row */}
-                  <div className="flex items-center justify-between w-full gap-2">
-                    {/* Undo button - shown when entry is marked as missed */}
-                    {currentEntry?.missed ? (
-                      <Button
-                        variant="outline"
-                        onClick={handleUndoMissedTrade}
-                        className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
-                        data-testid="undo-missed-trade-btn"
-                      >
-                        <RotateCcw className="w-4 h-4 mr-2" /> Undo
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        onClick={handleMissedTrade}
-                        className="flex-1"
-                        disabled={currentEntry?.actualProfit !== undefined}
-                      >
-                        <X className="w-4 h-4 mr-2" /> I Missed This Trade
-                      </Button>
-                    )}
-                  </div>
+                
+                {/* Compact Footer */}
+                <div className="px-3 py-2 border-t border-zinc-800 flex items-center justify-between">
+                  {currentEntry?.missed ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleUndoMissedTrade}
+                      className="h-7 text-xs text-red-400 hover:bg-red-500/10"
+                    >
+                      <RotateCcw className="w-3 h-3 mr-1" /> Undo
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleMissedTrade}
+                      className="h-7 text-xs"
+                      disabled={currentEntry?.actualProfit !== undefined}
+                    >
+                      <X className="w-3 h-3 mr-1" /> Missed
+                    </Button>
+                  )}
                   
-                  {/* Navigation row */}
-                  <div className="flex justify-end gap-2 w-full">
+                  <div className="flex gap-1">
                     {currentTradeIndex > 0 && (
-                      <Button variant="outline" onClick={handlePrevTrade}>
+                      <Button variant="outline" size="sm" onClick={handlePrevTrade} className="h-7 w-7 p-0">
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
                     )}
                     {currentTradeIndex < tradingDays.length - 1 && (
                       <Button 
+                        size="sm"
                         onClick={handleNextTrade}
-                        className="btn-primary"
+                        className="h-7 px-3 btn-primary"
                         disabled={!currentEntry || (!currentEntry.missed && currentEntry.actualProfit === undefined)}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     )}
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
                   </div>
                 </CardFooter>
               </Card>
