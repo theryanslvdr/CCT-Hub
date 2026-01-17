@@ -212,14 +212,25 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   };
   
   // Handle trade entry for current day
-  const handleTradeEntry = (actualProfit) => {
+  const handleTradeEntry = (field, value) => {
     const day = tradingDays[currentTradeIndex];
     if (!day) return;
     
     const dateKey = format(day, 'yyyy-MM-dd');
+    const currentData = tradeEntries[dateKey] || { 
+      product: 'MOIL10', 
+      direction: 'BUY', 
+      actualProfit: undefined, 
+      missed: false 
+    };
+    
     setTradeEntries({
       ...tradeEntries,
-      [dateKey]: { actualProfit: parseFloat(actualProfit) || 0, missed: false }
+      [dateKey]: { 
+        ...currentData,
+        [field]: field === 'actualProfit' ? (parseFloat(value) || 0) : value,
+        missed: false 
+      }
     });
   };
   
@@ -231,7 +242,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     const dateKey = format(day, 'yyyy-MM-dd');
     setTradeEntries({
       ...tradeEntries,
-      [dateKey]: { missed: true, actualProfit: 0 }
+      [dateKey]: { missed: true, actualProfit: 0, product: 'MOIL10', direction: 'BUY' }
     });
     
     // Move to next day
@@ -250,24 +261,6 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     delete newEntries[dateKey];
     setTradeEntries(newEntries);
     toast.success('Entry cleared - you can now re-enter this trade');
-  };
-  
-  // Handle marking day as holiday
-  const handleMarkAsHoliday = () => {
-    const day = tradingDays[currentTradeIndex];
-    if (!day) return;
-    
-    const dateKey = format(day, 'yyyy-MM-dd');
-    setTradeEntries({
-      ...tradeEntries,
-      [dateKey]: { holiday: true, actualProfit: 0 }
-    });
-    
-    // Move to next day
-    if (currentTradeIndex < tradingDays.length - 1) {
-      setCurrentTradeIndex(currentTradeIndex + 1);
-    }
-    toast.success('Day marked as personal holiday');
   };
   
   // Handle next trade entry
