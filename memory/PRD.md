@@ -11,6 +11,33 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 51 (2026-01-17) - Critical Data Integrity Fixes ✅
+
+#### P0 Bug Fix: Incorrect Lot Size Logged in Trade History ✅
+- **Issue**: Dashboard showed correct lot_size (19.32), but Trade History logged incorrect value (20.67)
+- **Root Cause**: Frontend (`TradeMonitorPage.jsx`) was sending a `lot_size` calculated from a stale `profitSummary.account_value` to the backend
+- **Fix**: 
+  1. Backend `POST /api/trade/log` now IGNORES frontend's `lot_size` parameter
+  2. Backend recalculates `lot_size` from authoritative `account_value` using `calculate_lot_size()` function
+  3. Frontend no longer sends `lot_size` for regular trades (BVE mode still sends it for simulation)
+- **Formula**: `lot_size = account_value / 980`
+- **Files Modified**:
+  - `server.py` (lines 1215-1280): Added import of `calculate_account_value`, `calculate_lot_size`; recalculates lot_size
+  - `TradeMonitorPage.jsx` (lines 190-201, 973-988): Added comments explaining lot_size is UI display only; removed lot_size from API call
+- **Testing**: All 9 backend tests passed - verified server ignores wrong/stale lot_size values
+
+#### P1 Bug Fix: Daily Projection "Balance Before" Synchronization ✅
+- **Issue**: Daily Projection table's "Balance Before" for current day didn't match live dashboard `account_value`
+- **Root Cause**: `generateDailyProjectionForMonth` calculated running balance from month start, not using live value for today
+- **Fix**:
+  1. Added `liveAccountValue` parameter to `generateDailyProjectionForMonth()`
+  2. For current day (`isToday`), override `balanceBefore` with `liveAccountValue`
+  3. Recalculate `lotSize` and `targetProfit` for today based on live account value
+  4. Past days remain immutable (calculated from historical data)
+- **Files Modified**:
+  - `ProfitTrackerPage.jsx` (lines 121-280, 766-775): Updated function signature and call site
+- **Note**: Today is Saturday - weekends are excluded from daily projection, so visual verification was limited to API tests
+
 ### Session 50 (2026-01-16) - Lot Size Calculation Synchronization Fix ✅
 
 #### Bug Fix: Account Value & LOT Size Calculation ✅
