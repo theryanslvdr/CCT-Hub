@@ -2087,7 +2087,7 @@ export const AdminSettingsPage = () => {
                       <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                         <p className="text-emerald-400 text-sm">
                           <TreePine className="w-4 h-4 inline mr-1" />
-                          Global holidays will automatically appear as "HOLIDAY" rows in all users' Daily Projection tables
+                          Global holidays will automatically appear as &quot;HOLIDAY&quot; rows in all users&apos; Daily Projection tables
                           and will be skipped in the onboarding wizard.
                         </p>
                       </div>
