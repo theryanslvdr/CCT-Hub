@@ -852,6 +852,17 @@ export const AdminSignalsPage = () => {
                 onCheckedChange={(v) => setEditForm({ ...editForm, is_active: v })}
               />
             </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div>
+                <Label className="text-zinc-300">Official Trading Signal</Label>
+                <p className="text-xs text-zinc-500 mt-0.5">Mark this as an official signal</p>
+              </div>
+              <Switch
+                checked={editForm.is_official}
+                onCheckedChange={(v) => setEditForm({ ...editForm, is_official: v })}
+                data-testid="edit-official-signal-toggle"
+              />
+            </div>
             <Button onClick={handleSaveEdit} className="w-full btn-primary">
               Save Changes
             </Button>
