@@ -860,7 +860,46 @@ export const ProfitTrackerPage = () => {
     }
     
     // For honorary licensees and regular users, use standard calculation
-    const startBalance = isCurrentMonth ? effectiveAccountValue : selectedMonth.startBalance;
+    // For past months, we need to calculate the correct starting balance by working
+    // backwards from current account value using trade logs and transactions
+    let startBalance;
+    
+    if (isCurrentMonth) {
+      startBalance = effectiveAccountValue;
+    } else if (selectedMonth.isPastMonth) {
+      // For past months, calculate starting balance by:
+      // Current balance - all profits after this month - all deposits/withdrawals after this month
+      const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
+      const monthStart = new Date(selectedMonth.monthDate.getFullYear(), selectedMonth.monthDate.getMonth(), 1);
+      
+      // Sum all profits from this month onwards
+      let totalProfitAfter = 0;
+      Object.entries(tradeLogs).forEach(([dateKey, log]) => {
+        if (dateKey >= monthKey.slice(0, 7)) {  // From this month onwards
+          totalProfitAfter += (log?.actual_profit || 0);
+        }
+      });
+      
+      // Sum all deposits/withdrawals from this month onwards
+      let totalTxAfter = 0;
+      [...deposits, ...withdrawals].forEach(tx => {
+        const txDate = tx.created_at?.split('T')[0];
+        if (txDate && txDate >= `${monthKey}-01`) {
+          totalTxAfter += (tx.amount || 0);  // Withdrawals already negative
+        }
+      });
+      
+      // Starting balance for this month = current - profits after - transactions after
+      // But we need the balance at the START of this month, so add back the month's profits
+      const monthProfits = Object.entries(tradeLogs)
+        .filter(([key]) => key.startsWith(monthKey))
+        .reduce((sum, [_, log]) => sum + (log?.actual_profit || 0), 0);
+      
+      startBalance = effectiveAccountValue - totalProfitAfter - totalTxAfter + monthProfits;
+    } else {
+      // Future months - use the month's calculated start balance
+      startBalance = selectedMonth.startBalance;
+    }
     
     // Combine deposits and withdrawals for accurate balance tracking
     // Note: Withdrawals already have NEGATIVE amounts stored in the database
