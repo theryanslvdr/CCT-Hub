@@ -301,7 +301,7 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}) => {
     let currentDate = isCurrentMonth ? new Date(today) : new Date(monthDate);
     
     while (currentDate <= lastDay) {
-      if (isTradingDay(currentDate)) {
+      if (isTradingDay(currentDate, globalHolidayDates)) {
         tradingDays++;
         const lotSize = monthBalance / 980;
         const dailyProfit = lotSize * 15;
