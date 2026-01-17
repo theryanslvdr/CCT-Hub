@@ -970,15 +970,17 @@ export const TradeMonitorPage = () => {
 
     try {
       // Use BVE endpoint if in BVE mode, otherwise use regular trade endpoint
+      // NOTE: For regular trades, lot_size is calculated server-side from authoritative account_value
+      // to prevent stale frontend values. BVE mode still uses frontend lot_size for simulation.
       const logTradeEndpoint = isInBVE 
         ? api.post('/bve/trade/log', {
-            lot_size: lotSize,
+            lot_size: lotSize,  // BVE uses frontend value for simulation
             direction: signal?.direction || 'BUY',
             actual_profit: parseFloat(actualExitValue),
             notes: `Signal: ${signal?.product || 'MOIL10'}`,
           })
         : tradeAPI.logTrade({
-            lot_size: lotSize,
+            // lot_size is NOT sent - backend calculates it from authoritative account_value
             direction: signal?.direction || 'BUY',
             actual_profit: parseFloat(actualExitValue),
             notes: `Signal: ${signal?.product || 'MOIL10'}`,
