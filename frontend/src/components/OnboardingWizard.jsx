@@ -181,12 +181,25 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   
   // Calculate running balance for a specific day
   const getBalanceForDay = (dayIndex) => {
+    // For experienced traders, LOT size is the source of truth
+    // Balance = LOT × 980
+    // If LOT is set for this day, use it; otherwise calculate from running balance
+    
+    const dayDate = tradingDays[dayIndex];
+    if (!dayDate) return parseFloat(startingBalance) || 0;
+    
+    const dateKey = format(dayDate, 'yyyy-MM-dd');
+    const entry = tradeEntries[dateKey];
+    
+    // If user has entered a LOT size for this day, derive balance from it
+    if (entry?.lotSize) {
+      return calculateBalanceFromLot(parseFloat(entry.lotSize));
+    }
+    
+    // Otherwise, calculate running balance from start
     let balance = parseFloat(startingBalance) || 0;
     
     // Add deposits/withdrawals up to this day
-    const dayDate = tradingDays[dayIndex];
-    if (!dayDate) return balance;
-    
     for (const tx of transactions) {
       const txDate = new Date(tx.date);
       if (isBefore(txDate, dayDate) || txDate.toDateString() === dayDate.toDateString()) {
@@ -198,22 +211,19 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       }
     }
     
-    // Add profits and commissions from previous days
+    // For days without LOT entry, use previous day's LOT balance + profit
+    // This gives a reasonable default before user enters their actual LOT
     for (let i = 0; i < dayIndex; i++) {
       const prevDay = tradingDays[i];
-      const dateKey = format(prevDay, 'yyyy-MM-dd');
-      const entry = tradeEntries[dateKey];
-      if (entry && !entry.missed) {
-        // If user set a custom LOT size, calculate balance from that LOT
-        if (entry.lotSize) {
-          // Use the balance from custom LOT for next day's calculation
-          const customBalance = calculateBalanceFromLot(entry.lotSize);
-          // Add actual profit and commission on top
-          balance = customBalance + (parseFloat(entry.actualProfit) || 0) + (parseFloat(entry.commission) || 0);
-        } else {
-          // Standard calculation: add profit and commission
-          balance += (parseFloat(entry.actualProfit) || 0) + (parseFloat(entry.commission) || 0);
+      const prevDateKey = format(prevDay, 'yyyy-MM-dd');
+      const prevEntry = tradeEntries[prevDateKey];
+      if (prevEntry && !prevEntry.missed) {
+        if (prevEntry.lotSize) {
+          // Previous day had a LOT, so use that as base
+          balance = calculateBalanceFromLot(parseFloat(prevEntry.lotSize));
         }
+        // Add actual profit (commission is captured in next day's LOT balance)
+        balance += parseFloat(prevEntry.actualProfit) || 0;
       }
     }
     
