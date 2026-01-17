@@ -484,6 +484,20 @@ export const AdminSignalsPage = () => {
                     placeholder="Market conditions, strategy notes..."
                   />
                 </div>
+                
+                {/* Official Signal Toggle */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                  <div>
+                    <Label className="text-zinc-300 cursor-pointer">Official Trading Signal</Label>
+                    <p className="text-xs text-zinc-500 mt-0.5">Mark this as an official signal from the trading team</p>
+                  </div>
+                  <Switch
+                    checked={newSignal.is_official}
+                    onCheckedChange={(checked) => setNewSignal({ ...newSignal, is_official: checked })}
+                    data-testid="official-signal-toggle"
+                  />
+                </div>
+                
                 <Button onClick={handleCreateSignal} className="w-full btn-primary" data-testid="submit-signal-btn">
                   <Radio className="w-4 h-4 mr-2" /> Publish Signal
                 </Button>
