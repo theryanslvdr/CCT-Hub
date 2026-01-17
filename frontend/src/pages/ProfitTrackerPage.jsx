@@ -365,10 +365,11 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
 };
 
 // Group months by year for accordion
+// Year 0 = "History" (past months with trade data)
 const groupMonthsByYear = (monthlyData) => {
   const years = {};
   monthlyData.forEach(m => {
-    const yearKey = m.year;
+    const yearKey = m.year === 0 ? 'History' : m.year;
     if (!years[yearKey]) {
       years[yearKey] = [];
     }
