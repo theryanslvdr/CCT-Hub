@@ -365,7 +365,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         ...prev,
         [dateKey]: {
           ...prev[dateKey],
-          balance: currentBalance
+          balance: truncateTo2Decimals(currentBalance)
         }
       }));
     }
