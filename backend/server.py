@@ -1214,7 +1214,17 @@ async def get_commissions(user: dict = Depends(get_current_user)):
 
 @trade_router.post("/log", response_model=TradeLogResponse)
 async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)):
-    projected_profit = calculate_exit_value(data.lot_size)
+    # CRITICAL: Always recalculate lot_size from the authoritative account_value
+    # to prevent stale frontend values from corrupting trade history
+    from utils.calculations import calculate_account_value, calculate_lot_size
+    
+    account_value = await calculate_account_value(db, user["id"], user)
+    lot_size = calculate_lot_size(account_value)
+    
+    # Log for debugging
+    logger.info(f"Trade log: user={user['id']}, account_value={account_value}, calculated_lot_size={lot_size}, frontend_lot_size={data.lot_size}")
+    
+    projected_profit = calculate_exit_value(lot_size)
     profit_difference = data.actual_profit - projected_profit
     
     # Determine performance
@@ -1232,7 +1242,7 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     trade = {
         "id": trade_id,
         "user_id": user["id"],
-        "lot_size": data.lot_size,
+        "lot_size": lot_size,  # Use server-calculated lot_size
         "direction": data.direction,
         "projected_profit": projected_profit,
         "actual_profit": data.actual_profit,
@@ -1258,7 +1268,7 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
                 "projected": projected_profit,
                 "actual": data.actual_profit,
                 "difference": profit_difference,
-                "lot_size": data.lot_size
+                "lot_size": lot_size
             }
         )
     
