@@ -781,7 +781,9 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         const currentDateKey = currentDay ? format(currentDay, 'yyyy-MM-dd') : '';
         const currentEntry = tradeEntries[currentDateKey];
         const currentBalance = getBalanceForDay(currentTradeIndex);
-        const currentLotSize = calculateLotSize(currentBalance);
+        const defaultLotSize = calculateLotSize(currentBalance);
+        // Use custom LOT if set, otherwise use calculated
+        const currentLotSize = currentEntry?.lotSize ? parseFloat(currentEntry.lotSize) : defaultLotSize;
         const currentProjected = calculateProjectedProfit(currentLotSize);
         
         // Calculate progress
@@ -817,18 +819,26 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  {/* LOT Size and Balance - Editable */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 rounded-lg bg-zinc-900/50">
-                      <p className="text-xs text-zinc-400">Balance</p>
-                      <p className="font-mono text-white">{formatMoney(currentBalance)}</p>
+                      <Label className="text-xs text-zinc-400">LOT Size</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={currentEntry?.lotSize ?? defaultLotSize.toFixed(2)}
+                        onChange={(e) => handleTradeEntry('lotSize', e.target.value)}
+                        className="mt-1 input-dark font-mono text-purple-400 text-center h-8"
+                        disabled={currentEntry?.missed}
+                      />
+                      <p className="text-xs text-zinc-500 mt-1">
+                        Balance: {formatMoney(currentEntry?.lotSize ? calculateBalanceFromLot(parseFloat(currentEntry.lotSize)) : currentBalance)}
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-zinc-900/50">
-                      <p className="text-xs text-zinc-400">LOT Size</p>
-                      <p className="font-mono text-purple-400">{currentLotSize.toFixed(2)}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-zinc-900/50">
-                      <p className="text-xs text-zinc-400">Projected</p>
-                      <p className="font-mono text-blue-400">{formatMoney(currentProjected)}</p>
+                      <p className="text-xs text-zinc-400">Projected Profit</p>
+                      <p className="font-mono text-blue-400 text-lg mt-1">{formatMoney(currentProjected)}</p>
+                      <p className="text-xs text-zinc-500 mt-1">LOT × $15</p>
                     </div>
                   </div>
                   
@@ -872,33 +882,58 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                         </div>
                       </div>
                       
-                      {/* Actual Profit Input */}
-                      <div>
-                        <Label className="text-zinc-300">Actual Profit (USDT)</Label>
-                        <div className="relative mt-2">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={currentEntry?.actualProfit ?? ''}
-                            onChange={(e) => handleTradeEntry('actualProfit', e.target.value)}
-                            placeholder="Enter your actual profit"
-                            className="pl-8 input-dark text-lg font-mono"
-                          />
+                      {/* Actual Profit and Commission Inputs */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-zinc-300">Actual Profit (USDT)</Label>
+                          <div className="relative mt-2">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={currentEntry?.actualProfit ?? ''}
+                              onChange={(e) => handleTradeEntry('actualProfit', e.target.value)}
+                              placeholder="0.00"
+                              className="pl-8 input-dark font-mono"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-zinc-300">Commission (USDT)</Label>
+                          <div className="relative mt-2">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={currentEntry?.commission ?? ''}
+                              onChange={(e) => handleTradeEntry('commission', e.target.value)}
+                              placeholder="0.00"
+                              className="pl-8 input-dark font-mono"
+                            />
+                          </div>
+                          <p className="text-xs text-zinc-500 mt-1">Referral earnings</p>
                         </div>
                       </div>
                     </>
                   )}
                   
                   {currentEntry?.actualProfit !== undefined && !currentEntry?.missed && !currentEntry?.holiday && (
-                    <div className="p-3 rounded-lg bg-zinc-900/50">
+                    <div className="p-3 rounded-lg bg-zinc-900/50 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-zinc-400">P/L Difference:</span>
-                        <span className={`font-mono ${(currentEntry.actualProfit - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {(currentEntry.actualProfit - currentProjected) >= 0 ? '+' : ''}
-                          {formatMoney(currentEntry.actualProfit - currentProjected)}
+                        <span className={`font-mono ${(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? '+' : ''}
+                          {formatMoney(parseFloat(currentEntry.actualProfit) - currentProjected)}
                         </span>
                       </div>
+                      {(currentEntry?.commission && parseFloat(currentEntry.commission) > 0) && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-zinc-400">Total Earnings:</span>
+                          <span className="font-mono text-emerald-400">
+                            {formatMoney((parseFloat(currentEntry.actualProfit) || 0) + (parseFloat(currentEntry.commission) || 0))}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>
