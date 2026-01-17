@@ -519,13 +519,23 @@ export const ProfitTrackerPage = () => {
   const [projectionView, setProjectionView] = useState('summary');
   
   // Global holidays state (fetched from backend)
-  const [userHolidays, setUserHolidays] = useState([]);
+  const [globalHolidays, setGlobalHolidays] = useState([]);
   
   const userTimezone = user?.timezone || 'Asia/Manila';
 
   useEffect(() => {
     loadData();
+    loadGlobalHolidays();
   }, [simulatedView]);
+
+  const loadGlobalHolidays = async () => {
+    try {
+      const response = await tradeAPI.getGlobalHolidays();
+      setGlobalHolidays(response.data.holidays || []);
+    } catch (error) {
+      console.error('Failed to load global holidays:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
