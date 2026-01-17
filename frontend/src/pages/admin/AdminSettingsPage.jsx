@@ -1166,6 +1166,7 @@ export const AdminSettingsPage = () => {
 
         {/* Custom Links Tab */}
         {activeTab === 'links' && (
+          <div className="space-y-6">
           {/* Registration Link */}
           <Card className="glass-card">
             <CardHeader>
