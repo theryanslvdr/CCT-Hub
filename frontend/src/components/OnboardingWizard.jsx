@@ -106,11 +106,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     [tradingProducts]
   );
   
-  // Combined holidays (static + global from backend) - memoized to prevent infinite loops
-  const allHolidays = useMemo(() => new Set([
-    ...STATIC_HOLIDAYS,
-    ...globalHolidays.map(h => h.date)
-  ]), [globalHolidays]);
+  // Holidays from backend (global trading holidays set by admin)
+  // Only use global holidays - no static fallback. Admin controls all holidays via Settings.
+  const allHolidays = useMemo(() => new Set(
+    globalHolidays.map(h => h.date)
+  ), [globalHolidays]);
   
   // Check if a date is a holiday (including global holidays)
   const isHolidayDate = useCallback((date) => {
