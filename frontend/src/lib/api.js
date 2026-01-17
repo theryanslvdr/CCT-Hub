@@ -121,6 +121,8 @@ export const tradeAPI = {
   getHolidays: () => api.get('/trade/holidays'),
   addHoliday: (date, reason) => api.post('/trade/holidays', null, { params: { date, reason } }),
   removeHoliday: (date) => api.delete(`/trade/holidays/${date}`),
+  // Global holidays (read-only for users)
+  getGlobalHolidays: () => api.get('/trade/global-holidays'),
 };
 
 // Admin APIs
@@ -138,6 +140,10 @@ export const adminAPI = {
   updateMember: (userId, data) => api.put(`/admin/members/${userId}`, data),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
+  // Global holidays (Master Admin)
+  getGlobalHolidays: () => api.get('/admin/global-holidays'),
+  addGlobalHoliday: (date, reason) => api.post('/admin/global-holidays', null, { params: { date, reason } }),
+  removeGlobalHoliday: (date) => api.delete(`/admin/global-holidays/${date}`),
   // Analytics
   getTeamAnalytics: () => api.get('/admin/analytics/team'),
   getMissedTrades: () => api.get('/admin/analytics/missed-trades'),
