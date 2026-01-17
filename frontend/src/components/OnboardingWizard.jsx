@@ -180,48 +180,67 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   }, [startDate, userType, allHolidays]);
   
   // Calculate running balance for a specific day
+  // Truncate to 2 decimals without rounding
+  const truncateTo2Decimals = (num) => Math.trunc(num * 100) / 100;
+  
   const getBalanceForDay = (dayIndex) => {
     // Balance-first approach: if user has entered a balance for this day, use it
     const dayDate = tradingDays[dayIndex];
-    if (!dayDate) return parseFloat(startingBalance) || 0;
+    if (!dayDate) return truncateTo2Decimals(parseFloat(startingBalance) || 0);
     
     const dateKey = format(dayDate, 'yyyy-MM-dd');
     const entry = tradeEntries[dateKey];
     
     // If user has entered a balance for this day, use it directly
     if (entry?.balance) {
-      return parseFloat(entry.balance);
+      return truncateTo2Decimals(parseFloat(entry.balance));
     }
     
-    // Otherwise, calculate default balance from start
+    // Otherwise, calculate balance from start, considering ALL factors:
+    // 1. Starting balance
+    // 2. Deposits/withdrawals before or on this day
+    // 3. Previous days' profits
+    
     let balance = parseFloat(startingBalance) || 0;
     
-    // Add deposits/withdrawals up to this day
-    for (const tx of transactions) {
-      const txDate = new Date(tx.date);
-      if (isBefore(txDate, dayDate) || txDate.toDateString() === dayDate.toDateString()) {
-        if (tx.type === 'deposit') {
-          balance += parseFloat(tx.amount) || 0;
-        } else {
-          balance -= parseFloat(tx.amount) || 0;
+    // Track which transactions have been applied
+    const appliedTxDates = new Set();
+    
+    // Process each day up to current day
+    for (let i = 0; i <= dayIndex; i++) {
+      const day = tradingDays[i];
+      const dayKey = format(day, 'yyyy-MM-dd');
+      
+      // Apply any deposits/withdrawals for this day BEFORE the trade
+      for (const tx of transactions) {
+        const txDateKey = tx.date.split('T')[0];
+        // Apply transaction if it's on or before this day and hasn't been applied yet
+        if (txDateKey <= dayKey && !appliedTxDates.has(tx.date)) {
+          if (tx.type === 'deposit') {
+            balance += parseFloat(tx.amount) || 0;
+          } else {
+            balance -= parseFloat(tx.amount) || 0;
+          }
+          appliedTxDates.add(tx.date);
+        }
+      }
+      
+      // For previous days (not the current dayIndex), add the profit
+      if (i < dayIndex) {
+        const prevEntry = tradeEntries[dayKey];
+        if (prevEntry && !prevEntry.missed) {
+          // If previous day has a user-entered balance, use that as the new base
+          // plus any transactions that happened AFTER that day
+          if (prevEntry.balance) {
+            balance = parseFloat(prevEntry.balance);
+          }
+          // Add the actual profit from that day
+          balance += parseFloat(prevEntry.actualProfit) || 0;
         }
       }
     }
     
-    // For days without balance entry, use previous day's balance + profit as estimate
-    for (let i = 0; i < dayIndex; i++) {
-      const prevDay = tradingDays[i];
-      const prevDateKey = format(prevDay, 'yyyy-MM-dd');
-      const prevEntry = tradeEntries[prevDateKey];
-      if (prevEntry && !prevEntry.missed) {
-        if (prevEntry.balance) {
-          balance = parseFloat(prevEntry.balance);
-        }
-        balance += parseFloat(prevEntry.actualProfit) || 0;
-      }
-    }
-    
-    return balance;
+    return truncateTo2Decimals(balance);
   };
   
   // Get total steps based on user type
