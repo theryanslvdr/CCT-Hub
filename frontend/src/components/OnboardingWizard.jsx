@@ -224,8 +224,11 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
       // If this day has a user-entered balance, use it as the new base
       if (prevEntry?.balance) {
         balance = parseFloat(prevEntry.balance);
-      } else if (prevEntry && !prevEntry.missed) {
-        // Add profit from this day
+      }
+      
+      // ALWAYS add profit from this day (even if user entered a custom balance)
+      // The user-entered balance is the "Balance Before" trade, so profit adds on top
+      if (prevEntry && !prevEntry.missed && prevEntry.actualProfit !== undefined) {
         balance += parseFloat(prevEntry.actualProfit) || 0;
       }
       
