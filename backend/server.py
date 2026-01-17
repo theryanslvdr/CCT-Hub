@@ -1895,6 +1895,78 @@ async def remove_user_holiday(date: str, user: dict = Depends(get_current_user))
     
     return {"message": "Holiday removed successfully", "date": date}
 
+# ==================== GLOBAL HOLIDAYS (Master Admin only) ====================
+
+@admin_router.get("/global-holidays")
+async def get_global_holidays(user: dict = Depends(require_admin)):
+    """Get all global holidays (Master Admin only)"""
+    holidays = await db.global_holidays.find(
+        {},
+        {"_id": 0}
+    ).sort("date", 1).to_list(100)
+    return {"holidays": holidays}
+
+@admin_router.post("/global-holidays")
+async def add_global_holiday(
+    date: str,
+    reason: Optional[str] = "Market holiday",
+    user: dict = Depends(require_master_admin)
+):
+    """Add a global holiday for all users (Master Admin only)"""
+    
+    # Parse and validate the date
+    try:
+        holiday_date = datetime.strptime(date, "%Y-%m-%d")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format. Use YYYY-MM-DD: {str(e)}")
+    
+    # Check if this date is already a global holiday
+    existing = await db.global_holidays.find_one({"date": date})
+    if existing:
+        raise HTTPException(status_code=400, detail="This date is already a global holiday")
+    
+    # Create the global holiday record
+    holiday_id = str(uuid.uuid4())
+    holiday = {
+        "id": holiday_id,
+        "date": date,
+        "reason": reason,
+        "created_by": user["id"],
+        "created_by_name": user.get("full_name", user.get("email")),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.global_holidays.insert_one(holiday)
+    
+    logger.info(f"Global holiday added: date={date}, by={user['id']}")
+    
+    return {
+        "message": "Global holiday added successfully",
+        "holiday": {k: v for k, v in holiday.items() if k != "_id"}
+    }
+
+@admin_router.delete("/global-holidays/{date}")
+async def remove_global_holiday(date: str, user: dict = Depends(require_master_admin)):
+    """Remove a global holiday (Master Admin only)"""
+    
+    result = await db.global_holidays.delete_one({"date": date})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Global holiday not found for this date")
+    
+    logger.info(f"Global holiday removed: date={date}, by={user['id']}")
+    
+    return {"message": "Global holiday removed successfully", "date": date}
+
+@trade_router.get("/global-holidays")
+async def get_global_holidays_for_user(user: dict = Depends(get_current_user)):
+    """Get all global holidays (for any authenticated user to see)"""
+    holidays = await db.global_holidays.find(
+        {},
+        {"_id": 0}
+    ).sort("date", 1).to_list(100)
+    return {"holidays": holidays}
+
 @trade_router.post("/request-change")
 async def request_trade_change(data: TradeChangeRequest, user: dict = Depends(get_current_user)):
     """Request a change to a trade - for non-master-admin users"""
