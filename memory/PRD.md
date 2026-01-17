@@ -11,6 +11,34 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 53 (2026-01-17) - Onboarding Wizard, Streaks, Daily Projection Fixes
+
+#### Onboarding Wizard Enhancements ✅
+- **Balance as Source of Truth**: Users now enter account balance per day instead of LOT
+- **LOT Size is Derived**: Balance ÷ 980 = LOT (read-only display)
+- **Commission Removed**: Daily commission calculation removed; commission is totaled at end
+- **Disclaimer Added**: "The goal is to catch up to your current account value with granular daily trade estimates. Commissions are totaled at the end."
+- **Compact Design**: Reduced padding, cleaner layout
+- **Data Sync**: Onboarding now sends `balance`, `product`, `direction` per trade entry
+
+#### Streak Calculation Fix ✅
+- **Before**: Used hardcoded HOLIDAYS list
+- **After**: Uses global holidays from database (`global_holidays` collection)
+- **Holidays Don't Break Streak**: Holidays are treated like weekends - skipped in streak calculation
+- **Backend**: `/api/trade/streak` now fetches global holidays dynamically
+
+#### Daily Projection Table Improvements ✅
+- **December Data for Existing Users**: Now shows past months (Year History) if user has trade data
+- **Global Holidays Integration**: `isTradingDay()` now uses dynamic holidays from backend
+- **Remaining Days Count Fixed**: Only counts days WITHOUT actual profit recorded
+
+#### Known Issue (Partial Fix)
+- **Trade History vs Daily Projection Mismatch**: Historical trades imported via onboarding may have different LOT/projected values than Daily Projection recalculation. This is because:
+  - Daily Projection recalculates LOT based on running balance + deposits/withdrawals
+  - Trade History shows stored values from when trade was logged
+  - For NEW trades, the backend recalculates LOT from authoritative account_value
+  - For HISTORICAL/ONBOARDING trades, values depend on what was entered during onboarding
+
 ### Session 52 (2026-01-17) - Admin Settings Redesign & Global Trading Settings ✅
 
 #### Major Refactoring: Admin Settings Page ✅
