@@ -1161,6 +1161,7 @@ export const AdminSettingsPage = () => {
               </div>
             </div>
           </div>
+          </div>
         )}
 
         {/* Custom Links Tab */}
