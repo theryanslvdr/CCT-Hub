@@ -52,6 +52,7 @@ export const AdminSignalsPage = () => {
     direction: 'BUY',
     profit_points: '15',
     notes: '',
+    is_official: false,
   });
   const [editForm, setEditForm] = useState({
     trade_time: '',
@@ -60,6 +61,7 @@ export const AdminSignalsPage = () => {
     profit_points: '',
     notes: '',
     is_active: true,
+    is_official: false,
   });
 
   useEffect(() => {
