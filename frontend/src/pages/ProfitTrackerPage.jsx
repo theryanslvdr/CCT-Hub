@@ -1122,10 +1122,10 @@ export const ProfitTrackerPage = () => {
     [effectiveAccountValue, selectedYears]
   );
   
-  const monthlyProjection = useMemo(() => 
-    generateMonthlyProjection(effectiveAccountValue, tradeLogs),
-    [effectiveAccountValue, tradeLogs]
-  );
+  const monthlyProjection = useMemo(() => {
+    const globalHolidayDates = new Set(globalHolidays.map(h => h.date));
+    return generateMonthlyProjection(effectiveAccountValue, tradeLogs, globalHolidayDates);
+  }, [effectiveAccountValue, tradeLogs, globalHolidays]);
   
   const yearlyGroupedProjection = useMemo(() => 
     groupMonthsByYear(monthlyProjection),
