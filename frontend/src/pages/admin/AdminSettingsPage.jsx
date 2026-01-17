@@ -93,11 +93,18 @@ export const AdminSettingsPage = () => {
     cloudinary_secret: false,
     heartbeat: false
   });
+  
+  // Global holidays state
+  const [globalHolidays, setGlobalHolidays] = useState([]);
+  const [holidaysLoading, setHolidaysLoading] = useState(false);
+  const [selectedHolidayMonth, setSelectedHolidayMonth] = useState(new Date());
+  const [savingHoliday, setSavingHoliday] = useState(false);
 
   useEffect(() => {
     loadSettings();
     loadEmailTemplates();
     loadEmailHistory();
+    loadGlobalHolidays();
   }, []);
 
   // Apply settings to document
