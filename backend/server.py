@@ -507,6 +507,12 @@ async def require_master_admin(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Master admin access required")
     return user
 
+async def require_super_or_master_admin(user: dict = Depends(get_current_user)):
+    """Require super_admin or master_admin role"""
+    if user.get("role") not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Super admin or master admin access required")
+    return user
+
 async def verify_heartbeat_user(email: str) -> bool:
     """Verify if user exists in Heartbeat community"""
     if not HEARTBEAT_API_KEY:
