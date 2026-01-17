@@ -198,7 +198,6 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       
       // For completed trades, use the STORED lot_size and projected_profit from trade logs
       // This ensures Trade History and Daily Projection show consistent values
-      const tradeLog = tradeLogs[dateKey];
       const hasStoredTradeData = tradeLog && tradeLog.lot_size && tradeLog.projected_profit;
       
       // Calculate lot size and target profit based on current running balance
