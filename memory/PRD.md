@@ -11,6 +11,40 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 52 (2026-01-17) - Admin Settings Redesign & Global Trading Settings ✅
+
+#### Major Refactoring: Admin Settings Page ✅
+- **Before**: Tab-based layout
+- **After**: Sidebar navigation layout for improved organization
+- **Sidebar Tabs**: SEO & Meta, Branding, UI Settings, API Keys, Links, Emails, Maintenance
+- **Files Modified**: `/app/frontend/src/pages/admin/AdminSettingsPage.jsx`
+- **Testing**: 13/13 backend tests passed, all frontend verified
+
+#### Feature: Global Trading Settings (Master Admin Only) ✅
+- **Location**: Admin Settings > Global Trading (sidebar)
+- **Access**: Master Admin ONLY (role-based visibility)
+- **Components**:
+  1. **Trading Products Management**:
+     - Add/remove/toggle products
+     - Default products: MOIL10, XAUUSD, EURUSD, GBPUSD, USDJPY
+     - Endpoints: `POST/PUT/DELETE /api/admin/trading-products`
+  2. **Global Holidays Management**:
+     - Calendar picker with tree icons for holidays
+     - Scheduled holidays list with delete buttons
+     - Existing endpoints: `POST/DELETE /api/admin/global-holidays`
+
+#### OnboardingWizard Integration ✅
+- **Products**: Fetches from `/api/trade/trading-products` (user endpoint)
+- **Holidays**: Fetches from `/api/trade/global-holidays` (user endpoint)
+- **Behavior**: Combines backend global holidays with static holidays to exclude from trading days
+
+#### New API Endpoints ✅
+- `GET /api/admin/trading-products` - List products (admin)
+- `POST /api/admin/trading-products?name=PRODUCT` - Add product
+- `PUT /api/admin/trading-products/{id}?is_active=bool` - Toggle product
+- `DELETE /api/admin/trading-products/{id}` - Remove product
+- `GET /api/trade/trading-products` - List active products (all users)
+
 ### Session 51 (2026-01-17) - Data Integrity Fixes + New Features ✅
 
 #### P0 Bug Fix: Incorrect Lot Size Logged in Trade History ✅
