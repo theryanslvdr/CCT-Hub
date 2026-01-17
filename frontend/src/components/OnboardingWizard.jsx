@@ -122,6 +122,12 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     return !isHolidayDate(date);
   }, [isHolidayDate]);
   
+  // Get trading days between two dates (using global holidays)
+  const getTradingDays = useCallback((startDate, endDate) => {
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    return days.filter(isTradingDayCheck);
+  }, [isTradingDayCheck]);
+  
   // Load global holidays and trading products
   useEffect(() => {
     const loadGlobalSettings = async () => {
