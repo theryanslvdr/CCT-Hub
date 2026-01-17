@@ -193,6 +193,9 @@ export const TradeMonitorPage = () => {
   const accountValue = simulatedAccountValue !== null 
     ? simulatedAccountValue 
     : (profitSummary?.account_value || 0);
+  // NOTE: lotSize here is for UI DISPLAY ONLY. 
+  // When logging trades, the backend recalculates lot_size from authoritative account_value
+  // to prevent stale frontend values from corrupting trade history.
   const lotSize = simulatedLotSize !== null 
     ? truncateTo2Decimals(simulatedLotSize) 
     : truncateTo2Decimals(accountValue / 980);
