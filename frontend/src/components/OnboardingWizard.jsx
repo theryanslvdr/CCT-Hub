@@ -769,11 +769,6 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                     {currentEntry?.missed && (
                       <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Missed</span>
                     )}
-                    {currentEntry?.holiday && (
-                      <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded flex items-center gap-1">
-                        <TreePine className="w-3 h-3" /> Holiday
-                      </span>
-                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -792,21 +787,62 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                     </div>
                   </div>
                   
-                  {!currentEntry?.missed && !currentEntry?.holiday && (
-                    <div>
-                      <Label className="text-zinc-300">Actual Profit (USDT)</Label>
-                      <div className="relative mt-2">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={currentEntry?.actualProfit ?? ''}
-                          onChange={(e) => handleTradeEntry(e.target.value)}
-                          placeholder="Enter your actual profit"
-                          className="pl-8 input-dark text-lg font-mono"
-                        />
+                  {!currentEntry?.missed && (
+                    <>
+                      {/* Product and Direction Selection */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-zinc-300 text-sm">Product</Label>
+                          <Select
+                            value={currentEntry?.product || 'MOIL10'}
+                            onValueChange={(value) => handleTradeEntry('product', value)}
+                          >
+                            <SelectTrigger className="mt-1 input-dark">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                              {PRODUCTS.map(p => (
+                                <SelectItem key={p} value={p} className="text-white">{p}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-zinc-300 text-sm">Direction</Label>
+                          <Select
+                            value={currentEntry?.direction || 'BUY'}
+                            onValueChange={(value) => handleTradeEntry('direction', value)}
+                          >
+                            <SelectTrigger className="mt-1 input-dark">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                              {DIRECTIONS.map(d => (
+                                <SelectItem key={d} value={d} className={`text-white ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {d}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                    </div>
+                      
+                      {/* Actual Profit Input */}
+                      <div>
+                        <Label className="text-zinc-300">Actual Profit (USDT)</Label>
+                        <div className="relative mt-2">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={currentEntry?.actualProfit ?? ''}
+                            onChange={(e) => handleTradeEntry('actualProfit', e.target.value)}
+                            placeholder="Enter your actual profit"
+                            className="pl-8 input-dark text-lg font-mono"
+                          />
+                        </div>
+                      </div>
+                    </>
                   )}
                   
                   {currentEntry?.actualProfit !== undefined && !currentEntry?.missed && !currentEntry?.holiday && (
