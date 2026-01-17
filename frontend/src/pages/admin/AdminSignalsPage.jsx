@@ -144,6 +144,7 @@ export const AdminSignalsPage = () => {
         await adminAPI.createSignal({
           ...newSignal,
           profit_points: parseFloat(newSignal.profit_points) || 15,
+          is_official: newSignal.is_official,
         });
         toast.success('Trading signal created!');
       }
@@ -155,6 +156,7 @@ export const AdminSignalsPage = () => {
         direction: 'BUY',
         profit_points: '15',
         notes: '',
+        is_official: false,
       });
       loadSignals();
     } catch (error) {
@@ -171,6 +173,7 @@ export const AdminSignalsPage = () => {
       profit_points: signal.profit_points?.toString() || '15',
       notes: signal.notes || '',
       is_active: signal.is_active,
+      is_official: signal.is_official || false,
     });
     setEditDialogOpen(true);
   };
@@ -196,6 +199,7 @@ export const AdminSignalsPage = () => {
           profit_points: parseFloat(editForm.profit_points) || 15,
           notes: editForm.notes,
           is_active: editForm.is_active,
+          is_official: editForm.is_official,
         });
         toast.success('Signal updated!');
       }
