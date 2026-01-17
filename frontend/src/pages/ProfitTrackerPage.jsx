@@ -2293,6 +2293,7 @@ export const ProfitTrackerPage = () => {
                     {!isExtendedLicensee && <th>Actual Profit</th>}
                     {!isExtendedLicensee && <th>P/L Diff</th>}
                     {isExtendedLicensee && <th>Profit Credited</th>}
+                    {!isExtendedLicensee && <th className="text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -2304,9 +2305,14 @@ export const ProfitTrackerPage = () => {
                     // For extended licensees: check if master admin traded on this day
                     const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
+                    // Check if this date is a user holiday
+                    const isUserHoliday = userHolidays.some(h => h.date === day.dateKey);
+                    
                     // Determine row styling based on status
                     let rowClass = '';
-                    if (day.isToday) {
+                    if (isUserHoliday) {
+                      rowClass = 'bg-amber-500/10 border-l-2 border-l-amber-500';
+                    } else if (day.isToday) {
                       rowClass = 'bg-blue-500/20 border-l-2 border-l-blue-500';
                     } else if (day.status === 'completed') {
                       rowClass = 'bg-emerald-500/5';
@@ -2321,10 +2327,13 @@ export const ProfitTrackerPage = () => {
                       >
                         <td className="font-medium">
                           {day.dateStr}
-                          {day.isToday && (
+                          {isUserHoliday && (
+                            <span className="ml-2 text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded">HOLIDAY</span>
+                          )}
+                          {day.isToday && !isUserHoliday && (
                             <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
                           )}
-                          {day.status === 'completed' && !day.isToday && (
+                          {day.status === 'completed' && !day.isToday && !isUserHoliday && (
                             <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">✓</span>
                           )}
                           {/* Show indicator for manually adjusted trades */}
