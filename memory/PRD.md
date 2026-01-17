@@ -11,7 +11,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 51 (2026-01-17) - Critical Data Integrity Fixes ✅
+### Session 51 (2026-01-17) - Data Integrity Fixes + New Features ✅
 
 #### P0 Bug Fix: Incorrect Lot Size Logged in Trade History ✅
 - **Issue**: Dashboard showed correct lot_size (19.32), but Trade History logged incorrect value (20.67)
@@ -21,22 +21,32 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   2. Backend recalculates `lot_size` from authoritative `account_value` using `calculate_lot_size()` function
   3. Frontend no longer sends `lot_size` for regular trades (BVE mode still sends it for simulation)
 - **Formula**: `lot_size = account_value / 980`
-- **Files Modified**:
-  - `server.py` (lines 1215-1280): Added import of `calculate_account_value`, `calculate_lot_size`; recalculates lot_size
-  - `TradeMonitorPage.jsx` (lines 190-201, 973-988): Added comments explaining lot_size is UI display only; removed lot_size from API call
-- **Testing**: All 9 backend tests passed - verified server ignores wrong/stale lot_size values
+- **Testing**: All backend tests passed - verified server ignores wrong/stale lot_size values
 
 #### P1 Bug Fix: Daily Projection "Balance Before" Synchronization ✅
 - **Issue**: Daily Projection table's "Balance Before" for current day didn't match live dashboard `account_value`
-- **Root Cause**: `generateDailyProjectionForMonth` calculated running balance from month start, not using live value for today
-- **Fix**:
-  1. Added `liveAccountValue` parameter to `generateDailyProjectionForMonth()`
-  2. For current day (`isToday`), override `balanceBefore` with `liveAccountValue`
-  3. Recalculate `lotSize` and `targetProfit` for today based on live account value
-  4. Past days remain immutable (calculated from historical data)
-- **Files Modified**:
-  - `ProfitTrackerPage.jsx` (lines 121-280, 766-775): Updated function signature and call site
-- **Note**: Today is Saturday - weekends are excluded from daily projection, so visual verification was limited to API tests
+- **Fix**: `generateDailyProjectionForMonth` now uses live account_value for today's row
+
+#### Feature: Undo Trade Button ✅
+- **Endpoint**: `DELETE /api/trade/undo-by-date/{date}`
+- **UI**: "Undo" button appears in Daily Projection table Actions column for completed trades
+- **Behavior**: Deletes trade record, stores audit trail in `reset_trades` collection
+- **Testing**: 20/20 backend tests passed
+
+#### Feature: Mark as Holiday Button ✅
+- **Endpoints**: 
+  - `GET /api/trade/holidays` - Get user's holidays
+  - `POST /api/trade/holidays?date=YYYY-MM-DD&reason=...` - Mark a day as holiday
+  - `DELETE /api/trade/holidays/{date}` - Remove holiday
+- **UI**: "Holiday" button appears for missed/future days, "HOLIDAY" badge shown on marked days
+- **Behavior**: Holiday days are excluded from projections and don't count as missed trades
+- **Collection**: `user_holidays` stores user-specific holidays
+
+#### Feature: Official Trading Signal Toggle ✅
+- **Backend**: Added `is_official` field to `TradingSignalCreate`, `TradingSignalUpdate`, `TradingSignalResponse` models
+- **Endpoints**: `POST /api/admin/signals` and `PUT /api/admin/signals/{id}` accept `is_official` parameter
+- **UI**: "Official Trading Signal" toggle in create/edit signal dialogs
+- **Badge**: "OFFICIAL" badge shown on active signal when `is_official=true`
 
 ### Session 50 (2026-01-16) - Lot Size Calculation Synchronization Fix ✅
 
