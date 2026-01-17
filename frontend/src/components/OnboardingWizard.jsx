@@ -269,8 +269,8 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     const dateKey = format(day, 'yyyy-MM-dd');
     const entry = tradeEntries[dateKey];
     
-    if (!entry || (!entry.missed && !entry.holiday && entry.actualProfit === undefined)) {
-      toast.error('Please enter your actual profit or mark as missed/holiday');
+    if (!entry || (!entry.missed && entry.actualProfit === undefined)) {
+      toast.error('Please enter your actual profit or mark as missed');
       return;
     }
     
