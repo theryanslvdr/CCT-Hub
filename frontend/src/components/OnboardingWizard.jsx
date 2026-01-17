@@ -183,14 +183,20 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     }
   }, [isOpen, userType, startingBalance, startDate, transactions, tradeEntries, currentStep, currentTradeIndex, saveProgress]);
   
-  // Calculate trading days when start date changes
+  // Calculate trading days when start date changes (using dynamic holidays)
   useEffect(() => {
     if (startDate && userType === 'experienced') {
       const today = startOfDay(new Date());
-      const days = getTradingDays(startDate, today);
-      setTradingDays(days);
+      const allDays = eachDayOfInterval({ start: startDate, end: today });
+      const filteredDays = allDays.filter(day => {
+        const dayOfWeek = day.getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) return false; // Weekend
+        const dateKey = format(day, 'yyyy-MM-dd');
+        return !allHolidays.has(dateKey);
+      });
+      setTradingDays(filteredDays);
     }
-  }, [startDate, userType]);
+  }, [startDate, userType, allHolidays]);
   
   // Calculate running balance for a specific day
   const getBalanceForDay = (dayIndex) => {
