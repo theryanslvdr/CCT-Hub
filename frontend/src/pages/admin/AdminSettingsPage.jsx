@@ -15,7 +15,8 @@ import {
   Settings, Upload, Globe, Image, Palette, RefreshCw, Crown, 
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
   FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link,
-  LogIn, Plus, Trash2, GripVertical, Copyright, Wrench, Megaphone, AlertTriangle, Send
+  LogIn, Plus, Trash2, GripVertical, Copyright, Wrench, Megaphone, AlertTriangle, Send,
+  TreePine, Calendar as CalendarIcon
 } from 'lucide-react';
 
 export const AdminSettingsPage = () => {
