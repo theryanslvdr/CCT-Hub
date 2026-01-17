@@ -2293,7 +2293,6 @@ export const ProfitTrackerPage = () => {
                     {!isExtendedLicensee && <th>Actual Profit</th>}
                     {!isExtendedLicensee && <th>P/L Diff</th>}
                     {isExtendedLicensee && <th>Profit Credited</th>}
-                    {!isExtendedLicensee && <th className="text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -2305,7 +2304,7 @@ export const ProfitTrackerPage = () => {
                     // For extended licensees: check if master admin traded on this day
                     const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
-                    // Check if this date is a user holiday
+                    // Check if this date is a user holiday or global holiday
                     const isUserHoliday = userHolidays.some(h => h.date === day.dateKey);
                     
                     // Determine row styling based on status
