@@ -797,15 +797,16 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         const currentLotBalance = currentEntry?.lotSize ? calculateBalanceFromLot(parseFloat(currentEntry.lotSize)) : currentBalance;
         const currentProjected = calculateProjectedProfit(currentLotSize);
         
-        // Calculate commission: Next Day Balance - Current Day Balance
+        // Calculate commission: (Next Day Balance - Current Day Balance) - Current Day Actual Profit
         // Commission is auto-calculated based on next day's LOT entry
         const nextDay = tradingDays[currentTradeIndex + 1];
         const nextDateKey = nextDay ? format(nextDay, 'yyyy-MM-dd') : '';
         const nextEntry = tradeEntries[nextDateKey];
         let calculatedCommission = null;
-        if (nextEntry?.lotSize) {
+        if (nextEntry?.lotSize && currentEntry?.actualProfit !== undefined) {
           const nextDayBalance = calculateBalanceFromLot(parseFloat(nextEntry.lotSize));
-          calculatedCommission = nextDayBalance - currentLotBalance;
+          const balanceDiff = nextDayBalance - currentLotBalance;
+          calculatedCommission = balanceDiff - (parseFloat(currentEntry.actualProfit) || 0);
         }
         
         // Calculate progress
