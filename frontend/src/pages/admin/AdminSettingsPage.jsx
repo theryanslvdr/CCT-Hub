@@ -1289,6 +1289,7 @@ export const AdminSettingsPage = () => {
 
         {/* Email Templates Tab */}
         {activeTab === 'emails' && (
+          <div className="space-y-6">
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
