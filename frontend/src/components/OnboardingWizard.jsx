@@ -12,7 +12,7 @@ import { format, addDays, isWeekend, isBefore, isAfter, startOfDay, eachDayOfInt
 import { 
   ChevronRight, ChevronLeft, User, Calendar as CalendarIcon, 
   DollarSign, ArrowDownCircle, ArrowUpCircle, Check, Loader2,
-  Sparkles, TrendingUp, Plus, Trash2, Save, X, RotateCcw
+  Sparkles, TrendingUp, Plus, Trash2, Save, X, RotateCcw, TreePine
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { profitAPI, tradeAPI } from '@/lib/api';
@@ -22,8 +22,8 @@ const MIN_START_DATE = new Date(2025, 11, 1); // December 1, 2025
 // Minimum deposit date (a week before December 1, 2025)
 const MIN_DEPOSIT_DATE = new Date(2025, 10, 24); // November 24, 2025
 
-// Holiday list (Merin non-trading days)
-const HOLIDAYS = new Set([
+// Static holidays (Merin non-trading days) - these are merged with global holidays from backend
+const STATIC_HOLIDAYS = new Set([
   // 2025 holidays
   '2025-12-25',  // Christmas
   '2025-12-26',  // Boxing Day
@@ -32,6 +32,7 @@ const HOLIDAYS = new Set([
   '2026-01-01',  // New Year's Day
   '2026-01-02',  // New Year Holiday
 ]);
+
 
 // Check if a date is a holiday
 const isHoliday = (date) => {
