@@ -22,36 +22,7 @@ const MIN_START_DATE = new Date(2025, 11, 1); // December 1, 2025
 // Minimum deposit date (a week before December 1, 2025)
 const MIN_DEPOSIT_DATE = new Date(2025, 10, 24); // November 24, 2025
 
-// Static holidays (Merin non-trading days) - these are merged with global holidays from backend
-const STATIC_HOLIDAYS = new Set([
-  // 2025 holidays
-  '2025-12-25',  // Christmas
-  '2025-12-26',  // Boxing Day
-  '2025-12-31',  // New Year's Eve
-  // 2026 holidays
-  '2026-01-01',  // New Year's Day
-  '2026-01-02',  // New Year Holiday
-]);
-
-
-// Check if a date is a static holiday (used for initial calculations before global holidays load)
-const isStaticHoliday = (date) => {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  return STATIC_HOLIDAYS.has(dateKey);
-};
-
-// Check if a date is a trading day (Mon-Fri and not a static holiday)
-const isStaticTradingDay = (date) => {
-  const day = date.getDay();
-  if (day === 0 || day === 6) return false; // Weekend
-  return !isStaticHoliday(date);
-};
-
-// Get trading days between two dates (using static holidays only - component version uses global holidays)
-const getStaticTradingDays = (startDate, endDate) => {
-  const days = eachDayOfInterval({ start: startDate, end: endDate });
-  return days.filter(isStaticTradingDay);
-};
+// Note: Static holidays removed - all holidays are now managed via Admin Settings > Global Trading
 
 // Format currency
 const formatMoney = (amount) => {
