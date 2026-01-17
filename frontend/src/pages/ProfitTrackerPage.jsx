@@ -111,9 +111,16 @@ const isHoliday = (date) => {
 };
 
 // Check if date is a trading day (weekday and not holiday)
-const isTradingDay = (date) => {
+// Now accepts globalHolidays parameter to use dynamic holidays from backend
+const isTradingDay = (date, globalHolidayDates = new Set()) => {
   const dayOfWeek = date.getDay();
-  return dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday(date);
+  if (dayOfWeek === 0 || dayOfWeek === 6) return false; // Weekend
+  
+  // Check global holidays from backend
+  const dateKey = date.toISOString().split('T')[0];
+  if (globalHolidayDates.has(dateKey)) return false;
+  
+  return true;
 };
 
 // Generate daily projection for a specific month
