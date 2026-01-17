@@ -5030,6 +5030,9 @@ class OnboardingTradeEntry(BaseModel):
     date: str  # YYYY-MM-DD
     actual_profit: Optional[float] = None
     missed: bool = False
+    balance: Optional[float] = None  # User-entered balance (source of truth for lot_size)
+    product: Optional[str] = 'MOIL10'
+    direction: Optional[str] = 'BUY'
 
 class OnboardingData(BaseModel):
     user_type: str  # 'new' or 'experienced'
