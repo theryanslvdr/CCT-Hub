@@ -280,7 +280,7 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
 };
 
 // Generate monthly projection data for accordion (up to 5 years = 60 months)
-const generateMonthlyProjection = (accountBalance, tradeLogs = {}) => {
+const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHolidayDates = new Set()) => {
   const months = [];
   let balance = accountBalance || 0;
   const today = new Date();
