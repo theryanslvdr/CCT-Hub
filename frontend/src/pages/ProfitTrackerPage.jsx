@@ -118,8 +118,8 @@ const isTradingDay = (date) => {
 
 // Generate daily projection for a specific month
 // Now accepts deposits array to properly calculate running balance
-// liveAccountValue: The current live account value for synchronizing today's balance
-const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allTransactions = [], liveAccountValue = null) => {
+// Also accepts globalHolidayDates set to use dynamic holidays
+const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allTransactions = [], liveAccountValue = null, globalHolidayDates = new Set()) => {
   const days = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
