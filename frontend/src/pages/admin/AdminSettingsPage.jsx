@@ -445,7 +445,7 @@ export const AdminSettingsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-8 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1">
           <TabsTrigger 
             value="seo" 
             className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
@@ -487,6 +487,13 @@ export const AdminSettingsPage = () => {
             data-testid="tab-emails"
           >
             <Mail className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Emails</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="holidays" 
+            className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white rounded-md text-xs sm:text-sm"
+            data-testid="tab-holidays"
+          >
+            <TreePine className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Holidays</span>
           </TabsTrigger>
           <TabsTrigger 
             value="maintenance" 
