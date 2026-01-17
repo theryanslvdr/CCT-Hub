@@ -287,25 +287,48 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
 };
 
 // Generate monthly projection data for accordion (up to 5 years = 60 months)
+// Now includes past months if user has trade data in those months
 const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHolidayDates = new Set()) => {
   const months = [];
   let balance = accountBalance || 0;
   const today = new Date();
   
-  for (let monthOffset = 0; monthOffset <= 60; monthOffset++) {
+  // Find the earliest trade date to determine if we need to show past months
+  const tradeKeys = Object.keys(tradeLogs).sort();
+  let startMonthOffset = 0;
+  
+  if (tradeKeys.length > 0) {
+    const earliestTradeDate = new Date(tradeKeys[0]);
+    const monthsDiff = (today.getFullYear() - earliestTradeDate.getFullYear()) * 12 + 
+                       (today.getMonth() - earliestTradeDate.getMonth());
+    startMonthOffset = -monthsDiff; // Negative to go back in time
+  }
+  
+  for (let monthOffset = startMonthOffset; monthOffset <= 60; monthOffset++) {
     const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
     const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Check if this is a past month
+    const isPastMonth = monthOffset < 0;
+    const isCurrentMonth = monthOffset === 0;
+    
+    // For past months, only include if there's trade data
+    if (isPastMonth) {
+      const hasTradesInMonth = tradeKeys.some(key => key.startsWith(monthKey));
+      if (!hasTradesInMonth) continue;
+    }
     
     // Calculate trading days in this month
     let tradingDays = 0;
     let monthBalance = balance;
     const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
     
-    // For current month, only count remaining days
-    const isCurrentMonth = monthDate.getFullYear() === today.getFullYear() && 
-                          monthDate.getMonth() === today.getMonth();
-    
     let currentDate = isCurrentMonth ? new Date(today) : new Date(monthDate);
+    
+    // For past months, start from the first day
+    if (isPastMonth) {
+      currentDate = new Date(monthDate);
+    }
     
     while (currentDate <= lastDay) {
       if (isTradingDay(currentDate, globalHolidayDates)) {
@@ -317,8 +340,8 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // Include current month (offset 0) in Year 1
-    const yearNumber = Math.max(1, Math.ceil((monthOffset + 1) / 12));
+    // Calculate year number (past months go to "History" or Year 0)
+    const yearNumber = isPastMonth ? 0 : Math.max(1, Math.ceil((monthOffset + 1) / 12));
     
     months.push({
       monthOffset: monthOffset,
@@ -332,6 +355,7 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
       dailyProfit: (monthBalance / 980) * 15,
       tradingDays: tradingDays,
       isCurrentMonth: isCurrentMonth,
+      isPastMonth: isPastMonth,
     });
     
     balance = monthBalance;
