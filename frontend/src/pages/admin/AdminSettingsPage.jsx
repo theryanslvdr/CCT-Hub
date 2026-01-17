@@ -169,6 +169,47 @@ export const AdminSettingsPage = () => {
       setClearingHistory(false);
     }
   };
+  
+  // Global Holidays functions
+  const loadGlobalHolidays = async () => {
+    setHolidaysLoading(true);
+    try {
+      const res = await adminAPI.getGlobalHolidays();
+      setGlobalHolidays(res.data.holidays || []);
+    } catch (error) {
+      console.error('Failed to load global holidays:', error);
+    } finally {
+      setHolidaysLoading(false);
+    }
+  };
+  
+  const toggleHoliday = async (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    const existingHoliday = globalHolidays.find(h => h.date === dateStr);
+    
+    setSavingHoliday(true);
+    try {
+      if (existingHoliday) {
+        // Remove holiday
+        await adminAPI.removeGlobalHoliday(dateStr);
+        toast.success('Holiday removed');
+      } else {
+        // Add holiday
+        await adminAPI.addGlobalHoliday(dateStr, 'Market Holiday');
+        toast.success('Holiday added');
+      }
+      loadGlobalHolidays();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update holiday');
+    } finally {
+      setSavingHoliday(false);
+    }
+  };
+  
+  const isHoliday = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return globalHolidays.some(h => h.date === dateStr);
+  };
 
   const handleSaveTemplate = async () => {
     if (!editingTemplate) return;
