@@ -971,11 +971,6 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
               </Card>
             )}
           </div>
-                  </div>
-                </CardFooter>
-              </Card>
-            )}
-          </div>
         );
       
       default:
