@@ -178,7 +178,8 @@ export const ContentProtection = ({
   // Render watermark overlay if enabled
   if (!enabled || !showWatermark) return null;
   
-  const watermarkText = userName || userEmail || 'Protected Content';
+  // Use custom watermark if set, otherwise fall back to user info
+  const watermarkText = customWatermark || userName || userEmail || 'Protected Content';
   
   return (
     <div 
