@@ -245,6 +245,7 @@ export const DashboardLayout = () => {
           enabled={platformSettings?.content_protection_enabled || false}
           userEmail={user?.email || ''}
           userName={user?.full_name || ''}
+          customWatermark={platformSettings?.content_protection_watermark_custom || ''}
           showWatermark={platformSettings?.content_protection_watermark !== false}
           disableCopy={platformSettings?.content_protection_disable_copy !== false}
           disableRightClick={platformSettings?.content_protection_disable_rightclick !== false}
