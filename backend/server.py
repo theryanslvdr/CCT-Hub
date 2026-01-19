@@ -1323,18 +1323,28 @@ async def get_trade_history(
         {"_id": 0}
     ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
     
-    # Enrich with signal details
+    # Batch fetch all signal IDs to avoid N+1 query problem
+    signal_ids = list(set(trade.get("signal_id") for trade in trades if trade.get("signal_id")))
+    signals_map = {}
+    if signal_ids:
+        signals = await db.trading_signals.find(
+            {"id": {"$in": signal_ids}}, 
+            {"_id": 0, "id": 1, "product": 1, "trade_time": 1, "trade_timezone": 1}
+        ).to_list(len(signal_ids))
+        signals_map = {s["id"]: s for s in signals}
+    
+    # Enrich with signal details (using pre-fetched signals)
     enriched_trades = []
     for trade in trades:
         signal_details = None
-        if trade.get("signal_id"):
-            signal = await db.trading_signals.find_one({"id": trade["signal_id"]}, {"_id": 0})
-            if signal:
-                signal_details = {
-                    "product": signal.get("product", "MOIL10"),
-                    "trade_time": signal.get("trade_time"),
-                    "trade_timezone": signal.get("trade_timezone", "Asia/Manila"),
-                }
+        signal_id = trade.get("signal_id")
+        if signal_id and signal_id in signals_map:
+            signal = signals_map[signal_id]
+            signal_details = {
+                "product": signal.get("product", "MOIL10"),
+                "trade_time": signal.get("trade_time"),
+                "trade_timezone": signal.get("trade_timezone", "Asia/Manila"),
+            }
         
         enriched_trades.append({
             **trade,
