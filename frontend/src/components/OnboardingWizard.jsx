@@ -957,7 +957,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
             ) : (
               <>
                 {(currentStep === 2 && userType === 'new') || 
-                 (currentStep === 5 && userType === 'experienced') ? 'Complete Setup' : 'Next'}
+                 (currentStep === 4 && userType === 'experienced') ? 'Complete Setup' : 'Next'}
                 <ChevronRight className="w-4 h-4 ml-2" />
               </>
             )}
