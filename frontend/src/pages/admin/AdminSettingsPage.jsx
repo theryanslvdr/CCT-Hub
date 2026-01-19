@@ -626,6 +626,15 @@ export const AdminSettingsPage = () => {
             >
               <Wrench className="w-4 h-4" /> Maintenance
             </button>
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                activeTab === 'security' ? 'bg-red-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              }`}
+              data-testid="tab-security"
+            >
+              <Shield className="w-4 h-4" /> Security
+            </button>
             
             {/* Master Admin Only Section */}
             {isMasterAdmin && (
