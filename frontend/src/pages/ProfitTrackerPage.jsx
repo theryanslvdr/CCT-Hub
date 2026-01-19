@@ -2390,6 +2390,7 @@ export const ProfitTrackerPage = () => {
                     <th>LOT Size</th>
                     <th>Target Profit</th>
                     {!isExtendedLicensee && <th>Actual Profit</th>}
+                    {!isExtendedLicensee && <th>Commission</th>}
                     {!isExtendedLicensee && <th>P/L Diff</th>}
                     {isExtendedLicensee && <th>Profit Credited</th>}
                   </tr>
