@@ -314,6 +314,7 @@ class PlatformSettings(BaseModel):
     # Content Protection Settings (copy/screenshot prevention)
     content_protection_enabled: bool = False
     content_protection_watermark: bool = True  # Show user watermark overlay
+    content_protection_watermark_custom: Optional[str] = None  # Custom watermark text (Master Admin only)
     content_protection_disable_copy: bool = True  # Disable text selection and copy
     content_protection_disable_rightclick: bool = True  # Disable right-click context menu
     content_protection_disable_shortcuts: bool = True  # Block Ctrl+C, PrtScn, etc.
