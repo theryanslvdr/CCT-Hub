@@ -1272,21 +1272,21 @@ export const TradeMonitorPage = () => {
         </Card>
       )}
 
-      {/* LOT Size & Projected Exit Value Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* LOT Size & Projected Exit Value Cards - Mobile optimized */}
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         {/* LOT Size Card */}
         <Card className="glass-card" data-testid="lot-size-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Current LOT Size</p>
-                <p className="text-4xl font-mono font-bold text-purple-400 mt-2" data-testid="lot-size-value">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-zinc-400">LOT Size</p>
+                <p className="text-2xl md:text-4xl font-mono font-bold text-purple-400 mt-1 md:mt-2 truncate" data-testid="lot-size-value">
                   {lotSize.toFixed(2)}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">From Profit Tracker (Balance ÷ 980)</p>
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1 truncate">Balance ÷ 980</p>
               </div>
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Calculator className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 ml-2">
+                <Calculator className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </div>
             </div>
           </CardContent>
@@ -1294,27 +1294,27 @@ export const TradeMonitorPage = () => {
 
         {/* Projected Exit Value Card */}
         <Card className="glass-card" data-testid="projected-exit-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-zinc-400">Projected Exit Value</p>
-                <p className="text-4xl font-mono font-bold text-emerald-400 mt-2" data-testid="projected-exit-value">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-zinc-400">Projected Exit</p>
+                <p className="text-2xl md:text-4xl font-mono font-bold text-emerald-400 mt-1 md:mt-2 truncate" data-testid="projected-exit-value">
                   {formatLargeNumber(exitValue)}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">LOT × {profitMultiplier} = {formatLargeNumber(exitValue)}</p>
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1 truncate">LOT × {profitMultiplier}</p>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                  <Rocket className="w-7 h-7 text-white" />
+              <div className="flex flex-col items-end gap-1 md:gap-2 flex-shrink-0 ml-2">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                  <Rocket className="w-5 h-5 md:w-7 md:h-7 text-white" />
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowDreamProfit(true)}
-                  className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10"
+                  className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-[10px] md:text-sm h-6 md:h-8 px-2 md:px-3"
                   data-testid="open-dream-profit"
                 >
-                  <Sparkles className="w-4 h-4 mr-1" /> Dream Profit
+                  <Sparkles className="w-3 h-3 md:w-4 md:h-4 mr-0.5 md:mr-1" /> <span className="hidden sm:inline">Dream</span>
                 </Button>
               </div>
             </div>
