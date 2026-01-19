@@ -1915,6 +1915,119 @@ export const AdminSettingsPage = () => {
           </div>
         )}
 
+        {/* Security Tab - Content Protection */}
+        {activeTab === 'security' && (
+          <div className="space-y-6">
+            {/* Content Protection Card */}
+            <Card className={`glass-card ${settings.content_protection_enabled ? 'border-red-500/50' : ''}`}>
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Shield className={`w-5 h-5 ${settings.content_protection_enabled ? 'text-red-400' : 'text-zinc-400'}`} /> 
+                  Content Protection
+                </CardTitle>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Prevent users from copying content or taking screenshots of the platform.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Master Toggle */}
+                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                  <div>
+                    <p className="text-white font-medium">Enable Content Protection</p>
+                    <p className="text-sm text-zinc-500 mt-1">
+                      When enabled, copy/paste and right-click will be disabled for all users.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={settings.content_protection_enabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, content_protection_enabled: checked })}
+                    data-testid="content-protection-toggle"
+                  />
+                </div>
+
+                {settings.content_protection_enabled && (
+                  <div className="space-y-4">
+                    {/* Watermark Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                      <div>
+                        <p className="text-white font-medium">Show User Watermark</p>
+                        <p className="text-sm text-zinc-500 mt-1">
+                          Display user&apos;s email/name as a subtle watermark overlay on all pages.
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.content_protection_watermark}
+                        onCheckedChange={(checked) => setSettings({ ...settings, content_protection_watermark: checked })}
+                        data-testid="watermark-toggle"
+                      />
+                    </div>
+
+                    {/* Copy Protection Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                      <div>
+                        <p className="text-white font-medium">Disable Text Selection & Copy</p>
+                        <p className="text-sm text-zinc-500 mt-1">
+                          Prevent users from selecting and copying text content.
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.content_protection_disable_copy}
+                        onCheckedChange={(checked) => setSettings({ ...settings, content_protection_disable_copy: checked })}
+                        data-testid="disable-copy-toggle"
+                      />
+                    </div>
+
+                    {/* Right-Click Protection Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                      <div>
+                        <p className="text-white font-medium">Disable Right-Click Menu</p>
+                        <p className="text-sm text-zinc-500 mt-1">
+                          Block the browser context menu (right-click).
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.content_protection_disable_rightclick}
+                        onCheckedChange={(checked) => setSettings({ ...settings, content_protection_disable_rightclick: checked })}
+                        data-testid="disable-rightclick-toggle"
+                      />
+                    </div>
+
+                    {/* Keyboard Shortcuts Protection Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                      <div>
+                        <p className="text-white font-medium">Block Keyboard Shortcuts</p>
+                        <p className="text-sm text-zinc-500 mt-1">
+                          Block Ctrl+C, Ctrl+A, PrintScreen, and other copy/screenshot shortcuts.
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.content_protection_disable_shortcuts}
+                        onCheckedChange={(checked) => setSettings({ ...settings, content_protection_disable_shortcuts: checked })}
+                        data-testid="disable-shortcuts-toggle"
+                      />
+                    </div>
+
+                    {/* Info Box */}
+                    <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5" />
+                        <div>
+                          <p className="text-amber-400 font-medium">Important Notice</p>
+                          <p className="text-sm text-zinc-400 mt-1">
+                            While these protections deter casual copying, they cannot prevent determined users 
+                            from capturing content using external tools, screen recorders, or phone cameras. 
+                            The watermark helps trace any leaked content back to the source user.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
           {/* Global Trading Settings (Master Admin Only) */}
           {activeTab === 'trading' && isMasterAdmin && (
             <div className="space-y-6">
