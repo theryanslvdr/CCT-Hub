@@ -11,13 +11,37 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 54 (2026-01-19) - Commission Tracking System ✅
+### Session 54 (2026-01-19) - Commission Tracking + Performance Optimization + Refactoring ✅
 
 #### Commission Tracking Feature Implementation ✅
 - **Commission Column in Daily Projection**: Added "Commission" column to the Daily Projection table in ProfitTrackerPage
 - **Commission Input in Trade Monitor**: Added commission input field when entering actual profit after a trade
-- **Commission Input in Onboarding Wizard**: Added total commission input at the final step (Step 5) for experienced traders
+- **Commission Input in Onboarding Wizard**: Added total commission input at the final step for experienced traders
 - **Balance Formula Updated**: `Next Day's Balance = Today's Balance + Today's Profit + Today's Commission`
+
+#### Performance Optimization (High Concurrency Fixes) ✅
+- **MongoDB Connection Pooling**: Added `maxPoolSize=100`, `minPoolSize=10`, `maxIdleTimeMS=45000`, `waitQueueTimeoutMS=10000`
+- **N+1 Query Fix**: Batch fetch signals in trade history endpoint instead of individual queries per trade
+- **CoinGecko Cache Optimization**: Increased cache TTL from 5 to 15 minutes, added request deduplication
+- **Database Indexes**: Added compound indexes for frequently queried fields:
+  - `trade_logs: (user_id, created_at)` for paginated queries
+  - `deposits: (user_id, created_at)` for sorted queries
+  - `licenses: (user_id, is_active)` for license checks
+  - `trading_signals: id` for signal enrichment
+
+#### Frontend Refactoring ✅
+- **OnboardingWizard Step Extraction**:
+  - Created `/app/frontend/src/components/onboarding/` directory
+  - `StepUserType.jsx` - Step 1: User type selection
+  - `StepNewTraderBalance.jsx` - Step 2: Starting balance for new traders
+  - `StepExperiencedStart.jsx` - Step 2: Combined start date + balance for experienced traders
+  - `index.js` - Exports with shared helper functions
+  - Reduced step count from 5 to 4 for experienced traders (combined date+balance step)
+- **Profit Tracker Utilities**:
+  - Created `/app/frontend/src/lib/profitTrackerUtils.js`
+  - Contains: `formatMoney`, `formatLargeNumber`, `truncateTo2Decimals`
+  - Contains: `calculateLotSize`, `calculateProjectedProfit`, `isTradingDay`
+  - Contains: `generateDailyProjectionForMonth` function
 
 #### Backend Changes ✅
 - **Models Updated**: `TradeLogCreate`, `TradeLogUpdate`, `OnboardingTradeEntry`, `OnboardingData` include `commission` field
@@ -29,25 +53,6 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Calculations Updated** (`utils/calculations.py`):
   - `calculate_account_value()` includes commission in balance calculation
   - `get_user_financial_summary()` returns `total_commission` field
-
-#### Frontend Changes ✅
-- **TradeMonitorPage.jsx**:
-  - Added `commissionValue` state
-  - Added commission input field in actual profit dialog
-  - Updated `submitActualProfit` to send commission to backend
-- **OnboardingWizard.jsx**:
-  - Added `totalCommission` state
-  - Added commission input card at final step (Step 5)
-  - Updated `handleSubmit` to include `total_commission` in API call
-  - Updated `handleRestart` to clear commission state
-- **ProfitTrackerPage.jsx**:
-  - Updated `generateDailyProjectionForMonth` to extract commission from trade logs
-  - Updated balance calculation: `runningBalance += actualProfit + commission`
-  - Added Commission column to table header and body
-
-#### P1: Data Consistency Verification ✅
-- Verified Reset Tracker correctly deletes deposits and trade_logs
-- Verified Complete Onboarding creates trade_logs with correct formulas:
   - `lot_size = balance / 980`
   - `projected_profit = lot_size * 15`
 - Verified Daily Projection uses stored trade_log values for completed trades
