@@ -255,16 +255,21 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       
       // For today, recalculate lot size and target profit based on live account value
       // For past days with trades, use stored values; for future days, use calculated values
-      let effectiveLotSize, effectiveTargetProfit;
+      let effectiveLotSize, effectiveTargetProfit, effectiveBalance;
       if (isToday && liveAccountValue !== null) {
+        effectiveBalance = liveAccountValue;
         effectiveLotSize = truncateTo2Decimals(liveAccountValue / 980);
         effectiveTargetProfit = truncateTo2Decimals(effectiveLotSize * 15);
       } else if (hasStoredTradeData) {
+        // CRITICAL: For days with stored trade data, derive balance FROM the stored lot_size
+        // This ensures Balance Before matches the LOT Size (Balance = LOT × 980)
         effectiveLotSize = lotSize;
         effectiveTargetProfit = targetProfit;
+        effectiveBalance = truncateTo2Decimals(lotSize * 980);
       } else {
         effectiveLotSize = lotSize;
         effectiveTargetProfit = targetProfit;
+        effectiveBalance = effectiveBalanceBefore;
       }
       
       days.push({
@@ -275,7 +280,7 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
           day: 'numeric' 
         }),
         dateKey: dateKey,
-        balanceBefore: effectiveBalanceBefore,
+        balanceBefore: effectiveBalance,
         lotSize: effectiveLotSize,
         targetProfit: effectiveTargetProfit,
         actualProfit: actualProfit,
