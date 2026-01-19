@@ -58,6 +58,7 @@ export const AdminSettingsPage = () => {
     // Content Protection (Security)
     content_protection_enabled: false,
     content_protection_watermark: true,
+    content_protection_watermark_custom: '',
     content_protection_disable_copy: true,
     content_protection_disable_rightclick: true,
     content_protection_disable_shortcuts: true,
