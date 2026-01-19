@@ -5183,10 +5183,27 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 await db.trade_logs.insert_one(trade_log)
                 created_trades.append(trade_id)
                 
-                # Update running balance for next iteration
-                running_balance += actual_profit
+                # Update running balance for next iteration (Balance + Profit + Commission)
+                running_balance += actual_profit + commission
         
-        # 4. Update user's onboarding status
+        # 4. If total_commission is provided (from final step), record it as a deposit
+        if data.total_commission and data.total_commission > 0:
+            commission_deposit_id = str(uuid.uuid4())
+            commission_deposit = {
+                "id": commission_deposit_id,
+                "user_id": user["id"],
+                "amount": data.total_commission,
+                "product": "COMMISSION",
+                "currency": "USDT",
+                "notes": "Total commission from onboarding",
+                "type": "commission",
+                "is_commission": True,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.deposits.insert_one(commission_deposit)
+            created_deposits.append(commission_deposit_id)
+        
+        # 5. Update user's onboarding status
         await db.users.update_one(
             {"id": user["id"]},
             {
@@ -5205,7 +5222,8 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
             "deposits_created": len(created_deposits),
             "trades_created": len(created_trades),
             "starting_balance": data.starting_balance,
-            "user_type": data.user_type
+            "user_type": data.user_type,
+            "total_commission": data.total_commission or 0
         }
         
     except Exception as e:
