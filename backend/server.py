@@ -1233,7 +1233,7 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     lot_size = calculate_lot_size(account_value)
     
     # Log for debugging
-    logger.info(f"Trade log: user={user['id']}, account_value={account_value}, calculated_lot_size={lot_size}, frontend_lot_size={data.lot_size}")
+    logger.info(f"Trade log: user={user['id']}, account_value={account_value}, calculated_lot_size={lot_size}, frontend_lot_size={data.lot_size}, commission={data.commission}")
     
     projected_profit = calculate_exit_value(lot_size)
     profit_difference = data.actual_profit - projected_profit
@@ -1257,6 +1257,7 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
         "direction": data.direction,
         "projected_profit": projected_profit,
         "actual_profit": data.actual_profit,
+        "commission": data.commission or 0,  # Daily commission from referrals
         "profit_difference": profit_difference,
         "performance": performance,
         "signal_id": active_signal["id"] if active_signal else None,
@@ -1279,7 +1280,8 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
                 "projected": projected_profit,
                 "actual": data.actual_profit,
                 "difference": profit_difference,
-                "lot_size": lot_size
+                "lot_size": lot_size,
+                "commission": data.commission or 0
             }
         )
     
