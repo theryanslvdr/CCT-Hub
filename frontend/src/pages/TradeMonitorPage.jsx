@@ -1380,17 +1380,32 @@ export const TradeMonitorPage = () => {
             <div className="text-center space-y-6">
               <h3 className="text-2xl font-bold text-white">Enter Your Actual Profit</h3>
               <p className="text-zinc-400">How much did you actually make from this trade?</p>
-              <div className="max-w-xs mx-auto">
-                <Label className="text-zinc-300">Actual Profit (USD)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={actualExitValue}
-                  onChange={(e) => setActualExitValue(e.target.value)}
-                  placeholder="Enter actual profit"
-                  className="input-dark mt-1 text-xl font-mono text-center"
-                  data-testid="actual-exit-input"
-                />
+              <div className="max-w-sm mx-auto space-y-4">
+                <div>
+                  <Label className="text-zinc-300">Actual Profit (USD)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={actualExitValue}
+                    onChange={(e) => setActualExitValue(e.target.value)}
+                    placeholder="Enter actual profit"
+                    className="input-dark mt-1 text-xl font-mono text-center"
+                    data-testid="actual-exit-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Commission (optional)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={commissionValue}
+                    onChange={(e) => setCommissionValue(e.target.value)}
+                    placeholder="0.00"
+                    className="input-dark mt-1 text-lg font-mono text-center"
+                    data-testid="commission-input"
+                  />
+                  <p className="text-xs text-zinc-500 mt-1">Daily commission from referrals</p>
+                </div>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-sm text-zinc-400">Projected Value</p>
