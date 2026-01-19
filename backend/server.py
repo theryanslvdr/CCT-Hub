@@ -1579,6 +1579,7 @@ async def check_missed_trade_status(user: dict = Depends(get_current_user)):
 async def log_missed_trade(
     date: str,  # ISO date string for which trade was missed
     actual_profit: float,
+    commission: float = 0,  # Daily commission from referrals
     lot_size: Optional[float] = None,
     direction: Optional[str] = "BUY",
     notes: Optional[str] = None,
