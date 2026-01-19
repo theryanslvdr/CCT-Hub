@@ -112,7 +112,7 @@ const pagesTitles = {
 };
 
 export const DashboardLayout = () => {
-  const { isAuthenticated, loading, isMasterAdmin } = useAuth();
+  const { isAuthenticated, loading, isMasterAdmin, user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [platformSettings, setPlatformSettings] = useState(null);
