@@ -407,6 +407,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     setNewTransactionAmount('');
     setNewTransactionDate(null);
     setNewTransactionType('deposit');
+    setTotalCommission('');
     
     // Clear saved progress
     localStorage.removeItem('onboarding_wizard_progress');
