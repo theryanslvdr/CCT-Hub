@@ -1043,6 +1043,36 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                 </div>
               </Card>
             )}
+            
+            {/* Commission Entry Card - shown when all days are complete or on last day */}
+            {currentTradeIndex === tradingDays.length - 1 && (
+              <Card className="max-w-md mx-auto glass-card mt-4 border-emerald-500/30">
+                <div className="px-4 py-2 border-b border-zinc-800 bg-emerald-500/10">
+                  <span className="text-emerald-400 font-medium text-sm flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Total Commission (Optional)
+                  </span>
+                </div>
+                <CardContent className="p-3">
+                  <p className="text-xs text-zinc-400 mb-2">
+                    Enter the total referral commission you've received during this trading period. This will be added to your account balance.
+                  </p>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={totalCommission}
+                      onChange={(e) => setTotalCommission(e.target.value)}
+                      placeholder="0.00"
+                      className="pl-7 input-dark font-mono text-lg"
+                      data-testid="total-commission-input"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         );
       
