@@ -7011,12 +7011,19 @@ async def startup_db():
         await db.users.create_index("email", unique=True)
         await db.users.create_index("id", unique=True)
         await db.deposits.create_index("user_id")
+        await db.deposits.create_index([("user_id", 1), ("created_at", -1)])  # For sorted queries
         await db.trade_logs.create_index("user_id")
+        await db.trade_logs.create_index([("user_id", 1), ("created_at", -1)])  # For paginated trade history
+        await db.trade_logs.create_index("signal_id")  # For signal lookups
         await db.trading_signals.create_index("is_active")
+        await db.trading_signals.create_index("id")  # For signal enrichment
         await db.debts.create_index("user_id")
         await db.goals.create_index("user_id")
         await db.notifications.create_index("recipient_id")
         await db.notifications.create_index([("recipient_id", 1), ("timestamp", -1)])
+        await db.global_holidays.create_index("date", unique=True)  # For holiday lookups
+        await db.trading_products.create_index("id")  # For product lookups
+        await db.licenses.create_index([("user_id", 1), ("is_active", 1)])  # For license checks
         logger.info("Database indexes created")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
