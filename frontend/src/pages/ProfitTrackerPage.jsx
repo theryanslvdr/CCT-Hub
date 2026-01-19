@@ -2516,6 +2516,21 @@ export const ProfitTrackerPage = () => {
                           </td>
                         )}
                         
+                        {/* Commission column - hidden for extended licensees */}
+                        {!isExtendedLicensee && (
+                          <td>
+                            {day.status === 'completed' && day.commission > 0 ? (
+                              <span className="font-mono text-cyan-400">
+                                +{formatMoney(day.commission)}
+                              </span>
+                            ) : day.status === 'completed' ? (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            ) : (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            )}
+                          </td>
+                        )}
+                        
                         {/* P/L Diff column - hidden for extended licensees */}
                         {!isExtendedLicensee && (
                           <td>
