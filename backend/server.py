@@ -5203,22 +5203,19 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 # Update running balance for next iteration (Balance + Profit + Commission)
                 running_balance += actual_profit + commission
         
-        # 4. If total_commission is provided (from final step), record it as a deposit
-        if data.total_commission and data.total_commission > 0:
-            commission_deposit_id = str(uuid.uuid4())
-            commission_deposit = {
-                "id": commission_deposit_id,
-                "user_id": user["id"],
-                "amount": data.total_commission,
-                "product": "COMMISSION",
-                "currency": "USDT",
-                "notes": "Total commission from onboarding",
-                "type": "commission",
-                "is_commission": True,
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            await db.deposits.insert_one(commission_deposit)
-            created_deposits.append(commission_deposit_id)
+        # 4. If total_commission is provided (from final step), assign it to the LAST trade entry
+        # This ensures it appears in the Daily Projection Commission column for the last trading day
+        if data.total_commission and data.total_commission > 0 and created_trades:
+            # Get the last trade log ID and update its commission field
+            last_trade_id = created_trades[-1]
+            
+            # Update the last trade log with the total commission
+            await db.trade_logs.update_one(
+                {"id": last_trade_id},
+                {"$inc": {"commission": data.total_commission}}  # Add to any existing commission
+            )
+            
+            logger.info(f"Assigned total commission ${data.total_commission} to last trade {last_trade_id}")
         
         # 5. Update user's onboarding status
         await db.users.update_one(
