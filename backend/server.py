@@ -1333,6 +1333,7 @@ async def get_trade_history(
         
         enriched_trades.append({
             **trade,
+            "commission": trade.get("commission", 0),  # Default to 0 for backward compatibility
             "created_at": datetime.fromisoformat(trade["created_at"]) if isinstance(trade["created_at"], str) else trade["created_at"],
             "signal_details": signal_details,
             "time_entered": trade.get("time_entered"),  # User-editable field
