@@ -67,6 +67,7 @@ export const ContentProtection = ({
   enabled = false,
   userEmail = '',
   userName = '',
+  customWatermark = '',  // Custom watermark text (overrides user info)
   showWatermark = true,
   disableCopy = true,
   disableRightClick = true,
