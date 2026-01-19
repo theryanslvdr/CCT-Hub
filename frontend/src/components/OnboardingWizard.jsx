@@ -690,8 +690,8 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
           </div>
         );
       
-      case 5:
-        // Enter actual profits for each trading day - Balance is source of truth
+      case 4:
+        // Enter actual profits for each trading day - Balance is source of truth (was case 5)
         const currentDay = tradingDays[currentTradeIndex];
         const currentDateKey = currentDay ? format(currentDay, 'yyyy-MM-dd') : '';
         const currentEntry = tradeEntries[currentDateKey];
