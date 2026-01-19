@@ -197,3 +197,220 @@
 .recharts-tooltip-wrapper {
     @apply glass rounded-lg !important;
 }
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Mobile Base Styles */
+@media (max-width: 768px) {
+    /* Global mobile spacing */
+    .mobile-container {
+        @apply px-4 py-4;
+    }
+    
+    /* Card adjustments */
+    .glass-card {
+        @apply rounded-lg p-4;
+    }
+    
+    /* KPI values - smaller on mobile */
+    .kpi-value {
+        @apply text-xl sm:text-2xl md:text-3xl;
+    }
+    
+    /* Trade card mobile */
+    .trade-card {
+        @apply p-4;
+    }
+    
+    /* Table mobile adjustments */
+    .data-table th {
+        @apply px-2 py-2 text-[10px];
+    }
+    
+    .data-table td {
+        @apply px-2 py-2 text-xs;
+    }
+    
+    /* Hide elements on mobile */
+    .hide-mobile {
+        @apply hidden !important;
+    }
+    
+    /* Show only on mobile */
+    .show-mobile {
+        @apply block !important;
+    }
+    
+    /* Full width cards on mobile */
+    .mobile-full-width {
+        @apply w-full !important;
+    }
+    
+    /* Mobile card grid - single column */
+    .mobile-card-grid {
+        @apply grid-cols-1 gap-3 !important;
+    }
+    
+    /* Mobile text sizes */
+    .mobile-text-sm {
+        @apply text-sm !important;
+    }
+    
+    .mobile-text-xs {
+        @apply text-xs !important;
+    }
+    
+    /* Mobile spacing utilities */
+    .mobile-p-3 {
+        @apply p-3 !important;
+    }
+    
+    .mobile-gap-2 {
+        @apply gap-2 !important;
+    }
+    
+    .mobile-gap-3 {
+        @apply gap-3 !important;
+    }
+    
+    /* Mobile button sizes */
+    .mobile-btn {
+        @apply py-3 px-4 text-sm min-h-[44px];
+    }
+    
+    /* Ensure touch targets are at least 44px */
+    button, a, input, select, textarea {
+        min-height: 44px;
+    }
+    
+    /* Mobile header adjustments */
+    .mobile-header {
+        @apply py-3 px-4;
+    }
+    
+    /* Mobile stat cards */
+    .mobile-stat-card {
+        @apply p-3 rounded-lg;
+    }
+    
+    .mobile-stat-card .stat-value {
+        @apply text-lg font-bold font-mono;
+    }
+    
+    .mobile-stat-card .stat-label {
+        @apply text-xs text-zinc-400 mt-1;
+    }
+}
+
+/* Small mobile screens (iPhone SE, etc.) */
+@media (max-width: 375px) {
+    .glass-card {
+        @apply p-3;
+    }
+    
+    .kpi-value {
+        @apply text-lg;
+    }
+    
+    .data-table th,
+    .data-table td {
+        @apply px-1 py-1.5 text-[9px];
+    }
+    
+    /* Even smaller text for very small screens */
+    .mobile-xs-text {
+        @apply text-[10px] !important;
+    }
+}
+
+/* Tablet and medium screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .tablet-2-cols {
+        @apply grid-cols-2 !important;
+    }
+}
+
+/* Desktop - hide mobile-only elements */
+@media (min-width: 769px) {
+    .show-mobile {
+        @apply hidden !important;
+    }
+    
+    .hide-desktop {
+        @apply hidden !important;
+    }
+}
+
+/* Mobile navigation bottom bar */
+.mobile-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-lg border-t border-zinc-800 z-50 px-2 py-2;
+}
+
+.mobile-bottom-nav a,
+.mobile-bottom-nav button {
+    @apply flex flex-col items-center justify-center py-2 px-3 text-zinc-400 hover:text-white transition-colors rounded-lg;
+}
+
+.mobile-bottom-nav a.active,
+.mobile-bottom-nav button.active {
+    @apply text-blue-400 bg-blue-500/10;
+}
+
+.mobile-bottom-nav .nav-icon {
+    @apply w-5 h-5 mb-1;
+}
+
+.mobile-bottom-nav .nav-label {
+    @apply text-[10px] font-medium;
+}
+
+/* Ensure content doesn't hide behind bottom nav on mobile */
+@media (max-width: 768px) {
+    .main-content-with-bottom-nav {
+        @apply pb-20;
+    }
+}
+
+/* Mobile iframe replacement button */
+.mobile-external-link-btn {
+    @apply w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-base flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95;
+}
+
+/* Mobile accordion */
+.mobile-accordion {
+    @apply border border-zinc-800 rounded-lg overflow-hidden;
+}
+
+.mobile-accordion-trigger {
+    @apply w-full flex items-center justify-between p-4 bg-zinc-900/50 text-white font-medium;
+}
+
+.mobile-accordion-content {
+    @apply p-4 bg-zinc-950/50;
+}
+
+/* Mobile-optimized chart container */
+.mobile-chart-container {
+    @apply w-full h-48 sm:h-64 md:h-80;
+}
+
+/* Projection formula - mobile optimized */
+.mobile-formula {
+    @apply text-xs leading-relaxed space-y-1;
+}
+
+.mobile-formula .formula-line {
+    @apply block whitespace-normal break-words;
+}
+
+/* Financial data display - mobile optimized */
+.mobile-financial-value {
+    @apply text-lg sm:text-xl font-bold font-mono truncate;
+}
+
+.mobile-financial-label {
+    @apply text-xs text-zinc-400 uppercase tracking-wide;
+}
+
