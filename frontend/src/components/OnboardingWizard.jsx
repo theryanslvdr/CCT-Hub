@@ -263,7 +263,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   const getTotalSteps = () => {
     if (!userType) return 2;
     if (userType === 'new') return 2;
-    return 5; // experienced: type, start date, balance, transactions, trade profits
+    return 4; // experienced: type, start date+balance (combined), transactions, trade profits
   };
   
   // Handle adding a transaction
