@@ -879,7 +879,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
                 </div>
                 <CardContent className="p-3">
                   <p className="text-xs text-zinc-400 mb-2">
-                    Enter the total referral commission you've received during this trading period. This will be added to your account balance.
+                    Enter the total referral commission you&apos;ve received during this trading period. This will be added to your account balance.
                   </p>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
