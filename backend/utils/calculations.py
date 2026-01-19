@@ -13,7 +13,7 @@ async def calculate_account_value(
     Calculate account value for a user.
     
     For licensees: Returns license.current_amount
-    For regular users: Returns total_deposits - total_withdrawals + total_profit
+    For regular users: Returns total_deposits - total_withdrawals + total_profit + total_commission
     
     Args:
         db: Database connection
@@ -38,7 +38,7 @@ async def calculate_account_value(
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
     # Regular user calculation: sum all deposit amounts (positive = deposit, negative = withdrawal)
-    # Then add total profit from trades
+    # Then add total profit + total commission from trades
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
@@ -46,8 +46,9 @@ async def calculate_account_value(
     # This is simpler and handles cases where amount is negative but is_withdrawal flag is not set
     total_net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)  # Sum daily commissions from trades
     
-    return round(total_net_deposits + total_profit, 2)
+    return round(total_net_deposits + total_profit + total_commission, 2)
 
 
 async def get_user_financial_summary(
