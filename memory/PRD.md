@@ -7,9 +7,46 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Backend**: FastAPI (Python) with MongoDB
 - **Frontend**: React with Tailwind CSS + Shadcn UI
 - **Auth**: JWT with Heartbeat API verification
-- **Integrations**: Cloudinary, Emailit, ExchangeRate-API, APScheduler
+- **Integrations**: Cloudinary, Emailit, ExchangeRate-API, APScheduler, CoinGecko (USDT rates)
 
 ## Completed Work
+
+### Session 54 (2026-01-19) - Commission Tracking System ✅
+
+#### Commission Tracking Feature Implementation ✅
+- **Commission Column in Daily Projection**: Added "Commission" column to the Daily Projection table in ProfitTrackerPage
+- **Commission Input in Trade Monitor**: Added commission input field when entering actual profit after a trade
+- **Commission Input in Onboarding Wizard**: Added total commission input at the final step (Step 5) for experienced traders
+- **Balance Formula Updated**: `Next Day's Balance = Today's Balance + Today's Profit + Today's Commission`
+
+#### Backend Changes ✅
+- **Models Updated**: `TradeLogCreate`, `TradeLogUpdate`, `OnboardingTradeEntry`, `OnboardingData` include `commission` field
+- **API Endpoints Updated**:
+  - `POST /api/trade/log` - Accepts and stores `commission` field (defaults to 0)
+  - `POST /api/trade/log-missed-trade` - Accepts `commission` field
+  - `POST /api/profit/complete-onboarding` - Accepts `total_commission` field
+- **Calculations Updated** (`utils/calculations.py`):
+  - `calculate_account_value()` includes commission in balance calculation
+  - `get_user_financial_summary()` returns `total_commission` field
+
+#### Frontend Changes ✅
+- **TradeMonitorPage.jsx**:
+  - Added `commissionValue` state
+  - Added commission input field in actual profit dialog
+  - Updated `submitActualProfit` to send commission to backend
+- **OnboardingWizard.jsx**:
+  - Added `totalCommission` state
+  - Added commission input card at final step (Step 5)
+  - Updated `handleSubmit` to include `total_commission` in API call
+  - Updated `handleRestart` to clear commission state
+- **ProfitTrackerPage.jsx**:
+  - Updated `generateDailyProjectionForMonth` to extract commission from trade logs
+  - Updated balance calculation: `runningBalance += actualProfit + commission`
+  - Added Commission column to table header and body
+
+#### Testing ✅
+- **15/15 backend tests passed** (test_iteration_53_commission_tracking.py)
+- **Frontend UI verified**: Commission column visible, inputs functional
 
 ### Session 53 (2026-01-17) - Onboarding Wizard, Streaks, Daily Projection Fixes
 
