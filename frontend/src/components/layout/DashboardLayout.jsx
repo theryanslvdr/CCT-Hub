@@ -240,6 +240,17 @@ export const DashboardLayout = () => {
 
         <Toaster position="top-right" richColors />
         
+        {/* Content Protection (copy/screenshot prevention) */}
+        <ContentProtection
+          enabled={platformSettings?.content_protection_enabled || false}
+          userEmail={user?.email || ''}
+          userName={user?.full_name || ''}
+          showWatermark={platformSettings?.content_protection_watermark !== false}
+          disableCopy={platformSettings?.content_protection_disable_copy !== false}
+          disableRightClick={platformSettings?.content_protection_disable_rightclick !== false}
+          disableShortcuts={platformSettings?.content_protection_disable_shortcuts !== false}
+        />
+        
         {/* Onboarding Tour */}
         <OnboardingTour isOpen={showTour} onClose={completeTour} />
 
