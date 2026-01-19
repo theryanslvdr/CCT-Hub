@@ -504,7 +504,8 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
           balance: entry.balance ? parseFloat(entry.balance) : null,  // Include user-entered balance
           product: entry.product || 'MOIL10',
           direction: entry.direction || 'BUY'
-        }))
+        })),
+        total_commission: totalCommission ? parseFloat(totalCommission) : 0  // Total commission from final step
       };
       
       // Call backend to save onboarding data
