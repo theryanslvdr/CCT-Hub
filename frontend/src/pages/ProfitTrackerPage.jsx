@@ -2164,16 +2164,16 @@ export const ProfitTrackerPage = () => {
 
       {/* Projection Vision Card */}
       <Card className="glass-highlight border-blue-500/30">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-400" /> Projection Vision
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" /> Projection Vision
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant={projectionView === 'summary' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setProjectionView('summary')}
-              className={projectionView === 'summary' ? 'btn-primary' : 'btn-secondary'}
+              className={`flex-1 sm:flex-none text-xs sm:text-sm ${projectionView === 'summary' ? 'btn-primary' : 'btn-secondary'}`}
             >
               Summary
             </Button>
@@ -2181,37 +2181,37 @@ export const ProfitTrackerPage = () => {
               variant={projectionView === 'table' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setProjectionView('table')}
-              className={projectionView === 'table' ? 'btn-primary' : 'btn-secondary'}
+              className={`flex-1 sm:flex-none text-xs sm:text-sm ${projectionView === 'table' ? 'btn-primary' : 'btn-secondary'}`}
             >
-              <Eye className="w-4 h-4 mr-1" /> Monthly Table
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Monthly Table
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           {projectionView === 'summary' ? (
-            <div className="space-y-6">
-              {/* Current Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg bg-zinc-900/50">
+            <div className="space-y-4 sm:space-y-6">
+              {/* Current Stats - Mobile optimized */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg bg-zinc-900/50">
                 <div>
-                  <p className="text-xs text-zinc-500">Current Balance</p>
-                  <p className="font-mono text-lg text-white">{formatLargeNumber(effectiveAccountValue)}</p>
+                  <p className="text-[10px] sm:text-xs text-zinc-500">Current Balance</p>
+                  <p className="font-mono text-sm sm:text-lg text-white truncate">{formatLargeNumber(effectiveAccountValue)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500">LOT Size</p>
-                  <p className="font-mono text-lg text-purple-400">{effectiveLotSize.toFixed(2)}</p>
+                  <p className="text-[10px] sm:text-xs text-zinc-500">LOT Size</p>
+                  <p className="font-mono text-sm sm:text-lg text-purple-400">{effectiveLotSize.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500">Daily Profit (×15)</p>
-                  <p className="font-mono text-lg text-emerald-400">{formatMoney(effectiveLotSize * 15)}</p>
+                  <p className="text-[10px] sm:text-xs text-zinc-500">Daily Profit</p>
+                  <p className="font-mono text-sm sm:text-lg text-emerald-400 truncate">{formatMoney(effectiveLotSize * 15)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-500">Formula</p>
-                  <p className="text-sm text-zinc-400">Balance ÷ 980 × 15</p>
+                  <p className="text-[10px] sm:text-xs text-zinc-500">Formula</p>
+                  <p className="text-xs sm:text-sm text-zinc-400">Bal ÷ 980 × 15</p>
                 </div>
               </div>
 
-              {/* Projection Chart */}
-              <div className="h-[250px]">
+              {/* Projection Chart - Mobile optimized height */}
+              <div className="h-[180px] sm:h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={projectionChartData}>
                     <defs>
@@ -2221,10 +2221,11 @@ export const ProfitTrackerPage = () => {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                    <XAxis dataKey="name" stroke="#71717A" fontSize={11} />
+                    <XAxis dataKey="name" stroke="#71717A" fontSize={10} tickMargin={5} />
                     <YAxis 
                       stroke="#71717A" 
-                      fontSize={11} 
+                      fontSize={10} 
+                      width={45}
                       tickFormatter={(v) => {
                         if (v >= 1e12) return `$${(v/1e12).toFixed(1)}T`;
                         if (v >= 1e9) return `$${(v/1e9).toFixed(1)}B`;
@@ -2234,34 +2235,34 @@ export const ProfitTrackerPage = () => {
                       }}
                     />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                      contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px', fontSize: '12px' }}
                       formatter={(value) => [formatLargeNumber(value), 'Projected Balance']}
                     />
-                    <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6' }} />
+                    <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6', r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Projection Grid - 1mo, 3mo, 6mo, then dropdown for years */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Projection Grid - Mobile optimized */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 {projectionData.slice(1, 4).map((p, i) => (
-                  <div key={p.period} className={`p-4 rounded-lg border ${i === 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-zinc-900/50 border-zinc-800'}`}>
-                    <p className={`text-xs ${i === 0 ? 'text-blue-400' : 'text-zinc-500'}`}>{p.period}</p>
-                    <p className={`font-mono text-lg ${i === 0 ? 'text-blue-400' : 'text-white'} mt-1`}>
+                  <div key={p.period} className={`p-2 sm:p-4 rounded-lg border ${i === 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-zinc-900/50 border-zinc-800'}`}>
+                    <p className={`text-[10px] sm:text-xs ${i === 0 ? 'text-blue-400' : 'text-zinc-500'}`}>{p.period}</p>
+                    <p className={`font-mono text-sm sm:text-lg ${i === 0 ? 'text-blue-400' : 'text-white'} mt-0.5 sm:mt-1 truncate`}>
                       {formatLargeNumber(p.balance)}
                     </p>
-                    <p className="text-xs text-zinc-500 mt-1">
-                      LOT: {truncateTo2Decimals(p.lotSize).toFixed(2)} | Daily: {formatLargeNumber(p.dailyProfit)}
+                    <p className="text-[9px] sm:text-xs text-zinc-500 mt-0.5 sm:mt-1 truncate">
+                      LOT: {truncateTo2Decimals(p.lotSize).toFixed(2)}
                     </p>
                   </div>
                 ))}
                 
                 {/* Year selector card */}
-                <div className="p-4 rounded-lg border bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-purple-400">Year Projection</p>
+                <div className="p-2 sm:p-4 rounded-lg border bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/30">
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <p className="text-[10px] sm:text-xs text-purple-400">Year</p>
                     <Select value={selectedYears.toString()} onValueChange={(v) => setSelectedYears(parseInt(v))}>
-                      <SelectTrigger className="w-20 h-6 text-xs bg-zinc-900/50 border-zinc-700">
+                      <SelectTrigger className="w-14 sm:w-20 h-5 sm:h-6 text-[10px] sm:text-xs bg-zinc-900/50 border-zinc-700">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -2273,11 +2274,11 @@ export const ProfitTrackerPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <p className="font-mono text-lg text-purple-400 mt-1">
+                  <p className="font-mono text-sm sm:text-lg text-purple-400 mt-0.5 sm:mt-1 truncate">
                     {formatLargeNumber(projectionData[4]?.balance || 0)}
                   </p>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    LOT: {truncateTo2Decimals(projectionData[4]?.lotSize || 0).toFixed(2)} | Daily: {formatLargeNumber(projectionData[4]?.dailyProfit || 0)}
+                  <p className="text-[9px] sm:text-xs text-zinc-500 mt-0.5 sm:mt-1 truncate">
+                    LOT: {truncateTo2Decimals(projectionData[4]?.lotSize || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
