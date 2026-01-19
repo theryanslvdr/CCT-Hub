@@ -183,6 +183,7 @@ class TradeLogCreate(BaseModel):
     lot_size: Optional[float] = None  # Optional - backend will recalculate
     direction: str  # BUY or SELL
     actual_profit: float
+    commission: Optional[float] = 0  # Daily commission from referrals
     notes: Optional[str] = None
 
 class TradeLogResponse(BaseModel):
@@ -192,6 +193,7 @@ class TradeLogResponse(BaseModel):
     direction: str
     projected_profit: float
     actual_profit: float
+    commission: Optional[float] = 0  # Daily commission from referrals
     profit_difference: float
     performance: str
     signal_id: Optional[str]
