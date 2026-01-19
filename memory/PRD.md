@@ -11,43 +11,53 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 54 (2026-01-19) - Commission Fix + Content Protection + Performance ✅
+### Session 54 (2026-01-19) - Commission Fix + Content Protection + Mobile Optimization ✅
 
-#### Commission Display Fix (Latest) ✅
+#### Commission Display Fix ✅
 - **Total Commission → Last Trade Entry**: When entering total commission at wizard's final step, it's now assigned to the **last trade entry's commission field** (not as separate deposit)
 - **Commission Column in Daily Projection**: Shows the commission amount for each trading day
 - **Balance Formula**: `Next Day's Balance = Today's Balance + Today's Profit + Today's Commission`
 - **Lot Size Sync**: Balance → Lot Size → Projection all now match correctly
 
-#### Content Protection Feature (Latest) ✅
+#### Content Protection Feature ✅
 - **Security Tab in Admin Settings**: New tab with content protection controls
+- **Custom Watermark Text** (Master Admin Only): Override default user watermark with custom text
 - **Features when enabled**:
-  - User watermark overlay (subtle, shows user's name/email)
+  - User watermark overlay (subtle, shows user's name/email or custom text)
   - Text selection/copy disabled (CSS + JS)
   - Right-click context menu blocked
   - Keyboard shortcuts blocked (Ctrl+C, Ctrl+A, PrtScn, etc.)
   - Visual warning overlay when blocked action attempted
-- **Files Created**:
-  - `/app/frontend/src/components/ContentProtection.jsx` - Protection component
-  - Updated `DashboardLayout.jsx` - Renders ContentProtection
-  - Updated `AdminSettingsPage.jsx` - Security tab UI
-  - Updated `server.py` - PlatformSettings model with content_protection fields
+- **Files Created/Updated**:
+  - `/app/frontend/src/components/ContentProtection.jsx` - Protection component with custom watermark support
+  - Updated `DashboardLayout.jsx` - Renders ContentProtection with custom watermark
+  - Updated `AdminSettingsPage.jsx` - Security tab with custom watermark field
+  - Updated `server.py` - PlatformSettings model with `content_protection_watermark_custom` field
 
-#### Performance Optimization (High Concurrency Fixes) ✅
-- **MongoDB Connection Pooling**: Added `maxPoolSize=100`, `minPoolSize=10`, `maxIdleTimeMS=45000`, `waitQueueTimeoutMS=10000`
-- **N+1 Query Fix**: Batch fetch signals in trade history endpoint instead of individual queries per trade
-- **CoinGecko Cache Optimization**: Increased cache TTL from 5 to 15 minutes, added request deduplication
-- **Database Indexes**: Added compound indexes for frequently queried fields
+#### Mobile Responsive Optimization ✅
+- **Global Mobile Styles**: Added comprehensive mobile CSS to `/app/frontend/src/index.css`
+- **DashboardLayout**: Fixed sidebar margin on mobile (no margin on mobile, proper margin on desktop)
+- **ProfitTrackerPage Mobile**:
+  - 2-column grid for summary cards on mobile
+  - Smaller padding, fonts, and icons on mobile
+  - Truncate long numbers, responsive chart height
+  - Mobile-optimized Projection Vision section
+- **TradeMonitorPage Mobile**:
+  - 2-column grid for LOT Size and Projected Exit cards
+  - **Merin iframe hidden on mobile** - replaced with floating "Open Merin Trading Platform" button
+  - Responsive card layout
+- **Consistent Breakpoints**: `sm:` (640px), `md:` (768px), `lg:` (1024px)
 
-#### Frontend Refactoring ✅
-- **OnboardingWizard Step Extraction**: Created `/app/frontend/src/components/onboarding/` directory
-- **Profit Tracker Utilities**: Created `/app/frontend/src/lib/profitTrackerUtils.js`
-- Reduced step count from 5 to 4 for experienced traders (combined date+balance step)
+#### Performance Optimization ✅
+- **MongoDB Connection Pooling**: `maxPoolSize=100`, `minPoolSize=10`
+- **N+1 Query Fix**: Batch fetch signals in trade history
+- **CoinGecko Cache**: 15-minute TTL with request deduplication
+- **Database Indexes**: Compound indexes for frequently queried fields
 
 #### Testing ✅
-- **Iteration 53**: 15/15 backend tests passed (commission tracking)
-- **Iteration 54**: 18/20 backend tests passed (data consistency)
-- **Iteration 55**: 12/12 backend tests passed (commission fix + content protection)
+- **Iteration 53**: 15/15 tests passed (commission tracking)
+- **Iteration 54**: 18/20 tests passed (data consistency)
+- **Iteration 55**: 12/12 tests passed (commission fix + content protection)
 
 ### Session 53 (2026-01-17) - Onboarding Wizard, Streaks, Daily Projection Fixes
 
