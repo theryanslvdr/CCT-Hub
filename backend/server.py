@@ -5036,6 +5036,7 @@ class OnboardingTradeEntry(BaseModel):
     balance: Optional[float] = None  # User-entered balance (source of truth for lot_size)
     product: Optional[str] = 'MOIL10'
     direction: Optional[str] = 'BUY'
+    commission: Optional[float] = 0  # Daily commission from referrals
 
 class OnboardingData(BaseModel):
     user_type: str  # 'new' or 'experienced'
@@ -5043,6 +5044,7 @@ class OnboardingData(BaseModel):
     start_date: Optional[str] = None  # ISO date string for experienced traders
     transactions: Optional[List[OnboardingTransaction]] = []
     trade_entries: Optional[List[OnboardingTradeEntry]] = []
+    total_commission: Optional[float] = 0  # Total commission to be added at the end
 
 @profit_router.post("/complete-onboarding")
 async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_current_user)):
