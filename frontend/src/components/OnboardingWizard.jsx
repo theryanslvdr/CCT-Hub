@@ -573,53 +573,7 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
         );
       
       case 3:
-        // Starting balance for experienced trader
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <DollarSign className="w-8 h-8 text-emerald-400" />
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">What was your starting balance?</h2>
-              <p className="text-zinc-400 text-sm">
-                Enter your balance on {startDate ? format(startDate, 'MMMM d, yyyy') : 'your start date'}
-              </p>
-            </div>
-            
-            <div className="max-w-md mx-auto">
-              <Label className="text-zinc-300">Starting Balance (USDT)</Label>
-              <div className="relative mt-2">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={startingBalance}
-                  onChange={(e) => setStartingBalance(e.target.value)}
-                  placeholder="0.00"
-                  className="pl-8 input-dark text-2xl font-mono h-14 text-center"
-                />
-              </div>
-              
-              {startingBalance && parseFloat(startingBalance) > 0 && (
-                <div className="mt-6 p-4 rounded-lg bg-zinc-900/50 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Starting LOT Size:</span>
-                    <span className="font-mono text-purple-400">{calculateLotSize(parseFloat(startingBalance))}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Starting Daily Projected:</span>
-                    <span className="font-mono text-emerald-400">
-                      {formatMoney(calculateProjectedProfit(calculateLotSize(parseFloat(startingBalance))))}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      
-      case 4:
-        // Deposits and withdrawals
+        // Deposits and withdrawals (was case 4)
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
