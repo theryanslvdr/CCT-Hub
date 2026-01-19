@@ -149,6 +149,7 @@ export const TradeMonitorPage = () => {
   const [worldTime, setWorldTime] = useState(new Date());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [actualExitValue, setActualExitValue] = useState('');
+  const [commissionValue, setCommissionValue] = useState(''); // Commission input
   const [lastTrade, setLastTrade] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState('');
