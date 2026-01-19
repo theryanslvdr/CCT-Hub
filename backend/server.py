@@ -34,19 +34,24 @@ from services import (
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection with Atlas-compatible settings
+# MongoDB connection with Atlas-compatible settings and connection pooling
 mongo_url = os.environ.get('MONGO_URL')
 if not mongo_url:
     raise ValueError("MONGO_URL environment variable is required")
 
-# Configure MongoDB client with proper settings for Atlas
+# Configure MongoDB client with proper settings for Atlas and high concurrency
 client = AsyncIOMotorClient(
     mongo_url,
     serverSelectionTimeoutMS=30000,  # 30 second timeout
     connectTimeoutMS=30000,
     socketTimeoutMS=30000,
     retryWrites=True,
-    w='majority'
+    w='majority',
+    # Connection pooling for high concurrency
+    maxPoolSize=100,  # Maximum connections in the pool
+    minPoolSize=10,   # Minimum connections to keep open
+    maxIdleTimeMS=45000,  # Close idle connections after 45 seconds
+    waitQueueTimeoutMS=10000,  # Wait up to 10 seconds for a connection
 )
 
 # Get database name from environment or parse from connection string
