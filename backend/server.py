@@ -5144,6 +5144,7 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 lot_size = round(effective_balance / 980, 2)
                 projected_profit = round(lot_size * 15, 2)
                 actual_profit = entry.actual_profit or 0
+                commission = entry.commission or 0  # Daily commission from referrals
                 profit_difference = round(actual_profit - projected_profit, 2)
                 
                 # Determine performance
@@ -5170,6 +5171,7 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                     "product": product,
                     "projected_profit": projected_profit,
                     "actual_profit": actual_profit,
+                    "commission": commission,  # Daily commission from referrals
                     "profit_difference": profit_difference,
                     "performance": performance,
                     "signal_id": None,
