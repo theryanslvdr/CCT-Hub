@@ -60,7 +60,7 @@ async def get_user_financial_summary(
     Get comprehensive financial summary for a user.
     
     Returns:
-        Dict with total_deposits, total_withdrawals, total_profit, account_value, is_licensee
+        Dict with total_deposits, total_withdrawals, total_profit, total_commission, account_value, is_licensee
     """
     is_licensee = False
     license_info = None
@@ -94,6 +94,7 @@ async def get_user_financial_summary(
     )
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_projected = sum(t.get("projected_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)  # Sum daily commissions from trades
     
     # Calculate account value
     if is_licensee and license_info:
@@ -103,12 +104,13 @@ async def get_user_financial_summary(
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
         net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
-        account_value = round(net_deposits + total_profit, 2)
+        account_value = round(net_deposits + total_profit + total_commission, 2)
     
     return {
         "total_deposits": round(total_deposits, 2),
         "total_withdrawals": round(total_withdrawals, 2),
         "total_profit": round(total_profit, 2),
+        "total_commission": round(total_commission, 2),
         "total_projected_profit": round(total_projected, 2),
         "account_value": account_value,
         "total_trades": len(trades),
