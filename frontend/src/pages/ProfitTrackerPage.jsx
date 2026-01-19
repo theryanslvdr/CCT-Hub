@@ -188,6 +188,7 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       const tradeLog = tradeLogs[dateKey];
       const hasTraded = tradeLog?.has_traded;
       const actualProfit = tradeLog?.actual_profit;
+      const commission = tradeLog?.commission || 0;  // Daily commission from referrals
       
       // Apply any deposits/withdrawals for this date BEFORE calculating lot size
       // (deposits should affect the balance BEFORE the day's trade)
