@@ -1959,7 +1959,8 @@ export const TradeMonitorPage = () => {
       </div>
 
       {/* Right Panel - Merin Trading Platform */}
-      <div className="lg:w-[400px] xl:w-[450px] flex-shrink-0" data-testid="merin-panel">
+      {/* Desktop: Show iframe, Mobile: Show button to open in new tab */}
+      <div className="hidden lg:block lg:w-[400px] xl:w-[450px] flex-shrink-0" data-testid="merin-panel">
         <Card className="glass-card h-full sticky top-0">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -1997,6 +1998,19 @@ export const TradeMonitorPage = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Mobile: Open Merin Button (shows only on mobile) */}
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50" data-testid="merin-mobile-button">
+        <a
+          href="https://www.meringlobaltrading.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mobile-external-link-btn"
+        >
+          <ExternalLink className="w-5 h-5" />
+          Open Merin Trading Platform
+        </a>
       </div>
     </div>
     </MobileNotice>
