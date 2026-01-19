@@ -3136,10 +3136,11 @@ async def get_recent_team_trades(
     
     trades = await db.trade_logs.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
     
-    # Add user names to trades
+    # Add user names to trades and ensure commission field is present
     enriched_trades = []
     for trade in trades:
         trade["trader_name"] = user_names.get(trade.get("user_id"), "Unknown")
+        trade["commission"] = trade.get("commission", 0)  # Default to 0 for backward compatibility
         enriched_trades.append(trade)
     
     return {
