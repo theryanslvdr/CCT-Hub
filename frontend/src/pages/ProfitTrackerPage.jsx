@@ -285,6 +285,7 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         lotSize: effectiveLotSize,
         targetProfit: effectiveTargetProfit,
         actualProfit: actualProfit,
+        commission: commission,  // Daily commission from referrals
         plDiff: hasTraded && actualProfit !== undefined 
           ? truncateTo2Decimals(actualProfit - effectiveTargetProfit)
           : null,
@@ -295,9 +296,10 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         transactionAmount: dayTransaction,
       });
       
-      // Add profit to running balance for next day's calculation
+      // Add profit AND commission to running balance for next day's calculation
+      // Balance formula: Next Day Balance = Today's Balance + Today's Profit + Today's Commission
       if (hasTraded && actualProfit !== undefined) {
-        runningBalance += actualProfit;
+        runningBalance += actualProfit + commission;
       } else {
         runningBalance += targetProfit;
       }
