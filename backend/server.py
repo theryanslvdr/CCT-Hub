@@ -5638,12 +5638,14 @@ async def get_usdt_rates():
                 # Update cache
                 _usdt_rates_cache["data"] = result
                 _usdt_rates_cache["timestamp"] = datetime.now(timezone.utc)
+                _usdt_rates_cache["fetching"] = False
                 
                 return result
             else:
                 raise Exception("Invalid CoinGecko response")
                 
     except Exception as e:
+        _usdt_rates_cache["fetching"] = False
         logger.error(f"CoinGecko USDT API error: {e}")
         # Return cached data if available
         if _usdt_rates_cache["data"]:
