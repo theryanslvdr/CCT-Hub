@@ -442,26 +442,22 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
     }
     
     if (currentStep === 2 && userType === 'experienced') {
-      // Validate start date for experienced trader
+      // Validate start date AND starting balance for experienced trader (combined step)
       if (!startDate) {
         toast.error('Please select your start date');
         return;
       }
-    }
-    
-    if (currentStep === 3 && userType === 'experienced') {
-      // Validate starting balance
       if (!startingBalance || parseFloat(startingBalance) <= 0) {
         toast.error('Please enter your starting balance');
         return;
       }
     }
     
-    if (currentStep === 4 && userType === 'experienced') {
+    if (currentStep === 3 && userType === 'experienced') {
       // Transactions step - can proceed without any
     }
     
-    if (currentStep === 5 && userType === 'experienced') {
+    if (currentStep === 4 && userType === 'experienced') {
       // Check if all trading days have entries
       const allEntered = tradingDays.every(day => {
         const dateKey = format(day, 'yyyy-MM-dd');
