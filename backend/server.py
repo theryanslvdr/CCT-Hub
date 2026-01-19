@@ -5530,8 +5530,22 @@ async def get_exchange_rates(base: str = "USD"):
             "source": "fallback"
         }
 
+# Cache for USDT rates (to avoid rate limiting)
+_usdt_rates_cache = {
+    "data": None,
+    "timestamp": None
+}
+
 async def get_usdt_rates():
-    """Get USDT exchange rates from CoinGecko API (free, no API key required for basic usage)"""
+    """Get USDT exchange rates from CoinGecko API with caching (5 min cache)"""
+    global _usdt_rates_cache
+    
+    # Check cache (5 minute TTL)
+    if _usdt_rates_cache["data"] and _usdt_rates_cache["timestamp"]:
+        cache_age = (datetime.now(timezone.utc) - _usdt_rates_cache["timestamp"]).total_seconds()
+        if cache_age < 300:  # 5 minutes
+            return _usdt_rates_cache["data"]
+    
     try:
         async with httpx.AsyncClient() as client:
             # CoinGecko API - get USDT price in multiple currencies
@@ -5541,8 +5555,18 @@ async def get_usdt_rates():
                     "ids": "tether",
                     "vs_currencies": "usd,php,eur,gbp,jpy,cny,krw,sgd,hkd,aud,cad,inr,myr,thb,idr,vnd"
                 },
-                timeout=10.0
+                timeout=10.0,
+                headers={
+                    "Accept": "application/json"
+                }
             )
+            
+            if response.status_code == 429:
+                logger.warning("CoinGecko rate limited, using cache or fallback")
+                if _usdt_rates_cache["data"]:
+                    return _usdt_rates_cache["data"]
+                raise Exception("Rate limited")
+            
             data = response.json()
             
             if "tether" in data:
@@ -5551,23 +5575,33 @@ async def get_usdt_rates():
                 rates = {currency.upper(): price for currency, price in tether_prices.items()}
                 rates["USDT"] = 1  # 1 USDT = 1 USDT
                 
-                return {
+                result = {
                     "base": "USDT",
                     "rates": rates,
                     "source": "coingecko",
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
+                
+                # Update cache
+                _usdt_rates_cache["data"] = result
+                _usdt_rates_cache["timestamp"] = datetime.now(timezone.utc)
+                
+                return result
             else:
                 raise Exception("Invalid CoinGecko response")
                 
     except Exception as e:
         logger.error(f"CoinGecko USDT API error: {e}")
-        # Fallback rates (approximate)
-        return {
+        # Return cached data if available
+        if _usdt_rates_cache["data"]:
+            return _usdt_rates_cache["data"]
+        
+        # Fallback rates (approximate - updated periodically)
+        fallback = {
             "base": "USDT",
             "rates": {
                 "USD": 1.0,
-                "PHP": 56.5,
+                "PHP": 58.0,  # Updated PHP rate
                 "EUR": 0.92,
                 "GBP": 0.79,
                 "JPY": 149.5,
@@ -5586,6 +5620,7 @@ async def get_usdt_rates():
             },
             "source": "fallback"
         }
+        return fallback
 
 @currency_router.post("/convert")
 async def convert_currency(amount: float, from_currency: str, to_currency: str):
