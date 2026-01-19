@@ -5573,20 +5573,33 @@ async def get_exchange_rates(base: str = "USD"):
 # Cache for USDT rates (to avoid rate limiting)
 _usdt_rates_cache = {
     "data": None,
-    "timestamp": None
+    "timestamp": None,
+    "fetching": False  # Prevent concurrent API calls
 }
 
 async def get_usdt_rates():
-    """Get USDT exchange rates from CoinGecko API with caching (5 min cache)"""
+    """Get USDT exchange rates from CoinGecko API with caching (15 min cache)"""
     global _usdt_rates_cache
     
-    # Check cache (5 minute TTL)
+    # Check cache (15 minute TTL - increased from 5 to reduce API calls)
     if _usdt_rates_cache["data"] and _usdt_rates_cache["timestamp"]:
         cache_age = (datetime.now(timezone.utc) - _usdt_rates_cache["timestamp"]).total_seconds()
-        if cache_age < 300:  # 5 minutes
+        if cache_age < 900:  # 15 minutes
+            return _usdt_rates_cache["data"]
+    
+    # If another request is already fetching, return cached data or wait briefly
+    if _usdt_rates_cache["fetching"]:
+        # Return cached data if available while another request fetches
+        if _usdt_rates_cache["data"]:
+            return _usdt_rates_cache["data"]
+        # Wait a bit and try again with cache
+        import asyncio
+        await asyncio.sleep(0.5)
+        if _usdt_rates_cache["data"]:
             return _usdt_rates_cache["data"]
     
     try:
+        _usdt_rates_cache["fetching"] = True
         async with httpx.AsyncClient() as client:
             # CoinGecko API - get USDT price in multiple currencies
             response = await client.get(
