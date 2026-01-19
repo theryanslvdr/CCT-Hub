@@ -1359,32 +1359,32 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Summary Cards - Mobile optimized */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card className="glass-card" data-testid="account-value-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Account Value (USDT)</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-zinc-400">Account Value</p>
+                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-white mt-1 md:mt-2 truncate">
                   {formatLargeNumber(effectiveAccountValue)}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 ml-2">
+                <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="total-deposits-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-zinc-400">Total Deposits</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-xs md:text-sm text-zinc-400">Deposits</p>
                   <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                    <SelectTrigger className="w-20 h-6 text-xs bg-zinc-900/50 border-zinc-700">
+                    <SelectTrigger className="w-14 md:w-20 h-5 md:h-6 text-[10px] md:text-xs bg-zinc-900/50 border-zinc-700">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1395,48 +1395,48 @@ export const ProfitTrackerPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="text-3xl font-bold font-mono text-white mt-2">
+                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-white mt-1 md:mt-2 truncate">
                   {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1 truncate">
                   ≈ {formatMoney(effectiveTotalDeposits)} USDT
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center ml-3">
-                <ArrowDownToLine className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 ml-2">
+                <ArrowDownToLine className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="total-profit-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Total Profit</p>
-                <p className={`text-3xl font-bold font-mono mt-2 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-zinc-400">Total Profit</p>
+                <p className={`text-lg md:text-2xl lg:text-3xl font-bold font-mono mt-1 md:mt-2 truncate ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 ml-2">
+                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="current-lot-card">
-          <CardContent className="p-6">
+          <CardContent className="p-3 md:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Current LOT Size</p>
-                <p className="text-3xl font-bold font-mono text-purple-400 mt-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-zinc-400">LOT Size</p>
+                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-purple-400 mt-1 md:mt-2">
                   {effectiveLotSize.toFixed(2)}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">Balance ÷ 980</p>
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1">Balance ÷ 980</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Calculator className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 ml-2">
+                <Calculator className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
             </div>
           </CardContent>
