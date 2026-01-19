@@ -5498,6 +5498,11 @@ async def get_goal_plan(goal_id: str, user: dict = Depends(get_current_user)):
 async def get_exchange_rates(base: str = "USD"):
     try:
         api_key = os.environ.get('EXCHANGE_RATE_API_KEY', '')
+        
+        # For USDT base, use CoinGecko API (free, no key required for basic usage)
+        if base.upper() == "USDT":
+            return await get_usdt_rates()
+        
         if not api_key:
             # Return mock rates for development
             return {
@@ -5522,6 +5527,63 @@ async def get_exchange_rates(base: str = "USD"):
         return {
             "base": base,
             "rates": {"USD": 1, "PHP": 56.5, "USDT": 1},
+            "source": "fallback"
+        }
+
+async def get_usdt_rates():
+    """Get USDT exchange rates from CoinGecko API (free, no API key required for basic usage)"""
+    try:
+        async with httpx.AsyncClient() as client:
+            # CoinGecko API - get USDT price in multiple currencies
+            response = await client.get(
+                "https://api.coingecko.com/api/v3/simple/price",
+                params={
+                    "ids": "tether",
+                    "vs_currencies": "usd,php,eur,gbp,jpy,cny,krw,sgd,hkd,aud,cad,inr,myr,thb,idr,vnd"
+                },
+                timeout=10.0
+            )
+            data = response.json()
+            
+            if "tether" in data:
+                tether_prices = data["tether"]
+                # CoinGecko returns how much 1 USDT is worth in each currency
+                rates = {currency.upper(): price for currency, price in tether_prices.items()}
+                rates["USDT"] = 1  # 1 USDT = 1 USDT
+                
+                return {
+                    "base": "USDT",
+                    "rates": rates,
+                    "source": "coingecko",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            else:
+                raise Exception("Invalid CoinGecko response")
+                
+    except Exception as e:
+        logger.error(f"CoinGecko USDT API error: {e}")
+        # Fallback rates (approximate)
+        return {
+            "base": "USDT",
+            "rates": {
+                "USD": 1.0,
+                "PHP": 56.5,
+                "EUR": 0.92,
+                "GBP": 0.79,
+                "JPY": 149.5,
+                "CNY": 7.25,
+                "KRW": 1350,
+                "SGD": 1.35,
+                "HKD": 7.82,
+                "AUD": 1.55,
+                "CAD": 1.36,
+                "INR": 83.5,
+                "MYR": 4.72,
+                "THB": 35.8,
+                "IDR": 15750,
+                "VND": 24500,
+                "USDT": 1
+            },
             "source": "fallback"
         }
 
