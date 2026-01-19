@@ -162,13 +162,13 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
     // Get all trades and transactions for this month
     const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
     
-    // Sum up all profits in this month
+    // Sum up all profits + commissions in this month
     const monthTrades = Object.entries(tradeLogs)
       .filter(([key, _]) => key.startsWith(monthPrefix))
       .sort(([a], [b]) => a.localeCompare(b));
     
     const totalMonthProfit = monthTrades.reduce((sum, [_, log]) => {
-      return sum + (log?.actual_profit || 0);
+      return sum + (log?.actual_profit || 0) + (log?.commission || 0);
     }, 0);
     
     // Sum up all deposits/withdrawals in this month
