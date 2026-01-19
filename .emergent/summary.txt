@@ -1,138 +1,164 @@
 <analysis>**original_problem_statement:**
-The user is building a Finance Center for CrossCurrent traders. The project began with fixing critical bugs related to a countdown timer and trade streak calculations. It then progressed to implementing major features like a multi-step onboarding wizard for traders and a persistent notification system.
+The user is building a Finance Center for CrossCurrent traders. The project began with fixing bugs and implementing a multi-step onboarding wizard. Recent work has focused on a major redesign of the Admin Settings page and addressing significant data consistency issues between different parts of the application, particularly the Daily Projection Table and the Trade History.
 
-Recent work has focused on data integrity and significant UI/UX enhancements based on iterative user feedback. This included:
-1.  Fixing a critical data bug causing an incorrect  to be logged.
-2.  Implementing Undo Missed Trade, Mark as Holiday, and Official Trading Signal features.
-3.  Refactoring the UI to move holiday and undo functionalities into the onboarding wizard.
-4.  A complete redesign of the Admin Settings page from a tabbed layout to a sidebar layout, introducing a Global Trading Settings section for Master Admins to manage trading products and global holidays.
+The user has repeatedly encountered discrepancies in  and  calculations. This has led to several refactoring attempts of the  and . The latest set of requests aims to solve these data issues by introducing a manual commission tracking system and ensuring that a Tracker Reset provides a clean slate for all trade-related data.
+
+**PRODUCT REQUIREMENTS:**
+1.  **Commission Tracking:**
+    -   Add a Commission column to the Daily Projection view.
+    -   When entering a daily trade, the user must be able to input the commission amount for that day.
+    -   At the end of the onboarding wizard, the user should be able to enter the commission for the last entered trade day.
+    -   The daily balance calculation must be: .
+2.  **Data Consistency:**
+    -   The  and  in the  (Trade Monitor) must be accurate and consistent with the .
+    -   When a user performs a Reset Tracker action, it must completely clear all historical  to ensure the subsequent onboarding process creates a clean, accurate history.
+3.  **Onboarding Wizard:**
+    -   The balance for each day in the wizard must correctly increment based on the previous day's balance, profit, and any deposits/withdrawals.
+    -   The balance input field should be limited to 2 decimal places.
+    -   A Restart Reset button must be available within the wizard to clear all user-entered data and start the process over.
+4.  **Daily Projection Table:**
+    -   The Balance Before for the first day of a historical month (e.g., after an onboarding) must reflect the actual starting balance entered by the user.
+    -   Withdrawals and deposits must be correctly factored into the running balance calculations.
+    -   Historical months (e.g., December 2025) should appear before the current year's data.
+5.  **Live Currency Conversion:**
+    -   Provide accurate, live conversion rates for USDT, not just fiat currencies.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack financial application with a React frontend, FastAPI backend, and MongoDB database. It supports different user roles (Master Admin, Licensees) and includes features for tracking trades, profits, and account balances.
-
-Key functionalities include a daily projection table, a trade monitor, an admin dashboard, and an onboarding wizard for new/experienced traders. The system now has a centralized Global Trading Settings page for Master Admins to configure application-wide holidays and trading products, which are respected in both the daily projection and the onboarding wizard.
+A full-stack application (React/FastAPI/MongoDB) with user roles, an admin dashboard, a trade monitor, and a daily projection table. The  has been heavily modified to support historical trade entry with a balance-first approach, where the user enters their account balance for each day. The  has been refactored to display historical trade data from past months. A backend integration with CoinGecko for cryptocurrency exchange rates has been added with caching. The core logic for balance calculation and data display is highly complex and has been a recurring source of bugs.
 
 **Last working item**:
-- **Last item agent was working:** The agent was in the final stages of implementing a major redesign of the . This involved:
-    1.  Converting the page from a tab-based layout to a more organized sidebar navigation.
-    2.  Creating a new Global Trading Settings section, visible only to Master Admins, which consolidates the management of trading products and global holidays.
-    3.  Updating the  to fetch and use these global settings (products and holidays) from the new backend endpoints.
+- **Last item agent was working:** The agent began implementing the user's latest request for a comprehensive commission tracking system. The first step taken was to update the backend Pydantic models (, ,  in ) to include a new  field.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
 - **Which testing method agent to use?** both
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Complete and verify the new Admin Settings page and Onboarding Wizard integration (Priority: P0)**
+- **Issue 1: Implement the new commission tracking system (Priority: P0)**
   
   **Issues Detail:**
   - **Issue 1:** 
-     - **Attempted fixes:** The agent has successfully refactored the  to use a sidebar, created the new backend endpoints for products, and updated the  to fetch the new global data. The UI for the Global Trading section has been verified via screenshots.
+     - **Attempted fixes:** None. This is a new implementation based on the user's latest requirements.
      - **Next debug checklist:**
-        1.  Perform a full regression test of the  to ensure all original settings sections (SEO, Branding, UI, etc.) are still functional and render correctly within the new sidebar layout.
-        2.  Test the  end-to-end to confirm that it correctly populates the product dropdown and skips dates marked as global holidays in the settings.
-        3.  Verify that the role-based visibility for the Global Trading Settings is working correctly (visible only to Master Admins).
-     - **Why fix this issue and what will be achieved with the fix?** This will complete the user's requested refactoring for a more centralized and streamlined admin experience.
+        1.  Update the backend database schema for  to include the  field.
+        2.  Modify backend endpoints (, ) to accept and save the  value.
+        3.  Update the Enter Actual Profit dialog in  to include an input field for .
+        4.  Update the  to include an input for  on the final trade entry step.
+        5.  Add a Commission column to the daily projection table in .
+        6.  Update all frontend (, ) and backend balance calculation logic to incorporate the commission: .
+     - **Why fix this issue and what will be achieved with the fix?** This is the user's highest priority requirement and is intended to create a more accurate and transparent system for tracking profits and account value.
      - **Status:** IN PROGRESS
      - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** Both
      - **Blocked on other issue:** None
 
-**In progress Task List**:
-  - **Task 1: Complete verification of the Admin Settings page redesign.**
-     - **Where to resume:** The agent has verified the new Global Trading section. The next step is to click through each of the other sidebar items (SEO & Meta, Branding, UI Settings, etc.) to ensure their corresponding content panels render correctly.
-     - **What will be achieved with this?** A more organized and user-friendly settings page as requested.
+- **Issue 2: Data inconsistency between Daily Projection and Trade History (Priority: P1)**
+  
+  **Issues Detail:**
+  - **Issue 2:** 
+     - **Attempted fixes:** The agent previously made the Daily Projection rely on stored  values to ensure consistency. However, this revealed that the  data itself was incorrect due to faulty logic in the Onboarding Wizard. The user wants the reset functionality to wipe these logs, forcing a clean re-import.
+     - **Next debug checklist:**
+        1.  Verify that the  function in  correctly calls the backend endpoint that deletes all  for the user.
+        2.  After implementing the commission feature, perform a full end-to-end test: Reset Tracker -> Complete Onboarding Wizard -> Verify  in DB are correct -> Verify Daily Projection and Trade History match perfectly.
+     - **Why fix this issue and what will be achieved with the fix?** This will finally resolve the user's long-standing frustration with data discrepancies and establish a reliable single source of truth for trade data.
      - **Status:** IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Is recurring issue?** Y
+     - **Should Test frontend/backend/both after fix?** Both
+     - **Blocked on other issue:** Issue 1
 
-  - **Task 2: Complete verification of Onboarding Wizard integration.**
-     - **Where to resume:** The code has been implemented. The next step is to test the onboarding flow for an Experienced Trader to confirm that the product dropdown is populated from the new global settings and that any globally set holidays are correctly disabled in the trade entry calendar.
-     - **What will be achieved with this?** Centralized management of trading rules that apply globally, including during user onboarding.
+**In progress Task List**:
+  - **Task 1: Add  field to backend API endpoints (Priority: P0)**
+     - **Where to resume:** The Pydantic models in  are updated. The next step is to modify the logic within the , , and  functions to process and save the commission value.
+     - **What will be achieved with this?** The backend will be ready to handle commission data.
      - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Backend
+     - **Blocked on something:** None
+
+  - **Task 2: Update frontend UI for commission entry (Priority: P1)**
+     - **Where to resume:** This task has not been started. The agent needs to edit  (the Enter Actual Profit modal) and  to add the new commission input fields.
+     - **What will be achieved with this?** Users will be able to input their daily commission.
+     - **Status:** NOT STARTED
      - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on something:** Task 1
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **P1: Frontend Refactoring:** Decompose large components. The newly refactored  is now over 2000 lines and is a prime candidate to be broken down into smaller sub-components for each settings section.
+    - **P1: Frontend Refactoring:** Decompose the massive  and  components into smaller, manageable sub-components to improve maintainability.
 - **Future Tasks:**
     - **Backend Refactoring:** Continue breaking down the monolithic  into the  directory.
     - Mobile responsiveness improvements.
     - Implement the placeholder Cloudinary integration for image hosting.
 
 **Completed work in this session**
-- **Critical Bug Fixes:**
-  - **Incorrect  in Trade History:** Fixed by recalculating  on the backend () to ensure data integrity, making it the source of truth.
-  - **Daily Projection Balance Before Sync:** Fixed by modifying  to use the live  for the current day's display.
-- **Feature Implementation & Refactoring:**
-  - **Admin Settings Page Redesign:** Converted the entire  from a tab-based layout to a sidebar navigation layout for improved usability.
-  - **Global Trading Settings:** Created a new Global Trading section (Master Admin only) for managing trading products and global holidays, complete with a calendar UI for holidays.
-  - **Onboarding Wizard Enhancements:** Added product and direction selection dropdowns for historical trade entries and integrated it with the new global holidays and products settings.
-  - **Global Holiday Display:** Updated  to fetch global holidays and display a full HOLIDAY row for those dates.
-  - **Official Trading Signal:** Implemented a toggle on the  to support an  flag on trading signals.
+- **Data Consistency & Projection Fixes:**
+  - **Corrected Historical Balance:** Modified  so the Balance Before for historical months (like December) is correctly derived from the stored  in trade logs, fixing the starting balance display issue.
+  - **Corrected Projection Data Source:** The Daily Projection table now uses data from  for days with completed trades, ensuring consistency with the Trade History page.
+  - **Corrected Month Ordering:** Fixed the monthly projection accordion to correctly display History (for past years) before Year 1.
+  - **Corrected Remaining Days Count:** The count now accurately excludes days where an actual profit has already been recorded.
+- **Onboarding Wizard Enhancements & Bug Fixes:**
+  - **Implemented Balance as Source of Truth:** Refactored the wizard to use the daily  as the primary user input, with  being a derived, read-only value.
+  - **Fixed Balance Increment Logic:** Ensured the balance correctly increases day-by-day by adding the previous day's actual profit.
+  - **Fixed Transaction Application:** Corrected the logic in  to properly apply deposits and withdrawals to the running balance.
+  - **Added Restart Reset Button:** Implemented a button to clear all state within the onboarding wizard and start over.
+  - **Input Validation:** Added logic to truncate balance inputs to two decimal places.
+  - **Fixed  error.**
+  - **Fixed infinite loop error related to .**
+- **Admin & Global Settings Verification:**
+  - Completed a full regression test of the redesigned , verifying all sidebar tabs (SEO, Branding, Maintenance, etc.) function correctly.
+  - Verified the  correctly fetches and applies global holidays and trading products from the new settings page.
+- **Live Crypto Conversion:**
+  - Implemented a backend service to fetch live USDT-to-fiat exchange rates from CoinGecko, with caching to handle API rate limits.
 
-**Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork:** Incorrect Lot Size logged in Trade History.
-  - **Recurrence count:** 1
-  - **Status:** RESOLVED
+**Earlier issues found/mentioned but not fixed**
+- The core data inconsistency between the Daily Projection and Trade History (now captured as Pending Issue #2) was a recurring theme throughout the session. While many contributing factors were fixed, the final solution relies on the Reset + Clean Onboard flow which is yet to be fully tested after the commission implementation.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Backend as Source of Truth:** Enforcing a pattern where the backend performs critical calculations () to prevent issues with stale frontend state.
-- **Centralized Configuration:** Moving application-wide settings (holidays, products) to a single admin-controlled page to ensure consistency across different features (, ).
-- **Role-Based UI:** Using the  to conditionally render UI elements () based on the user's role ().
-- **Iterative UI/UX Refactoring:** Radically changing page layouts and feature locations based on direct user feedback (e.g., moving holiday controls, redesigning the settings page).
-
-**key DB schema**
--  (New): Stores dates for global holidays set by admins. Fields: Sat Jan 17 05:57:04 UTC 2026, , .
--  (New): Stores the list of available trading products. Fields: , .
-- : An  boolean field was added.
+- **Balance as Source of Truth:** In the onboarding wizard, the user's daily account  is now the primary input, and  is calculated from it (). This was a key shift to improve data accuracy.
+- **Data Reconciliation:** The application now attempts to use stored  as the source of truth for historical data in the . This makes the 's data entry quality critical.
+- **Dynamic Balance Calculation:** The core balance formula has been established as . This logic must be consistently applied across the frontend and backend.
+- **API Caching:** Implemented caching on the backend for the CoinGecko API to avoid hitting rate limits for currency conversion.
 
 **All files of reference**
-- **/app/frontend/src/pages/admin/AdminSettingsPage.jsx**: The primary file for the current task. It was refactored from a tab layout to a sidebar and contains the new UI for managing global holidays and trading products.
-- **/app/frontend/src/components/OnboardingWizard.jsx**: Updated to fetch and use the global holidays and trading products from the backend.
-- **/app/backend/server.py**: Contains new endpoints for managing global holidays () and trading products ().
-- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: Updated to display global holidays as a full HOLIDAY row.
-- **/app/frontend/src/lib/api.js**: Updated with new API client functions for managing products and holidays.
+- **/app/frontend/src/components/OnboardingWizard.jsx**: Central to the user's data entry flow. Needs to be updated for commission entry.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: The main data display page. It was heavily refactored to fix projection bugs and now needs the commission column and updated calculation logic.
+- **/app/backend/server.py**: Contains all backend logic. The Pydantic models have been updated for commission, but the API endpoints that use them still need to be modified.
+- **/app/frontend/src/pages/TradeMonitorPage.jsx**: The page for daily interaction. The Enter Actual Profit dialog here needs to be updated to include a commission input.
 
 **Areas that need refactoring**:
-- **/app/frontend/src/pages/admin/AdminSettingsPage.jsx**: This is now a very large monolithic component (over 2000 lines). Each settings section (SEO, Branding, Global Trading, etc.) should be extracted into its own sub-component to improve readability and maintainability.
-- **/app/backend/server.py**: Remains a large monolith. The new endpoints should be moved into dedicated route files (e.g., ).
+- **/app/frontend/src/components/OnboardingWizard.jsx**: This component is extremely complex and over 1000 lines long. It should be broken down into smaller components for each step of the wizard.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: This component is over 2000 lines and manages a huge amount of state and complex calculation logic. The projection generation and display logic should be extracted into custom hooks or utility functions.
 
 **key api endpoints**
-- : (New) CRUD endpoints for managing global holidays.
-- : (New) CRUD endpoints for managing trading products.
-- : (Modified) The  sent from the frontend is now ignored, and the value is recalculated on the server.
+- : Needs to be updated to accept an optional  field.
+- : Needs to be updated to process  for each trade entry.
+- : Correctly deletes , , and . This is a critical part of the clean slate data consistency fix.
+- : (New) Fetches live exchange rates for a given currency (e.g., USDT), using CoinGecko with caching.
 
 **Critical Info for New Agent**
-- Your immediate priority is to complete the verification of the  redesign. While the Global Trading section has been checked, you must perform a regression test on all other settings sections (SEO, Branding, UI, API, etc.) to ensure they still render and function correctly in the new sidebar layout.
-- You must then test the integration with the  to confirm that it correctly fetches and applies the global products and holidays.
-- The user is highly focused on UI/UX. Pay close attention to their requests regarding layout, role-based visibility (Master Admin only), and how information is displayed.
+- **Priority 1 is implementing the commission feature.** This is the user's explicit current request and touches all the problematic areas of the app (balance calculation, data storage, UI).
+- **The user is highly sensitive to data discrepancies.** After implementing the commission feature, you must perform a full end-to-end test of the Reset Tracker - - Data flow. The Daily Projection and Trade History Lot Sizes **must** match.
+- **Do not trust the existing data in the database.** The user confirmed it's incorrect. The path forward is to ensure the reset/onboarding flow creates clean, accurate data.
+- The balance calculation logic is now clearly defined: . Apply this formula consistently.
 
-**documents and test reports created in this job**
-- /app/test_reports/iteration_48.json
-- /app/test_reports/iteration_49.json
-- /app/test_reports/iteration_50.json
-- /app/test_reports/iteration_51.json
-- /app/memory/PRD.md
-
-**Last 10 User Messages and any pending HUMAN messages**
-- **10.** User requested to move Undo and Holiday buttons into the onboarding wizard and make holiday setting a global admin toggle.
-- **9.** User requested adding product/direction selection to the onboarding wizard.
-- **8.** User requested moving the global holiday setting to a new Settings page for Super/Master Admins.
-- **7.** User specified that the holiday setting should use a date picker and selected dates should appear as a HOLIDAY row in the daily projection.
-- **6.** User requested a redesign of the  from a tabbed layout to a sidebar layout.
-- **5.** User requested a Global Trading Setting section in the sidebar for Master Admins only, to contain both product and holiday management.
-- **4.** Agent started implementing the sidebar layout and the new Global Trading Settings section.
-- **3.** Agent updated the  to fetch and respect the new global settings.
-- **2.** Agent verified the UI of the new Global Trading Settings section with screenshots.
-- **1.** (LATEST) Agent verified the HOLIDAY row functionality in the Daily Projection table. The next logical step is to verify the rest of the settings page and the onboarding integration.
+**Last 10 User Messages and any pending HUMAN messages** 
+- **10.** User requested to add total commission at the end of the wizard or find a better way to handle it, also asking for a more compact UI design.
+- **9.** User confirmed auto-calculation approach for commission:  and that it should be read-only.
+- **8.** User changed the commission formula to: .
+- **7.** User realized auto-calculation would fail due to deposits/withdrawals and asked for new options.
+- **6.** User chose Option C: make  the source of truth in the wizard, with a disclaimer that commission would be handled at the end.
+- **5.** User reported multiple critical bugs in the Daily Projection table: incorrect starting balance for December, wrong month order, and general data inaccuracy.
+- **4.** User expressed frustration, stating the  in the database is wrong (WE NEVER GOT TO 20 AS A LOT SIZE) and demanded that a tracker reset should also reset the trade history.
+- **3.** User reported that  doesn't decrease after a withdrawal and requested a Restart Reset button in the wizard.
+- **2.** User reported that the balance in the wizard is stagnant and doesn't increase as daily profits are added.
+- **1. (LATEST)** User clarified the final, desired commission implementation: a manual commission entry field for each trading day, a commission column in the projection table, and the balance formula updated to .
 
 **Project Health Check:**
-- **Broken:** None.
+- **Broken:** The data consistency between the  and the  is functionally broken until the commission feature is implemented and the Reset + Onboard flow is proven to generate accurate .
 - **Mocked:** Cloudinary integration is still a placeholder.
 
 **3rd Party Integrations**
@@ -140,24 +166,20 @@ Key functionalities include a daily projection table, a trade monitor, an admin 
 - Emailit (Service for sending emails)
 - APScheduler (Backend scheduled jobs)
 - Cloudinary (Placeholder for image hosting)
+- **CoinGecko** (New): For live cryptocurrency exchange rates, integrated on the backend with caching.
 
 **Testing status**
-  - **Testing agent used after significant changes:** YES
+  - **Testing agent used after significant changes:** NO (Agent performed manual screenshot verification).
   - **Troubleshoot agent used after agent stuck in loop:** NO
-  - **Test files created:** 
-    - 
-    - 
-    - 
-    - 
-  - **Known regressions:** None.
+  - **Test files created:** None in this session.
+  - **Known regressions:** The data in the  collection is known to be inaccurate from previous faulty imports. This is not a code regression but a data integrity issue that needs to be solved by the Reset + Clean Onboard flow.
 
 **Credentials to test flow:**
 - **Role:** Master Admin
 - **Email:** 
 - **Password:** 
-- **Role:** Extended Licensee
-- **Email:** 
-- **Password:** 
 
 **What agent forgot to execute**
-- The agent has not yet performed a full regression check on the  to ensure that all the original settings sections (SEO, Branding, UI, API, etc.) are still functional after the refactoring to a sidebar layout. This is a critical next step.</analysis>
+- The agent has not yet propagated the  field from the backend models into the actual API endpoint logic (, ).
+- The agent has not started any of the required frontend UI changes for commission entry or display.
+- After fixing numerous bugs in the Daily Projection and Onboarding wizard, a comprehensive end-to-end test of the Reset - - Data flow was not performed, which is critical to confirm all data consistency issues are resolved.</analysis>
