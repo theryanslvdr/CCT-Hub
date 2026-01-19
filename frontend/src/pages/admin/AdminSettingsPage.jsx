@@ -55,6 +55,12 @@ export const AdminSettingsPage = () => {
     maintenance_message: 'Our services are undergoing maintenance, and will be back soon!',
     // Announcements
     announcements: [],
+    // Content Protection (Security)
+    content_protection_enabled: false,
+    content_protection_watermark: true,
+    content_protection_disable_copy: true,
+    content_protection_disable_rightclick: true,
+    content_protection_disable_shortcuts: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
