@@ -1963,6 +1963,28 @@ export const AdminSettingsPage = () => {
                       />
                     </div>
 
+                    {/* Custom Watermark Text (Master Admin Only) */}
+                    {settings.content_protection_watermark && (
+                      <div className="p-4 rounded-lg bg-zinc-900/50 border border-purple-500/30">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Crown className="w-4 h-4 text-purple-400" />
+                          <p className="text-purple-400 font-medium text-sm">Master Admin Only</p>
+                        </div>
+                        <Label className="text-zinc-300">Custom Watermark Text</Label>
+                        <Input
+                          value={settings.content_protection_watermark_custom || ''}
+                          onChange={(e) => setSettings({ ...settings, content_protection_watermark_custom: e.target.value })}
+                          placeholder="Leave empty to use user's name/email"
+                          className="input-dark mt-2"
+                          data-testid="custom-watermark-input"
+                        />
+                        <p className="text-xs text-zinc-500 mt-2">
+                          If set, this text will be displayed instead of individual user names. 
+                          Leave empty to show each user&apos;s email/name for traceability.
+                        </p>
+                      </div>
+                    )}
+
                     {/* Copy Protection Toggle */}
                     <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                       <div>
