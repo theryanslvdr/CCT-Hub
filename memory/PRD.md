@@ -25,6 +25,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - `POST /api/trade/log` - Accepts and stores `commission` field (defaults to 0)
   - `POST /api/trade/log-missed-trade` - Accepts `commission` field
   - `POST /api/profit/complete-onboarding` - Accepts `total_commission` field
+  - `GET /api/trade/history` - Returns `commission` field with default 0 for backward compatibility
 - **Calculations Updated** (`utils/calculations.py`):
   - `calculate_account_value()` includes commission in balance calculation
   - `get_user_financial_summary()` returns `total_commission` field
@@ -44,9 +45,29 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - Updated balance calculation: `runningBalance += actualProfit + commission`
   - Added Commission column to table header and body
 
+#### P1: Data Consistency Verification ✅
+- Verified Reset Tracker correctly deletes deposits and trade_logs
+- Verified Complete Onboarding creates trade_logs with correct formulas:
+  - `lot_size = balance / 980`
+  - `projected_profit = lot_size * 15`
+- Verified Daily Projection uses stored trade_log values for completed trades
+- Fixed `/api/trade/history` endpoint to return commission field with default 0
+
+#### P1: Frontend Refactoring (Started) ✅
+- Created `/app/frontend/src/components/onboarding/` directory with extracted components:
+  - `StepUserType.jsx` - Step 1: User type selection (new/experienced)
+  - `StepNewTraderBalance.jsx` - Step 2: Starting balance for new traders
+  - `StepExperiencedStart.jsx` - Step 2: Start date and balance for experienced traders
+  - `index.js` - Export file with shared helper functions
+- Created `/app/frontend/src/lib/profitTrackerUtils.js` with shared calculation functions:
+  - `truncateTo2Decimals`, `formatLargeNumber`, `formatMoney`
+  - `calculateLotSize`, `calculateProjectedProfit`, `calculateExitValue`
+  - `isTradingDay`, `isHoliday`, `addBusinessDays`
+  - `generateDailyProjectionForMonth` - Core projection calculation
+
 #### Testing ✅
-- **15/15 backend tests passed** (test_iteration_53_commission_tracking.py)
-- **Frontend UI verified**: Commission column visible, inputs functional
+- **Iteration 53**: 15/15 backend tests passed (commission tracking)
+- **Iteration 54**: 18/20 backend tests passed (data consistency - 2 minor issues fixed)
 
 ### Session 53 (2026-01-17) - Onboarding Wizard, Streaks, Daily Projection Fixes
 
