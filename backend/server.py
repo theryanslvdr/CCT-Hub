@@ -1630,10 +1630,15 @@ async def log_missed_trade(
             {"$match": {"user_id": user["id"]}},
             {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
         ]).to_list(1)
+        commissions = await db.trade_logs.aggregate([
+            {"$match": {"user_id": user["id"]}},
+            {"$group": {"_id": None, "total": {"$sum": "$commission"}}}
+        ]).to_list(1)
         
         balance = (deposits[0]["total"] if deposits else 0) - \
                   (withdrawals[0]["total"] if withdrawals else 0) + \
-                  (profits[0]["total"] if profits else 0)
+                  (profits[0]["total"] if profits else 0) + \
+                  (commissions[0]["total"] if commissions else 0)
         
         lot_size = round(balance / 980, 2)
     
@@ -1663,6 +1668,7 @@ async def log_missed_trade(
         "direction": direction,
         "projected_profit": projected_profit,
         "actual_profit": actual_profit,
+        "commission": commission,  # Daily commission from referrals
         "profit_difference": profit_difference,
         "performance": performance,
         "signal_id": None,  # No signal for retroactive trades
