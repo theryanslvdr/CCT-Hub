@@ -11,68 +11,43 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 54 (2026-01-19) - Commission Tracking + Performance Optimization + Refactoring ✅
+### Session 54 (2026-01-19) - Commission Fix + Content Protection + Performance ✅
 
-#### Commission Tracking Feature Implementation ✅
-- **Commission Column in Daily Projection**: Added "Commission" column to the Daily Projection table in ProfitTrackerPage
-- **Commission Input in Trade Monitor**: Added commission input field when entering actual profit after a trade
-- **Commission Input in Onboarding Wizard**: Added total commission input at the final step for experienced traders
-- **Balance Formula Updated**: `Next Day's Balance = Today's Balance + Today's Profit + Today's Commission`
+#### Commission Display Fix (Latest) ✅
+- **Total Commission → Last Trade Entry**: When entering total commission at wizard's final step, it's now assigned to the **last trade entry's commission field** (not as separate deposit)
+- **Commission Column in Daily Projection**: Shows the commission amount for each trading day
+- **Balance Formula**: `Next Day's Balance = Today's Balance + Today's Profit + Today's Commission`
+- **Lot Size Sync**: Balance → Lot Size → Projection all now match correctly
+
+#### Content Protection Feature (Latest) ✅
+- **Security Tab in Admin Settings**: New tab with content protection controls
+- **Features when enabled**:
+  - User watermark overlay (subtle, shows user's name/email)
+  - Text selection/copy disabled (CSS + JS)
+  - Right-click context menu blocked
+  - Keyboard shortcuts blocked (Ctrl+C, Ctrl+A, PrtScn, etc.)
+  - Visual warning overlay when blocked action attempted
+- **Files Created**:
+  - `/app/frontend/src/components/ContentProtection.jsx` - Protection component
+  - Updated `DashboardLayout.jsx` - Renders ContentProtection
+  - Updated `AdminSettingsPage.jsx` - Security tab UI
+  - Updated `server.py` - PlatformSettings model with content_protection fields
 
 #### Performance Optimization (High Concurrency Fixes) ✅
 - **MongoDB Connection Pooling**: Added `maxPoolSize=100`, `minPoolSize=10`, `maxIdleTimeMS=45000`, `waitQueueTimeoutMS=10000`
 - **N+1 Query Fix**: Batch fetch signals in trade history endpoint instead of individual queries per trade
 - **CoinGecko Cache Optimization**: Increased cache TTL from 5 to 15 minutes, added request deduplication
-- **Database Indexes**: Added compound indexes for frequently queried fields:
-  - `trade_logs: (user_id, created_at)` for paginated queries
-  - `deposits: (user_id, created_at)` for sorted queries
-  - `licenses: (user_id, is_active)` for license checks
-  - `trading_signals: id` for signal enrichment
+- **Database Indexes**: Added compound indexes for frequently queried fields
 
 #### Frontend Refactoring ✅
-- **OnboardingWizard Step Extraction**:
-  - Created `/app/frontend/src/components/onboarding/` directory
-  - `StepUserType.jsx` - Step 1: User type selection
-  - `StepNewTraderBalance.jsx` - Step 2: Starting balance for new traders
-  - `StepExperiencedStart.jsx` - Step 2: Combined start date + balance for experienced traders
-  - `index.js` - Exports with shared helper functions
-  - Reduced step count from 5 to 4 for experienced traders (combined date+balance step)
-- **Profit Tracker Utilities**:
-  - Created `/app/frontend/src/lib/profitTrackerUtils.js`
-  - Contains: `formatMoney`, `formatLargeNumber`, `truncateTo2Decimals`
-  - Contains: `calculateLotSize`, `calculateProjectedProfit`, `isTradingDay`
-  - Contains: `generateDailyProjectionForMonth` function
-
-#### Backend Changes ✅
-- **Models Updated**: `TradeLogCreate`, `TradeLogUpdate`, `OnboardingTradeEntry`, `OnboardingData` include `commission` field
-- **API Endpoints Updated**:
-  - `POST /api/trade/log` - Accepts and stores `commission` field (defaults to 0)
-  - `POST /api/trade/log-missed-trade` - Accepts `commission` field
-  - `POST /api/profit/complete-onboarding` - Accepts `total_commission` field
-  - `GET /api/trade/history` - Returns `commission` field with default 0 for backward compatibility
-- **Calculations Updated** (`utils/calculations.py`):
-  - `calculate_account_value()` includes commission in balance calculation
-  - `get_user_financial_summary()` returns `total_commission` field
-  - `lot_size = balance / 980`
-  - `projected_profit = lot_size * 15`
-- Verified Daily Projection uses stored trade_log values for completed trades
-- Fixed `/api/trade/history` endpoint to return commission field with default 0
-
-#### P1: Frontend Refactoring (Started) ✅
-- Created `/app/frontend/src/components/onboarding/` directory with extracted components:
-  - `StepUserType.jsx` - Step 1: User type selection (new/experienced)
-  - `StepNewTraderBalance.jsx` - Step 2: Starting balance for new traders
-  - `StepExperiencedStart.jsx` - Step 2: Start date and balance for experienced traders
-  - `index.js` - Export file with shared helper functions
-- Created `/app/frontend/src/lib/profitTrackerUtils.js` with shared calculation functions:
-  - `truncateTo2Decimals`, `formatLargeNumber`, `formatMoney`
-  - `calculateLotSize`, `calculateProjectedProfit`, `calculateExitValue`
-  - `isTradingDay`, `isHoliday`, `addBusinessDays`
-  - `generateDailyProjectionForMonth` - Core projection calculation
+- **OnboardingWizard Step Extraction**: Created `/app/frontend/src/components/onboarding/` directory
+- **Profit Tracker Utilities**: Created `/app/frontend/src/lib/profitTrackerUtils.js`
+- Reduced step count from 5 to 4 for experienced traders (combined date+balance step)
 
 #### Testing ✅
 - **Iteration 53**: 15/15 backend tests passed (commission tracking)
-- **Iteration 54**: 18/20 backend tests passed (data consistency - 2 minor issues fixed)
+- **Iteration 54**: 18/20 backend tests passed (data consistency)
+- **Iteration 55**: 12/12 backend tests passed (commission fix + content protection)
 
 ### Session 53 (2026-01-17) - Onboarding Wizard, Streaks, Daily Projection Fixes
 
