@@ -62,6 +62,9 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   const [currentTradeIndex, setCurrentTradeIndex] = useState(0);
   const [tradeEntries, setTradeEntries] = useState({}); // { dateKey: { balance: number, actualProfit: number, missed: boolean, product: string, direction: string } }
   
+  // Commission (entered at final step)
+  const [totalCommission, setTotalCommission] = useState('');
+  
   // Global trading settings from backend
   const [globalHolidays, setGlobalHolidays] = useState([]);
   const [tradingProducts, setTradingProducts] = useState([]);
