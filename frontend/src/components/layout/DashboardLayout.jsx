@@ -217,14 +217,15 @@ export const DashboardLayout = () => {
         
         <main className={cn(
           "flex-1 flex flex-col transition-all duration-300",
-          sidebarCollapsed ? "ml-16" : "ml-64"
+          "ml-0 lg:ml-16",  // No margin on mobile, sidebar margin on desktop
+          !sidebarCollapsed && "lg:ml-64"  // Expanded sidebar margin only on desktop
         )}>
           <Header
             title={currentTitle}
             onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           />
           
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden">
             {/* Announcements Banner */}
             <AnnouncementBanner 
               announcements={visibleAnnouncements} 
