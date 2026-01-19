@@ -17,6 +17,11 @@ import {
 import { toast } from 'sonner';
 import { profitAPI, tradeAPI } from '@/lib/api';
 
+// Import extracted step components
+import { StepUserType } from './onboarding/StepUserType';
+import { StepNewTraderBalance } from './onboarding/StepNewTraderBalance';
+import { StepExperiencedStart } from './onboarding/StepExperiencedStart';
+
 // Minimum start date for experienced traders (December 1, 2025)
 const MIN_START_DATE = new Date(2025, 11, 1); // December 1, 2025
 // Minimum deposit date (a week before December 1, 2025)
