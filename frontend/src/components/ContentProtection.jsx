@@ -8,6 +8,61 @@ import React, { useEffect, useCallback } from 'react';
  * - Blocks keyboard shortcuts (Ctrl+C, Ctrl+A, PrtScn, etc.)
  * - Shows watermark overlay with user info
  */
+
+// Show warning toast or flash - defined outside component to avoid recreating
+const showProtectionWarning = () => {
+  // Check if warning already exists
+  if (document.getElementById('protection-warning')) return;
+  
+  // Create temporary warning overlay
+  const warning = document.createElement('div');
+  warning.id = 'protection-warning';
+  warning.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: fadeInOut 1.5s ease-in-out forwards;
+  `;
+  warning.innerHTML = `
+    <div style="text-align: center; color: white;">
+      <svg style="width: 64px; height: 64px; margin: 0 auto 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+      <p style="font-size: 18px; font-weight: 600;">Content Protected</p>
+      <p style="font-size: 14px; opacity: 0.7; margin-top: 8px;">This action is not allowed</p>
+    </div>
+  `;
+  
+  // Add animation style if not exists
+  if (!document.getElementById('protection-style')) {
+    const style = document.createElement('style');
+    style.id = 'protection-style';
+    style.textContent = `
+      @keyframes fadeInOut {
+        0% { opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(warning);
+  
+  // Remove after animation
+  setTimeout(() => {
+    warning.remove();
+  }, 1500);
+};
+
 export const ContentProtection = ({ 
   enabled = false,
   userEmail = '',
@@ -42,8 +97,6 @@ export const ContentProtection = ({
     if (e.key === 'PrintScreen' || e.keyCode === 44) {
       e.preventDefault();
       e.stopPropagation();
-      
-      // Flash screen or show warning
       showProtectionWarning();
       return false;
     }
@@ -87,54 +140,6 @@ export const ContentProtection = ({
     showProtectionWarning();
     return false;
   }, [enabled, disableCopy]);
-  
-  // Show warning toast or flash
-  const showProtectionWarning = () => {
-    // Create temporary warning overlay
-    const warning = document.createElement('div');
-    warning.id = 'protection-warning';
-    warning.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-      animation: fadeInOut 1.5s ease-in-out forwards;
-    `;
-    warning.innerHTML = `
-      <div style="text-align: center; color: white;">
-        <svg style="width: 64px; height: 64px; margin: 0 auto 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-        </svg>
-        <p style="font-size: 18px; font-weight: 600;">Content Protected</p>
-        <p style="font-size: 14px; opacity: 0.7; margin-top: 8px;">This action is not allowed</p>
-      </div>
-    `;
-    
-    // Add animation style
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeInOut {
-        0% { opacity: 0; }
-        20% { opacity: 1; }
-        80% { opacity: 1; }
-        100% { opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-    document.body.appendChild(warning);
-    
-    // Remove after animation
-    setTimeout(() => {
-      warning.remove();
-      style.remove();
-    }, 1500);
-  };
   
   // Apply protection styles and event listeners
   useEffect(() => {
