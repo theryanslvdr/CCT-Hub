@@ -25,25 +25,18 @@ const truncateTo2Decimals = (num) => {
   return Math.trunc(num * 100) / 100;
 };
 
-// Format large numbers (millions, billions)
+// Format large numbers with K, M, B abbreviations
 const formatLargeNumber = (amount) => {
-  if (amount === null || amount === undefined) return '$0.00';
+  if (amount === null || amount === undefined) return '$0';
   
   const absAmount = Math.abs(amount);
   const sign = amount < 0 ? '-' : '';
   
-  if (absAmount >= 1e9) {
-    return `${sign}$${(absAmount / 1e9).toFixed(2)} Billion`;
-  } else if (absAmount >= 1e6) {
-    return `${sign}$${(absAmount / 1e6).toFixed(2)} Million`;
-  } else {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  }
+  if (absAmount >= 1e12) return `${sign}$${(absAmount / 1e12).toFixed(2)}T`;
+  if (absAmount >= 1e9) return `${sign}$${(absAmount / 1e9).toFixed(2)}B`;
+  if (absAmount >= 1e6) return `${sign}$${(absAmount / 1e6).toFixed(2)}M`;
+  if (absAmount >= 1e3) return `${sign}$${(absAmount / 1e3).toFixed(2)}K`;
+  return `${sign}$${absAmount.toFixed(2)}`;
 };
 
 // Convert time from one timezone to another
