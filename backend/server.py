@@ -1247,18 +1247,17 @@ async def get_commissions(user: dict = Depends(get_current_user)):
     return commissions
 
 
-@profit_router.get("/master-admin-breakdown")
-async def get_master_admin_financial_breakdown(user: dict = Depends(require_master_admin)):
-    """Get detailed financial breakdown for Master Admin, including licensee funds.
+@profit_router.get("/vsd")
+async def get_virtual_share_distribution(user: dict = Depends(require_master_admin)):
+    """Get Virtual Share Distribution (VSD) for Master Admin.
     
-    This shows:
-    Shows Virtual Share Distribution (VSD):
-    - Total Pool (Master Admin's Merin balance)
-    - Master Admin's remaining portion
+    Shows how the Master Admin's Merin balance is distributed:
+    - Total Pool (Master Admin's Merin balance - the actual trading account)
+    - Master Admin's remaining portion (their share after licensee allocations)
     - Total licensee virtual shares
     - Breakdown per licensee (Current Balance, Total Deposit, Total Profit, % Share)
     
-    NOTE: Licensee funds are PART OF the total pool (not in addition to it).
+    NOTE: Licensee funds are PART OF the total pool (they deposited into it).
     """
     from utils.calculations import get_master_admin_financial_breakdown as get_breakdown
     
