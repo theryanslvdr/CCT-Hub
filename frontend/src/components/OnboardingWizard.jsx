@@ -909,47 +909,50 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
   
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-2xl bg-zinc-900 border-zinc-700 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl bg-zinc-900 border-zinc-700 max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center justify-between">
-            <span>
+            <span className="text-base sm:text-lg">
               {isReset ? 'Reset Profit Tracker' : 'Setup Profit Tracker'}
             </span>
-            <span className="text-sm font-normal text-zinc-400">
+            <span className="text-xs sm:text-sm font-normal text-zinc-400">
               Step {currentStep} of {getTotalSteps()}
             </span>
           </DialogTitle>
           <Progress value={progress} className="h-1 mt-2" />
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-2 sm:py-4">
           {renderStepContent()}
         </div>
         
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
-          <div className="flex gap-2">
+        {/* Mobile-friendly footer buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-zinc-800">
+          {/* Secondary actions - stacked on mobile */}
+          <div className="flex flex-wrap gap-2 order-2 sm:order-1">
             {currentStep > 1 && (
-              <Button variant="outline" onClick={handleBack}>
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back
+              <Button variant="outline" onClick={handleBack} className="flex-1 sm:flex-initial">
+                <ChevronLeft className="w-4 h-4 mr-1 sm:mr-2" /> Back
               </Button>
             )}
             {currentStep > 1 && (
               <Button 
                 variant="ghost" 
                 onClick={handleRestart} 
-                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 flex-1 sm:flex-initial"
               >
-                <RotateCcw className="w-4 h-4 mr-2" /> Restart
+                <RotateCcw className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Restart</span><span className="sm:hidden">Reset</span>
               </Button>
             )}
-            <Button variant="ghost" onClick={handleSaveForLater} className="text-zinc-400">
-              <Save className="w-4 h-4 mr-2" /> Save & Continue Later
+            <Button variant="ghost" onClick={handleSaveForLater} className="text-zinc-400 flex-1 sm:flex-initial">
+              <Save className="w-4 h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Save & Continue Later</span><span className="sm:hidden">Save</span>
             </Button>
           </div>
           
+          {/* Primary action - full width on mobile */}
           <Button 
             onClick={handleNext} 
-            className="btn-primary"
+            className="btn-primary w-full sm:w-auto order-1 sm:order-2"
             disabled={isLoading || (currentStep === 1 && !userType)}
           >
             {isLoading ? (
