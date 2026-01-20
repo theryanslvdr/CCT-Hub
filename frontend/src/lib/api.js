@@ -193,6 +193,10 @@ export const adminAPI = {
   resendLicenseInvite: (inviteId) => api.post(`/admin/license-invites/${inviteId}/resend`),
   deleteLicenseInvite: (inviteId) => api.delete(`/admin/license-invites/${inviteId}`),
   resetLicenseBalance: (licenseId, data) => api.post(`/admin/licenses/${licenseId}/reset-balance`, data),
+  // License Trade Overrides
+  getLicenseTradeOverrides: (licenseId) => api.get(`/admin/licenses/${licenseId}/trade-overrides`),
+  setLicenseTradeOverride: (licenseId, data) => api.post(`/admin/licenses/${licenseId}/trade-overrides`, data),
+  deleteLicenseTradeOverride: (licenseId, date) => api.delete(`/admin/licenses/${licenseId}/trade-overrides/${date}`),
   // Licensee Transactions
   getLicenseeTransactions: () => api.get('/admin/licensee-transactions'),
   addTransactionFeedback: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/feedback`, formData, {
