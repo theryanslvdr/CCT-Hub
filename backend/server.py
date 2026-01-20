@@ -353,6 +353,7 @@ class LicenseInviteCreate(BaseModel):
     notes: Optional[str] = None
     invitee_email: Optional[str] = None
     invitee_name: Optional[str] = None
+    effective_start_date: Optional[str] = None  # YYYY-MM-DD format for when trading starts
 
 class LicenseInviteUpdate(BaseModel):
     valid_duration: Optional[str] = None
@@ -360,6 +361,7 @@ class LicenseInviteUpdate(BaseModel):
     notes: Optional[str] = None
     invitee_email: Optional[str] = None
     invitee_name: Optional[str] = None
+    effective_start_date: Optional[str] = None  # Can update the effective start date
 
 # Email Template Models
 class EmailTemplateType(str, Enum):
