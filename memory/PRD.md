@@ -18,10 +18,14 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Master Admin assigns balance via Admin panel
 - Onboarding only shown for non-licensee users
 
-#### Daily Projection Table for Licensees (PENDING FRONTEND IMPLEMENTATION)
-- **Hide columns**: Actual Profit, Commission, P/L Difference
-- **Add column**: "Manager Traded" (✓ if traded, ✗ if not)
-- **Projected Profit Logic**: Show "--" if manager didn't trade, carry forward balance
+#### Daily Projection Table for Licensees ✅
+- **Hidden columns** (for ALL licensees): Actual Profit, Commission, P/L Difference
+- **New column**: "Manager Traded" 
+  - ✓ (green check) = Manager traded - profit added to balance
+  - ✗ (red X) = Manager didn't trade - balance carried forward
+- **Target Profit**: Shows "--" when manager didn't trade
+- **Balance Logic**: Carries forward when manager didn't trade (no profit added)
+- **Legend**: Explanatory text at bottom of dialog
 
 #### Effective Start Trade Date ✅
 - **License Creation**: New "Effective Start Trade Date" field in Generate License Invite form
