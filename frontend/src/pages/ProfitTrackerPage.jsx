@@ -668,6 +668,13 @@ export const ProfitTrackerPage = () => {
   // License projections for extended licensees (fixed lot size and daily profit per quarter)
   const [licenseProjections, setLicenseProjections] = useState([]);
   
+  // Trade overrides for licensees (per-licensee, per-date manual toggles by Master Admin)
+  const [tradeOverrides, setTradeOverrides] = useState({});
+  const [togglingTrade, setTogglingTrade] = useState(null); // Track which date is being toggled
+  
+  // Get effective start date for licensees
+  const effectiveStartDate = simulatedView?.effective_start_date || null;
+  
   // Projection states
   const [selectedYears, setSelectedYears] = useState(1);
   const [projectionView, setProjectionView] = useState('summary');
@@ -682,6 +689,10 @@ export const ProfitTrackerPage = () => {
     loadGlobalHolidays();
     // Check if licensee needs to see welcome screen
     checkLicenseeWelcome();
+    // Load trade overrides if simulating a licensee
+    if (simulatedView?.licenseId) {
+      loadTradeOverrides(simulatedView.licenseId);
+    }
   }, [simulatedView]);
 
   const checkLicenseeWelcome = async () => {
@@ -696,6 +707,46 @@ export const ProfitTrackerPage = () => {
       }
     } catch (error) {
       console.error('Failed to check licensee welcome:', error);
+    }
+  };
+
+  const loadTradeOverrides = async (licenseId) => {
+    try {
+      const response = await adminAPI.getLicenseTradeOverrides(licenseId);
+      setTradeOverrides(response.data.overrides || {});
+    } catch (error) {
+      console.error('Failed to load trade overrides:', error);
+      setTradeOverrides({});
+    }
+  };
+
+  const handleToggleTradeOverride = async (dateKey, currentTraded) => {
+    if (!simulatedView?.licenseId) {
+      toast.error('Cannot toggle trade status - no license selected');
+      return;
+    }
+    
+    setTogglingTrade(dateKey);
+    try {
+      await adminAPI.setLicenseTradeOverride(simulatedView.licenseId, {
+        license_id: simulatedView.licenseId,
+        date: dateKey,
+        traded: !currentTraded,
+        notes: `Toggled by Master Admin on ${new Date().toISOString()}`
+      });
+      
+      // Update local state
+      setTradeOverrides(prev => ({
+        ...prev,
+        [dateKey]: { ...prev[dateKey], traded: !currentTraded, date: dateKey }
+      }));
+      
+      toast.success(`Trade status for ${dateKey} set to ${!currentTraded ? '✓ Traded' : '✗ Not Traded'}`);
+    } catch (error) {
+      console.error('Failed to toggle trade override:', error);
+      toast.error('Failed to update trade status');
+    } finally {
+      setTogglingTrade(null);
     }
   };
 
