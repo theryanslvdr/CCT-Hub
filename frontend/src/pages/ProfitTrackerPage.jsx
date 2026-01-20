@@ -1436,9 +1436,13 @@ export const ProfitTrackerPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-xs text-zinc-400">Account Value</p>
-                <p className="text-2xl font-bold font-mono text-white mt-1">
-                  {formatCompact(effectiveAccountValue)}
-                </p>
+                <ValueTooltip exactValue={formatFullCurrency(effectiveAccountValue)}>
+                  {/* Desktop: Full amount, Mobile: Compact */}
+                  <p className="text-2xl font-bold font-mono text-white mt-1">
+                    <span className="hidden md:inline">{formatLargeNumber(effectiveAccountValue)}</span>
+                    <span className="md:hidden">{formatCompact(effectiveAccountValue)}</span>
+                  </p>
+                </ValueTooltip>
               </div>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
                 <Wallet className="w-5 h-5 text-white" />
@@ -1465,10 +1469,13 @@ export const ProfitTrackerPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="text-2xl font-bold font-mono text-white mt-1">
-                  {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}
-                </p>
-                <p className="text-[10px] text-zinc-500">≈ {formatCompact(effectiveTotalDeposits)} USDT</p>
+                <ValueTooltip exactValue={`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
+                  <p className="text-2xl font-bold font-mono text-white mt-1">
+                    <span className="hidden md:inline">{getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}</span>
+                    <span className="md:hidden">{formatCompact(effectiveTotalDeposits)}</span>
+                  </p>
+                </ValueTooltip>
+                <p className="text-[10px] text-zinc-500 hidden md:block">≈ {formatFullCurrency(effectiveTotalDeposits)} USDT</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
                 <ArrowDownToLine className="w-5 h-5 text-white" />
@@ -1482,9 +1489,12 @@ export const ProfitTrackerPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-xs text-zinc-400">Total Profit</p>
-                <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {effectiveTotalProfit >= 0 ? '+' : ''}{formatCompact(effectiveTotalProfit)}
-                </p>
+                <ValueTooltip exactValue={formatFullCurrency(effectiveTotalProfit)}>
+                  <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className="hidden md:inline">{effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}</span>
+                    <span className="md:hidden">{effectiveTotalProfit >= 0 ? '+' : ''}{formatCompact(effectiveTotalProfit)}</span>
+                  </p>
+                </ValueTooltip>
               </div>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="w-5 h-5 text-white" />
