@@ -1350,7 +1350,7 @@ export const ProfitTrackerPage = () => {
               <div className="flex items-center gap-4">
                 <Radio className="w-5 h-5 text-blue-400 animate-pulse" />
                 <div>
-                  <p className="text-xs text-zinc-400">Today's Trading Signal</p>
+                  <p className="text-xs text-zinc-400">Today&apos;s Trading Signal</p>
                   <div className="flex items-center gap-3 mt-1">
                     <span className="text-white font-bold">{activeSignal.product}</span>
                     <span className={`px-3 py-1 rounded-lg font-bold text-sm ${activeSignal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -1742,14 +1742,14 @@ export const ProfitTrackerPage = () => {
                     <div>
                       <p className="text-blue-400 font-medium">Confirm Your Action</p>
                       <p className="text-sm text-zinc-400 mt-1">
-                        By proceeding, you're confirming that you're adding <span className="text-white font-mono">{formatMoney(depositSimulation?.receiveAmount)}</span> to your Merin Account.
+                        By proceeding, you&apos;re confirming that you&apos;re adding <span className="text-white font-mono">{formatMoney(depositSimulation?.receiveAmount)}</span> to your Merin Account.
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => setDepositStep('simulate')}>
-                    No, I'm just thinking
+                    No, I&apos;m just thinking
                   </Button>
                   <Button onClick={handleConfirmDeposit} className="flex-1 btn-primary" data-testid="confirm-deposit-button">
                     <CheckCircle2 className="w-4 h-4 mr-2" /> Yes, I confirm
@@ -1858,7 +1858,7 @@ export const ProfitTrackerPage = () => {
                     <div>
                       <p className="text-amber-400 font-medium">Confirm Withdrawal</p>
                       <p className="text-sm text-zinc-400 mt-1">
-                        By proceeding, you're confirming that you're withdrawing <span className="text-white font-mono">{formatMoney(parseFloat(withdrawalAmount))}</span> from your Merin Account.
+                        By proceeding, you&apos;re confirming that you&apos;re withdrawing <span className="text-white font-mono">{formatMoney(parseFloat(withdrawalAmount))}</span> from your Merin Account.
                       </p>
                       <p className="text-sm text-zinc-400 mt-2">
                         You will receive <span className="text-emerald-400 font-mono">{formatMoney(withdrawalResult?.netAmount)}</span> in your Binance account.
