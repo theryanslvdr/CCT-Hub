@@ -500,10 +500,13 @@ export const DashboardPage = () => {
                       <span className="text-zinc-400">Total Trades</span>
                       <span className="text-xl font-mono text-cyan-400">{summary?.total_trades || 0}</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
-                      <span className="text-zinc-400">Current LOT Size</span>
-                      <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
-                    </div>
+                    {/* Hide Current LOT Size for licensees */}
+                    {!isLicenseeView && (
+                      <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                        <span className="text-zinc-400">Current LOT Size</span>
+                        <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
