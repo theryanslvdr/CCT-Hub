@@ -526,7 +526,8 @@ export const DashboardPage = () => {
                         <tr>
                           <th>Date</th>
                           <th>Direction</th>
-                          <th>LOT Size</th>
+                          {/* Hide LOT Size for licensees */}
+                          {!isLicenseeView && <th>LOT Size</th>}
                           <th>Projected</th>
                           <th>Actual</th>
                           <th>Difference</th>
