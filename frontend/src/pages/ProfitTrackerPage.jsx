@@ -1030,10 +1030,16 @@ export const ProfitTrackerPage = () => {
       if (monthProjections.length === 0) return [];
       
       // Build projections with carry-forward logic when manager didn't trade
-      let runningBalance = monthProjections[0]?.account_value - monthProjections[0]?.daily_profit || effectiveAccountValue;
+      // Start with the first day's "start_value" (balance BEFORE first trade)
+      let runningBalance = monthProjections[0]?.start_value || 
+                           (monthProjections[0]?.account_value - monthProjections[0]?.daily_profit) || 
+                           effectiveAccountValue;
+      
+      // Track accumulated profit for this month (for licensees)
+      let accumulatedProfit = 0;
       
       return monthProjections.map((p, idx) => {
-        const projDate = new Date(p.date);
+        const projDate = new Date(p.date + 'T00:00:00'); // Ensure local date parsing
         const isToday = projDate.toDateString() === today.toDateString();
         const isFuture = projDate > today;
         const isPast = projDate < today;
@@ -1046,23 +1052,46 @@ export const ProfitTrackerPage = () => {
         
         // Determine status
         let status = 'pending';
-        if (masterTraded) {
+        if (isPast && masterTraded) {
           status = 'completed';
-        } else if (isPast) {
+        } else if (isPast && !masterTraded) {
           status = 'missed'; // Past day without master admin trade
+        } else if (isToday) {
+          status = masterTraded ? 'completed' : 'pending';
         } else if (isFuture) {
           status = 'future';
         }
         
-        // Calculate balance - if manager didn't trade, carry forward from previous day
+        // Calculate balance - accumulate properly
         const balanceBefore = runningBalance;
-        const targetProfit = masterTraded ? p.daily_profit : 0; // 0 if manager didn't trade
+        
+        // For past days and today (if traded), add the actual profit
+        // For future days, project based on accumulated balance
+        let dailyProfit = p.daily_profit;
+        
+        // If master didn't trade on a past day, no profit for that day
+        if (isPast && !masterTraded) {
+          dailyProfit = 0;
+        }
+        
+        // Track accumulated profit from trading days
+        if ((isPast || (isToday && masterTraded)) && masterTraded) {
+          accumulatedProfit += p.daily_profit;
+        }
         
         // Update running balance for next day
-        if (masterTraded) {
+        // Only add profit if manager actually traded (for past days) or for future projections
+        if (isPast && masterTraded) {
+          runningBalance = balanceBefore + p.daily_profit;
+        } else if (isToday && masterTraded) {
+          // For today, use the projected profit if manager traded
+          runningBalance = balanceBefore + p.daily_profit;
+        } else if (isFuture) {
+          // For future days, project based on current running balance
+          // Assume manager WILL trade (optimistic projection)
           runningBalance = balanceBefore + p.daily_profit;
         }
-        // If manager didn't trade, balance stays the same (carry forward)
+        // If manager didn't trade on past day, balance stays the same (carry forward)
         
         return {
           date: projDate,
@@ -1073,9 +1102,9 @@ export const ProfitTrackerPage = () => {
           }),
           dateKey: p.date,
           balanceBefore: balanceBefore,
-          lotSize: p.lot_size,  // FIXED from backend (quarterly)
-          targetProfit: p.daily_profit,  // Original target (may show "--" in UI if manager didn't trade)
-          actualProfit: masterTraded ? p.daily_profit : undefined,
+          lotSize: p.lot_size,  // Will be hidden in UI for licensees
+          targetProfit: masterTraded || isFuture ? p.daily_profit : 0, // Show "--" for missed past days
+          actualProfit: (isPast || isToday) && masterTraded ? p.daily_profit : undefined,
           status: status,
           isToday: isToday,
           managerTraded: masterTraded, // Explicit flag for the "Manager Traded" column
