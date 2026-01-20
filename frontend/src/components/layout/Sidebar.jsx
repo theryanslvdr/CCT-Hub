@@ -78,13 +78,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       // Get members array from response
       const members = membersRes.data.members || membersRes.data || [];
       
-      // Match with member details
+      // Match with member details - licenses already have user_name from backend
       const licenseesWithDetails = activeLicenses.map(license => {
         const member = members.find(m => m.id === license.user_id);
         return {
           ...license,
-          full_name: member?.full_name || 'Unknown User',
-          email: member?.email || 'N/A',
+          // Use user_name from license (already enriched by backend), fallback to member.full_name
+          full_name: license.user_name || member?.full_name || 'Unknown User',
+          email: license.user_email || member?.email || 'N/A',
           account_value: license.current_amount || member?.account_value || 0,
           lot_size: member?.lot_size || 0.01,
           total_deposits: license.starting_amount || member?.total_deposits || 0,
