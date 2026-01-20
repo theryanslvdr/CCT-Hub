@@ -428,6 +428,58 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  // Edit transaction handler
+  const handleOpenEditTx = (tx) => {
+    setSelectedTx(tx);
+    setEditTxForm({
+      amount: tx.amount?.toString() || '',
+      notes: ''
+    });
+    setEditTxDialogOpen(true);
+  };
+
+  const handleSaveEditTx = async () => {
+    if (!editTxForm.amount || parseFloat(editTxForm.amount) <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    setSavingTx(true);
+    try {
+      await adminAPI.updateLicenseeTransaction(selectedTx.id, {
+        amount: parseFloat(editTxForm.amount),
+        notes: editTxForm.notes || `Amount corrected by admin from $${selectedTx.amount} to $${editTxForm.amount}`
+      });
+      toast.success('Transaction updated successfully');
+      setEditTxDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update transaction');
+    } finally {
+      setSavingTx(false);
+    }
+  };
+
+  // Delete transaction handler
+  const handleOpenDeleteTx = (tx) => {
+    setSelectedTx(tx);
+    setDeleteTxDialogOpen(true);
+  };
+
+  const handleDeleteTx = async () => {
+    setDeletingTx(true);
+    try {
+      await adminAPI.deleteLicenseeTransaction(selectedTx.id);
+      toast.success('Transaction deleted successfully');
+      setDeleteTxDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete transaction');
+    } finally {
+      setDeletingTx(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       active: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Active</span>,
