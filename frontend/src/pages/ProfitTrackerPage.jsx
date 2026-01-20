@@ -1966,13 +1966,13 @@ export const ProfitTrackerPage = () => {
         </Dialog>
         </div>
 
-        {/* Right side - Access Records and Reset Buttons */}
-        <div className="flex flex-wrap gap-2 ml-auto">
+        {/* Access Records and Reset Buttons - Side by side on mobile, full width together */}
+        <div className="flex gap-2 w-full md:w-auto md:ml-auto">
           {/* Access Records Button - Combined Popup */}
           <Dialog open={accessRecordsOpen} onOpenChange={setAccessRecordsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="btn-secondary gap-2" data-testid="access-records-button">
-                <FolderOpen className="w-4 h-4" /> Access Records
+              <Button variant="outline" className="btn-secondary gap-2 flex-1 md:flex-none" data-testid="access-records-button">
+                <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline">Access </span>Records
               </Button>
             </DialogTrigger>
             <DialogContent className="glass-card border-zinc-800 max-w-sm">
@@ -2013,8 +2013,8 @@ export const ProfitTrackerPage = () => {
           {/* Reset Button */}
           <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300" data-testid="reset-tracker-button">
-                <RotateCcw className="w-4 h-4" /> Reset Tracker
+              <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300 flex-1 md:flex-none" data-testid="reset-tracker-button">
+                <RotateCcw className="w-4 h-4" /> Reset<span className="hidden sm:inline"> Tracker</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="glass-card border-zinc-800">
