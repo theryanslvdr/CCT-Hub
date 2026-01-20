@@ -65,8 +65,9 @@ export const DashboardPage = () => {
           account_value: stats.account_value || 0,  // This is the authoritative value from license.current_amount
           total_actual_profit: stats.total_profit || 0,
           total_trades: stats.total_trades || 0,
-          performance_rate: 0,
+          performance_rate: stats.performance_rate || 0,
           profit_difference: 0,
+          is_licensee: stats.is_licensee || false,
         });
         setTrades(tradesRes.data || []);
         setSignal(signalRes.data.signal);
