@@ -7,19 +7,22 @@ async def calculate_account_value(
     db,
     user_id: str,
     user: Optional[Dict] = None,
-    include_licensee_check: bool = True
+    include_licensee_check: bool = True,
+    include_managed_licensees: bool = False
 ) -> float:
     """
     Calculate account value for a user.
     
     For licensees: Returns license.current_amount
     For regular users: Returns total_deposits - total_withdrawals + total_profit + total_commission
+    For Master Admin (with include_managed_licensees=True): Includes funds from all their active licensees
     
     Args:
         db: Database connection
         user_id: User's ID
         user: Optional user dict (to avoid extra DB lookup)
         include_licensee_check: Whether to check if user is a licensee
+        include_managed_licensees: Whether to include funds from managed licensees (for Master Admin)
     
     Returns:
         Account value as float
@@ -48,7 +51,94 @@ async def calculate_account_value(
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_commission = sum(t.get("commission", 0) for t in trades)  # Sum daily commissions from trades
     
-    return round(total_net_deposits + total_profit + total_commission, 2)
+    base_account_value = round(total_net_deposits + total_profit + total_commission, 2)
+    
+    # For Master Admin, include funds from all managed licensees
+    if include_managed_licensees and user and user.get("role") == "master_admin":
+        licensee_funds = await calculate_total_managed_licensee_funds(db, user_id)
+        return round(base_account_value + licensee_funds, 2)
+    
+    return base_account_value
+
+
+async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> float:
+    """
+    Calculate the total funds across all active licensees managed by a Master Admin.
+    
+    The Master Admin's account value INCLUDES these funds (not adds to them).
+    When a licensee deposits, it comes from the Master Admin's pool.
+    When a licensee withdraws, it goes back to the Master Admin's pool.
+    
+    Args:
+        db: Database connection
+        master_admin_id: The Master Admin's user ID (who created the licenses)
+    
+    Returns:
+        Total funds across all active licensees
+    """
+    # Get all active licenses created by this master admin
+    active_licenses = await db.licenses.find(
+        {"created_by": master_admin_id, "is_active": True},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_licensee_funds = 0.0
+    for license in active_licenses:
+        # Use current_amount if available, otherwise use starting_amount
+        amount = license.get("current_amount", license.get("starting_amount", 0))
+        total_licensee_funds += amount
+    
+    return round(total_licensee_funds, 2)
+
+
+async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[Dict] = None) -> Dict[str, Any]:
+    """
+    Get detailed financial breakdown for a Master Admin, including licensee funds.
+    
+    Returns:
+        Dict with personal_account_value, licensee_funds, total_account_value, licensee_count, etc.
+    """
+    if user is None:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    
+    if not user or user.get("role") != "master_admin":
+        return {"error": "User is not a Master Admin"}
+    
+    # Calculate personal account value (without licensee funds)
+    personal_summary = await get_user_financial_summary(db, user_id, user)
+    personal_account_value = personal_summary["account_value"]
+    
+    # Get licensee funds breakdown
+    active_licenses = await db.licenses.find(
+        {"created_by": user_id, "is_active": True},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    total_licensee_funds = 0.0
+    licensee_breakdown = []
+    
+    for license in active_licenses:
+        licensee_user = await db.users.find_one({"id": license["user_id"]}, {"_id": 0, "full_name": 1})
+        current_amount = license.get("current_amount", license.get("starting_amount", 0))
+        total_licensee_funds += current_amount
+        
+        licensee_breakdown.append({
+            "license_id": license.get("id"),
+            "user_id": license.get("user_id"),
+            "user_name": licensee_user.get("full_name") if licensee_user else "Unknown",
+            "license_type": license.get("license_type"),
+            "starting_amount": license.get("starting_amount", 0),
+            "current_amount": current_amount
+        })
+    
+    return {
+        "personal_account_value": round(personal_account_value, 2),
+        "licensee_funds": round(total_licensee_funds, 2),
+        "total_account_value": round(personal_account_value + total_licensee_funds, 2),
+        "licensee_count": len(active_licenses),
+        "licensee_breakdown": licensee_breakdown,
+        **{k: v for k, v in personal_summary.items() if k != "account_value"}
+    }
 
 
 async def get_user_financial_summary(
