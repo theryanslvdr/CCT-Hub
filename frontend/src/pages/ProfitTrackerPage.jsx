@@ -307,19 +307,22 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         }
       }
       
-      // CRITICAL: For the current day, always use the live account value from profitSummary
-      // This ensures synchronization between the dashboard and daily projection table
-      // Past days' balanceBefore values remain immutable (calculated from historical data)
-      const effectiveBalanceBefore = isToday && liveAccountValue !== null 
-        ? liveAccountValue 
-        : runningBalance;
-      
       // For today, recalculate lot size and target profit based on live account value
       // For past days with trades, use stored values; for future days, use calculated values
       let effectiveLotSize, effectiveTargetProfit, effectiveBalance;
+      
       if (isToday && liveAccountValue !== null) {
-        effectiveBalance = liveAccountValue;
-        effectiveLotSize = truncateTo2Decimals(liveAccountValue / 980);
+        // CRITICAL FIX: "Balance Before" should show the balance BEFORE today's trade
+        // If we traded today, the live account value already INCLUDES today's profit + commission
+        // So we need to subtract them to get the true "Balance Before"
+        if (hasTraded && actualProfit !== undefined) {
+          // Calculate what the balance was BEFORE we traded
+          effectiveBalance = truncateTo2Decimals(liveAccountValue - actualProfit - commission);
+        } else {
+          // No trade yet today, live value IS the balance before
+          effectiveBalance = liveAccountValue;
+        }
+        effectiveLotSize = truncateTo2Decimals(effectiveBalance / 980);
         effectiveTargetProfit = truncateTo2Decimals(effectiveLotSize * 15);
       } else if (hasStoredTradeData) {
         // CRITICAL: For days with stored trade data, derive balance FROM the stored lot_size
@@ -330,7 +333,7 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
       } else {
         effectiveLotSize = lotSize;
         effectiveTargetProfit = targetProfit;
-        effectiveBalance = effectiveBalanceBefore;
+        effectiveBalance = runningBalance;
       }
       
       days.push({
