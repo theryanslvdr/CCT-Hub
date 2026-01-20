@@ -2744,11 +2744,25 @@ export const ProfitTrackerPage = () => {
                           )}
                         </td>
                         
-                        {/* For licensees: Manager Traded column */}
+                        {/* For licensees: Manager Traded column with toggle for Master Admin */}
                         {isLicensee && (
                           <td className="text-center">
                             {day.status === 'future' ? (
                               <span className="text-zinc-500 text-xs">-</span>
+                            ) : isMasterAdmin() && simulatedView?.licenseId ? (
+                              // Master Admin can toggle trade status when simulating a licensee
+                              <div className="flex items-center justify-center gap-2">
+                                <Switch
+                                  checked={masterTraded || false}
+                                  onCheckedChange={() => handleToggleTradeOverride(day.dateKey, masterTraded)}
+                                  disabled={togglingTrade === day.dateKey}
+                                  className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-red-500"
+                                  data-testid={`trade-toggle-${day.dateKey}`}
+                                />
+                                {togglingTrade === day.dateKey && (
+                                  <Loader2 className="w-3 h-3 animate-spin text-zinc-400" />
+                                )}
+                              </div>
                             ) : masterTraded ? (
                               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20" title="Manager traded - profit added">
                                 <Check className="w-4 h-4 text-emerald-400" />
