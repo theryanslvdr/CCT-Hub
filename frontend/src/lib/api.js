@@ -197,6 +197,8 @@ export const adminAPI = {
   completeTransaction: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/complete`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  updateLicenseeTransaction: (txId, data) => api.put(`/admin/licensee-transactions/${txId}`, data),
+  deleteLicenseeTransaction: (txId) => api.delete(`/admin/licensee-transactions/${txId}`),
 };
 
 // Licensee APIs (for licensed users)
