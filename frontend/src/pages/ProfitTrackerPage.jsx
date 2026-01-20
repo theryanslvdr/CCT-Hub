@@ -2822,7 +2822,10 @@ export const ProfitTrackerPage = () => {
                           )}
                         </td>
                         <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
-                        <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
+                        {/* Hide LOT Size for licensees - they don't trade */}
+                        {!isLicensee && (
+                          <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
+                        )}
                         
                         {/* Target Profit - For licensees: show "--" if manager didn't trade */}
                         <td className="font-mono text-zinc-400">
