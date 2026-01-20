@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { MobileNotice } from '@/components/MobileNotice';
 import { 
-  Award, Plus, Copy, Mail, RefreshCw, Trash2, Ban, Eye, 
+  Award, Plus, Copy, Mail, RefreshCw, Trash2, Ban, Eye, Edit2,
   Clock, Users, CheckCircle2, XCircle, Calendar, DollarSign,
   FileText, Send, RotateCcw, Link2, Upload, ArrowUpCircle,
   ArrowDownCircle, MessageSquare, Image, Loader2, AlertCircle, UserCog
