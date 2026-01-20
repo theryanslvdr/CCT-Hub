@@ -4183,10 +4183,14 @@ async def register_with_license(
         "is_suspended": False,
         "license_invite_code": invite_code,
         "license_type": invite["license_type"],
+        "has_seen_welcome": False,  # Track if licensee has seen welcome screen
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(new_user)
+    
+    # Determine effective start date - use invite's effective_start_date or today
+    effective_start_date = invite.get("effective_start_date") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     
     # Create the actual license
     license_id = str(uuid.uuid4())
@@ -4195,7 +4199,9 @@ async def register_with_license(
         "user_id": user_id,
         "license_type": invite["license_type"],
         "starting_amount": invite["starting_amount"],
+        "current_amount": invite["starting_amount"],  # Initialize current_amount
         "start_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "effective_start_date": effective_start_date,  # When trading projections start
         "notes": f"Created via invite: {invite_code}",
         "is_active": True,
         "created_at": datetime.now(timezone.utc).isoformat(),
