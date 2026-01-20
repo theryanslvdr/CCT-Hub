@@ -955,6 +955,24 @@ export const AdminLicensesPage = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                onClick={() => handleOpenEditTx(tx)}
+                                className="text-zinc-400 hover:text-blue-400"
+                                title="Edit Transaction"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenDeleteTx(tx)}
+                                className="text-zinc-400 hover:text-red-400"
+                                title="Delete Transaction"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => handleOpenFeedbackDialog(tx)}
                                 className="text-zinc-400 hover:text-blue-400"
                                 title="Send Feedback"
