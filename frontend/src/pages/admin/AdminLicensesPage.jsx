@@ -2056,6 +2056,61 @@ export const AdminLicensesPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Effective Start Date Dialog */}
+      <Dialog open={editEffectiveDateDialogOpen} onOpenChange={setEditEffectiveDateDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-400" /> Edit Effective Start Date
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLicense && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 rounded-lg bg-zinc-900/50">
+                <div className="text-sm">
+                  <span className="text-zinc-500">Licensee:</span>
+                  <span className="ml-2 text-white">{selectedLicense.user_name}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Effective Start Trade Date</Label>
+                <Input
+                  type="date"
+                  value={editEffectiveDateForm.effective_start_date}
+                  onChange={(e) => setEditEffectiveDateForm({ ...editEffectiveDateForm, effective_start_date: e.target.value })}
+                  className="input-dark mt-1"
+                />
+                <p className="text-xs text-zinc-500 mt-1">
+                  The Daily Projection table will start from this date for the licensee.
+                </p>
+              </div>
+
+              <DialogFooter className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditEffectiveDateDialogOpen(false)}
+                  className="flex-1 btn-secondary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEffectiveDate}
+                  disabled={savingEffectiveDate}
+                  className="flex-1 btn-primary"
+                >
+                  {savingEffectiveDate ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
+                  ) : (
+                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Save Changes</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
