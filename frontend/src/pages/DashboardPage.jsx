@@ -143,11 +143,12 @@ export const DashboardPage = () => {
       color: 'cyan',
     },
     {
-      title: 'Performance Rate',
+      title: 'Actual vs Projected',
       value: summary?.performance_rate || 0,
       format: 'percent',
       icon: Target,
       color: 'purple',
+      subtitle: summary?.performance_rate > 100 ? 'Above target!' : summary?.performance_rate === 100 ? 'On target' : 'Below target',
     },
   ];
 
