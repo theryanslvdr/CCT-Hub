@@ -1440,93 +1440,94 @@ export const TradeMonitorPage = () => {
               </Button>
             </div>
           ) : isTrading && countdown ? (
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-4 md:space-y-6">
               {/* Countdown stall warning */}
               {countdownStalled && (
-                <div className="p-3 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400" />
-                  <span className="text-amber-400 text-sm">Countdown may have stalled</span>
+                <div className="p-2 md:p-3 rounded-lg bg-amber-500/20 border border-amber-500/30 flex flex-wrap items-center justify-center gap-2 md:gap-3">
+                  <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-400" />
+                  <span className="text-amber-400 text-xs md:text-sm">Countdown may have stalled</span>
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={restartCountdown}
-                    className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10"
+                    className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10 text-xs h-7"
                     data-testid="restart-countdown-btn"
                   >
-                    <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+                    <RefreshCw className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Refresh
                   </Button>
                 </div>
               )}
               
               {/* Show active 30-second countdown when within 30 seconds */}
               {preTradeCountdown ? (
-                <div className="space-y-4">
-                  <div className="animate-pulse p-6 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/50">
-                    <p className="text-lg text-red-300 mb-2">🚨 TRADE STARTING IN</p>
-                    <p className="text-6xl font-mono font-bold text-red-400">
+                <div className="space-y-3 md:space-y-4">
+                  <div className="animate-pulse p-4 md:p-6 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/50">
+                    <p className="text-base md:text-lg text-red-300 mb-2">🚨 TRADE STARTING IN</p>
+                    <p className="text-5xl md:text-6xl font-mono font-bold text-red-400">
                       {preTradeCountdown}
                     </p>
-                    <p className="text-sm text-red-300 mt-2">SECONDS</p>
+                    <p className="text-xs md:text-sm text-red-300 mt-2">SECONDS</p>
                   </div>
-                  <p className="text-zinc-400">
-                    Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
+                  <p className="text-zinc-400 text-sm md:text-base">
+                    Target: <span className="text-xl md:text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
                   </p>
                 </div>
               ) : (
                 <>
-                  <p className="text-zinc-400">Waiting for trade time...</p>
-                  <div className="flex justify-center gap-4">
+                  <p className="text-zinc-400 text-sm md:text-base">Waiting for trade time...</p>
+                  {/* Mobile: Compact horizontal countdown, Desktop: Cards */}
+                  <div className="flex justify-center gap-2 md:gap-4">
                     {['hours', 'minutes', 'seconds'].map((unit) => (
-                      <div key={unit} className={`glass-card p-4 min-w-[100px] ${countdownStalled ? 'border-amber-500/50' : ''}`}>
-                        <p className={`text-4xl font-mono font-bold ${countdownStalled ? 'text-amber-400' : 'text-white'}`}>
+                      <div key={unit} className={`glass-card p-2 md:p-4 min-w-[60px] md:min-w-[100px] ${countdownStalled ? 'border-amber-500/50' : ''}`}>
+                        <p className={`text-2xl md:text-4xl font-mono font-bold ${countdownStalled ? 'text-amber-400' : 'text-white'}`}>
                           {String(countdown[unit]).padStart(2, '0')}
                         </p>
-                        <p className="text-xs text-zinc-500 uppercase">{unit}</p>
+                        <p className="text-[10px] md:text-xs text-zinc-500 uppercase">{unit.slice(0, 3)}</p>
                       </div>
                     ))}
                   </div>
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-sm text-blue-300">
-                      💡 Active countdown will appear 30 seconds before trade time
+                  <div className="p-2 md:p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                    <p className="text-xs md:text-sm text-blue-300">
+                      💡 Active countdown appears 30s before trade
                     </p>
                   </div>
-                  <div className="text-zinc-400">
-                    Target Exit: <span className="text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
+                  <div className="text-zinc-400 text-sm md:text-base">
+                    Target: <span className="text-xl md:text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
                   </div>
                 </>
               )}
-              <div className="flex gap-3 justify-center">
-                <Button onClick={stopTrade} variant="outline" className="btn-secondary" data-testid="cancel-trade-button">
-                  <Square className="w-5 h-5 mr-2" /> Cancel
+              <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
+                <Button onClick={stopTrade} variant="outline" className="btn-secondary text-sm md:text-base py-2 md:py-2.5" data-testid="cancel-trade-button">
+                  <Square className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" /> Cancel
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={restartCountdown}
-                  className="text-zinc-400 hover:text-white"
+                  className="text-zinc-400 hover:text-white text-xs md:text-sm"
                   data-testid="refresh-countdown-btn"
                 >
-                  <RefreshCw className="w-4 h-4 mr-1" /> Refresh Timer
+                  <RefreshCw className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Refresh
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="text-center space-y-6">
-              <p className="text-zinc-400">Ready to trade? Check in when you&apos;re ready.</p>
+            <div className="text-center space-y-4 md:space-y-6">
+              <p className="text-zinc-400 text-sm md:text-base">Ready to trade? Check in when you&apos;re ready.</p>
               {!tradeWindowInfo.canTrade && signal && (
-                <div className="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
-                  <p className="text-amber-400 text-sm mb-2">Trading window opens in:</p>
-                  <p className="text-2xl font-mono font-bold text-amber-300">
+                <div className="mb-4 p-3 md:p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+                  <p className="text-amber-400 text-xs md:text-sm mb-2">Trading window opens in:</p>
+                  <p className="text-xl md:text-2xl font-mono font-bold text-amber-300">
                     {tradeWindowInfo.minutesUntilOpen > 60 
                       ? `${Math.floor(tradeWindowInfo.minutesUntilOpen / 60)}h ${tradeWindowInfo.minutesUntilOpen % 60}m`
-                      : `${tradeWindowInfo.minutesUntilOpen} minutes`}
+                      : `${tradeWindowInfo.minutesUntilOpen} min`}
                   </p>
-                  <p className="text-xs text-zinc-500 mt-2">You can check in 20 minutes before the scheduled trade time</p>
+                  <p className="text-[10px] md:text-xs text-zinc-500 mt-2">Check in available 20 min before trade time</p>
                 </div>
               )}
               <Button
                 onClick={startTrade}
-                className={`exit-button idle py-8 text-2xl w-full max-w-md ${!tradeWindowInfo.canTrade ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`exit-button idle py-6 md:py-8 text-lg md:text-2xl w-full max-w-md ${!tradeWindowInfo.canTrade ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={!signal || !tradeWindowInfo.canTrade}
                 data-testid="check-in-button"
               >
