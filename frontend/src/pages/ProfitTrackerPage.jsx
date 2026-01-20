@@ -601,6 +601,11 @@ export const ProfitTrackerPage = () => {
   const [onboardingWizardOpen, setOnboardingWizardOpen] = useState(false);
   const [isResetOnboarding, setIsResetOnboarding] = useState(false);
   
+  // Licensee Welcome Screen states
+  const [showLicenseeWelcome, setShowLicenseeWelcome] = useState(false);
+  const [licenseeWelcomeInfo, setLicenseeWelcomeInfo] = useState(null);
+  const [licenseeProjections, setLicenseeProjections] = useState([]);
+  
   // Adjust Trade Dialog for past trades (renamed from Adjust Trade)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
   const [enterAPDate, setEnterAPDate] = useState(null);
