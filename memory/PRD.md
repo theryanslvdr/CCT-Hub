@@ -11,6 +11,44 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 64 (2026-01-20) - Licensee Bug Fixes ✅
+
+#### Issue 1: Balance Accumulation Fixed ✅
+- **Problem**: Balance wasn't accumulating properly for succeeding days in licensee view
+- **Fix**: Rewrote licensee projection logic to properly track `runningBalance` and accumulate profit day-over-day
+- **Behavior**: Balance = Previous Balance + Daily Profit (when manager traded)
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 1020-1114
+
+#### Issue 2: LOT Size Hidden for Licensees ✅
+- **Problem**: LOT Size was visible to licensees even though they don't trade
+- **Hidden In**:
+  - Daily Projection table (column header and data cell)
+  - Profit Tracker Summary Cards (LOT Size card)
+  - Projection Vision stats panel
+  - Dashboard "Your Stats" and "Admin Section"
+  - Recent Trades table (column)
+  - Simulation banner
+- **Implementation**: Added `!isLicensee` / `!isLicenseeView` conditionals
+
+#### Issue 3: Total Profit Card Fixed ✅
+- **Problem**: Total Profit showed 0 for licensees
+- **Fix**: Calculate as `current_amount - starting_amount` in Sidebar.jsx
+- **Result**: Ryan TEST shows +$399.00 = $3,010.10 - $2,611.10
+- **Location**: `/app/frontend/src/components/layout/Sidebar.jsx` line 91
+
+#### Issue 4: Licensee Computation Fixed ✅
+- **Problem**: Balance was resetting instead of accumulating
+- **Root Cause**: The projection wasn't carrying forward balance correctly
+- **Fix**: Explicit tracking of `accumulatedProfit` and proper `runningBalance` updates
+- **Behavior**: 
+  - Past day + manager traded → balance += daily_profit
+  - Past day + manager didn't trade → balance stays same (carry forward)
+  - Future days → optimistic projection (assume manager will trade)
+
+#### Testing ✅
+- **Iteration 64**: 100% backend (8/8 tests passed), 100% frontend
+- Test file: `/app/tests/test_iteration_64_licensee_fixes.py`
+
 ### Session 63 (2026-01-20) - 5 Bug Fixes ✅
 
 #### Issue 1: Signal Card Duplicate on Desktop ✅
