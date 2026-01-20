@@ -210,13 +210,6 @@ async def get_user_financial_summary(
         "license_type": license_info.get("license_type") if license_info else None,
         "performance_rate": round((total_profit / total_projected * 100) if total_projected > 0 else 0, 2)
     }
-    
-    # Add licensee info for Master Admin
-    if include_managed_licensees and user and user.get("role") == "master_admin":
-        result["licensee_funds"] = round(licensee_funds, 2)
-        result["licensee_count"] = licensee_count
-    
-    return result
 
 
 def calculate_lot_size(account_value: float, lot_divisor: float = 980) -> float:
