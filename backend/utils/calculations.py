@@ -7,22 +7,22 @@ async def calculate_account_value(
     db,
     user_id: str,
     user: Optional[Dict] = None,
-    include_licensee_check: bool = True,
-    include_managed_licensees: bool = False
+    include_licensee_check: bool = True
 ) -> float:
     """
     Calculate account value for a user.
     
-    For licensees: Returns license.current_amount
-    For regular users: Returns total_deposits - total_withdrawals + total_profit + total_commission
-    For Master Admin (with include_managed_licensees=True): Includes funds from all their active licensees
+    For licensees: Returns license.current_amount (their virtual share of Master Admin's pool)
+    For regular users/Master Admin: Returns total_deposits - total_withdrawals + total_profit + total_commission
+    
+    NOTE: Licensee funds are ALREADY INCLUDED in Master Admin's account value (they deposited into it).
+    We do NOT add licensee funds on top - that would be double-counting.
     
     Args:
         db: Database connection
         user_id: User's ID
         user: Optional user dict (to avoid extra DB lookup)
         include_licensee_check: Whether to check if user is a licensee
-        include_managed_licensees: Whether to include funds from managed licensees (for Master Admin)
     
     Returns:
         Account value as float
@@ -40,41 +40,34 @@ async def calculate_account_value(
             if license:
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
-    # Regular user calculation: sum all deposit amounts (positive = deposit, negative = withdrawal)
+    # Regular user / Master Admin calculation: sum all deposit amounts (positive = deposit, negative = withdrawal)
     # Then add total profit + total commission from trades
+    # NOTE: For Master Admin, licensee deposits are already in the deposits collection
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
     # Sum all deposit amounts - negative amounts are withdrawals
-    # This is simpler and handles cases where amount is negative but is_withdrawal flag is not set
     total_net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
-    total_commission = sum(t.get("commission", 0) for t in trades)  # Sum daily commissions from trades
+    total_commission = sum(t.get("commission", 0) for t in trades)
     
-    base_account_value = round(total_net_deposits + total_profit + total_commission, 2)
-    
-    # For Master Admin, include funds from all managed licensees
-    if include_managed_licensees and user and user.get("role") == "master_admin":
-        licensee_funds = await calculate_total_managed_licensee_funds(db, user_id)
-        return round(base_account_value + licensee_funds, 2)
-    
-    return base_account_value
+    return round(total_net_deposits + total_profit + total_commission, 2)
 
 
 async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> float:
     """
-    Calculate the total funds across all active licensees managed by a Master Admin.
+    Calculate the total virtual share funds across all active licensees managed by a Master Admin.
     
-    The Master Admin's account value INCLUDES these funds (not adds to them).
-    When a licensee deposits, it comes from the Master Admin's pool.
-    When a licensee withdraws, it goes back to the Master Admin's pool.
+    IMPORTANT: These funds are ALREADY PART OF the Master Admin's account value.
+    Licensees deposited into the Master Admin's Merin account.
+    This function calculates how much of the Master Admin's pool belongs to licensees.
     
     Args:
         db: Database connection
         master_admin_id: The Master Admin's user ID (who created the licenses)
     
     Returns:
-        Total funds across all active licensees
+        Total virtual share across all active licensees
     """
     # Get all active licenses created by this master admin
     active_licenses = await db.licenses.find(
