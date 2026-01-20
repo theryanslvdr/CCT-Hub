@@ -46,7 +46,8 @@ export const AdminLicensesPage = () => {
     valid_duration: '3_months',
     max_uses: '1',
     invitee_name: '',
-    notes: ''
+    notes: '',
+    effective_start_date: '' // YYYY-MM-DD format
   });
   const [creating, setCreating] = useState(false);
   
@@ -57,6 +58,13 @@ export const AdminLicensesPage = () => {
     notes: ''
   });
   const [changingLicense, setChangingLicense] = useState(false);
+  
+  // Edit effective start date state
+  const [editEffectiveDateDialogOpen, setEditEffectiveDateDialogOpen] = useState(false);
+  const [editEffectiveDateForm, setEditEffectiveDateForm] = useState({
+    effective_start_date: ''
+  });
+  const [savingEffectiveDate, setSavingEffectiveDate] = useState(false);
   
   // Reset balance dialog state
   const [resetBalanceDialogOpen, setResetBalanceDialogOpen] = useState(false);
