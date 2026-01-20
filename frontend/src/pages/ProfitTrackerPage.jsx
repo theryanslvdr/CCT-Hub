@@ -2842,7 +2842,11 @@ export const ProfitTrackerPage = () => {
                       : null;
                     
                     // For licensees: check if master admin traded on this day
-                    const masterTraded = masterAdminTrades[day.dateKey]?.traded;
+                    // First check trade overrides (manual overrides by Master Admin), then fall back to actual trades
+                    const hasOverride = tradeOverrides[day.dateKey] !== undefined;
+                    const masterTraded = hasOverride 
+                      ? tradeOverrides[day.dateKey].traded 
+                      : masterAdminTrades[day.dateKey]?.traded;
                     
                     // Check if this date is a global holiday
                     const isGlobalHoliday = globalHolidays.some(h => h.date === day.dateKey);
