@@ -1155,6 +1155,22 @@ export const AdminLicensesPage = () => {
             </div>
 
             <div>
+              <Label className="text-zinc-300">
+                Effective Start Trade Date
+                <span className="text-zinc-500 font-normal ml-1">(optional)</span>
+              </Label>
+              <Input
+                type="date"
+                value={createForm.effective_start_date}
+                onChange={(e) => setCreateForm({ ...createForm, effective_start_date: e.target.value })}
+                className="input-dark mt-1"
+              />
+              <p className="text-xs text-zinc-500 mt-1">
+                When the licensee&apos;s trading projections start. Defaults to registration date if empty.
+              </p>
+            </div>
+
+            <div>
               <Label className="text-zinc-300">Notes (optional)</Label>
               <Input
                 value={createForm.notes}
