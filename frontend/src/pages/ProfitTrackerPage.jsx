@@ -850,15 +850,19 @@ export const ProfitTrackerPage = () => {
       });
       setTradeLogs(logsMap);
       
-      if (allDeposits.length === 0) {
+      // Check if first time user - but skip onboarding wizard for licensees
+      const licenseType = simulatedView?.license_type || user?.license_type;
+      if (allDeposits.length === 0 && !licenseType) {
+        // Non-licensees: Show onboarding wizard
         setIsFirstTime(true);
-        // Open the new onboarding wizard instead of the old dialog
         setIsResetOnboarding(false);
         setOnboardingWizardOpen(true);
+      } else if (allDeposits.length === 0 && licenseType) {
+        // Licensees: Skip onboarding, they get their balance from admin
+        setIsFirstTime(false);
       }
       
       // Load master admin trades for extended licensees
-      const licenseType = simulatedView?.license_type || user?.license_type;
       if (licenseType === 'extended') {
         try {
           // Get trades for the current year
