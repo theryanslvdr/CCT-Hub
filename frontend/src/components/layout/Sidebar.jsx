@@ -81,6 +81,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       // Match with member details - licenses already have user_name from backend
       const licenseesWithDetails = activeLicenses.map(license => {
         const member = members.find(m => m.id === license.user_id);
+        // For licensees, total_profit = current_amount - starting_amount
+        // This represents the accumulated projected profits from days when Master Admin traded
+        const licenseeProfit = (license.current_amount || 0) - (license.starting_amount || 0);
         return {
           ...license,
           // Use user_name from license (already enriched by backend), fallback to member.full_name
@@ -89,7 +92,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           account_value: license.current_amount || member?.account_value || 0,
           lot_size: member?.lot_size || 0.01,
           total_deposits: license.starting_amount || member?.total_deposits || 0,
-          total_profit: member?.total_profit || 0,
+          total_profit: licenseeProfit, // Calculated as current_amount - starting_amount
           allowed_dashboards: member?.allowed_dashboards
         };
       });
