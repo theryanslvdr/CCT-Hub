@@ -11,6 +11,54 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 61 (2026-01-20) - Account Value Bug Fix + VSD Panel ✅
+
+#### Bug Fix: Double-Counting Licensee Funds ✅
+- **Issue**: Master Admin's account value was incorrectly adding licensee funds ON TOP of their Merin balance
+- **Root Cause**: Previous logic treated licensee funds as separate from the pool, but they are PART OF it (licensees deposited INTO the Master Admin's account)
+- **Fix**: Removed `include_managed_licensees` parameter from calculation functions
+- **Result**: `/api/profit/summary` now returns the raw Merin balance ($19,329.15 in test) without double-counting
+- **Files Modified**: 
+  - `/app/backend/utils/calculations.py` (calculate_account_value, get_user_financial_summary)
+  - `/app/backend/server.py` (get_profit_summary endpoint)
+
+#### Feature: VSD (Virtual Share Distribution) Panel ✅
+- **Purpose**: Shows how Master Admin's Merin balance is distributed between themselves and licensees
+- **Location**: Simulate Actions > "Licensee VSD" button (Master Admin only)
+- **New Endpoint**: `GET /api/profit/vsd`
+- **Response Structure**:
+  ```json
+  {
+    "total_pool": 19329.15,          // Merin Balance (actual trading account)
+    "master_admin_portion": -17281.95, // Master Admin's remaining share
+    "licensee_funds": 36611.10,       // Total licensee virtual shares
+    "licensee_count": 9,
+    "licensee_breakdown": [
+      {
+        "user_name": "Elsa",
+        "current_amount": 3307.99,    // Current Balance
+        "starting_amount": 3000.00,   // Total Deposit
+        "total_profit": 307.99,       // Accumulated projected profits
+        "share_percentage": 17.12     // % Share of pool
+      }
+    ]
+  }
+  ```
+- **UI Features**:
+  - Summary header with Total Pool, Your Portion, Licensee Portions
+  - Pie chart showing visual distribution
+  - Table with columns: Name, Current Balance, Total Deposit, Total Profit, % Share
+  - Info note explaining the terms
+- **Files Modified**:
+  - `/app/backend/utils/calculations.py` (get_master_admin_financial_breakdown)
+  - `/app/backend/server.py` (get_virtual_share_distribution endpoint)
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (VSD dialog)
+  - `/app/frontend/src/lib/api.js` (getVSD method)
+
+#### Testing ✅
+- **Iteration 61**: 100% backend (8/8 tests passed), 100% frontend
+- Test files: `/app/tests/test_iteration_61_vsd_account_value.py`
+
 ### Session 60 (2026-01-20) - P0 Licensee Features Complete ✅
 
 #### Bug Fix: Effective Start Date Filtering ✅
