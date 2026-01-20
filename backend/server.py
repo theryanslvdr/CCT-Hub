@@ -1252,10 +1252,13 @@ async def get_master_admin_financial_breakdown(user: dict = Depends(require_mast
     """Get detailed financial breakdown for Master Admin, including licensee funds.
     
     This shows:
-    - Personal account value (Master Admin's own funds)
-    - Licensee funds (total funds allocated to active licensees)
-    - Total account value (personal + licensee funds)
-    - Breakdown per licensee
+    Shows Virtual Share Distribution (VSD):
+    - Total Pool (Master Admin's Merin balance)
+    - Master Admin's remaining portion
+    - Total licensee virtual shares
+    - Breakdown per licensee (Current Balance, Total Deposit, Total Profit, % Share)
+    
+    NOTE: Licensee funds are PART OF the total pool (not in addition to it).
     """
     from utils.calculations import get_master_admin_financial_breakdown as get_breakdown
     
