@@ -18,7 +18,7 @@ import {
   TrendingUp, TrendingDown, Wallet, RotateCcw, Rocket, Calendar,
   Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
   ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
-  Radio, EyeOff, Award, FolderOpen, MoreHorizontal, Edit3, X, TreePine, Loader2
+  Radio, EyeOff, Award, FolderOpen, MoreHorizontal, Edit3, X, TreePine, Loader2, Users, PieChart as PieChartIcon
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
