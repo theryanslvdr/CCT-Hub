@@ -1758,7 +1758,7 @@ export const TradeMonitorPage = () => {
                     size="sm"
                     onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))}
                     disabled={historyPage === historyTotalPages}
-                    className="btn-secondary"
+                    className="btn-secondary h-8 w-8 md:h-9 md:w-auto p-0 md:px-3"
                     data-testid="next-page"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -1767,7 +1767,7 @@ export const TradeMonitorPage = () => {
               </div>
             </>
           ) : (
-            <div className="text-center py-8 text-zinc-500">
+            <div className="text-center py-6 md:py-8 text-zinc-500 text-sm">
               No trade history yet. Start trading to see your history here!
             </div>
           )}
