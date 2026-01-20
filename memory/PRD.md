@@ -11,6 +11,34 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 62 (2026-01-20) - P0 Fixes + P1 Refactoring ✅
+
+#### P0: Trade Override Toggle Fix ✅
+- **Issue**: `masterTraded` variable wasn't checking `tradeOverrides` first
+- **Fix**: Updated line 2847 to check `tradeOverrides[day.dateKey]` first, then fall back to `masterAdminTrades`
+- **AuthContext Fix**: Testing agent fixed `simulateMemberView` to properly pass `licenseId` and `effective_start_date`
+- **Testing**: 11/11 backend tests passed
+
+#### P0: Effective Start Date Filtering ✅
+- Already implemented in `generateDailyProjectionForMonth` (lines 174-187)
+- Filters out days before `effectiveStartDate` when generating projections
+- Verified working with license `618db632` (effective_start_date: 2025-01-15)
+
+#### P1: Frontend Refactoring - VSDDialog Component ✅
+- **Extracted**: `VSDDialog.jsx` (~150 lines) from `ProfitTrackerPage.jsx`
+- **Location**: `/app/frontend/src/components/VSDDialog.jsx`
+- **Props**: `open`, `onOpenChange`, `vsdData`, `loading`
+- **Result**: ProfitTrackerPage.jsx reduced from 3220 to 3095 lines
+
+#### Files Modified:
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` (masterTraded fix, VSDDialog extraction)
+- `/app/frontend/src/contexts/AuthContext.jsx` (licenseId and effective_start_date in simulatedView)
+- `/app/frontend/src/components/VSDDialog.jsx` (NEW)
+
+#### Testing ✅
+- **Iteration 62**: 100% backend (11/11 tests passed)
+- Test file: `/app/tests/test_iteration_62_p0_features.py`
+
 ### Session 61 (2026-01-20) - Account Value Bug Fix + VSD Panel ✅
 
 #### Bug Fix: Double-Counting Licensee Funds ✅
