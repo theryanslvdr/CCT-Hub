@@ -3880,6 +3880,103 @@ def generate_invite_code() -> str:
     import secrets
     return f"LIC-{secrets.token_urlsafe(12).upper()[:16]}"
 
+# ==================== LICENSEE TRADE OVERRIDES ====================
+
+@admin_router.get("/licenses/{license_id}/trade-overrides")
+async def get_license_trade_overrides(license_id: str, user: dict = Depends(require_admin)):
+    """Get all trade overrides for a specific license"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can view trade overrides")
+    
+    overrides = await db.licensee_trade_overrides.find(
+        {"license_id": license_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Convert to a dict keyed by date for easy lookup
+    overrides_by_date = {o["date"]: o for o in overrides}
+    
+    return {"overrides": overrides_by_date}
+
+@admin_router.post("/licenses/{license_id}/trade-overrides")
+async def set_license_trade_override(
+    license_id: str,
+    data: LicenseeTradeOverride,
+    user: dict = Depends(require_admin)
+):
+    """Set or update a trade override for a specific license on a specific date"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can set trade overrides")
+    
+    # Validate license exists
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    # Validate date format
+    try:
+        datetime.strptime(data.date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    # Check if override already exists
+    existing = await db.licensee_trade_overrides.find_one(
+        {"license_id": license_id, "date": data.date},
+        {"_id": 0}
+    )
+    
+    if existing:
+        # Update existing override
+        await db.licensee_trade_overrides.update_one(
+            {"license_id": license_id, "date": data.date},
+            {"$set": {
+                "traded": data.traded,
+                "notes": data.notes,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_by": user["id"]
+            }}
+        )
+        action = "updated"
+    else:
+        # Create new override
+        override_doc = {
+            "id": str(uuid.uuid4()),
+            "license_id": license_id,
+            "date": data.date,
+            "traded": data.traded,
+            "notes": data.notes,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_by": user["id"]
+        }
+        await db.licensee_trade_overrides.insert_one(override_doc)
+        action = "created"
+    
+    return {
+        "message": f"Trade override {action} successfully",
+        "license_id": license_id,
+        "date": data.date,
+        "traded": data.traded
+    }
+
+@admin_router.delete("/licenses/{license_id}/trade-overrides/{date}")
+async def delete_license_trade_override(
+    license_id: str,
+    date: str,
+    user: dict = Depends(require_admin)
+):
+    """Delete a trade override (revert to automatic detection)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can delete trade overrides")
+    
+    result = await db.licensee_trade_overrides.delete_one(
+        {"license_id": license_id, "date": date}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Override not found")
+    
+    return {"message": "Trade override deleted, reverting to automatic detection"}
+
 @admin_router.get("/license-invites")
 async def get_all_license_invites(user: dict = Depends(require_admin)):
     """Get all license invites (Master Admin only)"""
