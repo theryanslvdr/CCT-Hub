@@ -144,10 +144,17 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
 async def get_user_financial_summary(
     db,
     user_id: str,
-    user: Optional[Dict] = None
+    user: Optional[Dict] = None,
+    include_managed_licensees: bool = False
 ) -> Dict[str, Any]:
     """
     Get comprehensive financial summary for a user.
+    
+    Args:
+        db: Database connection
+        user_id: User's ID
+        user: Optional user dict (to avoid extra DB lookup)
+        include_managed_licensees: For Master Admin, include funds from managed licensees
     
     Returns:
         Dict with total_deposits, total_withdrawals, total_profit, total_commission, account_value, is_licensee
@@ -196,7 +203,19 @@ async def get_user_financial_summary(
         net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
         account_value = round(net_deposits + total_profit + total_commission, 2)
     
-    return {
+    # For Master Admin, include licensee funds if requested
+    licensee_funds = 0.0
+    licensee_count = 0
+    if include_managed_licensees and user and user.get("role") == "master_admin":
+        licensee_funds = await calculate_total_managed_licensee_funds(db, user_id)
+        active_licenses = await db.licenses.find(
+            {"created_by": user_id, "is_active": True},
+            {"_id": 0}
+        ).to_list(1000)
+        licensee_count = len(active_licenses)
+        account_value = round(account_value + licensee_funds, 2)
+    
+    result = {
         "total_deposits": round(total_deposits, 2),
         "total_withdrawals": round(total_withdrawals, 2),
         "total_profit": round(total_profit, 2),
@@ -208,6 +227,13 @@ async def get_user_financial_summary(
         "license_type": license_info.get("license_type") if license_info else None,
         "performance_rate": round((total_profit / total_projected * 100) if total_projected > 0 else 0, 2)
     }
+    
+    # Add licensee info for Master Admin
+    if include_managed_licensees and user and user.get("role") == "master_admin":
+        result["licensee_funds"] = round(licensee_funds, 2)
+        result["licensee_count"] = licensee_count
+    
+    return result
 
 
 def calculate_lot_size(account_value: float, lot_divisor: float = 980) -> float:
