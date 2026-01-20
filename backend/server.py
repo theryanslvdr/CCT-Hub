@@ -2528,8 +2528,35 @@ async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
             sort=[("created_at", -1)]  # Get most recent license
         )
         if license:
-            account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
             starting_amount = license.get("starting_amount", 0)
+            
+            # For extended licensees, calculate current_amount dynamically using projections
+            # This ensures consistency with /api/admin/licenses endpoint
+            if license.get("license_type") == "extended":
+                start_date_raw = license.get("start_date", "")
+                if isinstance(start_date_raw, str):
+                    start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                else:
+                    start_date = start_date_raw.replace(tzinfo=timezone.utc)
+                
+                today = datetime.now(timezone.utc)
+                days_since_start = (today - start_date).days
+                if days_since_start > 0:
+                    projections = calculate_extended_license_projections(
+                        starting_amount, 
+                        start_date, 
+                        min(days_since_start + 1, 365)
+                    )
+                    if projections:
+                        account_value = projections[-1]["account_value"]
+                    else:
+                        account_value = starting_amount
+                else:
+                    account_value = starting_amount
+            else:
+                # Honorary licensees use stored current_amount
+                account_value = round(license.get("current_amount", starting_amount), 2)
+            
             # For licensees, profit = current_amount - starting_amount
             licensee_profit = round(account_value - starting_amount, 2)
             
