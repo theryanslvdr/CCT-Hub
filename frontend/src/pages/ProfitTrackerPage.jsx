@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { toast } from 'sonner';
 import { 
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
-  TrendingUp, Wallet, RotateCcw, Rocket, Calendar,
+  TrendingUp, TrendingDown, Wallet, RotateCcw, Rocket, Calendar,
   Clock, CheckCircle2, AlertTriangle, Eye, Sparkles,
   ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
   Radio, EyeOff, Award, FolderOpen, MoreHorizontal, Edit3, X, TreePine
