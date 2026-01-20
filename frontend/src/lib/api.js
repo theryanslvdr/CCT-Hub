@@ -178,6 +178,7 @@ export const adminAPI = {
   updateLicense: (licenseId, data) => api.put(`/admin/licenses/${licenseId}`, null, { params: data }),
   deleteLicense: (licenseId) => api.delete(`/admin/licenses/${licenseId}`),
   changeLicenseType: (licenseId, data) => api.post(`/admin/licenses/${licenseId}/change-type`, data),
+  updateLicenseEffectiveStartDate: (licenseId, effective_start_date) => api.put(`/admin/licenses/${licenseId}/effective-start-date`, { effective_start_date }),
   // License Invites
   getLicenseInvites: () => api.get('/admin/license-invites'),
   createLicenseInvite: (data) => api.post('/admin/license-invites', data),
