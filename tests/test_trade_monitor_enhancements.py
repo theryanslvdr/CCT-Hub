@@ -17,7 +17,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://finance-center-8.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://finmobile-dash.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "admin@crosscurrent.com"

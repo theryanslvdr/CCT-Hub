@@ -1,164 +1,148 @@
 <analysis>**original_problem_statement:**
-The user is building a Finance Center for CrossCurrent traders. The project began with fixing bugs and implementing a multi-step onboarding wizard. Recent work has focused on a major redesign of the Admin Settings page and addressing significant data consistency issues between different parts of the application, particularly the Daily Projection Table and the Trade History.
-
-The user has repeatedly encountered discrepancies in  and  calculations. This has led to several refactoring attempts of the  and . The latest set of requests aims to solve these data issues by introducing a manual commission tracking system and ensuring that a Tracker Reset provides a clean slate for all trade-related data.
+The user is building a Finance Center for CrossCurrent traders. Initially, the project focused on fixing data consistency bugs and implementing a commission tracking system. After successfully implementing those features and adding performance optimizations and a content protection system, the user's new high-priority request is a complete overhaul of the mobile user experience. The user has provided screenshots and detailed feedback on how the application should look and behave on mobile devices, including requests for single-column layouts, abbreviated number formatting (K/M/B), and simplified data entry flows. A minor enhancement for a custom watermark text field for admins was also requested.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Commission Tracking:**
-    -   Add a Commission column to the Daily Projection view.
-    -   When entering a daily trade, the user must be able to input the commission amount for that day.
-    -   At the end of the onboarding wizard, the user should be able to enter the commission for the last entered trade day.
-    -   The daily balance calculation must be: .
-2.  **Data Consistency:**
-    -   The  and  in the  (Trade Monitor) must be accurate and consistent with the .
-    -   When a user performs a Reset Tracker action, it must completely clear all historical  to ensure the subsequent onboarding process creates a clean, accurate history.
-3.  **Onboarding Wizard:**
-    -   The balance for each day in the wizard must correctly increment based on the previous day's balance, profit, and any deposits/withdrawals.
-    -   The balance input field should be limited to 2 decimal places.
-    -   A Restart Reset button must be available within the wizard to clear all user-entered data and start the process over.
-4.  **Daily Projection Table:**
-    -   The Balance Before for the first day of a historical month (e.g., after an onboarding) must reflect the actual starting balance entered by the user.
-    -   Withdrawals and deposits must be correctly factored into the running balance calculations.
-    -   Historical months (e.g., December 2025) should appear before the current year's data.
-5.  **Live Currency Conversion:**
-    -   Provide accurate, live conversion rates for USDT, not just fiat currencies.
+1.  **Mobile-First UX/UI:**
+    *   All pages must be fully responsive and usable on mobile screens.
+    *   Layouts should switch to a single-column format on mobile to prevent elements from being cut off.
+    *   Large numbers (thousands, millions) should be formatted with abbreviations (e.g., .23K, .00M).
+    *   All text, especially financial figures and timers, must be fully visible and not truncated.
+    *   The active signal display must be clear and not overflow the screen.
+    *   On the Profit Tracker page, the signal should be a compact version or a Trade Now button.
+    *   On the Trade Monitor page, the Merin iframe should be hidden on mobile and replaced with a button that opens Merin in a new tab.
+    *   The trade entry process on the Trade Monitor page must be simplified for mobile use.
+2.  **Commission & Data Consistency:**
+    *   The total commission entered in the onboarding wizard must be assigned to the last trade day and correctly reflected in the Daily Projection table's Commission column and subsequent balance calculations.
+3.  **Content Protection:**
+    *   Implement an admin-configurable system to deter content theft.
+    *   Features include disabling text selection/copy, blocking right-click, and adding a visible watermark with the user's details.
+    *   A Master Admin should have the ability to set a custom watermark text that overrides the default user-specific one.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application (React/FastAPI/MongoDB) with user roles, an admin dashboard, a trade monitor, and a daily projection table. The  has been heavily modified to support historical trade entry with a balance-first approach, where the user enters their account balance for each day. The  has been refactored to display historical trade data from past months. A backend integration with CoinGecko for cryptocurrency exchange rates has been added with caching. The core logic for balance calculation and data display is highly complex and has been a recurring source of bugs.
+A full-stack application (React/FastAPI/MongoDB). The agent has successfully implemented a comprehensive commission tracking system, fixed several data consistency bugs, and significantly improved backend performance by adding connection pooling, caching, and optimizing database queries. A new Content Protection feature was also added, allowing admins to enable watermarks and disable copying. The agent has just begun a major mobile responsiveness refactor, applying some initial style changes to  and .
 
 **Last working item**:
-- **Last item agent was working:** The agent began implementing the user's latest request for a comprehensive commission tracking system. The first step taken was to update the backend Pydantic models (, ,  in ) to include a new  field.
+- **Last item agent was working:** Implementing a series of user-requested mobile UI/UX improvements. The agent started by updating the number formatting function to use K/M/B abbreviations and began adjusting the layout of summary cards on the  and  to be single-column on mobile.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** both
+- **Which testing method agent to use?** Frontend testing agent and screenshot tool (with mobile viewport).
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Implement the new commission tracking system (Priority: P0)**
-  
+- **Issue 1: Complete the mobile UI/UX refactor (Priority: P0)**
+
   **Issues Detail:**
-  - **Issue 1:** 
-     - **Attempted fixes:** None. This is a new implementation based on the user's latest requirements.
+  - **Issue 1:**
+     - **Attempted fixes:** The agent has updated the  function and modified the  and  classes on  and  to begin creating a single-column layout for mobile.
      - **Next debug checklist:**
-        1.  Update the backend database schema for  to include the  field.
-        2.  Modify backend endpoints (, ) to accept and save the  value.
-        3.  Update the Enter Actual Profit dialog in  to include an input field for .
-        4.  Update the  to include an input for  on the final trade entry step.
-        5.  Add a Commission column to the daily projection table in .
-        6.  Update all frontend (, ) and backend balance calculation logic to incorporate the commission: .
-     - **Why fix this issue and what will be achieved with the fix?** This is the user's highest priority requirement and is intended to create a more accurate and transparent system for tracking profits and account value.
+        1. Verify that all key pages (, , ) render in a strict single-column layout on mobile viewports.
+        2. Ensure all numerical values are correctly formatted with K/M/B abbreviations where applicable.
+        3. Confirm that no text (especially timers or financial data) is truncated or overflows on any mobile screen size.
+        4. Implement the compact signal or Trade Now button on the  as requested.
+        5. Redesign the trade entry modal on  to be simpler and more user-friendly on mobile.
+        6. Thoroughly test the changes using screenshots with a mobile viewport.
+     - **Why fix this issue and what will be achieved with the fix?** The user has identified the current mobile experience as unusable and a critical blocker. Fixing this will make the application accessible and functional for users on mobile devices.
      - **Status:** IN PROGRESS
      - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** Both
+     - **Should Test frontend/backend/both after fix?** Frontend
      - **Blocked on other issue:** None
 
-- **Issue 2: Data inconsistency between Daily Projection and Trade History (Priority: P1)**
-  
-  **Issues Detail:**
-  - **Issue 2:** 
-     - **Attempted fixes:** The agent previously made the Daily Projection rely on stored  values to ensure consistency. However, this revealed that the  data itself was incorrect due to faulty logic in the Onboarding Wizard. The user wants the reset functionality to wipe these logs, forcing a clean re-import.
-     - **Next debug checklist:**
-        1.  Verify that the  function in  correctly calls the backend endpoint that deletes all  for the user.
-        2.  After implementing the commission feature, perform a full end-to-end test: Reset Tracker -> Complete Onboarding Wizard -> Verify  in DB are correct -> Verify Daily Projection and Trade History match perfectly.
-     - **Why fix this issue and what will be achieved with the fix?** This will finally resolve the user's long-standing frustration with data discrepancies and establish a reliable single source of truth for trade data.
-     - **Status:** IN PROGRESS
-     - **Is recurring issue?** Y
-     - **Should Test frontend/backend/both after fix?** Both
-     - **Blocked on other issue:** Issue 1
-
 **In progress Task List**:
-  - **Task 1: Add  field to backend API endpoints (Priority: P0)**
-     - **Where to resume:** The Pydantic models in  are updated. The next step is to modify the logic within the , , and  functions to process and save the commission value.
-     - **What will be achieved with this?** The backend will be ready to handle commission data.
+- **Task 1: Mobile Responsiveness Overhaul (Priority: P0)**
+     - **Where to resume:** The agent has just applied  edits to  and . The next step is to continue implementing the remaining user requests from the list in Issue 1 above, focusing on the compact signal display and the simplified trade entry flow.
+     - **What will be achieved with this?** A fully responsive, mobile-friendly application that meets the user's detailed UI/UX requirements.
      - **Status:** IN PROGRESS
-     - **Should Test frontend/backend/both after fix?** Backend
-     - **Blocked on something:** None
-
-  - **Task 2: Update frontend UI for commission entry (Priority: P1)**
-     - **Where to resume:** This task has not been started. The agent needs to edit  (the Enter Actual Profit modal) and  to add the new commission input fields.
-     - **What will be achieved with this?** Users will be able to input their daily commission.
-     - **Status:** NOT STARTED
      - **Should Test frontend/backend/both after fix?** Frontend
-     - **Blocked on something:** Task 1
+     - **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **P1: Frontend Refactoring:** Decompose the massive  and  components into smaller, manageable sub-components to improve maintainability.
+    - **P1: Frontend Refactoring:** Complete the refactoring of . The agent created separate files for each step () but the integration is incomplete and the core component still contains the old logic.
 - **Future Tasks:**
     - **Backend Refactoring:** Continue breaking down the monolithic  into the  directory.
-    - Mobile responsiveness improvements.
+    - Mobile responsiveness improvements for remaining pages.
     - Implement the placeholder Cloudinary integration for image hosting.
+    - PWA support for a mobile app-like experience.
 
 **Completed work in this session**
-- **Data Consistency & Projection Fixes:**
-  - **Corrected Historical Balance:** Modified  so the Balance Before for historical months (like December) is correctly derived from the stored  in trade logs, fixing the starting balance display issue.
-  - **Corrected Projection Data Source:** The Daily Projection table now uses data from  for days with completed trades, ensuring consistency with the Trade History page.
-  - **Corrected Month Ordering:** Fixed the monthly projection accordion to correctly display History (for past years) before Year 1.
-  - **Corrected Remaining Days Count:** The count now accurately excludes days where an actual profit has already been recorded.
-- **Onboarding Wizard Enhancements & Bug Fixes:**
-  - **Implemented Balance as Source of Truth:** Refactored the wizard to use the daily  as the primary user input, with  being a derived, read-only value.
-  - **Fixed Balance Increment Logic:** Ensured the balance correctly increases day-by-day by adding the previous day's actual profit.
-  - **Fixed Transaction Application:** Corrected the logic in  to properly apply deposits and withdrawals to the running balance.
-  - **Added Restart Reset Button:** Implemented a button to clear all state within the onboarding wizard and start over.
-  - **Input Validation:** Added logic to truncate balance inputs to two decimal places.
-  - **Fixed  error.**
-  - **Fixed infinite loop error related to .**
-- **Admin & Global Settings Verification:**
-  - Completed a full regression test of the redesigned , verifying all sidebar tabs (SEO, Branding, Maintenance, etc.) function correctly.
-  - Verified the  correctly fetches and applies global holidays and trading products from the new settings page.
-- **Live Crypto Conversion:**
-  - Implemented a backend service to fetch live USDT-to-fiat exchange rates from CoinGecko, with caching to handle API rate limits.
+- **Commission Display Fix:**
+  - Modified the  endpoint to correctly assign the  from the wizard's final step to the last trade entry, ensuring it appears correctly in the Daily Projection table.
+- **Content Protection Feature:**
+  - **Backend:** Updated  model and API endpoints to manage content protection settings.
+  - **Frontend:** Created a  component that disables copy/paste, right-click, and adds a dynamic watermark.
+  - **Admin UI:** Added a Security tab in  with toggles for all protection features, including a Master Admin Only field for custom watermark text.
+- **Performance Optimization:**
+  - **Backend:** Increased Gunicorn workers, configured MongoDB connection pooling, extended CoinGecko API cache duration, fixed N+1 query issues in trade history endpoints, and added several new database indexes.
+- **Mobile Responsiveness (Initial Implementation):**
+  - Added global CSS rules in  for mobile-first styling.
+  - Replaced the Merin iframe with a button on the  for mobile users.
+  - Began converting grid layouts to single-column flex layouts on  and .
+  - Implemented a  utility to abbreviate large numbers (e.g., 0.5K, .2M).
 
 **Earlier issues found/mentioned but not fixed**
-- The core data inconsistency between the Daily Projection and Trade History (now captured as Pending Issue #2) was a recurring theme throughout the session. While many contributing factors were fixed, the final solution relies on the Reset + Clean Onboard flow which is yet to be fully tested after the commission implementation.
+- The large-scale refactoring of  and  into smaller, more manageable components was started but is far from complete. The agent created the file structure but did not fully migrate the logic.
+
+**Known issue recurrence from previous fork**
+- **Data consistency:** This remains a sensitive area. Although specific bugs (like the commission display) were fixed, the complexity of the balance and projection calculations means any new change carries a risk of introducing regressions. The Reset Tracker flow remains the primary method for ensuring a clean data slate.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Balance as Source of Truth:** In the onboarding wizard, the user's daily account  is now the primary input, and  is calculated from it (). This was a key shift to improve data accuracy.
-- **Data Reconciliation:** The application now attempts to use stored  as the source of truth for historical data in the . This makes the 's data entry quality critical.
-- **Dynamic Balance Calculation:** The core balance formula has been established as . This logic must be consistently applied across the frontend and backend.
-- **API Caching:** Implemented caching on the backend for the CoinGecko API to avoid hitting rate limits for currency conversion.
+- **Responsive Design (Mobile-First):** Using TailwindCSS responsive prefixes (, , ) and custom media queries in  to create adaptive layouts that work across devices.
+- **Performance Optimization:** Improving application scalability through backend configuration (Gunicorn workers), database connection management (pooling), efficient data fetching (fixing N+1 queries, indexing), and caching external API calls.
+- **Content Protection (Deterrence):** Employing a combination of CSS () and JavaScript event listeners to block common content copying methods. A watermark overlay acts as a further deterrent.
+- **Dynamic Component Rendering:** Using state to conditionally render UI components, such as showing the  overlay or switching between the Merin iframe and a button based on screen size.
+
+**key DB schema**
+- **platform_settings**: (collection) Stores global settings. Updated to include:
+  - 
+  - 
+  - 
+  - 
+  - 
+- **trade_logs**:  field is now consistently populated.
 
 **All files of reference**
-- **/app/frontend/src/components/OnboardingWizard.jsx**: Central to the user's data entry flow. Needs to be updated for commission entry.
-- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: The main data display page. It was heavily refactored to fix projection bugs and now needs the commission column and updated calculation logic.
-- **/app/backend/server.py**: Contains all backend logic. The Pydantic models have been updated for commission, but the API endpoints that use them still need to be modified.
-- **/app/frontend/src/pages/TradeMonitorPage.jsx**: The page for daily interaction. The Enter Actual Profit dialog here needs to be updated to include a commission input.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: Core page for mobile refactor.
+- **/app/frontend/src/pages/TradeMonitorPage.jsx**: Core page for mobile refactor and simplified trade entry.
+- **/app/frontend/src/index.css**: Contains the new global mobile styles.
+- **/app/frontend/src/components/layout/DashboardLayout.jsx**: Controls main layout padding for mobile.
+- **/app/frontend/src/pages/admin/AdminSettingsPage.jsx**: Contains UI for new Security settings.
+- **/app/frontend/src/components/ContentProtection.jsx**: New component for watermarking and copy prevention.
+- **/app/backend/server.py**: Contains performance optimizations and API logic for content protection.
 
 **Areas that need refactoring**:
-- **/app/frontend/src/components/OnboardingWizard.jsx**: This component is extremely complex and over 1000 lines long. It should be broken down into smaller components for each step of the wizard.
-- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: This component is over 2000 lines and manages a huge amount of state and complex calculation logic. The projection generation and display logic should be extracted into custom hooks or utility functions.
+- **/app/frontend/src/components/OnboardingWizard.jsx**: Still over 1000 lines. The refactoring into smaller step-based components has been started but needs to be completed by moving all relevant logic and state out of the main file.
+- **/app/frontend/src/pages/ProfitTrackerPage.jsx**: Still over 2000 lines. The mobile responsiveness changes have added more conditional classes. Extracting sections (e.g., , ) into their own components is critical for maintainability.
 
 **key api endpoints**
-- : Needs to be updated to accept an optional  field.
-- : Needs to be updated to process  for each trade entry.
-- : Correctly deletes , , and . This is a critical part of the clean slate data consistency fix.
-- : (New) Fetches live exchange rates for a given currency (e.g., USDT), using CoinGecko with caching.
+- : Updated to save new content protection settings.
+- : Updated to fetch new content protection settings.
+- : Logic was fixed to correctly handle .
 
 **Critical Info for New Agent**
-- **Priority 1 is implementing the commission feature.** This is the user's explicit current request and touches all the problematic areas of the app (balance calculation, data storage, UI).
-- **The user is highly sensitive to data discrepancies.** After implementing the commission feature, you must perform a full end-to-end test of the Reset Tracker - - Data flow. The Daily Projection and Trade History Lot Sizes **must** match.
-- **Do not trust the existing data in the database.** The user confirmed it's incorrect. The path forward is to ensure the reset/onboarding flow creates clean, accurate data.
-- The balance calculation logic is now clearly defined: . Apply this formula consistently.
+- **Mobile UX is the absolute highest priority.** The user has provided very specific feedback. Adhere to it closely: single-column layouts, no truncated text, and K/M/B number formatting are non-negotiable.
+- **Test on a mobile viewport.** Use your browser's developer tools to simulate a mobile device (e.g., iPhone 12/13) for all frontend changes. Do not assume desktop styles will translate well.
+- **The performance fixes are significant but need monitoring.** The app should now handle more concurrent users, but keep an eye on backend logs for any new bottlenecks, especially related to WebSocket connections or API rate limits.
+- **The refactoring of  is incomplete.** After the mobile UX work is done, this should be the next priority to improve code health.
 
-**Last 10 User Messages and any pending HUMAN messages** 
-- **10.** User requested to add total commission at the end of the wizard or find a better way to handle it, also asking for a more compact UI design.
-- **9.** User confirmed auto-calculation approach for commission:  and that it should be read-only.
-- **8.** User changed the commission formula to: .
-- **7.** User realized auto-calculation would fail due to deposits/withdrawals and asked for new options.
-- **6.** User chose Option C: make  the source of truth in the wizard, with a disclaimer that commission would be handled at the end.
-- **5.** User reported multiple critical bugs in the Daily Projection table: incorrect starting balance for December, wrong month order, and general data inaccuracy.
-- **4.** User expressed frustration, stating the  in the database is wrong (WE NEVER GOT TO 20 AS A LOT SIZE) and demanded that a tracker reset should also reset the trade history.
-- **3.** User reported that  doesn't decrease after a withdrawal and requested a Restart Reset button in the wizard.
-- **2.** User reported that the balance in the wizard is stagnant and doesn't increase as daily profits are added.
-- **1. (LATEST)** User clarified the final, desired commission implementation: a manual commission entry field for each trading day, a commission column in the projection table, and the balance formula updated to .
+**Last 10 User Messages and any pending HUMAN messages**
+- **10.** User requested custom watermark for Master Admin, initiated mobile dashboard improvements, and provided screenshots.
+- **9.** Agent analyzed screenshots and provided a detailed plan for mobile improvements and the custom watermark feature.
+- **8.** User approved the plan and provided additional instructions: ensure UI consistency, hide Merin iframe on mobile (replace with button).
+- **7.** Agent confirmed understanding and started implementation.
+- **6.** User reported commission not showing for Jan 16th and asked about screenshot prevention (Netflix-style).
+- **5.** Agent confirmed understanding of the commission bug and clarified the technical limitations of screenshot prevention, proposing a viable alternative (watermark + copy prevention).
+- **4.** User approved the agent's plan for both the commission fix and the content protection feature.
+- **3.** Agent confirmed final understanding and started implementation.
+- **2.** User requested to complete the next action items and raised a critical issue: the site crashes under heavy load.
+- **1. (LATEST)** User provided detailed feedback for the next round of mobile improvements: enforce single-column layouts, abbreviate large numbers (K/M/B), ensure no elements are cut off, and simplify data entry flows.
 
 **Project Health Check:**
-- **Broken:** The data consistency between the  and the  is functionally broken until the commission feature is implemented and the Reset + Onboard flow is proven to generate accurate .
+- **Broken:** The mobile user experience is considered broken by the user. While initial fixes are in place, it does not yet meet their requirements.
 - **Mocked:** Cloudinary integration is still a placeholder.
 
 **3rd Party Integrations**
@@ -166,13 +150,13 @@ A full-stack application (React/FastAPI/MongoDB) with user roles, an admin dashb
 - Emailit (Service for sending emails)
 - APScheduler (Backend scheduled jobs)
 - Cloudinary (Placeholder for image hosting)
-- **CoinGecko** (New): For live cryptocurrency exchange rates, integrated on the backend with caching.
+- CoinGecko (For live cryptocurrency exchange rates, with backend caching)
 
 **Testing status**
-  - **Testing agent used after significant changes:** NO (Agent performed manual screenshot verification).
-  - **Troubleshoot agent used after agent stuck in loop:** NO
-  - **Test files created:** None in this session.
-  - **Known regressions:** The data in the  collection is known to be inaccurate from previous faulty imports. This is not a code regression but a data integrity issue that needs to be solved by the Reset + Clean Onboard flow.
+- **Testing agent used after significant changes:** YES, for the commission fix and content protection features. Both received 100% pass rates.
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** None in this session.
+- **Known regressions:** None from the recent changes, but the mobile layout is in an intermediate, incomplete state.
 
 **Credentials to test flow:**
 - **Role:** Master Admin
@@ -180,6 +164,5 @@ A full-stack application (React/FastAPI/MongoDB) with user roles, an admin dashb
 - **Password:** 
 
 **What agent forgot to execute**
-- The agent has not yet propagated the  field from the backend models into the actual API endpoint logic (, ).
-- The agent has not started any of the required frontend UI changes for commission entry or display.
-- After fixing numerous bugs in the Daily Projection and Onboarding wizard, a comprehensive end-to-end test of the Reset - - Data flow was not performed, which is critical to confirm all data consistency issues are resolved.</analysis>
+- The agent has not fully completed the list of mobile UI improvements from the user's latest message. Specifically, the compact signal on the Profit Tracker and the simplified trade entry on the Trade Monitor still need to be designed and implemented.
+- The refactoring of  into the newly created step components remains incomplete. The new files exist, but the logic hasn't been fully migrated out of the parent component.</analysis>
