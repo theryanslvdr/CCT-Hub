@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { toast } from 'sonner';
 import { 
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
