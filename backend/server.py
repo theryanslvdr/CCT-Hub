@@ -1042,15 +1042,15 @@ async def get_deposits(user: dict = Depends(get_current_user)):
 async def get_profit_summary(user: dict = Depends(get_current_user)):
     """Get financial summary for the current user - uses unified calculation utility
     
-    For Master Admin, this includes funds from all managed licensees.
+    NOTE: For Master Admin, account_value is the actual Merin balance.
+    Licensee funds are ALREADY PART OF this balance (they deposited into it).
+    We do NOT add licensee funds on top.
     """
     from utils.calculations import get_user_financial_summary
     
-    # For Master Admin, include managed licensee funds in the account value
-    include_licensees = user.get("role") == "master_admin"
-    summary = await get_user_financial_summary(db, user["id"], user, include_managed_licensees=include_licensees)
+    summary = await get_user_financial_summary(db, user["id"], user)
     
-    response = {
+    return {
         "total_deposits": summary["total_deposits"],
         "total_projected_profit": summary["total_projected_profit"],
         "total_actual_profit": summary["total_profit"],
@@ -1061,13 +1061,6 @@ async def get_profit_summary(user: dict = Depends(get_current_user)):
         "is_licensee": summary.get("is_licensee", False),
         "license_type": summary.get("license_type")
     }
-    
-    # Add licensee info for Master Admin
-    if include_licensees:
-        response["licensee_funds"] = summary.get("licensee_funds", 0)
-        response["licensee_count"] = summary.get("licensee_count", 0)
-    
-    return response
 
 @profit_router.post("/calculate-exit")
 async def calculate_exit(lot_size: float):
