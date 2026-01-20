@@ -849,6 +849,7 @@ export const AdminLicensesPage = () => {
                         <th>Starting Amount</th>
                         <th>Current Amount</th>
                         <th>Start Date</th>
+                        <th>Effective Start</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
