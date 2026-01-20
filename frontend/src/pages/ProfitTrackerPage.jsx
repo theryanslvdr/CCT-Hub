@@ -1342,9 +1342,9 @@ export const ProfitTrackerPage = () => {
         </div>
       )}
 
-      {/* Trading Signal Banner */}
+      {/* Trading Signal Banner - Desktop Only */}
       {activeSignal && (
-        <Card className="glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+        <Card className="hidden md:block glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -1368,6 +1368,43 @@ export const ProfitTrackerPage = () => {
                 data-testid="trade-now-button"
               >
                 Trade Now <ExternalLink className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mobile Signal Card - Compact "Trade Now" button that navigates to Trade Monitor */}
+      {activeSignal && (
+        <Card className="md:hidden glass-card border-blue-500/30 bg-blue-500/5" data-testid="mobile-signal-card">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                activeSignal.direction === 'BUY' ? 'bg-emerald-500' : 'bg-red-500'
+              }`}>
+                {activeSignal.direction === 'BUY' ? (
+                  <TrendingUp className="w-5 h-5 text-white" />
+                ) : (
+                  <TrendingDown className="w-5 h-5 text-white" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-bold ${activeSignal.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {activeSignal.direction}
+                  </span>
+                  <span className="text-xs text-zinc-400">{activeSignal.product || 'MOIL10'}</span>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  {activeSignal.trade_time} ({activeSignal.trade_timezone || 'Manila'})
+                </p>
+              </div>
+              <Button
+                onClick={() => window.location.href = '/trade-monitor'}
+                className="btn-primary h-10 px-4 text-sm font-medium flex-shrink-0"
+                data-testid="mobile-trade-now-btn"
+              >
+                Trade Now
               </Button>
             </div>
           </CardContent>
@@ -1456,9 +1493,9 @@ export const ProfitTrackerPage = () => {
         </Card>
       </div>
 
-      {/* Compact Active Signal Card for Profit Tracker */}
+      {/* Compact Active Signal Card for Profit Tracker - Desktop Only (mobile version above) */}
       {activeSignal && (
-        <Card className="glass-card border-blue-500/30 bg-blue-500/5">
+        <Card className="hidden md:block glass-card border-blue-500/30 bg-blue-500/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
