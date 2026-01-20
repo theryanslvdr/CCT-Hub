@@ -2737,7 +2737,8 @@ export const ProfitTrackerPage = () => {
                   <tr>
                     <th>Date</th>
                     <th>Balance Before</th>
-                    <th>LOT Size</th>
+                    {/* Hide LOT Size for licensees - they don't trade */}
+                    {!isLicensee && <th>LOT Size</th>}
                     <th>Target Profit</th>
                     {/* For licensees: Show Manager Traded column, hide Actual/Commission/P/L */}
                     {isLicensee ? (
