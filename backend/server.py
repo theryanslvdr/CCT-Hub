@@ -1040,12 +1040,17 @@ async def get_deposits(user: dict = Depends(get_current_user)):
 
 @profit_router.get("/summary")
 async def get_profit_summary(user: dict = Depends(get_current_user)):
-    """Get financial summary for the current user - uses unified calculation utility"""
+    """Get financial summary for the current user - uses unified calculation utility
+    
+    For Master Admin, this includes funds from all managed licensees.
+    """
     from utils.calculations import get_user_financial_summary
     
-    summary = await get_user_financial_summary(db, user["id"], user)
+    # For Master Admin, include managed licensee funds in the account value
+    include_licensees = user.get("role") == "master_admin"
+    summary = await get_user_financial_summary(db, user["id"], user, include_managed_licensees=include_licensees)
     
-    return {
+    response = {
         "total_deposits": summary["total_deposits"],
         "total_projected_profit": summary["total_projected_profit"],
         "total_actual_profit": summary["total_profit"],
@@ -1056,6 +1061,13 @@ async def get_profit_summary(user: dict = Depends(get_current_user)):
         "is_licensee": summary.get("is_licensee", False),
         "license_type": summary.get("license_type")
     }
+    
+    # Add licensee info for Master Admin
+    if include_licensees:
+        response["licensee_funds"] = summary.get("licensee_funds", 0)
+        response["licensee_count"] = summary.get("licensee_count", 0)
+    
+    return response
 
 @profit_router.post("/calculate-exit")
 async def calculate_exit(lot_size: float):
