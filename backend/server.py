@@ -3814,6 +3814,42 @@ async def delete_license(license_id: str, user: dict = Depends(require_admin)):
     
     return {"message": "License deleted successfully"}
 
+@admin_router.put("/licenses/{license_id}/effective-start-date")
+async def update_license_effective_start_date(
+    license_id: str,
+    effective_start_date: str = Body(..., embed=True),
+    user: dict = Depends(require_admin)
+):
+    """Update the effective start date for a license (Master Admin only)"""
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can update license effective start date")
+    
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    # Validate date format
+    try:
+        datetime.strptime(effective_start_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    old_date = license_doc.get("effective_start_date", license_doc.get("start_date"))
+    
+    await db.licenses.update_one(
+        {"id": license_id},
+        {"$set": {
+            "effective_start_date": effective_start_date,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": f"Effective start date updated from {old_date} to {effective_start_date}",
+        "old_date": old_date,
+        "new_date": effective_start_date
+    }
+
 # ==================== LICENSE INVITES ====================
 def calculate_validity_date(duration: str) -> Optional[str]:
     """Calculate expiry date based on duration string"""
