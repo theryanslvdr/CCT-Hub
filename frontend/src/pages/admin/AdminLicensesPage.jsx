@@ -879,6 +879,20 @@ export const AdminLicensesPage = () => {
                           <td className="text-zinc-400">
                             {license.start_date?.split('T')[0]}
                           </td>
+                          <td className="text-blue-400">
+                            <div className="flex items-center gap-1">
+                              <span>{license.effective_start_date || license.start_date?.split('T')[0]}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenEditEffectiveDate(license)}
+                                className="w-6 h-6 text-zinc-400 hover:text-blue-400"
+                                title="Edit Effective Start Date"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </td>
                           <td>
                             <div className="flex gap-1">
                               <Button
