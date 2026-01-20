@@ -20,9 +20,10 @@ import {
   ChevronDown, FileText, Receipt, Lock, Check, ExternalLink,
   Radio, EyeOff, Award, FolderOpen, MoreHorizontal, Edit3, X, TreePine, Loader2, Users, PieChart as PieChartIcon
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
+import { VSDDialog } from '@/components/VSDDialog';
 
 // Truncate to 2 decimal places without rounding
 const truncateTo2Decimals = (num) => {
