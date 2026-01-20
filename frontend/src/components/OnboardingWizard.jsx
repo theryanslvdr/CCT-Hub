@@ -584,8 +584,8 @@ export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false 
             
             <div className="max-w-lg mx-auto">
               {/* Add transaction form */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 mb-4">
-                <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="p-3 sm:p-4 rounded-lg bg-zinc-900/50 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                   <div>
                     <Label className="text-xs text-zinc-400">Type</Label>
                     <Select value={newTransactionType} onValueChange={setNewTransactionType}>
