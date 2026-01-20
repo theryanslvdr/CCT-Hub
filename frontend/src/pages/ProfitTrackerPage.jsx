@@ -904,7 +904,7 @@ export const ProfitTrackerPage = () => {
   };
 
   // Get daily projection data for selected month
-  // Note: For extended licensees, use backend projections with FIXED lot size and daily profit per quarter
+  // Note: For licensees, use backend projections with Manager Traded logic
   // For current month, always use the latest effectiveAccountValue to ensure
   // the projection reflects any newly logged trades
   const getDailyProjectionForSelectedMonth = useMemo(() => {
@@ -914,15 +914,16 @@ export const ProfitTrackerPage = () => {
     const isCurrentMonth = selectedMonth.monthDate.getFullYear() === today.getFullYear() &&
                            selectedMonth.monthDate.getMonth() === today.getMonth();
     
-    // For extended licensees, use backend projections with fixed lot size
-    if (isExtendedLicensee && licenseProjections.length > 0) {
+    // For ALL licensees: Use backend projections with Manager Traded logic
+    if (isLicensee && licenseProjections.length > 0) {
       // Filter projections for selected month
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
       const monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
       
-      // Show ALL days for the month (including past days with trade history)
-      // Don't filter out past days anymore
-      return monthProjections.map(p => {
+      // Build projections with carry-forward logic when manager didn't trade
+      let runningBalance = monthProjections[0]?.account_value - monthProjections[0]?.daily_profit || effectiveAccountValue;
+      
+      return monthProjections.map((p, idx) => {
         const projDate = new Date(p.date);
         const isToday = projDate.toDateString() === today.toDateString();
         const isFuture = projDate > today;
@@ -939,6 +940,16 @@ export const ProfitTrackerPage = () => {
           status = 'future';
         }
         
+        // Calculate balance - if manager didn't trade, carry forward from previous day
+        const balanceBefore = runningBalance;
+        const targetProfit = masterTraded ? p.daily_profit : 0; // 0 if manager didn't trade
+        
+        // Update running balance for next day
+        if (masterTraded) {
+          runningBalance = balanceBefore + p.daily_profit;
+        }
+        // If manager didn't trade, balance stays the same (carry forward)
+        
         return {
           date: projDate,
           dateStr: projDate.toLocaleDateString('en-US', { 
@@ -947,17 +958,18 @@ export const ProfitTrackerPage = () => {
             day: 'numeric' 
           }),
           dateKey: p.date,
-          balanceBefore: p.account_value - p.daily_profit,  // Balance before adding daily profit
+          balanceBefore: balanceBefore,
           lotSize: p.lot_size,  // FIXED from backend (quarterly)
-          targetProfit: p.daily_profit,  // FIXED from backend (quarterly)
+          targetProfit: p.daily_profit,  // Original target (may show "--" in UI if manager didn't trade)
           actualProfit: masterTraded ? p.daily_profit : undefined,
           status: status,
           isToday: isToday,
+          managerTraded: masterTraded, // Explicit flag for the "Manager Traded" column
         };
       });
     }
     
-    // For honorary licensees and regular users, use standard calculation
+    // For regular users (non-licensees), use standard calculation
     // For past months, we need to calculate the correct starting balance by working
     // backwards from current account value using trade logs and transactions
     let startBalance;
