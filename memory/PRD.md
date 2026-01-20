@@ -11,6 +11,45 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 60 (2026-01-20) - P0 Licensee Features Complete ✅
+
+#### Bug Fix: Effective Start Date Filtering ✅
+- **Issue**: Daily Projection table for licensees showed dates before their effective_start_date
+- **Fix**: Modified `generateDailyProjectionForMonth` to accept `effectiveStartDate` parameter
+- **Behavior**: Days before effective_start_date are filtered out; returns empty array if entire month is before start date
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 163-187)
+
+#### Feature: Manager Traded Toggle for Master Admin ✅
+- **Location**: Daily Projection table "Manager Traded" column
+- **Visibility**: Only visible when Master Admin is simulating a specific licensee
+- **UI**: Switch toggle component (emerald when on, red when off)
+- **Loading State**: Shows Loader2 spinner while toggling
+- **Backend**: Uses existing `POST /api/admin/licenses/{id}/trade-overrides` endpoint
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 2747-2778)
+
+#### Feature: Master Admin Account Value Includes Licensee Funds ✅
+- **Change**: Master Admin's account value now includes funds from all their managed licensees
+- **Formula**: `Total Account Value = Personal Account Value + Licensee Funds`
+- **API Response**: `/api/profit/summary` now returns `licensee_funds` and `licensee_count` for Master Admin
+- **New Endpoint**: `GET /api/profit/master-admin-breakdown` returns detailed breakdown:
+  - `personal_account_value`: Master Admin's own funds
+  - `licensee_funds`: Total funds across all active licensees
+  - `total_account_value`: Combined total
+  - `licensee_count`: Number of active licensees
+  - `licensee_breakdown`: Array with per-licensee details
+- **Backend Functions Added** in `/app/backend/utils/calculations.py`:
+  - `calculate_total_managed_licensee_funds()`: Sums funds from all active licenses
+  - `get_master_admin_financial_breakdown()`: Returns detailed breakdown
+  - Updated `calculate_account_value()` and `get_user_financial_summary()` with `include_managed_licensees` parameter
+- **Files Modified**:
+  - `/app/backend/utils/calculations.py`
+  - `/app/backend/server.py`
+
+#### Testing ✅
+- **Iteration 60**: 100% backend (14/14 tests passed)
+- All P0 features verified via automated tests
+- Test file created: `/app/tests/test_iteration_60_p0_features.py`
+
 ### Session 58 (2026-01-20) - Licensee Management Features ✅
 
 #### No Onboarding Wizard for Licensees ✅
