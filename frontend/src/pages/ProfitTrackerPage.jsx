@@ -680,7 +680,33 @@ export const ProfitTrackerPage = () => {
   useEffect(() => {
     loadData();
     loadGlobalHolidays();
+    // Check if licensee needs to see welcome screen
+    checkLicenseeWelcome();
   }, [simulatedView]);
+
+  const checkLicenseeWelcome = async () => {
+    // Only check for actual licensees (not simulated views)
+    if (simulatedView || !user?.license_type) return;
+    
+    try {
+      const response = await profitAPI.getLicenseeWelcomeInfo();
+      if (response.data.is_licensee && !response.data.has_seen_welcome) {
+        setLicenseeWelcomeInfo(response.data);
+        setShowLicenseeWelcome(true);
+      }
+    } catch (error) {
+      console.error('Failed to check licensee welcome:', error);
+    }
+  };
+
+  const loadLicenseeProjections = async () => {
+    try {
+      const response = await profitAPI.getLicenseeDailyProjection();
+      setLicenseeProjections(response.data.projections || []);
+    } catch (error) {
+      console.error('Failed to load licensee projections:', error);
+    }
+  };
 
   const loadGlobalHolidays = async () => {
     try {
