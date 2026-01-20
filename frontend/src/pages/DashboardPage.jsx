@@ -400,20 +400,44 @@ export const DashboardPage = () => {
                         {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
                       </p>
                     </div>
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                      <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
-                      <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                        {((summary?.account_value || 0) / 980).toFixed(2)}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                      <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
-                      <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                        {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">LOT × 15 multiplier</p>
-                    </div>
+                    {/* Hide LOT Size and Projected Daily for licensees - they don't trade */}
+                    {!isLicenseeView && (
+                      <>
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                          <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
+                          <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                            {((summary?.account_value || 0) / 980).toFixed(2)}
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                          <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
+                          <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                            {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">LOT × 15 multiplier</p>
+                        </div>
+                      </>
+                    )}
+                    {/* For licensees, show additional relevant stats */}
+                    {isLicenseeView && (
+                      <>
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                          <p className="text-xs text-blue-400 uppercase tracking-wider">Total Trades</p>
+                          <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                            {summary?.total_trades || 0}
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">Days manager traded</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                          <p className="text-xs text-purple-400 uppercase tracking-wider">Actual vs Projected</p>
+                          <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                            {summary?.performance_rate?.toFixed(1) || 0}%
+                          </p>
+                          <p className="text-xs text-zinc-500 mt-1">Growth rate</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
