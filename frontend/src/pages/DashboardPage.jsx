@@ -543,7 +543,8 @@ export const DashboardPage = () => {
                                 {trade.direction}
                               </span>
                             </td>
-                            <td className="font-mono">{trade.lot_size}</td>
+                            {/* Hide LOT Size for licensees */}
+                            {!isLicenseeView && <td className="font-mono">{trade.lot_size}</td>}
                             <td className="font-mono">${formatNumber(trade.projected_profit)}</td>
                             <td className="font-mono">${formatNumber(trade.actual_profit)}</td>
                             <td className={`font-mono ${trade.profit_difference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
