@@ -1531,42 +1531,42 @@ export const TradeMonitorPage = () => {
                 disabled={!signal || !tradeWindowInfo.canTrade}
                 data-testid="check-in-button"
               >
-                <Play className="w-8 h-8 mr-3" /> I&apos;m Ready to Trade
+                <Play className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3" /> I&apos;m Ready to Trade
               </Button>
               {!tradeWindowInfo.canTrade && signal && (
-                <p className="text-xs text-zinc-500 mt-2">Button will be enabled 20 minutes before trade time</p>
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-2">Enabled 20 min before trade time</p>
               )}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* World Timer & Today's Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* World Timer - Prioritize Philippines Time */}
+      {/* World Timer & Today's Summary - Single column on mobile */}
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
+        {/* World Timer - Compact on mobile */}
         <Card className="glass-card" data-testid="time-card">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Clock className="w-5 h-5" /> Your Time
+          <CardHeader className="pb-2 md:pb-4">
+            <CardTitle className="text-white flex items-center gap-2 text-base md:text-lg">
+              <Clock className="w-4 h-4 md:w-5 md:h-5" /> Your Time
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="text-center overflow-hidden">
               {/* Primary: Philippine Time */}
-              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
-                Philippines (Asia/Manila)
+              <p className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-wider mb-1 md:mb-2">
+                Philippines (Manila)
               </p>
-              <p className="text-4xl sm:text-5xl lg:text-6xl font-mono font-bold text-white tracking-wider truncate" data-testid="ph-time">
+              <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-mono font-bold text-white tracking-wider" data-testid="ph-time">
                 {formatTimeForTimezone(worldTime, 'Asia/Manila')}
               </p>
               
-              {/* Secondary: User's Local Time (smaller, underneath) */}
+              {/* Secondary: User's Local Time */}
               {!isPhilippines && (
-                <div className="mt-4 pt-4 border-t border-zinc-800">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1 truncate">
-                    Your Local Time ({userTimezone.split('/').pop()})
+                <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-zinc-800">
+                  <p className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-wider mb-1">
+                    Your Time ({userTimezone.split('/').pop()})
                   </p>
-                  <p className="text-xl sm:text-2xl font-mono text-zinc-400 truncate" data-testid="local-time">
+                  <p className="text-lg sm:text-xl md:text-2xl font-mono text-zinc-400" data-testid="local-time">
                     {formatTimeForTimezone(worldTime, userTimezone)}
                   </p>
                 </div>
@@ -1575,29 +1575,29 @@ export const TradeMonitorPage = () => {
           </CardContent>
         </Card>
 
-        {/* Today's Summary - Simplified: Only Actual Total & P/L Difference + Encouragement */}
+        {/* Today's Summary - Compact on mobile */}
         <Card className="glass-card" data-testid="todays-summary-card">
-          <CardHeader>
-            <CardTitle className="text-white">Today&apos;s Summary</CardTitle>
+          <CardHeader className="pb-2 md:pb-4">
+            <CardTitle className="text-white text-base md:text-lg">Today&apos;s Summary</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Actual Total</p>
-                <p className="text-3xl font-mono font-bold text-emerald-400" data-testid="actual-total">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="p-3 md:p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-xs md:text-sm text-zinc-400">Actual Total</p>
+                <p className="text-xl md:text-2xl lg:text-3xl font-mono font-bold text-emerald-400" data-testid="actual-total">
                   {formatLargeNumber(dailySummary?.total_actual || 0)}
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">P/L Difference</p>
-                <p className={`text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="pl-difference">
+              <div className="p-3 md:p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-xs md:text-sm text-zinc-400">P/L Diff</p>
+                <p className={`text-xl md:text-2xl lg:text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="pl-difference">
                   {(dailySummary?.difference || 0) >= 0 ? '+' : ''}{formatLargeNumber(dailySummary?.difference || 0)}
                 </p>
               </div>
             </div>
-            {/* Encouragement phrase placed here */}
-            <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
-              <p className="text-zinc-300" data-testid="encouragement-message">{getDailyPerformanceMessage()}</p>
+            {/* Encouragement - Hidden on small mobile to save space */}
+            <div className="hidden sm:block mt-3 md:mt-4 p-3 md:p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
+              <p className="text-xs md:text-sm text-zinc-300" data-testid="encouragement-message">{getDailyPerformanceMessage()}</p>
             </div>
           </CardContent>
         </Card>
