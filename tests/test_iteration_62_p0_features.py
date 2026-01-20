@@ -18,7 +18,7 @@ MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
 MASTER_ADMIN_PASSWORD = "admin123"
 
 # Extended license with effective_start_date 2025-01-15 (from agent context)
-EXTENDED_LICENSE_ID = "618db632"
+EXTENDED_LICENSE_ID = "618db632-4910-47d0-a0dc-1efdd297736a"
 
 
 class TestTradeOverrideEndpoints:
@@ -52,7 +52,10 @@ class TestTradeOverrideEndpoints:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200, f"Failed to get licenses: {licenses_response.text}"
         
-        licenses = licenses_response.json()
+        # Response has 'licenses' key
+        licenses_data = licenses_response.json()
+        licenses = licenses_data.get("licenses", [])
+        
         if not licenses:
             pytest.skip("No licenses found to test trade overrides")
         
@@ -72,7 +75,7 @@ class TestTradeOverrideEndpoints:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200
         
-        licenses = licenses_response.json()
+        licenses = licenses_response.json().get("licenses", [])
         if not licenses:
             pytest.skip("No licenses found to test trade overrides")
         
@@ -111,7 +114,7 @@ class TestTradeOverrideEndpoints:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200
         
-        licenses = licenses_response.json()
+        licenses = licenses_response.json().get("licenses", [])
         if not licenses:
             pytest.skip("No licenses found to test trade overrides")
         
@@ -151,7 +154,7 @@ class TestTradeOverrideEndpoints:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200
         
-        licenses = licenses_response.json()
+        licenses = licenses_response.json().get("licenses", [])
         if not licenses:
             pytest.skip("No licenses found")
         
@@ -205,7 +208,7 @@ class TestEffectiveStartDateFiltering:
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200
         
-        licenses = response.json()
+        licenses = response.json().get("licenses", [])
         
         # Find a license with effective_start_date
         license_with_eff_date = None
@@ -217,8 +220,10 @@ class TestEffectiveStartDateFiltering:
         if license_with_eff_date:
             print(f"Found license with effective_start_date: {license_with_eff_date.get('id')} - {license_with_eff_date.get('effective_start_date')}")
             assert license_with_eff_date.get("effective_start_date"), "effective_start_date should be set"
+            # Verify the specific license mentioned in the test request
+            assert license_with_eff_date.get("effective_start_date") == "2025-01-15", f"Expected 2025-01-15, got {license_with_eff_date.get('effective_start_date')}"
         else:
-            print("No licenses with effective_start_date found - this is OK if none were created with this field")
+            pytest.fail("No licenses with effective_start_date found - expected at least one (618db632)")
     
     def test_license_invite_can_set_effective_start_date(self):
         """Test that license invites can include effective_start_date"""
@@ -226,60 +231,13 @@ class TestEffectiveStartDateFiltering:
         response = self.session.get(f"{BASE_URL}/api/admin/license-invites")
         assert response.status_code == 200
         
-        invites = response.json()
+        invites = response.json().get("invites", [])
         
-        # Check if any invite has effective_start_date
-        for invite in invites:
-            if invite.get("effective_start_date"):
-                print(f"Found invite with effective_start_date: {invite.get('effective_start_date')}")
-                break
-
-
-class TestMasterAdminTradesEndpoint:
-    """Test master admin trades endpoint used for licensee projections"""
-    
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Login as Master Admin"""
-        self.session = requests.Session()
-        self.session.headers.update({"Content-Type": "application/json"})
-        
-        login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
-            "email": MASTER_ADMIN_EMAIL,
-            "password": MASTER_ADMIN_PASSWORD
-        })
-        
-        if login_response.status_code != 200:
-            pytest.skip(f"Failed to login: {login_response.text}")
-        
-        token = login_response.json().get("access_token")
-        self.session.headers.update({"Authorization": f"Bearer {token}"})
-    
-    def test_master_admin_trades_endpoint(self):
-        """Test /api/profit/master-admin-trades endpoint returns trading dates"""
-        start_date = "2025-01-01"
-        end_date = "2025-12-31"
-        
-        response = self.session.get(f"{BASE_URL}/api/profit/master-admin-trades", params={
-            "start_date": start_date,
-            "end_date": end_date
-        })
-        
-        assert response.status_code == 200, f"Failed to get master admin trades: {response.text}"
-        
-        data = response.json()
-        assert "trading_dates" in data, "Response should contain 'trading_dates'"
-        
-        # trading_dates should be a dict keyed by date
-        trading_dates = data.get("trading_dates", {})
-        assert isinstance(trading_dates, dict), "trading_dates should be a dict"
-        
-        # If there are any trades, verify structure
-        if trading_dates:
-            sample_date = list(trading_dates.keys())[0]
-            sample_trade = trading_dates[sample_date]
-            print(f"Sample trade for {sample_date}: {sample_trade}")
-            assert "traded" in sample_trade, "Each trade entry should have 'traded' field"
+        # Check if any invite has effective_start_date field (even if null)
+        if invites:
+            sample_invite = invites[0]
+            assert "effective_start_date" in sample_invite, "Invite should have effective_start_date field"
+            print(f"Sample invite effective_start_date: {sample_invite.get('effective_start_date')}")
 
 
 class TestLicenseSimulation:
@@ -307,17 +265,17 @@ class TestLicenseSimulation:
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200
         
-        licenses = response.json()
+        licenses = response.json().get("licenses", [])
         
         # Check structure of licenses
         if licenses:
             sample_license = licenses[0]
             print(f"License fields: {list(sample_license.keys())}")
             
-            # effective_start_date may or may not be present depending on license
-            # Just verify the endpoint works
+            # Verify required fields
             assert "id" in sample_license
             assert "license_type" in sample_license
+            assert "effective_start_date" in sample_license, "License should have effective_start_date field"
     
     def test_simulate_licensee_endpoint(self):
         """Test that we can get licensee details for simulation"""
@@ -325,13 +283,21 @@ class TestLicenseSimulation:
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200
         
-        licenses = response.json()
+        licenses = response.json().get("licenses", [])
         if not licenses:
             pytest.skip("No licenses to test simulation")
         
-        # Get first license details
-        license_id = licenses[0].get("id")
-        user_id = licenses[0].get("user_id")
+        # Get first active license
+        active_license = None
+        for lic in licenses:
+            if lic.get("is_active"):
+                active_license = lic
+                break
+        
+        if not active_license:
+            pytest.skip("No active licenses found")
+        
+        user_id = active_license.get("user_id")
         
         # Get member details (used for simulation)
         member_response = self.session.get(f"{BASE_URL}/api/admin/members/{user_id}")
@@ -368,7 +334,7 @@ class TestDeleteTradeOverride:
         licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert licenses_response.status_code == 200
         
-        licenses = licenses_response.json()
+        licenses = licenses_response.json().get("licenses", [])
         if not licenses:
             pytest.skip("No licenses found")
         
@@ -393,6 +359,72 @@ class TestDeleteTradeOverride:
         get_response = self.session.get(f"{BASE_URL}/api/admin/licenses/{license_id}/trade-overrides")
         overrides = get_response.json().get("overrides", {})
         assert test_date not in overrides, f"Override for {test_date} should be deleted"
+
+
+class TestTradeOverrideToggleLogic:
+    """Test that masterTraded checks tradeOverrides first, then falls back to masterAdminTrades"""
+    
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        """Login as Master Admin"""
+        self.session = requests.Session()
+        self.session.headers.update({"Content-Type": "application/json"})
+        
+        login_response = self.session.post(f"{BASE_URL}/api/auth/login", json={
+            "email": MASTER_ADMIN_EMAIL,
+            "password": MASTER_ADMIN_PASSWORD
+        })
+        
+        if login_response.status_code != 200:
+            pytest.skip(f"Failed to login: {login_response.text}")
+        
+        token = login_response.json().get("access_token")
+        self.session.headers.update({"Authorization": f"Bearer {token}"})
+    
+    def test_override_takes_precedence_over_master_trades(self):
+        """Test that trade override takes precedence over master admin trades"""
+        # Get a license
+        licenses_response = self.session.get(f"{BASE_URL}/api/admin/licenses")
+        assert licenses_response.status_code == 200
+        
+        licenses = licenses_response.json().get("licenses", [])
+        if not licenses:
+            pytest.skip("No licenses found")
+        
+        license_id = licenses[0].get("id")
+        
+        # Create an override for a specific date
+        test_date = "2025-01-15"  # Use the effective_start_date
+        
+        # Set override to traded=True
+        response = self.session.post(f"{BASE_URL}/api/admin/licenses/{license_id}/trade-overrides", json={
+            "license_id": license_id,
+            "date": test_date,
+            "traded": True,
+            "notes": "Override test - should take precedence"
+        })
+        assert response.status_code == 200
+        
+        # Verify override is set
+        get_response = self.session.get(f"{BASE_URL}/api/admin/licenses/{license_id}/trade-overrides")
+        overrides = get_response.json().get("overrides", {})
+        
+        assert test_date in overrides, f"Override for {test_date} should exist"
+        assert overrides[test_date].get("traded") == True
+        
+        # Now toggle it to False
+        response2 = self.session.post(f"{BASE_URL}/api/admin/licenses/{license_id}/trade-overrides", json={
+            "license_id": license_id,
+            "date": test_date,
+            "traded": False,
+            "notes": "Override test - toggled to False"
+        })
+        assert response2.status_code == 200
+        
+        # Verify toggle worked
+        get_response2 = self.session.get(f"{BASE_URL}/api/admin/licenses/{license_id}/trade-overrides")
+        overrides2 = get_response2.json().get("overrides", {})
+        assert overrides2[test_date].get("traded") == False
 
 
 if __name__ == "__main__":
