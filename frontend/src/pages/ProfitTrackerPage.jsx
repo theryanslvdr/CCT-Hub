@@ -1564,7 +1564,11 @@ export const ProfitTrackerPage = () => {
               <Eye className="w-5 h-5 text-amber-400" />
               <div>
                 <p className="text-amber-400 font-medium">Simulating: {simulatedMemberName}</p>
-                <p className="text-xs text-amber-400/70">Account Value: {formatLargeNumber(effectiveAccountValue)} • LOT Size: {effectiveLotSize.toFixed(2)}</p>
+                <p className="text-xs text-amber-400/70">
+                  Account Value: {formatLargeNumber(effectiveAccountValue)}
+                  {/* Hide LOT Size for licensees */}
+                  {!isLicensee && ` • LOT Size: ${effectiveLotSize.toFixed(2)}`}
+                </p>
               </div>
             </div>
           </div>
