@@ -1254,6 +1254,22 @@ async def get_commissions(user: dict = Depends(get_current_user)):
     return commissions
 
 
+@profit_router.get("/master-admin-breakdown")
+async def get_master_admin_financial_breakdown(user: dict = Depends(require_master_admin)):
+    """Get detailed financial breakdown for Master Admin, including licensee funds.
+    
+    This shows:
+    - Personal account value (Master Admin's own funds)
+    - Licensee funds (total funds allocated to active licensees)
+    - Total account value (personal + licensee funds)
+    - Breakdown per licensee
+    """
+    from utils.calculations import get_master_admin_financial_breakdown as get_breakdown
+    
+    breakdown = await get_breakdown(db, user["id"], user)
+    return breakdown
+
+
 # ==================== TRADE MONITOR ROUTES ====================
 
 @trade_router.post("/log", response_model=TradeLogResponse)
