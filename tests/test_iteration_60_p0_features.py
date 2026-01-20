@@ -239,8 +239,14 @@ class TestTradeOverrides:
         """Get a license ID for testing"""
         response = requests.get(f"{BASE_URL}/api/admin/licenses", headers=auth_headers)
         if response.status_code == 200:
-            licenses = response.json()
+            data = response.json()
+            licenses = data.get("licenses", [])
             if len(licenses) > 0:
+                # Get an active license
+                for lic in licenses:
+                    if lic.get("is_active"):
+                        return lic.get("id")
+                # Fallback to first license
                 return licenses[0].get("id")
         return None
     
