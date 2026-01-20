@@ -1714,22 +1714,25 @@ export const ProfitTrackerPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card" data-testid="current-lot-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-xs text-zinc-400">LOT Size</p>
-                <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                  {effectiveLotSize.toFixed(2)}
-                </p>
-                <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
+        {/* LOT Size card - Hidden for licensees (they don't trade) */}
+        {!isLicensee && (
+          <Card className="glass-card" data-testid="current-lot-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-zinc-400">LOT Size</p>
+                  <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                    {effectiveLotSize.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <Calculator className="w-5 h-5 text-white" />
+                </div>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                <Calculator className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) */}
