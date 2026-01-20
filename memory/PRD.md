@@ -11,6 +11,60 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 57 (2026-01-20) - Desktop/Mobile Number Formatting + Licensee Management ✅
+
+#### Desktop Number Formatting with Tooltips ✅
+- **Full Amounts on Desktop**: Account Value, Total Profit show full amounts (e.g., $19,329.15) unless ≥$100K
+- **Abbreviations only at 100K+**: Large amounts show as $100K, $1.2M, $3.5B
+- **ValueTooltip Component**: New component at `/app/frontend/src/components/ui/value-tooltip.jsx`
+  - Hover: Shows exact value, disappears on mouse leave
+  - Click: Tooltip stays until user clicks elsewhere
+  - Shows "Exact: $X,XXX.XX" in green with close instructions
+
+#### Mobile Dashboard Improvements ✅
+- **2-Row Greeting Card Layout**: 
+  - Row 1: "Welcome back, {name}!" greeting
+  - Row 2: Compact signal card with BUY/SELL, product, time
+- **Signal Card Clickable**: Navigates to `/trade-monitor` when clicked
+- **Dashboard KPIs**: 2-column grid on mobile instead of single column
+
+#### "Actual vs Projected" Renamed ✅
+- **Renamed from "Performance Rate"**: Now shows "Actual vs Projected" with clearer context
+- **Subtitle Added**: Shows "Above target!", "On target", or "Below target" based on percentage
+- **101.2% Explained**: When actual profit exceeds projected, percentage > 100% (working as intended)
+
+#### Profit Tracker Button Layout ✅
+- **Simulate Actions**: Full width button on mobile
+- **Access Records + Reset Tracker**: Side by side, together spanning full width (50% each)
+- **Desktop**: Original horizontal layout preserved
+
+#### Licensee Transaction Management ✅
+- **Edit Transaction**: Master Admin can correct transaction amounts
+  - New dialog shows original amount, type, user
+  - Notes field for correction reason
+  - Backend: `PUT /api/admin/licensee-transactions/{tx_id}`
+- **Delete Transaction**: Master Admin can delete transactions
+  - Confirmation dialog with warnings
+  - Cascades to delete related deposit/withdrawal records
+  - Backend: `DELETE /api/admin/licensee-transactions/{tx_id}`
+
+#### Honorary Invite Starting Balance ✅
+- **Optional Starting Balance**: Now available for honorary licensees (not just extended)
+- **UI Updated**: Shows "(optional)" label with helper text for honorary type
+- **API Response**: Now includes `starting_amount` and `license_type` in response
+
+#### Files Modified
+- `/app/frontend/src/components/ui/value-tooltip.jsx` - NEW: ValueTooltip component
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - formatLargeNumber, formatFullCurrency, button layout
+- `/app/frontend/src/pages/DashboardPage.jsx` - 2-row greeting, signal navigation, KPI updates
+- `/app/frontend/src/pages/admin/AdminLicensesPage.jsx` - Edit/Delete tx dialogs, honorary starting balance
+- `/app/frontend/src/lib/api.js` - updateLicenseeTransaction, deleteLicenseeTransaction
+- `/app/backend/server.py` - PUT/DELETE licensee transaction endpoints, Body import
+
+#### Testing ✅
+- **Iteration 57**: 100% frontend pass rate, 75% backend (minor response format issue fixed)
+- All features verified on desktop (1920x800) and mobile (393x852)
+
 ### Session 56 (2026-01-20) - Mobile UI/UX Overhaul ✅
 
 #### Mobile Responsiveness Complete Rewrite ✅
