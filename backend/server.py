@@ -3890,6 +3890,7 @@ async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(
         "notes": data.notes,
         "invitee_email": data.invitee_email,
         "invitee_name": data.invitee_name,
+        "effective_start_date": data.effective_start_date,  # When licensee's trading starts
         "is_revoked": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": user["id"],
