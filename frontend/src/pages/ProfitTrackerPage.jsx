@@ -239,7 +239,12 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
   
   while (currentDate <= lastDay) {
     if (isTradingDay(currentDate, globalHolidayDates)) {
-      const dateKey = currentDate.toISOString().split('T')[0];
+      // Use LOCAL date format to avoid timezone issues
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+      
       const tradeLog = tradeLogs[dateKey];
       const hasTraded = tradeLog?.has_traded;
       const actualProfit = tradeLog?.actual_profit;
