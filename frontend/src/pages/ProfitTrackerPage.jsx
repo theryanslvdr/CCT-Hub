@@ -36,9 +36,11 @@ const formatLargeNumber = (amount) => {
   if (absAmount >= 1e12) {
     return `${sign}$${(absAmount / 1e12).toFixed(2)} Trillion`;
   } else if (absAmount >= 1e9) {
-    return `${sign}$${(absAmount / 1e9).toFixed(2)} Billion`;
+    return `${sign}$${(absAmount / 1e9).toFixed(2)}B`;
   } else if (absAmount >= 1e6) {
-    return `${sign}$${(absAmount / 1e6).toFixed(2)} Million`;
+    return `${sign}$${(absAmount / 1e6).toFixed(2)}M`;
+  } else if (absAmount >= 1e3) {
+    return `${sign}$${(absAmount / 1e3).toFixed(2)}K`;
   } else {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -47,6 +49,19 @@ const formatLargeNumber = (amount) => {
       maximumFractionDigits: 2
     }).format(amount);
   }
+};
+
+// Compact number format for mobile (always uses abbreviations)
+const formatCompact = (amount) => {
+  if (amount === null || amount === undefined) return '$0';
+  const absAmount = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  
+  if (absAmount >= 1e12) return `${sign}$${(absAmount / 1e12).toFixed(2)}T`;
+  if (absAmount >= 1e9) return `${sign}$${(absAmount / 1e9).toFixed(2)}B`;
+  if (absAmount >= 1e6) return `${sign}$${(absAmount / 1e6).toFixed(2)}M`;
+  if (absAmount >= 1e3) return `${sign}$${(absAmount / 1e3).toFixed(2)}K`;
+  return `${sign}$${absAmount.toFixed(2)}`;
 };
 
 // Standard money formatting
