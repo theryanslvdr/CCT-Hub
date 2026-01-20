@@ -654,6 +654,11 @@ export const ProfitTrackerPage = () => {
   // Simulate Actions Dialog (combined simulate deposit, withdrawal, commission)
   const [simulateActionsOpen, setSimulateActionsOpen] = useState(false);
   
+  // VSD (Virtual Share Distribution) Dialog - Master Admin only
+  const [vsdDialogOpen, setVsdDialogOpen] = useState(false);
+  const [vsdData, setVsdData] = useState(null);
+  const [vsdLoading, setVsdLoading] = useState(false);
+  
   // Form states
   const [depositAmount, setDepositAmount] = useState('');
   const [depositNotes, setDepositNotes] = useState('');
