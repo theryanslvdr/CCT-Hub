@@ -182,15 +182,19 @@ export const AuthProvider = ({ children }) => {
       // If object with member data, use full simulation
       setSimulatedView({
         role: 'member',
-        memberId: memberData.id,
+        memberId: memberData.id || memberData.memberId,
         memberName: memberData.full_name,
-        displayName: memberData.full_name,
+        displayName: memberData.full_name || memberData.displayName,
         accountValue: memberData.account_value,
         lotSize: memberData.lot_size,
         totalDeposits: memberData.total_deposits,
         totalProfit: memberData.total_profit,
         license_type: memberData.license_type || null,
         allowed_dashboards: memberData.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
+        // Include licenseId for trade override API calls (P0 feature)
+        licenseId: memberData.licenseId || null,
+        // Include effective_start_date for Daily Projection filtering (P0 feature)
+        effective_start_date: memberData.effective_start_date || null,
       });
     }
   }, [isMasterAdmin]);
