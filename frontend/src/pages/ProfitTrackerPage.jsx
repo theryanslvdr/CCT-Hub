@@ -2542,24 +2542,38 @@ export const ProfitTrackerPage = () => {
         <CardContent className="p-3 sm:p-6">
           {projectionView === 'summary' ? (
             <div className="space-y-4 sm:space-y-6">
-              {/* Current Stats - Mobile optimized */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg bg-zinc-900/50">
+              {/* Current Stats - Mobile optimized, hide LOT Size and Daily Profit for licensees */}
+              <div className={`grid ${isLicensee ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg bg-zinc-900/50`}>
                 <div>
                   <p className="text-[10px] sm:text-xs text-zinc-500">Current Balance</p>
                   <p className="font-mono text-sm sm:text-lg text-white truncate">{formatLargeNumber(effectiveAccountValue)}</p>
                 </div>
-                <div>
-                  <p className="text-[10px] sm:text-xs text-zinc-500">LOT Size</p>
-                  <p className="font-mono text-sm sm:text-lg text-purple-400">{effectiveLotSize.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-xs text-zinc-500">Daily Profit</p>
-                  <p className="font-mono text-sm sm:text-lg text-emerald-400 truncate">{formatMoney(effectiveLotSize * 15)}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-xs text-zinc-500">Formula</p>
-                  <p className="text-xs sm:text-sm text-zinc-400">Bal ÷ 980 × 15</p>
-                </div>
+                {/* Hide LOT Size and Daily Profit for licensees - they don't trade */}
+                {!isLicensee && (
+                  <>
+                    <div>
+                      <p className="text-[10px] sm:text-xs text-zinc-500">LOT Size</p>
+                      <p className="font-mono text-sm sm:text-lg text-purple-400">{effectiveLotSize.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] sm:text-xs text-zinc-500">Daily Profit</p>
+                      <p className="font-mono text-sm sm:text-lg text-emerald-400 truncate">{formatMoney(effectiveLotSize * 15)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] sm:text-xs text-zinc-500">Formula</p>
+                      <p className="text-xs sm:text-sm text-zinc-400">Bal ÷ 980 × 15</p>
+                    </div>
+                  </>
+                )}
+                {/* For licensees, show Total Profit instead */}
+                {isLicensee && (
+                  <div>
+                    <p className="text-[10px] sm:text-xs text-zinc-500">Total Profit</p>
+                    <p className={`font-mono text-sm sm:text-lg ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Projection Chart - Mobile optimized height */}
