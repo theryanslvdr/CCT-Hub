@@ -1562,14 +1562,14 @@ export const ProfitTrackerPage = () => {
 
       {/* Actions - Hidden for licensees who have their own Deposit/Withdrawal page */}
       {!isLicensee && (
-      <div className="flex flex-wrap items-center gap-4">
-        {/* Left side - Simulate Actions Button */}
-        <div className="flex flex-wrap gap-4 flex-1">
+      <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:gap-4">
+        {/* Simulate Actions - Full width on mobile */}
+        <div className="w-full md:w-auto md:flex-1">
         
         {/* Simulate Actions Popup */}
         <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
           <DialogTrigger asChild>
-            <Button className="btn-primary gap-2" data-testid="simulate-actions-button">
+            <Button className="btn-primary gap-2 w-full md:w-auto" data-testid="simulate-actions-button">
               <Calculator className="w-4 h-4" /> Simulate Actions
             </Button>
           </DialogTrigger>
