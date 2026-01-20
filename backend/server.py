@@ -3904,7 +3904,9 @@ async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(
         "message": "License invite created successfully",
         "invite_id": invite["id"],
         "code": invite_code,
-        "registration_url": registration_url
+        "registration_url": registration_url,
+        "starting_amount": invite["starting_amount"],
+        "license_type": invite["license_type"]
     }
 
 @admin_router.get("/license-invites/{invite_id}")
