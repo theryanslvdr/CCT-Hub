@@ -113,7 +113,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         accountValue: 5000,
         lotSize: 0.05,
         totalDeposits: 5000,
-        totalProfit: 0
+        totalProfit: 0,
+        effective_start_date: new Date().toISOString().split('T')[0] // Default to today for demo
       });
     } else {
       // Simulate specific licensee
@@ -122,6 +123,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         simulateMemberView({
           id: licensee.user_id,
           memberId: licensee.user_id,
+          licenseId: licensee.id, // Include license ID for trade override API calls
           full_name: licensee.full_name,
           account_value: licensee.account_value,
           lot_size: licensee.lot_size,
@@ -129,7 +131,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           total_profit: licensee.total_profit,
           allowed_dashboards: licensee.allowed_dashboards,
           license_type: selectedLicenseType,
-          displayName: licensee.full_name
+          displayName: licensee.full_name,
+          effective_start_date: licensee.effective_start_date || licensee.start_date // Include effective start date
         });
       }
     }
