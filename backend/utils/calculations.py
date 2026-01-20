@@ -97,11 +97,12 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
     if not user or user.get("role") != "master_admin":
         return {"error": "User is not a Master Admin"}
     
-    # Calculate personal account value (without licensee funds)
-    personal_summary = await get_user_financial_summary(db, user_id, user)
-    personal_account_value = personal_summary["account_value"]
+    # Get Master Admin's total account value (this is the actual Merin balance)
+    # Licensee funds are ALREADY PART OF this balance
+    master_summary = await get_user_financial_summary(db, user_id, user)
+    total_pool = master_summary["account_value"]
     
-    # Get licensee funds breakdown
+    # Get licensee virtual share breakdown
     active_licenses = await db.licenses.find(
         {"created_by": user_id, "is_active": True},
         {"_id": 0}
@@ -113,24 +114,43 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
     for license in active_licenses:
         licensee_user = await db.users.find_one({"id": license["user_id"]}, {"_id": 0, "full_name": 1})
         current_amount = license.get("current_amount", license.get("starting_amount", 0))
+        starting_amount = license.get("starting_amount", 0)
+        # Total profit for licensee = current_amount - starting_amount (projected profits accumulated when manager traded)
+        total_profit = round(current_amount - starting_amount, 2)
         total_licensee_funds += current_amount
+        
+        # Calculate percentage share of the pool
+        share_percentage = round((current_amount / total_pool * 100) if total_pool > 0 else 0, 2)
         
         licensee_breakdown.append({
             "license_id": license.get("id"),
             "user_id": license.get("user_id"),
             "user_name": licensee_user.get("full_name") if licensee_user else "Unknown",
             "license_type": license.get("license_type"),
-            "starting_amount": license.get("starting_amount", 0),
-            "current_amount": current_amount
+            "starting_amount": round(starting_amount, 2),  # Total Deposit
+            "current_amount": round(current_amount, 2),    # Current Balance
+            "total_profit": total_profit,                   # Total Profit (projected profits when manager traded)
+            "share_percentage": share_percentage,           # % Share of the pool
+            "effective_start_date": license.get("effective_start_date")
         })
     
+    # Master Admin's remaining portion = Total Pool - Licensee Virtual Shares
+    master_admin_portion = round(total_pool - total_licensee_funds, 2)
+    master_admin_share_percentage = round((master_admin_portion / total_pool * 100) if total_pool > 0 else 100, 2)
+    
     return {
-        "personal_account_value": round(personal_account_value, 2),
-        "licensee_funds": round(total_licensee_funds, 2),
-        "total_account_value": round(personal_account_value + total_licensee_funds, 2),
+        "total_pool": round(total_pool, 2),                      # Merin Balance (the actual trading account)
+        "master_admin_portion": master_admin_portion,             # Master Admin's remaining share
+        "master_admin_share_percentage": master_admin_share_percentage,
+        "licensee_funds": round(total_licensee_funds, 2),        # Total of all licensee virtual shares
+        "licensee_share_percentage": round(100 - master_admin_share_percentage, 2),
         "licensee_count": len(active_licenses),
         "licensee_breakdown": licensee_breakdown,
-        **{k: v for k, v in personal_summary.items() if k != "account_value"}
+        # Include other summary fields for reference
+        "total_deposits": master_summary["total_deposits"],
+        "total_profit": master_summary["total_profit"],
+        "total_commission": master_summary["total_commission"],
+        "total_trades": master_summary["total_trades"]
     }
 
 
