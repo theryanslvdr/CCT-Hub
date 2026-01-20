@@ -40,6 +40,9 @@ export const DashboardPage = () => {
   
   // Check if user is a regular member (not admin)
   const isMember = !isAdmin();
+  
+  // Check if viewing as a licensee (either simulated or actual licensee user)
+  const isLicenseeView = simulatedView?.license_type || user?.license_type || summary?.is_licensee;
 
   const loadDashboardData = useCallback(async () => {
     try {
