@@ -153,7 +153,11 @@ const isTradingDay = (date, globalHolidayDates = new Set()) => {
   if (dayOfWeek === 0 || dayOfWeek === 6) return false; // Weekend
   
   // Check global holidays from backend
-  const dateKey = date.toISOString().split('T')[0];
+  // Use LOCAL date format (YYYY-MM-DD) to avoid timezone issues
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const dateKey = `${year}-${month}-${day}`;
   if (globalHolidayDates.has(dateKey)) return false;
   
   return true;
