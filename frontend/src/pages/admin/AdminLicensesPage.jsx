@@ -490,6 +490,37 @@ export const AdminLicensesPage = () => {
     }
   };
 
+  // Edit effective start date handler
+  const handleOpenEditEffectiveDate = (license) => {
+    setSelectedLicense(license);
+    setEditEffectiveDateForm({
+      effective_start_date: license.effective_start_date || license.start_date || ''
+    });
+    setEditEffectiveDateDialogOpen(true);
+  };
+
+  const handleSaveEffectiveDate = async () => {
+    if (!editEffectiveDateForm.effective_start_date) {
+      toast.error('Please select a date');
+      return;
+    }
+
+    setSavingEffectiveDate(true);
+    try {
+      await adminAPI.updateLicenseEffectiveStartDate(
+        selectedLicense.id, 
+        editEffectiveDateForm.effective_start_date
+      );
+      toast.success('Effective start date updated successfully');
+      setEditEffectiveDateDialogOpen(false);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update effective start date');
+    } finally {
+      setSavingEffectiveDate(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       active: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Active</span>,
