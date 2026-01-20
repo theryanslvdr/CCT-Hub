@@ -184,26 +184,29 @@ class TestLicenseeManagement:
         assert response.status_code == 200, f"Failed to get licenses: {response.text}"
         
         data = response.json()
-        print(f"Active Licenses: {len(data)} found")
+        # Response is a dict with "licenses" key
+        licenses = data.get("licenses", [])
+        print(f"Active Licenses: {len(licenses)} found")
         
         # Store license IDs for later tests
-        if len(data) > 0:
-            for license in data[:3]:  # Show first 3
+        if len(licenses) > 0:
+            for license in licenses[:3]:  # Show first 3
                 print(f"  - License ID: {license.get('id')}, User: {license.get('user_id')}, Type: {license.get('license_type')}")
                 print(f"    Effective Start: {license.get('effective_start_date')}, Current Amount: ${license.get('current_amount')}")
         
-        return data
+        return licenses
     
     def test_license_has_effective_start_date(self, auth_headers):
         """Test that licenses have effective_start_date field"""
         response = requests.get(f"{BASE_URL}/api/admin/licenses", headers=auth_headers)
         assert response.status_code == 200
         
-        licenses = response.json()
+        data = response.json()
+        licenses = data.get("licenses", [])
         if len(licenses) > 0:
             for license in licenses:
                 # effective_start_date should exist (may be null for older licenses)
-                if "effective_start_date" in license:
+                if "effective_start_date" in license and license.get("effective_start_date"):
                     print(f"✓ License {license.get('id')} has effective_start_date: {license.get('effective_start_date')}")
                 else:
                     # Check for fallback start_date
