@@ -87,6 +87,17 @@ export const AdminLicensesPage = () => {
     screenshot: null
   });
   const [sendingFeedback, setSendingFeedback] = useState(false);
+  
+  // Edit/Delete Transaction state
+  const [editTxDialogOpen, setEditTxDialogOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [editTxForm, setEditTxForm] = useState({
+    amount: '',
+    notes: ''
+  });
+  const [savingTx, setSavingTx] = useState(false);
+  const [deleteTxDialogOpen, setDeleteTxDialogOpen] = useState(false);
+  const [deletingTx, setDeletingTx] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
