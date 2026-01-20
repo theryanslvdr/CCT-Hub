@@ -160,15 +160,30 @@ const isTradingDay = (date, globalHolidayDates = new Set()) => {
 // Generate daily projection for a specific month
 // Now accepts deposits array to properly calculate running balance
 // Also accepts globalHolidayDates set to use dynamic holidays
-const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allTransactions = [], liveAccountValue = null, globalHolidayDates = new Set()) => {
+const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}, activeSignal = null, allTransactions = [], liveAccountValue = null, globalHolidayDates = new Set(), effectiveStartDate = null) => {
   const days = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
   const year = monthDate.getFullYear();
   const month = monthDate.getMonth();
-  const firstDay = new Date(year, month, 1);
+  let firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
+  
+  // If effectiveStartDate is set and falls within or after this month, adjust firstDay
+  if (effectiveStartDate) {
+    const effStartParsed = new Date(effectiveStartDate + 'T00:00:00');
+    if (!isNaN(effStartParsed.getTime())) {
+      // Only show days on or after the effective start date
+      if (effStartParsed > firstDay) {
+        firstDay = effStartParsed;
+      }
+      // If effective start is after this month entirely, return empty
+      if (effStartParsed > lastDay) {
+        return [];
+      }
+    }
+  }
   
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   const isPastMonth = (year < today.getFullYear()) || (year === today.getFullYear() && month < today.getMonth());
