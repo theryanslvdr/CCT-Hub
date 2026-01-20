@@ -1374,32 +1374,32 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Summary Cards - Mobile optimized */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      {/* Summary Cards - Single column on mobile for readability */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="glass-card" data-testid="account-value-card">
-          <CardContent className="p-3 md:p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs md:text-sm text-zinc-400">Account Value</p>
-                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-white mt-1 md:mt-2 truncate">
-                  {formatLargeNumber(effectiveAccountValue)}
+              <div className="flex-1">
+                <p className="text-xs text-zinc-400">Account Value</p>
+                <p className="text-2xl font-bold font-mono text-white mt-1">
+                  {formatCompact(effectiveAccountValue)}
                 </p>
               </div>
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <Wallet className="w-4 h-4 md:w-6 md:h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                <Wallet className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="total-deposits-card">
-          <CardContent className="p-3 md:p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-1">
-                  <p className="text-xs md:text-sm text-zinc-400">Deposits</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-zinc-400">Deposits</p>
                   <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                    <SelectTrigger className="w-14 md:w-20 h-5 md:h-6 text-[10px] md:text-xs bg-zinc-900/50 border-zinc-700">
+                    <SelectTrigger className="w-16 h-5 text-[10px] bg-zinc-900/50 border-zinc-700">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1410,53 +1410,90 @@ export const ProfitTrackerPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-white mt-1 md:mt-2 truncate">
+                <p className="text-2xl font-bold font-mono text-white mt-1">
                   {getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}
                 </p>
-                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1 truncate">
-                  ≈ {formatMoney(effectiveTotalDeposits)} USDT
-                </p>
+                <p className="text-[10px] text-zinc-500">≈ {formatCompact(effectiveTotalDeposits)} USDT</p>
               </div>
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <ArrowDownToLine className="w-4 h-4 md:w-6 md:h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
+                <ArrowDownToLine className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="total-profit-card">
-          <CardContent className="p-3 md:p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs md:text-sm text-zinc-400">Total Profit</p>
-                <p className={`text-lg md:text-2xl lg:text-3xl font-bold font-mono mt-1 md:mt-2 truncate ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}
+              <div className="flex-1">
+                <p className="text-xs text-zinc-400">Total Profit</p>
+                <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {effectiveTotalProfit >= 0 ? '+' : ''}{formatCompact(effectiveTotalProfit)}
                 </p>
               </div>
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="glass-card" data-testid="current-lot-card">
-          <CardContent className="p-3 md:p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs md:text-sm text-zinc-400">LOT Size</p>
-                <p className="text-lg md:text-2xl lg:text-3xl font-bold font-mono text-purple-400 mt-1 md:mt-2">
+              <div className="flex-1">
+                <p className="text-xs text-zinc-400">LOT Size</p>
+                <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
                   {effectiveLotSize.toFixed(2)}
                 </p>
-                <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1">Balance ÷ 980</p>
+                <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
               </div>
-              <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <Calculator className="w-4 h-4 md:w-6 md:h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <Calculator className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Compact Active Signal Card for Profit Tracker */}
+      {activeSignal && (
+        <Card className="glass-card border-blue-500/30 bg-blue-500/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  activeSignal.direction === 'BUY' ? 'bg-emerald-500' : 'bg-red-500'
+                }`}>
+                  {activeSignal.direction === 'BUY' ? (
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  ) : (
+                    <TrendingDown className="w-5 h-5 text-white" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-bold ${activeSignal.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {activeSignal.direction}
+                    </span>
+                    <span className="text-xs text-zinc-400">{activeSignal.product || 'MOIL10'}</span>
+                  </div>
+                  <p className="text-xs text-zinc-500">
+                    Trade at {activeSignal.trade_time} ({activeSignal.trade_timezone})
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => window.location.href = '/trade-monitor'}
+                className="btn-primary h-10 px-4 text-sm font-medium flex-shrink-0"
+                data-testid="trade-now-btn"
+              >
+                Trade Now
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions - Hidden for licensees who have their own Deposit/Withdrawal page */}
       {!isLicensee && (
