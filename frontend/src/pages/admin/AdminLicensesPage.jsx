@@ -1837,6 +1837,153 @@ export const AdminLicensesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Transaction Dialog */}
+      <Dialog open={editTxDialogOpen} onOpenChange={setEditTxDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Edit2 className="w-5 h-5 text-blue-400" /> Edit Transaction
+            </DialogTitle>
+          </DialogHeader>
+          {selectedTx && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 rounded-lg bg-zinc-900/50">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-zinc-500">Type:</span>
+                    <span className={`ml-2 ${selectedTx.type === 'deposit' ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {selectedTx.type}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500">User:</span>
+                    <span className="ml-2 text-white">{selectedTx.user_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500">Original Amount:</span>
+                    <span className="ml-2 text-zinc-400 font-mono">${selectedTx.amount?.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500">Status:</span>
+                    <span className="ml-2">{getStatusBadge(selectedTx.status)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Corrected Amount (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={editTxForm.amount}
+                    onChange={(e) => setEditTxForm({ ...editTxForm, amount: e.target.value })}
+                    placeholder="0.00"
+                    className="input-dark pl-7"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Reason for Correction (optional)</Label>
+                <Textarea
+                  value={editTxForm.notes}
+                  onChange={(e) => setEditTxForm({ ...editTxForm, notes: e.target.value })}
+                  placeholder="Reason for amount correction..."
+                  className="input-dark mt-1"
+                  rows={2}
+                />
+              </div>
+
+              <DialogFooter className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditTxDialogOpen(false)}
+                  className="flex-1 btn-secondary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEditTx}
+                  disabled={savingTx}
+                  className="flex-1 btn-primary"
+                >
+                  {savingTx ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
+                  ) : (
+                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Save Changes</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Transaction Dialog */}
+      <Dialog open={deleteTxDialogOpen} onOpenChange={setDeleteTxDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-400" /> Delete Transaction
+            </DialogTitle>
+          </DialogHeader>
+          {selectedTx && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                <p className="text-red-400 font-medium mb-2">⚠️ Warning: This action cannot be undone</p>
+                <p className="text-zinc-400 text-sm">
+                  Deleting this transaction will permanently remove it from the system and affect the licensee&apos;s balance calculations.
+                </p>
+              </div>
+              
+              <div className="p-3 rounded-lg bg-zinc-900/50 text-sm">
+                <div className="flex justify-between mb-1">
+                  <span className="text-zinc-400">Type:</span>
+                  <span className={selectedTx.type === 'deposit' ? 'text-emerald-400' : 'text-red-400'}>
+                    {selectedTx.type}
+                  </span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-zinc-400">User:</span>
+                  <span className="text-white">{selectedTx.user_name}</span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-zinc-400">Amount:</span>
+                  <span className="text-emerald-400 font-mono">${selectedTx.amount?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">Date:</span>
+                  <span className="text-white">{new Date(selectedTx.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              <DialogFooter className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteTxDialogOpen(false)}
+                  className="flex-1 btn-secondary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteTx}
+                  disabled={deletingTx}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {deletingTx ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Deleting...</>
+                  ) : (
+                    <><Trash2 className="w-4 h-4 mr-2" /> Delete Transaction</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
