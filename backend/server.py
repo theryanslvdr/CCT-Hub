@@ -4452,6 +4452,77 @@ async def complete_transaction(
     
     return {"message": "Transaction completed successfully"}
 
+@admin_router.put("/licensee-transactions/{tx_id}")
+async def update_licensee_transaction(
+    tx_id: str,
+    amount: float = Body(..., embed=False),
+    notes: Optional[str] = Body(None, embed=False),
+    user: dict = Depends(require_admin)
+):
+    """Update a licensee transaction amount (Master Admin only)"""
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can update transactions")
+    
+    tx = await db.licensee_transactions.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    old_amount = tx.get("amount", 0)
+    
+    # Update the transaction
+    update_data = {
+        "$set": {
+            "amount": amount,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "correction_notes": notes or f"Amount corrected from ${old_amount} to ${amount}",
+            "corrected_by": user["id"]
+        }
+    }
+    
+    await db.licensee_transactions.update_one({"id": tx_id}, update_data)
+    
+    # If transaction was completed, we need to update the related deposit/withdrawal records
+    if tx.get("status") == "completed":
+        # Update corresponding deposit or withdrawal record
+        if tx["type"] == "deposit":
+            await db.deposits.update_many(
+                {"user_id": tx["user_id"], "notes": {"$regex": f"Transaction #{tx_id[:8]}"}},
+                {"$set": {"amount": amount}}
+            )
+        else:
+            await db.withdrawals.update_many(
+                {"user_id": tx["user_id"], "notes": {"$regex": f"Transaction #{tx_id[:8]}"}},
+                {"$set": {"amount": amount}}
+            )
+    
+    return {"message": "Transaction updated successfully", "old_amount": old_amount, "new_amount": amount}
+
+@admin_router.delete("/licensee-transactions/{tx_id}")
+async def delete_licensee_transaction(tx_id: str, user: dict = Depends(require_admin)):
+    """Delete a licensee transaction (Master Admin only)"""
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can delete transactions")
+    
+    tx = await db.licensee_transactions.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Delete the transaction
+    await db.licensee_transactions.delete_one({"id": tx_id})
+    
+    # If transaction was completed, we need to delete the related deposit/withdrawal records
+    if tx.get("status") == "completed":
+        if tx["type"] == "deposit":
+            await db.deposits.delete_many(
+                {"user_id": tx["user_id"], "notes": {"$regex": f"Transaction #{tx_id[:8]}"}}
+            )
+        else:
+            await db.withdrawals.delete_many(
+                {"user_id": tx["user_id"], "notes": {"$regex": f"Transaction #{tx_id[:8]}"}}
+            )
+    
+    return {"message": "Transaction deleted successfully"}
+
 # Licensee endpoints (for licensed users)
 @profit_router.post("/licensee/deposit")
 async def create_licensee_deposit(
