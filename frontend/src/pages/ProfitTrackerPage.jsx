@@ -26,29 +26,46 @@ const truncateTo2Decimals = (num) => {
   return Math.trunc(num * 100) / 100;
 };
 
-// Format large numbers (millions, billions, trillions)
-const formatLargeNumber = (amount) => {
+// Format full currency amount (no abbreviation)
+const formatFullCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '$0.00';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
+// Format large numbers - Desktop: Full amount unless 100K+, Mobile: Always abbreviated
+const formatLargeNumber = (amount, forceCompact = false) => {
   if (amount === null || amount === undefined) return '$0.00';
   
   const absAmount = Math.abs(amount);
   const sign = amount < 0 ? '-' : '';
   
-  if (absAmount >= 1e12) {
-    return `${sign}$${(absAmount / 1e12).toFixed(2)} Trillion`;
-  } else if (absAmount >= 1e9) {
-    return `${sign}$${(absAmount / 1e9).toFixed(2)}B`;
-  } else if (absAmount >= 1e6) {
-    return `${sign}$${(absAmount / 1e6).toFixed(2)}M`;
-  } else if (absAmount >= 1e3) {
-    return `${sign}$${(absAmount / 1e3).toFixed(2)}K`;
-  } else {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+  // For mobile (forceCompact) or amounts >= 100K, use abbreviations
+  const shouldAbbreviate = forceCompact || absAmount >= 1e5;
+  
+  if (shouldAbbreviate) {
+    if (absAmount >= 1e12) {
+      return `${sign}$${(absAmount / 1e12).toFixed(2)}T`;
+    } else if (absAmount >= 1e9) {
+      return `${sign}$${(absAmount / 1e9).toFixed(2)}B`;
+    } else if (absAmount >= 1e6) {
+      return `${sign}$${(absAmount / 1e6).toFixed(2)}M`;
+    } else if (absAmount >= 1e5) {
+      return `${sign}$${(absAmount / 1e3).toFixed(1)}K`;
+    }
   }
+  
+  // For amounts under 100K on desktop, show full amount
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
 };
 
 // Compact number format for mobile (always uses abbreviations)
