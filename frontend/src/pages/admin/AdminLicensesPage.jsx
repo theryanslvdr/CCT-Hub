@@ -947,7 +947,7 @@ export const AdminLicensesPage = () => {
               <Label className="text-zinc-300">License Type</Label>
               <Select 
                 value={createForm.license_type} 
-                onValueChange={(v) => setCreateForm({ ...createForm, license_type: v, starting_amount: v === 'honorary' ? '' : createForm.starting_amount })}
+                onValueChange={(v) => setCreateForm({ ...createForm, license_type: v })}
               >
                 <SelectTrigger className="input-dark mt-1">
                   <SelectValue />
@@ -968,22 +968,30 @@ export const AdminLicensesPage = () => {
               )}
             </div>
 
-            {/* Starting Amount - Only for Extended Licensees */}
-            {createForm.license_type === 'extended' && (
-              <div>
-                <Label className="text-zinc-300">Starting Amount (USDT)</Label>
-                <div className="relative mt-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
-                  <Input
-                    type="number"
-                    value={createForm.starting_amount}
-                    onChange={(e) => setCreateForm({ ...createForm, starting_amount: e.target.value })}
-                    placeholder="10000"
-                    className="input-dark pl-7"
-                  />
-                </div>
+            {/* Starting Amount - Required for Extended, Optional for Honorary */}
+            <div>
+              <Label className="text-zinc-300">
+                Starting Amount (USDT)
+                {createForm.license_type === 'honorary' && (
+                  <span className="text-zinc-500 font-normal ml-1">(optional)</span>
+                )}
+              </Label>
+              <div className="relative mt-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                <Input
+                  type="number"
+                  value={createForm.starting_amount}
+                  onChange={(e) => setCreateForm({ ...createForm, starting_amount: e.target.value })}
+                  placeholder={createForm.license_type === 'extended' ? '10000' : '0 (optional)'}
+                  className="input-dark pl-7"
+                />
               </div>
-            )}
+              {createForm.license_type === 'honorary' && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  Set an initial balance for this honorary licensee. Leave empty or 0 for no starting balance.
+                </p>
+              )}
+            </div>
 
             <div>
               <Label className="text-zinc-300">Valid For</Label>
