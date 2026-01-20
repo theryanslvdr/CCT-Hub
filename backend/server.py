@@ -2521,7 +2521,12 @@ async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
     performance_rate = 0
     
     if member.get("license_type"):
-        license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
+        # Get the most recent active license for this user
+        license = await db.licenses.find_one(
+            {"user_id": user_id, "is_active": True}, 
+            {"_id": 0},
+            sort=[("created_at", -1)]  # Get most recent license
+        )
         if license:
             account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
             starting_amount = license.get("starting_amount", 0)
