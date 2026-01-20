@@ -207,30 +207,46 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* Welcome Section */}
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between">
+      {/* Welcome Section - Mobile: 2 rows when signal active */}
+      <div className="glass-card p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          {/* Row 1: Greeting */}
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-xl md:text-2xl font-bold text-white">
               Welcome back, {displayName}!
             </h2>
-            <p className="text-zinc-400 mt-1">
+            <p className="text-zinc-400 text-sm md:text-base mt-1">
               Here&apos;s your trading overview for today.
             </p>
           </div>
+          {/* Row 2 on Mobile / Right side on Desktop: Signal Card - Clickable to Trade Monitor */}
           {signal && (
-            <div className="glass-highlight px-6 py-3 flex items-center gap-4">
-              <div>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider">Active Signal</p>
-                <p className="text-lg font-bold text-white">{signal.product}</p>
+            <div 
+              onClick={() => window.location.href = '/trade-monitor'}
+              className="glass-highlight px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-blue-500/50 transition-all"
+              data-testid="dashboard-signal-card"
+            >
+              <div className={`w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2 rounded-lg font-bold flex items-center justify-center ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                <span className="hidden md:block">{signal.direction}</span>
+                {signal.direction === 'BUY' ? (
+                  <TrendingUp className="w-5 h-5 md:hidden" />
+                ) : (
+                  <TrendingDown className="w-5 h-5 md:hidden" />
+                )}
               </div>
-              <div className={`px-4 py-2 rounded-lg font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                {signal.direction}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-zinc-400 uppercase tracking-wider hidden md:block">Active Signal</p>
+                  <span className={`md:hidden text-xs font-bold ${signal.direction === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>{signal.direction}</span>
+                  <span className="text-xs text-zinc-500 md:hidden">{signal.product}</span>
+                </div>
+                <p className="text-base md:text-lg font-bold text-white hidden md:block">{signal.product}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-zinc-400">Trade Time (UTC)</p>
-                <p className="text-lg font-mono text-blue-400">{signal.trade_time}</p>
+                <p className="text-[10px] md:text-xs text-zinc-400">Trade Time</p>
+                <p className="text-sm md:text-lg font-mono text-blue-400">{signal.trade_time}</p>
               </div>
+              <ChevronRight className="w-4 h-4 text-zinc-500 hidden md:block" />
             </div>
           )}
         </div>
