@@ -153,7 +153,8 @@ export const AdminLicensesPage = () => {
         max_uses: parseInt(createForm.max_uses),
         invitee_name: createForm.invitee_name || null,
         invitee_email: null, // Email is no longer attached to invite
-        notes: createForm.notes || null
+        notes: createForm.notes || null,
+        effective_start_date: createForm.effective_start_date || null
       });
 
       toast.success('License invite created!');
@@ -171,7 +172,8 @@ export const AdminLicensesPage = () => {
         valid_duration: '3_months',
         max_uses: '1',
         invitee_name: '',
-        notes: ''
+        notes: '',
+        effective_start_date: ''
       });
       loadData();
     } catch (error) {
