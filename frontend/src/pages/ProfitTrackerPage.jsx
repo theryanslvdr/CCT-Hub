@@ -2557,10 +2557,16 @@ export const ProfitTrackerPage = () => {
                     <th>Balance Before</th>
                     <th>LOT Size</th>
                     <th>Target Profit</th>
-                    {!isExtendedLicensee && <th>Actual Profit</th>}
-                    {!isExtendedLicensee && <th>Commission</th>}
-                    {!isExtendedLicensee && <th>P/L Diff</th>}
-                    {isExtendedLicensee && <th>Profit Credited</th>}
+                    {/* For licensees: Show Manager Traded column, hide Actual/Commission/P/L */}
+                    {isLicensee ? (
+                      <th>Manager Traded</th>
+                    ) : (
+                      <>
+                        <th>Actual Profit</th>
+                        <th>Commission</th>
+                        <th>P/L Diff</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -2569,7 +2575,7 @@ export const ProfitTrackerPage = () => {
                       ? day.actualProfit - day.targetProfit 
                       : null;
                     
-                    // For extended licensees: check if master admin traded on this day
+                    // For licensees: check if master admin traded on this day
                     const masterTraded = masterAdminTrades[day.dateKey]?.traded;
                     
                     // Check if this date is a global holiday
@@ -2597,7 +2603,7 @@ export const ProfitTrackerPage = () => {
                               {day.dateStr}
                             </div>
                           </td>
-                          <td colSpan={isExtendedLicensee ? 4 : 5} className="text-center">
+                          <td colSpan={isLicensee ? 4 : 6} className="text-center">
                             <span className="text-emerald-400 font-medium flex items-center justify-center gap-2">
                               <TreePine className="w-4 h-4" />
                               HOLIDAY
@@ -2622,7 +2628,7 @@ export const ProfitTrackerPage = () => {
                             <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">✓</span>
                           )}
                           {/* Show indicator for manually adjusted trades */}
-                          {tradeLogs[day.dateKey]?.is_manual_adjustment && (
+                          {!isLicensee && tradeLogs[day.dateKey]?.is_manual_adjustment && (
                             <span className="ml-1 text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded" title="Manually Adjusted">
                               ✎
                             </span>
@@ -2630,10 +2636,35 @@ export const ProfitTrackerPage = () => {
                         </td>
                         <td className="font-mono text-white">{formatLargeNumber(day.balanceBefore)}</td>
                         <td className="font-mono text-purple-400">{truncateTo2Decimals(day.lotSize).toFixed(2)}</td>
-                        <td className="font-mono text-zinc-400">{formatMoney(day.targetProfit)}</td>
                         
-                        {/* Actual Profit column - hidden for extended licensees */}
-                        {!isExtendedLicensee && (
+                        {/* Target Profit - For licensees: show "--" if manager didn't trade */}
+                        <td className="font-mono text-zinc-400">
+                          {isLicensee && day.status !== 'future' && !masterTraded ? (
+                            <span className="text-zinc-500">--</span>
+                          ) : (
+                            formatMoney(day.targetProfit)
+                          )}
+                        </td>
+                        
+                        {/* For licensees: Manager Traded column */}
+                        {isLicensee && (
+                          <td className="text-center">
+                            {day.status === 'future' ? (
+                              <span className="text-zinc-500 text-xs">-</span>
+                            ) : masterTraded ? (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20" title="Manager traded - profit added">
+                                <Check className="w-4 h-4 text-emerald-400" />
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20" title="Manager did not trade - balance carried forward">
+                                <X className="w-4 h-4 text-red-400" />
+                              </span>
+                            )}
+                          </td>
+                        )}
+                        
+                        {/* For non-licensees: Actual Profit column */}
+                        {!isLicensee && (
                           <td>
                             {day.status === 'completed' ? (
                               <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -2684,8 +2715,8 @@ export const ProfitTrackerPage = () => {
                           </td>
                         )}
                         
-                        {/* Commission column - hidden for extended licensees */}
-                        {!isExtendedLicensee && (
+                        {/* Commission column - hidden for licensees */}
+                        {!isLicensee && (
                           <td>
                             {day.status === 'completed' && day.commission > 0 ? (
                               <span className="font-mono text-cyan-400">
@@ -2699,8 +2730,8 @@ export const ProfitTrackerPage = () => {
                           </td>
                         )}
                         
-                        {/* P/L Diff column - hidden for extended licensees */}
-                        {!isExtendedLicensee && (
+                        {/* P/L Diff column - hidden for licensees */}
+                        {!isLicensee && (
                           <td>
                             {plDiff !== null ? (
                               <span className={`font-mono ${plDiff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -2708,23 +2739,6 @@ export const ProfitTrackerPage = () => {
                               </span>
                             ) : (
                               <span className="text-zinc-500 text-xs">-</span>
-                            )}
-                          </td>
-                        )}
-                        
-                        {/* Profit Credited column - only for extended licensees */}
-                        {isExtendedLicensee && (
-                          <td className="text-center">
-                            {day.status === 'future' ? (
-                              <span className="text-zinc-500 text-xs">-</span>
-                            ) : masterTraded ? (
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20" title="Profit credited">
-                                <Check className="w-4 h-4 text-emerald-400" />
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20" title="Not credited - Master Admin did not trade">
-                                <X className="w-4 h-4 text-red-400" />
-                              </span>
                             )}
                           </td>
                         )}
@@ -2741,11 +2755,11 @@ export const ProfitTrackerPage = () => {
           </div>
           <div className="mt-4 p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
             <p>• Weekends and holidays are excluded from projections</p>
-            {isExtendedLicensee ? (
+            {isLicensee ? (
               <>
-                <p>• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Profit credited (Master Admin traded)</p>
-                <p>• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Not credited (Master Admin did not trade, profit deducted)</p>
-                <p>• Your balance recalculates every quarter (every 3 months)</p>
+                <p>• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Manager traded - profit added to your balance</p>
+                <p>• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Manager did not trade - balance carried forward (no profit)</p>
+                <p>• &quot;--&quot; in Target Profit means no trade was made that day</p>
               </>
             ) : (
               <>
