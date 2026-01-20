@@ -95,6 +95,10 @@ export const profitAPI = {
   // Onboarding
   completeOnboarding: (data) => api.post('/profit/complete-onboarding', data),
   getOnboardingStatus: () => api.get('/profit/onboarding-status'),
+  // Licensee
+  getLicenseeWelcomeInfo: () => api.get('/profit/licensee/welcome-info'),
+  markLicenseeWelcomeSeen: () => api.post('/profit/licensee/mark-welcome-seen'),
+  getLicenseeDailyProjection: () => api.get('/profit/licensee/daily-projection'),
 };
 
 // Trade Monitor APIs
