@@ -2872,6 +2872,9 @@ export const ProfitTrackerPage = () => {
                 <p>• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Manager traded - profit added to your balance</p>
                 <p>• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Manager did not trade - balance carried forward (no profit)</p>
                 <p>• &quot;--&quot; in Target Profit means no trade was made that day</p>
+                {isMasterAdmin() && simulatedView?.licenseId && (
+                  <p className="mt-1 text-amber-400">• Toggle switch to override &quot;Manager Traded&quot; status for any day</p>
+                )}
               </>
             ) : (
               <>
