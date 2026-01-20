@@ -4765,6 +4765,155 @@ async def confirm_licensee_transaction(tx_id: str, user: dict = Depends(get_curr
     
     return {"message": "Transaction confirmed. Admin will process your request."}
 
+@profit_router.get("/licensee/welcome-info")
+async def get_licensee_welcome_info(user: dict = Depends(get_current_user)):
+    """Get licensee welcome info for first login screen"""
+    # Check if user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        return {"is_licensee": False, "has_seen_welcome": True}
+    
+    # Check if user has seen welcome
+    has_seen = user.get("has_seen_welcome", False)
+    
+    # Get master admin info
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "full_name": 1})
+    master_admin_name = master_admin.get("full_name", "Master Admin") if master_admin else "Master Admin"
+    
+    return {
+        "is_licensee": True,
+        "has_seen_welcome": has_seen,
+        "licensee_name": user.get("full_name", "Licensee"),
+        "starting_balance": license.get("starting_amount", 0),
+        "current_balance": license.get("current_amount", license.get("starting_amount", 0)),
+        "effective_start_date": license.get("effective_start_date", license.get("start_date")),
+        "license_type": license.get("license_type"),
+        "master_admin_name": master_admin_name
+    }
+
+@profit_router.post("/licensee/mark-welcome-seen")
+async def mark_licensee_welcome_seen(user: dict = Depends(get_current_user)):
+    """Mark that licensee has seen the welcome screen"""
+    # Verify user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        raise HTTPException(status_code=403, detail="Only licensees can access this endpoint")
+    
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"has_seen_welcome": True}}
+    )
+    
+    return {"message": "Welcome screen marked as seen"}
+
+@profit_router.get("/licensee/daily-projection")
+async def get_licensee_daily_projection(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """Get daily projection table for licensees (with Manager Traded column)"""
+    # Check if user is a licensee
+    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    if not license:
+        raise HTTPException(status_code=403, detail="Only licensees can access this endpoint")
+    
+    # Get effective start date from license
+    effective_start = license.get("effective_start_date", license.get("start_date"))
+    
+    # Get master admin's trade logs to determine "Manager Traded" status
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+    master_admin_id = master_admin["id"] if master_admin else None
+    
+    # Get all master admin trades
+    master_trades = []
+    if master_admin_id:
+        master_trades = await db.trade_logs.find(
+            {"user_id": master_admin_id},
+            {"_id": 0, "trade_date": 1, "created_at": 1}
+        ).to_list(10000)
+    
+    # Create a set of dates when master admin traded
+    traded_dates = set()
+    for trade in master_trades:
+        trade_date = trade.get("trade_date")
+        if not trade_date and trade.get("created_at"):
+            # Extract date from created_at
+            trade_date = trade["created_at"][:10]
+        if trade_date:
+            traded_dates.add(trade_date)
+    
+    # Get licensee deposits (for adding to their account)
+    licensee_deposits = await db.licensee_transactions.find(
+        {"user_id": user["id"], "type": "deposit", "status": "completed"},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Map deposits by date
+    deposit_by_date = {}
+    for dep in licensee_deposits:
+        dep_date = dep.get("completed_at", dep.get("created_at", ""))[:10]
+        if dep_date:
+            deposit_by_date[dep_date] = deposit_by_date.get(dep_date, 0) + dep.get("amount", 0)
+    
+    # Build projection table starting from effective_start_date
+    projections = []
+    current_balance = license.get("starting_amount", 0)
+    
+    # Parse start date
+    try:
+        start_dt = datetime.strptime(effective_start, "%Y-%m-%d")
+    except:
+        start_dt = datetime.now(timezone.utc)
+    
+    end_dt = datetime.now(timezone.utc)
+    
+    current_dt = start_dt
+    while current_dt <= end_dt:
+        date_str = current_dt.strftime("%Y-%m-%d")
+        
+        # Check if master admin traded this day
+        manager_traded = date_str in traded_dates
+        
+        # Check for deposits on this date
+        deposit_amount = deposit_by_date.get(date_str, 0)
+        
+        # Calculate projected profit based on manager traded status
+        if manager_traded:
+            # Use 0.5% daily profit (standard projection)
+            projected_profit = round(current_balance * 0.005, 2)
+        else:
+            projected_profit = None  # Show "--" in frontend
+        
+        # Add deposit first
+        if deposit_amount > 0:
+            current_balance += deposit_amount
+        
+        projection = {
+            "date": date_str,
+            "day_of_week": current_dt.strftime("%A"),
+            "starting_balance": round(current_balance, 2),
+            "manager_traded": manager_traded,
+            "projected_profit": projected_profit,
+            "deposit": deposit_amount if deposit_amount > 0 else None
+        }
+        
+        # Update balance for next day
+        if manager_traded and projected_profit:
+            current_balance += projected_profit
+        
+        projection["ending_balance"] = round(current_balance, 2)
+        
+        projections.append(projection)
+        current_dt += timedelta(days=1)
+    
+    return {
+        "projections": projections,
+        "effective_start_date": effective_start,
+        "starting_amount": license.get("starting_amount", 0),
+        "current_balance": round(current_balance, 2)
+    }
+
 # ==================== EMAIL TEMPLATES ====================
 @settings_router.get("/email-templates")
 async def get_email_templates(user: dict = Depends(require_admin)):
