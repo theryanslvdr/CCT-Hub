@@ -772,6 +772,22 @@ export const ProfitTrackerPage = () => {
     }
   };
 
+  // Load VSD (Virtual Share Distribution) data for Master Admin
+  const loadVSDData = async () => {
+    if (!isMasterAdmin()) return;
+    
+    setVsdLoading(true);
+    try {
+      const response = await profitAPI.getVSD();
+      setVsdData(response.data);
+    } catch (error) {
+      console.error('Failed to load VSD data:', error);
+      toast.error('Failed to load Virtual Share Distribution');
+    } finally {
+      setVsdLoading(false);
+    }
+  };
+
   const loadLicenseeProjections = async () => {
     try {
       const response = await profitAPI.getLicenseeDailyProjection();
