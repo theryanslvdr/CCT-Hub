@@ -1198,72 +1198,80 @@ export const TradeMonitorPage = () => {
           <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
         </audio>
 
-        {/* Active Signal Card - Redesigned like AdminSignalsPage */}
+        {/* Active Signal Card - Mobile optimized */}
         {signal ? (
           <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> 
-                Active Signal
+            <CardHeader className="pb-2 px-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex items-center gap-2 text-base">
+                  <Radio className="w-4 h-4 text-blue-400 animate-pulse" /> 
+                  Active Signal
+                </CardTitle>
                 {signal.is_simulated && (
-                  <span className="ml-2 px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
-                    <FlaskConical className="w-3 h-3" /> SIMULATED
+                  <span className="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded-full flex items-center gap-1">
+                    <FlaskConical className="w-3 h-3" /> SIM
                   </span>
                 )}
-              </CardTitle>
-              <p className="text-sm text-zinc-400 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+              </div>
+              <p className="text-xs text-zinc-500 flex items-center gap-1 mt-1">
+                <Calendar className="w-3 h-3" />
                 {getTradingDate()}
               </p>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-6">
-                  <div>
-                    <p className="text-xs text-zinc-400">Product</p>
-                    <p className="text-2xl font-bold text-white">{signal.product}</p>
-                  </div>
-                  <div className={`px-6 py-3 rounded-xl text-xl font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                    {signal.direction === 'BUY' ? <TrendingUp className="inline w-5 h-5 mr-2" /> : <TrendingDown className="inline w-5 h-5 mr-2" />}
-                    {signal.direction}
-                  </div>
-                  <div>
-                    <p className="text-xs text-zinc-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Trade Time ({signal.trade_timezone || 'Asia/Manila'})
-                    </p>
-                    <p className="text-2xl font-mono font-bold text-blue-400">{signal.trade_time}</p>
-                  </div>
-                  {!isPhilippines && (
-                    <div>
-                      <p className="text-xs text-zinc-400 flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Your Time ({userTimezone.split('/').pop()})
-                      </p>
-                      <p className="text-xl font-mono font-bold text-cyan-400">{getUserLocalTradeTime()}</p>
+            <CardContent className="px-4 pb-4">
+              {/* Signal Info Grid - Single column on mobile */}
+              <div className="space-y-3">
+                {/* Direction Badge - Prominent */}
+                <div className="flex items-center gap-3">
+                  <div className={`flex-1 px-4 py-3 rounded-lg text-center font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    <div className="flex items-center justify-center gap-2">
+                      {signal.direction === 'BUY' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                      <span className="text-xl">{signal.direction}</span>
                     </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-zinc-400 flex items-center gap-1">
-                      <Target className="w-3 h-3" /> Profit Multiplier
-                    </p>
-                    <p className="text-2xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
+                    <p className="text-xs opacity-70 mt-1">{signal.product}</p>
+                  </div>
+                  <div className="flex-1 px-4 py-3 rounded-lg bg-purple-500/10 text-center">
+                    <p className="text-[10px] text-zinc-500 uppercase">Multiplier</p>
+                    <p className="text-xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
                   </div>
                 </div>
+                
+                {/* Time Row */}
+                <div className="flex gap-3">
+                  <div className="flex-1 p-3 rounded-lg bg-zinc-900/50">
+                    <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Trade Time
+                    </p>
+                    <p className="text-lg font-mono font-bold text-blue-400">{signal.trade_time}</p>
+                    <p className="text-[10px] text-zinc-600">{signal.trade_timezone || 'Asia/Manila'}</p>
+                  </div>
+                  {!isPhilippines && (
+                    <div className="flex-1 p-3 rounded-lg bg-zinc-900/50">
+                      <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Your Time
+                      </p>
+                      <p className="text-lg font-mono font-bold text-cyan-400">{getUserLocalTradeTime()}</p>
+                      <p className="text-[10px] text-zinc-600">{userTimezone.split('/').pop()}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            {signal.notes && (
-              <p className="text-zinc-400 mt-4 p-3 bg-zinc-900/50 rounded-lg">{signal.notes}</p>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="glass-card border-2 border-dashed border-zinc-700">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4 text-zinc-500">
-              <AlertTriangle className="w-6 h-6" />
-              <p>No active trading signal. Wait for admin to post today&apos;s signal.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              
+              {signal.notes && (
+                <p className="text-zinc-400 mt-3 p-2 bg-zinc-900/50 rounded-lg text-xs">{signal.notes}</p>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="glass-card border-2 border-dashed border-zinc-700">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 text-zinc-500">
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm">No active signal. Wait for today&apos;s signal.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       {/* LOT Size & Projected Exit Value Cards - Single column on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
