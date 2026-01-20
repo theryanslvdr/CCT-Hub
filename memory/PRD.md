@@ -11,6 +11,50 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 58 (2026-01-20) - Licensee Management Features ✅
+
+#### No Onboarding Wizard for Licensees ✅
+- Licensees skip onboarding wizard completely
+- Master Admin assigns balance via Admin panel
+- Onboarding only shown for non-licensee users
+
+#### Daily Projection Table for Licensees (PENDING FRONTEND IMPLEMENTATION)
+- **Hide columns**: Actual Profit, Commission, P/L Difference
+- **Add column**: "Manager Traded" (✓ if traded, ✗ if not)
+- **Projected Profit Logic**: Show "--" if manager didn't trade, carry forward balance
+
+#### Effective Start Trade Date ✅
+- **License Creation**: New "Effective Start Trade Date" field in Generate License Invite form
+- **Active Licenses Tab**: New "Effective Start" column with edit (pencil) icon
+- **Edit Dialog**: Master Admin can modify effective start date from Active Licenses
+- **Backend**: `PUT /api/admin/licenses/{id}/effective-start-date`
+
+#### Licensee Welcome Screen ✅
+- **First Login Only**: Shows for all licensees (new + existing) once
+- **Welcome Message**: "Hey, [Name]! You deposited [Amount] to [Master Admin] and your effective start date is [Date]."
+- **Account Info Cards**: Current balance and start date
+- **Continue Button**: "Continue to Profit Tracker"
+- **Backend Endpoints**:
+  - `GET /api/profit/licensee/welcome-info` - Get welcome screen data
+  - `POST /api/profit/licensee/mark-welcome-seen` - Mark as seen
+
+#### Bug Fix: "Unknown User" in Licensee Simulation ✅
+- Fixed name display in simulation dropdown
+- Now uses `license.user_name` from backend (already enriched)
+- Falls back to `member.full_name` if needed
+
+#### Files Modified
+- `/app/frontend/src/components/LicenseeWelcomeScreen.jsx` - NEW: Welcome screen component
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Skip onboarding for licensees, welcome screen integration
+- `/app/frontend/src/pages/admin/AdminLicensesPage.jsx` - Effective start date field/column/dialog
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Fixed Unknown User bug
+- `/app/frontend/src/lib/api.js` - New API methods for licensee endpoints
+- `/app/backend/server.py` - New endpoints for effective start date and welcome screen
+
+#### Testing ✅
+- **Iteration 58**: 100% backend (12/12 tests), 100% frontend
+- All licensee features verified
+
 ### Session 57 (2026-01-20) - Desktop/Mobile Number Formatting + Licensee Management ✅
 
 #### Desktop Number Formatting with Tooltips ✅
