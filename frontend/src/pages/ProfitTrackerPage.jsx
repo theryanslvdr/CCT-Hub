@@ -969,7 +969,14 @@ export const ProfitTrackerPage = () => {
     if (isLicensee && licenseProjections.length > 0) {
       // Filter projections for selected month
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
-      const monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
+      let monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
+      
+      // Filter by effective start date if set
+      if (effectiveStartDate) {
+        monthProjections = monthProjections.filter(p => p.date >= effectiveStartDate);
+      }
+      
+      if (monthProjections.length === 0) return [];
       
       // Build projections with carry-forward logic when manager didn't trade
       let runningBalance = monthProjections[0]?.account_value - monthProjections[0]?.daily_profit || effectiveAccountValue;
@@ -979,7 +986,12 @@ export const ProfitTrackerPage = () => {
         const isToday = projDate.toDateString() === today.toDateString();
         const isFuture = projDate > today;
         const isPast = projDate < today;
-        const masterTraded = masterAdminTrades[p.date]?.traded;
+        
+        // Check trade override first, then fall back to master admin trades
+        const hasOverride = tradeOverrides[p.date] !== undefined;
+        const masterTraded = hasOverride 
+          ? tradeOverrides[p.date].traded 
+          : masterAdminTrades[p.date]?.traded;
         
         // Determine status
         let status = 'pending';
@@ -1016,6 +1028,7 @@ export const ProfitTrackerPage = () => {
           status: status,
           isToday: isToday,
           managerTraded: masterTraded, // Explicit flag for the "Manager Traded" column
+          hasOverride: hasOverride, // Track if this is an override
         };
       });
     }
