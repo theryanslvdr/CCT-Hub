@@ -1,0 +1,63 @@
+{
+  "summary": "Iteration 63 - Bug Fixes Verification. All 5 issues verified: 1) Signal card hidden on desktop (md:hidden), 2) Balance calculation shows pre-trade balance, 3) Daily Projection shows current day (Jan 20), 4) Licensee profit calculation fixed (current_amount - starting_amount), 5) OnboardingWizard mobile-friendly layout confirmed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_iteration_63_bug_fixes.py",
+    "/app/test_reports/pytest/pytest_iteration_63.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fixed: get_member_details now calculates current_amount dynamically for extended licensees using calculate_extended_license_projections, ensuring consistency with /api/admin/licenses endpoint"
+  ],
+  "updated_files": [
+    "/app/backend/server.py - Fixed licensee profit calculation in get_member_details to use dynamic projection calculation for extended licensees"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "Master Admin Email": "iam@ryansalvador.com",
+    "Master Admin Password": "admin123"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 5 bug fixes verified: Issue 1 (Signal Card md:hidden) - PASS, Issue 2 (Balance Before calculation) - PASS, Issue 3 (Date handling with local date format) - PASS, Issue 4 (Licensee profit = current_amount - starting_amount) - PASS (required additional fix to calculate current_amount dynamically for extended licensees), Issue 5 (OnboardingWizard mobile layout) - PASS. Backend tests: 8/8 passed. Frontend tests: All visual verifications passed.",
+  "issues_verified": {
+    "issue_1_signal_card": {
+      "status": "PASS",
+      "description": "Mobile signal card (md:hidden) is hidden on desktop and visible on mobile",
+      "verification": "Playwright tests confirmed visibility behavior"
+    },
+    "issue_2_balance_calculation": {
+      "status": "PASS",
+      "description": "Balance Before shows pre-trade balance (liveAccountValue - actualProfit - commission)",
+      "verification": "Daily Projection table shows correct Balance Before values"
+    },
+    "issue_3_date_handling": {
+      "status": "PASS",
+      "description": "Daily Projection shows current day (Jan 20) without timezone-related skipping",
+      "verification": "Daily View dialog shows 'Tue, Jan 20' with TODAY badge"
+    },
+    "issue_4_licensee_profit": {
+      "status": "PASS",
+      "description": "Licensee profit = current_amount - starting_amount",
+      "verification": "API returns total_profit: 399 for Ryan TEST (3010.1 - 2611.1)",
+      "fix_applied": "Updated get_member_details to calculate current_amount dynamically for extended licensees"
+    },
+    "issue_5_onboarding_mobile": {
+      "status": "PASS",
+      "description": "OnboardingWizard has responsive layout (flex-col on mobile, flex-row on desktop)",
+      "verification": "Code review confirmed flex-col sm:flex-row and w-full sm:w-auto classes"
+    }
+  }
+}
