@@ -862,10 +862,9 @@ export const ProfitTrackerPage = () => {
         setIsFirstTime(false);
       }
       
-      // Load master admin trades for extended licensees
-      if (licenseType === 'extended') {
+      // Load master admin trades for ALL licensees (not just extended)
+      if (licenseType) {
         try {
-          // Get trades for the current year
           const startDate = new Date();
           startDate.setMonth(0, 1); // January 1st of current year
           const endDate = new Date();
@@ -877,11 +876,16 @@ export const ProfitTrackerPage = () => {
           );
           setMasterAdminTrades(tradesRes.data?.trading_dates || {});
           
-          // Load license projections for fixed lot size/daily profit
-          const projectionsRes = await profitAPI.getLicenseProjections();
-          if (projectionsRes.data?.monthly_projections) {
-            setLicenseProjections(projectionsRes.data.monthly_projections);
+          // Load license projections for fixed lot size/daily profit (extended licensees)
+          if (licenseType === 'extended') {
+            const projectionsRes = await profitAPI.getLicenseProjections();
+            if (projectionsRes.data?.monthly_projections) {
+              setLicenseProjections(projectionsRes.data.monthly_projections);
+            }
           }
+          
+          // Load licensee-specific daily projections
+          await loadLicenseeProjections();
         } catch (error) {
           console.error('Failed to load master admin trades:', error);
         }
