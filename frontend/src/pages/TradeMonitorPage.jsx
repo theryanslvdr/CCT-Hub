@@ -1603,23 +1603,24 @@ export const TradeMonitorPage = () => {
         </Card>
       </div>
 
-      {/* Trade History Card */}
+      {/* Trade History Card - Mobile optimized with horizontal scroll */}
       <Card className="glass-card" data-testid="trade-history-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-white">Trade History</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 md:pb-4">
+          <CardTitle className="text-white text-base md:text-lg">Trade History</CardTitle>
           {/* Streak indicator */}
           {streak.streak > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
-              <Flame className="w-5 h-5 text-orange-400" />
-              <span className="font-bold text-orange-400">{streak.streak}</span>
-              <span className="text-xs text-zinc-400">streak</span>
+            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
+              <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
+              <span className="font-bold text-orange-400 text-sm md:text-base">{streak.streak}</span>
+              <span className="text-[10px] md:text-xs text-zinc-400 hidden sm:inline">streak</span>
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 md:px-6">
           {tradeHistory.length > 0 ? (
             <>
-              <div className="overflow-x-auto">
+              {/* Mobile: Card-based layout, Desktop: Table */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full data-table">
                   <thead>
                     <tr>
@@ -1686,7 +1687,7 @@ export const TradeMonitorPage = () => {
                               ) : (
                                 <>
                                   <MessageSquare className="w-3 h-3 mr-1" />
-                                  Request Change
+                                  Request
                                 </>
                               )}
                             </Button>
@@ -1698,24 +1699,59 @@ export const TradeMonitorPage = () => {
                 </table>
               </div>
               
-              {/* Pagination */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
-                <p className="text-sm text-zinc-500">
-                  Showing {((historyPage - 1) * 10) + 1} - {Math.min(historyPage * 10, historyTotal)} of {historyTotal} trades
+              {/* Mobile: Compact card layout */}
+              <div className="md:hidden space-y-2">
+                {tradeHistory.map((trade) => (
+                  <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-zinc-500">
+                          {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded ${trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                          {trade.direction}
+                        </span>
+                      </div>
+                      <span className="text-xs text-zinc-400">{trade.signal_details?.product || 'MOIL10'}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-[10px] text-zinc-500">Projected</p>
+                        <p className="text-sm font-mono text-blue-400">{formatLargeNumber(trade.projected_profit || 0)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-zinc-500">Actual</p>
+                        <p className="text-sm font-mono text-emerald-400">{formatLargeNumber(trade.actual_profit || 0)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-zinc-500">P/L</p>
+                        <p className={`text-sm font-mono font-bold ${(trade.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {(trade.profit_difference || 0) >= 0 ? '+' : ''}{formatLargeNumber(trade.profit_difference || 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Pagination - Mobile optimized */}
+              <div className="flex items-center justify-between mt-3 md:mt-4 pt-3 md:pt-4 border-t border-zinc-800">
+                <p className="text-[10px] md:text-sm text-zinc-500">
+                  {historyPage}/{historyTotalPages} <span className="hidden sm:inline">• {historyTotal} trades</span>
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
                     disabled={historyPage === 1}
-                    className="btn-secondary"
+                    className="btn-secondary h-8 w-8 md:h-9 md:w-auto p-0 md:px-3"
                     data-testid="prev-page"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <span className="text-sm text-zinc-400">
-                    Page {historyPage} of {historyTotalPages}
+                  <span className="text-xs md:text-sm text-zinc-400 hidden sm:block">
+                    Page {historyPage}
                   </span>
                   <Button
                     variant="outline"
