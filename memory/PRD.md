@@ -11,6 +11,48 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 63 (2026-01-20) - 5 Bug Fixes ✅
+
+#### Issue 1: Signal Card Duplicate on Desktop ✅
+- **Problem**: Second signal card (above Projection Vision graph) was showing on both mobile AND desktop
+- **Fix**: Changed class from `hidden md:block` to `md:hidden` (line 1707)
+- **Result**: Signal card now only shows on mobile; desktop users see the banner version
+
+#### Issue 2: Balance Calculation for Today ✅
+- **Problem**: "Balance Before" for today was showing POST-trade balance instead of PRE-trade
+- **Root Cause**: Using `liveAccountValue` directly, which already includes today's profit
+- **Fix**: For completed trades: `effectiveBalance = liveAccountValue - actualProfit - commission`
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 310-325
+
+#### Issue 3: Missing Current Day (Jan 20) in Daily Projection ✅
+- **Problem**: Users couldn't see today's date; projection jumped from Jan 19 to Jan 21
+- **Root Cause**: `toISOString().split('T')[0]` converts to UTC, shifting dates for some timezones
+- **Fix**: Use LOCAL date format: `${year}-${month}-${day}` instead of `toISOString()`
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 151-164 (isTradingDay) and 242-252 (dateKey)
+
+#### Issue 4: Licensee Profit Display ✅
+- **Problem**: Licensee's Total Profit card showed 0 instead of accumulated projected profits
+- **Fix**: 
+  - Sidebar: Calculate profit as `current_amount - starting_amount` (line 91)
+  - Backend: Updated `get_member_details` to return `total_profit` for licensees
+  - Extended licensees: Dynamic calculation using `calculate_extended_license_projections`
+- **Location**: 
+  - `/app/frontend/src/components/layout/Sidebar.jsx` line 91
+  - `/app/backend/server.py` lines 2523-2562
+
+#### Issue 5: OnboardingWizard Mobile Responsiveness ✅
+- **Problem**: Footer buttons overflowed on mobile screens
+- **Fix**: 
+  - Changed footer to `flex-col sm:flex-row`
+  - Primary button: `w-full sm:w-auto order-1 sm:order-2`
+  - Secondary buttons: `flex-wrap` with `flex-1 sm:flex-initial`
+  - Shortened button text on mobile (e.g., "Save" instead of "Save & Continue Later")
+- **Location**: `/app/frontend/src/components/OnboardingWizard.jsx` lines 910-968
+
+#### Testing ✅
+- **Iteration 63**: 100% backend (8/8 tests passed), 100% frontend
+- Test file: `/app/tests/test_iteration_63_bug_fixes.py`
+
 ### Session 62 (2026-01-20) - P0 Fixes + P1 Refactoring ✅
 
 #### P0: Trade Override Toggle Fix ✅
