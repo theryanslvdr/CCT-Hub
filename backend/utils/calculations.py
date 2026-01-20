@@ -137,17 +137,18 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
 async def get_user_financial_summary(
     db,
     user_id: str,
-    user: Optional[Dict] = None,
-    include_managed_licensees: bool = False
+    user: Optional[Dict] = None
 ) -> Dict[str, Any]:
     """
     Get comprehensive financial summary for a user.
+    
+    NOTE: For Master Admin, account_value is their actual Merin balance.
+    Licensee funds are ALREADY PART OF this balance (not added on top).
     
     Args:
         db: Database connection
         user_id: User's ID
         user: Optional user dict (to avoid extra DB lookup)
-        include_managed_licensees: For Master Admin, include funds from managed licensees
     
     Returns:
         Dict with total_deposits, total_withdrawals, total_profit, total_commission, account_value, is_licensee
@@ -184,7 +185,7 @@ async def get_user_financial_summary(
     )
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_projected = sum(t.get("projected_profit", 0) for t in trades)
-    total_commission = sum(t.get("commission", 0) for t in trades)  # Sum daily commissions from trades
+    total_commission = sum(t.get("commission", 0) for t in trades)
     
     # Calculate account value
     if is_licensee and license_info:
@@ -193,22 +194,11 @@ async def get_user_financial_summary(
         total_deposits = license_info.get("starting_amount", 0)
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
+        # NOTE: For Master Admin, licensee deposits are already included in the deposits collection
         net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
         account_value = round(net_deposits + total_profit + total_commission, 2)
     
-    # For Master Admin, include licensee funds if requested
-    licensee_funds = 0.0
-    licensee_count = 0
-    if include_managed_licensees and user and user.get("role") == "master_admin":
-        licensee_funds = await calculate_total_managed_licensee_funds(db, user_id)
-        active_licenses = await db.licenses.find(
-            {"created_by": user_id, "is_active": True},
-            {"_id": 0}
-        ).to_list(1000)
-        licensee_count = len(active_licenses)
-        account_value = round(account_value + licensee_funds, 2)
-    
-    result = {
+    return {
         "total_deposits": round(total_deposits, 2),
         "total_withdrawals": round(total_withdrawals, 2),
         "total_profit": round(total_profit, 2),
