@@ -378,6 +378,13 @@ class EmailTemplateUpdate(BaseModel):
     body: str
     variables: Optional[List[str]] = None  # Available template variables like {{name}}, {{link}}
 
+# Licensee Trade Override Model
+class LicenseeTradeOverride(BaseModel):
+    license_id: str
+    date: str  # YYYY-MM-DD format
+    traded: bool
+    notes: Optional[str] = None
+
 # Licensee Transaction Models
 class LicenseeTransactionStatus(str, Enum):
     PENDING = "pending"
