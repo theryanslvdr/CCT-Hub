@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
+import { LicenseeWelcomeScreen } from '@/components/LicenseeWelcomeScreen';
 import { toast } from 'sonner';
 import { 
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
