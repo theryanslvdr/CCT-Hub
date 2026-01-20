@@ -1353,32 +1353,34 @@ export const TradeMonitorPage = () => {
         </CardHeader>
         <CardContent>
           {showExitAlert ? (
-            // Step 1: Alarm is ringing - show "Trade Entered" button
-            <div className="text-center space-y-6">
+            // Step 1: Alarm is ringing - show "Trade Entered" button (Mobile Optimized)
+            <div className="text-center space-y-4 md:space-y-6">
               <div className="animate-bounce">
-                <div className="text-6xl">🚨</div>
+                <div className="text-5xl md:text-6xl">🚨</div>
               </div>
-              <h2 className="text-4xl font-bold text-emerald-400 animate-pulse">ENTER YOUR TRADE NOW!</h2>
-              <p className="text-xl text-zinc-300">Target Exit Value: <span className="font-mono text-emerald-400">{formatLargeNumber(exitValue)}</span></p>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={confirmTradeEntered} className="btn-primary text-xl py-6 px-8" data-testid="trade-entered-button">
-                  <Check className="w-6 h-6 mr-2" /> Trade Entered
+              <h2 className="text-2xl md:text-4xl font-bold text-emerald-400 animate-pulse">ENTER YOUR TRADE NOW!</h2>
+              <p className="text-base md:text-xl text-zinc-300">
+                Target: <span className="font-mono text-emerald-400">{formatLargeNumber(exitValue)}</span>
+              </p>
+              <div className="flex justify-center">
+                <Button onClick={confirmTradeEntered} className="btn-primary text-lg md:text-xl py-5 md:py-6 px-6 md:px-8 w-full md:w-auto" data-testid="trade-entered-button">
+                  <Check className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Trade Entered
                 </Button>
               </div>
             </div>
           ) : tradeEntered ? (
-            // Step 2: User entered trade - show "Exit Trade" button
-            <div className="text-center space-y-6">
-              <div className="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
-                <p className="text-emerald-400 text-lg font-semibold">✓ Trade Active</p>
-                <p className="text-zinc-400 text-sm mt-1">Click &quot;Exit Trade&quot; when you&apos;ve closed your position</p>
+            // Step 2: User entered trade - show "Exit Trade" button (Mobile Optimized)
+            <div className="text-center space-y-4 md:space-y-6">
+              <div className="p-3 md:p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
+                <p className="text-emerald-400 text-base md:text-lg font-semibold">✓ Trade Active</p>
+                <p className="text-zinc-400 text-xs md:text-sm mt-1">Click &quot;Exit Trade&quot; when you&apos;ve closed your position</p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
-                <p className="text-sm text-zinc-400">Target Exit Value</p>
-                <p className="text-3xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
+              <div className="p-3 md:p-4 rounded-lg bg-zinc-900/50">
+                <p className="text-xs md:text-sm text-zinc-400">Target Exit Value</p>
+                <p className="text-2xl md:text-3xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
               </div>
-              <Button onClick={confirmTradeExited} className="btn-primary text-xl py-6 px-8" data-testid="exit-trade-button">
-                <ArrowRight className="w-6 h-6 mr-2" /> Exit Trade
+              <Button onClick={confirmTradeExited} className="btn-primary text-lg md:text-xl py-5 md:py-6 px-6 md:px-8 w-full md:w-auto" data-testid="exit-trade-button">
+                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Exit Trade
               </Button>
             </div>
           ) : tradeEnded ? (
