@@ -1375,6 +1375,20 @@ export const ProfitTrackerPage = () => {
     );
   }
 
+  // Show licensee welcome screen for first-time licensees
+  if (showLicenseeWelcome && licenseeWelcomeInfo) {
+    return (
+      <LicenseeWelcomeScreen 
+        welcomeInfo={licenseeWelcomeInfo}
+        onContinue={() => {
+          setShowLicenseeWelcome(false);
+          loadData();
+          loadLicenseeProjections();
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Simulation Banner */}
