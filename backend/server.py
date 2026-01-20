@@ -2514,20 +2514,50 @@ async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
     total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") != "profit")
     
     # For licensees, use license.current_amount as the authoritative account_value
+    # And calculate profit as current_amount - starting_amount (projected profits when manager traded)
     account_value = round(total_deposits + total_profit, 2)
+    licensee_profit = None
+    licensee_trades = 0
+    performance_rate = 0
+    
     if member.get("license_type"):
         license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
         if license:
             account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
+            starting_amount = license.get("starting_amount", 0)
+            # For licensees, profit = current_amount - starting_amount
+            licensee_profit = round(account_value - starting_amount, 2)
+            
+            # Count Master Admin trades (days when manager traded that benefited this licensee)
+            # Get master admin's trade logs
+            master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+            if master_admin:
+                # Count trades from effective_start_date
+                effective_start = license.get("effective_start_date", license.get("start_date"))
+                query = {"user_id": master_admin["id"], "has_traded": True}
+                if effective_start:
+                    query["trade_date"] = {"$gte": effective_start}
+                licensee_trades = await db.trade_logs.count_documents(query)
+            
+            # For licensees, performance_rate is always 100% if they have profit (they get exactly projected)
+            if starting_amount > 0:
+                performance_rate = round((account_value / starting_amount) * 100 - 100, 2)  # Growth rate
+    else:
+        # Regular user performance rate
+        total_projected = sum(t.get("projected_profit", 0) for t in trades)
+        if total_projected > 0:
+            performance_rate = round((total_profit / total_projected) * 100, 2)
     
     return {
         "user": member,
         "stats": {
-            "total_trades": total_trades,
-            "total_profit": round(total_profit, 2),
-            "total_actual_profit": round(total_profit, 2),
+            "total_trades": licensee_trades if licensee_profit is not None else total_trades,
+            "total_profit": licensee_profit if licensee_profit is not None else round(total_profit, 2),
+            "total_actual_profit": licensee_profit if licensee_profit is not None else round(total_profit, 2),
             "total_deposits": round(total_deposits, 2),
-            "account_value": account_value
+            "account_value": account_value,
+            "performance_rate": performance_rate,
+            "is_licensee": member.get("license_type") is not None
         },
         "recent_trades": trades[:10],
         "recent_deposits": deposits[:10]
