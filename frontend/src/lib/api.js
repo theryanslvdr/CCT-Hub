@@ -101,6 +101,8 @@ export const profitAPI = {
   getLicenseeWelcomeInfo: () => api.get('/profit/licensee/welcome-info'),
   markLicenseeWelcomeSeen: () => api.post('/profit/licensee/mark-welcome-seen'),
   getLicenseeDailyProjection: () => api.get('/profit/licensee/daily-projection'),
+  // Admin: Get licensee projections for a specific license (used when simulating)
+  getLicenseeProjectionsForLicense: (licenseId) => api.get(`/admin/licenses/${licenseId}/projections`),
 };
 
 // Trade Monitor APIs
