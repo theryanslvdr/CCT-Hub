@@ -1224,11 +1224,15 @@ export const ProfitTrackerPage = () => {
       // Calculate the lot size based on adjusted balance if provided
       const balanceForCalculation = adjustedBalance ? parseFloat(adjustedBalance) : enterAPDate.balanceBefore;
       const calculatedLotSize = truncateTo2Decimals(balanceForCalculation / 980);
+      
+      // Parse commission (default to 0 if empty)
+      const commissionValue = enterAPCommission ? parseFloat(enterAPCommission) : 0;
 
-      // Log the trade
+      // Log the trade with commission
       await tradeAPI.logMissedTrade({
         date: enterAPDate.dateKey,
         actual_profit: parseFloat(enterAPValue),
+        commission: commissionValue,
         lot_size: calculatedLotSize,
         direction: activeSignal?.direction || 'BUY',
         balance_before: balanceForCalculation,
@@ -1240,6 +1244,7 @@ export const ProfitTrackerPage = () => {
       toast.success('Trade adjusted successfully!');
       setEnterAPDialogOpen(false);
       setEnterAPValue('');
+      setEnterAPCommission('');
       setEnterAPDate(null);
       setAdjustmentType('profit_only');
       setAdjustmentAmount('');
