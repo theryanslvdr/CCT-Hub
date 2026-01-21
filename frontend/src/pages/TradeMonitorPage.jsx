@@ -347,16 +347,21 @@ export const TradeMonitorPage = () => {
         const savedTime = new Date(tradeState.timestamp);
         const now = new Date();
         
-        // Check if saved state is still valid (within 30 minutes)
-        const thirtyMinutes = 30 * 60 * 1000;
-        if (now - savedTime < thirtyMinutes && tradeState.signalId === signal?.id) {
-          // Restore the trade entered state
+        // Check if saved state is still valid (within 2 hours for profit entry)
+        const twoHours = 2 * 60 * 60 * 1000;
+        if (now - savedTime < twoHours && tradeState.signalId === signal?.id) {
+          // Restore the trade entered state - user can enter their profit
           setTradeEntered(true);
           setIsTrading(true);
           tradeEnteredRef.current = true;
           tradeNotifiedRef.current = true;
-          // Don't show exit alert since user already entered trade
+          // Don't show exit alert since user already entered trade (or it was auto-entered)
           setShowExitAlert(false);
+          
+          // If this was auto-entered, show a reminder toast
+          if (tradeState.autoEntered) {
+            toast.info('Trade window already passed. Enter your profit and commission when ready.', { duration: 5000 });
+          }
         } else {
           // Expired or different signal, clear it
           localStorage.removeItem('trade_entered_state');
