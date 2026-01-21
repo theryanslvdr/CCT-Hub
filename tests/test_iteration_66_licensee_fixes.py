@@ -142,7 +142,9 @@ class TestLicenseeBackendFixes:
         response = self.session.get(f"{BASE_URL}/api/admin/licenses")
         assert response.status_code == 200, f"Failed to get licenses: {response.text}"
         
-        licenses = response.json()
+        data = response.json()
+        # API returns {"licenses": [...]}
+        licenses = data.get("licenses", []) if isinstance(data, dict) else data
         print(f"✓ Found {len(licenses)} licenses")
         
         for lic in licenses[:5]:  # Check first 5
