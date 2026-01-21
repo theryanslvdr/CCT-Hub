@@ -2792,7 +2792,56 @@ export const ProfitTrackerPage = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+          
+          {/* Monthly Summary Card */}
+          {getDailyProjectionForSelectedMonth.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                <p className="text-xs text-blue-400 uppercase tracking-wider">Monthly Target</p>
+                <p className="text-lg font-bold font-mono text-blue-400 mt-1">
+                  ${formatNumber(
+                    getDailyProjectionForSelectedMonth.reduce((sum, day) => sum + (day.targetProfit || 0), 0)
+                  )}
+                </p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">
+                  {getDailyProjectionForSelectedMonth.length} trading days
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                <p className="text-xs text-emerald-400 uppercase tracking-wider">Current Profit</p>
+                <p className={`text-lg font-bold font-mono mt-1 ${
+                  getDailyProjectionForSelectedMonth
+                    .filter(day => day.status === 'completed' && day.actualProfit !== undefined)
+                    .reduce((sum, day) => sum + (day.actualProfit || 0), 0) >= 0
+                    ? 'text-emerald-400' : 'text-red-400'
+                }`}>
+                  ${formatNumber(
+                    getDailyProjectionForSelectedMonth
+                      .filter(day => day.status === 'completed' && day.actualProfit !== undefined)
+                      .reduce((sum, day) => sum + (day.actualProfit || 0), 0)
+                  )}
+                </p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">
+                  {getDailyProjectionForSelectedMonth.filter(day => day.status === 'completed' && day.actualProfit !== undefined).length} trades completed
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20">
+                <p className="text-xs text-cyan-400 uppercase tracking-wider">Total Commission</p>
+                <p className="text-lg font-bold font-mono text-cyan-400 mt-1">
+                  ${formatNumber(
+                    getDailyProjectionForSelectedMonth
+                      .filter(day => day.status === 'completed')
+                      .reduce((sum, day) => sum + (day.commission || 0), 0)
+                  )}
+                </p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">
+                  From referral bonuses
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <div className="mt-4 max-h-[50vh] overflow-y-auto">
             {getDailyProjectionForSelectedMonth.length > 0 ? (
               <table className="w-full data-table text-sm">
                 <thead className="sticky top-0 bg-zinc-900">
