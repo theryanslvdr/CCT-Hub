@@ -1780,8 +1780,8 @@ export const ProfitTrackerPage = () => {
         )}
       </div>
 
-      {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) */}
-      {activeSignal && (
+      {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) - Hidden for licensees */}
+      {activeSignal && !isLicensee && (
         <Card className="md:hidden glass-card border-blue-500/30 bg-blue-500/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-3">
