@@ -121,7 +121,8 @@ export const DashboardPage = () => {
     loadDashboardData();
   }, [loadDashboardData, simulatedView, isInBVE]); // Also re-run when simulatedView or BVE mode changes
 
-  const kpiCards = [
+  // Define KPI cards - filter based on licensee view
+  const allKpiCards = [
     {
       title: 'Account Value',
       value: summary?.account_value || 0,
@@ -129,6 +130,7 @@ export const DashboardPage = () => {
       icon: DollarSign,
       change: summary?.profit_difference || 0,
       color: 'blue',
+      showForLicensee: true,
     },
     {
       title: 'Total Profit',
@@ -138,6 +140,7 @@ export const DashboardPage = () => {
       change: summary?.performance_rate || 0,
       changeFormat: 'percent',
       color: 'emerald',
+      showForLicensee: true,
     },
     {
       title: 'Total Trades',
@@ -145,6 +148,7 @@ export const DashboardPage = () => {
       format: 'number',
       icon: Activity,
       color: 'cyan',
+      showForLicensee: true,
     },
     {
       title: 'Actual vs Projected',
@@ -153,8 +157,14 @@ export const DashboardPage = () => {
       icon: Target,
       color: 'purple',
       subtitle: summary?.performance_rate > 100 ? 'Above target!' : summary?.performance_rate === 100 ? 'On target' : 'Below target',
+      showForLicensee: true,
     },
   ];
+  
+  // Filter cards for licensees - they see all 4 cards but full width (3 columns on lg)
+  const kpiCards = isLicenseeView 
+    ? allKpiCards.filter(card => card.showForLicensee)
+    : allKpiCards;
 
   // Prepare chart data from trades
   const chartData = trades.slice().reverse().map((trade, index) => ({
