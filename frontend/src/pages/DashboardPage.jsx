@@ -225,8 +225,8 @@ export const DashboardPage = () => {
               Here&apos;s your trading overview for today.
             </p>
           </div>
-          {/* Row 2 on Mobile / Right side on Desktop: Signal Card - Clickable to Trade Monitor */}
-          {signal && (
+          {/* Row 2 on Mobile / Right side on Desktop: Signal Card - Clickable to Trade Monitor - Hidden for licensees */}
+          {signal && !isLicenseeView && (
             <div 
               onClick={() => window.location.href = '/trade-monitor'}
               className="glass-highlight px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-blue-500/50 transition-all"
