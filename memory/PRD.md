@@ -11,6 +11,50 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 65 (2026-01-21) - 6 Feature Requests & Bug Fixes ✅
+
+#### Issue 1: Admin Approval for Trade Adjustments ✅
+- **Status**: Already not present - members can directly adjust their trades without admin approval
+- **No changes needed**
+
+#### Issue 2: Commission Field in Adjust Trade Dialog ✅
+- **Added**: `enterAPCommission` state and input field
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 642-646, 3115-3130
+- **Backend**: `/api/trade/log-missed-trade` now accepts `commission` parameter
+- **Summary card** now shows commission in the adjustment preview
+
+#### Issue 3: Licensee Balance Bug Fixed ✅
+- **Problem**: Balance was resetting instead of accumulating for licensee simulations
+- **Fix**: Created new endpoint `GET /api/admin/licenses/{id}/projections` that:
+  - Returns properly accumulated projections
+  - Includes `manager_traded` flag for each day
+  - Uses Master Admin's trade logs to determine trading days
+  - Handles trade overrides
+- **Frontend**: Updated `loadData` to use new endpoint when simulating licensees
+- **Testing agent fixed**: Timezone-naive datetime comparison bug
+
+#### Issue 4: Auto-Enter Trade on Timer Expiry ✅
+- **Location**: `/app/frontend/src/pages/TradeMonitorPage.jsx` lines 694-724
+- **Behavior**: When countdown reaches 0, trade is automatically marked as entered
+- **Persistence**: State saved to localStorage for 2 hours (was 30 minutes)
+- **Refresh support**: Users can refresh and still enter profit/commission
+- **Toast**: Shows "Trade window opened! Enter your profit when you exit."
+
+#### Issue 5: Balance Calculation with Commission ✅
+- **Already working**: Line 365 in `generateDailyProjectionForMonth` adds `actualProfit + commission`
+- **Verified**: Balance rolls forward correctly with both profit and commission
+
+#### Issue 6: Monthly Summary Card in Daily Projection ✅
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 2781-2837
+- **Cards added**:
+  1. **Monthly Target** - Sum of all target profits + trading days count
+  2. **Current Profit** - Sum of actual profits from completed trades + trades count
+  3. **Total Commission** - Sum of commissions from referral bonuses
+
+#### Testing ✅
+- **Iteration 65**: 100% backend (11/11 tests passed), 100% frontend
+- Test file: `/app/tests/test_iteration_65_fixes.py`
+
 ### Session 64 (2026-01-20) - Licensee Bug Fixes ✅
 
 #### Issue 1: Balance Accumulation Fixed ✅
