@@ -641,6 +641,7 @@ export const ProfitTrackerPage = () => {
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
   const [enterAPDate, setEnterAPDate] = useState(null);
   const [enterAPValue, setEnterAPValue] = useState('');
+  const [enterAPCommission, setEnterAPCommission] = useState(''); // Commission for the day
   const [enterAPLoading, setEnterAPLoading] = useState(false);
   
   // Adjustment options for past trades
