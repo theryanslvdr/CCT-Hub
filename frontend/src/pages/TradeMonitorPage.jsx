@@ -697,20 +697,33 @@ export const TradeMonitorPage = () => {
           countdownRef.current = null;
         }
         
-        // Only show exit alert if user hasn't already confirmed trade entry
+        // Only process if user hasn't already confirmed trade entry
         if (!tradeEnteredRef.current) {
-          setShowExitAlert(true);
+          // AUTO-ENTER: When timer hits 0, automatically mark trade as entered
+          tradeEnteredRef.current = true;
+          setTradeEntered(true);
+          setShowExitAlert(false);
           setCountdown(null);
           setPreTradeCountdown(null);
           
+          // Persist trade entered state to localStorage for refresh resilience
+          const tradeState = {
+            tradeEntered: true,
+            autoEntered: true, // Mark as auto-entered
+            signalId: signal?.id,
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem('trade_entered_state', JSON.stringify(tradeState));
+          
+          // Play sound notification
           if (soundEnabled && audioRef.current) {
             audioRef.current.play().catch(console.error);
           }
           
-          // Only show toast once using ref to prevent flood
+          // Show toast notification
           if (!tradeNotifiedRef.current) {
             tradeNotifiedRef.current = true;
-            toast.success('🚨 ENTER THE TRADE NOW!', { duration: 10000 });
+            toast.success('🎯 Trade window opened! Enter your profit when you exit.', { duration: 10000 });
           }
         }
       } else {
