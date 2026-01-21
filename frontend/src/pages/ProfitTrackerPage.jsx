@@ -3111,6 +3111,26 @@ export const ProfitTrackerPage = () => {
                   Enter positive for profit, negative for loss
                 </p>
               </div>
+              
+              {/* Commission input */}
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Commission for the Day (USD) - Optional</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={enterAPCommission}
+                    onChange={(e) => setEnterAPCommission(e.target.value)}
+                    placeholder="0.00"
+                    className="input-dark pl-7 font-mono"
+                    data-testid="enter-ap-commission-input"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Enter any referral commission you earned on this day
+                </p>
+              </div>
 
               {/* Summary of adjustments */}
               {(enterAPValue || adjustmentAmount || adjustedBalance) && (
