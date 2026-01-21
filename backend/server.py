@@ -3732,6 +3732,106 @@ async def get_license_details(license_id: str, user: dict = Depends(require_admi
     
     return result
 
+
+@admin_router.get("/licenses/{license_id}/projections")
+async def get_license_projections(license_id: str, user: dict = Depends(require_admin)):
+    """Get daily projections for a specific license (for simulation view)
+    
+    This endpoint returns projections that can be used by the frontend
+    when the Master Admin is simulating a licensee's view.
+    """
+    if user["role"] != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can view license projections")
+    
+    license_doc = await db.licenses.find_one({"id": license_id}, {"_id": 0})
+    if not license_doc:
+        raise HTTPException(status_code=404, detail="License not found")
+    
+    # Use effective_start_date if available, otherwise start_date
+    effective_start = license_doc.get("effective_start_date") or license_doc.get("start_date")
+    if effective_start:
+        start_date = datetime.fromisoformat(effective_start.replace("Z", "+00:00") if "Z" in effective_start else effective_start)
+    else:
+        start_date = datetime.now(timezone.utc)
+    
+    starting_amount = license_doc.get("starting_amount", 0)
+    current_amount = license_doc.get("current_amount", starting_amount)
+    
+    # Get Master Admin's trade logs to determine which days manager traded
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+    master_trade_logs = {}
+    if master_admin:
+        trades = await db.trade_logs.find({"user_id": master_admin["id"]}, {"_id": 0}).to_list(1000)
+        for trade in trades:
+            date_key = trade.get("trade_date") or trade.get("created_at", "")[:10]
+            if date_key:
+                master_trade_logs[date_key] = {
+                    "traded": trade.get("has_traded", True),
+                    "actual_profit": trade.get("actual_profit", 0),
+                    "commission": trade.get("commission", 0)
+                }
+    
+    # Get trade overrides for this license
+    overrides = {}
+    async for override in db.licensee_trade_overrides.find({"license_id": license_id}, {"_id": 0}):
+        overrides[override["date"]] = override
+    
+    # Generate projections for up to 2 years from start date
+    projections = []
+    current_balance = starting_amount
+    
+    # Generate projections day by day
+    current_date = start_date
+    end_date = datetime.now(timezone.utc) + timedelta(days=365)  # Up to 1 year from now
+    
+    while current_date <= end_date:
+        # Skip weekends
+        if current_date.weekday() >= 5:
+            current_date += timedelta(days=1)
+            continue
+        
+        date_str = current_date.strftime("%Y-%m-%d")
+        
+        # Calculate lot size and daily profit based on balance
+        lot_size = round(current_balance / 980, 2)
+        daily_profit = round(lot_size * 15, 2)
+        
+        # Check if manager traded (override takes precedence)
+        override = overrides.get(date_str)
+        master_trade = master_trade_logs.get(date_str)
+        
+        if override:
+            manager_traded = override.get("traded", False)
+        elif master_trade:
+            manager_traded = master_trade.get("traded", True)
+        else:
+            manager_traded = False  # No trade record = didn't trade
+        
+        projections.append({
+            "date": date_str,
+            "start_value": current_balance,
+            "account_value": current_balance + daily_profit if manager_traded else current_balance,
+            "lot_size": lot_size,
+            "daily_profit": daily_profit,
+            "manager_traded": manager_traded,
+            "has_override": override is not None
+        })
+        
+        # Update balance for next day (only if manager traded)
+        if manager_traded and current_date <= datetime.now(timezone.utc):
+            current_balance = current_balance + daily_profit
+        
+        current_date += timedelta(days=1)
+    
+    return {
+        "license": license_doc,
+        "projections": projections,
+        "current_amount": current_amount,
+        "starting_amount": starting_amount,
+        "master_trade_logs": master_trade_logs
+    }
+
+
 @admin_router.put("/licenses/{license_id}")
 async def update_license(license_id: str, starting_amount: Optional[float] = None, notes: Optional[str] = None, is_active: Optional[bool] = None, user: dict = Depends(require_admin)):
     """Update a license (Master Admin only)"""
