@@ -3750,7 +3750,16 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
     # Use effective_start_date if available, otherwise start_date
     effective_start = license_doc.get("effective_start_date") or license_doc.get("start_date")
     if effective_start:
-        start_date = datetime.fromisoformat(effective_start.replace("Z", "+00:00") if "Z" in effective_start else effective_start)
+        # Handle various date formats
+        if "T" in effective_start:
+            # Full datetime string
+            start_date = datetime.fromisoformat(effective_start.replace("Z", "+00:00") if "Z" in effective_start else effective_start)
+        else:
+            # Date-only string (YYYY-MM-DD) - parse and add timezone
+            start_date = datetime.strptime(effective_start[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        # Ensure timezone-aware
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
     else:
         start_date = datetime.now(timezone.utc)
     
