@@ -3133,7 +3133,7 @@ export const ProfitTrackerPage = () => {
               </div>
 
               {/* Summary of adjustments */}
-              {(enterAPValue || adjustmentAmount || adjustedBalance) && (
+              {(enterAPValue || adjustmentAmount || adjustedBalance || enterAPCommission) && (
                 <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-2 text-sm">
                   <p className="text-amber-400 font-medium">Adjustment Summary:</p>
                   {adjustedBalance && adjustedBalance !== enterAPDate.balanceBefore?.toString() && (
@@ -3155,6 +3155,14 @@ export const ProfitTrackerPage = () => {
                       <span className="text-zinc-400">Actual Profit</span>
                       <span className={`font-mono ${parseFloat(enterAPValue) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {parseFloat(enterAPValue) >= 0 ? '+' : ''}${parseFloat(enterAPValue).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {enterAPCommission && parseFloat(enterAPCommission) > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">Commission</span>
+                      <span className="font-mono text-cyan-400">
+                        +${parseFloat(enterAPCommission).toLocaleString()}
                       </span>
                     </div>
                   )}
