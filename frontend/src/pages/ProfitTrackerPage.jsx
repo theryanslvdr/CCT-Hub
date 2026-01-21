@@ -861,14 +861,28 @@ export const ProfitTrackerPage = () => {
       if (isSpecificMemberSimulation) {
         // For specific member simulation, fetch their complete data from API
         const memberId = simulatedView.memberId;
-        const [memberRes, ratesRes, signalRes, memberTradeLogsRes, memberDepositsRes, memberWithdrawalsRes] = await Promise.all([
+        const isLicenseeSimulation = simulatedView.licenseId && simulatedView.license_type;
+        
+        // Build API calls - add licensee projections if simulating a licensee
+        const apiCalls = [
           adminAPI.getMemberDetails(memberId),
           currencyAPI.getRates('USDT'),
           api.get('/trade/active-signal').catch(() => ({ data: null })),
           api.get(`/trade/logs?user_id=${memberId}`).catch(() => ({ data: [] })),
           api.get(`/admin/members/${memberId}/deposits`).catch(() => ({ data: [] })),
           api.get(`/admin/members/${memberId}/withdrawals`).catch(() => ({ data: [] })),
-        ]);
+        ];
+        
+        // If simulating a licensee, also load their projections and Master Admin trades
+        if (isLicenseeSimulation) {
+          apiCalls.push(
+            profitAPI.getLicenseeProjectionsForLicense(simulatedView.licenseId).catch(() => ({ data: { projections: [] } })),
+            profitAPI.getMasterAdminTrades().catch(() => ({ data: [] }))
+          );
+        }
+        
+        const results = await Promise.all(apiCalls);
+        const [memberRes, ratesRes, signalRes, memberTradeLogsRes, memberDepositsRes, memberWithdrawalsRes] = results;
         
         const stats = memberRes.data.stats || {};
         setSummary({
@@ -881,7 +895,27 @@ export const ProfitTrackerPage = () => {
         setDeposits(memberDepositsRes.data || memberRes.data.recent_deposits || []);
         setWithdrawals(memberWithdrawalsRes.data || []);
         
-        // Process trade logs to get the date-keyed format
+        // For licensees, use the projections from the dedicated endpoint
+        if (isLicenseeSimulation && results[6]?.data?.projections) {
+          setLicenseeProjections(results[6].data.projections);
+          
+          // Also set Master Admin trades for the Manager Traded column
+          const masterTrades = results[7]?.data || [];
+          const masterTradesMap = {};
+          masterTrades.forEach(trade => {
+            const dateKey = trade.trade_date || trade.created_at?.split('T')[0] || '';
+            if (dateKey) {
+              masterTradesMap[dateKey] = {
+                traded: trade.has_traded !== false,
+                actual_profit: trade.actual_profit,
+                commission: trade.commission || 0
+              };
+            }
+          });
+          setMasterAdminTrades(masterTradesMap);
+        }
+        
+        // Process trade logs to get the date-keyed format (for non-licensees)
         const tradeLogsData = memberTradeLogsRes.data || [];
         const logsMap = {};
         tradeLogsData.forEach(trade => {
@@ -892,6 +926,7 @@ export const ProfitTrackerPage = () => {
               has_traded: true,
               lot_size: trade.lot_size,
               projected_profit: trade.projected_profit,
+              commission: trade.commission || 0,
               ...trade
             };
           }
