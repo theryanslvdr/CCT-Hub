@@ -1616,8 +1616,8 @@ export const ProfitTrackerPage = () => {
         </div>
       )}
 
-      {/* Trading Signal Banner - Desktop Only */}
-      {activeSignal && (
+      {/* Trading Signal Banner - Desktop Only - Hidden for licensees (they don't trade) */}
+      {activeSignal && !isLicensee && (
         <Card className="hidden md:block glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -1648,8 +1648,8 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Mobile Signal Card - Compact "Trade Now" button that navigates to Trade Monitor */}
-      {activeSignal && (
+      {/* Mobile Signal Card - Compact "Trade Now" button that navigates to Trade Monitor - Hidden for licensees */}
+      {activeSignal && !isLicensee && (
         <Card className="md:hidden glass-card border-blue-500/30 bg-blue-500/5" data-testid="mobile-signal-card">
           <CardContent className="p-3">
             <div className="flex items-center gap-3">
