@@ -1685,8 +1685,8 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Summary Cards - Single column on mobile for readability */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Summary Cards - For licensees: 3 full-width cards (no LOT size), For others: 4 cards */}
+      <div className={`grid gap-3 ${isLicensee ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
         <Card className="glass-card" data-testid="account-value-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
