@@ -152,7 +152,13 @@ class TestIssue3LicenseeProjections:
             headers=auth_headers
         )
         assert licenses_response.status_code == 200
-        licenses = licenses_response.json()
+        licenses_data = licenses_response.json()
+        
+        # Handle both list and dict response formats
+        if isinstance(licenses_data, dict):
+            licenses = licenses_data.get("licenses", [])
+        else:
+            licenses = licenses_data
         
         if not licenses:
             pytest.skip("No licenses found to test projections")
