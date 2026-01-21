@@ -100,9 +100,14 @@ class TestIssue2CommissionField:
         assert response.status_code == 200, f"Failed to log trade: {response.text}"
         data = response.json()
         
-        # Verify commission was recorded
-        assert "commission" in data or "trade_id" in data, f"Response: {data}"
-        print(f"✓ Logged missed trade with commission: {data}")
+        # Verify commission was recorded - check in the nested 'trade' object
+        if "trade" in data:
+            assert "commission" in data["trade"], f"Commission missing in trade: {data}"
+            assert data["trade"]["commission"] == 5.0, f"Commission value incorrect: {data['trade']['commission']}"
+            print(f"✓ Logged missed trade with commission: {data['trade']['commission']}")
+        else:
+            assert "commission" in data, f"Response: {data}"
+            print(f"✓ Logged missed trade with commission: {data}")
         
         # Clean up - delete the test trade
         requests.delete(
