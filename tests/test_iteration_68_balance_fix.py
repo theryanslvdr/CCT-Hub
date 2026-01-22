@@ -37,7 +37,8 @@ class TestLicenseProjectionBalanceFix:
         if login_response.status_code != 200:
             pytest.skip("Failed to login as Master Admin")
         
-        token = login_response.json().get("token")
+        # API returns access_token, not token
+        token = login_response.json().get("access_token") or login_response.json().get("token")
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         
         # Test licensee ID
@@ -238,7 +239,8 @@ class TestLicenseProjectionDataIntegrity:
         if login_response.status_code != 200:
             pytest.skip("Failed to login as Master Admin")
         
-        token = login_response.json().get("token")
+        # API returns access_token, not token
+        token = login_response.json().get("access_token") or login_response.json().get("token")
         self.session.headers.update({"Authorization": f"Bearer {token}"})
         self.license_id = "618db632-4910-47d0-a0dc-1efdd297736a"
     
