@@ -1867,6 +1867,39 @@ export const ProfitTrackerPage = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Account Growth card - Only for licensees */}
+        {isLicensee && (
+          <Card className="glass-card" data-testid="account-growth-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-zinc-400">Account Growth</p>
+                  <p className={`text-2xl font-bold font-mono mt-1 ${
+                    licenseeAccountGrowth !== null && licenseeAccountGrowth >= 0 
+                      ? 'text-emerald-400' 
+                      : 'text-red-400'
+                  }`}>
+                    {licenseeAccountGrowth !== null 
+                      ? `${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`
+                      : '--'
+                    }
+                  </p>
+                  <p className="text-[10px] text-zinc-500">
+                    From initial {formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0)}
+                  </p>
+                </div>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  licenseeAccountGrowth !== null && licenseeAccountGrowth >= 0
+                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
+                    : 'bg-gradient-to-br from-red-500 to-red-600'
+                }`}>
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) - Hidden for licensees */}
