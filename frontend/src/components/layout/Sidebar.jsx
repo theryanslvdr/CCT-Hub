@@ -117,6 +117,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         lotSize: 0.05,
         totalDeposits: 5000,
         totalProfit: 0,
+        starting_amount: 5000, // Add starting amount for demo
         effective_start_date: new Date().toISOString().split('T')[0] // Default to today for demo
       });
     } else {
@@ -132,6 +133,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           lot_size: licensee.lot_size,
           total_deposits: licensee.total_deposits,
           total_profit: licensee.total_profit,
+          starting_amount: licensee.starting_amount, // Add starting amount for growth calculation
           allowed_dashboards: licensee.allowed_dashboards,
           license_type: selectedLicenseType,
           displayName: licensee.full_name,
