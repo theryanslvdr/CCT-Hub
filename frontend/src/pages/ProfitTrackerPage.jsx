@@ -2880,12 +2880,9 @@ export const ProfitTrackerPage = () => {
                       ? day.actualProfit - day.targetProfit 
                       : null;
                     
-                    // For licensees: check if master admin traded on this day
-                    // First check trade overrides (manual overrides by Master Admin), then fall back to actual trades
-                    const hasOverride = tradeOverrides[day.dateKey] !== undefined;
-                    const masterTraded = hasOverride 
-                      ? tradeOverrides[day.dateKey].traded 
-                      : masterAdminTrades[day.dateKey]?.traded;
+                    // For licensees: use the managerTraded flag directly from the computed projection
+                    // This is more reliable as it's already calculated with proper fallback logic
+                    const masterTraded = day.managerTraded;
                     
                     // Check if this date is a global holiday
                     const isGlobalHoliday = globalHolidays.some(h => h.date === day.dateKey);
