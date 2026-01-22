@@ -1065,13 +1065,11 @@ export const ProfitTrackerPage = () => {
       
       if (monthProjections.length === 0) return [];
       
-      // Build projections with carry-forward logic when manager didn't trade
-      // Start with the first day's "start_value" (balance BEFORE first trade)
-      let runningBalance = monthProjections[0]?.start_value || 
-                           (monthProjections[0]?.account_value - monthProjections[0]?.daily_profit) || 
-                           effectiveAccountValue;
+      // For licensees: The backend's get_license_projections endpoint already calculates
+      // correct start_value for each day with quarterly compounding. We just use those
+      // values directly instead of recalculating in the frontend.
       
-      // Track accumulated profit for this month (for licensees)
+      // Track accumulated profit for this month (for Current Profit display)
       let accumulatedProfit = 0;
       
       return monthProjections.map((p, idx) => {
