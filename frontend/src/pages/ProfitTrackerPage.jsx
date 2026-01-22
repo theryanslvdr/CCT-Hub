@@ -1053,10 +1053,12 @@ export const ProfitTrackerPage = () => {
                            selectedMonth.monthDate.getMonth() === today.getMonth();
     
     // For ALL licensees: Use backend projections with Manager Traded logic
-    if (isLicensee && licenseProjections.length > 0) {
+    // Note: licenseeProjections (from simulation) takes precedence over licenseProjections (from user profile)
+    const activeProjections = licenseeProjections.length > 0 ? licenseeProjections : licenseProjections;
+    if (isLicensee && activeProjections.length > 0) {
       // Filter projections for selected month
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
-      let monthProjections = licenseProjections.filter(p => p.date.startsWith(monthKey));
+      let monthProjections = activeProjections.filter(p => p.date.startsWith(monthKey));
       
       // Filter by effective start date if set
       if (effectiveStartDate) {
