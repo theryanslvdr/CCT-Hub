@@ -189,6 +189,7 @@ export const AuthProvider = ({ children }) => {
         lotSize: memberData.lot_size,
         totalDeposits: memberData.total_deposits,
         totalProfit: memberData.total_profit,
+        starting_amount: memberData.starting_amount, // Include starting amount for growth calculation
         license_type: memberData.license_type || null,
         allowed_dashboards: memberData.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'profile'],
         // Include licenseId for trade override API calls (P0 feature)
