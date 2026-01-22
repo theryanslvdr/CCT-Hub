@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="9" time="2.676" timestamp="2026-01-22T08:07:00.190423+00:00" hostname="agent-env-a661057d-39f2-4d1b-bb1d-aa0447aaf384"><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_projections_endpoint_returns_200" time="0.299"><failure message="AssertionError: Expected 200, got 401: {&quot;detail&quot;:&quot;Invalid token&quot;}&#10;assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:49: in test_projections_endpoint_returns_200
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid token"}
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_projections_have_required_fields" time="0.280"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:59: in test_projections_have_required_fields
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_balance_never_drops_on_consecutive_days" time="0.277"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:75: in test_balance_never_drops_on_consecutive_days
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_balance_increases_when_manager_traded" time="0.270"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:107: in test_balance_increases_when_manager_traded
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_balance_stays_same_when_not_traded" time="0.266"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:142: in test_balance_stays_same_when_not_traded
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_quarterly_compounding_lot_size_fixed" time="0.307"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:174: in test_quarterly_compounding_lot_size_fixed
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionBalanceFix" name="test_specific_january_dates_no_drop" time="0.271"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:199: in test_specific_january_dates_no_drop
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionDataIntegrity" name="test_start_value_matches_account_value_logic" time="0.263"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:248: in test_start_value_matches_account_value_logic
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_68_balance_fix.TestLicenseProjectionDataIntegrity" name="test_daily_profit_formula" time="0.263"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_68_balance_fix.py:281: in test_daily_profit_formula
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase></testsuite></testsuites>
