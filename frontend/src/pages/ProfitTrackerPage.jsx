@@ -1106,36 +1106,28 @@ export const ProfitTrackerPage = () => {
           status = 'future';
         }
         
-        // Calculate balance - accumulate properly
-        const balanceBefore = runningBalance;
+        // For licensees: USE THE BACKEND'S PRE-CALCULATED VALUES DIRECTLY
+        // The backend's get_license_projections endpoint already calculates:
+        // - start_value: correct balance at start of each day (with quarterly compounding)
+        // - daily_profit: fixed per quarter
+        // - manager_traded: whether master admin traded
+        // DO NOT recalculate in frontend - this causes the balance drop bug!
+        const balanceBefore = p.start_value;  // Use backend value directly!
         
-        // For past days and today (if traded), add the actual profit
-        // For future days, project based on accumulated balance
+        // Daily profit comes from backend
         let dailyProfit = p.daily_profit;
         
-        // If master didn't trade on a past day, no profit for that day
+        // For display: if master didn't trade on a past day, show 0 profit for that day
         if (isPast && !masterTraded) {
           dailyProfit = 0;
         }
         
-        // Track accumulated profit from trading days
+        // Track accumulated profit from trading days (for summary display)
         if ((isPast || (isToday && masterTraded)) && masterTraded) {
           accumulatedProfit += p.daily_profit;
         }
         
-        // Update running balance for next day
-        // Only add profit if manager actually traded (for past days) or for future projections
-        if (isPast && masterTraded) {
-          runningBalance = balanceBefore + p.daily_profit;
-        } else if (isToday && masterTraded) {
-          // For today, use the projected profit if manager traded
-          runningBalance = balanceBefore + p.daily_profit;
-        } else if (isFuture) {
-          // For future days, project based on current running balance
-          // Assume manager WILL trade (optimistic projection)
-          runningBalance = balanceBefore + p.daily_profit;
-        }
-        // If manager didn't trade on past day, balance stays the same (carry forward)
+        // NO NEED to update runningBalance - we're using backend values directly
         
         return {
           date: projDate,
