@@ -1065,9 +1065,20 @@ export const ProfitTrackerPage = () => {
       
       if (monthProjections.length === 0) return [];
       
-      // For licensees: The backend's get_license_projections endpoint already calculates
-      // correct start_value for each day with quarterly compounding. We just use those
-      // values directly instead of recalculating in the frontend.
+      // For licensees: Use backend's quarterly compounding values as the base,
+      // BUT recalculate when there are local overrides that differ from backend
+      
+      // First, check if any overrides differ from backend's manager_traded
+      const hasOverrideDifferences = monthProjections.some(p => {
+        const override = tradeOverrides[p.date];
+        if (override !== undefined) {
+          return override.traded !== p.manager_traded;
+        }
+        return false;
+      });
+      
+      // Track running balance (starting from first projection's start_value)
+      let runningBalance = monthProjections[0]?.start_value || effectiveAccountValue;
       
       // Track accumulated profit for this month (for Current Profit display)
       let accumulatedProfit = 0;
@@ -1078,54 +1089,68 @@ export const ProfitTrackerPage = () => {
         const isFuture = projDate > today;
         const isPast = projDate < today;
         
-        // Check trade override first, then fall back to:
-        // - For licensees: use manager_traded from projections endpoint (more reliable)
-        // - For non-licensees: use masterAdminTrades from separate API call
+        // Check trade override first, then fall back to backend's manager_traded
         const hasOverride = tradeOverrides[p.date] !== undefined;
         let masterTraded;
         if (hasOverride) {
           masterTraded = tradeOverrides[p.date].traded;
         } else if (isLicensee && p.manager_traded !== undefined) {
-          // Use manager_traded directly from license projections (most reliable source)
           masterTraded = p.manager_traded;
         } else {
           masterTraded = masterAdminTrades[p.date]?.traded;
         }
         
-        // Determine status
+        // Determine status based on masterTraded (including overrides)
         let status = 'pending';
         if (isPast && masterTraded) {
           status = 'completed';
         } else if (isPast && !masterTraded) {
-          status = 'missed'; // Past day without master admin trade
+          status = 'missed';
         } else if (isToday) {
           status = masterTraded ? 'completed' : 'pending';
         } else if (isFuture) {
           status = 'future';
         }
         
-        // For licensees: USE THE BACKEND'S PRE-CALCULATED VALUES DIRECTLY
-        // The backend's get_license_projections endpoint already calculates:
-        // - start_value: correct balance at start of each day (with quarterly compounding)
-        // - daily_profit: fixed per quarter
-        // - manager_traded: whether master admin traded
-        // DO NOT recalculate in frontend - this causes the balance drop bug!
-        const balanceBefore = p.start_value;  // Use backend value directly!
-        
-        // Daily profit comes from backend
-        let dailyProfit = p.daily_profit;
-        
-        // For display: if master didn't trade on a past day, show 0 profit for that day
-        if (isPast && !masterTraded) {
-          dailyProfit = 0;
+        // Determine balance before for this day
+        // If no override differences, use backend's pre-calculated start_value
+        // If there are override differences, recalculate from running balance
+        let balanceBefore;
+        if (hasOverrideDifferences) {
+          // Recalculate: use running balance which accounts for overrides
+          balanceBefore = runningBalance;
+        } else {
+          // No overrides differ: use backend's pre-calculated value (most accurate)
+          balanceBefore = p.start_value;
+          // Also sync runningBalance for consistency
+          runningBalance = p.start_value;
         }
         
-        // Track accumulated profit from trading days (for summary display)
-        if ((isPast || (isToday && masterTraded)) && masterTraded) {
-          accumulatedProfit += p.daily_profit;
+        // Daily profit from backend
+        const dailyProfit = p.daily_profit;
+        
+        // Track accumulated profit from trading days
+        if ((isPast || isToday) && masterTraded) {
+          accumulatedProfit += dailyProfit;
         }
         
-        // NO NEED to update runningBalance - we're using backend values directly
+        // Update running balance for next day's calculation
+        // Add profit only if manager traded (or if today and traded, or future for projection)
+        if (hasOverrideDifferences) {
+          if ((isPast || (isToday && masterTraded)) && masterTraded) {
+            runningBalance = balanceBefore + dailyProfit;
+          } else if (isFuture) {
+            // For future: assume trading will happen (optimistic projection)
+            runningBalance = balanceBefore + dailyProfit;
+          }
+          // If didn't trade on past day, balance stays same (carry forward)
+        } else {
+          // When using backend values, let the next iteration pick up from backend's start_value
+          // But we still need to track running balance for the case when next day has override
+          if (idx < monthProjections.length - 1) {
+            runningBalance = monthProjections[idx + 1]?.start_value || (balanceBefore + (masterTraded ? dailyProfit : 0));
+          }
+        }
         
         return {
           date: projDate,
@@ -1136,13 +1161,13 @@ export const ProfitTrackerPage = () => {
           }),
           dateKey: p.date,
           balanceBefore: balanceBefore,
-          lotSize: p.lot_size,  // Will be hidden in UI for licensees
-          targetProfit: masterTraded || isFuture ? p.daily_profit : 0, // Show "--" for missed past days
-          actualProfit: (isPast || isToday) && masterTraded ? p.daily_profit : undefined,
+          lotSize: p.lot_size,
+          targetProfit: masterTraded || isFuture ? dailyProfit : 0,
+          actualProfit: (isPast || isToday) && masterTraded ? dailyProfit : undefined,
           status: status,
           isToday: isToday,
-          managerTraded: masterTraded, // Explicit flag for the "Manager Traded" column
-          hasOverride: hasOverride, // Track if this is an override
+          managerTraded: masterTraded,
+          hasOverride: hasOverride,
         };
       });
     }
