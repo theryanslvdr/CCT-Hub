@@ -1080,11 +1080,19 @@ export const ProfitTrackerPage = () => {
         const isFuture = projDate > today;
         const isPast = projDate < today;
         
-        // Check trade override first, then fall back to master admin trades
+        // Check trade override first, then fall back to:
+        // - For licensees: use manager_traded from projections endpoint (more reliable)
+        // - For non-licensees: use masterAdminTrades from separate API call
         const hasOverride = tradeOverrides[p.date] !== undefined;
-        const masterTraded = hasOverride 
-          ? tradeOverrides[p.date].traded 
-          : masterAdminTrades[p.date]?.traded;
+        let masterTraded;
+        if (hasOverride) {
+          masterTraded = tradeOverrides[p.date].traded;
+        } else if (isLicensee && p.manager_traded !== undefined) {
+          // Use manager_traded directly from license projections (most reliable source)
+          masterTraded = p.manager_traded;
+        } else {
+          masterTraded = masterAdminTrades[p.date]?.traded;
+        }
         
         // Determine status
         let status = 'pending';
