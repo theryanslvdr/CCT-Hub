@@ -1774,18 +1774,18 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Summary Cards - For licensees: 3 full-width cards (no LOT size), For others: 4 cards */}
-      <div className={`grid gap-3 ${isLicensee ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
+      {/* Summary Cards - For licensees: 4 cards (Account Value, Deposits, Total Profit, Account Growth), For others: 4 cards */}
+      <div className={`grid gap-3 ${isLicensee ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
         <Card className="glass-card" data-testid="account-value-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-xs text-zinc-400">Account Value</p>
-                <ValueTooltip exactValue={formatFullCurrency(effectiveAccountValue)}>
+                <ValueTooltip exactValue={formatFullCurrency(displayAccountValue)}>
                   {/* Desktop: Full amount, Mobile: Compact */}
                   <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{formatLargeNumber(effectiveAccountValue)}</span>
-                    <span className="md:hidden">{formatCompact(effectiveAccountValue)}</span>
+                    <span className="hidden md:inline">{formatLargeNumber(displayAccountValue)}</span>
+                    <span className="md:hidden">{formatCompact(displayAccountValue)}</span>
                   </p>
                 </ValueTooltip>
               </div>
