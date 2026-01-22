@@ -1233,7 +1233,7 @@ export const ProfitTrackerPage = () => {
       globalHolidayDates,
       effectiveStartDate  // Pass effective start date for licensees
     );
-  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, masterAdminTrades, tradeOverrides, deposits, withdrawals, globalHolidays, effectiveStartDate]);
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, licenseeProjections, masterAdminTrades, tradeOverrides, deposits, withdrawals, globalHolidays, effectiveStartDate]);
 
   // Handle opening Adjust Trade dialog for a specific date
   const handleOpenEnterAP = (day) => {
