@@ -2793,9 +2793,9 @@ export const ProfitTrackerPage = () => {
             </DialogTitle>
           </DialogHeader>
           
-          {/* Monthly Summary Card */}
+          {/* Monthly Summary Card - For licensees: 2 columns (no commission), For others: 3 columns */}
           {getDailyProjectionForSelectedMonth.length > 0 && (
-            <div className="grid grid-cols-3 gap-3 mt-4">
+            <div className={`grid ${isLicensee ? 'grid-cols-2' : 'grid-cols-3'} gap-3 mt-4`}>
               <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
                 <p className="text-xs text-blue-400 uppercase tracking-wider">Monthly Target</p>
                 <p className="text-lg font-bold font-mono text-blue-400 mt-1">
@@ -2811,33 +2811,36 @@ export const ProfitTrackerPage = () => {
                 <p className="text-xs text-emerald-400 uppercase tracking-wider">Current Profit</p>
                 <p className={`text-lg font-bold font-mono mt-1 ${
                   getDailyProjectionForSelectedMonth
-                    .filter(day => day.status === 'completed' && day.actualProfit !== undefined)
-                    .reduce((sum, day) => sum + (day.actualProfit || 0), 0) >= 0
+                    .filter(day => day.managerTraded === true || (day.status === 'completed' && day.actualProfit !== undefined))
+                    .reduce((sum, day) => sum + (day.actualProfit || day.targetProfit || 0), 0) >= 0
                     ? 'text-emerald-400' : 'text-red-400'
                 }`}>
                   ${formatNumber(
                     getDailyProjectionForSelectedMonth
-                      .filter(day => day.status === 'completed' && day.actualProfit !== undefined)
-                      .reduce((sum, day) => sum + (day.actualProfit || 0), 0)
+                      .filter(day => day.managerTraded === true || (day.status === 'completed' && day.actualProfit !== undefined))
+                      .reduce((sum, day) => sum + (day.actualProfit || day.targetProfit || 0), 0)
                   )}
                 </p>
                 <p className="text-[10px] text-zinc-500 mt-0.5">
-                  {getDailyProjectionForSelectedMonth.filter(day => day.status === 'completed' && day.actualProfit !== undefined).length} trades completed
+                  {getDailyProjectionForSelectedMonth.filter(day => day.managerTraded === true || (day.status === 'completed' && day.actualProfit !== undefined)).length} trades completed
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20">
-                <p className="text-xs text-cyan-400 uppercase tracking-wider">Total Commission</p>
-                <p className="text-lg font-bold font-mono text-cyan-400 mt-1">
-                  ${formatNumber(
-                    getDailyProjectionForSelectedMonth
-                      .filter(day => day.status === 'completed')
-                      .reduce((sum, day) => sum + (day.commission || 0), 0)
-                  )}
-                </p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
-                  From referral bonuses
-                </p>
-              </div>
+              {/* Total Commission - Hidden for licensees (they don't earn commission) */}
+              {!isLicensee && (
+                <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20">
+                  <p className="text-xs text-cyan-400 uppercase tracking-wider">Total Commission</p>
+                  <p className="text-lg font-bold font-mono text-cyan-400 mt-1">
+                    ${formatNumber(
+                      getDailyProjectionForSelectedMonth
+                        .filter(day => day.status === 'completed')
+                        .reduce((sum, day) => sum + (day.commission || 0), 0)
+                    )}
+                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">
+                    From referral bonuses
+                  </p>
+                </div>
+              )}
             </div>
           )}
           
