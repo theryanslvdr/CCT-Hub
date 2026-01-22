@@ -3803,8 +3803,18 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
         overrides[override["date"]] = override
     
     # Generate projections for up to 2 years from start date
+    # IMPORTANT: For BOTH honorary and extended licensees, use QUARTERLY COMPOUNDING
+    # Lot size and daily profit are fixed for the entire quarter
     projections = []
     current_balance = starting_amount
+    
+    # Track quarter for quarterly compounding
+    current_quarter = get_quarter(start_date)
+    current_year = start_date.year
+    
+    # Calculate initial quarter's values (FIXED for entire quarter)
+    quarter_lot_size = round(current_balance / 980, 2)
+    quarter_daily_profit = round(quarter_lot_size * 15, 2)
     
     # Generate projections day by day
     current_date = start_date
@@ -3818,9 +3828,20 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
         
         date_str = current_date.strftime("%Y-%m-%d")
         
-        # Calculate lot size and daily profit based on balance
-        lot_size = round(current_balance / 980, 2)
-        daily_profit = round(lot_size * 15, 2)
+        # Check if we've moved to a new quarter - recalculate lot size and daily profit
+        new_quarter = get_quarter(current_date)
+        new_year = current_date.year
+        
+        if new_year != current_year or new_quarter != current_quarter:
+            # Recalculate lot size and daily profit for new quarter using accumulated balance
+            quarter_lot_size = round(current_balance / 980, 2)
+            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            current_quarter = new_quarter
+            current_year = new_year
+        
+        # Use FIXED quarter values (not recalculated daily)
+        lot_size = quarter_lot_size
+        daily_profit = quarter_daily_profit
         
         # Check if manager traded (override takes precedence)
         override = overrides.get(date_str)
@@ -3843,7 +3864,7 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
             "has_override": override is not None
         })
         
-        # Update balance for next day (only if manager traded)
+        # Update balance for next day (only if manager traded AND day is in the past or today)
         if manager_traded and current_date <= datetime.now(timezone.utc):
             current_balance = current_balance + daily_profit
         
