@@ -1235,6 +1235,70 @@ export const ProfitTrackerPage = () => {
     );
   }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, licenseeProjections, masterAdminTrades, tradeOverrides, deposits, withdrawals, globalHolidays, effectiveStartDate]);
 
+  // For licensees: Calculate Account Value from daily projections
+  // This shows the balance AFTER the most recent day where Manager Traded = true
+  const licenseeAccountValueFromProjections = useMemo(() => {
+    if (!isLicensee) return null;
+    
+    // Use the same projection source as the daily table
+    const activeProjections = licenseeProjections.length > 0 ? licenseeProjections : licenseProjections;
+    if (activeProjections.length === 0) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get all projections up to and including today
+    const projectionsUpToToday = activeProjections.filter(p => {
+      const projDate = new Date(p.date + 'T00:00:00');
+      return projDate <= today;
+    });
+    
+    if (projectionsUpToToday.length === 0) return null;
+    
+    // Find the most recent day where manager traded (including overrides)
+    let lastTradedProjection = null;
+    for (let i = projectionsUpToToday.length - 1; i >= 0; i--) {
+      const p = projectionsUpToToday[i];
+      const override = tradeOverrides[p.date];
+      const managerTraded = override !== undefined ? override.traded : p.manager_traded;
+      
+      if (managerTraded) {
+        lastTradedProjection = p;
+        break;
+      }
+    }
+    
+    if (!lastTradedProjection) {
+      // No trades yet, return starting balance
+      return projectionsUpToToday[0]?.start_value || null;
+    }
+    
+    // Return balance AFTER the last traded day (start_value + daily_profit)
+    return lastTradedProjection.start_value + lastTradedProjection.daily_profit;
+  }, [isLicensee, licenseeProjections, licenseProjections, tradeOverrides]);
+
+  // For licensees: Calculate Account Growth percentage
+  // Formula: ((Current Account Value - Starting Amount) / Starting Amount) × 100
+  const licenseeAccountGrowth = useMemo(() => {
+    if (!isLicensee) return null;
+    
+    // Get starting amount from simulation context
+    const startingAmount = simulatedView?.starting_amount || simulatedView?.startingAmount;
+    if (!startingAmount || startingAmount === 0) return null;
+    
+    // Use the calculated account value from projections, or fall back to effectiveAccountValue
+    const currentValue = licenseeAccountValueFromProjections || effectiveAccountValue;
+    if (!currentValue) return null;
+    
+    const growth = ((currentValue - startingAmount) / startingAmount) * 100;
+    return growth;
+  }, [isLicensee, simulatedView, licenseeAccountValueFromProjections, effectiveAccountValue]);
+
+  // Effective account value for display - for licensees, use projection-based value
+  const displayAccountValue = isLicensee && licenseeAccountValueFromProjections !== null
+    ? licenseeAccountValueFromProjections
+    : effectiveAccountValue;
+
   // Handle opening Adjust Trade dialog for a specific date
   const handleOpenEnterAP = (day) => {
     setEnterAPDate(day);
