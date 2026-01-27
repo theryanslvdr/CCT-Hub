@@ -969,7 +969,7 @@ export const AdminMembersPage = () => {
                   )}
 
                   {/* Manage License - Master Admin only, for regular members */}
-                  {isMasterAdmin() && (selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
+                  {isMasterAdmin() && selectedMember?.role === 'member' && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
