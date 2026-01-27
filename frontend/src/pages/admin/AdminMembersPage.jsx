@@ -1056,6 +1056,51 @@ export const AdminMembersPage = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Deactivate/Reactivate User - Admin only */}
+                  {selectedMember?.id !== user?.id && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${memberDetails?.user?.is_deactivated ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                            {memberDetails?.user?.is_deactivated ? (
+                              <UserCheck className="w-5 h-5 text-emerald-400" />
+                            ) : (
+                              <UserX className="w-5 h-5 text-red-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">
+                              {memberDetails?.user?.is_deactivated ? 'Reactivate User' : 'Deactivate User'}
+                            </p>
+                            <p className="text-xs text-zinc-500">
+                              {memberDetails?.user?.is_deactivated 
+                                ? 'Allow this user to login again' 
+                                : 'Prevent this user from logging in'}
+                            </p>
+                          </div>
+                        </div>
+                        {memberDetails?.user?.is_deactivated ? (
+                          <Button
+                            onClick={() => handleReactivateUser(selectedMember.id)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            data-testid="reactivate-user-btn"
+                          >
+                            <UserCheck className="w-4 h-4 mr-1" /> Reactivate
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => handleDeactivateUser(selectedMember.id)}
+                            variant="outline"
+                            className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                            data-testid="deactivate-user-btn"
+                          >
+                            <UserX className="w-4 h-4 mr-1" /> Deactivate
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
