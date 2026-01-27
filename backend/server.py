@@ -1218,12 +1218,16 @@ class CommissionCreate(BaseModel):
 @profit_router.post("/commission")
 async def record_commission(data: CommissionCreate, user: dict = Depends(get_current_user)):
     """Record a commission from referral trades"""
+    # Use the specified commission date or default to today
+    commission_date = data.commission_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
     commission = {
         "id": str(uuid.uuid4()),
         "user_id": user["id"],
         "amount": data.amount,
         "traders_count": data.traders_count,
         "notes": data.notes or f"Commission from {data.traders_count} referral trades",
+        "commission_date": commission_date,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
@@ -1238,6 +1242,7 @@ async def record_commission(data: CommissionCreate, user: dict = Depends(get_cur
         "currency": "USDT",
         "notes": f"Referral commission ({data.traders_count} traders)",
         "is_commission": True,
+        "commission_date": commission_date,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.deposits.insert_one(deposit)
@@ -1246,7 +1251,8 @@ async def record_commission(data: CommissionCreate, user: dict = Depends(get_cur
         "message": "Commission recorded successfully",
         "commission_id": commission["id"],
         "amount": data.amount,
-        "traders_count": data.traders_count
+        "traders_count": data.traders_count,
+        "commission_date": commission_date
     }
 
 @profit_router.get("/commissions")
