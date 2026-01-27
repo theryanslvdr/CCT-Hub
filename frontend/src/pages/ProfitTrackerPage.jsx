@@ -1409,6 +1409,30 @@ export const ProfitTrackerPage = () => {
     }
   };
 
+  // Handle "Did not trade" action
+  const handleDidNotTrade = async (day) => {
+    if (!window.confirm(
+      `Mark ${day.dateStr} as "Did not trade"?\n\n` +
+      `This will:\n` +
+      `• Set profit/commission for this day to $0\n` +
+      `• Reset your trading streak to 0\n\n` +
+      `This action cannot be undone.`
+    )) {
+      return;
+    }
+
+    try {
+      await api.post('/trade/did-not-trade', null, {
+        params: { date: day.dateKey }
+      });
+      toast.success('Marked as "Did not trade". Your streak has been reset.');
+      loadData();
+    } catch (error) {
+      console.error('Failed to mark as did not trade:', error);
+      toast.error(error.response?.data?.detail || 'Failed to mark as "did not trade"');
+    }
+  };
+
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
