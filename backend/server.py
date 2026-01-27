@@ -1213,6 +1213,7 @@ class CommissionCreate(BaseModel):
     amount: float
     traders_count: int
     notes: Optional[str] = None
+    commission_date: Optional[str] = None  # Date to tie the commission to (YYYY-MM-DD)
 
 @profit_router.post("/commission")
 async def record_commission(data: CommissionCreate, user: dict = Depends(get_current_user)):
