@@ -674,6 +674,13 @@ async def login(data: UserLogin):
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    # Check if user is deactivated
+    if user.get("is_deactivated"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Your account has been deactivated. Please contact your inviter to reactivate your account."
+        )
+    
     # Skip Heartbeat verification for admins and licensees
     admin_roles = ["basic_admin", "admin", "super_admin", "master_admin"]
     is_licensee = user.get("license_type") is not None
