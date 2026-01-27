@@ -978,7 +978,7 @@ export const AdminMembersPage = () => {
                           </div>
                           <div>
                             <p className="text-white font-medium">Simulate Member View</p>
-                            <p className="text-xs text-zinc-500">See the platform from this member's perspective</p>
+                            <p className="text-xs text-zinc-500">See the platform from this member&apos;s perspective</p>
                           </div>
                         </div>
                         <Button
