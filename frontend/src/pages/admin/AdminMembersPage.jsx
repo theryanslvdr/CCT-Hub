@@ -595,8 +595,14 @@ export const AdminMembersPage = () => {
                           </td>
                         )}
                         <td>
-                          <span className={`status-badge ${member.is_suspended ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                            {member.is_suspended ? 'Suspended' : 'Active'}
+                          <span className={`status-badge ${
+                            member.is_deactivated 
+                              ? 'bg-zinc-500/20 text-zinc-400' 
+                              : member.is_suspended 
+                                ? 'bg-red-500/20 text-red-400' 
+                                : 'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {member.is_deactivated ? 'Deactivated' : member.is_suspended ? 'Suspended' : 'Active'}
                           </span>
                         </td>
                         <td className="font-mono text-zinc-400">
