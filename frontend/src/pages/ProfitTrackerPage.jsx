@@ -376,7 +376,8 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
 
 // Generate monthly projection data for accordion (up to 5 years = 60 months)
 // Now includes past months if user has trade data in those months
-const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHolidayDates = new Set(), deposits = []) => {
+// effectiveStartDate filters out months before the user's start date (for "new trader" resets)
+const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHolidayDates = new Set(), deposits = [], effectiveStartDate = null) => {
   const months = [];
   const today = new Date();
   
