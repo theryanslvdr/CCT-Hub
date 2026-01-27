@@ -539,6 +539,7 @@ export const AdminMembersPage = () => {
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="suspended">Suspended</SelectItem>
+            <SelectItem value="deactivated">Deactivated</SelectItem>
           </SelectContent>
         </Select>
       </div>
