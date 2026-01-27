@@ -2790,6 +2790,56 @@ export const ProfitTrackerPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Adjust Commission Dialog */}
+      <Dialog open={adjustCommissionOpen} onOpenChange={setAdjustCommissionOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Award className="w-5 h-5 text-cyan-400" /> Adjust Commission
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-sm text-zinc-400">
+              Add or update commission for <span className="text-white font-medium">{adjustCommissionDate?.dateStr}</span>
+            </p>
+            <div>
+              <Label className="text-zinc-300">Commission Amount (USDT)</Label>
+              <div className="relative mt-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={adjustCommissionAmount}
+                  onChange={(e) => setAdjustCommissionAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="input-dark pl-7"
+                  data-testid="adjust-commission-amount"
+                />
+              </div>
+              <p className="text-xs text-zinc-500 mt-1">
+                This will add commission earnings for the selected date
+              </p>
+            </div>
+            <Button 
+              onClick={handleSubmitAdjustCommission} 
+              className="w-full btn-primary"
+              disabled={adjustCommissionLoading}
+              data-testid="confirm-adjust-commission"
+            >
+              {adjustCommissionLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Award className="w-4 h-4 mr-2" /> Save Commission
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Projection Vision Card */}
       <Card className="glass-highlight border-blue-500/30">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
