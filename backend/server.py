@@ -2971,7 +2971,7 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
     
     # Get all member users
     all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
-    member_users = [u for u in all_users if u.get("role") in ["user", "member"]]
+    member_users = [u for u in all_users if u.get("role") == "member"]  # Merged "user" into "member"
     
     # Get today's trades
     today_trades = await db.trade_logs.find({
