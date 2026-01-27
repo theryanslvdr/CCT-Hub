@@ -1443,6 +1443,17 @@ async def update_trade_time_entered(
 async def get_trade_streak(user: dict = Depends(get_current_user)):
     """Calculate current streak of consecutive trading days (regardless of profit/loss)"""
     
+    # Check if user has a streak reset date (from "did not trade" action)
+    streak_reset_date = user.get("streak_reset_date")
+    streak_reset_filter = None
+    if streak_reset_date:
+        try:
+            reset_date = datetime.strptime(streak_reset_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            # Only count trades AFTER the reset date
+            streak_reset_filter = reset_date.isoformat()
+        except:
+            pass
+    
     # Fetch global holidays from database instead of hardcoded list
     global_holidays_cursor = db.global_holidays.find({}, {"_id": 0, "date": 1})
     global_holidays_list = await global_holidays_cursor.to_list(1000)
@@ -1477,9 +1488,19 @@ async def get_trade_streak(user: dict = Depends(get_current_user)):
             attempts += 1
         return prev if attempts < 14 else None
     
-    # Get all trades ordered by date descending
+    # Build query - exclude "did not trade" entries from streak calculation
+    query = {
+        "user_id": user["id"],
+        "did_not_trade": {"$ne": True}  # Exclude "did not trade" entries
+    }
+    
+    # If there's a streak reset date, only count trades after that date
+    if streak_reset_filter:
+        query["created_at"] = {"$gt": streak_reset_filter}
+    
+    # Get all valid trades ordered by date descending
     trades = await db.trade_logs.find(
-        {"user_id": user["id"]}, 
+        query, 
         {"_id": 0, "created_at": 1}
     ).sort("created_at", -1).to_list(1000)
     
