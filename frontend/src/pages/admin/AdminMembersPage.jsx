@@ -89,6 +89,7 @@ export const AdminMembersPage = () => {
       if (searchQuery) params.append('search', searchQuery);
       if (roleFilter !== 'all') params.append('role', roleFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (sortByAccountValue !== 'none') params.append('sort_account_value', sortByAccountValue);
 
       const res = await api.get(`/admin/members?${params}`);
       setMembers(res.data.members);
@@ -100,7 +101,7 @@ export const AdminMembersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, roleFilter, statusFilter]);
+  }, [currentPage, searchQuery, roleFilter, statusFilter, sortByAccountValue]);
 
   const loadLicenses = useCallback(async () => {
     if (!isMasterAdmin()) return;
