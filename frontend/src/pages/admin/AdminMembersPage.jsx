@@ -544,6 +544,30 @@ export const AdminMembersPage = () => {
             <SelectItem value="deactivated">Deactivated</SelectItem>
           </SelectContent>
         </Select>
+        {canSeeAccountValue && (
+          <Select value={sortByAccountValue} onValueChange={(v) => { setSortByAccountValue(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-48 input-dark" data-testid="sort-account-value">
+              <SelectValue placeholder="Sort by Account" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4" /> Default Order
+                </div>
+              </SelectItem>
+              <SelectItem value="asc">
+                <div className="flex items-center gap-2">
+                  <ArrowUp className="w-4 h-4" /> Account Value: Low → High
+                </div>
+              </SelectItem>
+              <SelectItem value="desc">
+                <div className="flex items-center gap-2">
+                  <ArrowDown className="w-4 h-4" /> Account Value: High → Low
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Members Table */}
