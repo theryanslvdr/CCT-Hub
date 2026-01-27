@@ -3179,15 +3179,26 @@ export const ProfitTrackerPage = () => {
                                 Trade Now
                               </Button>
                             ) : day.status === 'missed' ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-                                onClick={() => handleOpenEnterAP(day)}
-                                data-testid={`enter-ap-${day.dateKey}`}
-                              >
-                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
-                              </Button>
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
+                                  onClick={() => handleOpenEnterAP(day)}
+                                  data-testid={`enter-ap-${day.dateKey}`}
+                                >
+                                  <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-6 text-xs border-red-500/50 text-red-400 hover:bg-red-500/20"
+                                  onClick={() => handleDidNotTrade(day)}
+                                  data-testid={`did-not-trade-${day.dateKey}`}
+                                >
+                                  <X className="w-3 h-3 mr-1" /> Did Not Trade
+                                </Button>
+                              </div>
                             ) : day.status === 'future' ? (
                               <span className="text-zinc-500 text-xs">-</span>
                             ) : day.isToday ? (
