@@ -2461,8 +2461,11 @@ async def get_members(
         query["role"] = role
     if status == "suspended":
         query["is_suspended"] = True
+    elif status == "deactivated":
+        query["is_deactivated"] = True
     elif status == "active":
         query["is_suspended"] = {"$ne": True}
+        query["is_deactivated"] = {"$ne": True}
     
     # IMPORTANT: Exclude licensees from standard member list
     # Licensees should be managed through the Licenses page, not Member Management
