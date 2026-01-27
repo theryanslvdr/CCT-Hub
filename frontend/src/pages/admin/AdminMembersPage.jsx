@@ -224,13 +224,44 @@ export const AdminMembersPage = () => {
   };
 
   const handleDowngradeRole = async (userId) => {
-    if (!window.confirm('Are you sure you want to downgrade this user to regular user?')) return;
+    if (!window.confirm('Are you sure you want to downgrade this user to member?')) return;
     try {
       await api.post(`/admin/downgrade-role/${userId}`);
-      toast.success('User downgraded to regular user');
+      toast.success('User downgraded to member');
       loadMembers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to downgrade role');
+    }
+  };
+
+  const handleDeactivateUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to deactivate this user? They will not be able to login until reactivated.')) return;
+    try {
+      await api.post(`/admin/deactivate/${userId}`);
+      toast.success('User has been deactivated');
+      loadMembers();
+      // Refresh member details if viewing
+      if (selectedMember?.id === userId) {
+        const res = await api.get(`/admin/members/${userId}`);
+        setMemberDetails(res.data);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to deactivate user');
+    }
+  };
+
+  const handleReactivateUser = async (userId) => {
+    try {
+      await api.post(`/admin/reactivate/${userId}`);
+      toast.success('User has been reactivated');
+      loadMembers();
+      // Refresh member details if viewing
+      if (selectedMember?.id === userId) {
+        const res = await api.get(`/admin/members/${userId}`);
+        setMemberDetails(res.data);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reactivate user');
     }
   };
 
