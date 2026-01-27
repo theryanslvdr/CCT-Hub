@@ -731,7 +731,9 @@ async def get_me(user: dict = Depends(get_current_user)):
         lot_size=user.get("lot_size"),
         timezone=user.get("timezone", "UTC"),
         allowed_dashboards=user.get("allowed_dashboards"),
-        license_type=user.get("license_type")
+        license_type=user.get("license_type"),
+        trading_start_date=user.get("trading_start_date"),  # For filtering past dates
+        trading_type=user.get("trading_type")  # "new" or "experienced"
     )
 
 class VerifyPasswordRequest(BaseModel):
