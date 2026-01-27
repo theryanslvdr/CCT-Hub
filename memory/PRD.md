@@ -11,6 +11,52 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 66 (2026-01-27) - 6 Feature Batch Implementation ✅
+
+#### Feature #1: Simulate Commission with Date Picker ✅
+- **Added**: `commission_date` field to Commission dialog
+- **Backend**: `/api/profit/commission` now accepts `commission_date` parameter
+- **UI**: Date picker at top of Simulate Commission dialog
+- **Default**: Today's date, user can select any date
+
+#### Feature #2: Adjust Commission in Daily Projection Table ✅
+- **Added**: Commission column is now clickable
+- **Opens**: "Adjust Commission" dialog with date pre-filled
+- **Endpoint**: Uses same `/api/profit/commission` endpoint
+- **For missed days**: Shows "Add" link to add commission
+
+#### Feature #3: Merge "User" and "Member" Roles ✅
+- **Migrated**: All "user" roles to "member" in database
+- **UI Updated**: Role filter dropdown shows "Members" instead of "Users"
+- **Backend Updated**: Admin downgrade now sets role to "member"
+- **Consolidated**: Single role for all non-admin users
+
+#### Feature #4: Sort Members by Account Value ✅
+- **Added**: "Sort by Account Value" dropdown on Admin Members page
+- **Options**: Default Order, Low → High, High → Low
+- **Backend**: `/api/admin/members` accepts `sort_account_value` parameter
+- **Visibility**: Only shown to Super Admin and Master Admin
+
+#### Feature #5: Deactivate/Reactivate Users ✅
+- **New Endpoints**: 
+  - `POST /api/admin/deactivate/{user_id}` - Deactivate user
+  - `POST /api/admin/reactivate/{user_id}` - Reactivate user
+- **Login Check**: Deactivated users see "Your account has been deactivated" message
+- **UI**: Deactivate/Reactivate buttons in Member Details → Actions tab
+- **Status Filter**: Added "Deactivated" option to status dropdown
+
+#### Feature #6: "Did Not Trade" Button ✅
+- **New Endpoint**: `POST /api/trade/did-not-trade?date=YYYY-MM-DD`
+- **Behavior**: Creates trade log with `actual_profit=0`, `did_not_trade=true`
+- **Streak Reset**: Sets `streak_reset_date` on user, streak recalculates from after that date
+- **UI**: Red "Did Not Trade" button appears next to "Adjust Trade" for missed days
+- **Confirmation**: Shows warning about streak reset before action
+
+#### Testing ✅
+- **Iteration 73**: 100% backend (11/11 tests passed), 100% frontend
+- All 6 features verified via UI testing
+- Test file: `/app/backend/tests/test_six_features.py`
+
 ### Session 65 (2026-01-21) - 6 Feature Requests & Bug Fixes ✅
 
 #### Issue 1: Admin Approval for Trade Adjustments ✅
