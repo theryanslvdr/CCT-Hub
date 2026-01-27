@@ -3275,12 +3275,22 @@ export const ProfitTrackerPage = () => {
                         {/* Commission column - hidden for licensees */}
                         {!isLicensee && (
                           <td>
-                            {day.status === 'completed' && day.commission > 0 ? (
-                              <span className="font-mono text-cyan-400">
-                                +{formatMoney(day.commission)}
-                              </span>
-                            ) : day.status === 'completed' ? (
-                              <span className="text-zinc-500 text-xs">-</span>
+                            {day.status === 'completed' || day.status === 'active' || day.isToday ? (
+                              <button
+                                onClick={() => handleOpenAdjustCommission(day)}
+                                className="font-mono text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer"
+                                data-testid={`adjust-commission-${day.dateKey}`}
+                              >
+                                {day.commission > 0 ? `+${formatMoney(day.commission)}` : '-'}
+                              </button>
+                            ) : day.status === 'missed' ? (
+                              <button
+                                onClick={() => handleOpenAdjustCommission(day)}
+                                className="text-zinc-500 text-xs hover:text-cyan-400 hover:underline cursor-pointer"
+                                data-testid={`adjust-commission-${day.dateKey}`}
+                              >
+                                Add
+                              </button>
                             ) : (
                               <span className="text-zinc-500 text-xs">-</span>
                             )}
