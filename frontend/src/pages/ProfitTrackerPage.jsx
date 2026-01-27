@@ -668,6 +668,12 @@ export const ProfitTrackerPage = () => {
   const [adjustmentAmount, setAdjustmentAmount] = useState(''); // deposit/withdrawal amount
   const [adjustedBalance, setAdjustedBalance] = useState(''); // manually adjusted balance before trade
   
+  // Adjust Commission Dialog states
+  const [adjustCommissionOpen, setAdjustCommissionOpen] = useState(false);
+  const [adjustCommissionDate, setAdjustCommissionDate] = useState(null);
+  const [adjustCommissionAmount, setAdjustCommissionAmount] = useState('');
+  const [adjustCommissionLoading, setAdjustCommissionLoading] = useState(false);
+  
   // Access Records Dialog (combined deposit, withdrawal, commission records)
   const [accessRecordsOpen, setAccessRecordsOpen] = useState(false);
   const [activeRecordTab, setActiveRecordTab] = useState('deposits');
