@@ -407,7 +407,8 @@ export const AdminMembersPage = () => {
     return null;
   };
 
-  const userCount = members.filter(m => m.role === 'user').length;
+  // Count members (merged "user" into "member")
+  const memberCount = members.filter(m => m.role === 'member').length;
   const adminCount = members.filter(m => m.role === 'admin').length;
   const superAdminCount = members.filter(m => m.role === 'super_admin').length;
 
