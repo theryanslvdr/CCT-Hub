@@ -1407,24 +1407,8 @@ export const TradeMonitorPage = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          {showExitAlert ? (
-            // Step 1: Alarm is ringing - show "Trade Entered" button (Mobile Optimized)
-            <div className="text-center space-y-4 md:space-y-6">
-              <div className="animate-bounce">
-                <div className="text-5xl md:text-6xl">🚨</div>
-              </div>
-              <h2 className="text-2xl md:text-4xl font-bold text-emerald-400 animate-pulse">ENTER YOUR TRADE NOW!</h2>
-              <p className="text-base md:text-xl text-zinc-300">
-                Target: <span className="font-mono text-emerald-400">{formatLargeNumber(exitValue)}</span>
-              </p>
-              <div className="flex justify-center">
-                <Button onClick={confirmTradeEntered} className="btn-primary text-lg md:text-xl py-5 md:py-6 px-6 md:px-8 w-full md:w-auto" data-testid="trade-entered-button">
-                  <Check className="w-5 h-5 md:w-6 md:h-6 mr-2" /> Trade Entered
-                </Button>
-              </div>
-            </div>
-          ) : tradeEntered ? (
-            // Step 2: User entered trade - show "Exit Trade" button (Mobile Optimized)
+          {tradeEntered && !tradeEnded ? (
+            // Trade time has passed - show "Exit Trade" button (auto-entered or manually entered)
             <div className="text-center space-y-4 md:space-y-6">
               <div className="p-3 md:p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
                 <p className="text-emerald-400 text-base md:text-lg font-semibold">✓ Trade Active</p>
@@ -1439,7 +1423,7 @@ export const TradeMonitorPage = () => {
               </Button>
             </div>
           ) : tradeEnded ? (
-            // Step 3: User exited trade - show actual profit input (Mobile Optimized)
+            // User exited trade - show actual profit input (Mobile Optimized)
             <div className="text-center space-y-4 md:space-y-6">
               <h3 className="text-xl md:text-2xl font-bold text-white">Enter Your Actual Profit</h3>
               <p className="text-zinc-400 text-sm md:text-base">How much did you actually make?</p>
@@ -1494,102 +1478,58 @@ export const TradeMonitorPage = () => {
                 Submit & See Results
               </Button>
             </div>
-          ) : isTrading && countdown ? (
+          ) : (
+            // Waiting for trade time or ready to trade
             <div className="text-center space-y-4 md:space-y-6">
-              {/* Countdown stall warning */}
-              {countdownStalled && (
-                <div className="p-2 md:p-3 rounded-lg bg-amber-500/20 border border-amber-500/30 flex flex-wrap items-center justify-center gap-2 md:gap-3">
-                  <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-400" />
-                  <span className="text-amber-400 text-xs md:text-sm">Countdown may have stalled</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={restartCountdown}
-                    className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10 text-xs h-7"
-                    data-testid="restart-countdown-btn"
-                  >
-                    <RefreshCw className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Refresh
-                  </Button>
-                </div>
-              )}
-              
-              {/* Show active 30-second countdown when within 30 seconds */}
-              {preTradeCountdown ? (
-                <div className="space-y-3 md:space-y-4">
-                  <div className="animate-pulse p-4 md:p-6 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/50">
-                    <p className="text-base md:text-lg text-red-300 mb-2">🚨 TRADE STARTING IN</p>
-                    <p className="text-5xl md:text-6xl font-mono font-bold text-red-400">
-                      {preTradeCountdown}
-                    </p>
-                    <p className="text-xs md:text-sm text-red-300 mt-2">SECONDS</p>
+              {tradeWindowInfo.isTradeTime || tradeWindowInfo.isPostTrade ? (
+                // Trade time has passed but not auto-entered yet (edge case)
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    <p className="text-emerald-400 text-lg font-semibold">🎯 Trade Time!</p>
+                    <p className="text-zinc-400 text-sm mt-1">The trading window is now open</p>
                   </div>
-                  <p className="text-zinc-400 text-sm md:text-base">
-                    Target: <span className="text-xl md:text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
-                  </p>
+                  <div className="p-3 rounded-lg bg-zinc-900/50">
+                    <p className="text-xs text-zinc-400">Target Exit Value</p>
+                    <p className="text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
+                  </div>
+                </div>
+              ) : tradeWindowInfo.canTrade ? (
+                // Within 20 min of trade time - can check in
+                <div className="space-y-4">
+                  <p className="text-zinc-400 text-sm md:text-base">Ready to trade? The window is open!</p>
+                  <div className="p-3 md:p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+                    <p className="text-blue-400 text-sm">Trade time: <span className="font-mono font-bold">{signal?.trade_time}</span></p>
+                    <p className="text-[10px] text-zinc-500 mt-1">{signal?.trade_timezone || 'Asia/Manila'}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-zinc-900/50">
+                    <p className="text-xs text-zinc-400">Target Exit Value</p>
+                    <p className="text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
+                  </div>
+                </div>
+              ) : signal ? (
+                // Not yet within trade window
+                <div className="space-y-4">
+                  <p className="text-zinc-400 text-sm md:text-base">Trading window opens in:</p>
+                  <div className="p-3 md:p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <p className="text-2xl md:text-3xl font-mono font-bold text-amber-300">
+                      {tradeWindowInfo.minutesUntilOpen > 60 
+                        ? `${Math.floor(tradeWindowInfo.minutesUntilOpen / 60)}h ${tradeWindowInfo.minutesUntilOpen % 60}m`
+                        : `${tradeWindowInfo.minutesUntilOpen} min`}
+                    </p>
+                    <p className="text-[10px] md:text-xs text-zinc-500 mt-2">
+                      Trade time: {signal?.trade_time} ({signal?.trade_timezone || 'Asia/Manila'})
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-zinc-900/50">
+                    <p className="text-xs text-zinc-400">Target Exit Value</p>
+                    <p className="text-xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</p>
+                  </div>
                 </div>
               ) : (
-                <>
-                  <p className="text-zinc-400 text-sm md:text-base">Waiting for trade time...</p>
-                  {/* Mobile: Compact horizontal countdown, Desktop: Cards */}
-                  <div className="flex justify-center gap-2 md:gap-4">
-                    {['hours', 'minutes', 'seconds'].map((unit) => (
-                      <div key={unit} className={`glass-card p-2 md:p-4 min-w-[60px] md:min-w-[100px] ${countdownStalled ? 'border-amber-500/50' : ''}`}>
-                        <p className={`text-2xl md:text-4xl font-mono font-bold ${countdownStalled ? 'text-amber-400' : 'text-white'}`}>
-                          {String(countdown[unit]).padStart(2, '0')}
-                        </p>
-                        <p className="text-[10px] md:text-xs text-zinc-500 uppercase">{unit.slice(0, 3)}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-2 md:p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-xs md:text-sm text-blue-300">
-                      💡 Active countdown appears 30s before trade
-                    </p>
-                  </div>
-                  <div className="text-zinc-400 text-sm md:text-base">
-                    Target: <span className="text-xl md:text-2xl font-mono font-bold text-emerald-400">{formatLargeNumber(exitValue)}</span>
-                  </div>
-                </>
-              )}
-              <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
-                <Button onClick={stopTrade} variant="outline" className="btn-secondary text-sm md:text-base py-2 md:py-2.5" data-testid="cancel-trade-button">
-                  <Square className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" /> Cancel
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={restartCountdown}
-                  className="text-zinc-400 hover:text-white text-xs md:text-sm"
-                  data-testid="refresh-countdown-btn"
-                >
-                  <RefreshCw className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Refresh
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center space-y-4 md:space-y-6">
-              <p className="text-zinc-400 text-sm md:text-base">Ready to trade? Check in when you&apos;re ready.</p>
-              {!tradeWindowInfo.canTrade && signal && (
-                <div className="mb-4 p-3 md:p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
-                  <p className="text-amber-400 text-xs md:text-sm mb-2">Trading window opens in:</p>
-                  <p className="text-xl md:text-2xl font-mono font-bold text-amber-300">
-                    {tradeWindowInfo.minutesUntilOpen > 60 
-                      ? `${Math.floor(tradeWindowInfo.minutesUntilOpen / 60)}h ${tradeWindowInfo.minutesUntilOpen % 60}m`
-                      : `${tradeWindowInfo.minutesUntilOpen} min`}
-                  </p>
-                  <p className="text-[10px] md:text-xs text-zinc-500 mt-2">Check in available 20 min before trade time</p>
+                // No signal
+                <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                  <p className="text-zinc-400">No active trading signal</p>
                 </div>
-              )}
-              <Button
-                onClick={startTrade}
-                className={`exit-button idle py-6 md:py-8 text-lg md:text-2xl w-full max-w-md ${!tradeWindowInfo.canTrade ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={!signal || !tradeWindowInfo.canTrade}
-                data-testid="check-in-button"
-              >
-                <Play className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3" /> I&apos;m Ready to Trade
-              </Button>
-              {!tradeWindowInfo.canTrade && signal && (
-                <p className="text-[10px] md:text-xs text-zinc-500 mt-2">Enabled 20 min before trade time</p>
               )}
             </div>
           )}
