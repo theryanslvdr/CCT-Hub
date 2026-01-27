@@ -526,7 +526,7 @@ export const AdminMembersPage = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="user">Users</SelectItem>
+            <SelectItem value="member">Members</SelectItem>
             <SelectItem value="admin">Admins</SelectItem>
             <SelectItem value="super_admin">Super Admins</SelectItem>
           </SelectContent>
