@@ -161,6 +161,8 @@ class UserResponse(BaseModel):
     timezone: Optional[str] = "UTC"
     allowed_dashboards: Optional[List[str]] = None  # For normal members - modular access
     license_type: Optional[str] = None  # For licensees: "extended" or "honorary"
+    trading_start_date: Optional[str] = None  # For new traders: date they started (YYYY-MM-DD)
+    trading_type: Optional[str] = None  # "new" or "experienced"
 
 class TokenResponse(BaseModel):
     access_token: str
