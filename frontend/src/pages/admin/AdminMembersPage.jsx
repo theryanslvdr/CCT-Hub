@@ -14,7 +14,8 @@ import {
   Users, ShieldCheck, ShieldAlert, Search, UserCog, Eye, Ban, 
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
   Activity, DollarSign, TrendingUp, Calendar, Crown, Play,
-  Award, FileCheck, AlertTriangle, RefreshCw, Loader2, AlertCircle
+  Award, FileCheck, AlertTriangle, RefreshCw, Loader2, AlertCircle,
+  UserX, UserCheck
 } from 'lucide-react';
 import api, { adminAPI } from '@/lib/api';
 
