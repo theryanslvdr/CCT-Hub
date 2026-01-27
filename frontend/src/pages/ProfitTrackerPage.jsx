@@ -385,6 +385,15 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
   const depositDates = deposits.map(d => d.created_at?.split('T')[0]).filter(Boolean).sort();
   const allDates = [...tradeKeys, ...depositDates].sort();
   
+  // Parse effective start date for filtering (for "new trader" users who reset)
+  let effectiveStartParsed = null;
+  if (effectiveStartDate) {
+    effectiveStartParsed = new Date(effectiveStartDate + 'T00:00:00');
+    if (isNaN(effectiveStartParsed.getTime())) {
+      effectiveStartParsed = null;
+    }
+  }
+  
   let startMonthOffset = 0;
   
   if (allDates.length > 0) {
@@ -402,6 +411,15 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
   for (let monthOffset = startMonthOffset; monthOffset < 0; monthOffset++) {
     const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
     const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    // Skip months that are entirely before the effective start date
+    // For "new trader" users, don't show months before their reset date
+    if (effectiveStartParsed) {
+      const monthLastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+      if (monthLastDay < effectiveStartParsed) {
+        continue; // Skip this month entirely
+      }
+    }
     
     const hasTradesInMonth = tradeKeys.some(key => key.startsWith(monthKey));
     const hasDepositsInMonth = depositDates.some(d => d?.startsWith(monthKey));
