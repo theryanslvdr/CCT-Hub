@@ -257,6 +257,43 @@ export const TradeMonitorPage = () => {
     return () => clearInterval(interval);
   }, [getTradeWindowInfo]);
 
+  // AUTO-ENTRY: When trade time passes, automatically enter the trade
+  // This replaces the countdown timer logic - simpler and more reliable
+  useEffect(() => {
+    // Only auto-enter if:
+    // 1. We have a signal
+    // 2. Trade time has passed (isTradeTime or isPostTrade)
+    // 3. User hasn't already entered the trade
+    // 4. User hasn't already logged profit (tradeEnded = true means they're in profit entry)
+    // 5. We haven't already shown the missed trade popup
+    if (!signal || tradeEntered || tradeEnded || missedTradeChecked || showCelebration) {
+      return;
+    }
+    
+    const { isTradeTime, isPostTrade } = tradeWindowInfo;
+    
+    if (isTradeTime || isPostTrade) {
+      // Auto-enter the trade
+      setTradeEntered(true);
+      setIsTrading(true);
+      tradeEnteredRef.current = true;
+      
+      // Save to localStorage so state persists across refreshes
+      const tradeState = {
+        signalId: signal.id,
+        timestamp: new Date().toISOString(),
+        autoEntered: true // Flag that this was auto-entered
+      };
+      localStorage.setItem('trade_entered_state', JSON.stringify(tradeState));
+      
+      // Show a notification that trade time has passed
+      if (!tradeNotifiedRef.current) {
+        tradeNotifiedRef.current = true;
+        toast.success('Trade time has passed! Enter your profit when ready.', { duration: 5000 });
+      }
+    }
+  }, [signal, tradeWindowInfo, tradeEntered, tradeEnded, missedTradeChecked, showCelebration]);
+
   // Data loading functions - use useCallback to capture isInBVE correctly
   const loadData = useCallback(async () => {
     try {
