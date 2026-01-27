@@ -2456,6 +2456,7 @@ async def get_members(
     search: Optional[str] = None,
     role: Optional[str] = None,
     status: Optional[str] = None,
+    sort_account_value: Optional[str] = None,  # 'asc' or 'desc'
     user: dict = Depends(require_admin)
 ):
     query = {}
