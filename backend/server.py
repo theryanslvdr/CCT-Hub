@@ -1758,6 +1758,82 @@ async def log_missed_trade(
         "trade": {k: v for k, v in trade_log.items() if k != "_id"}
     }
 
+@trade_router.post("/did-not-trade")
+async def mark_did_not_trade(
+    date: str,  # ISO date string (YYYY-MM-DD)
+    user: dict = Depends(get_current_user)
+):
+    """Mark a date as 'did not trade' - sets profit to 0 and resets streak"""
+    
+    # Parse the date
+    try:
+        if 'T' in date:
+            trade_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+        else:
+            trade_date = datetime.strptime(date, "%Y-%m-%d").replace(
+                hour=12, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+            )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+    
+    # Check if this is a past date (can't mark future dates as did not trade)
+    now = datetime.now(timezone.utc)
+    if trade_date.date() >= now.date():
+        raise HTTPException(status_code=400, detail="Can only mark past dates as 'did not trade'")
+    
+    # Check if user already has a trade for this date
+    date_start = trade_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    date_end = trade_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    existing_trade = await db.trade_logs.find_one({
+        "user_id": user["id"],
+        "created_at": {
+            "$gte": date_start.isoformat(),
+            "$lte": date_end.isoformat()
+        }
+    })
+    
+    if existing_trade:
+        raise HTTPException(status_code=400, detail="Trade already exists for this date")
+    
+    # Create the "did not trade" entry with 0 profit
+    trade_id = str(uuid.uuid4())
+    created_at_str = trade_date.isoformat()
+    if '+' not in created_at_str and not created_at_str.endswith('Z'):
+        created_at_str = created_at_str + "+00:00"
+    
+    trade_log = {
+        "id": trade_id,
+        "user_id": user["id"],
+        "lot_size": 0,
+        "direction": None,
+        "projected_profit": 0,
+        "actual_profit": 0,
+        "commission": 0,
+        "profit_difference": 0,
+        "performance": "missed",
+        "signal_id": None,
+        "notes": "Did not trade",
+        "did_not_trade": True,  # Special flag for this type of entry
+        "is_retroactive": True,
+        "created_at": created_at_str
+    }
+    
+    await db.trade_logs.insert_one(trade_log)
+    
+    # Reset user's streak to 0 by storing the reset date
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"streak_reset_date": trade_date.strftime("%Y-%m-%d")}}
+    )
+    
+    return {
+        "message": "Marked as 'did not trade'. Your trading streak has been reset to 0.",
+        "trade_id": trade_id,
+        "date": date,
+        "streak_reset": True
+    }
+
 @trade_router.post("/forward-to-profit")
 async def forward_trade_to_profit(trade_id: str, is_bve: bool = False, user: dict = Depends(get_current_user)):
     """Forward trade profit to profit tracker by creating a deposit entry"""
