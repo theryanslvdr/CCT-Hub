@@ -5946,6 +5946,36 @@ async def downgrade_role(user_id: str, user: dict = Depends(require_super_admin)
     )
     return {"message": "User downgraded to member"}
 
+@admin_router.post("/deactivate/{user_id}")
+async def deactivate_user(user_id: str, user: dict = Depends(require_admin)):
+    """Deactivate a user - they cannot login until reactivated"""
+    if user_id == user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot deactivate yourself")
+    
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check role hierarchy - can't deactivate higher or equal roles
+    role_hierarchy = {'super_admin': 4, 'master_admin': 3, 'admin': 2, 'member': 1}
+    if role_hierarchy.get(target_user.get("role"), 0) >= role_hierarchy.get(user.get("role"), 0):
+        raise HTTPException(status_code=403, detail="Cannot deactivate users with equal or higher role")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_deactivated": True, "deactivated_at": datetime.now(timezone.utc).isoformat(), "deactivated_by": user["id"]}}
+    )
+    return {"message": "User has been deactivated"}
+
+@admin_router.post("/reactivate/{user_id}")
+async def reactivate_user(user_id: str, user: dict = Depends(require_admin)):
+    """Reactivate a deactivated user"""
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_deactivated": False}, "$unset": {"deactivated_at": "", "deactivated_by": ""}}
+    )
+    return {"message": "User has been reactivated"}
+
 # ==================== DEBT MANAGEMENT ROUTES ====================
 
 @debt_router.post("", response_model=DebtResponse)
