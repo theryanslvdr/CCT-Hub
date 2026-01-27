@@ -5942,9 +5942,9 @@ async def downgrade_role(user_id: str, user: dict = Depends(require_super_admin)
     
     await db.users.update_one(
         {"id": user_id},
-        {"$set": {"role": "user", "updated_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {"role": "member", "updated_at": datetime.now(timezone.utc).isoformat()}}  # Changed from "user" to "member"
     )
-    return {"message": "User downgraded to regular user"}
+    return {"message": "User downgraded to member"}
 
 # ==================== DEBT MANAGEMENT ROUTES ====================
 
