@@ -904,7 +904,7 @@ export const AdminMembersPage = () => {
                   <h4 className="text-sm font-medium text-zinc-400">Member Actions</h4>
                   
                   {/* Simulate Member View - for regular members */}
-                  {(selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
+                  {selectedMember?.role === 'member' && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -973,7 +973,7 @@ export const AdminMembersPage = () => {
                   )}
 
                   {/* Upgrade Role - for regular members */}
-                  {(selectedMember?.role === 'member' || selectedMember?.role === 'user') && (
+                  {selectedMember?.role === 'member' && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
