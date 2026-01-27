@@ -1139,7 +1139,10 @@ A sandboxed environment for Super/Master Admins to test without affecting real d
 - `POST /api/bve/exit` - Exit BVE, cleanup
 
 ### Other Key Endpoints
-- `POST /api/profit/commission` - Record commission
+- `POST /api/profit/commission` - Record commission (now with commission_date parameter)
+- `POST /api/trade/did-not-trade` - Mark day as "did not trade", resets streak
+- `POST /api/admin/deactivate/{user_id}` - Deactivate user account
+- `POST /api/admin/reactivate/{user_id}` - Reactivate user account
 - `GET /api/settings/email-history` - Email logs
 - `PUT /api/admin/signals/{id}` - Update/deactivate signal
 
