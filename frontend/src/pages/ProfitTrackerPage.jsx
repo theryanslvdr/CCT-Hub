@@ -1439,6 +1439,47 @@ export const ProfitTrackerPage = () => {
     }
   };
 
+  // Adjust Commission handlers
+  const handleOpenAdjustCommission = (day) => {
+    setAdjustCommissionDate(day);
+    setAdjustCommissionAmount(day.commission?.toString() || '');
+    setAdjustCommissionOpen(true);
+  };
+
+  const handleSubmitAdjustCommission = async () => {
+    if (!adjustCommissionAmount || parseFloat(adjustCommissionAmount) < 0) {
+      toast.error('Please enter a valid commission amount');
+      return;
+    }
+
+    if (!adjustCommissionDate) {
+      toast.error('No date selected');
+      return;
+    }
+
+    setAdjustCommissionLoading(true);
+    try {
+      // Use the commission endpoint with the specific date
+      await api.post('/profit/commission', {
+        amount: parseFloat(adjustCommissionAmount),
+        traders_count: 1,
+        notes: `Commission adjustment for ${adjustCommissionDate.dateStr}`,
+        commission_date: adjustCommissionDate.dateKey
+      });
+      
+      toast.success('Commission adjusted successfully!');
+      setAdjustCommissionOpen(false);
+      setAdjustCommissionAmount('');
+      setAdjustCommissionDate(null);
+      loadData();
+    } catch (error) {
+      console.error('Failed to adjust commission:', error);
+      toast.error(error.response?.data?.detail || 'Failed to adjust commission');
+    } finally {
+      setAdjustCommissionLoading(false);
+    }
+  };
+
 
   // Deposit flow handlers
   const handleSimulateDeposit = () => {
