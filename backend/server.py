@@ -2510,6 +2510,11 @@ async def get_members(
                 user_data["account_value"] = round(total_deposits - total_withdrawals + total_profit, 2)
         users.append(user_data)
     
+    # Sort by account value if requested (sorting happens after calculation)
+    if sort_account_value and can_see_account_value:
+        reverse = sort_account_value == 'desc'
+        users.sort(key=lambda x: x.get('account_value', 0), reverse=reverse)
+    
     return {
         "members": users,
         "total": total,
