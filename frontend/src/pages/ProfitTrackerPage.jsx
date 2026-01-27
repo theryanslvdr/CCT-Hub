@@ -2353,6 +2353,17 @@ export const ProfitTrackerPage = () => {
                 Record commission earnings from your referrals&apos; trades.
               </p>
               <div>
+                <Label className="text-zinc-300">Commission Date</Label>
+                <Input
+                  type="date"
+                  value={commissionDate}
+                  onChange={(e) => setCommissionDate(e.target.value)}
+                  className="input-dark mt-1"
+                  data-testid="commission-date-input"
+                />
+                <p className="text-xs text-zinc-500 mt-1">The date the commission should be applied to</p>
+              </div>
+              <div>
                 <Label className="text-zinc-300">Commission Amount (USDT)</Label>
                 <div className="relative mt-1">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
