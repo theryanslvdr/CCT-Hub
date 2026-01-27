@@ -708,8 +708,13 @@ export const ProfitTrackerPage = () => {
   const [tradeOverrides, setTradeOverrides] = useState({});
   const [togglingTrade, setTogglingTrade] = useState(null); // Track which date is being toggled
   
-  // Get effective start date for licensees
-  const effectiveStartDate = simulatedView?.effective_start_date || null;
+  // Get effective start date for filtering past dates
+  // Priority: 1) Simulated view's effective_start_date (for licensee simulation)
+  //           2) User's trading_start_date (for users who reset as "new trader")
+  // This ensures users who reset as "new trader" don't see dates before their reset
+  const effectiveStartDate = simulatedView?.effective_start_date 
+    || (user?.trading_type === 'new' ? user?.trading_start_date : null)
+    || null;
   
   // Projection states
   const [selectedYears, setSelectedYears] = useState(1);
