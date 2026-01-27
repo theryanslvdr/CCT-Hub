@@ -678,6 +678,7 @@ export const ProfitTrackerPage = () => {
   const [commissionAmount, setCommissionAmount] = useState('');
   const [commissionTradersCount, setCommissionTradersCount] = useState('');
   const [commissionNotes, setCommissionNotes] = useState('');
+  const [commissionDate, setCommissionDate] = useState(new Date().toISOString().split('T')[0]);
   const [commissions, setCommissions] = useState([]);
   
   // Dream Daily Profit Dialog states
