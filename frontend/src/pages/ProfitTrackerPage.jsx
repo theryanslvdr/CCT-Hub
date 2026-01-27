@@ -1620,7 +1620,8 @@ export const ProfitTrackerPage = () => {
       await api.post('/profit/commission', {
         amount: parseFloat(commissionAmount),
         traders_count: parseInt(commissionTradersCount),
-        notes: commissionNotes || `Commission from ${commissionTradersCount} referral trades`
+        notes: commissionNotes || `Commission from ${commissionTradersCount} referral trades`,
+        commission_date: commissionDate
       });
       toast.success('Commission recorded successfully!');
       resetCommissionDialog();
