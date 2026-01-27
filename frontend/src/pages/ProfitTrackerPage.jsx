@@ -1636,6 +1636,7 @@ export const ProfitTrackerPage = () => {
     setCommissionAmount('');
     setCommissionTradersCount('');
     setCommissionNotes('');
+    setCommissionDate(new Date().toISOString().split('T')[0]);
   };
 
   // Dream Daily Profit Calculator
