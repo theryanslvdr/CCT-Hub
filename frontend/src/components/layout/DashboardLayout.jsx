@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
+import { MobileMenu } from './MobileMenu';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
 import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
