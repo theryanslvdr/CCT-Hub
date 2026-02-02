@@ -240,9 +240,25 @@ export const Header = ({ onMenuClick, title }) => {
             </div>
           </div>
 
-          {/* Notification Sheet - Off-Canvas Panel - Only for Super/Master Admin */}
+          {/* Mobile Notification Bell - Links to /notifications page */}
+          <button
+            onClick={() => navigate('/notifications')}
+            className="md:hidden relative p-2 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-colors"
+            data-testid="mobile-notifications-bell"
+          >
+            <Bell className="w-5 h-5" />
+            {wsUnreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full">
+                {wsUnreadCount > 99 ? '99+' : wsUnreadCount}
+              </span>
+            )}
+          </button>
+
+          {/* Notification Sheet - Off-Canvas Panel - Only for Super/Master Admin (Desktop) */}
           {canSeeNotifications && (
-            <NotificationSheet />
+            <div className="hidden md:block">
+              <NotificationSheet />
+            </div>
           )}
 
           {/* BVE Toggle - Only for Super/Master Admin */}
