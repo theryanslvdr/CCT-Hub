@@ -11,6 +11,49 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 67 (2026-02-02) - Bug Fixes & Mobile Experience Overhaul ✅
+
+#### Issue #1: Trade Direction Mismatch - FIXED ✅
+- **Problem**: Trade history showed direction from frontend input, not from signal
+- **Fix**: `log_trade` endpoint now uses `active_signal.get('direction')` as source of truth
+- **Trade History**: Updated to show direction from linked signal
+
+#### Issue #2: Mobile App Experience - IMPLEMENTED ✅
+- **Bottom Navigation**: Added `MobileBottomNav.jsx` with 5 tabs
+  - Home | Tracker | **Trade** (center, highlighted) | Members/Goals | Profile
+  - Trade Monitor is center button with gradient styling
+- **Pull-to-Refresh**: Added `usePullToRefresh` hook in `/hooks/usePullToRefresh.js`
+  - Integrated in TradeMonitorPage
+  - PullToRefreshIndicator component shows during pull
+- **Haptic Feedback**: `triggerHaptic()` function on button taps
+  - Light (10ms), Medium (25ms), Heavy (30-10-30ms), Success (15-50-15ms)
+- **Layout Updated**: DashboardLayout includes MobileBottomNav, hides footer on mobile
+
+#### Issue #3: Notifications System - FIXED ✅
+- **Problem**: Notifications weren't being recorded properly
+- **Solution**: Enhanced notification system with role-based visibility
+- **New Functions**:
+  - `create_admin_notification()` - Admin-only (deposits, withdrawals, underperformance)
+  - `create_member_notification()` - Community (new members, trading signals, profit submissions)
+- **Updated Endpoints**: Notifications now triggered for:
+  - User registration (admin + member)
+  - Deposits/withdrawals (admin)
+  - Trade logged (admin if underperform + member for profit submission)
+  - Trading signals (member)
+  - Tracker reset (admin)
+- **GET /api/notifications**: Returns from 3 collections (personal, community, admin)
+
+#### Issue #4: Email Deliverability - INVESTIGATED ✅
+- **Problem**: Emails not sending
+- **Root Cause Found**: Function name conflict (`send_email` defined twice in server.py)
+- **Fix**: Renamed conflicting function to `send_simple_email`
+- **Status**: API calls work, but domain "crosscurrent.finance" needs verification with Emailit
+- **Note**: User needs to verify their domain with Emailit provider
+
+#### Testing ✅
+- **Iteration 74**: 100% backend (14/14 tests passed), 100% frontend
+- All 4 issues verified via UI and API testing
+
 ### Session 66 (2026-01-27) - 6 Feature Batch Implementation ✅
 
 #### Feature #1: Simulate Commission with Date Picker ✅
