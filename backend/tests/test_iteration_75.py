@@ -104,29 +104,25 @@ class TestMissedTradersWidget:
         assert res.status_code == 200, f"Failed: {res.text}"
         data = res.json()
         
-        # Check response structure - frontend expects 'missed_traders' but backend returns 'missed_members'
-        # This is a potential bug - let's document what we get
-        print(f"Response keys: {data.keys()}")
+        # Check response structure
+        assert "missed_traders" in data, "Response should include missed_traders"
+        print(f"Missed traders count: {len(data['missed_traders'])}")
         
-        # Backend returns missed_members, frontend expects missed_traders
-        if "missed_members" in data:
-            print(f"Backend returns 'missed_members' (count: {len(data['missed_members'])})")
-            # Check structure of each member
-            if data["missed_members"]:
-                member = data["missed_members"][0]
-                print(f"Member fields: {member.keys()}")
-                # Frontend expects: id, full_name, last_trade_at
-                # Backend returns: id, name, email
-        
-        if "missed_traders" in data:
-            print(f"Backend returns 'missed_traders' (count: {len(data['missed_traders'])})")
+        # Check structure of each trader
+        if data["missed_traders"]:
+            trader = data["missed_traders"][0]
+            assert "id" in trader, "Trader should have id"
+            assert "full_name" in trader, "Trader should have full_name"
+            assert "last_trade_at" in trader, "Trader should have last_trade_at"
+            print(f"Trader fields: {trader.keys()}")
     
     def test_send_email_to_member_endpoint(self):
         """Test sending email to a member"""
         # First get a member to send email to
         res = requests.get(f"{BASE_URL}/api/admin/members", headers=self.headers)
         assert res.status_code == 200, f"Failed to get members: {res.text}"
-        members = res.json()
+        data = res.json()
+        members = data.get("members", [])
         
         if members and len(members) > 0:
             member = members[0]
