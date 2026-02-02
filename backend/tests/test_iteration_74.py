@@ -192,7 +192,10 @@ class TestIssue4Email:
         assert response.status_code != 404, "Email history endpoint should exist"
         if response.status_code == 200:
             data = response.json()
-            assert isinstance(data, list), "Email history should return a list"
+            # Email history returns paginated response with 'emails' field
+            assert "emails" in data or isinstance(data, list), "Email history should return emails"
+            if "emails" in data:
+                assert isinstance(data["emails"], list), "emails field should be a list"
     
     def test_test_emailit_endpoint(self, auth_token):
         """Test that test-emailit endpoint exists for testing email config"""
