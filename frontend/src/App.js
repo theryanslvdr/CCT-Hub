@@ -18,6 +18,7 @@ import { DebtManagementPage } from "./pages/DebtManagementPage";
 import { ProfitPlannerPage } from "./pages/ProfitPlannerPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LicenseeAccountPage } from "./pages/LicenseeAccountPage";
+import { NotificationsPage } from "./pages/NotificationsPage";
 
 // Admin Pages
 import { AdminSignalsPage } from "./pages/admin/AdminSignalsPage";
