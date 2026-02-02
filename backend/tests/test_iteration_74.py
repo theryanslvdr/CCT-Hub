@@ -166,13 +166,14 @@ class TestIssue4Email:
         return response.json()["access_token"]
     
     def test_send_simple_email_endpoint_exists(self, auth_token):
-        """Test that send-simple-email endpoint exists (admin only)"""
+        """Test that send-email endpoint exists (admin only) - uses query params"""
         headers = {"Authorization": f"Bearer {auth_token}"}
         # Test with a simple request - may fail due to domain verification but endpoint should exist
+        # The endpoint uses query parameters: /api/send-email?to=...&subject=...&body=...
         response = requests.post(
-            f"{BASE_URL}/api/admin/send-simple-email",
+            f"{BASE_URL}/api/send-email",
             headers=headers,
-            json={
+            params={
                 "to": "test@example.com",
                 "subject": "Test Email",
                 "body": "This is a test email"
@@ -180,18 +181,30 @@ class TestIssue4Email:
         )
         # Endpoint should exist - may return 200 (success) or error due to email config
         # But should NOT return 404
-        assert response.status_code != 404, "send-simple-email endpoint should exist"
+        assert response.status_code != 404, "send-email endpoint should exist"
         print(f"Email endpoint response: {response.status_code} - {response.text[:200]}")
     
     def test_email_history_endpoint(self, auth_token):
-        """Test that email history endpoint exists"""
+        """Test that email history endpoint exists (under settings router)"""
         headers = {"Authorization": f"Bearer {auth_token}"}
-        response = requests.get(f"{BASE_URL}/api/admin/email-history", headers=headers)
+        response = requests.get(f"{BASE_URL}/api/settings/email-history", headers=headers)
         # Should return 200 or at least not 404
         assert response.status_code != 404, "Email history endpoint should exist"
         if response.status_code == 200:
             data = response.json()
             assert isinstance(data, list), "Email history should return a list"
+    
+    def test_test_emailit_endpoint(self, auth_token):
+        """Test that test-emailit endpoint exists for testing email config"""
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = requests.post(
+            f"{BASE_URL}/api/settings/test-emailit",
+            headers=headers,
+            json={"test_email": "test@example.com"}
+        )
+        # Endpoint should exist - may fail due to domain verification
+        assert response.status_code != 404, "test-emailit endpoint should exist"
+        print(f"Test emailit response: {response.status_code} - {response.text[:200]}")
 
 
 class TestMobileFeatures:
