@@ -675,6 +675,16 @@ async def register(data: UserCreate):
         metadata={"email": data.email.lower(), "role": role}
     )
     
+    # Send notification to all members about new member (community notification)
+    await create_member_notification(
+        notification_type="new_member",
+        title="New Member Joined",
+        message=f"Welcome {data.full_name} to the community!",
+        triggered_by_id=user_id,
+        triggered_by_name=data.full_name,
+        metadata={"email": data.email.lower()}
+    )
+    
     # Send email notification to admins
     try:
         from services.email_service import send_registration_notification_to_admins
