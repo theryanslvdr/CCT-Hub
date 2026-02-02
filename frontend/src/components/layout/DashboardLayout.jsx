@@ -226,7 +226,7 @@ export const DashboardLayout = () => {
             onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           />
           
-          <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden">
+          <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden pb-20 md:pb-6">
             {/* Announcements Banner */}
             <AnnouncementBanner 
               announcements={visibleAnnouncements} 
@@ -236,9 +236,14 @@ export const DashboardLayout = () => {
             <Outlet />
           </div>
           
-          {/* Persistent Footer */}
-          <Footer />
+          {/* Persistent Footer - hidden on mobile when bottom nav is visible */}
+          <div className="hidden md:block">
+            <Footer />
+          </div>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav />
 
         <Toaster position="top-right" richColors />
         
