@@ -6017,6 +6017,23 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
             }
         )
         
+        # 6. Create notification for admins about tracker reset (if experienced trader resetting)
+        if data.user_type == 'experienced':
+            await create_admin_notification(
+                notification_type="tracker_reset",
+                title="Tracker Reset",
+                message=f"{user['full_name']} reset their tracker as experienced trader",
+                user_id=user["id"],
+                user_name=user["full_name"],
+                amount=data.starting_balance,
+                metadata={
+                    "user_type": data.user_type,
+                    "start_date": data.start_date,
+                    "deposits_created": len(created_deposits),
+                    "trades_created": len(created_trades)
+                }
+            )
+        
         return {
             "success": True,
             "message": "Onboarding completed successfully",
