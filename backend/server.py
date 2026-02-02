@@ -6829,26 +6829,67 @@ async def get_notifications(
     unread_only: bool = False,
     user: dict = Depends(get_current_user)
 ):
-    """Get notifications for the current user"""
-    query = {"recipient_id": user["id"]}
+    """Get notifications for the current user (personal + community)"""
+    is_admin = user.get("role") in ["basic_admin", "admin", "super_admin", "master_admin"]
+    
+    # Get personal notifications (targeted to this user)
+    personal_query = {"recipient_id": user["id"]}
     if unread_only:
-        query["read"] = False
+        personal_query["read"] = False
     
-    notifications = await db.notifications.find(
-        query,
+    personal_notifications = await db.notifications.find(
+        personal_query,
         {"_id": 0}
-    ).sort("timestamp", -1).skip(skip).limit(limit).to_list(limit)
+    ).sort("timestamp", -1).limit(limit // 2).to_list(limit // 2)
     
-    # Get unread count
-    unread_count = await db.notifications.count_documents({
+    # Get community/member notifications (visible to all)
+    member_notifications = await db.member_notifications.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit // 2).to_list(limit // 2)
+    
+    # For admins, also get admin-only notifications
+    admin_notifications = []
+    if is_admin:
+        admin_notifications = await db.admin_notifications.find(
+            {},
+            {"_id": 0}
+        ).sort("created_at", -1).limit(limit // 2).to_list(limit // 2)
+    
+    # Combine and sort all notifications
+    all_notifications = []
+    
+    for n in personal_notifications:
+        n["source"] = "personal"
+        n["created_at"] = n.get("timestamp", n.get("created_at"))
+        all_notifications.append(n)
+    
+    for n in member_notifications:
+        n["source"] = "community"
+        all_notifications.append(n)
+    
+    for n in admin_notifications:
+        n["source"] = "admin"
+        all_notifications.append(n)
+    
+    # Sort by created_at descending
+    all_notifications.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    all_notifications = all_notifications[:limit]
+    
+    # Get unread counts
+    personal_unread = await db.notifications.count_documents({
         "recipient_id": user["id"],
         "read": False
     })
     
+    admin_unread = 0
+    if is_admin:
+        admin_unread = await db.admin_notifications.count_documents({"is_read": False})
+    
     return {
-        "notifications": notifications,
-        "unread_count": unread_count,
-        "total": await db.notifications.count_documents({"recipient_id": user["id"]})
+        "notifications": all_notifications,
+        "unread_count": personal_unread + admin_unread,
+        "is_admin": is_admin
     }
 
 @api_router.post("/notifications/mark-read")
