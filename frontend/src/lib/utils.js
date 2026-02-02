@@ -13,12 +13,114 @@ export function formatCurrency(amount, currency = 'USD') {
   }).format(amount);
 }
 
+// Format currency compact for mobile (K, M, B, T) - 3 digits, no rounding
+export function formatCurrencyCompact(amount) {
+  const absAmount = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  
+  // Determine the suffix and divisor
+  let suffix = '';
+  let divisor = 1;
+  
+  if (absAmount >= 1e12) {
+    suffix = 'T';
+    divisor = 1e12;
+  } else if (absAmount >= 1e9) {
+    suffix = 'B';
+    divisor = 1e9;
+  } else if (absAmount >= 1e6) {
+    suffix = 'M';
+    divisor = 1e6;
+  } else if (absAmount >= 1e3) {
+    suffix = 'K';
+    divisor = 1e3;
+  } else {
+    // For small numbers, just show as-is with 2 decimals max
+    if (absAmount >= 100) {
+      return `${sign}$${Math.trunc(absAmount)}`;
+    } else if (absAmount >= 10) {
+      // 2 whole + 1 decimal: 99.9
+      const truncated = Math.trunc(absAmount * 10) / 10;
+      return `${sign}$${truncated.toFixed(1)}`;
+    } else {
+      // 1 whole + 2 decimal: 9.99
+      const truncated = Math.trunc(absAmount * 100) / 100;
+      return `${sign}$${truncated.toFixed(2)}`;
+    }
+  }
+  
+  // Calculate the scaled value
+  const scaled = absAmount / divisor;
+  
+  // Format to 3 significant digits without rounding
+  // If >= 100: show as integer (e.g., 123K)
+  // If >= 10: show 2 whole + 1 decimal (e.g., 19.3K)
+  // If >= 1: show 1 whole + 2 decimal (e.g., 1.23K)
+  
+  if (scaled >= 100) {
+    return `${sign}$${Math.trunc(scaled)}${suffix}`;
+  } else if (scaled >= 10) {
+    // 2 whole + 1 decimal: truncate to 1 decimal place
+    const truncated = Math.trunc(scaled * 10) / 10;
+    return `${sign}$${truncated.toFixed(1)}${suffix}`;
+  } else {
+    // 1 whole + 2 decimal: truncate to 2 decimal places
+    const truncated = Math.trunc(scaled * 100) / 100;
+    return `${sign}$${truncated.toFixed(2)}${suffix}`;
+  }
+}
+
 // Format number with commas
 export function formatNumber(num, decimals = 2) {
   return num.toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
+}
+
+// Format number compact for mobile (K, M, B, T) - 3 digits, no rounding
+export function formatNumberCompact(num) {
+  const absNum = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+  
+  let suffix = '';
+  let divisor = 1;
+  
+  if (absNum >= 1e12) {
+    suffix = 'T';
+    divisor = 1e12;
+  } else if (absNum >= 1e9) {
+    suffix = 'B';
+    divisor = 1e9;
+  } else if (absNum >= 1e6) {
+    suffix = 'M';
+    divisor = 1e6;
+  } else if (absNum >= 1e3) {
+    suffix = 'K';
+    divisor = 1e3;
+  } else {
+    if (absNum >= 100) {
+      return `${sign}${Math.trunc(absNum)}`;
+    } else if (absNum >= 10) {
+      const truncated = Math.trunc(absNum * 10) / 10;
+      return `${sign}${truncated.toFixed(1)}`;
+    } else {
+      const truncated = Math.trunc(absNum * 100) / 100;
+      return `${sign}${truncated.toFixed(2)}`;
+    }
+  }
+  
+  const scaled = absNum / divisor;
+  
+  if (scaled >= 100) {
+    return `${sign}${Math.trunc(scaled)}${suffix}`;
+  } else if (scaled >= 10) {
+    const truncated = Math.trunc(scaled * 10) / 10;
+    return `${sign}${truncated.toFixed(1)}${suffix}`;
+  } else {
+    const truncated = Math.trunc(scaled * 100) / 100;
+    return `${sign}${truncated.toFixed(2)}${suffix}`;
+  }
 }
 
 // Calculate exit value (LOT × 15)
