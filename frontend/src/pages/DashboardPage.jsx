@@ -329,6 +329,15 @@ export const DashboardPage = () => {
         })}
       </div>
 
+      {/* Admin Widget - Missed Traders */}
+      {isAdmin() && !isSimulating && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-1">
+            <MissedTradersWidget />
+          </div>
+        </div>
+      )}
+
       {/* Tabbed Interface for Members */}
       {isMember && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
