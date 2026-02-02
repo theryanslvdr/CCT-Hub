@@ -271,7 +271,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                 onClick={() => handleExternalLink(link)}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-300 active:bg-zinc-800 transition-all"
               >
-                <Icon className="w-5 h-5" />
+                <Icon className={cn("w-5 h-5", link.iconColor)} />
                 <span className="font-medium flex-1 text-left">{link.label}</span>
                 <ExternalLink className="w-4 h-4 text-zinc-500" />
               </button>
