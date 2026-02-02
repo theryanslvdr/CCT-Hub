@@ -1371,7 +1371,7 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     
     await db.trade_logs.insert_one(trade)
     
-    # Create notification if member exited below projected amount
+    # Create notification if member exited below projected amount (admin-only)
     if performance == "below" and profit_difference < -5:  # Only notify if more than $5 below
         await create_admin_notification(
             notification_type="trade_underperform",
@@ -1388,6 +1388,17 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
                 "commission": data.commission or 0
             }
         )
+    
+    # Create notification for all members about profit submission (community notification)
+    await create_member_notification(
+        notification_type="profit_submitted",
+        title="Profit Reported",
+        message=f"{user['full_name']} reported ${data.actual_profit:.2f} profit",
+        triggered_by_id=user["id"],
+        triggered_by_name=user["full_name"],
+        amount=data.actual_profit,
+        metadata={"performance": performance, "lot_size": lot_size}
+    )
     
     return TradeLogResponse(**{**trade, "created_at": datetime.fromisoformat(trade["created_at"])})
 
