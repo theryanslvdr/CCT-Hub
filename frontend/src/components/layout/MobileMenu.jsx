@@ -83,10 +83,13 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   // External links
   const externalLinks = [
     { 
-      label: 'Heartbeat Chat', 
-      icon: MessageCircle, 
-      iosUrl: 'https://apps.apple.com/us/app/heartbeat-chat/id1540206041',
-      androidUrl: 'https://play.google.com/store/apps/details?id=com.heartbeatreactnative&hl=en_US'
+      label: 'Heartbeat', 
+      icon: Heart, 
+      iconColor: 'text-red-400',
+      action: () => {
+        openHeartbeatApp();
+        onClose();
+      }
     },
     { 
       label: 'Rewards Platform', 
@@ -101,15 +104,12 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   };
 
   const handleExternalLink = (link) => {
-    if (link.url) {
+    if (link.action) {
+      link.action();
+    } else if (link.url) {
       window.open(link.url, '_blank');
-    } else {
-      // Detect platform and open appropriate app store
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const url = isIOS ? link.iosUrl : link.androidUrl;
-      window.open(url, '_blank');
+      onClose();
     }
-    onClose();
   };
 
   const handleLogout = () => {
