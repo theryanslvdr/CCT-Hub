@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import { MobileNotice } from '@/components/MobileNotice';
+import { usePullToRefresh, PullToRefreshIndicator } from '@/hooks/usePullToRefresh';
 import { 
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
   TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
@@ -19,6 +21,19 @@ import {
   ChevronLeft, ChevronRight, Edit2, Check, X, Calendar, Eye, RefreshCw,
   RotateCcw, MessageSquare, Loader2, Plus
 } from 'lucide-react';
+
+// Haptic feedback utility
+const triggerHaptic = (type = 'light') => {
+  if ('vibrate' in navigator) {
+    switch (type) {
+      case 'light': navigator.vibrate(10); break;
+      case 'medium': navigator.vibrate(25); break;
+      case 'heavy': navigator.vibrate([30, 10, 30]); break;
+      case 'success': navigator.vibrate([15, 50, 15]); break;
+      default: navigator.vibrate(10);
+    }
+  }
+};
 
 // Truncate to 2 decimal places without rounding
 const truncateTo2Decimals = (num) => {
