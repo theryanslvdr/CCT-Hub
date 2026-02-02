@@ -112,9 +112,16 @@ async def send_email(
     settings = await db.platform_settings.find_one({}, {"_id": 0})
     platform_name = settings.get("platform_name", "CrossCurrent") if settings else "CrossCurrent"
     
-    # Default from email - use a generic sender that should be verified
+    # Default from email - try platform setting first, then fallback
+    # NOTE: The sender domain must be verified with Emailit
     if not from_email:
-        from_email = f"{platform_name} <noreply@crosscurrent.com>"
+        # Check for custom verified sender in settings
+        verified_sender = settings.get("verified_email_sender") if settings else None
+        if verified_sender:
+            from_email = f"{platform_name} <{verified_sender}>"
+        else:
+            # Fallback - this may fail if domain is not verified
+            from_email = f"{platform_name} <noreply@crosscurrent.finance>"
     
     # Build payload
     payload = {
