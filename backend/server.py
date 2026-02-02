@@ -2524,6 +2524,18 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
     }
     
     await db.trading_signals.insert_one(signal)
+    
+    # Create notification for all members about new official trading signal
+    if data.is_official:
+        await create_member_notification(
+            notification_type="trading_signal",
+            title=f"New Trading Signal: {data.direction}",
+            message=f"Official {data.direction} signal for {data.product} at {data.trade_time}",
+            triggered_by_id=user["id"],
+            triggered_by_name=user["full_name"],
+            metadata={"signal_id": signal_id, "direction": data.direction, "product": data.product, "trade_time": data.trade_time}
+        )
+    
     return TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"])})
 
 @admin_router.put("/signals/{signal_id}")
