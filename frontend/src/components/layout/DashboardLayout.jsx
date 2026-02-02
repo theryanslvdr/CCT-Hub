@@ -209,12 +209,21 @@ export const DashboardLayout = () => {
   return (
     <ApiKeyStatusContext.Provider value={{ missingKeys, hasMissingKeys: missingKeys.length > 0 }}>
       <div className="min-h-screen bg-background grid-bg flex flex-col">
-        <Sidebar
-          isOpen={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-          onShowTour={resetTour}
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block">
+          <Sidebar
+            isOpen={false}
+            onClose={() => {}}
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onShowTour={resetTour}
+          />
+        </div>
+        
+        {/* Mobile Full-Screen Menu */}
+        <MobileMenu 
+          isOpen={mobileMenuOpen} 
+          onClose={() => setMobileMenuOpen(false)} 
         />
         
         <main className={cn(
