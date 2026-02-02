@@ -460,7 +460,7 @@ class RoleUpgrade(BaseModel):
 # ==================== HELPERS ====================
 
 async def create_admin_notification(notification_type: str, title: str, message: str, user_id: str, user_name: str, amount: float = None, metadata: dict = None):
-    """Create a notification for admins about member activity"""
+    """Create a notification for admins about member activity and broadcast via WebSocket"""
     notification = {
         "id": str(uuid.uuid4()),
         "type": notification_type,
@@ -471,9 +471,41 @@ async def create_admin_notification(notification_type: str, title: str, message:
         "amount": amount,
         "metadata": metadata or {},
         "is_read": False,
+        "visibility": "admin",  # admin-only notification
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.admin_notifications.insert_one(notification)
+    
+    # Also broadcast to connected admins via WebSocket
+    try:
+        await websocket_manager.broadcast_to_admins(notification)
+    except Exception as e:
+        logger.error(f"Failed to broadcast admin notification: {e}")
+    
+    return notification
+
+async def create_member_notification(notification_type: str, title: str, message: str, triggered_by_id: str = None, triggered_by_name: str = None, amount: float = None, metadata: dict = None):
+    """Create a notification visible to all members and broadcast via WebSocket"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "type": notification_type,
+        "title": title,
+        "message": message,
+        "triggered_by_id": triggered_by_id,
+        "triggered_by_name": triggered_by_name,
+        "amount": amount,
+        "metadata": metadata or {},
+        "visibility": "all",  # visible to all users
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.member_notifications.insert_one(notification)
+    
+    # Broadcast to all connected users via WebSocket
+    try:
+        await websocket_manager.broadcast_to_all(notification)
+    except Exception as e:
+        logger.error(f"Failed to broadcast member notification: {e}")
+    
     return notification
 
 def hash_password(password: str) -> str:
