@@ -1443,7 +1443,7 @@ async def get_trade_history(
     if signal_ids:
         signals = await db.trading_signals.find(
             {"id": {"$in": signal_ids}}, 
-            {"_id": 0, "id": 1, "product": 1, "trade_time": 1, "trade_timezone": 1}
+            {"_id": 0, "id": 1, "product": 1, "trade_time": 1, "trade_timezone": 1, "direction": 1}
         ).to_list(len(signal_ids))
         signals_map = {s["id"]: s for s in signals}
     
@@ -1452,6 +1452,8 @@ async def get_trade_history(
     for trade in trades:
         signal_details = None
         signal_id = trade.get("signal_id")
+        signal_direction = trade.get("direction")  # Default to stored direction
+        
         if signal_id and signal_id in signals_map:
             signal = signals_map[signal_id]
             signal_details = {
@@ -1459,9 +1461,12 @@ async def get_trade_history(
                 "trade_time": signal.get("trade_time"),
                 "trade_timezone": signal.get("trade_timezone", "Asia/Manila"),
             }
+            # Use signal direction as the source of truth
+            signal_direction = signal.get("direction", trade.get("direction"))
         
         enriched_trades.append({
             **trade,
+            "direction": signal_direction,  # Override with signal direction
             "commission": trade.get("commission", 0),  # Default to 0 for backward compatibility
             "created_at": datetime.fromisoformat(trade["created_at"]) if isinstance(trade["created_at"], str) else trade["created_at"],
             "signal_details": signal_details,
