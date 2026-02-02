@@ -2083,18 +2083,94 @@ export const TradeMonitorPage = () => {
         </Card>
       </div>
       
-      {/* Mobile: Open Merin Button (shows only on mobile) */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50" data-testid="merin-mobile-button">
-        <a
-          href="https://www.meringlobaltrading.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mobile-external-link-btn"
-        >
-          <ExternalLink className="w-5 h-5" />
-          Open Merin Trading Platform
-        </a>
+      {/* Mobile: Merin Trading Platform Options */}
+      <div className="lg:hidden fixed bottom-20 left-4 right-4 z-40" data-testid="merin-mobile-section">
+        {showMerinOptions ? (
+          <div className="bg-zinc-900/95 backdrop-blur-lg rounded-xl border border-zinc-800 p-4 space-y-3 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-white">Open Merin Trading</h3>
+              <button 
+                onClick={() => setShowMerinOptions(false)}
+                className="p-1 hover:bg-zinc-800 rounded-lg"
+              >
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </div>
+            
+            {/* Option 1: View in Hub (iframe) */}
+            <button
+              onClick={() => {
+                setShowMerinIframe(true);
+                setShowMerinOptions(false);
+                // Scroll to bottom where iframe will appear
+                setTimeout(() => {
+                  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 100);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 active:bg-blue-500/30"
+            >
+              <Eye className="w-5 h-5" />
+              <div className="flex-1 text-left">
+                <p className="font-medium">View in Hub</p>
+                <p className="text-xs text-blue-300/70">Open embedded view below</p>
+              </div>
+            </button>
+            
+            {/* Option 2: Open in New Tab */}
+            <a
+              href="https://www.meringlobaltrading.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white active:bg-zinc-700"
+            >
+              <ExternalLink className="w-5 h-5" />
+              <div className="flex-1 text-left">
+                <p className="font-medium">Open in New Tab</p>
+                <p className="text-xs text-zinc-400">Opens in browser</p>
+              </div>
+            </a>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowMerinOptions(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform"
+            data-testid="merin-open-button"
+          >
+            <ExternalLink className="w-5 h-5" />
+            Open Merin Trading Platform
+          </button>
+        )}
       </div>
+      
+      {/* Mobile: Embedded Merin iframe (when user chooses "View in Hub") */}
+      {showMerinIframe && (
+        <div className="lg:hidden mt-6 mb-24" data-testid="merin-mobile-iframe">
+          <Card className="glass-card border-zinc-800">
+            <CardHeader className="py-3 px-4 border-b border-zinc-800">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base text-white flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 text-blue-400" />
+                  Merin Trading Platform
+                </CardTitle>
+                <button
+                  onClick={() => setShowMerinIframe(false)}
+                  className="p-1.5 hover:bg-zinc-800 rounded-lg"
+                >
+                  <X className="w-4 h-4 text-zinc-400" />
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <iframe
+                src="https://www.meringlobaltrading.com/"
+                title="Merin Trading Platform"
+                className="w-full h-[500px] border-0"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
     </MobileNotice>
   );
