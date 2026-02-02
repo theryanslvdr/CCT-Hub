@@ -36,6 +36,25 @@ const playNotificationSound = () => {
   }
 };
 
+// Haptic feedback function (defined at module level)
+const triggerHaptic = (type = 'light') => {
+  if ('vibrate' in navigator) {
+    switch (type) {
+      case 'light':
+        navigator.vibrate(10);
+        break;
+      case 'medium':
+        navigator.vibrate(20);
+        break;
+      case 'heavy':
+        navigator.vibrate([30, 10, 30]);
+        break;
+      default:
+        navigator.vibrate(10);
+    }
+  }
+};
+
 export const MobileBottomNav = () => {
   const { isSuperAdmin, isMasterAdmin, user } = useAuth();
   const location = useLocation();
@@ -43,7 +62,6 @@ export const MobileBottomNav = () => {
   
   // Notification state
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const lastUnreadCount = useRef(0);
 
@@ -74,25 +92,6 @@ export const MobileBottomNav = () => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
-
-  // Haptic feedback function
-  const triggerHaptic = (type = 'light') => {
-    if ('vibrate' in navigator) {
-      switch (type) {
-        case 'light':
-          navigator.vibrate(10);
-          break;
-        case 'medium':
-          navigator.vibrate(20);
-          break;
-        case 'heavy':
-          navigator.vibrate([30, 10, 30]);
-          break;
-        default:
-          navigator.vibrate(10);
-      }
-    }
-  };
 
   const navItems = [
     { 
