@@ -6098,31 +6098,22 @@ async def send_email_to_member(user_id: str, subject: str, body: str, user: dict
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
     
-    if not EMAILIT_API_KEY:
-        raise HTTPException(status_code=500, detail="Email service not configured")
+    # Use the email service with verified sender
+    from services.email_service import send_email as send_email_service
     
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.emailit.com/v1/emails",
-                headers={
-                    "Authorization": f"Bearer {EMAILIT_API_KEY}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "from": "noreply@crosscurrent.finance",
-                    "to": member["email"],
-                    "subject": subject,
-                    "html": body
-                },
-                timeout=30.0
-            )
-            if response.status_code in [200, 201, 202]:
-                return {"message": "Email sent successfully"}
-            else:
-                raise HTTPException(status_code=response.status_code, detail="Email sending failed")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Email error: {str(e)}")
+    result = await send_email_service(
+        db=db,
+        to_email=member["email"],
+        subject=subject,
+        html_content=body,
+        template_type="admin_reminder",
+        metadata={"sent_by": user["id"], "sent_to": user_id}
+    )
+    
+    if result.get("success"):
+        return {"message": "Email sent successfully"}
+    else:
+        raise HTTPException(status_code=500, detail=result.get("error", "Email sending failed"))
 
 @admin_router.post("/upgrade-role")
 async def upgrade_role(data: RoleUpgrade, user: dict = Depends(require_admin)):
