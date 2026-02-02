@@ -331,16 +331,6 @@ export const TradeMonitorPage = () => {
     }
   }, [isInBVE]);
 
-  // Pull-to-refresh for mobile
-  const handleRefresh = useCallback(async () => {
-    triggerHaptic('medium');
-    await loadData();
-    await loadTradeHistory();
-    toast.success('Data refreshed');
-  }, [loadData]);
-
-  const { pullDistance, isRefreshing, threshold } = usePullToRefresh(handleRefresh);
-
   const loadTradeHistory = useCallback(async () => {
     try {
       const res = await tradeAPI.getHistory(historyPage, 10);
@@ -351,6 +341,16 @@ export const TradeMonitorPage = () => {
       console.error('Failed to load trade history:', error);
     }
   }, [historyPage]);
+
+  // Pull-to-refresh for mobile
+  const handleRefresh = useCallback(async () => {
+    triggerHaptic('medium');
+    await loadData();
+    await loadTradeHistory();
+    toast.success('Data refreshed');
+  }, [loadData, loadTradeHistory]);
+
+  const { pullDistance, isRefreshing, threshold } = usePullToRefresh(handleRefresh);
 
   // Load data
   useEffect(() => {
