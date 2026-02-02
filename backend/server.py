@@ -3178,14 +3178,24 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
     # Get users who traded today
     users_who_traded = set(t.get("user_id") for t in today_trades)
     
-    # Find who missed
-    missed_members = []
+    # Get last trade date for each member who missed
+    missed_traders = []
     for member in member_users:
         if member["id"] not in users_who_traded:
-            missed_members.append({
+            # Get last trade for this member
+            last_trade = await db.trade_logs.find_one(
+                {"user_id": member["id"]},
+                {"_id": 0, "created_at": 1}
+            )
+            last_trade_at = None
+            if last_trade:
+                last_trade_at = last_trade.get("created_at")
+            
+            missed_traders.append({
                 "id": member["id"],
-                "name": member.get("full_name", "Unknown"),
-                "email": member.get("email", "")
+                "full_name": member.get("full_name", "Unknown"),
+                "email": member.get("email", ""),
+                "last_trade_at": last_trade_at
             })
     
     # Calculate today's team stats for email
@@ -3203,7 +3213,7 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
                 highest_earner = user_data.get("full_name", "Unknown")
     
     return {
-        "missed_members": missed_members,
+        "missed_traders": missed_traders,
         "team_profit_today": round(team_profit_today, 2),
         "highest_earner": highest_earner,
         "highest_profit": round(highest_profit, 2),
