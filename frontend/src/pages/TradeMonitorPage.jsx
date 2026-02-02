@@ -166,6 +166,10 @@ export const TradeMonitorPage = () => {
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
   const [checkInRestored, setCheckInRestored] = useState(false);
   
+  // Merin mobile options
+  const [showMerinOptions, setShowMerinOptions] = useState(false);
+  const [showMerinIframe, setShowMerinIframe] = useState(false);
+  
   // Missed Trade Popup state
   const [showMissedTradePopup, setShowMissedTradePopup] = useState(false);
   const [missedTradeChecked, setMissedTradeChecked] = useState(false);
