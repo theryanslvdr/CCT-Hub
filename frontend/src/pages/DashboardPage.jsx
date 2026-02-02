@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBVE } from '@/contexts/BVEContext';
 import { profitAPI, tradeAPI, currencyAPI, adminAPI } from '@/lib/api';
 import api from '@/lib/api';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatCurrency, formatCurrencyCompact, formatNumber, formatNumberCompact } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
