@@ -6718,7 +6718,8 @@ async def delete_api_connection(conn_id: str, user: dict = Depends(require_admin
 # ==================== EMAIL ROUTES ====================
 
 @api_router.post("/send-email")
-async def send_email(to: str, subject: str, body: str, user: dict = Depends(require_admin)):
+async def send_simple_email(to: str, subject: str, body: str, user: dict = Depends(require_admin)):
+    """Simple email endpoint - uses direct API call"""
     if not EMAILIT_API_KEY:
         raise HTTPException(status_code=500, detail="Email service not configured")
     
