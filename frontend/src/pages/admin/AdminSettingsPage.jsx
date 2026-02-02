@@ -546,12 +546,13 @@ export const AdminSettingsPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Settings className="w-6 h-6" /> Platform Settings
+    <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+          <Settings className="w-5 h-5 md:w-6 md:h-6" /> Platform Settings
         </h1>
-        <Button onClick={handleSave} className="btn-primary gap-2" disabled={saving} data-testid="save-settings-button">
+        <Button onClick={handleSave} className="btn-primary gap-2 w-full sm:w-auto" disabled={saving} data-testid="save-settings-button">
           {saving ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
@@ -564,10 +565,45 @@ export const AdminSettingsPage = () => {
         </Button>
       </div>
 
+      {/* Mobile: Horizontal scrollable tabs */}
+      <div className="md:hidden overflow-x-auto pb-2 -mx-3 px-3">
+        <div className="flex gap-2 min-w-max">
+          {[
+            { key: 'seo', icon: Globe, label: 'SEO' },
+            { key: 'branding', icon: Image, label: 'Brand' },
+            { key: 'ui', icon: Palette, label: 'UI' },
+            { key: 'integrations', icon: Plug, label: 'API' },
+            { key: 'links', icon: ExternalLink, label: 'Links' },
+            { key: 'emails', icon: Mail, label: 'Email' },
+            { key: 'announcements', icon: Megaphone, label: 'News' },
+            { key: 'trading', icon: TrendingUp, label: 'Trading' },
+            { key: 'security', icon: Shield, label: 'Security' },
+            { key: 'holidays', icon: TreePine, label: 'Holidays' },
+            { key: 'maintenance', icon: Wrench, label: 'Maint' },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.key 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Sidebar + Content Layout */}
       <div className="flex gap-6">
-        {/* Sidebar Navigation */}
-        <div className="w-56 flex-shrink-0">
+        {/* Desktop Sidebar Navigation */}
+        <div className="hidden md:block w-56 flex-shrink-0">
           <div className="sticky top-4 space-y-1 bg-zinc-900/50 rounded-lg border border-zinc-800 p-2">
             {/* Regular Settings */}
             <button
