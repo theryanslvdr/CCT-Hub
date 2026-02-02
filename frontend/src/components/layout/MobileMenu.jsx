@@ -5,9 +5,51 @@ import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
   User, Settings, LogOut, X, Award, Wallet, Target, CreditCard,
-  ChevronRight, Shield, Eye, ExternalLink, MessageCircle, Gift
+  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+// Smart app opener - tries to open app, falls back to store
+const openHeartbeatApp = () => {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  
+  const appStoreUrl = 'https://apps.apple.com/us/app/heartbeat-chat/id1540206041';
+  const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.heartbeatreactnative&hl=en_US';
+  const heartbeatScheme = 'heartbeat://';
+  
+  if (isIOS) {
+    const now = Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = heartbeatScheme;
+    document.body.appendChild(iframe);
+    
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      if (document.visibilityState === 'visible' && Date.now() - now < 2000) {
+        window.location.href = appStoreUrl;
+      }
+    }, 1500);
+    
+    setTimeout(() => {
+      window.location.href = heartbeatScheme;
+    }, 100);
+    
+  } else if (isAndroid) {
+    const intentUrl = `intent://open#Intent;scheme=heartbeat;package=com.heartbeatreactnative;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
+    window.location.href = intentUrl;
+    
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        window.location.href = playStoreUrl;
+      }
+    }, 2000);
+    
+  } else {
+    window.open(appStoreUrl, '_blank');
+  }
+};
 
 export const MobileMenu = ({ isOpen, onClose }) => {
   const { 
