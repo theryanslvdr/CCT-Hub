@@ -62,7 +62,6 @@ export const MobileBottomNav = () => {
   
   // Notification state
   const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState([]);
   const lastUnreadCount = useRef(0);
 
   // Fetch notifications
@@ -80,7 +79,6 @@ export const MobileBottomNav = () => {
       lastUnreadCount.current = newUnreadCount;
       
       setUnreadCount(newUnreadCount);
-      setNotifications(res.data.notifications || []);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
