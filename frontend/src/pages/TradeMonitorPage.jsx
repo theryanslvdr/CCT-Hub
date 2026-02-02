@@ -1252,6 +1252,13 @@ export const TradeMonitorPage = () => {
 
   return (
     <MobileNotice featureName="Trade Monitor" showOnMobile={true}>
+    {/* Pull-to-Refresh Indicator */}
+    <PullToRefreshIndicator 
+      pullDistance={pullDistance} 
+      threshold={threshold} 
+      isRefreshing={isRefreshing} 
+    />
+    
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
       <div className="flex-1 space-y-6 lg:overflow-y-auto lg:pr-4">
