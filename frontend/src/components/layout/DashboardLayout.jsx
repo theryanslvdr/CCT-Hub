@@ -5,6 +5,7 @@ import { settingsAPI } from '@/lib/api';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { MobileBottomNav } from './MobileBottomNav';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
 import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
