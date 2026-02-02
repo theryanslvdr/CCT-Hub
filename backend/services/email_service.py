@@ -120,8 +120,8 @@ async def send_email(
         if verified_sender:
             from_email = f"{platform_name} <{verified_sender}>"
         else:
-            # Fallback - this may fail if domain is not verified
-            from_email = f"{platform_name} <noreply@crosscurrent.finance>"
+            # Use the verified sender domain
+            from_email = f"{platform_name} <hello@crosscur.rent>"
     
     # Build payload
     payload = {
