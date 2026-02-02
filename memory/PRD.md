@@ -20,14 +20,16 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 #### Issue #2: Mobile App Experience - IMPLEMENTED ✅
 - **Bottom Navigation**: Added `MobileBottomNav.jsx` with 5 tabs
-  - Home | Tracker | **Trade** (center, highlighted) | Members/Goals | Profile
+  - Home | Tracker | **Trade** (center, highlighted) | Members | Alerts (with badge)
   - Trade Monitor is center button with gradient styling
+  - Alerts tab shows unread notification count with animated badge
 - **Pull-to-Refresh**: Added `usePullToRefresh` hook in `/hooks/usePullToRefresh.js`
-  - Integrated in TradeMonitorPage
+  - Integrated in TradeMonitorPage and NotificationsPage
   - PullToRefreshIndicator component shows during pull
 - **Haptic Feedback**: `triggerHaptic()` function on button taps
   - Light (10ms), Medium (25ms), Heavy (30-10-30ms), Success (15-50-15ms)
-- **Layout Updated**: DashboardLayout includes MobileBottomNav, hides footer on mobile
+- **Notification Sound**: Plays audio tone when new notifications arrive
+- **Notifications Page**: New `/notifications` page with tabs (All, Community, Admin)
 
 #### Issue #3: Notifications System - FIXED ✅
 - **Problem**: Notifications weren't being recorded properly
@@ -35,7 +37,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **New Functions**:
   - `create_admin_notification()` - Admin-only (deposits, withdrawals, underperformance)
   - `create_member_notification()` - Community (new members, trading signals, profit submissions)
-- **Updated Endpoints**: Notifications now triggered for:
+- **Updated Endpoints**: Notifications now trigger for:
   - User registration (admin + member)
   - Deposits/withdrawals (admin)
   - Trade logged (admin if underperform + member for profit submission)
@@ -43,16 +45,25 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - Tracker reset (admin)
 - **GET /api/notifications**: Returns from 3 collections (personal, community, admin)
 
-#### Issue #4: Email Deliverability - INVESTIGATED ✅
-- **Problem**: Emails not sending
-- **Root Cause Found**: Function name conflict (`send_email` defined twice in server.py)
-- **Fix**: Renamed conflicting function to `send_simple_email`
-- **Status**: API calls work, but domain "crosscurrent.finance" needs verification with Emailit
-- **Note**: User needs to verify their domain with Emailit provider
+#### Issue #4: Email Deliverability - FIXED ✅
+- **Problem**: Emails not sending (domain not verified)
+- **Solution**: Updated to use verified sender `hello@crosscur.rent`
+- **Status**: Email sending now works correctly
+- **Test**: POST /api/email/test returns success
+
+#### Admin Dashboard Widget - IMPLEMENTED ✅
+- **"Didn't Trade Today" Widget**: Shows on admin dashboard
+- **Features**:
+  - Lists members who haven't traded today
+  - "Send All" button for bulk reminders
+  - Individual email buttons per user
+  - Custom message dialog before sending
+- **Backend**: `/api/admin/analytics/missed-trades` returns missed_traders list
 
 #### Testing ✅
 - **Iteration 74**: 100% backend (14/14 tests passed), 100% frontend
-- All 4 issues verified via UI and API testing
+- **Iteration 75**: 100% backend (9/9 tests passed), all UI features verified
+- All features verified via Playwright and API testing
 
 ### Session 66 (2026-01-27) - 6 Feature Batch Implementation ✅
 
