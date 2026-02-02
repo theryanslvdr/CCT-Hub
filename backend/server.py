@@ -1350,15 +1350,19 @@ async def log_trade(data: TradeLogCreate, user: dict = Depends(get_current_user)
     else:
         performance = "below"
     
-    # Get active signal
+    # Get active signal - USE SIGNAL DIRECTION AS SOURCE OF TRUTH
     active_signal = await db.trading_signals.find_one({"is_active": True}, {"_id": 0})
+    
+    # Direction should come from the official signal, not from frontend
+    # This ensures trade history matches signal history
+    trade_direction = active_signal.get("direction") if active_signal else data.direction
     
     trade_id = str(uuid.uuid4())
     trade = {
         "id": trade_id,
         "user_id": user["id"],
         "lot_size": lot_size,  # Use server-calculated lot_size
-        "direction": data.direction,
+        "direction": trade_direction,  # Use signal direction as source of truth
         "projected_profit": projected_profit,
         "actual_profit": data.actual_profit,
         "commission": data.commission or 0,  # Daily commission from referrals
