@@ -335,19 +335,19 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         effectiveTargetProfit = truncateTo2Decimals(effectiveLotSize * 15);
         // CRITICAL FIX: Sync runningBalance with effectiveBalance for today
         runningBalance = effectiveBalance;
-      } else if (hasStoredTradeData) {
-        // CRITICAL: For days with stored trade data, derive balance FROM the stored lot_size
-        // This ensures Balance Before matches the LOT Size (Balance = LOT × 980)
-        effectiveLotSize = lotSize;
-        effectiveTargetProfit = targetProfit;
-        effectiveBalance = truncateTo2Decimals(lotSize * 980);
-        // CRITICAL FIX: Sync runningBalance with effectiveBalance to prevent divergence
-        // This ensures the next day's calculation starts from the correct base
-        runningBalance = effectiveBalance;
       } else {
-        effectiveLotSize = lotSize;
-        effectiveTargetProfit = targetProfit;
+        // For past/future days: ALWAYS use runningBalance as the source of truth
+        // This prevents issues where stored lot_size doesn't match the cumulative calculation
         effectiveBalance = runningBalance;
+        effectiveLotSize = truncateTo2Decimals(effectiveBalance / 980);
+        
+        // For days with stored trade data, use stored target profit for P/L calculation
+        // But keep the balance from running calculation
+        if (hasStoredTradeData) {
+          effectiveTargetProfit = targetProfit; // Use stored projected_profit
+        } else {
+          effectiveTargetProfit = truncateTo2Decimals(effectiveLotSize * 15);
+        }
       }
       
       days.push({
