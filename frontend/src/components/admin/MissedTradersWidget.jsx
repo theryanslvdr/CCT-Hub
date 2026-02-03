@@ -280,8 +280,8 @@ export const MissedTradersWidget = () => {
     for (const trader of missedTraders) {
       try {
         await api.post(`/admin/members/${trader.id}/notify`, {
-          title: `⚠️ ${trader.missed_trades_count} Undeclared Trade${trader.missed_trades_count > 1 ? 's' : ''}`,
-          message: `You have ${trader.missed_trades_count} undeclared trade${trader.missed_trades_count > 1 ? 's' : ''}. Please report your results.`
+          title: "📊 Report Your Trade Results",
+          message: `The team made $${todayStats.totalProfit.toFixed(2)} today! Don't forget to log your results.`
         });
         successCount++;
       } catch (error) {
