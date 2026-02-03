@@ -3381,22 +3381,22 @@ export const ProfitTrackerPage = () => {
               </div>
             )}
           </div>
-          <div className="mt-4 p-3 md:p-4 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
-            <p>• Weekends and holidays are excluded from projections</p>
+          <div className="mt-4 p-3 md:p-4 rounded-lg bg-zinc-900/50 text-xs text-zinc-400 max-w-full overflow-hidden">
+            <p className="break-words">• Weekends and holidays are excluded from projections</p>
             {isLicensee ? (
               <>
-                <p>• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Manager traded - profit added to your balance</p>
-                <p>• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Manager did not trade - balance carried forward (no profit)</p>
-                <p>• &quot;--&quot; in Target Profit means no trade was made that day</p>
+                <p className="break-words">• <span className="text-emerald-400"><Check className="w-3 h-3 inline" /></span> = Manager traded - profit added to your balance</p>
+                <p className="break-words">• <span className="text-red-400"><X className="w-3 h-3 inline" /></span> = Manager did not trade - balance carried forward (no profit)</p>
+                <p className="break-words">• &quot;--&quot; in Target Profit means no trade was made that day</p>
                 {isMasterAdmin() && simulatedView?.licenseId && (
-                  <p className="mt-1 text-amber-400">• Toggle switch to override &quot;Manager Traded&quot; status for any day</p>
+                  <p className="mt-1 text-amber-400 break-words">• Toggle switch to override &quot;Manager Traded&quot; status for any day</p>
                 )}
               </>
             ) : (
               <>
-                <p>• <span className="text-amber-400">Adjust Trade</span> = Click to enter your actual profit for missed trades</p>
-                <p>• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
-                <p>• Actual profits update your Account Value when recorded</p>
+                <p className="break-words">• <span className="text-amber-400">Adjust Trade</span> = Click to enter your actual profit for missed trades</p>
+                <p className="break-words">• <span className="text-blue-400">Trade Now</span> = Active signal available</p>
+                <p className="break-words">• Actual profits update your Account Value when recorded</p>
               </>
             )}
           </div>
