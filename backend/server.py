@@ -6321,7 +6321,7 @@ async def create_email_template(data: EmailTemplateCreate, user: dict = Depends(
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     await db.email_templates.insert_one(template)
-    del template["_id"] if "_id" in template else None
+    template.pop("_id", None)
     return template
 
 @admin_router.put("/email-templates/{template_id}")
