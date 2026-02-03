@@ -1218,35 +1218,36 @@ export const ProfitTrackerPage = () => {
     if (isCurrentMonth) {
       startBalance = effectiveAccountValue;
     } else if (selectedMonth.isPastMonth) {
-      // For past months, calculate starting balance by:
-      // Current balance - all profits after this month - all deposits/withdrawals after this month
+      // For past months, calculate starting balance by working backwards from current balance
+      // The inner generateDailyProjectionForMonth will handle the day-by-day calculations
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
       const monthStart = new Date(selectedMonth.monthDate.getFullYear(), selectedMonth.monthDate.getMonth(), 1);
       
-      // Sum all profits from this month onwards (including commissions)
-      let totalProfitAfter = 0;
+      // Sum all profits from AFTER this month (not including this month)
+      // This gives us the balance at the END of this month
+      const nextMonthPrefix = selectedMonth.monthDate.getMonth() === 11
+        ? `${selectedMonth.monthDate.getFullYear() + 1}-01`
+        : `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 2).padStart(2, '0')}`;
+      
+      let totalProfitAfterMonth = 0;
       Object.entries(tradeLogs).forEach(([dateKey, log]) => {
-        if (dateKey >= monthKey.slice(0, 7)) {  // From this month onwards
-          totalProfitAfter += (log?.actual_profit || 0) + (log?.commission || 0);
+        if (dateKey >= nextMonthPrefix) {  // From NEXT month onwards (not including this month)
+          totalProfitAfterMonth += (log?.actual_profit || 0) + (log?.commission || 0);
         }
       });
       
-      // Sum all deposits/withdrawals from this month onwards
-      let totalTxAfter = 0;
+      // Sum all deposits/withdrawals from AFTER this month
+      let totalTxAfterMonth = 0;
       [...deposits, ...withdrawals].forEach(tx => {
         const txDate = tx.created_at?.split('T')[0];
-        if (txDate && txDate >= `${monthKey}-01`) {
-          totalTxAfter += (tx.amount || 0);  // Withdrawals already negative
+        if (txDate && txDate >= `${nextMonthPrefix}-01`) {
+          totalTxAfterMonth += (tx.amount || 0);  // Withdrawals already negative
         }
       });
       
-      // Starting balance for this month = current - profits after - transactions after
-      // But we need the balance at the START of this month, so add back the month's profits + commissions
-      const monthProfits = Object.entries(tradeLogs)
-        .filter(([key]) => key.startsWith(monthKey))
-        .reduce((sum, [_, log]) => sum + (log?.actual_profit || 0) + (log?.commission || 0), 0);
-      
-      startBalance = effectiveAccountValue - totalProfitAfter - totalTxAfter + monthProfits;
+      // Balance at END of selected month = current balance - profits after - transactions after
+      // The inner function will then work backwards from this to get daily balances
+      startBalance = effectiveAccountValue - totalProfitAfterMonth - totalTxAfterMonth;
     } else {
       // Future months - use the month's calculated start balance
       startBalance = selectedMonth.startBalance;
