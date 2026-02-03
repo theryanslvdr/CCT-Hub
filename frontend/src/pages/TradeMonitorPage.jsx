@@ -1867,7 +1867,26 @@ export const TradeMonitorPage = () => {
                           {trade.direction}
                         </span>
                       </div>
-                      <span className="text-xs text-zinc-400">{trade.signal_details?.product || 'MOIL10'}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-zinc-400">{trade.signal_details?.product || 'MOIL10'}</span>
+                        {/* Delete button for admin simulating member - Mobile */}
+                        {isSimulatingMember && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteMemberTrade(trade)}
+                            disabled={deleteTradeLoading === trade.id}
+                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            data-testid={`delete-trade-mobile-${trade.id}`}
+                          >
+                            {deleteTradeLoading === trade.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
