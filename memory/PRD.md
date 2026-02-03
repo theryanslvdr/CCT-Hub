@@ -11,7 +11,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 68 (2026-02-03) - 7 Feature Batch Implementation ✅
+### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes ✅
 
 #### Feature #1: Mobile Trade Monitor - Sticky Signal Bar ✅
 - **Added**: Sticky bar at top of Trade Monitor page (mobile only)
@@ -54,8 +54,41 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **New endpoint**: `POST /api/admin/members/{user_id}/notify` (sends in-app notification + email)
 - **Grid**: 4-column layout on desktop
 
+#### Bug Fix #1: Balance Calculation for Past Months ✅
+- **Issue**: January 30 showing wrong balance ($16,777.60)
+- **Root Cause**: Past month calculation only subtracted that month's profits, not ALL profits from month start onwards
+- **Fix**: Now subtracts all profits + transactions from the start of the viewed month to get correct starting balance
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 194-240
+
+#### Bug Fix #2: Exit Trade Adjustments ADDING Instead of REPLACING ✅
+- **Issue**: Clicking "Adjust?" and submitting added a new trade instead of replacing
+- **Fix**: Added `isAdjustingTrade` state; when true, calls `undoTradeByDate` to delete existing trade before logging new one
+- **Location**: `/app/frontend/src/pages/TradeMonitorPage.jsx` lines 1048-1068
+
+#### Bug Fix #3: Simulated User Trade History Showing Admin's Data ✅
+- **Issue**: When simulating a member, Trade Monitor showed admin's data
+- **Root Cause**: API calls for `daily-summary`, `streak`, and `history` weren't passing simulated user ID
+- **Fix**: 
+  - Updated `loadData` to pass `simulatedView?.memberId` to API calls
+  - Updated backend endpoints to accept optional `user_id` param for admins
+  - Added useEffect to reload data when simulation changes
+- **Endpoints Updated**: `/api/trade/daily-summary`, `/api/trade/streak`, `/api/trade/history`
+
+#### Bug Fix #4: Dialog Content Overflow ✅
+- **Issue**: Disclaimer text in Daily Projection dialog overflowed container
+- **Fix**: Added `max-w-full overflow-hidden` to container and `break-words` to text elements
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 3384-3402
+
+#### Bug Fix #5: Email Function Error + WYSIWYG Editor ✅
+- **Issue**: "Failed to Send Email" error due to endpoint expecting query params instead of JSON body
+- **Fix**: Created `SendEmailRequest` Pydantic model for proper JSON body parsing
+- **WYSIWYG**: Replaced basic textarea with `react-quill-new` rich text editor
+- **Features**: Formatting toolbar, shortcode panel ({user_name}, {team_profit}, {team_commission}, {profit_tracker_url}), emoji support
+- **Location**: `/app/frontend/src/components/admin/MissedTradersWidget.jsx`
+
 #### Testing ✅
-- **Iteration 77**: 100% backend (8/8 tests passed), 100% frontend (7/7 features verified)
+- **Iteration 77**: 8/8 backend tests, 7/7 features verified
+- **Iteration 78**: Identified issues with ReactQuill and simulation (both fixed)
 
 ### Session 67 (2026-02-02) - Balance Calculation Bug Fix ✅
 
