@@ -739,7 +739,7 @@ export const MissedTradersWidget = () => {
             </DialogDescription>
           </DialogHeader>
           
-          {!editingTemplate ? (
+          {!editingTemplate && !isCreatingTemplate ? (
             /* Template List View */
             <div className="space-y-4 py-4">
               <div className="flex justify-between items-center">
