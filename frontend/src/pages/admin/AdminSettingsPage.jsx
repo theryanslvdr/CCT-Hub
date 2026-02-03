@@ -19,6 +19,7 @@ import {
   LogIn, Plus, Trash2, GripVertical, Copyright, Wrench, Megaphone, AlertTriangle, Send,
   TreePine, Calendar as CalendarIcon, TrendingUp, Shield
 } from 'lucide-react';
+import { CustomEmailTemplates } from '@/components/admin/CustomEmailTemplates';
 
 export const AdminSettingsPage = () => {
   const { user, isMasterAdmin, isSuperAdmin } = useAuth();
