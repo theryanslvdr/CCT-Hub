@@ -6276,6 +6276,86 @@ async def send_email_to_member(user_id: str, data: SendEmailRequest, user: dict 
     else:
         raise HTTPException(status_code=500, detail=result.get("error", "Email sending failed"))
 
+# Email Templates CRUD (Master Admin only)
+class EmailTemplateCreate(BaseModel):
+    name: str
+    subject: str
+    body: str
+    category: Optional[str] = "general"
+    is_html: bool = False
+
+class EmailTemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    category: Optional[str] = None
+    is_html: Optional[bool] = None
+
+@admin_router.get("/email-templates")
+async def get_email_templates(user: dict = Depends(require_admin)):
+    """Get all email templates"""
+    templates = await db.email_templates.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"templates": templates}
+
+@admin_router.get("/email-templates/{template_id}")
+async def get_email_template(template_id: str, user: dict = Depends(require_admin)):
+    """Get a specific email template"""
+    template = await db.email_templates.find_one({"id": template_id}, {"_id": 0})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return template
+
+@admin_router.post("/email-templates")
+async def create_email_template(data: EmailTemplateCreate, user: dict = Depends(require_master_admin)):
+    """Create a new email template (Master Admin only)"""
+    template = {
+        "id": str(uuid.uuid4()),
+        "name": data.name,
+        "subject": data.subject,
+        "body": data.body,
+        "category": data.category,
+        "is_html": data.is_html,
+        "created_by": user["id"],
+        "created_by_name": user.get("full_name", "Admin"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.email_templates.insert_one(template)
+    del template["_id"] if "_id" in template else None
+    return template
+
+@admin_router.put("/email-templates/{template_id}")
+async def update_email_template(template_id: str, data: EmailTemplateUpdate, user: dict = Depends(require_master_admin)):
+    """Update an email template (Master Admin only)"""
+    template = await db.email_templates.find_one({"id": template_id})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if data.name is not None:
+        update_data["name"] = data.name
+    if data.subject is not None:
+        update_data["subject"] = data.subject
+    if data.body is not None:
+        update_data["body"] = data.body
+    if data.category is not None:
+        update_data["category"] = data.category
+    if data.is_html is not None:
+        update_data["is_html"] = data.is_html
+    
+    await db.email_templates.update_one({"id": template_id}, {"$set": update_data})
+    
+    updated = await db.email_templates.find_one({"id": template_id}, {"_id": 0})
+    return updated
+
+@admin_router.delete("/email-templates/{template_id}")
+async def delete_email_template(template_id: str, user: dict = Depends(require_master_admin)):
+    """Delete an email template (Master Admin only)"""
+    result = await db.email_templates.delete_one({"id": template_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template deleted successfully"}
+
 class NotifyRequest(BaseModel):
     title: str
     message: str
