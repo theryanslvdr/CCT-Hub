@@ -1163,6 +1163,10 @@ export const TradeMonitorPage = () => {
 
   // Trade action handlers (Reset / Request Change)
   const isMasterAdmin = user?.role === 'master_admin';
+  const isSimulatingMember = simulatedView && simulatedView.memberId && isMasterAdmin;
+  
+  // Delete trade state
+  const [deleteTradeLoading, setDeleteTradeLoading] = useState(null);
 
   const handleResetTrade = async (tradeId) => {
     if (!window.confirm('Are you sure you want to reset this trade? This action cannot be undone.')) {
@@ -1179,6 +1183,38 @@ export const TradeMonitorPage = () => {
       toast.error(error.response?.data?.detail || 'Failed to reset trade');
     } finally {
       setResetTradeLoading(null);
+    }
+  };
+
+  // Admin: Delete a member's trade when simulating
+  const handleDeleteMemberTrade = async (trade) => {
+    if (!isSimulatingMember) {
+      toast.error('Can only delete trades when simulating a member');
+      return;
+    }
+    
+    const confirmMessage = `Are you sure you want to delete this trade?\n\n` +
+      `Date: ${new Date(trade.created_at).toLocaleDateString()}\n` +
+      `Profit: $${formatNumber(trade.actual_profit || 0)}\n\n` +
+      `This will:\n` +
+      `• Remove the trade record permanently\n` +
+      `• Deduct $${formatNumber(trade.actual_profit || 0)} from ${simulatedMemberName}'s balance\n\n` +
+      `This action cannot be undone.`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    setDeleteTradeLoading(trade.id);
+    try {
+      await api.delete(`/admin/members/${simulatedView.memberId}/trades/${trade.id}`);
+      toast.success(`Trade deleted. $${formatNumber(trade.actual_profit || 0)} deducted from balance.`);
+      loadTradeHistory();
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete trade');
+    } finally {
+      setDeleteTradeLoading(null);
     }
   };
 
