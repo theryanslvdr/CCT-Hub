@@ -317,15 +317,18 @@ export const TradeMonitorPage = () => {
   // Data loading functions - use useCallback to capture isInBVE correctly
   const loadData = useCallback(async () => {
     try {
+      // Get the user ID to use (simulated member or current user)
+      const userId = simulatedView?.memberId || null;
+      
       // If in BVE mode, fetch signal from BVE endpoints
       const signalEndpoint = isInBVE ? api.get('/bve/active-signal') : tradeAPI.getActiveSignal();
       const summaryEndpoint = isInBVE ? api.get('/bve/summary') : profitAPI.getSummary();
       
       const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
         signalEndpoint,
-        tradeAPI.getDailySummary(),
+        tradeAPI.getDailySummary(userId),
         summaryEndpoint,
-        tradeAPI.getStreak(),
+        tradeAPI.getStreak(userId),
       ]);
       setSignal(signalRes.data.signal);
       setDailySummary(summaryRes.data);
@@ -334,7 +337,7 @@ export const TradeMonitorPage = () => {
     } catch (error) {
       console.error('Failed to load trade data:', error);
     }
-  }, [isInBVE]);
+  }, [isInBVE, simulatedView?.memberId]);
 
   const loadTradeHistory = useCallback(async () => {
     try {
