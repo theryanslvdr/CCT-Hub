@@ -396,8 +396,6 @@ export const MissedTradersWidget = () => {
     day: 'numeric' 
   });
 
-  const totalMissedTrades = missedTraders.reduce((sum, t) => sum + (t.missed_trades_count || 0), 0);
-
   return (
     <>
       <Card className="glass-card border-zinc-800" data-testid="no-trade-members-widget">
