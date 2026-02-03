@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { 
   AlertTriangle, Users, Mail, RefreshCw, Loader2, 
-  Clock, Calendar, Send, CheckCircle, XCircle
+  Clock, Calendar, Send, CheckCircle, Bell, DollarSign
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -16,16 +15,26 @@ export const MissedTradersWidget = () => {
   const [missedTraders, setMissedTraders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingReminder, setSendingReminder] = useState(null);
+  const [sendingNotify, setSendingNotify] = useState(null);
   const [bulkSending, setBulkSending] = useState(false);
+  const [bulkNotifying, setBulkNotifying] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [customMessage, setCustomMessage] = useState('');
+  const [todayStats, setTodayStats] = useState({ totalProfit: 0, totalCommission: 0 });
 
   const fetchMissedTraders = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/analytics/missed-trades');
-      setMissedTraders(res.data.missed_traders || []);
+      const [missedRes, statsRes] = await Promise.all([
+        api.get('/admin/analytics/missed-trades'),
+        api.get('/admin/analytics/today-stats').catch(() => ({ data: { total_profit: 0, total_commission: 0 } }))
+      ]);
+      setMissedTraders(missedRes.data.missed_traders || []);
+      setTodayStats({
+        totalProfit: statsRes.data.total_profit || 0,
+        totalCommission: statsRes.data.total_commission || 0
+      });
     } catch (error) {
       console.error('Failed to fetch missed traders:', error);
     } finally {
@@ -37,34 +46,102 @@ export const MissedTradersWidget = () => {
     fetchMissedTraders();
   }, [fetchMissedTraders]);
 
-  const handleSendReminder = async (user) => {
+  // Generate motivational FOMO email content
+  const generateFOMOEmail = (userName) => {
+    const profit = todayStats.totalProfit.toFixed(2);
+    const commission = todayStats.totalCommission.toFixed(2);
+    
+    return {
+      subject: "💰 You're Missing Out! The Team Made $" + profit + " Today",
+      body: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #10B981;">Hi ${userName}! 👋</h2>
+  
+  <p style="font-size: 16px; color: #333;">We noticed you haven't reported your trade results yet today.</p>
+  
+  <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center;">
+    <p style="color: rgba(255,255,255,0.9); margin: 0 0 8px 0; font-size: 14px;">THE TEAM GENERATED TODAY</p>
+    <p style="color: #fff; font-size: 36px; font-weight: bold; margin: 0;">$${profit}</p>
+    <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">+ $${commission} in commissions</p>
+  </div>
+  
+  <p style="font-size: 18px; color: #EF4444; font-weight: bold; text-align: center;">
+    🚨 If you didn't trade, you're missing out!
+  </p>
+  
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="${process.env.REACT_APP_BACKEND_URL?.replace('/api', '') || window.location.origin}/profit-tracker" 
+       style="display: inline-block; background: #3B82F6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+      📊 Oh, you traded? Report Your Profit Now
+    </a>
+  </div>
+  
+  <p style="color: #666; font-size: 14px; text-align: center;">
+    Don't let your results go untracked. Every trade counts towards your growth!
+  </p>
+</div>
+      `.trim()
+    };
+  };
+
+  const handleSendEmail = async (user) => {
     setSelectedUser(user);
-    setCustomMessage(`Hi ${user.full_name},\n\nWe noticed you haven't logged your trade for today. Don't forget to record your results in the Trade Monitor!\n\nKeep up the great work!`);
+    const { body } = generateFOMOEmail(user.full_name);
+    setCustomMessage(body);
     setEmailDialogOpen(true);
   };
 
-  const confirmSendReminder = async () => {
+  const confirmSendEmail = async () => {
     if (!selectedUser) return;
     
     setSendingReminder(selectedUser.id);
+    const { subject } = generateFOMOEmail(selectedUser.full_name);
+    
     try {
       await api.post(`/admin/members/${selectedUser.id}/send-email`, {
-        subject: '📊 Trade Reminder - Log Your Results',
-        body: customMessage.replace(/\n/g, '<br>')
+        subject: subject,
+        body: customMessage
       });
-      toast.success(`Reminder sent to ${selectedUser.full_name}`);
+      toast.success(`Email sent to ${selectedUser.full_name}`);
       setEmailDialogOpen(false);
       setSelectedUser(null);
       setCustomMessage('');
     } catch (error) {
-      toast.error('Failed to send reminder');
+      toast.error('Failed to send email');
       console.error(error);
     } finally {
       setSendingReminder(null);
     }
   };
 
-  const handleSendBulkReminders = async () => {
+  const handleNotify = async (user) => {
+    setSendingNotify(user.id);
+    try {
+      // Send push notification or in-app notification
+      await api.post(`/admin/members/${user.id}/notify`, {
+        title: "📊 Report Your Trade Results",
+        message: `The team made $${todayStats.totalProfit.toFixed(2)} today! Don't forget to log your results.`
+      });
+      toast.success(`Notification sent to ${user.full_name}`);
+    } catch (error) {
+      // If notify endpoint doesn't exist, fall back to email
+      toast.info('Sending email notification instead...');
+      const { subject, body } = generateFOMOEmail(user.full_name);
+      try {
+        await api.post(`/admin/members/${user.id}/send-email`, {
+          subject: subject,
+          body: body
+        });
+        toast.success(`Email sent to ${user.full_name}`);
+      } catch (emailError) {
+        toast.error('Failed to notify user');
+      }
+    } finally {
+      setSendingNotify(null);
+    }
+  };
+
+  const handleEmailAll = async () => {
     if (missedTraders.length === 0) return;
     
     setBulkSending(true);
@@ -72,10 +149,11 @@ export const MissedTradersWidget = () => {
     let failCount = 0;
 
     for (const trader of missedTraders) {
+      const { subject, body } = generateFOMOEmail(trader.full_name);
       try {
         await api.post(`/admin/members/${trader.id}/send-email`, {
-          subject: '📊 Trade Reminder - Log Your Results',
-          body: `Hi ${trader.full_name},<br><br>We noticed you haven't logged your trade for today. Don't forget to record your results in the Trade Monitor!<br><br>Keep up the great work!`
+          subject: subject,
+          body: body
         });
         successCount++;
       } catch (error) {
@@ -87,10 +165,49 @@ export const MissedTradersWidget = () => {
     setBulkSending(false);
     
     if (successCount > 0) {
-      toast.success(`Sent ${successCount} reminder${successCount > 1 ? 's' : ''}`);
+      toast.success(`Sent ${successCount} email${successCount > 1 ? 's' : ''}`);
     }
     if (failCount > 0) {
-      toast.error(`Failed to send ${failCount} reminder${failCount > 1 ? 's' : ''}`);
+      toast.error(`Failed to send ${failCount} email${failCount > 1 ? 's' : ''}`);
+    }
+  };
+
+  const handleNotifyAll = async () => {
+    if (missedTraders.length === 0) return;
+    
+    setBulkNotifying(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const trader of missedTraders) {
+      try {
+        await api.post(`/admin/members/${trader.id}/notify`, {
+          title: "📊 Report Your Trade Results",
+          message: `The team made $${todayStats.totalProfit.toFixed(2)} today! Don't forget to log your results.`
+        });
+        successCount++;
+      } catch (error) {
+        // Fall back to email if notify doesn't work
+        const { subject, body } = generateFOMOEmail(trader.full_name);
+        try {
+          await api.post(`/admin/members/${trader.id}/send-email`, {
+            subject: subject,
+            body: body
+          });
+          successCount++;
+        } catch (emailError) {
+          failCount++;
+        }
+      }
+    }
+
+    setBulkNotifying(false);
+    
+    if (successCount > 0) {
+      toast.success(`Notified ${successCount} member${successCount > 1 ? 's' : ''}`);
+    }
+    if (failCount > 0) {
+      toast.error(`Failed to notify ${failCount} member${failCount > 1 ? 's' : ''}`);
     }
   };
 
@@ -102,18 +219,19 @@ export const MissedTradersWidget = () => {
 
   return (
     <>
-      <Card className="glass-card border-zinc-800">
+      <Card className="glass-card border-zinc-800" data-testid="missed-traders-widget">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
-              Didn&apos;t Trade Today
+            <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+              <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-400" />
+              Didn&apos;t Report Today
             </CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={fetchMissedTraders}
               disabled={loading}
+              className="h-8 w-8 p-0"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -134,74 +252,133 @@ export const MissedTradersWidget = () => {
           ) : missedTraders.length === 0 ? (
             <div className="text-center py-6">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
-              <p className="text-zinc-400 text-sm">Everyone traded today!</p>
+              <p className="text-zinc-400 text-sm">Everyone reported today!</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {/* Summary */}
-              <div className="flex items-center justify-between p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm text-amber-300">
-                    {missedTraders.length} member{missedTraders.length > 1 ? 's' : ''} haven&apos;t traded
-                  </span>
+              {/* Today's Stats Summary */}
+              {(todayStats.totalProfit > 0 || todayStats.totalCommission > 0) && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                  <p className="text-xs text-emerald-400 uppercase tracking-wider">Team Made Today</p>
+                  <div className="flex items-center justify-center gap-3 mt-1">
+                    <span className="text-lg font-mono font-bold text-emerald-400">
+                      ${todayStats.totalProfit.toFixed(2)}
+                    </span>
+                    {todayStats.totalCommission > 0 && (
+                      <span className="text-sm text-emerald-400/70">
+                        +${todayStats.totalCommission.toFixed(2)} comm
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-                  onClick={handleSendBulkReminders}
-                  disabled={bulkSending}
-                >
-                  {bulkSending ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <Mail className="w-3 h-3 mr-1" />
-                  )}
-                  Send All
-                </Button>
+              )}
+
+              {/* Summary with bulk action buttons */}
+              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm text-amber-300">
+                      {missedTraders.length} haven&apos;t reported
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-8 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                    onClick={handleEmailAll}
+                    disabled={bulkSending}
+                    data-testid="email-all-btn"
+                  >
+                    {bulkSending ? (
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    ) : (
+                      <Mail className="w-3 h-3 mr-1" />
+                    )}
+                    Email All
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-8 text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                    onClick={handleNotifyAll}
+                    disabled={bulkNotifying}
+                    data-testid="notify-all-btn"
+                  >
+                    {bulkNotifying ? (
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                    ) : (
+                      <Bell className="w-3 h-3 mr-1" />
+                    )}
+                    Notify All
+                  </Button>
+                </div>
               </div>
 
               {/* List */}
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
                 {missedTraders.map((trader) => (
                   <div 
                     key={trader.id}
                     className="flex items-center justify-between p-3 bg-zinc-900/50 rounded-lg border border-zinc-800"
+                    data-testid={`missed-trader-${trader.id}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
                         <span className="text-sm font-medium text-zinc-400">
                           {trader.full_name?.charAt(0) || '?'}
                         </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white truncate">
                           {trader.full_name}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-zinc-500">
-                          <Clock className="w-3 h-3" />
-                          {trader.last_trade_at ? (
-                            `Last trade ${formatDistanceToNow(new Date(trader.last_trade_at), { addSuffix: true })}`
-                          ) : (
-                            'No trades yet'
-                          )}
+                        <div className="flex items-center gap-1 text-xs text-zinc-500">
+                          <Clock className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">
+                            {trader.last_trade_at ? (
+                              formatDistanceToNow(new Date(trader.last_trade_at), { addSuffix: true })
+                            ) : (
+                              'Never'
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 text-xs text-zinc-400 hover:text-white"
-                      onClick={() => handleSendReminder(trader)}
-                      disabled={sendingReminder === trader.id}
-                    >
-                      {sendingReminder === trader.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Mail className="w-4 h-4" />
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                        onClick={() => handleSendEmail(trader)}
+                        disabled={sendingReminder === trader.id}
+                        title="Send Email"
+                        data-testid={`email-btn-${trader.id}`}
+                      >
+                        {sendingReminder === trader.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Mail className="w-4 h-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                        onClick={() => handleNotify(trader)}
+                        disabled={sendingNotify === trader.id}
+                        title="Send Notification"
+                        data-testid={`notify-btn-${trader.id}`}
+                      >
+                        {sendingNotify === trader.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Bell className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -212,21 +389,21 @@ export const MissedTradersWidget = () => {
 
       {/* Email Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-zinc-800 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Mail className="w-5 h-5 text-blue-400" />
               Send Reminder to {selectedUser?.full_name}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Customize your message before sending
+              Customize the FOMO email before sending
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Textarea
               value={customMessage}
               onChange={(e) => setCustomMessage(e.target.value)}
-              className="input-dark min-h-[150px]"
+              className="input-dark min-h-[200px] font-mono text-xs"
               placeholder="Enter your message..."
             />
           </div>
@@ -239,7 +416,7 @@ export const MissedTradersWidget = () => {
               Cancel
             </Button>
             <Button
-              onClick={confirmSendReminder}
+              onClick={confirmSendEmail}
               className="btn-primary"
               disabled={sendingReminder}
             >
@@ -251,7 +428,7 @@ export const MissedTradersWidget = () => {
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  Send Reminder
+                  Send Email
                 </>
               )}
             </Button>
