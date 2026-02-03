@@ -113,7 +113,11 @@ export const tradeAPI = {
     if (userId) params.user_id = userId;
     return api.get('/trade/logs', { params });
   },
-  getHistory: (page = 1, pageSize = 10) => api.get('/trade/history', { params: { page, page_size: pageSize } }),
+  getHistory: (page = 1, pageSize = 10, userId = null) => {
+    const params = { page, page_size: pageSize };
+    if (userId) params.user_id = userId;
+    return api.get('/trade/history', { params });
+  },
   updateTimeEntered: (tradeId, timeEntered) => api.put(`/trade/logs/${tradeId}/time-entered`, { time_entered: timeEntered }),
   getStreak: () => api.get('/trade/streak'),
   getActiveSignal: () => api.get('/trade/active-signal'),
