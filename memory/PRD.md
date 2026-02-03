@@ -11,7 +11,30 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes ✅
+### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 2 Enhancements ✅
+
+#### Enhancement #1: "No Trade Members" Widget ✅
+- **Renamed**: From "Didn't Report Today" to "No Trade Members"
+- **New Logic**: Shows members with undeclared trades (any day with signal but no trade logged)
+- **Display**: Shows count of missed trades per member with red badge
+- **Summary**: Shows total members with issues + total missed trades
+- **Backend**: Updated `/api/admin/analytics/missed-trades` to calculate missed trades against signal dates
+- **Location**: `/app/frontend/src/components/admin/MissedTradersWidget.jsx`
+
+#### Enhancement #2: Email Template Management (Master Admin) ✅
+- **CRUD Endpoints**: 
+  - `GET /api/admin/email-templates` - List all templates
+  - `POST /api/admin/email-templates` - Create template (Master Admin only)
+  - `PUT /api/admin/email-templates/{id}` - Update template (Master Admin only)
+  - `DELETE /api/admin/email-templates/{id}` - Delete template (Master Admin only)
+- **Features**:
+  - Template name and category (general, reminder, announcement, welcome)
+  - Subject line with shortcode support
+  - Visual (WYSIWYG) and HTML Code editor modes
+  - Shortcodes: `{user_name}`, `{user_email}`, `{missed_count}`, `{team_profit}`, `{team_commission}`, `{profit_tracker_url}`, `{current_date}`
+  - Quick template selection when composing emails
+- **UI**: FileText icon in widget header opens template management dialog
+- **Location**: `/app/frontend/src/components/admin/MissedTradersWidget.jsx`, `/app/backend/server.py`
 
 #### Feature #1: Mobile Trade Monitor - Sticky Signal Bar ✅
 - **Added**: Sticky bar at top of Trade Monitor page (mobile only)
