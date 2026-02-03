@@ -3278,6 +3278,43 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
         "total_traded_today": len(users_who_traded)
     }
 
+@admin_router.get("/analytics/today-stats")
+async def get_today_stats(user: dict = Depends(require_admin)):
+    """Get today's team performance stats (profit and commissions)"""
+    
+    # Get today's date range
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_end = datetime.combine(today, datetime.max.time()).replace(tzinfo=timezone.utc)
+    
+    # Get today's trades
+    today_trades = await db.trade_logs.find({
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0}).to_list(1000)
+    
+    # Calculate total profit
+    total_profit = sum(t.get("actual_profit", 0) for t in today_trades)
+    
+    # Get today's commissions from deposits
+    today_commissions = await db.deposits.find({
+        "type": "commission",
+        "created_at": {
+            "$gte": today_start.isoformat(),
+            "$lte": today_end.isoformat()
+        }
+    }, {"_id": 0}).to_list(500)
+    
+    total_commission = sum(c.get("amount", 0) for c in today_commissions)
+    
+    return {
+        "total_profit": round(total_profit, 2),
+        "total_commission": round(total_commission, 2),
+        "trades_count": len(today_trades)
+    }
+
 class NotifyMissedTradeRequest(BaseModel):
     user_id: str
 
