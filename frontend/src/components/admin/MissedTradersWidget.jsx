@@ -130,31 +130,28 @@ export const MissedTradersWidget = () => {
     const profit = todayStats.totalProfit.toFixed(2);
     const commission = todayStats.totalCommission.toFixed(2);
     const appUrl = process.env.REACT_APP_BACKEND_URL?.replace('/api', '') || window.location.origin;
-    const missedCount = userData.missed_trades_count || 0;
     
     return {
-      subject: `⚠️ You have ${missedCount} undeclared trade${missedCount > 1 ? 's' : ''}!`,
+      subject: `💰 You're Missing Out! The Team Made $${profit} Today`,
       body: `
-<h2 style="color: #F59E0B;">Hi ${userData.full_name}! 👋</h2>
+<h2 style="color: #10B981;">Hi ${userData.full_name}! 👋</h2>
 
-<p>We noticed you have <strong>${missedCount} undeclared trade${missedCount > 1 ? 's' : ''}</strong> that need your attention.</p>
+<p>We noticed you haven't reported your trade results yet today.</p>
 
-<div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center; color: white;">
-  <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">UNDECLARED TRADES</p>
-  <p style="font-size: 48px; font-weight: bold; margin: 0;">${missedCount}</p>
-  <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.8;">trades waiting for your input</p>
+<div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center; color: white;">
+  <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">THE TEAM GENERATED TODAY</p>
+  <p style="font-size: 36px; font-weight: bold; margin: 0;">$${profit}</p>
+  <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.8;">+ $${commission} in commissions</p>
 </div>
 
-<p>Meanwhile, the team has generated:</p>
-<div style="background: #10B981; padding: 16px; border-radius: 8px; margin: 16px 0; text-align: center; color: white;">
-  <p style="margin: 0; font-size: 24px; font-weight: bold;">$${profit}</p>
-  <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.8;">+ $${commission} in commissions</p>
-</div>
+<p style="font-size: 18px; color: #EF4444; font-weight: bold; text-align: center;">
+  🚨 If you didn't trade, you're missing out!
+</p>
 
 <div style="text-align: center; margin: 32px 0;">
   <a href="${appUrl}/profit-tracker" 
      style="display: inline-block; background: #3B82F6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
-    📊 Report Your Trades Now
+    📊 Oh, you traded? Report Your Profit Now
   </a>
 </div>
 
