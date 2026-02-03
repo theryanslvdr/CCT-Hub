@@ -71,16 +71,17 @@ class TestIssue3_SimulatedMemberTradeHistory:
             "Authorization": f"Bearer {admin_token}"
         })
         assert response.status_code == 200
-        members = response.json()
+        data = response.json()
+        members = data.get("members", data) if isinstance(data, dict) else data
         
         # Find J J member
         for member in members:
-            if member.get("email") == MEMBER_EMAIL:
+            if isinstance(member, dict) and member.get("email") == MEMBER_EMAIL:
                 return member["id"]
         
         # If not found, return first non-admin member
         for member in members:
-            if member.get("role") == "member":
+            if isinstance(member, dict) and member.get("role") == "member":
                 return member["id"]
         
         pytest.skip("No member found for simulation testing")
@@ -175,10 +176,11 @@ class TestIssue5_EmailFunction:
             "Authorization": f"Bearer {admin_token}"
         })
         assert response.status_code == 200
-        members = response.json()
+        data = response.json()
+        members = data.get("members", data) if isinstance(data, dict) else data
         
         for member in members:
-            if member.get("role") == "member":
+            if isinstance(member, dict) and member.get("role") == "member":
                 return member["id"]
         
         pytest.skip("No member found for email testing")
