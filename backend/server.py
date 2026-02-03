@@ -1422,18 +1422,28 @@ async def get_trade_logs(limit: int = 50, user_id: Optional[str] = None, user: d
 @trade_router.get("/history")
 async def get_trade_history(
     page: int = 1, 
-    page_size: int = 10, 
+    page_size: int = 10,
+    user_id: Optional[str] = None,
     user: dict = Depends(get_current_user)
 ):
-    """Get paginated trade history with signal details"""
+    """Get paginated trade history with signal details.
+    Admins can pass user_id to view another user's history (for simulation).
+    """
+    # Determine which user's history to fetch
+    target_user_id = user["id"]
+    
+    # If user_id provided and requester is admin, use that user_id
+    if user_id and user.get("role") in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+    
     skip = (page - 1) * page_size
     
     # Get total count
-    total = await db.trade_logs.count_documents({"user_id": user["id"]})
+    total = await db.trade_logs.count_documents({"user_id": target_user_id})
     
     # Get paginated trades
     trades = await db.trade_logs.find(
-        {"user_id": user["id"]}, 
+        {"user_id": target_user_id}, 
         {"_id": 0}
     ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
     
