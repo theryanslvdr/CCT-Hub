@@ -3071,10 +3071,13 @@ export const ProfitTrackerPage = () => {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-400" />
-              Daily Projection - {selectedMonth?.monthName}
+              <span className="hidden md:inline">Daily Projection - </span>
+              <span className="md:hidden text-left">{selectedMonth?.monthName}</span>
+              <span className="hidden md:inline">{selectedMonth?.monthName}</span>
               {selectedMonth?.isCurrentMonth && (
                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full ml-2">
-                  {getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Remaining Days
+                  <span className="hidden md:inline">{getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days remaining</span>
+                  <span className="md:hidden">{getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days</span>
                 </span>
               )}
             </DialogTitle>
@@ -3376,7 +3379,7 @@ export const ProfitTrackerPage = () => {
               </div>
             )}
           </div>
-          <div className="mt-4 p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
+          <div className="mt-4 p-3 md:p-4 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
             <p>• Weekends and holidays are excluded from projections</p>
             {isLicensee ? (
               <>

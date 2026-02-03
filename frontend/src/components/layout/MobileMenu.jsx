@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { settingsAPI } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
