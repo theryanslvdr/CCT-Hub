@@ -907,11 +907,11 @@ export const MissedTradersWidget = () => {
           )}
           
           <DialogFooter className="gap-2">
-            {editingTemplate ? (
+            {(editingTemplate || isCreatingTemplate) ? (
               <>
                 <Button
                   variant="outline"
-                  onClick={() => setEditingTemplate(null)}
+                  onClick={closeTemplateEdit}
                   className="border-zinc-700"
                 >
                   <X className="w-4 h-4 mr-2" />
@@ -927,7 +927,7 @@ export const MissedTradersWidget = () => {
                   ) : (
                     <Save className="w-4 h-4 mr-2" />
                   )}
-                  Save Template
+                  {editingTemplate ? 'Update' : 'Create'} Template
                 </Button>
               </>
             ) : (
