@@ -1639,11 +1639,17 @@ async def get_active_signal():
     return {"signal": TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"]) if isinstance(signal["created_at"], str) else signal["created_at"]})}
 
 @trade_router.get("/daily-summary")
-async def get_daily_summary(user: dict = Depends(get_current_user)):
+async def get_daily_summary(user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Get today's trade summary. Admins can pass user_id to view another user's summary."""
+    # Determine target user
+    target_user_id = user["id"]
+    if user_id and user.get("role") in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+    
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     
     trades = await db.trade_logs.find({
-        "user_id": user["id"],
+        "user_id": target_user_id,
         "created_at": {"$gte": today.isoformat()}
     }, {"_id": 0}).to_list(100)
     
