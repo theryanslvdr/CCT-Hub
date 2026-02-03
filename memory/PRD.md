@@ -11,6 +11,62 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 68 (2026-02-03) - 7 Feature Batch Implementation ✅
+
+#### Feature #1: Mobile Trade Monitor - Sticky Signal Bar ✅
+- **Added**: Sticky bar at top of Trade Monitor page (mobile only)
+- **Shows**: Current signal direction (BUY/SELL), product name, trade time
+- **Location**: `/app/frontend/src/pages/TradeMonitorPage.jsx` lines 1303-1323
+- **Data-testid**: `mobile-sticky-signal`
+
+#### Feature #2: Exit Trade - Performance Summary After Submission ✅
+- **Behavior**: After trade submitted, "Exit Trade" button is replaced with performance summary
+- **Shows**: Target, Actual, Performance Difference
+- **Includes**: "Adjust?" button to edit results
+- **Location**: `/app/frontend/src/pages/TradeMonitorPage.jsx` lines 1506-1545
+
+#### Feature #3: Admin - Delete Member's Trade History ✅
+- **Endpoint**: `DELETE /api/admin/members/{user_id}/trades/{trade_id}`
+- **Requires**: Master Admin role
+- **Behavior**: Deletes trade and creates negative deposit to deduct profit from balance
+- **Audit**: Records deletion in `audit_logs` collection
+- **UI**: Delete button appears when admin is simulating a member
+
+#### Feature #4: Profit Tracker Dialog Padding ✅
+- **Fixed**: Added responsive padding to Daily Projection dialog (p-3 on mobile, p-4 on desktop)
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+#### Feature #5: Mobile Menu Header ✅
+- **Updated**: Header now shows platform logo + "| The Hub"
+- **Falls back**: Uses favicon if logo not set, or gradient icon as default
+- **Location**: `/app/frontend/src/components/layout/MobileMenu.jsx` lines 149-179
+
+#### Feature #6: Daily Projection Dialog - Mobile Styling ✅
+- **Changes**: Left-aligned title, shortened "Days remaining" to "X Days" on mobile
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+#### Feature #7: Admin Dashboard - "Didn't Report Today" Widget Redesign ✅
+- **Renamed**: From "Didn't Trade Today" to "Didn't Report Today"
+- **New buttons per user**: Email (amber) + Notify (blue)
+- **Bulk actions**: "Email All" + "Notify All" buttons
+- **FOMO Email**: Motivational email showing team profit with CTA to report
+- **New endpoint**: `GET /api/admin/analytics/today-stats` (returns total_profit, total_commission)
+- **New endpoint**: `POST /api/admin/members/{user_id}/notify` (sends in-app notification + email)
+- **Grid**: 4-column layout on desktop
+
+#### Testing ✅
+- **Iteration 77**: 100% backend (8/8 tests passed), 100% frontend (7/7 features verified)
+
+### Session 67 (2026-02-02) - Balance Calculation Bug Fix ✅
+
+#### Balance Calculation Bug - FIXED ✅
+- **Problem**: "Balance Before" in Daily Projection was incorrect for past months
+- **Root Causes**:
+  1. Divergence between `runningBalance` and `effectiveBalance`
+  2. Double-subtraction of transactions when viewing past months
+  3. Missing commissions in past month calculations
+- **Fix**: Synchronized balance calculations, corrected formulas in `ProfitTrackerPage.jsx`
+
 ### Session 67 (2026-02-02) - Bug Fixes & Mobile Experience Overhaul ✅
 
 #### Issue #1: Trade Direction Mismatch - FIXED ✅
