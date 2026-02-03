@@ -668,7 +668,7 @@ export const DashboardPage = () => {
       {/* Original Layout for Admins (no tabs) */}
       {!isMember && (
         <>
-          {/* Charts & Recent Trades */}
+          {/* Charts & No Trade Members Widget */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Performance Chart */}
         <Card className="glass-card lg:col-span-2">
@@ -711,7 +711,13 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
 
-        {/* User Performance Stats */}
+        {/* No Trade Members Widget - beside Performance Overview */}
+        {isAdmin() && !isSimulating && (
+          <MissedTradersWidget />
+        )}
+        
+        {/* Your Stats - only show if simulating OR not admin */}
+        {(!isAdmin() || isSimulating) && (
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="text-white">Your Stats</CardTitle>
