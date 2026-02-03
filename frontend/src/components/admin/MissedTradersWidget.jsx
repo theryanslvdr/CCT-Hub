@@ -459,7 +459,7 @@ export const MissedTradersWidget = () => {
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-amber-400" />
                     <span className="text-sm text-amber-300">
-                      {missedTraders.length} member{missedTraders.length > 1 ? 's' : ''} • {totalMissedTrades} missed trade{totalMissedTrades > 1 ? 's' : ''}
+                      {missedTraders.length} member{missedTraders.length > 1 ? 's' : ''} haven&apos;t traded today
                     </span>
                   </div>
                 </div>
