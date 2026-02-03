@@ -53,6 +53,7 @@ export const MissedTradersWidget = () => {
   const [templates, setTemplates] = useState([]);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateCategory, setTemplateCategory] = useState('general');
   const [templateEditorMode, setTemplateEditorMode] = useState('visual');
