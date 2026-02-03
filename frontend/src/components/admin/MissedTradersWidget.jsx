@@ -794,6 +794,7 @@ export const MissedTradersWidget = () => {
                           size="sm"
                           onClick={() => {
                             setEditingTemplate(template);
+                            setIsCreatingTemplate(false);
                             setTemplateName(template.name);
                             setEmailSubject(template.subject);
                             setEmailBody(template.body);
