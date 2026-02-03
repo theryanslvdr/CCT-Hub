@@ -1466,7 +1466,48 @@ export const TradeMonitorPage = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          {tradeEntered && !tradeEnded ? (
+          {/* Show Performance Summary if trade already submitted today */}
+          {dailySummary?.trades_count > 0 && !tradeEnded && !showCelebration ? (
+            <div className="text-center space-y-4" data-testid="trade-submitted-summary">
+              <div className="p-3 md:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-emerald-400 text-base md:text-lg font-semibold flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" /> Trade Submitted
+                </p>
+                <p className="text-zinc-400 text-xs md:text-sm mt-1">You&apos;ve logged your results for today</p>
+              </div>
+              
+              {/* Today's Performance Summary */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <p className="text-xs text-zinc-500 uppercase">Target</p>
+                  <p className="text-lg md:text-xl font-mono font-bold text-blue-400">{formatLargeNumber(dailySummary?.total_projected || exitValue)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <p className="text-xs text-zinc-500 uppercase">Actual</p>
+                  <p className="text-lg md:text-xl font-mono font-bold text-emerald-400">{formatLargeNumber(dailySummary?.total_actual || 0)}</p>
+                </div>
+              </div>
+              
+              <div className="p-3 rounded-lg bg-zinc-900/50">
+                <p className="text-xs text-zinc-500">Performance Difference</p>
+                <p className={`text-2xl md:text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {(dailySummary?.difference || 0) >= 0 ? '+' : ''}{formatLargeNumber(dailySummary?.difference || 0)}
+                </p>
+              </div>
+              
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setTradeEnded(true);
+                  setActualExitValue((dailySummary?.total_actual || 0).toString());
+                }}
+                className="text-amber-400 border-amber-400/30 hover:bg-amber-400/10 gap-2"
+                data-testid="adjust-trade-button"
+              >
+                <Edit2 className="w-4 h-4" /> Adjust?
+              </Button>
+            </div>
+          ) : tradeEntered && !tradeEnded ? (
             // Trade time has passed - show "Exit Trade" button (auto-entered or manually entered)
             <div className="text-center space-y-4 md:space-y-6">
               <div className="p-3 md:p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
