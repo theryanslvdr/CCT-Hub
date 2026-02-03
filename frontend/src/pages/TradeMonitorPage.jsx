@@ -402,10 +402,17 @@ export const TradeMonitorPage = () => {
     setShowMissedTradePopup(false);
   }, [signal?.id]);
 
-  // Load trade history when page changes
+  // Load trade history when page changes or simulation changes
   useEffect(() => {
     loadTradeHistory();
   }, [loadTradeHistory]);
+  
+  // Re-load trade history when simulation view changes
+  useEffect(() => {
+    if (simulatedView?.memberId) {
+      loadTradeHistory();
+    }
+  }, [simulatedView?.memberId, loadTradeHistory]);
 
   // Restore trade entered state from localStorage on mount
   useEffect(() => {
