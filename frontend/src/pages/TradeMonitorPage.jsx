@@ -1053,6 +1053,18 @@ export const TradeMonitorPage = () => {
     }
 
     try {
+      // If adjusting an existing trade, delete it first
+      if (isAdjustingTrade) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        try {
+          await tradeAPI.undoTradeByDate(today);
+        } catch (undoError) {
+          // If undo fails (e.g., no trade found), continue anyway
+          console.log('No existing trade to undo or undo failed:', undoError);
+        }
+        setIsAdjustingTrade(false); // Reset adjustment mode
+      }
+      
       // Use BVE endpoint if in BVE mode, otherwise use regular trade endpoint
       // NOTE: For regular trades, lot_size is calculated server-side from authoritative account_value
       // to prevent stale frontend values. BVE mode still uses frontend lot_size for simulation.
