@@ -3068,14 +3068,16 @@ export const ProfitTrackerPage = () => {
       {/* Daily Projection Dialog */}
       <Dialog open={dailyProjectionOpen} onOpenChange={setDailyProjectionOpen}>
         <DialogContent className="glass-card border-zinc-800 max-w-5xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-400" />
-              <span className="hidden md:inline">Daily Projection - </span>
-              <span className="md:hidden text-left">{selectedMonth?.monthName}</span>
-              <span className="hidden md:inline">{selectedMonth?.monthName}</span>
+          <DialogHeader className="text-left">
+            <DialogTitle className="text-white flex flex-col md:flex-row md:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-400" />
+                <span className="hidden md:inline">Daily Projection - </span>
+                <span className="md:hidden text-left">{selectedMonth?.monthName}</span>
+                <span className="hidden md:inline">{selectedMonth?.monthName}</span>
+              </div>
               {selectedMonth?.isCurrentMonth && (
-                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full ml-2">
+                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full md:ml-2 w-fit">
                   <span className="hidden md:inline">{getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days remaining</span>
                   <span className="md:hidden">{getDailyProjectionForSelectedMonth.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days</span>
                 </span>
