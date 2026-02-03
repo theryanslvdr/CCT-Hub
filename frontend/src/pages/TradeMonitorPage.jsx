@@ -165,6 +165,7 @@ export const TradeMonitorPage = () => {
   const [dreamDailyProfit, setDreamDailyProfit] = useState('');
   const [preTradeCountdown, setPreTradeCountdown] = useState(null);
   const [checkInRestored, setCheckInRestored] = useState(false);
+  const [isAdjustingTrade, setIsAdjustingTrade] = useState(false); // Track if adjusting existing trade
   
   // Merin mobile options
   const [showMerinOptions, setShowMerinOptions] = useState(false);
