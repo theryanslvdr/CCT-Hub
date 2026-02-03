@@ -1,15 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { 
   AlertTriangle, Users, Mail, RefreshCw, Loader2, 
-  Clock, Calendar, Send, CheckCircle, Bell, DollarSign
+  Clock, Calendar, Send, CheckCircle, Bell, Code, Smile
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+// Available shortcodes for email templates
+const SHORTCODES = [
+  { code: '{user_name}', description: "Recipient's name", example: 'John Doe' },
+  { code: '{team_profit}', description: "Today's team profit", example: '$1,250.00' },
+  { code: '{team_commission}', description: "Today's team commission", example: '$125.00' },
+  { code: '{profit_tracker_url}', description: 'Link to Profit Tracker', example: 'https://...' },
+];
 
 export const MissedTradersWidget = () => {
   const [missedTraders, setMissedTraders] = useState([]);
@@ -20,8 +31,28 @@ export const MissedTradersWidget = () => {
   const [bulkNotifying, setBulkNotifying] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [customMessage, setCustomMessage] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [showShortcodes, setShowShortcodes] = useState(false);
   const [todayStats, setTodayStats] = useState({ totalProfit: 0, totalCommission: 0 });
+
+  // Quill editor modules
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link'],
+      ['clean']
+    ],
+  }), []);
+
+  const quillFormats = [
+    'header', 'bold', 'italic', 'underline', 'strike',
+    'color', 'background', 'list', 'bullet', 'align', 'link'
+  ];
 
   const fetchMissedTraders = useCallback(async () => {
     try {
@@ -46,66 +77,86 @@ export const MissedTradersWidget = () => {
     fetchMissedTraders();
   }, [fetchMissedTraders]);
 
-  // Generate motivational FOMO email content
-  const generateFOMOEmail = (userName) => {
+  // Process shortcodes in email body
+  const processShortcodes = useCallback((body, userName) => {
+    const appUrl = process.env.REACT_APP_BACKEND_URL?.replace('/api', '') || window.location.origin;
+    
+    return body
+      .replace(/\{user_name\}/g, userName)
+      .replace(/\{team_profit\}/g, `$${todayStats.totalProfit.toFixed(2)}`)
+      .replace(/\{team_commission\}/g, `$${todayStats.totalCommission.toFixed(2)}`)
+      .replace(/\{profit_tracker_url\}/g, `${appUrl}/profit-tracker`);
+  }, [todayStats]);
+
+  // Generate default FOMO email content
+  const generateFOMOEmail = useCallback((userName) => {
     const profit = todayStats.totalProfit.toFixed(2);
     const commission = todayStats.totalCommission.toFixed(2);
+    const appUrl = process.env.REACT_APP_BACKEND_URL?.replace('/api', '') || window.location.origin;
     
     return {
-      subject: "💰 You're Missing Out! The Team Made $" + profit + " Today",
+      subject: `💰 You're Missing Out! The Team Made $${profit} Today`,
       body: `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-  <h2 style="color: #10B981;">Hi ${userName}! 👋</h2>
-  
-  <p style="font-size: 16px; color: #333;">We noticed you haven't reported your trade results yet today.</p>
-  
-  <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center;">
-    <p style="color: rgba(255,255,255,0.9); margin: 0 0 8px 0; font-size: 14px;">THE TEAM GENERATED TODAY</p>
-    <p style="color: #fff; font-size: 36px; font-weight: bold; margin: 0;">$${profit}</p>
-    <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0 0; font-size: 14px;">+ $${commission} in commissions</p>
-  </div>
-  
-  <p style="font-size: 18px; color: #EF4444; font-weight: bold; text-align: center;">
-    🚨 If you didn't trade, you're missing out!
-  </p>
-  
-  <div style="text-align: center; margin: 32px 0;">
-    <a href="${process.env.REACT_APP_BACKEND_URL?.replace('/api', '') || window.location.origin}/profit-tracker" 
-       style="display: inline-block; background: #3B82F6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
-      📊 Oh, you traded? Report Your Profit Now
-    </a>
-  </div>
-  
-  <p style="color: #666; font-size: 14px; text-align: center;">
-    Don't let your results go untracked. Every trade counts towards your growth!
-  </p>
+<h2 style="color: #10B981;">Hi ${userName}! 👋</h2>
+
+<p>We noticed you haven't reported your trade results yet today.</p>
+
+<div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center; color: white;">
+  <p style="margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">THE TEAM GENERATED TODAY</p>
+  <p style="font-size: 36px; font-weight: bold; margin: 0;">$${profit}</p>
+  <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.8;">+ $${commission} in commissions</p>
 </div>
+
+<p style="font-size: 18px; color: #EF4444; font-weight: bold; text-align: center;">
+  🚨 If you didn't trade, you're missing out!
+</p>
+
+<div style="text-align: center; margin: 32px 0;">
+  <a href="${appUrl}/profit-tracker" 
+     style="display: inline-block; background: #3B82F6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+    📊 Oh, you traded? Report Your Profit Now
+  </a>
+</div>
+
+<p style="color: #666; font-size: 14px; text-align: center;">
+  Don't let your results go untracked. Every trade counts towards your growth! 🚀
+</p>
       `.trim()
     };
+  }, [todayStats]);
+
+  const handleSendEmail = (user) => {
+    setSelectedUser(user);
+    const { subject, body } = generateFOMOEmail(user.full_name);
+    setEmailSubject(subject);
+    setEmailBody(body);
+    setEmailDialogOpen(true);
   };
 
-  const handleSendEmail = async (user) => {
-    setSelectedUser(user);
-    const { body } = generateFOMOEmail(user.full_name);
-    setCustomMessage(body);
-    setEmailDialogOpen(true);
+  const insertShortcode = (code) => {
+    setEmailBody(prev => prev + code);
+    setShowShortcodes(false);
   };
 
   const confirmSendEmail = async () => {
     if (!selectedUser) return;
     
     setSendingReminder(selectedUser.id);
-    const { subject } = generateFOMOEmail(selectedUser.full_name);
     
     try {
+      // Process shortcodes before sending
+      const processedBody = processShortcodes(emailBody, selectedUser.full_name);
+      const processedSubject = processShortcodes(emailSubject, selectedUser.full_name);
+      
       await api.post(`/admin/members/${selectedUser.id}/send-email`, {
-        subject: subject,
-        body: customMessage
+        subject: processedSubject,
+        body: processedBody
       });
       toast.success(`Email sent to ${selectedUser.full_name}`);
       setEmailDialogOpen(false);
       setSelectedUser(null);
-      setCustomMessage('');
+      setEmailSubject('');
+      setEmailBody('');
     } catch (error) {
       toast.error('Failed to send email');
       console.error(error);
@@ -117,14 +168,12 @@ export const MissedTradersWidget = () => {
   const handleNotify = async (user) => {
     setSendingNotify(user.id);
     try {
-      // Send push notification or in-app notification
       await api.post(`/admin/members/${user.id}/notify`, {
         title: "📊 Report Your Trade Results",
         message: `The team made $${todayStats.totalProfit.toFixed(2)} today! Don't forget to log your results.`
       });
       toast.success(`Notification sent to ${user.full_name}`);
     } catch (error) {
-      // If notify endpoint doesn't exist, fall back to email
       toast.info('Sending email notification instead...');
       const { subject, body } = generateFOMOEmail(user.full_name);
       try {
@@ -187,7 +236,6 @@ export const MissedTradersWidget = () => {
         });
         successCount++;
       } catch (error) {
-        // Fall back to email if notify doesn't work
         const { subject, body } = generateFOMOEmail(trader.full_name);
         try {
           await api.post(`/admin/members/${trader.id}/send-email`, {
@@ -387,26 +435,87 @@ export const MissedTradersWidget = () => {
         </CardContent>
       </Card>
 
-      {/* Email Dialog */}
+      {/* WYSIWYG Email Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-lg">
+        <DialogContent className="glass-card border-zinc-800 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Mail className="w-5 h-5 text-blue-400" />
-              Send Reminder to {selectedUser?.full_name}
+              Compose Email to {selectedUser?.full_name}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Customize the FOMO email before sending
+              Use the rich text editor to format your email. Click &quot;Shortcodes&quot; to insert dynamic content.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Textarea
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              className="input-dark min-h-[200px] font-mono text-xs"
-              placeholder="Enter your message..."
-            />
+          
+          <div className="space-y-4 py-4">
+            {/* Subject Line */}
+            <div className="space-y-2">
+              <Label htmlFor="email-subject" className="text-zinc-400">Subject</Label>
+              <Input
+                id="email-subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                className="input-dark"
+                placeholder="Email subject..."
+              />
+            </div>
+            
+            {/* Shortcodes Button */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowShortcodes(!showShortcodes)}
+                className="border-zinc-700 text-zinc-400 hover:text-white"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                Shortcodes
+              </Button>
+              <span className="text-xs text-zinc-500">Insert dynamic content into your email</span>
+            </div>
+            
+            {/* Shortcodes Panel */}
+            {showShortcodes && (
+              <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-2">
+                <p className="text-xs text-zinc-400 font-medium mb-2">Click to insert:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {SHORTCODES.map((sc) => (
+                    <button
+                      key={sc.code}
+                      type="button"
+                      onClick={() => insertShortcode(sc.code)}
+                      className="text-left p-2 rounded bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
+                    >
+                      <code className="text-blue-400 text-sm">{sc.code}</code>
+                      <p className="text-xs text-zinc-500 mt-0.5">{sc.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Rich Text Editor */}
+            <div className="space-y-2">
+              <Label className="text-zinc-400">Email Body</Label>
+              <div className="rounded-lg overflow-hidden border border-zinc-800 bg-white">
+                <ReactQuill
+                  theme="snow"
+                  value={emailBody}
+                  onChange={setEmailBody}
+                  modules={quillModules}
+                  formats={quillFormats}
+                  className="bg-white text-black"
+                  style={{ minHeight: '200px' }}
+                />
+              </div>
+              <p className="text-xs text-zinc-500">
+                💡 Tip: Use emojis directly in your text! Just copy/paste them: 🎉 💰 📊 🚀 ✨
+              </p>
+            </div>
           </div>
+          
           <DialogFooter>
             <Button
               variant="outline"
@@ -418,7 +527,7 @@ export const MissedTradersWidget = () => {
             <Button
               onClick={confirmSendEmail}
               className="btn-primary"
-              disabled={sendingReminder}
+              disabled={sendingReminder || !emailSubject.trim() || !emailBody.trim()}
             >
               {sendingReminder ? (
                 <>
@@ -435,6 +544,39 @@ export const MissedTradersWidget = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Custom styles for Quill editor */}
+      <style>{`
+        .ql-toolbar.ql-snow {
+          border-color: #3f3f46 !important;
+          background: #18181b !important;
+        }
+        .ql-toolbar.ql-snow .ql-stroke {
+          stroke: #a1a1aa !important;
+        }
+        .ql-toolbar.ql-snow .ql-fill {
+          fill: #a1a1aa !important;
+        }
+        .ql-toolbar.ql-snow .ql-picker-label {
+          color: #a1a1aa !important;
+        }
+        .ql-toolbar.ql-snow button:hover .ql-stroke,
+        .ql-toolbar.ql-snow .ql-picker-label:hover .ql-stroke {
+          stroke: #fff !important;
+        }
+        .ql-toolbar.ql-snow button:hover .ql-fill,
+        .ql-toolbar.ql-snow .ql-picker-label:hover .ql-fill {
+          fill: #fff !important;
+        }
+        .ql-container.ql-snow {
+          border-color: #3f3f46 !important;
+          min-height: 200px;
+        }
+        .ql-editor {
+          min-height: 200px;
+          font-size: 14px;
+        }
+      `}</style>
     </>
   );
 };
