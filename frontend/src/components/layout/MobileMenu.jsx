@@ -58,9 +58,23 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     simulatedView, exitSimulation, logout 
   } = useAuth();
   const navigate = useNavigate();
+  const [platformSettings, setPlatformSettings] = useState(null);
 
   // Check if user is a licensee
   const isLicenseeView = simulatedView?.license_type || user?.license_type;
+
+  // Load platform settings for logo
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsAPI.getPlatform();
+        setPlatformSettings(res.data);
+      } catch (error) {
+        console.error('Failed to load platform settings');
+      }
+    };
+    loadSettings();
+  }, []);
 
   // Navigation items
   const mainNavItems = [
