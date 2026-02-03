@@ -1184,7 +1184,7 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
         "amount": -data.amount,  # Negative to indicate withdrawal
         "product": "WITHDRAWAL",  # Mark as withdrawal type
         "currency": "USDT",
-        "notes": data.notes or f"Withdrawal to Binance",
+        "notes": data.notes or "Withdrawal to Binance",
         "is_withdrawal": True,
         "gross_amount": data.amount,
         "merin_fee": merin_fee,
