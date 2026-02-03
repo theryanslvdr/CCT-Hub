@@ -217,8 +217,8 @@ export const MissedTradersWidget = () => {
     setSendingNotify(userData.id);
     try {
       await api.post(`/admin/members/${userData.id}/notify`, {
-        title: `⚠️ ${userData.missed_trades_count} Undeclared Trade${userData.missed_trades_count > 1 ? 's' : ''}`,
-        message: `You have ${userData.missed_trades_count} undeclared trade${userData.missed_trades_count > 1 ? 's' : ''}. Please report your results.`
+        title: "📊 Report Your Trade Results",
+        message: `The team made $${todayStats.totalProfit.toFixed(2)} today! Don't forget to log your results.`
       });
       toast.success(`Notification sent to ${userData.full_name}`);
     } catch (error) {
