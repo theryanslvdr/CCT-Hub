@@ -1241,10 +1241,10 @@ export const ProfitTrackerPage = () => {
       });
       
       // Starting balance for this month = current - profits after - transactions after
-      // But we need the balance at the START of this month, so add back the month's profits
+      // But we need the balance at the START of this month, so add back the month's profits + commissions
       const monthProfits = Object.entries(tradeLogs)
         .filter(([key]) => key.startsWith(monthKey))
-        .reduce((sum, [_, log]) => sum + (log?.actual_profit || 0), 0);
+        .reduce((sum, [_, log]) => sum + (log?.actual_profit || 0) + (log?.commission || 0), 0);
       
       startBalance = effectiveAccountValue - totalProfitAfter - totalTxAfter + monthProfits;
     } else {
