@@ -1727,6 +1727,21 @@ export const AdminSettingsPage = () => {
               )}
             </CardContent>
           </Card>
+          
+          {/* Custom Email Templates Card - Master Admin Only */}
+          {isMasterAdmin() && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-purple-400" /> Custom Templates
+                </CardTitle>
+                <p className="text-sm text-zinc-500">Create reusable email templates with shortcodes for personalization</p>
+              </CardHeader>
+              <CardContent>
+                <CustomEmailTemplates />
+              </CardContent>
+            </Card>
+          )}
           </div>
         )}
 
