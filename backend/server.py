@@ -6197,8 +6197,12 @@ async def get_onboarding_status(user: dict = Depends(get_current_user)):
 
 
 
+class SendEmailRequest(BaseModel):
+    subject: str
+    body: str
+
 @admin_router.post("/members/{user_id}/send-email")
-async def send_email_to_member(user_id: str, subject: str, body: str, user: dict = Depends(require_admin)):
+async def send_email_to_member(user_id: str, data: SendEmailRequest, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
@@ -6209,8 +6213,8 @@ async def send_email_to_member(user_id: str, subject: str, body: str, user: dict
     result = await send_email_service(
         db=db,
         to_email=member["email"],
-        subject=subject,
-        html_content=body,
+        subject=data.subject,
+        html_content=data.body,
         template_type="admin_reminder",
         metadata={"sent_by": user["id"], "sent_to": user_id}
     )
