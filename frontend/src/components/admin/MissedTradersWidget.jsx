@@ -745,7 +745,15 @@ export const MissedTradersWidget = () => {
               <div className="flex justify-between items-center">
                 <p className="text-sm text-zinc-400">{templates.length} template{templates.length !== 1 ? 's' : ''}</p>
                 <Button
-                  onClick={() => openTemplateDialog()}
+                  onClick={() => {
+                    setIsCreatingTemplate(true);
+                    setEditingTemplate(null);
+                    setTemplateName('');
+                    setEmailSubject('');
+                    setEmailBody('');
+                    setTemplateCategory('general');
+                    setTemplateEditorMode('visual');
+                  }}
                   className="btn-primary"
                   size="sm"
                 >
