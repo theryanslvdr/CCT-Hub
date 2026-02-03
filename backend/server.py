@@ -1512,11 +1512,22 @@ async def update_trade_time_entered(
     return {"message": "Time entered updated", "time_entered": data.time_entered}
 
 @trade_router.get("/streak")
-async def get_trade_streak(user: dict = Depends(get_current_user)):
-    """Calculate current streak of consecutive trading days (regardless of profit/loss)"""
+async def get_trade_streak(user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Calculate current streak of consecutive trading days (regardless of profit/loss).
+    Admins can pass user_id to view another user's streak.
+    """
+    # Determine target user
+    target_user_id = user["id"]
+    target_user = user
+    if user_id and user.get("role") in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+        # Fetch the target user's data for streak_reset_date
+        target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+        if not target_user:
+            target_user = user
     
     # Check if user has a streak reset date (from "did not trade" action)
-    streak_reset_date = user.get("streak_reset_date")
+    streak_reset_date = target_user.get("streak_reset_date")
     streak_reset_filter = None
     if streak_reset_date:
         try:
