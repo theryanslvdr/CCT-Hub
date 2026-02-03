@@ -3304,7 +3304,6 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
         "highest_profit": round(highest_profit, 2),
         "total_traded_today": len(users_who_traded_today)
     }
-    }
 
 @admin_router.get("/analytics/today-stats")
 async def get_today_stats(user: dict = Depends(require_admin)):
