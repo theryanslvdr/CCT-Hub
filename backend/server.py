@@ -3241,87 +3241,52 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
 
 @admin_router.get("/analytics/missed-trades")
 async def get_missed_trades(user: dict = Depends(require_admin)):
-    """Get members with undeclared trades (missed trading days)"""
-    
-    # Get all member users
-    all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
-    member_users = [u for u in all_users if u.get("role") == "member"]
-    
-    # Get all signals to determine trading days
-    all_signals = await db.signals.find({}, {"_id": 0}).to_list(500)
-    
-    # Create a set of all trading dates (dates with signals)
-    trading_dates = set()
-    for signal in all_signals:
-        if signal.get("created_at"):
-            signal_date = signal["created_at"].split("T")[0]
-            trading_dates.add(signal_date)
+    """Get all members who haven't traded today"""
     
     # Get today's date
     today = datetime.now(timezone.utc).date()
     today_str = today.isoformat()
     
-    # Filter to only past trading dates (not including today if after market close, or today if signal exists)
-    past_trading_dates = [d for d in trading_dates if d <= today_str]
+    # Get all member users
+    all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    member_users = [u for u in all_users if u.get("role") == "member"]
     
-    # Get all trade logs
+    # Get today's trades
     all_trades = await db.trade_logs.find({}, {"_id": 0}).to_list(10000)
+    today_trades = [t for t in all_trades if t.get("created_at", "").startswith(today_str)]
     
-    # Create a map of user_id -> set of dates they traded
-    user_trade_dates = {}
-    for trade in all_trades:
-        user_id = trade.get("user_id")
-        if user_id:
-            if user_id not in user_trade_dates:
-                user_trade_dates[user_id] = set()
-            trade_date = trade.get("created_at", "").split("T")[0]
-            if trade_date:
-                user_trade_dates[user_id].add(trade_date)
+    # Get users who traded today
+    users_who_traded_today = set(t.get("user_id") for t in today_trades)
     
-    # Calculate missed trades for each member
+    # Find members who haven't traded today
     missed_traders = []
     for member in member_users:
         user_id = member["id"]
-        member_join_date = member.get("created_at", "").split("T")[0] if member.get("created_at") else "2000-01-01"
         
-        # Get the dates this member has traded
-        member_traded_dates = user_trade_dates.get(user_id, set())
-        
-        # Calculate missed trading days (trading days after member joined that they didn't trade)
-        missed_dates = []
-        for trading_date in past_trading_dates:
-            # Only count dates after member joined and before/on today
-            if trading_date >= member_join_date and trading_date <= today_str:
-                if trading_date not in member_traded_dates:
-                    missed_dates.append(trading_date)
-        
-        missed_count = len(missed_dates)
-        
-        if missed_count > 0:
-            # Get last trade date
+        if user_id not in users_who_traded_today:
+            # Get last trade date for this member
+            member_trades = [t for t in all_trades if t.get("user_id") == user_id]
             last_trade_at = None
-            if member_traded_dates:
-                last_trade_at = max(member_traded_dates) + "T00:00:00Z"
+            if member_trades:
+                sorted_trades = sorted(member_trades, key=lambda x: x.get("created_at", ""), reverse=True)
+                last_trade_at = sorted_trades[0].get("created_at")
+            
+            # Count total trades this member has made
+            total_trades = len(member_trades)
             
             missed_traders.append({
                 "id": member["id"],
                 "full_name": member.get("full_name", "Unknown"),
                 "email": member.get("email", ""),
                 "last_trade_at": last_trade_at,
-                "missed_trades_count": missed_count,
-                "missed_dates": sorted(missed_dates)[-5:]  # Last 5 missed dates
+                "total_trades": total_trades
             })
     
-    # Sort by most missed trades first
-    missed_traders.sort(key=lambda x: x["missed_trades_count"], reverse=True)
+    # Sort: members who never traded first, then by last trade date (oldest first)
+    missed_traders.sort(key=lambda x: (x["total_trades"] > 0, x["last_trade_at"] or ""))
     
     # Calculate today's team stats
-    today_start = datetime.combine(today, datetime.min.time()).replace(tzinfo=timezone.utc)
-    today_end = datetime.combine(today, datetime.max.time()).replace(tzinfo=timezone.utc)
-    
-    today_trades = [t for t in all_trades if t.get("created_at", "").startswith(today_str)]
     team_profit_today = sum(t.get("actual_profit", 0) for t in today_trades)
-    users_who_traded_today = set(t.get("user_id") for t in today_trades)
     
     highest_earner = None
     highest_profit = 0
@@ -3338,6 +3303,7 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
         "highest_earner": highest_earner,
         "highest_profit": round(highest_profit, 2),
         "total_traded_today": len(users_who_traded_today)
+    }
     }
 
 @admin_router.get("/analytics/today-stats")
