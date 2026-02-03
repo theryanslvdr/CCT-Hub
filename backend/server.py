@@ -6210,6 +6210,45 @@ async def send_email_to_member(user_id: str, subject: str, body: str, user: dict
     else:
         raise HTTPException(status_code=500, detail=result.get("error", "Email sending failed"))
 
+class NotifyRequest(BaseModel):
+    title: str
+    message: str
+
+@admin_router.post("/members/{user_id}/notify")
+async def notify_member(user_id: str, data: NotifyRequest, user: dict = Depends(require_admin)):
+    """Send an in-app notification to a member"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create in-app notification
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "type": "admin_reminder",
+        "title": data.title,
+        "message": data.message,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "sent_by": user["id"]
+    }
+    
+    await db.notifications.insert_one(notification)
+    
+    # Also send email as backup
+    from services.email_service import send_email as send_email_service
+    
+    await send_email_service(
+        db=db,
+        to_email=member["email"],
+        subject=data.title,
+        html_content=f"<p>{data.message}</p>",
+        template_type="admin_reminder",
+        metadata={"sent_by": user["id"], "sent_to": user_id}
+    )
+    
+    return {"message": "Notification sent successfully"}
+
 @admin_router.post("/upgrade-role")
 async def upgrade_role(data: RoleUpgrade, user: dict = Depends(require_admin)):
     """Upgrade a user's role. Master Admin can promote to any role without secret code."""
