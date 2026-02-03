@@ -330,6 +330,9 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         effectiveLotSize = lotSize;
         effectiveTargetProfit = targetProfit;
         effectiveBalance = truncateTo2Decimals(lotSize * 980);
+        // CRITICAL FIX: Sync runningBalance with effectiveBalance to prevent divergence
+        // This ensures the next day's calculation starts from the correct base
+        runningBalance = effectiveBalance;
       } else {
         effectiveLotSize = lotSize;
         effectiveTargetProfit = targetProfit;
