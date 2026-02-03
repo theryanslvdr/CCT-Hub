@@ -1537,6 +1537,7 @@ export const TradeMonitorPage = () => {
               <Button 
                 variant="outline"
                 onClick={() => {
+                  setIsAdjustingTrade(true); // Mark as adjustment mode
                   setTradeEnded(true);
                   setActualExitValue((dailySummary?.total_actual || 0).toString());
                 }}
