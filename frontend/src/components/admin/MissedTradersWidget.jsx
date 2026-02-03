@@ -316,6 +316,7 @@ export const MissedTradersWidget = () => {
   const openTemplateDialog = (template = null) => {
     if (template) {
       setEditingTemplate(template);
+      setIsCreatingTemplate(false);
       setTemplateName(template.name);
       setEmailSubject(template.subject);
       setEmailBody(template.body);
@@ -323,6 +324,7 @@ export const MissedTradersWidget = () => {
       setTemplateEditorMode(template.is_html ? 'code' : 'visual');
     } else {
       setEditingTemplate(null);
+      setIsCreatingTemplate(true);
       setTemplateName('');
       setEmailSubject('');
       setEmailBody('');
@@ -330,6 +332,11 @@ export const MissedTradersWidget = () => {
       setTemplateEditorMode('visual');
     }
     setTemplateDialogOpen(true);
+  };
+
+  const closeTemplateEdit = () => {
+    setEditingTemplate(null);
+    setIsCreatingTemplate(false);
   };
 
   const saveTemplate = async () => {
