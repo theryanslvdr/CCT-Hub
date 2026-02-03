@@ -1223,11 +1223,11 @@ export const ProfitTrackerPage = () => {
       const monthKey = `${selectedMonth.monthDate.getFullYear()}-${String(selectedMonth.monthDate.getMonth() + 1).padStart(2, '0')}`;
       const monthStart = new Date(selectedMonth.monthDate.getFullYear(), selectedMonth.monthDate.getMonth(), 1);
       
-      // Sum all profits from this month onwards
+      // Sum all profits from this month onwards (including commissions)
       let totalProfitAfter = 0;
       Object.entries(tradeLogs).forEach(([dateKey, log]) => {
         if (dateKey >= monthKey.slice(0, 7)) {  // From this month onwards
-          totalProfitAfter += (log?.actual_profit || 0);
+          totalProfitAfter += (log?.actual_profit || 0) + (log?.commission || 0);
         }
       });
       
