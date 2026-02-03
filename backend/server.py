@@ -2838,6 +2838,64 @@ async def get_member_withdrawals(user_id: str, user: dict = Depends(require_admi
     
     return withdrawals
 
+@admin_router.delete("/members/{user_id}/trades/{trade_id}")
+async def delete_member_trade(user_id: str, trade_id: str, user: dict = Depends(require_master_admin)):
+    """Delete a specific trade for a member and deduct profit from balance (Master Admin only)"""
+    
+    # Verify member exists
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Find the trade
+    trade = await db.trade_logs.find_one({"id": trade_id, "user_id": user_id}, {"_id": 0})
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found for this user")
+    
+    actual_profit = trade.get("actual_profit", 0)
+    commission = trade.get("commission", 0)
+    total_deduction = actual_profit + commission
+    
+    # Store in audit trail
+    audit_record = {
+        "id": str(uuid.uuid4()),
+        "action": "admin_trade_delete",
+        "trade_id": trade_id,
+        "user_id": user_id,
+        "admin_id": user["id"],
+        "admin_name": user.get("full_name", "Admin"),
+        "trade_data": trade,
+        "profit_deducted": total_deduction,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.audit_logs.insert_one(audit_record)
+    
+    # Delete the trade
+    await db.trade_logs.delete_one({"id": trade_id})
+    
+    # Also delete any associated deposit (if trade was forwarded to profit)
+    await db.deposits.delete_many({"trade_id": trade_id})
+    
+    # Create a negative deposit to deduct the profit from balance
+    if total_deduction > 0:
+        deduction_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "amount": -total_deduction,  # Negative to deduct from balance
+            "type": "admin_adjustment",
+            "notes": f"Admin deleted trade from {trade.get('created_at', 'unknown date')}. Profit deducted: ${actual_profit:.2f}, Commission: ${commission:.2f}",
+            "is_withdrawal": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "admin_id": user["id"]
+        }
+        await db.deposits.insert_one(deduction_record)
+    
+    return {
+        "message": "Trade deleted successfully",
+        "profit_deducted": total_deduction,
+        "trade_id": trade_id
+    }
+
 class AdminUserUpdate(BaseModel):
     full_name: Optional[str] = None
     timezone: Optional[str] = None
