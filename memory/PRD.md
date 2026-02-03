@@ -11,7 +11,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 2 Enhancements ✅
+### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 4 Enhancements ✅
 
 #### Enhancement #1: "No Trade Members" Widget ✅
 - **Renamed**: From "Didn't Report Today" to "No Trade Members"
@@ -28,13 +28,36 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - `PUT /api/admin/email-templates/{id}` - Update template (Master Admin only)
   - `DELETE /api/admin/email-templates/{id}` - Delete template (Master Admin only)
 - **Features**:
-  - Template name and category (general, reminder, announcement, welcome)
+  - Template name and category (general, reminder, announcement, welcome, notification)
   - Subject line with shortcode support
   - Visual (WYSIWYG) and HTML Code editor modes
-  - Shortcodes: `{user_name}`, `{user_email}`, `{missed_count}`, `{team_profit}`, `{team_commission}`, `{profit_tracker_url}`, `{current_date}`
+  - Shortcodes: `{user_name}`, `{user_email}`, `{missed_count}`, `{team_profit}`, `{team_commission}`, `{profit_tracker_url}`, `{current_date}`, `{account_value}`, `{lot_size}`
   - Quick template selection when composing emails
 - **UI**: FileText icon in widget header opens template management dialog
 - **Location**: `/app/frontend/src/components/admin/MissedTradersWidget.jsx`, `/app/backend/server.py`
+
+#### Enhancement #3: Email Settings Page ✅
+- **New Component**: `/app/frontend/src/components/admin/CustomEmailTemplates.jsx`
+- **Location**: Added to Platform Settings → Emails tab (scroll down)
+- **Features**:
+  - Full-page template management interface
+  - Two-column layout: template list (left) + editor panel (right)
+  - Category filtering
+  - Visual/HTML code toggle
+  - Shortcode reference with click-to-insert
+- **Access**: Master Admin only
+
+#### Enhancement #4: Dashboard Layout Update ✅
+- **Change**: Moved "No Trade Members" widget to be beside "Performance Overview" chart
+- **Layout**: 3-column grid with Performance (2 cols) + No Trade Members widget (1 col)
+- **Location**: `/app/frontend/src/pages/DashboardPage.jsx`
+
+#### Bug Fix: Balance Calculation (January 30) ✅
+- **Issue**: Balance showing wrong value ($16,777.60)
+- **Root Cause**: Code was deriving balance from stored `lot_size` which could be inconsistent
+- **Fix**: Changed to always use cumulative `runningBalance` calculation as source of truth
+- **Result**: Balance Before is now calculated sequentially from month start, not derived from stored lot_size
+- **Location**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` lines 319-350
 
 #### Feature #1: Mobile Trade Monitor - Sticky Signal Bar ✅
 - **Added**: Sticky bar at top of Trade Monitor page (mobile only)
