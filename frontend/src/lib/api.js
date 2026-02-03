@@ -119,9 +119,15 @@ export const tradeAPI = {
     return api.get('/trade/history', { params });
   },
   updateTimeEntered: (tradeId, timeEntered) => api.put(`/trade/logs/${tradeId}/time-entered`, { time_entered: timeEntered }),
-  getStreak: () => api.get('/trade/streak'),
+  getStreak: (userId = null) => {
+    const params = userId ? { user_id: userId } : {};
+    return api.get('/trade/streak', { params });
+  },
   getActiveSignal: () => api.get('/trade/active-signal'),
-  getDailySummary: () => api.get('/trade/daily-summary'),
+  getDailySummary: (userId = null) => {
+    const params = userId ? { user_id: userId } : {};
+    return api.get('/trade/daily-summary', { params });
+  },
   forwardToProfit: (tradeId, isBve = false) => api.post('/trade/forward-to-profit', null, { params: { trade_id: tradeId, is_bve: isBve } }),
   getMissedTradeStatus: () => api.get('/trade/missed-trade-status'),
   logMissedTrade: (data) => api.post('/trade/log-missed-trade', null, { params: data }),
