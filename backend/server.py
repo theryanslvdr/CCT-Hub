@@ -1573,7 +1573,7 @@ async def get_trade_streak(user_id: Optional[str] = None, user: dict = Depends(g
     
     # Build query - exclude "did not trade" entries from streak calculation
     query = {
-        "user_id": user["id"],
+        "user_id": target_user_id,
         "did_not_trade": {"$ne": True}  # Exclude "did not trade" entries
     }
     
