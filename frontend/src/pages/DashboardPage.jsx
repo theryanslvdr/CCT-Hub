@@ -768,6 +768,7 @@ export const DashboardPage = () => {
             </div>
           </CardContent>
         </Card>
+        )}
       </div>
 
       {/* Recent Trades */}
