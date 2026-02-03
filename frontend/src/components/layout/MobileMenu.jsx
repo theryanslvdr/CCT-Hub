@@ -145,16 +145,38 @@ export const MobileMenu = ({ isOpen, onClose }) => {
 
   return (
     <div className="md:hidden fixed inset-0 z-[100] bg-zinc-950/98 backdrop-blur-xl">
-      {/* Header with close button */}
+      {/* Header with logo and close button */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">CrossCurrent</h1>
-            <p className="text-xs text-zinc-500">Finance Center</p>
-          </div>
+          {platformSettings?.logo_url ? (
+            <div className="flex items-center gap-2">
+              <img 
+                src={platformSettings.logo_url} 
+                alt="Logo" 
+                className="h-8 max-w-[140px] object-contain" 
+              />
+              <span className="text-zinc-500 text-lg font-light">|</span>
+              <span className="text-white font-semibold">The Hub</span>
+            </div>
+          ) : platformSettings?.favicon_url ? (
+            <div className="flex items-center gap-2">
+              <img 
+                src={platformSettings.favicon_url} 
+                alt="Logo" 
+                className="w-8 h-8 rounded-lg object-contain" 
+              />
+              <span className="text-zinc-500 text-lg font-light">|</span>
+              <span className="text-white font-semibold">The Hub</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-zinc-500 text-lg font-light">|</span>
+              <span className="text-white font-semibold">The Hub</span>
+            </div>
+          )}
         </div>
         <Button
           variant="ghost"
