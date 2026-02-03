@@ -337,14 +337,16 @@ export const TradeMonitorPage = () => {
 
   const loadTradeHistory = useCallback(async () => {
     try {
-      const res = await tradeAPI.getHistory(historyPage, 10);
+      // When simulating a member, load their trade history instead of admin's
+      const userId = simulatedView?.memberId || null;
+      const res = await tradeAPI.getHistory(historyPage, 10, userId);
       setTradeHistory(res.data.trades);
       setHistoryTotalPages(res.data.total_pages);
       setHistoryTotal(res.data.total);
     } catch (error) {
       console.error('Failed to load trade history:', error);
     }
-  }, [historyPage]);
+  }, [historyPage, simulatedView?.memberId]);
 
   // Pull-to-refresh for mobile
   const handleRefresh = useCallback(async () => {
