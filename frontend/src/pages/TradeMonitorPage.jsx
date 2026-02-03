@@ -1787,23 +1787,47 @@ export const TradeMonitorPage = () => {
                         </td>
                         <td>
                           {isMasterAdmin ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleResetTrade(trade.id)}
-                              disabled={resetTradeLoading === trade.id}
-                              className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                              data-testid={`reset-trade-${trade.id}`}
-                            >
-                              {resetTradeLoading === trade.id ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
+                            <div className="flex items-center gap-1">
+                              {isSimulatingMember ? (
+                                // When simulating a member, show Delete button
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteMemberTrade(trade)}
+                                  disabled={deleteTradeLoading === trade.id}
+                                  className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  data-testid={`delete-trade-${trade.id}`}
+                                >
+                                  {deleteTradeLoading === trade.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Trash2 className="w-3 h-3 mr-1" />
+                                      Delete
+                                    </>
+                                  )}
+                                </Button>
                               ) : (
-                                <>
-                                  <RotateCcw className="w-3 h-3 mr-1" />
-                                  Reset
-                                </>
+                                // When not simulating, show Reset button
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleResetTrade(trade.id)}
+                                  disabled={resetTradeLoading === trade.id}
+                                  className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  data-testid={`reset-trade-${trade.id}`}
+                                >
+                                  {resetTradeLoading === trade.id ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <RotateCcw className="w-3 h-3 mr-1" />
+                                      Reset
+                                    </>
+                                  )}
+                                </Button>
                               )}
-                            </Button>
+                            </div>
                           ) : (
                             <Button
                               variant="ghost"
