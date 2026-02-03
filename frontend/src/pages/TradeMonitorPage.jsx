@@ -1263,6 +1263,29 @@ export const TradeMonitorPage = () => {
       isRefreshing={isRefreshing} 
     />
     
+    {/* Mobile Sticky Signal Bar - Only visible on mobile when signal exists */}
+    {signal && (
+      <div className="md:hidden sticky top-0 z-40 -mx-4 px-4 py-2 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800" data-testid="mobile-sticky-signal">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+              {signal.direction === 'BUY' ? (
+                <TrendingUp className="w-4 h-4 inline mr-1" />
+              ) : (
+                <TrendingDown className="w-4 h-4 inline mr-1" />
+              )}
+              {signal.direction}
+            </div>
+            <span className="text-zinc-400 text-sm font-medium">{signal.product}</span>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-zinc-500">Trade Time</p>
+            <p className="text-sm font-mono text-blue-400">{signal.trade_time}</p>
+          </div>
+        </div>
+      </div>
+    )}
+    
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
       <div className="flex-1 space-y-6 lg:overflow-y-auto lg:pr-4">
