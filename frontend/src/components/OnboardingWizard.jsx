@@ -48,7 +48,13 @@ const calculateProjectedProfit = (lotSize) => Math.floor(lotSize * 15 * 100) / 1
 
 // Hook to detect mobile viewport
 const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialize with actual window width check if available
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
   
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
