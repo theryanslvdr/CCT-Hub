@@ -661,6 +661,10 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
+  // Backend-calculated daily balances (authoritative source for historical months)
+  const [backendDailyBalances, setBackendDailyBalances] = useState({});
+  const [backendBalancesLoading, setBackendBalancesLoading] = useState(false);
+  
   // Onboarding Wizard states
   const [onboardingWizardOpen, setOnboardingWizardOpen] = useState(false);
   const [isResetOnboarding, setIsResetOnboarding] = useState(false);
