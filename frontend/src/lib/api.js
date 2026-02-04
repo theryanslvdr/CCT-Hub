@@ -94,6 +94,9 @@ export const profitAPI = {
   getReportBase64: (period = 'monthly', userId = null) => api.get('/admin/analytics/report/base64', { params: { period, user_id: userId } }),
   // Virtual Share Distribution (VSD) - Master Admin only
   getVSD: () => api.get('/profit/vsd'),
+  // Balance calculation endpoints (authoritative backend calculation)
+  getBalanceOnDate: (date, userId = null) => api.get('/profit/balance-on-date', { params: { date, user_id: userId } }),
+  getDailyBalances: (startDate, endDate, userId = null) => api.get('/profit/daily-balances', { params: { start_date: startDate, end_date: endDate, user_id: userId } }),
   // Onboarding
   completeOnboarding: (data) => api.post('/profit/complete-onboarding', data),
   getOnboardingStatus: () => api.get('/profit/onboarding-status'),
