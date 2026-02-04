@@ -510,6 +510,104 @@ async def create_member_notification(notification_type: str, title: str, message
     
     return notification
 
+
+async def send_signal_email_to_members(signal: dict, frontend_url: str = None):
+    """
+    Send trading signal email to all active members.
+    
+    Uses the 'trading_signal' template if custom, otherwise falls back to 'trade_notification' default.
+    
+    Shortcodes supported:
+    - {user_name} or {{name}} - Member's full name
+    - {user_email} - Member's email
+    - {product} - Trading product
+    - {direction} - BUY or SELL
+    - {time} - Trade time
+    - {timezone} - Trade timezone
+    - {trade_monitor_url} - Link to trade monitor
+    - {current_date} - Current date
+    """
+    # Get all active users (members)
+    active_users = await db.users.find(
+        {"is_active": True},
+        {"_id": 0, "id": 1, "email": 1, "full_name": 1}
+    ).to_list(10000)
+    
+    if not active_users:
+        logger.info("No active users to send signal email")
+        return {"sent": 0, "failed": 0}
+    
+    # Get email template - try custom 'trading_signal' first, then 'trade_notification'
+    template = await db.email_templates.find_one({"type": "trading_signal"}, {"_id": 0})
+    if not template:
+        template = await db.email_templates.find_one({"type": "trade_notification"}, {"_id": 0})
+    
+    # Default template if none exists
+    default_subject = f"New Trading Signal: {signal.get('direction', 'BUY')} {signal.get('product', 'MOIL10')}"
+    default_body = f"""Hello {{{{name}}}},
+
+A new official trading signal is available!
+
+📊 Signal Details:
+- Product: {signal.get('product', 'MOIL10')}
+- Direction: {signal.get('direction', 'BUY')}
+- Trade Time: {signal.get('trade_time', '')} ({signal.get('trade_timezone', 'Asia/Manila')})
+
+<a href="{frontend_url or ''}/trade-monitor" style="display:inline-block;padding:12px 24px;background:#3B82F6;color:white;text-decoration:none;border-radius:8px;margin:16px 0;">Go to Trade Monitor</a>
+
+Don't miss this opportunity!
+
+Best regards,
+CrossCurrent Team"""
+    
+    subject = template.get("subject", default_subject) if template else default_subject
+    body = template.get("body", default_body) if template else default_body
+    
+    # Prepare trade monitor URL
+    trade_monitor_url = f"{frontend_url}/trade-monitor" if frontend_url else "/trade-monitor"
+    current_date = datetime.now(timezone.utc).strftime("%B %d, %Y")
+    
+    sent_count = 0
+    failed_count = 0
+    
+    for user in active_users:
+        try:
+            # Replace shortcodes
+            user_subject = subject.replace("{user_name}", user.get("full_name", "Trader"))
+            user_subject = user_subject.replace("{{name}}", user.get("full_name", "Trader"))
+            user_subject = user_subject.replace("{product}", signal.get("product", ""))
+            user_subject = user_subject.replace("{{product}}", signal.get("product", ""))
+            user_subject = user_subject.replace("{direction}", signal.get("direction", ""))
+            user_subject = user_subject.replace("{{direction}}", signal.get("direction", ""))
+            
+            user_body = body.replace("{user_name}", user.get("full_name", "Trader"))
+            user_body = user_body.replace("{{name}}", user.get("full_name", "Trader"))
+            user_body = user_body.replace("{user_email}", user.get("email", ""))
+            user_body = user_body.replace("{product}", signal.get("product", ""))
+            user_body = user_body.replace("{{product}}", signal.get("product", ""))
+            user_body = user_body.replace("{direction}", signal.get("direction", ""))
+            user_body = user_body.replace("{{direction}}", signal.get("direction", ""))
+            user_body = user_body.replace("{time}", signal.get("trade_time", ""))
+            user_body = user_body.replace("{{time}}", signal.get("trade_time", ""))
+            user_body = user_body.replace("{timezone}", signal.get("trade_timezone", ""))
+            user_body = user_body.replace("{trade_monitor_url}", trade_monitor_url)
+            user_body = user_body.replace("{current_date}", current_date)
+            
+            # Send email
+            await send_email_via_emailit(
+                to_email=user.get("email"),
+                subject=user_subject,
+                html_content=user_body.replace("\n", "<br>") if "<" not in user_body else user_body
+            )
+            sent_count += 1
+            
+        except Exception as e:
+            logger.error(f"Failed to send signal email to {user.get('email')}: {e}")
+            failed_count += 1
+    
+    logger.info(f"Signal email sent: {sent_count} successful, {failed_count} failed")
+    return {"sent": sent_count, "failed": failed_count}
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
