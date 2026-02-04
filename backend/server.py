@@ -214,6 +214,7 @@ class TradingSignalCreate(BaseModel):
     profit_points: float = 15  # Default profit multiplier
     notes: Optional[str] = None
     is_official: bool = False  # Official trading signal flag
+    send_email: bool = True  # Auto-send email to active members when signal is official
 
 class TradingSignalUpdate(BaseModel):
     trade_time: Optional[str] = None
@@ -223,6 +224,7 @@ class TradingSignalUpdate(BaseModel):
     notes: Optional[str] = None
     is_active: Optional[bool] = None
     is_official: Optional[bool] = None  # Official trading signal flag
+    send_email: Optional[bool] = None  # Option to trigger email on update
 
 class TradingSignalResponse(BaseModel):
     id: str
