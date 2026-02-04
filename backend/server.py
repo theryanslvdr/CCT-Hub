@@ -376,6 +376,7 @@ class EmailTemplateType(str, Enum):
     LICENSE_INVITE = "license_invite"
     ADMIN_NOTIFICATION = "admin_notification"
     SUPER_ADMIN_NOTIFICATION = "super_admin_notification"
+    TRADING_SIGNAL = "trading_signal"  # Email sent when official signal is released
 
 class EmailTemplateUpdate(BaseModel):
     subject: str
