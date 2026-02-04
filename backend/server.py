@@ -6814,6 +6814,70 @@ async def reactivate_user(user_id: str, user: dict = Depends(require_admin)):
     )
     return {"message": "User has been reactivated"}
 
+
+@admin_router.post("/migrate-trade-directions")
+async def migrate_trade_directions(user: dict = Depends(require_master_admin)):
+    """
+    One-time migration to fix historical trade log directions.
+    Updates trade_logs.direction field to match the linked signal's direction.
+    Only Master Admin can run this migration.
+    """
+    # Get all trade logs with a signal_id
+    trades_with_signals = await db.trade_logs.find(
+        {"signal_id": {"$ne": None}},
+        {"_id": 0, "id": 1, "signal_id": 1, "direction": 1}
+    ).to_list(10000)
+    
+    if not trades_with_signals:
+        return {"message": "No trades found to migrate", "updated": 0, "skipped": 0}
+    
+    # Get all unique signal IDs
+    signal_ids = list(set(t.get("signal_id") for t in trades_with_signals if t.get("signal_id")))
+    
+    # Fetch all signals in one query
+    signals = await db.trading_signals.find(
+        {"id": {"$in": signal_ids}},
+        {"_id": 0, "id": 1, "direction": 1}
+    ).to_list(len(signal_ids))
+    
+    signals_map = {s["id"]: s.get("direction") for s in signals}
+    
+    updated_count = 0
+    skipped_count = 0
+    
+    for trade in trades_with_signals:
+        signal_id = trade.get("signal_id")
+        current_direction = trade.get("direction")
+        signal_direction = signals_map.get(signal_id)
+        
+        # Skip if signal not found or direction already matches
+        if not signal_direction:
+            skipped_count += 1
+            continue
+            
+        if current_direction == signal_direction:
+            skipped_count += 1
+            continue
+        
+        # Update the trade's direction to match the signal
+        result = await db.trade_logs.update_one(
+            {"id": trade["id"]},
+            {"$set": {"direction": signal_direction}}
+        )
+        
+        if result.modified_count > 0:
+            updated_count += 1
+            logger.info(f"Migrated trade {trade['id']}: {current_direction} -> {signal_direction}")
+        else:
+            skipped_count += 1
+    
+    return {
+        "message": f"Migration complete. Updated {updated_count} trades, skipped {skipped_count} trades.",
+        "updated": updated_count,
+        "skipped": skipped_count
+    }
+
+
 # ==================== DEBT MANAGEMENT ROUTES ====================
 
 @debt_router.post("", response_model=DebtResponse)
