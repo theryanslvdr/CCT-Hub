@@ -70,6 +70,8 @@ const useIsMobile = () => {
 export const OnboardingWizard = (props) => {
   const isMobile = useIsMobile();
   
+  console.log('[OnboardingWizard] Rendering, isMobile:', isMobile, 'isOpen:', props.isOpen);
+  
   // Render mobile-optimized wizard on mobile devices
   if (isMobile) {
     return <OnboardingWizardMobile {...props} />;
