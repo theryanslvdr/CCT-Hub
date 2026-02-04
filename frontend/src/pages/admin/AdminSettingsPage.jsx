@@ -363,6 +363,31 @@ export const AdminSettingsPage = () => {
     }
   };
 
+  // Handle trade direction migration
+  const handleMigrateTradeDirections = async () => {
+    if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
+    setMigrationLoading(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/migrate-trade-directions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
+      } else {
+        toast.error(data.detail || 'Migration failed');
+      }
+    } catch (error) {
+      toast.error('Migration failed: ' + error.message);
+    } finally {
+      setMigrationLoading(false);
+    }
+  };
+
   const handleTestEmailit = async () => {
     setTestingEmailit(true);
     try {
