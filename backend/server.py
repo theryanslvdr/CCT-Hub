@@ -3241,52 +3241,97 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
 
 @admin_router.get("/analytics/missed-trades")
 async def get_missed_trades(user: dict = Depends(require_admin)):
-    """Get all members who haven't traded today"""
-    
-    # Get today's date
-    today = datetime.now(timezone.utc).date()
-    today_str = today.isoformat()
+    """Get members with undeclared trading days (days with signals but no trade entry and not marked as 'did not trade')"""
     
     # Get all member users
     all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     member_users = [u for u in all_users if u.get("role") == "member"]
     
-    # Get today's trades
+    # Get all signals to determine trading days
+    all_signals = await db.signals.find({}, {"_id": 0}).to_list(500)
+    
+    # Create a set of all trading dates (dates with signals)
+    trading_dates = set()
+    for signal in all_signals:
+        if signal.get("created_at"):
+            signal_date = signal["created_at"].split("T")[0]
+            trading_dates.add(signal_date)
+    
+    # Get today's date
+    today = datetime.now(timezone.utc).date()
+    today_str = today.isoformat()
+    
+    # Get all trade logs (includes both actual trades and "did not trade" declarations)
     all_trades = await db.trade_logs.find({}, {"_id": 0}).to_list(10000)
-    today_trades = [t for t in all_trades if t.get("created_at", "").startswith(today_str)]
     
-    # Get users who traded today
-    users_who_traded_today = set(t.get("user_id") for t in today_trades)
+    # Get all user holidays
+    all_holidays = await db.user_holidays.find({}, {"_id": 0}).to_list(5000)
     
-    # Find members who haven't traded today
+    # Build a map of user_id -> set of dates they have accounted for (traded OR declared did_not_trade OR holiday)
+    user_accounted_dates = {}
+    
+    # Add trade log dates (both actual trades and did_not_trade entries)
+    for trade in all_trades:
+        user_id = trade.get("user_id")
+        if user_id:
+            if user_id not in user_accounted_dates:
+                user_accounted_dates[user_id] = set()
+            trade_date = trade.get("created_at", "").split("T")[0]
+            if trade_date:
+                user_accounted_dates[user_id].add(trade_date)
+    
+    # Add user holiday dates
+    for holiday in all_holidays:
+        user_id = holiday.get("user_id")
+        holiday_date = holiday.get("date", "").split("T")[0] if holiday.get("date") else None
+        if user_id and holiday_date:
+            if user_id not in user_accounted_dates:
+                user_accounted_dates[user_id] = set()
+            user_accounted_dates[user_id].add(holiday_date)
+    
+    # Find members with undeclared trading days
     missed_traders = []
     for member in member_users:
         user_id = member["id"]
+        member_join_date = member.get("created_at", "").split("T")[0] if member.get("created_at") else "2000-01-01"
         
-        if user_id not in users_who_traded_today:
-            # Get last trade date for this member
-            member_trades = [t for t in all_trades if t.get("user_id") == user_id]
+        # Get dates this member has accounted for
+        accounted_dates = user_accounted_dates.get(user_id, set())
+        
+        # Find undeclared trading days (signal dates after member joined, up to today, not accounted for)
+        undeclared_dates = []
+        for signal_date in trading_dates:
+            # Only count dates after member joined and up to today
+            if signal_date >= member_join_date and signal_date <= today_str:
+                if signal_date not in accounted_dates:
+                    undeclared_dates.append(signal_date)
+        
+        undeclared_count = len(undeclared_dates)
+        
+        if undeclared_count > 0:
+            # Get last trade date (actual trades only, not did_not_trade)
+            member_actual_trades = [t for t in all_trades if t.get("user_id") == user_id and not t.get("did_not_trade")]
             last_trade_at = None
-            if member_trades:
-                sorted_trades = sorted(member_trades, key=lambda x: x.get("created_at", ""), reverse=True)
+            if member_actual_trades:
+                sorted_trades = sorted(member_actual_trades, key=lambda x: x.get("created_at", ""), reverse=True)
                 last_trade_at = sorted_trades[0].get("created_at")
-            
-            # Count total trades this member has made
-            total_trades = len(member_trades)
             
             missed_traders.append({
                 "id": member["id"],
                 "full_name": member.get("full_name", "Unknown"),
                 "email": member.get("email", ""),
                 "last_trade_at": last_trade_at,
-                "total_trades": total_trades
+                "undeclared_count": undeclared_count,
+                "undeclared_dates": sorted(undeclared_dates)[-5:]  # Last 5 undeclared dates for reference
             })
     
-    # Sort: members who never traded first, then by last trade date (oldest first)
-    missed_traders.sort(key=lambda x: (x["total_trades"] > 0, x["last_trade_at"] or ""))
+    # Sort by most undeclared days first
+    missed_traders.sort(key=lambda x: x["undeclared_count"], reverse=True)
     
     # Calculate today's team stats
+    today_trades = [t for t in all_trades if t.get("created_at", "").startswith(today_str) and not t.get("did_not_trade")]
     team_profit_today = sum(t.get("actual_profit", 0) for t in today_trades)
+    users_who_traded_today = set(t.get("user_id") for t in today_trades)
     
     highest_earner = None
     highest_profit = 0
