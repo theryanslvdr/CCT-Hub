@@ -216,6 +216,57 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
     return allHolidays.has(dateKey);
   }, [allHolidays]);
 
+  // Save progress to localStorage
+  const saveProgress = useCallback(() => {
+    const data = {
+      userType,
+      startingBalance,
+      startDate: startDate?.toISOString(),
+      transactions,
+      tradeEntries,
+      currentStep,
+      currentTradeIndex,
+      totalCommission
+    };
+    localStorage.setItem('onboarding_wizard_progress', JSON.stringify(data));
+  }, [userType, startingBalance, startDate, transactions, tradeEntries, currentStep, currentTradeIndex, totalCommission]);
+
+  // Auto-save progress when state changes
+  useEffect(() => {
+    if (isOpen && (userType || startingBalance || startDate)) {
+      saveProgress();
+    }
+  }, [isOpen, userType, startingBalance, startDate, transactions, tradeEntries, currentStep, currentTradeIndex, totalCommission, saveProgress]);
+
+  // Load saved progress on mount
+  useEffect(() => {
+    if (isOpen) {
+      const saved = localStorage.getItem('onboarding_wizard_progress');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.userType) setUserType(data.userType);
+          if (data.startingBalance) setStartingBalance(data.startingBalance);
+          if (data.startDate) setStartDate(new Date(data.startDate));
+          if (data.transactions) setTransactions(data.transactions);
+          if (data.tradeEntries) setTradeEntries(data.tradeEntries);
+          if (data.currentStep) setCurrentStep(data.currentStep);
+          if (data.currentTradeIndex) setCurrentTradeIndex(data.currentTradeIndex);
+          if (data.totalCommission) setTotalCommission(data.totalCommission);
+        } catch (e) {
+          console.error('Failed to load saved progress:', e);
+        }
+      }
+    }
+  }, [isOpen]);
+
+  // Handle save and continue later
+  const handleSaveForLater = () => {
+    saveProgress();
+    toast.success('Progress saved! You can continue later.');
+    onClose();
+  };
+
   // Fetch global settings
   useEffect(() => {
     const fetchSettings = async () => {
