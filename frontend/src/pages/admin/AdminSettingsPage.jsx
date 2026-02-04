@@ -113,6 +113,9 @@ export const AdminSettingsPage = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [newProductName, setNewProductName] = useState('');
   const [savingProduct, setSavingProduct] = useState(false);
+  
+  // Data migration state
+  const [migrationLoading, setMigrationLoading] = useState(false);
 
   useEffect(() => {
     loadSettings();
