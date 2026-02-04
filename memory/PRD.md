@@ -11,6 +11,25 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 69 (2026-02-04) - Balance Calculation Bug Fix (P0) ✅
+
+#### Critical Fix: Historical Balance Calculation - RESOLVED ✅
+- **Issue**: "Balance Before" values in Daily Projection were showing incorrect values for past months (e.g., Jan 30 showing $16,777.60 instead of correct value)
+- **Root Cause**: Frontend-side calculation of historical balances was brittle, deriving balance from stored `lot_size` which could be inconsistent
+- **Solution**: Implemented authoritative backend calculation with new API endpoints
+- **New Backend Endpoints**:
+  - `GET /api/profit/balance-on-date?date=YYYY-MM-DD` - Returns authoritative balance for any specific date
+  - `GET /api/profit/daily-balances?start_date=&end_date=` - Returns array of daily balance entries for a date range
+- **Frontend Changes**:
+  - `handleOpenDailyProjection()` now fetches backend-calculated balances when opening Daily Projection dialog
+  - `getDailyProjectionForSelectedMonth` uses backend balances to override frontend-calculated values for historical months
+  - Added `backendDailyBalances` state with caching per month
+- **Testing**: 100% pass rate (15/15 backend tests, all frontend features verified)
+- **Files Modified**:
+  - `/app/backend/server.py` - Added balance-on-date and daily-balances endpoints
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Updated to use backend balances
+  - `/app/frontend/src/lib/api.js` - Added API functions
+
 ### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 4 Enhancements ✅
 
 #### Enhancement #1: "No Trade Members" Widget ✅
