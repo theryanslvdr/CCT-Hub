@@ -313,9 +313,11 @@ class TestDashboardIntegration:
         response = self.session.get(f"{BASE_URL}/api/admin/analytics/missed-trades")
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
-        # Should return a list (may be empty in preview environment)
+        # Should return a dict with missed_traders list
         data = response.json()
-        assert isinstance(data, list), f"Expected list, got {type(data)}"
+        assert isinstance(data, dict), f"Expected dict, got {type(data)}"
+        assert "missed_traders" in data, "Missing missed_traders field"
+        assert isinstance(data["missed_traders"], list), "missed_traders should be a list"
 
 
 if __name__ == "__main__":
