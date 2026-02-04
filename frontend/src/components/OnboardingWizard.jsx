@@ -46,8 +46,36 @@ const calculateLotSize = (balance) => Math.floor((balance / 980) * 100) / 100;
 const calculateBalanceFromLot = (lotSize) => Math.round(lotSize * 980 * 100) / 100;
 const calculateProjectedProfit = (lotSize) => Math.floor(lotSize * 15 * 100) / 100;
 
+// Hook to detect mobile viewport
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
+};
+
 export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false }) => {
-  // Wizard state
+  const isMobile = useIsMobile();
+  
+  // Render mobile-optimized wizard on mobile devices
+  if (isMobile) {
+    return (
+      <OnboardingWizardMobile 
+        isOpen={isOpen} 
+        onClose={onClose} 
+        onComplete={onComplete} 
+        isReset={isReset} 
+      />
+    );
+  }
+  
+  // Desktop wizard state
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
