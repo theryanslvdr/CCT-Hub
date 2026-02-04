@@ -147,8 +147,11 @@ export const AdminSignalsPage = () => {
           ...newSignal,
           profit_points: parseFloat(newSignal.profit_points) || 15,
           is_official: newSignal.is_official,
+          send_email: newSignal.is_official && newSignal.send_email,  // Only send if official
         });
-        toast.success('Trading signal created!');
+        toast.success(newSignal.is_official && newSignal.send_email 
+          ? 'Trading signal created & emails sent!' 
+          : 'Trading signal created!');
       }
       setDialogOpen(false);
       setNewSignal({
@@ -159,6 +162,7 @@ export const AdminSignalsPage = () => {
         profit_points: '15',
         notes: '',
         is_official: false,
+        send_email: true,
       });
       loadSignals();
     } catch (error) {
