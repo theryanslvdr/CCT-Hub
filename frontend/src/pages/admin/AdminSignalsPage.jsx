@@ -504,6 +504,21 @@ export const AdminSignalsPage = () => {
                   />
                 </div>
                 
+                {/* Auto-send Email Toggle - only show when is_official is true */}
+                {newSignal.is_official && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                    <div>
+                      <Label className="text-blue-300 cursor-pointer">Send Email to Members</Label>
+                      <p className="text-xs text-blue-400/70 mt-0.5">Auto-send signal email to all active members</p>
+                    </div>
+                    <Switch
+                      checked={newSignal.send_email}
+                      onCheckedChange={(checked) => setNewSignal({ ...newSignal, send_email: checked })}
+                      data-testid="send-email-toggle"
+                    />
+                  </div>
+                )}
+                
                 <Button onClick={handleCreateSignal} className="w-full btn-primary" data-testid="submit-signal-btn">
                   <Radio className="w-4 h-4 mr-2" /> Publish Signal
                 </Button>
