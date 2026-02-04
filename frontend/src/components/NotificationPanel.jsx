@@ -24,14 +24,25 @@ const NotificationIcon = ({ type }) => {
 };
 
 const formatTimeAgo = (timestamp) => {
-  const now = new Date();
-  const time = new Date(timestamp);
-  const diff = Math.floor((now - time) / 1000);
+  if (!timestamp) return 'Recently';
   
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  try {
+    const now = new Date();
+    const time = new Date(timestamp);
+    
+    // Check if date is valid
+    if (isNaN(time.getTime())) return 'Recently';
+    
+    const diff = Math.floor((now - time) / 1000);
+    
+    if (diff < 0) return 'Just now';
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  } catch (e) {
+    return 'Recently';
+  }
 };
 
 export const NotificationPanel = () => {
