@@ -41,6 +41,22 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - `/app/backend/server.py` - Added migration endpoint
   - `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` - Added Data Migration UI
 
+#### Mobile Sticky Signal Bar Fix ✅
+- **Issue**: Signal bar was not sticking below the header on mobile Trade Monitor page
+- **Solution**: Changed from `sticky top-0` to `fixed top-16` positioning
+- **Added**: Spacer div to prevent content overlap
+- **File Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx`
+
+#### Email Template Preview Feature - NEW ✅
+- **Added**: "Preview" button in Custom Email Templates editor
+- **Feature**: Shows rendered email with shortcodes replaced by sample values
+- **Preview Dialog includes**:
+  - Subject line preview with replaced shortcodes
+  - Email body preview in white card (as recipient would see)
+  - Legend showing all sample value mappings
+- **Sample Values**: `{user_name}` → "John Doe", `{account_value}` → "$15,000.00", etc.
+- **File Modified**: `/app/frontend/src/components/admin/CustomEmailTemplates.jsx`
+
 ### Session 69 (2026-02-04) - Balance Calculation Bug Fix (P0) + 5 Feature Fixes + Mobile Onboarding Redesign ✅
 
 #### Critical Fix: Historical Balance Calculation - RESOLVED ✅
