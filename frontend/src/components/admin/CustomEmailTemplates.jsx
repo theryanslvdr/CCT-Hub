@@ -405,6 +405,16 @@ export const CustomEmailTemplates = () => {
               {/* Save Button */}
               <div className="flex gap-2">
                 <Button
+                  variant="outline"
+                  onClick={() => setPreviewOpen(true)}
+                  disabled={!templateBody.trim()}
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                  data-testid="preview-template-btn"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Preview
+                </Button>
+                <Button
                   onClick={handleSave}
                   disabled={saving}
                   className="btn-primary flex-1"
@@ -429,6 +439,57 @@ export const CustomEmailTemplates = () => {
                   Cancel
                 </Button>
               </div>
+
+              {/* Preview Dialog */}
+              <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="bg-zinc-900 border-zinc-800 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle className="text-white flex items-center gap-2">
+                      <Eye className="w-5 h-5 text-blue-400" />
+                      Email Preview
+                    </DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                    {/* Subject Preview */}
+                    <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Subject</p>
+                      <p className="text-white font-medium">{getPreviewContent(templateSubject)}</p>
+                    </div>
+                    
+                    {/* Body Preview */}
+                    <div className="p-4 rounded-lg bg-white border border-zinc-300">
+                      <div 
+                        className="prose prose-sm max-w-none text-gray-800"
+                        dangerouslySetInnerHTML={{ __html: getPreviewContent(templateBody) }}
+                      />
+                    </div>
+                    
+                    {/* Sample Values Legend */}
+                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <p className="text-xs text-amber-400 mb-2">Preview uses sample values:</p>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {Object.entries(previewValues).map(([code, value]) => (
+                          <div key={code} className="flex items-center gap-2">
+                            <code className="text-zinc-400">{code}</code>
+                            <span className="text-zinc-500">→</span>
+                            <span className="text-white">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-zinc-800">
+                    <Button 
+                      onClick={() => setPreviewOpen(false)}
+                      className="w-full bg-zinc-800 hover:bg-zinc-700"
+                    >
+                      Close Preview
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           ) : (
             <div className="flex items-center justify-center h-full min-h-[300px] text-center">
