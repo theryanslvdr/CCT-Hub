@@ -5985,6 +5985,12 @@ async def get_email_templates(user: dict = Depends(require_admin)):
             "variables": ["name", "product", "direction", "time"]
         },
         {
+            "type": "trading_signal",
+            "subject": "📊 Official Trading Signal: {{direction}} {{product}}",
+            "body": "Hello {{name}},\n\nA new official trading signal has been released!\n\n📊 Signal Details:\n• Product: {{product}}\n• Direction: {{direction}}\n• Trade Time: {{time}} ({{timezone}})\n\n<a href=\"{{trade_monitor_url}}\" style=\"display:inline-block;padding:12px 24px;background:#3B82F6;color:white;text-decoration:none;border-radius:8px;margin:16px 0;\">Go to Trade Monitor</a>\n\nDon't miss this opportunity!\n\nBest regards,\nCrossCurrent Team",
+            "variables": ["name", "product", "direction", "time", "timezone", "trade_monitor_url", "current_date"]
+        },
+        {
             "type": "missed_trade",
             "subject": "You Missed Today's Trade",
             "body": "Hello {{name}},\n\nIt looks like you missed today's trading signal.\n\nDon't worry - there will be more opportunities tomorrow!\n\nMake sure to check your Trade Monitor daily.\n\nBest regards,\nCrossCurrent Team",
