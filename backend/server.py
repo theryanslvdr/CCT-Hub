@@ -1325,6 +1325,225 @@ async def get_virtual_share_distribution(user: dict = Depends(require_master_adm
     return breakdown
 
 
+@profit_router.get("/balance-on-date")
+async def get_balance_on_date(
+    date: str,
+    user_id: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get the user's account balance as of a specific date.
+    
+    This is the authoritative backend calculation that the frontend should use
+    for historical balance lookups instead of frontend-side recalculation.
+    
+    The balance is calculated as:
+    - Sum of all deposits/withdrawals up to and including the date
+    - Plus sum of all profits/commissions from trades up to and including the date
+    
+    Args:
+        date: Date string in YYYY-MM-DD format (end of day)
+        user_id: Optional user ID (for admin simulation)
+    
+    Returns:
+        balance_on_date: The account balance at end of the given date
+        lot_size: The LOT size (balance / 980)
+        date: The requested date
+    """
+    # Determine target user
+    target_user_id = user["id"]
+    if user_id and user.get("role") in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+    
+    # Parse the date
+    try:
+        target_date = datetime.strptime(date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+        target_date_str = target_date.strftime("%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    # Get all deposits up to and including the target date
+    deposits = await db.deposits.find(
+        {
+            "user_id": target_user_id,
+            "created_at": {"$lte": target_date_str}
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Get all trades up to and including the target date
+    trades = await db.trade_logs.find(
+        {
+            "user_id": target_user_id,
+            "created_at": {"$lte": target_date_str}
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Calculate net deposits (positive = deposit, negative = withdrawal)
+    total_net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)
+    
+    balance_on_date = round(total_net_deposits + total_profit + total_commission, 2)
+    lot_size = round(balance_on_date / 980, 2) if balance_on_date > 0 else 0
+    
+    return {
+        "balance_on_date": balance_on_date,
+        "lot_size": lot_size,
+        "date": date,
+        "deposits_count": len(deposits),
+        "trades_count": len(trades),
+        "total_deposits": round(sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0), 2),
+        "total_withdrawals": round(abs(sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) < 0)), 2),
+        "total_profit": round(total_profit, 2),
+        "total_commission": round(total_commission, 2)
+    }
+
+
+@profit_router.get("/daily-balances")
+async def get_daily_balances(
+    start_date: str,
+    end_date: str,
+    user_id: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get daily balance calculations for a date range.
+    
+    This is used by the frontend's Daily Projection table to show accurate
+    "Balance Before" values for each trading day.
+    
+    Args:
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+        user_id: Optional user ID (for admin simulation)
+    
+    Returns:
+        Array of daily balance entries with date, balance, lot_size
+    """
+    # Determine target user
+    target_user_id = user["id"]
+    if user_id and user.get("role") in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        target_user_id = user_id
+    
+    # Parse dates
+    try:
+        start = datetime.strptime(start_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    if start > end:
+        raise HTTPException(status_code=400, detail="start_date must be before end_date")
+    
+    # Get all deposits and trades for the user up to end_date
+    end_date_str = end.replace(hour=23, minute=59, second=59).strftime("%Y-%m-%dT%H:%M:%S")
+    
+    deposits = await db.deposits.find(
+        {
+            "user_id": target_user_id,
+            "created_at": {"$lte": end_date_str}
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    trades = await db.trade_logs.find(
+        {
+            "user_id": target_user_id,
+            "created_at": {"$lte": end_date_str}
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Build deposits and trades maps by date
+    deposits_by_date = {}
+    for d in deposits:
+        date_key = d.get("created_at", "")[:10]  # YYYY-MM-DD
+        if date_key:
+            if date_key not in deposits_by_date:
+                deposits_by_date[date_key] = 0
+            deposits_by_date[date_key] += d.get("amount", 0)
+    
+    trades_by_date = {}
+    for t in trades:
+        date_key = t.get("created_at", "")[:10]
+        if date_key:
+            if date_key not in trades_by_date:
+                trades_by_date[date_key] = {"profit": 0, "commission": 0, "lot_size": None, "projected": None}
+            trades_by_date[date_key]["profit"] += t.get("actual_profit", 0)
+            trades_by_date[date_key]["commission"] += t.get("commission", 0)
+            # Store the stored lot_size and projected_profit for reference
+            if t.get("lot_size"):
+                trades_by_date[date_key]["lot_size"] = t.get("lot_size")
+                trades_by_date[date_key]["projected"] = t.get("projected_profit")
+    
+    # Calculate running balance day by day
+    daily_balances = []
+    
+    # Get all unique dates up to start_date to calculate the starting balance
+    all_dates = sorted(set(list(deposits_by_date.keys()) + list(trades_by_date.keys())))
+    
+    # Calculate balance at start of the date range (before any trades on start_date)
+    running_balance = 0.0
+    start_date_str = start.strftime("%Y-%m-%d")
+    
+    for date_key in all_dates:
+        if date_key < start_date_str:
+            running_balance += deposits_by_date.get(date_key, 0)
+            trade_data = trades_by_date.get(date_key, {})
+            running_balance += trade_data.get("profit", 0)
+            running_balance += trade_data.get("commission", 0)
+    
+    # Now iterate through the requested date range
+    current_date = start
+    while current_date <= end:
+        date_key = current_date.strftime("%Y-%m-%d")
+        
+        # Apply deposits/withdrawals first (they affect balance BEFORE the trade)
+        day_deposit = deposits_by_date.get(date_key, 0)
+        if day_deposit != 0:
+            running_balance += day_deposit
+        
+        # "Balance Before" is the balance at the start of the trading day
+        balance_before = round(running_balance, 2)
+        lot_size = round(balance_before / 980, 2) if balance_before > 0 else 0
+        target_profit = round(lot_size * 15, 2)
+        
+        trade_data = trades_by_date.get(date_key, {})
+        actual_profit = trade_data.get("profit")
+        commission = trade_data.get("commission", 0)
+        stored_lot_size = trade_data.get("lot_size")
+        stored_projected = trade_data.get("projected")
+        
+        daily_balances.append({
+            "date": date_key,
+            "balance_before": balance_before,
+            "lot_size": lot_size,
+            "target_profit": target_profit,
+            "actual_profit": actual_profit if actual_profit else None,
+            "commission": commission if commission else None,
+            "has_trade": actual_profit is not None and actual_profit != 0,
+            "stored_lot_size": stored_lot_size,
+            "stored_projected": stored_projected
+        })
+        
+        # Apply trade profit + commission for next day's balance
+        if actual_profit is not None:
+            running_balance += actual_profit
+        if commission:
+            running_balance += commission
+        
+        current_date += timedelta(days=1)
+    
+    return {
+        "daily_balances": daily_balances,
+        "start_date": start_date,
+        "end_date": end_date,
+        "user_id": target_user_id
+    }
+
+
 # ==================== TRADE MONITOR ROUTES ====================
 
 @trade_router.post("/log", response_model=TradeLogResponse)
