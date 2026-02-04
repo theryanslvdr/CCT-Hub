@@ -47,6 +47,13 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Added**: Spacer div to prevent content overlap
 - **File Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx`
 
+#### Mobile Onboarding Wizard Direction Dropdown Fix ✅
+- **Issue**: Direction dropdown (BUY/SELL) was not clickable/visible
+- **Root Cause**: SelectContent z-index was lower than the wizard overlay (z-9999)
+- **Solution**: Added `z-[99999]` to both Product and Direction SelectContent components
+- **Verified**: Both BUY and SELL can be selected successfully
+- **File Modified**: `/app/frontend/src/components/OnboardingWizardMobile.jsx`
+
 #### Email Template Preview Feature - NEW ✅
 - **Added**: "Preview" button in Custom Email Templates editor
 - **Feature**: Shows rendered email with shortcodes replaced by sample values
