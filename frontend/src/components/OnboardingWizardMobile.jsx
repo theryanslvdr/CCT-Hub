@@ -414,7 +414,12 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('[OnboardingWizardMobile] isOpen is false, returning null');
+    return null;
+  }
+  
+  console.log('[OnboardingWizardMobile] Rendering wizard, step:', currentStep);
 
   const progress = (currentStep / getTotalSteps()) * 100;
   const lotSize = calculateLotSize(parseFloat(startingBalance) || 0);
