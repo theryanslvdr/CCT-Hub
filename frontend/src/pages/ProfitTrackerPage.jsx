@@ -1309,7 +1309,7 @@ export const ProfitTrackerPage = () => {
     // Pass effectiveAccountValue as liveAccountValue to synchronize today's balance
     // with the live dashboard value
     const globalHolidayDates = new Set(globalHolidays.map(h => h.date));
-    return generateDailyProjectionForMonth(
+    const frontendProjection = generateDailyProjectionForMonth(
       startBalance,
       selectedMonth.monthDate,
       tradeLogs,
@@ -1319,7 +1319,44 @@ export const ProfitTrackerPage = () => {
       globalHolidayDates,
       effectiveStartDate  // Pass effective start date for licensees
     );
-  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, licenseeProjections, masterAdminTrades, tradeOverrides, deposits, withdrawals, globalHolidays, effectiveStartDate]);
+    
+    // CRITICAL FIX: For historical months, use backend-calculated balances as the authoritative source
+    // This fixes the recurring balance calculation bug where frontend-calculated balances diverge
+    const year = selectedMonth.monthDate.getFullYear();
+    const monthNum = selectedMonth.monthDate.getMonth() + 1;
+    const cacheKey = `${year}-${monthNum}`;
+    const backendBalanceMap = backendDailyBalances[cacheKey];
+    
+    if (backendBalanceMap && Object.keys(backendBalanceMap).length > 0 && !isCurrentMonth) {
+      // Override frontend-calculated balances with authoritative backend values
+      return frontendProjection.map(day => {
+        const backendData = backendBalanceMap[day.dateKey];
+        if (backendData) {
+          // Use backend's authoritative balance calculation
+          const correctedBalance = backendData.balance_before;
+          const correctedLotSize = truncateTo2Decimals(correctedBalance / 980);
+          const correctedTarget = truncateTo2Decimals(correctedLotSize * 15);
+          
+          // Recalculate P/L diff with corrected target
+          const correctedPlDiff = day.actualProfit !== undefined && day.actualProfit !== null
+            ? truncateTo2Decimals(day.actualProfit - correctedTarget)
+            : null;
+          
+          return {
+            ...day,
+            balanceBefore: correctedBalance,
+            lotSize: correctedLotSize,
+            targetProfit: correctedTarget,
+            plDiff: correctedPlDiff,
+            // Keep original actual profit, commission, and status
+          };
+        }
+        return day;
+      });
+    }
+    
+    return frontendProjection;
+  }, [selectedMonth, tradeLogs, activeSignal, effectiveAccountValue, isExtendedLicensee, licenseProjections, licenseeProjections, masterAdminTrades, tradeOverrides, deposits, withdrawals, globalHolidays, effectiveStartDate, backendDailyBalances]);
 
   // For licensees: Calculate Account Value from daily projections
   // This shows the balance AFTER the most recent day where Manager Traded = true
