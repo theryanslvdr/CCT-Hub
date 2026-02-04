@@ -2100,6 +2100,74 @@ export const AdminSettingsPage = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Data Migration Card (Master Admin Only) */}
+            {isMasterAdmin && (
+              <Card className="glass-card border-purple-500/30">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-5 h-5 text-purple-400" />
+                    <CardTitle className="text-white">Data Migration</CardTitle>
+                  </div>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    One-time data fixes and migrations for Master Admin only.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Trade Direction Migration */}
+                  <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-white font-medium">Fix Historical Trade Directions</p>
+                        <p className="text-sm text-zinc-500 mt-1">
+                          Updates trade logs to match the direction from their linked trading signals. 
+                          Use this if trade history shows incorrect BUY/SELL values.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={async () => {
+                          if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
+                          setMigrationLoading(true);
+                          try {
+                            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/migrate-trade-directions`, {
+                              method: 'POST',
+                              headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json'
+                              }
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                              toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
+                            } else {
+                              toast.error(data.detail || 'Migration failed');
+                            }
+                          } catch (error) {
+                            toast.error('Migration failed: ' + error.message);
+                          } finally {
+                            setMigrationLoading(false);
+                          }
+                        }}
+                        disabled={migrationLoading}
+                        variant="outline"
+                        className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                        data-testid="migrate-directions-btn"
+                      >
+                        {migrationLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Database className="w-4 h-4 mr-2" />}
+                        Run Migration
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                    <p className="text-xs text-amber-400">
+                      <strong>Note:</strong> These are one-time fixes. Each migration can be run multiple times safely 
+                      - only records that need updating will be modified.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
