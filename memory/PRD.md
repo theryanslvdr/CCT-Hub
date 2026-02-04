@@ -35,6 +35,18 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
    - Master admin can disable auto-send per signal
 4. **Notification Time Bug Fixed** - "NaNd ago" replaced with proper time formatting ("1 minute ago", "about 14 hours ago") with safeguards for invalid dates
 5. **Mobile Responsiveness** - Verified onboarding wizard and dashboard work correctly on mobile
+#### Mobile Onboarding Wizard Redesign ✅
+- Created new `OnboardingWizardMobile.jsx` with bold, modern, minimalist design
+- **Design Features**:
+  - Full-screen dark overlay with gradient background
+  - Bold uppercase headings ("WELCOME", "RESET TRACKER")
+  - Teal/cyan accent colors with glow effects
+  - Selection cards with hover states and check indicators
+  - Glass-morphism input fields
+  - Stats preview cards showing LOT Size and Daily Target
+  - Progress bar with animated steps
+  - Smooth slide-in animations
+- **Responsive Detection**: Automatically renders mobile version on viewports < 768px
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
