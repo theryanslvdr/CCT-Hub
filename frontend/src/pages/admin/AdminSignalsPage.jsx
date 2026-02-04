@@ -53,6 +53,7 @@ export const AdminSignalsPage = () => {
     profit_points: '15',
     notes: '',
     is_official: false,
+    send_email: true,  // Auto-send email when official signal is created
   });
   const [editForm, setEditForm] = useState({
     trade_time: '',
@@ -62,6 +63,7 @@ export const AdminSignalsPage = () => {
     notes: '',
     is_active: true,
     is_official: false,
+    send_email: false,  // Don't auto-send on edit by default
   });
 
   useEffect(() => {
