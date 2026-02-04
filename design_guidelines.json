@@ -1,137 +1,137 @@
 {
-  "brand_identity": {
-    "name": "CrossCurrent Finance Center",
-    "archetype": "Electric & Jewel (Professional Trading)",
-    "emotional_tone": "Precision, Authority, High-Frequency, Trust",
-    "design_principles": [
-      "Fusion over Imitation: Mix Bloomberg Terminal density with Consumer Fintech polish",
-      "Data Density: High information density but with clear hierarchy",
-      "Dark Mode First: Optimized for low-light environments and long sessions",
-      "Visual Feedback: Immediate reaction to every interaction (hover, click, update)"
+  "identity": {
+    "name": "E1",
+    "role": "Creative Designer",
+    "aesthetic": "Dark Futuristic Minimalist",
+    "principles": [
+      "Fusion over Imitation",
+      "Emotion First",
+      "Content is King",
+      "Zoom In",
+      "Negative Space",
+      "Contrast"
     ]
   },
-  "typography": {
-    "headings": {
-      "family": "Manrope, sans-serif",
-      "weights": ["600", "700", "800"],
-      "usage": "Page titles, Section headers, KPI values",
-      "letter_spacing": "tracking-tight"
-    },
-    "body": {
-      "family": "Inter, sans-serif",
-      "weights": ["400", "500"],
-      "usage": "General text, labels, descriptions",
-      "letter_spacing": "tracking-normal"
-    },
-    "mono": {
-      "family": "JetBrains Mono, monospace",
-      "weights": ["400", "500"],
-      "usage": "Financial data, tabular numbers, wallet addresses, API keys",
-      "letter_spacing": "tracking-wide"
-    }
+  "project": {
+    "name": "Merin Trader Onboarding",
+    "platform": "Mobile Web App",
+    "theme": "Dark Mode (Cyberpunk/Fintech)",
+    "viewport_target": "390px (Mobile First)"
   },
-  "colors": {
-    "palette": {
+  "design_system": {
+    "colors": {
       "background": {
-        "default": "#09090B",
-        "paper": "#18181B",
-        "subtle": "#27272A"
+        "base": "#09090B",
+        "glass": "rgba(9, 9, 11, 0.6)",
+        "glass_high": "rgba(24, 24, 27, 0.8)"
       },
       "primary": {
-        "default": "#3B82F6",
-        "hover": "#2563EB",
-        "foreground": "#FFFFFF"
+        "cyan": "#06b6d4",
+        "cyan_glow": "rgba(6, 182, 212, 0.5)",
+        "teal": "#14b8a6",
+        "electric_blue": "#3b82f6"
       },
-      "secondary": {
-        "default": "#27272A",
-        "hover": "#3F3F46",
-        "foreground": "#FAFAFA"
+      "text": {
+        "primary": "#ffffff",
+        "secondary": "#a1a1aa",
+        "muted": "#52525b"
       },
-      "accent": {
-        "cyan": "#06B6D4",
-        "purple": "#8B5CF6",
-        "amber": "#F59E0B"
-      },
-      "semantic": {
-        "success": "#10B981",
-        "warning": "#F59E0B",
-        "error": "#EF4444",
-        "info": "#3B82F6"
+      "border": {
+        "subtle": "rgba(255, 255, 255, 0.1)",
+        "active": "rgba(6, 182, 212, 0.5)"
       }
     },
-    "gradients": {
-      "primary": "bg-gradient-to-r from-blue-600 to-cyan-500",
-      "glow": "bg-gradient-to-b from-white/10 to-transparent",
-      "surface": "bg-gradient-to-br from-zinc-900 to-zinc-950"
-    }
-  },
-  "layout_system": {
-    "dashboard_grid": {
-      "type": "Control Room Grid",
-      "classes": "grid grid-cols-1 md:grid-cols-12 gap-4 p-4 md:p-6",
-      "areas": {
-        "sidebar": "col-span-12 md:col-span-2",
-        "main": "col-span-12 md:col-span-10",
-        "widget_large": "col-span-12 md:col-span-8 lg:col-span-9",
-        "widget_small": "col-span-12 md:col-span-4 lg:col-span-3"
+    "typography": {
+      "headings": {
+        "font": "Manrope",
+        "weights": ["700", "800"],
+        "style": "tracking-tight uppercase"
+      },
+      "body": {
+        "font": "Inter",
+        "weights": ["400", "500"]
+      },
+      "mono": {
+        "font": "JetBrains Mono",
+        "usage": "Numbers, Balances, Dates"
       }
     },
-    "spacing": {
-      "container_padding": "p-4 md:p-8",
-      "section_gap": "gap-6 md:gap-8",
-      "component_gap": "gap-4"
+    "effects": {
+      "glass_panel": "backdrop-blur-xl bg-zinc-900/50 border border-white/10 shadow-2xl",
+      "neon_glow": "shadow-[0_0_20px_rgba(6,182,212,0.3)]",
+      "neon_text": "drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"
     }
-  },
-  "component_styles": {
-    "cards": {
-      "default": "bg-zinc-900/50 border border-white/10 backdrop-blur-md shadow-xl rounded-xl",
-      "highlight": "bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-blue-500/20 shadow-blue-900/10 rounded-xl",
-      "interactive": "hover:border-blue-500/40 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-    },
-    "buttons": {
-      "primary": "bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-400/20 rounded-lg font-medium transition-all active:scale-95",
-      "secondary": "bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 hover:border-zinc-600 rounded-lg font-medium transition-all",
-      "ghost": "hover:bg-white/5 text-zinc-400 hover:text-white transition-colors rounded-lg"
-    },
-    "inputs": {
-      "default": "bg-zinc-950/50 border-zinc-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 transition-all"
-    },
-    "tables": {
-      "header": "text-xs uppercase tracking-wider text-zinc-500 font-medium bg-zinc-900/50",
-      "row": "border-b border-zinc-800/50 hover:bg-white/5 transition-colors",
-      "cell": "py-3 px-4 text-sm text-zinc-300"
-    }
-  },
-  "visual_enhancers": {
-    "glassmorphism": "backdrop-blur-xl bg-black/40 border border-white/10",
-    "neon_glow": "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
-    "grid_background": "bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
   },
   "assets": {
-    "images": {
-      "hero_bg": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxjcnlwdG9jdXJyZW5jeSUyMHRyYWRpbmclMjBjaGFydCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODAzNTkxMHww&ixlib=rb-4.1.0&q=85",
-      "chart_viz": "https://images.unsplash.com/photo-1634097537825-b446635b2f7f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxjcnlwdG9jdXJyZW5jeSUyMHRyYWRpbmclMjBjaGFydCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODAzNTkxMHww&ixlib=rb-4.1.0&q=85",
-      "world_map": "https://images.unsplash.com/photo-1639060015191-9d83063eab2a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxmdXR1cmlzdGljJTIwd29ybGQlMjBtYXAlMjBkYXJrJTIwY29ubmVjdGlvbnxlbnwwfHx8fDE3NjgwMzU5MTJ8MA&ixlib=rb-4.1.0&q=85",
-      "abstract_data": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBmaW5hbmNpYWwlMjBkYXRhJTIwdmlzdWFsaXphdGlvbnxlbnwwfHx8fDE3NjgwMzU5MDl8MA&ixlib=rb-4.1.0&q=85"
+    "images": [
+      {
+        "category": "background",
+        "url": "https://images.unsplash.com/photo-1764258906159-3f5952286f5e?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Abstract blue liquid/light reflections for subtle modal background"
+      },
+      {
+        "category": "card_new_trader",
+        "url": "https://images.unsplash.com/photo-1758637612717-e0cd7dc3cdea?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Abstract blue geometric shapes for 'New Trader' selection card"
+      },
+      {
+        "category": "card_experienced_trader",
+        "url": "https://images.unsplash.com/photo-1708778002586-37c4f23b7f3f?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Black and green wavy lines for 'Experienced Trader' selection card"
+      }
+    ]
+  },
+  "components": {
+    "WizardDialog": {
+      "description": "Full-screen modal on mobile, centered on desktop. Glassmorphism background.",
+      "classes": "fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6"
     },
-    "icons": "Use Lucide React (default) or Phosphor Icons for specific trading metaphors"
+    "StepIndicator": {
+      "description": "Segmented progress bar at the top. Active step glows.",
+      "structure": "Flex container with gaps. Each segment is a div.",
+      "active_class": "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]",
+      "inactive_class": "bg-zinc-800"
+    },
+    "SelectionCard": {
+      "description": "Large tappable area for user type selection. Image background with gradient overlay.",
+      "classes": "relative overflow-hidden rounded-2xl border border-zinc-800 hover:border-cyan-500/50 transition-all duration-300 group cursor-pointer h-48"
+    },
+    "InputGroup": {
+      "description": "Floating label style or minimal bottom border. High contrast text.",
+      "classes": "bg-zinc-950/50 border-zinc-800 focus:border-cyan-500 focus:ring-cyan-500/20 text-lg py-6"
+    },
+    "PrimaryButton": {
+      "description": "Full width, bold gradient, neon shadow.",
+      "classes": "w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-6 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95"
+    }
+  },
+  "layout_strategy": {
+    "mobile_first": true,
+    "spacing": "Generous (p-6, gap-6)",
+    "alignment": "Left aligned text, Centered actions",
+    "grid": "Single column for mobile, 2-column for desktop selection"
   },
   "instructions_to_main_agent": [
-    "1. SETUP: Ensure 'Manrope' and 'JetBrains Mono' are imported in index.css or via Google Fonts.",
-    "2. THEME: Apply the 'dark' class to the root HTML element by default. Do not rely on system preference alone.",
-    "3. LAYOUT: Use the 'Control Room Grid' for the main dashboard. Sidebar on left (collapsible), Header on top, Main content in the center.",
-    "4. COMPONENTS: Customize Shadcn components to match the 'component_styles' defined above. Remove default rounded-md and use rounded-lg or rounded-xl.",
-    "5. CHARTS: Use Recharts. Style them with the 'semantic' colors defined in the palette. Ensure tooltips have the 'glassmorphism' style.",
-    "6. DATA: All financial data must use the 'mono' font family for alignment.",
-    "7. INTERACTION: Add hover states to all rows in tables and all cards. Use 'transition-all duration-200'.",
-    "8. ACCESSIBILITY: Ensure all text on dark backgrounds meets contrast ratios. Use 'text-zinc-400' for secondary text, not darker.",
-    "9. TESTING: Add 'data-testid' to all interactive elements (buttons, inputs, links)."
+    "1. Create a new component `OnboardingWizard.jsx` in `/app/frontend/src/components/`.",
+    "2. Use `framer-motion` for smooth transitions between steps (AnimatePresence).",
+    "3. Implement the state machine for the wizard (Step 1 -> Step 2a/2b -> etc.).",
+    "4. Use the provided image URLs for the selection cards.",
+    "5. Ensure all inputs have `data-testid` attributes.",
+    "6. Use `lucide-react` for icons (ChevronRight, Wallet, History, TrendingUp).",
+    "7. The 'New Trader' flow skips history/trade entry steps.",
+    "8. The 'Experienced Trader' flow includes Date, Deposits, and Trade History steps.",
+    "9. For the Trade History step, create a 'Trade Entry Card' that looks like a ticket/receipt.",
+    "10. STRICTLY follow the color palette. No default blue, use Cyan/Teal accents."
   ],
   "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
-    "Avoid 'AI Slop': Do not use generic centered layouts or default Shadcn styles without customization.",
-    "Depth: Use z-index and shadows to create depth. The dashboard should feel layered, not flat.",
-    "Motion: Micro-interactions are mandatory. Buttons should scale slightly on press. Lists should stagger in.",
-    "Spacing: Use 'gap-6' or 'gap-8' between major sections. Don't cram content.",
-    "Toasts: Use 'sonner' for notifications. Style them to match the dark theme (black bg, white text, colored border)."
+    "Avoid 'AI slop' aesthetic (generic centered layouts, uniform styling).",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "Do NOT apply universal transition (e.g., `transition: all`).",
+    "Do NOT center align the app container.",
+    "Always use modern button styles (pill-shaped or sharp).",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Subtle grain textures and noise overlays are encouraged."
   ]
 }
