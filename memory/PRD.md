@@ -1319,16 +1319,18 @@ A sandboxed environment for Super/Master Admins to test without affecting real d
 
 ### P0 - Critical (NONE REMAINING)
 - ~~Security vulnerability in report generation endpoint~~ ✅ FIXED
+- ~~Balance Calculation Bug for Past Dates~~ ✅ FIXED (Session 69 - Backend API solution)
 
 ### P1 - High Priority
-- **Profit Tracker Calculation Discrepancy**: User reported balance calculations don't match live data
 - **User-configurable announcement display**: Allow users to hide/show global announcements
-- **Backend Route Migration**: server.py → /routes/ directory
+- **Backend Route Migration**: server.py → /routes/ directory (code organization)
+- **Email Template Preview**: Add preview button in email template editor
 
 ### P2 - Medium Priority
 - **Admin Daily Email Recap**: Scheduled daily summary to admins
 - Frontend Refactoring: Break down large admin components
 - Mobile responsiveness improvements
+- PWA Support for better mobile experience
 
 ## Key API Endpoints
 
