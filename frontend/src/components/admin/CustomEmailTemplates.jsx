@@ -43,6 +43,7 @@ export const CustomEmailTemplates = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   
   // Form state
   const [templateName, setTemplateName] = useState('');
@@ -50,6 +51,28 @@ export const CustomEmailTemplates = () => {
   const [templateBody, setTemplateBody] = useState('');
   const [templateCategory, setTemplateCategory] = useState('general');
   const [editorMode, setEditorMode] = useState('visual'); // 'visual' or 'code'
+
+  // Sample values for preview
+  const previewValues = {
+    '{user_name}': 'John Doe',
+    '{user_email}': 'john@example.com',
+    '{missed_count}': '3',
+    '{team_profit}': '$1,250.00',
+    '{team_commission}': '$125.00',
+    '{profit_tracker_url}': 'https://crosscurrent.finance/profit-tracker',
+    '{current_date}': new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    '{account_value}': '$15,000.00',
+    '{lot_size}': '15.31',
+  };
+
+  // Replace shortcodes with sample values for preview
+  const getPreviewContent = (content) => {
+    let result = content;
+    Object.entries(previewValues).forEach(([code, value]) => {
+      result = result.replace(new RegExp(code.replace(/[{}]/g, '\\$&'), 'g'), value);
+    });
+    return result;
+  };
 
   // Quill modules
   const quillModules = useMemo(() => ({
