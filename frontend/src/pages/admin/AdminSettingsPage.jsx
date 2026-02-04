@@ -2153,29 +2153,7 @@ export const AdminSettingsPage = () => {
                         </p>
                       </div>
                       <Button
-                        onClick={async () => {
-                          if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
-                          setMigrationLoading(true);
-                          try {
-                            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/migrate-trade-directions`, {
-                              method: 'POST',
-                              headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                                'Content-Type': 'application/json'
-                              }
-                            });
-                            const data = await response.json();
-                            if (response.ok) {
-                              toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
-                            } else {
-                              toast.error(data.detail || 'Migration failed');
-                            }
-                          } catch (error) {
-                            toast.error('Migration failed: ' + error.message);
-                          } finally {
-                            setMigrationLoading(false);
-                          }
-                        }}
+                        onClick={handleMigrateTradeDirections}
                         disabled={migrationLoading}
                         variant="outline"
                         className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
