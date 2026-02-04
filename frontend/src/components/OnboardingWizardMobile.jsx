@@ -397,8 +397,8 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
     }
     
     if (currentStep === 2) {
-      if (!startingBalance || parseFloat(startingBalance) < 100) {
-        toast.error('Please enter a valid starting balance (min $100)');
+      if (!startingBalance || parseFloat(startingBalance) < 10) {
+        toast.error('Please enter a valid starting balance (min $10)');
         return;
       }
       if (userType === 'experienced' && !startDate) {
