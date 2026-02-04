@@ -60,21 +60,21 @@ const useIsMobile = () => {
   return isMobile;
 };
 
-export const OnboardingWizard = ({ isOpen, onClose, onComplete, isReset = false }) => {
+// Wrapper component to handle responsive rendering
+export const OnboardingWizard = (props) => {
   const isMobile = useIsMobile();
   
   // Render mobile-optimized wizard on mobile devices
   if (isMobile) {
-    return (
-      <OnboardingWizardMobile 
-        isOpen={isOpen} 
-        onClose={onClose} 
-        onComplete={onComplete} 
-        isReset={isReset} 
-      />
-    );
+    return <OnboardingWizardMobile {...props} />;
   }
   
+  // Render desktop wizard
+  return <OnboardingWizardDesktop {...props} />;
+};
+
+// Desktop version of the wizard
+const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false }) => {
   // Desktop wizard state
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
