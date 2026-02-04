@@ -11,7 +11,7 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
-### Session 69 (2026-02-04) - Balance Calculation Bug Fix (P0) ✅
+### Session 69 (2026-02-04) - Balance Calculation Bug Fix (P0) + 5 Feature Fixes ✅
 
 #### Critical Fix: Historical Balance Calculation - RESOLVED ✅
 - **Issue**: "Balance Before" values in Daily Projection were showing incorrect values for past months (e.g., Jan 30 showing $16,777.60 instead of correct value)
@@ -24,11 +24,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - `handleOpenDailyProjection()` now fetches backend-calculated balances when opening Daily Projection dialog
   - `getDailyProjectionForSelectedMonth` uses backend balances to override frontend-calculated values for historical months
   - Added `backendDailyBalances` state with caching per month
-- **Testing**: 100% pass rate (15/15 backend tests, all frontend features verified)
-- **Files Modified**:
-  - `/app/backend/server.py` - Added balance-on-date and daily-balances endpoints
-  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Updated to use backend balances
-  - `/app/frontend/src/lib/api.js` - Added API functions
+
+#### Additional Fixes Implemented ✅
+1. **Performance Overview Chart** - X-axis now shows actual trade dates (Jan 14, Jan 15, etc.) instead of "Trade 1, 2, 3"
+2. **Trade Direction from Signal** - Backend already uses signal direction as source of truth (verified existing logic at line 1677)
+3. **Auto-Email on Official Signal** - New feature with:
+   - `send_email` toggle in Create Signal dialog (only shows when Official Signal is enabled)
+   - `trading_signal` email template with shortcodes: `{{name}}`, `{{product}}`, `{{direction}}`, `{{time}}`, `{{timezone}}`, `{{trade_monitor_url}}`
+   - `send_signal_email_to_members()` backend helper function
+   - Master admin can disable auto-send per signal
+4. **Notification Time Bug Fixed** - "NaNd ago" replaced with proper time formatting ("1 minute ago", "about 14 hours ago") with safeguards for invalid dates
+5. **Mobile Responsiveness** - Verified onboarding wizard and dashboard work correctly on mobile
+
+**Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
 ### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 4 Enhancements ✅
 
