@@ -8,7 +8,7 @@ import { format, isWeekend, startOfDay, eachDayOfInterval } from 'date-fns';
 import { 
   ChevronRight, ChevronLeft, Calendar as CalendarIcon, 
   DollarSign, ArrowDownCircle, ArrowUpCircle, Check, Loader2,
-  Wallet, History, TrendingUp, Plus, Trash2, X, RotateCcw
+  Wallet, History, TrendingUp, Plus, Trash2, X, RotateCcw, Save
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { profitAPI, tradeAPI } from '@/lib/api';
