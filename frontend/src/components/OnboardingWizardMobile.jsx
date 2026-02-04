@@ -421,7 +421,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
   const dailyTarget = calculateProjectedProfit(lotSize);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm">
       {/* Main Container */}
       <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden">
         
