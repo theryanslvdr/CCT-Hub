@@ -1326,7 +1326,7 @@ export const TradeMonitorPage = () => {
     
     {/* Mobile Sticky Signal Bar - Only visible on mobile when signal exists */}
     {signal && (
-      <div className="md:hidden sticky top-0 z-40 -mx-4 px-4 py-2 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800" data-testid="mobile-sticky-signal">
+      <div className="md:hidden fixed top-16 left-0 right-0 z-40 px-4 py-2 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800" data-testid="mobile-sticky-signal">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -1346,6 +1346,9 @@ export const TradeMonitorPage = () => {
         </div>
       </div>
     )}
+    
+    {/* Spacer for fixed sticky bar on mobile */}
+    {signal && <div className="md:hidden h-12" />}
     
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
