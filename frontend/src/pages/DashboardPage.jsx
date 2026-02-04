@@ -167,12 +167,16 @@ export const DashboardPage = () => {
     ? allKpiCards.filter(card => card.showForLicensee)
     : allKpiCards;
 
-  // Prepare chart data from trades
-  const chartData = trades.slice().reverse().map((trade, index) => ({
-    name: `Trade ${index + 1}`,
-    projected: trade.projected_profit,
-    actual: trade.actual_profit,
-  }));
+  // Prepare chart data from trades - use actual trade dates
+  const chartData = trades.slice().reverse().map((trade, index) => {
+    const tradeDate = new Date(trade.created_at);
+    const dateLabel = tradeDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return {
+      name: dateLabel,
+      projected: trade.projected_profit,
+      actual: trade.actual_profit,
+    };
+  });
 
   if (loading) {
     return (
