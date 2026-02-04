@@ -90,9 +90,6 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 ### P1: Verify "No Trade Members" Widget
 - Logic implemented but needs production data verification
 
-### P2: Email Template Preview Button
-- Add preview functionality to CustomEmailTemplates.jsx
-
 ## Backlog
 - Backend refactoring (break down `server.py` into routes)
 - Component extraction for `OnboardingWizardMobile.jsx`
