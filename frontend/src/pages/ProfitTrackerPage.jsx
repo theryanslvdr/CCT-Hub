@@ -778,6 +778,8 @@ export const ProfitTrackerPage = () => {
     if (simulatedView?.licenseId) {
       loadTradeOverrides(simulatedView.licenseId);
     }
+    // Clear backend balance cache when simulation changes (to fetch fresh data)
+    setBackendDailyBalances({});
   }, [simulatedView]);
 
   const checkLicenseeWelcome = async () => {
