@@ -810,7 +810,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                               <SelectTrigger className="mt-1 bg-zinc-950 border-zinc-800 text-white text-sm">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-zinc-800">
+                              <SelectContent className="bg-zinc-900 border-zinc-800 z-[99999]">
                                 {PRODUCTS.map(p => (
                                   <SelectItem key={p} value={p} className="text-white text-sm">{p}</SelectItem>
                                 ))}
@@ -826,7 +826,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                               <SelectTrigger className="mt-1 bg-zinc-950 border-zinc-800 text-white text-sm">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-zinc-800">
+                              <SelectContent className="bg-zinc-900 border-zinc-800 z-[99999]">
                                 {DIRECTIONS.map(d => (
                                   <SelectItem key={d} value={d} className={`text-sm ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
                                     {d}
