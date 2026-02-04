@@ -420,8 +420,6 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
   const lotSize = calculateLotSize(parseFloat(startingBalance) || 0);
   const dailyTarget = calculateProjectedProfit(lotSize);
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
       {/* Main Container */}
