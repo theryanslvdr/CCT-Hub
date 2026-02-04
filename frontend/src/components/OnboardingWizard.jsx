@@ -17,6 +17,9 @@ import {
 import { toast } from 'sonner';
 import { profitAPI, tradeAPI } from '@/lib/api';
 
+// Import mobile-optimized wizard
+import { OnboardingWizardMobile } from './OnboardingWizardMobile';
+
 // Import extracted step components
 import { StepUserType } from './onboarding/StepUserType';
 import { StepNewTraderBalance } from './onboarding/StepNewTraderBalance';
