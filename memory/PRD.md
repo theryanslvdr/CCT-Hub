@@ -80,6 +80,27 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
+## Pending Tasks
+
+### P1: Run Trade Direction Migration in Production
+- The migration endpoint is ready at `POST /api/admin/migrate-trade-directions`
+- UI is available at Admin Settings > Security > Data Migration
+- Needs to be run in production where historical trade data exists
+
+### P1: Verify "No Trade Members" Widget
+- Logic implemented but needs production data verification
+
+### P2: Email Template Preview Button
+- Add preview functionality to CustomEmailTemplates.jsx
+
+## Backlog
+- Backend refactoring (break down `server.py` into routes)
+- Component extraction for `OnboardingWizardMobile.jsx`
+- Cloudinary integration (currently placeholder)
+- PWA support
+
+---
+
 ### Session 68 (2026-02-03) - 7 Feature Batch + 5 Bug Fixes + 4 Enhancements ✅
 
 #### Enhancement #1: "No Trade Members" Widget ✅
