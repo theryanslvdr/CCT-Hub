@@ -679,8 +679,11 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                       </PopoverTrigger>
                       <PopoverContent 
                         className="w-auto p-0 bg-zinc-900 border-zinc-800 z-[99999]" 
-                        align="start"
+                        align="center"
+                        side="bottom"
                         sideOffset={5}
+                        collisionPadding={20}
+                        avoidCollisions={true}
                       >
                         <Calendar
                           mode="single"
