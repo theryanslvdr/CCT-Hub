@@ -202,14 +202,25 @@ export const Header = ({ onMenuClick, title }) => {
   };
 
   const formatTimeAgo = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000);
+    if (!dateStr) return 'Recently';
     
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
+    try {
+      const date = new Date(dateStr);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) return 'Recently';
+      
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+      
+      if (diff < 0) return 'Just now';
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return `${Math.floor(diff / 86400)}d ago`;
+    } catch (e) {
+      return 'Recently';
+    }
   };
 
   return (
