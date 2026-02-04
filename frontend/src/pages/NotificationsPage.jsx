@@ -36,9 +36,21 @@ const NotificationIcon = ({ type }) => {
 };
 
 const NotificationCard = ({ notification }) => {
-  const timeAgo = notification.created_at 
-    ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
-    : '';
+  // Safe time parsing with fallback
+  let timeAgo = '';
+  try {
+    if (notification.created_at) {
+      const date = new Date(notification.created_at);
+      // Check if date is valid
+      if (!isNaN(date.getTime())) {
+        timeAgo = formatDistanceToNow(date, { addSuffix: true });
+      } else {
+        timeAgo = 'Recently';
+      }
+    }
+  } catch (e) {
+    timeAgo = 'Recently';
+  }
 
   const getSourceBadge = (source) => {
     switch (source) {
