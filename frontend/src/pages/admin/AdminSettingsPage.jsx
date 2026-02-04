@@ -17,7 +17,7 @@ import {
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
   FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link,
   LogIn, Plus, Trash2, GripVertical, Copyright, Wrench, Megaphone, AlertTriangle, Send,
-  TreePine, Calendar as CalendarIcon, TrendingUp, Shield
+  TreePine, Calendar as CalendarIcon, TrendingUp, Shield, Database
 } from 'lucide-react';
 import { CustomEmailTemplates } from '@/components/admin/CustomEmailTemplates';
 
