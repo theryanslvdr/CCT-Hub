@@ -507,9 +507,16 @@ export const MissedTradersWidget = () => {
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
-                          {trader.full_name}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-white truncate">
+                            {trader.full_name}
+                          </p>
+                          {trader.undeclared_count > 0 && (
+                            <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-xs shrink-0">
+                              {trader.undeclared_count} day{trader.undeclared_count > 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1 text-xs text-zinc-500">
                           <Clock className="w-3 h-3 flex-shrink-0" />
                           <span className="truncate">
