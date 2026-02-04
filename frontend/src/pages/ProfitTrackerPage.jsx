@@ -1084,10 +1084,46 @@ export const ProfitTrackerPage = () => {
     }
   };
 
-  // Open daily projection for a month
-  const handleOpenDailyProjection = (month) => {
+  // Open daily projection for a month and fetch backend balances
+  const handleOpenDailyProjection = async (month) => {
     setSelectedMonth(month);
     setDailyProjectionOpen(true);
+    
+    // Fetch authoritative daily balances from backend for historical accuracy
+    const year = month.monthDate.getFullYear();
+    const monthNum = month.monthDate.getMonth() + 1;
+    const startDate = `${year}-${String(monthNum).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, monthNum, 0).getDate();
+    const endDate = `${year}-${String(monthNum).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    
+    // Cache key for this month
+    const cacheKey = `${year}-${monthNum}`;
+    
+    // Skip if already cached
+    if (backendDailyBalances[cacheKey]) return;
+    
+    try {
+      setBackendBalancesLoading(true);
+      const userId = simulatedView?.userId || null;
+      const response = await profitAPI.getDailyBalances(startDate, endDate, userId);
+      
+      if (response.data?.daily_balances) {
+        // Convert array to date-keyed map for quick lookup
+        const balanceMap = {};
+        response.data.daily_balances.forEach(b => {
+          balanceMap[b.date] = b;
+        });
+        
+        setBackendDailyBalances(prev => ({
+          ...prev,
+          [cacheKey]: balanceMap
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch backend daily balances:', error);
+    } finally {
+      setBackendBalancesLoading(false);
+    }
   };
 
   // Get daily projection data for selected month
