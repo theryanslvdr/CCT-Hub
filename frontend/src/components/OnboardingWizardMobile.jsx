@@ -912,7 +912,18 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 p-6 pt-4 border-t border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm">
+        <div className="flex-shrink-0 p-6 pt-4 border-t border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm space-y-3">
+          {/* Save & Continue Later button */}
+          <button
+            onClick={handleSaveForLater}
+            className="w-full flex items-center justify-center gap-2 py-3 text-zinc-400 hover:text-white transition-colors"
+            data-testid="wizard-save-later-btn"
+          >
+            <Save className="w-4 h-4" />
+            <span className="text-sm font-medium">Save & Continue Later</span>
+          </button>
+          
+          {/* Navigation buttons */}
           <div className="flex gap-3">
             {currentStep > 1 && (
               <Button
