@@ -674,7 +674,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
 
                 {transactions.length === 0 && (
                   <p className="text-center text-zinc-500 text-sm py-4">
-                    No transactions added. Tap "Next" to continue.
+                    No transactions added. Tap &quot;Next&quot; to continue.
                   </p>
                 )}
               </div>
