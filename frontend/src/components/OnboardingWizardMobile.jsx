@@ -853,7 +853,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
               {tradingDays.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-zinc-500">No trading days between your start date and today.</p>
-                  <p className="text-zinc-600 text-sm mt-2">This can happen if you just started or it's a weekend.</p>
+                  <p className="text-zinc-600 text-sm mt-2">This can happen if you just started or it&apos;s a weekend.</p>
                 </div>
               )}
             </div>
