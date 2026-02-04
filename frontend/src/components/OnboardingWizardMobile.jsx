@@ -674,7 +674,11 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                           <CalendarIcon className="w-4 h-4 text-zinc-500" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 bg-zinc-900 border-zinc-800 z-[99999]" 
+                        align="start"
+                        sideOffset={5}
+                      >
                         <Calendar
                           mode="single"
                           selected={newTransactionDate}
