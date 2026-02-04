@@ -2858,7 +2858,7 @@ async def handle_trade_change_request(
 # ==================== ADMIN ROUTES ====================
 
 @admin_router.post("/signals", response_model=TradingSignalResponse)
-async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_admin)):
+async def create_signal(data: TradingSignalCreate, request: Request, user: dict = Depends(require_admin)):
     # Deactivate all existing signals
     await db.trading_signals.update_many({}, {"$set": {"is_active": False}})
     
@@ -2890,6 +2890,16 @@ async def create_signal(data: TradingSignalCreate, user: dict = Depends(require_
             triggered_by_name=user["full_name"],
             metadata={"signal_id": signal_id, "direction": data.direction, "product": data.product, "trade_time": data.trade_time}
         )
+        
+        # Send email to all active members if send_email is True
+        if data.send_email:
+            # Get frontend URL from request headers or use default
+            frontend_url = request.headers.get("origin") or os.environ.get("FRONTEND_URL", "")
+            try:
+                email_result = await send_signal_email_to_members(signal, frontend_url)
+                logger.info(f"Signal email sent to {email_result['sent']} members")
+            except Exception as e:
+                logger.error(f"Failed to send signal emails: {e}")
     
     return TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"])})
 
