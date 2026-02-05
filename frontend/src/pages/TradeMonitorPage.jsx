@@ -322,7 +322,18 @@ export const TradeMonitorPage = () => {
       
       // If in BVE mode, fetch signal from BVE endpoints
       const signalEndpoint = isInBVE ? api.get('/bve/active-signal') : tradeAPI.getActiveSignal();
-      const summaryEndpoint = isInBVE ? api.get('/bve/summary') : profitAPI.getSummary();
+      
+      // When simulating a specific member, fetch their simulation data for accurate values
+      // Otherwise, use current user's summary
+      let summaryEndpoint;
+      if (isInBVE) {
+        summaryEndpoint = api.get('/bve/summary');
+      } else if (userId) {
+        // Simulating a specific member - fetch their data
+        summaryEndpoint = adminAPI.getMemberSimulation(userId);
+      } else {
+        summaryEndpoint = profitAPI.getSummary();
+      }
       
       const [signalRes, summaryRes, profitRes, streakRes] = await Promise.all([
         signalEndpoint,
@@ -332,7 +343,18 @@ export const TradeMonitorPage = () => {
       ]);
       setSignal(signalRes.data.signal);
       setDailySummary(summaryRes.data);
-      setProfitSummary(profitRes.data);
+      // Handle the different response formats from simulation vs regular summary
+      if (userId && profitRes.data?.account_value !== undefined) {
+        // Simulation data format
+        setProfitSummary({
+          account_value: profitRes.data.account_value,
+          total_deposits: profitRes.data.total_deposits,
+          total_profit: profitRes.data.total_profit,
+          lot_size: profitRes.data.lot_size
+        });
+      } else {
+        setProfitSummary(profitRes.data);
+      }
       setStreak(streakRes.data);
     } catch (error) {
       console.error('Failed to load trade data:', error);
