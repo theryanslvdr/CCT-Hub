@@ -2639,6 +2639,7 @@ export const ProfitTrackerPage = () => {
                           <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
                           <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
                           <SelectItem value="ETHUSD" className="text-white">ETHUSD</SelectItem>
+                          <SelectItem value="OTHER" className="text-amber-400">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -2656,6 +2657,21 @@ export const ProfitTrackerPage = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  
+                  {/* Date Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Date of Error Trade
+                    </label>
+                    <input
+                      type="date"
+                      value={errorDate}
+                      onChange={(e) => setErrorDate(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-base focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300 px-4 py-5"
+                      data-testid="mobile-error-date-input"
+                    />
                   </div>
                   
                   {/* Profit/Loss Amount */}
