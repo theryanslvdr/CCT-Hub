@@ -54,6 +54,32 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Verified**: Both BUY and SELL can be selected successfully
 - **File Modified**: `/app/frontend/src/components/OnboardingWizardMobile.jsx`
 
+#### No Trade Members Widget Fix ✅
+- **Issue**: Widget showing no members with undeclared trades
+- **Root Cause**: API was querying `db.signals` (empty collection) instead of `db.trading_signals`
+- **Solution**: Changed query to use `db.trading_signals` collection
+- **File Modified**: `/app/backend/server.py` (get_missed_trades endpoint)
+
+#### Simulate Error Trade Feature - NEW ✅
+- **Purpose**: Allow users to report trading errors (wrong product, wrong time, wrong direction, etc.)
+- **Backend Endpoint**: `POST /api/trade/log-error`
+  - Creates error trade entry with is_error_trade flag
+  - Sends admin notification about the error
+  - Affects account value (profit/loss reflected)
+- **Frontend UI**: Admin Settings > Simulate Actions > "Simulate Error" button
+  - Dialog with error type selection (Wrong Product, Wrong Time, Wrong Direction, Other)
+  - Product and Direction dropdowns
+  - Profit/Loss amount input (negative for losses)
+  - Explanation field (required for "Other" type)
+- **Files Modified**:
+  - `/app/backend/server.py` - Added ErrorTradeCreate model and log-error endpoint
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Added error dialog and handler
+
+#### Daily Projection Onboarding Fix - Verified ✅
+- **Issue**: User reported daily trade values not appearing after onboarding
+- **Verification**: Tested experienced trader onboarding flow - trade entries ARE being created and displayed correctly in Daily Projection table
+- **Minor Fix**: Changed `getattr(entry, 'product', ...)` to `entry.product or 'MOIL10'` for better Pydantic model handling
+
 #### Email Template Preview Feature - NEW ✅
 - **Added**: "Preview" button in Custom Email Templates editor
 - **Feature**: Shows rendered email with shortcodes replaced by sample values
