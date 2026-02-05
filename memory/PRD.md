@@ -142,6 +142,38 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
+### Session 72 (2026-02-05) - Three Bug Fixes ✅
+
+#### Bug Fix #1: Trade Monitor Simulation - FIXED ✅
+- **Issue**: When simulating a member, Trade Monitor page displayed Master Admin's account value, LOT size, and target profit instead of the simulated member's values
+- **Root Cause**: `loadData()` function was always fetching current user's summary, not the simulated member's data
+- **Fix**: Modified `loadData()` to call `adminAPI.getMemberSimulation(userId)` when simulating a specific member
+- **Files Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx` (lines 318-362)
+- **Testing**: Verified with member J J ($0 account value) - Trade Monitor correctly showed $0.00 instead of admin's $5,126
+
+#### Bug Fix #2: Mobile Daily Projection Icon-Only Buttons - FIXED ✅
+- **Issue**: Adjust Trade and Did Not Trade buttons on mobile Daily Projection table had text that could cause UI overlap
+- **Fix**: Made buttons icon-only on mobile (<768px viewport) with tooltips showing button text on hover
+- **Implementation**:
+  - Added `ShadcnTooltip` wrapper around buttons
+  - Used `hidden md:inline` for button text, showing only icons on mobile
+  - Buttons now compact: 24x24px squares with centered icons
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 3968-4055)
+
+#### Bug Fix #3: effectiveStartDate for Simulated "New Trader" Members - FIXED ✅
+- **Issue**: When simulating a member who reset as "New Trader" with a specific start date, dates before that start date were still shown in Daily Projection
+- **Fix**: Extended `effectiveStartDate` logic to check simulated member's `trading_type` and `trading_start_date`
+- **Priority Order**:
+  1. `simulatedView.effective_start_date`
+  2. `simulatedView.trading_start_date` (if `trading_type === 'new'`)
+  3. `user.trading_start_date` (if `trading_type === 'new'`)
+- **Files Modified**:
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 773-780)
+  - `/app/frontend/src/contexts/AuthContext.jsx` (lines 200-201)
+  - `/app/frontend/src/pages/admin/AdminMembersPage.jsx` (lines 1544-1545)
+
+**Testing**: 100% pass rate (Iteration 82 - all bugs verified fixed)
+
 ### Session 71 (2026-02-05) - Error Trade UI Enhancement + Migration Feature Removal ✅
 
 #### Error Trade UI Enhancement - COMPLETED ✅
