@@ -712,6 +712,15 @@ export const ProfitTrackerPage = () => {
   // Simulate Actions Dialog (combined simulate deposit, withdrawal, commission)
   const [simulateActionsOpen, setSimulateActionsOpen] = useState(false);
   
+  // Simulate Error Dialog
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorType, setErrorType] = useState('');
+  const [errorExplanation, setErrorExplanation] = useState('');
+  const [errorProfit, setErrorProfit] = useState('');
+  const [errorProduct, setErrorProduct] = useState('MOIL10');
+  const [errorDirection, setErrorDirection] = useState('BUY');
+  const [submittingError, setSubmittingError] = useState(false);
+  
   // VSD (Virtual Share Distribution) Dialog - Master Admin only
   const [vsdDialogOpen, setVsdDialogOpen] = useState(false);
   const [vsdData, setVsdData] = useState(null);
