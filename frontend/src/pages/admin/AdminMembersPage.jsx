@@ -988,8 +988,8 @@ export const AdminMembersPage = () => {
                         </div>
                         <Button
                           onClick={() => {
-                            setViewDialogOpen(false);
                             handleSimulateMember(selectedMember);
+                            setViewDialogOpen(false);
                           }}
                           className="btn-secondary"
                         >
