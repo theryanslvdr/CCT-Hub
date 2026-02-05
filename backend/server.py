@@ -3577,8 +3577,8 @@ async def get_missed_trades(user: dict = Depends(require_admin)):
     all_users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     member_users = [u for u in all_users if u.get("role") == "member"]
     
-    # Get all signals to determine trading days
-    all_signals = await db.signals.find({}, {"_id": 0}).to_list(500)
+    # Get all signals to determine trading days (use trading_signals collection)
+    all_signals = await db.trading_signals.find({}, {"_id": 0}).to_list(500)
     
     # Create a set of all trading dates (dates with signals)
     trading_dates = set()
