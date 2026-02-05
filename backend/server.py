@@ -2196,6 +2196,125 @@ async def log_missed_trade(
         "trade": {k: v for k, v in trade_log.items() if k != "_id"}
     }
 
+
+@trade_router.post("/log-error")
+async def log_error_trade(data: ErrorTradeCreate, user: dict = Depends(get_current_user)):
+    """
+    Log an error trade (wrong product, wrong time, wrong direction, or other user errors).
+    This creates a special trade log entry that affects the account value.
+    Also sends a notification to admins.
+    """
+    # Parse the date
+    if data.date:
+        try:
+            if 'T' in data.date:
+                trade_date = datetime.fromisoformat(data.date.replace('Z', '+00:00'))
+            else:
+                trade_date = datetime.strptime(data.date, "%Y-%m-%d").replace(
+                    hour=12, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+                )
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+    else:
+        trade_date = datetime.now(timezone.utc)
+    
+    # Get user's current balance to calculate lot size
+    deposits = await db.deposits.aggregate([
+        {"$match": {"user_id": user["id"]}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    withdrawals = await db.withdrawals.aggregate([
+        {"$match": {"user_id": user["id"], "status": "completed"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    profits = await db.trade_logs.aggregate([
+        {"$match": {"user_id": user["id"]}},
+        {"$group": {"_id": None, "total": {"$sum": "$actual_profit"}}}
+    ]).to_list(1)
+    commissions = await db.trade_logs.aggregate([
+        {"$match": {"user_id": user["id"]}},
+        {"$group": {"_id": None, "total": {"$sum": "$commission"}}}
+    ]).to_list(1)
+    
+    balance = (deposits[0]["total"] if deposits else 0) - \
+              (withdrawals[0]["total"] if withdrawals else 0) + \
+              (profits[0]["total"] if profits else 0) + \
+              (commissions[0]["total"] if commissions else 0)
+    
+    lot_size = round(balance / 980, 2)
+    projected_profit = round(lot_size * 15, 2)
+    profit_difference = round(data.actual_profit - projected_profit, 2)
+    
+    # Determine performance
+    if data.actual_profit >= projected_profit:
+        performance = "exceeded" if data.actual_profit > projected_profit else "perfect"
+    elif data.actual_profit > 0:
+        performance = "below"
+    else:
+        performance = "loss"
+    
+    # Error type labels for display
+    error_type_labels = {
+        'wrong_product': 'Wrong Product Selection',
+        'wrong_time': 'Wrong Trade Time',
+        'wrong_direction': 'Wrong Direction',
+        'other': 'Other Error'
+    }
+    error_label = error_type_labels.get(data.error_type, 'User Error')
+    
+    # Build notes with error information
+    notes = f"ERROR TRADE: {error_label}"
+    if data.error_explanation:
+        notes += f" - {data.error_explanation}"
+    
+    trade_id = str(uuid.uuid4())
+    created_at_str = trade_date.isoformat()
+    
+    trade_log = {
+        "id": trade_id,
+        "user_id": user["id"],
+        "lot_size": lot_size,
+        "direction": data.direction or "BUY",
+        "product": data.product or "MOIL10",
+        "projected_profit": projected_profit,
+        "actual_profit": data.actual_profit,
+        "commission": 0,
+        "profit_difference": profit_difference,
+        "performance": performance,
+        "signal_id": None,
+        "notes": notes,
+        "is_error_trade": True,
+        "error_type": data.error_type,
+        "error_explanation": data.error_explanation,
+        "is_manual_adjustment": True,
+        "created_at": created_at_str
+    }
+    
+    await db.trade_logs.insert_one(trade_log)
+    
+    # Create admin notification about the error trade
+    await create_admin_notification(
+        notification_type="error_trade",
+        title="Error Trade Reported",
+        message=f"{user['full_name']} reported an error trade ({error_label}): ${data.actual_profit:.2f}",
+        user_id=user["id"],
+        user_name=user.get("full_name", "Unknown"),
+        amount=data.actual_profit,
+        metadata={
+            "error_type": data.error_type,
+            "error_explanation": data.error_explanation,
+            "trade_id": trade_id
+        }
+    )
+    
+    logger.info(f"Error trade logged for user {user['id']}: {error_label}, profit: ${data.actual_profit}")
+    
+    return {
+        "message": "Error trade logged successfully",
+        "trade": {k: v for k, v in trade_log.items() if k != "_id"}
+    }
+
+
 @trade_router.post("/did-not-trade")
 async def mark_did_not_trade(
     date: str,  # ISO date string (YYYY-MM-DD)
