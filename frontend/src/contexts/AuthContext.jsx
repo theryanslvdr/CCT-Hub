@@ -196,6 +196,9 @@ export const AuthProvider = ({ children }) => {
         licenseId: memberData.licenseId || null,
         // Include effective_start_date for Daily Projection filtering (P0 feature)
         effective_start_date: memberData.effective_start_date || null,
+        // Include trading_type and trading_start_date for "New Trader" filtering
+        trading_type: memberData.trading_type || null,
+        trading_start_date: memberData.trading_start_date || null,
       });
     }
   }, [isMasterAdmin]);
