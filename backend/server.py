@@ -455,6 +455,14 @@ class WithdrawalSimulation(BaseModel):
     from_currency: str = "USDT"
     to_currency: str = "USD"
 
+class ErrorTradeCreate(BaseModel):
+    error_type: str  # 'wrong_product', 'wrong_time', 'wrong_direction', 'other'
+    error_explanation: Optional[str] = None
+    actual_profit: float  # The profit/loss from this error trade
+    date: Optional[str] = None  # ISO date string, defaults to today
+    product: Optional[str] = "MOIL10"
+    direction: Optional[str] = "BUY"
+
 class RoleUpgrade(BaseModel):
     user_id: str
     new_role: str  # basic_admin, admin, super_admin
