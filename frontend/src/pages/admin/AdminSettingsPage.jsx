@@ -369,7 +369,7 @@ export const AdminSettingsPage = () => {
     if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
     setMigrationLoading(true);
     try {
-      const response = await api.post('/admin/migrate-trade-directions');
+      const response = await adminAPI.migrateTradeDirections();
       const data = response.data;
       toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
     } catch (error) {
