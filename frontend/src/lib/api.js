@@ -214,6 +214,8 @@ export const adminAPI = {
   getLicenseTradeOverrides: (licenseId) => api.get(`/admin/licenses/${licenseId}/trade-overrides`),
   setLicenseTradeOverride: (licenseId, data) => api.post(`/admin/licenses/${licenseId}/trade-overrides`, data),
   deleteLicenseTradeOverride: (licenseId, date) => api.delete(`/admin/licenses/${licenseId}/trade-overrides/${date}`),
+  // Data Migration
+  migrateTradeDirections: () => api.post('/admin/migrate-trade-directions'),
   // Licensee Transactions
   getLicenseeTransactions: () => api.get('/admin/licensee-transactions'),
   addTransactionFeedback: (txId, formData) => api.post(`/admin/licensee-transactions/${txId}/feedback`, formData, {
