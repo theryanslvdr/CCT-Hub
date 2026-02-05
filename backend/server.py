@@ -984,7 +984,7 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
     if not heartbeat_api_key:
         raise HTTPException(status_code=500, detail="Heartbeat integration not configured. Please add your Heartbeat API key in Admin Settings > Integrations.")
     
-    # Verify with Heartbeat using the query parameter format (same as verify_heartbeat_user)
+    # Verify with Heartbeat using the query parameter format
     try:
         import httpx
         async with httpx.AsyncClient() as client:
@@ -1015,11 +1015,31 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
                 if heartbeat_user:
                     heartbeat_user_id = heartbeat_user.get("id")
                     
+                    # Check for deactivation status
+                    status = heartbeat_user.get("status", "").lower() if heartbeat_user.get("status") else ""
+                    is_active = heartbeat_user.get("is_active", heartbeat_user.get("active", True))
+                    is_suspended = heartbeat_user.get("suspended", heartbeat_user.get("is_suspended", False))
+                    is_banned = heartbeat_user.get("banned", heartbeat_user.get("is_banned", False))
+                    
+                    is_deactivated = (
+                        status in ["deactivated", "suspended", "banned", "deleted", "inactive", "disabled"] or
+                        is_suspended or is_banned or is_active == False
+                    )
+                    
+                    if is_deactivated:
+                        return {
+                            "verified": False,
+                            "is_deactivated": True,
+                            "user": None,
+                            "message": "Your Heartbeat account has been deactivated. Please contact support to regain access."
+                        }
+                    
                     # Check if user already exists in our DB
                     existing_user = await db.users.find_one({"email": email}, {"_id": 0, "id": 1, "full_name": 1, "password": 1})
                     
                     return {
                         "verified": True,
+                        "is_deactivated": False,
                         "user": {
                             "email": email,
                             "full_name": heartbeat_user.get("name", email.split('@')[0]),
@@ -1028,10 +1048,10 @@ async def verify_heartbeat_membership(data: HeartbeatVerifyRequest):
                         }
                     }
             
-            return {"verified": False, "user": None}
+            return {"verified": False, "is_deactivated": False, "user": None}
     except Exception as e:
         print(f"Heartbeat verification error: {e}")
-        return {"verified": False, "user": None}
+        return {"verified": False, "is_deactivated": False, "user": None}
 
 class SetPasswordRequest(BaseModel):
     email: str
