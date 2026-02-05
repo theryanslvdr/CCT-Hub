@@ -3931,9 +3931,27 @@ export const ProfitTrackerPage = () => {
                         {!isLicensee && (
                           <td>
                             {day.status === 'completed' ? (
-                              <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
-                              </span>
+                              day.isErrorTrade ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="font-mono text-orange-400 inline-flex items-center gap-1 cursor-help">
+                                        <AlertTriangle className="w-3.5 h-3.5" />
+                                        {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-[250px] bg-zinc-900 border border-orange-500/30 text-orange-200">
+                                      <p className="font-semibold text-orange-400 mb-1">Error Trade Correction</p>
+                                      {day.errorType && <p className="text-xs text-zinc-400">Type: {day.errorType}</p>}
+                                      {day.errorExplanation && <p className="text-xs">{day.errorExplanation}</p>}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
+                                </span>
+                              )
                             ) : day.status === 'active' ? (
                               <Button
                                 size="sm"
