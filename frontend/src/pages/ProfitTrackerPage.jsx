@@ -2472,6 +2472,7 @@ export const ProfitTrackerPage = () => {
                       <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
                       <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
                       <SelectItem value="ETHUSD" className="text-white">ETHUSD</SelectItem>
+                      <SelectItem value="OTHER" className="text-amber-400">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -2487,6 +2488,19 @@ export const ProfitTrackerPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              
+              {/* Date Selection */}
+              <div>
+                <Label className="text-zinc-300">Date of Error Trade</Label>
+                <Input
+                  type="date"
+                  value={errorDate}
+                  onChange={(e) => setErrorDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="input-dark mt-1"
+                  data-testid="error-date-input"
+                />
               </div>
               
               {/* Profit/Loss Amount */}
