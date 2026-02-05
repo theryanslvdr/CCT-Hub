@@ -875,7 +875,7 @@ async def login(data: UserLogin):
     if not verify_password(data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Check if user is deactivated
+    # Check if user is deactivated locally
     if user.get("is_deactivated"):
         raise HTTPException(
             status_code=403, 
@@ -900,13 +900,21 @@ async def login(data: UserLogin):
                 detail="Your license has been revoked or expired. Please contact the administrator to renew your license."
             )
     elif user.get("role") not in admin_roles:
-        # Non-admin, non-licensee - check Heartbeat membership
+        # Non-admin, non-licensee - check Heartbeat membership AND active status
         heartbeat_email = user.get("heartbeat_email", user["email"])
-        is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
-        if not is_heartbeat_user:
+        heartbeat_result = await verify_heartbeat_user(heartbeat_email)
+        
+        if not heartbeat_result.get("exists"):
             raise HTTPException(
                 status_code=403, 
                 detail="Your Heartbeat membership could not be verified. Please ensure you're still a community member."
+            )
+        
+        if not heartbeat_result.get("is_active"):
+            reason = heartbeat_result.get("reason", "Account is not active")
+            raise HTTPException(
+                status_code=403,
+                detail=f"Your Heartbeat account has been deactivated. {reason}. Please contact support to regain access."
             )
     
     token = create_token(user["id"], user["email"], user["role"])
