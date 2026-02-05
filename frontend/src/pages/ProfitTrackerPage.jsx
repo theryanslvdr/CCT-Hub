@@ -719,6 +719,7 @@ export const ProfitTrackerPage = () => {
   const [errorProfit, setErrorProfit] = useState('');
   const [errorProduct, setErrorProduct] = useState('MOIL10');
   const [errorDirection, setErrorDirection] = useState('BUY');
+  const [errorDate, setErrorDate] = useState(new Date().toISOString().split('T')[0]);
   const [submittingError, setSubmittingError] = useState(false);
   
   // VSD (Virtual Share Distribution) Dialog - Master Admin only
