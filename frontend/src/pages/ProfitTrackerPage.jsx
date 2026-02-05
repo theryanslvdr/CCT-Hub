@@ -772,9 +772,11 @@ export const ProfitTrackerPage = () => {
   
   // Get effective start date for filtering past dates
   // Priority: 1) Simulated view's effective_start_date (for licensee simulation)
-  //           2) User's trading_start_date (for users who reset as "new trader")
+  //           2) Simulated view's trading_start_date (for simulating "new trader" members)
+  //           3) User's trading_start_date (for users who reset as "new trader")
   // This ensures users who reset as "new trader" don't see dates before their reset
   const effectiveStartDate = simulatedView?.effective_start_date 
+    || (simulatedView?.trading_type === 'new' ? simulatedView?.trading_start_date : null)
     || (user?.trading_type === 'new' ? user?.trading_start_date : null)
     || null;
   
