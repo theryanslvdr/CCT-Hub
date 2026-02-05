@@ -2229,6 +2229,15 @@ export const ProfitTrackerPage = () => {
               >
                 <Award className="w-4 h-4" /> Simulate Commission
               </Button>
+              {/* Simulate Error Button */}
+              <Button 
+                variant="outline"
+                className="w-full btn-secondary gap-2 justify-start border-red-500/50 hover:bg-red-500/10" 
+                onClick={() => { setSimulateActionsOpen(false); setErrorDialogOpen(true); }}
+                data-testid="simulate-error-button"
+              >
+                <AlertTriangle className="w-4 h-4 text-red-400" /> Simulate Error
+              </Button>
               {/* VSD Button - Master Admin Only */}
               {isMasterAdmin() && (
                 <Button 
