@@ -679,11 +679,16 @@ async def require_super_or_master_admin(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Super admin or master admin access required")
     return user
 
-async def verify_heartbeat_user(email: str) -> bool:
-    """Verify if user exists in Heartbeat community"""
+async def verify_heartbeat_user(email: str) -> dict:
+    """
+    Verify if user exists and is active in Heartbeat community.
+    Returns dict with 'exists', 'is_active', and 'user' fields.
+    """
+    result = {"exists": False, "is_active": False, "user": None, "reason": None}
+    
     if not HEARTBEAT_API_KEY:
         logger.warning("Heartbeat API key not configured, skipping verification")
-        return True
+        return {"exists": True, "is_active": True, "user": None, "reason": None}  # Allow on no config
     
     try:
         async with httpx.AsyncClient() as client:
@@ -704,11 +709,48 @@ async def verify_heartbeat_user(email: str) -> bool:
                 if isinstance(users, list):
                     for user in users:
                         if isinstance(user, dict) and user.get("email", "").lower() == email.lower():
-                            return True
-            return False
+                            result["exists"] = True
+                            result["user"] = user
+                            
+                            # Check various possible deactivation/status fields
+                            # Common patterns: status, is_active, active, suspended, banned, deleted
+                            status = user.get("status", "").lower() if user.get("status") else ""
+                            is_active = user.get("is_active", user.get("active", True))
+                            is_suspended = user.get("suspended", user.get("is_suspended", False))
+                            is_banned = user.get("banned", user.get("is_banned", False))
+                            is_deleted = user.get("deleted", user.get("is_deleted", False))
+                            
+                            # Determine if user is active
+                            if status in ["deactivated", "suspended", "banned", "deleted", "inactive", "disabled"]:
+                                result["is_active"] = False
+                                result["reason"] = f"Account status: {status}"
+                            elif is_suspended:
+                                result["is_active"] = False
+                                result["reason"] = "Account is suspended"
+                            elif is_banned:
+                                result["is_active"] = False
+                                result["reason"] = "Account is banned"
+                            elif is_deleted:
+                                result["is_active"] = False
+                                result["reason"] = "Account has been deleted"
+                            elif is_active == False:
+                                result["is_active"] = False
+                                result["reason"] = "Account is not active"
+                            else:
+                                result["is_active"] = True
+                            
+                            return result
+            return result
     except Exception as e:
         logger.error(f"Heartbeat verification error: {e}")
-        return True  # Allow on error for development
+        return {"exists": True, "is_active": True, "user": None, "reason": None}  # Allow on error for development
+
+
+# Legacy wrapper for backward compatibility
+async def verify_heartbeat_user_exists(email: str) -> bool:
+    """Legacy function - returns True if user exists (regardless of status)"""
+    result = await verify_heartbeat_user(email)
+    return result.get("exists", False)
 
 def calculate_exit_value(lot_size: float) -> float:
     """Calculate exit value: LOT Size × 15"""
