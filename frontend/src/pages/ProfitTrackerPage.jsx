@@ -2421,9 +2421,9 @@ export const ProfitTrackerPage = () => {
           />
         )}
         
-        {/* Simulate Error Dialog */}
+        {/* Simulate Error Dialog - Desktop */}
         <Dialog open={errorDialogOpen} onOpenChange={(open) => { if (!open) resetErrorDialog(); else setErrorDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-400" /> Report Error Trade
@@ -2547,6 +2547,184 @@ export const ProfitTrackerPage = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Mobile Error Dialog - Full Screen Overlay */}
+        {errorDialogOpen && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden">
+              
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-red-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">Report Error Trade</h1>
+                      <p className="text-sm text-zinc-500">This will affect your account</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={resetErrorDialog}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area */}
+              <div className="flex-1 overflow-y-auto px-6 pb-32">
+                <div className="space-y-6">
+                  
+                  {/* Warning Banner */}
+                  <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30">
+                    <p className="text-sm text-red-400 leading-relaxed">
+                      Report a trading error (wrong product, wrong time, etc.). 
+                      This will be logged and affect your account value. Admins will be notified.
+                    </p>
+                  </div>
+                  
+                  {/* Error Type Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Error Type
+                    </label>
+                    <Select value={errorType} onValueChange={setErrorType}>
+                      <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg py-5 focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                        <SelectValue placeholder="Select error type..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                        <SelectItem value="wrong_product" className="text-white py-3">Wrong Product Selection</SelectItem>
+                        <SelectItem value="wrong_time" className="text-white py-3">Wrong Trade Time</SelectItem>
+                        <SelectItem value="wrong_direction" className="text-white py-3">Wrong Direction (BUY/SELL)</SelectItem>
+                        <SelectItem value="other" className="text-white py-3">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Product & Direction */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                        Product
+                      </label>
+                      <Select value={errorProduct} onValueChange={setErrorProduct}>
+                        <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-cyan-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                          <SelectItem value="MOIL10" className="text-white">MOIL10</SelectItem>
+                          <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
+                          <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
+                          <SelectItem value="ETHUSD" className="text-white">ETHUSD</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                        Direction
+                      </label>
+                      <Select value={errorDirection} onValueChange={setErrorDirection}>
+                        <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-cyan-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                          <SelectItem value="BUY" className="text-emerald-400">BUY</SelectItem>
+                          <SelectItem value="SELL" className="text-red-400">SELL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Profit/Loss Amount */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Profit/Loss Amount (USDT)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={errorProfit}
+                        onChange={(e) => setErrorProfit(e.target.value)}
+                        placeholder="-50.00"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-300 pl-10 pr-4 py-5"
+                        data-testid="mobile-error-profit-input"
+                      />
+                    </div>
+                    <p className="text-xs text-zinc-500">Enter negative for losses (e.g., -50 for $50 loss)</p>
+                  </div>
+                  
+                  {/* Explanation */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Explanation {errorType === 'other' && <span className="text-red-400">*</span>}
+                    </label>
+                    <input
+                      value={errorExplanation}
+                      onChange={(e) => setErrorExplanation(e.target.value)}
+                      placeholder="Describe what happened..."
+                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-base placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 px-4 py-5"
+                      data-testid="mobile-error-explanation-input"
+                    />
+                  </div>
+                  
+                  {/* Preview Card */}
+                  {errorProfit && (
+                    <div className={`p-5 rounded-2xl border-2 ${
+                      parseFloat(errorProfit) >= 0 
+                        ? 'bg-emerald-500/10 border-emerald-500/30' 
+                        : 'bg-red-500/10 border-red-500/30'
+                    }`}>
+                      <p className="text-zinc-300 text-center">
+                        This will {parseFloat(errorProfit) >= 0 ? 'add' : 'subtract'}{' '}
+                        <span className={`text-2xl font-mono font-bold block mt-2 ${
+                          parseFloat(errorProfit) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                        }`}>
+                          ${Math.abs(parseFloat(errorProfit || 0)).toFixed(2)}
+                        </span>
+                        <span className="text-sm text-zinc-500 mt-1 block">
+                          {parseFloat(errorProfit) >= 0 ? 'to' : 'from'} your account value
+                        </span>
+                      </p>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
+              {/* Bottom Action Area */}
+              <div className="flex-shrink-0 p-6 pt-0 pb-8 bg-gradient-to-t from-black to-transparent space-y-3">
+                <button
+                  onClick={handleSubmitErrorTrade}
+                  disabled={submittingError}
+                  className="w-full py-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  data-testid="mobile-submit-error-button"
+                >
+                  {submittingError ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-5 h-5" /> Log Error Trade
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={resetErrorDialog}
+                  className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
         
         {/* Simulate Deposit Dialog - Now triggered from popup */}
         <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
