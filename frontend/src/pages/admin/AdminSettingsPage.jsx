@@ -368,21 +368,12 @@ export const AdminSettingsPage = () => {
     if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
     setMigrationLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/migrate-trade-directions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
-      } else {
-        toast.error(data.detail || 'Migration failed');
-      }
+      const response = await api.post('/admin/migrate-trade-directions');
+      const data = response.data;
+      toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
     } catch (error) {
-      toast.error('Migration failed: ' + error.message);
+      const errorMessage = error.response?.data?.detail || error.message || 'Migration failed';
+      toast.error(`Migration failed: ${errorMessage}`);
     } finally {
       setMigrationLoading(false);
     }
