@@ -6625,8 +6625,8 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 trade_date = datetime.strptime(entry.date, "%Y-%m-%d").replace(hour=12, minute=0, second=0, tzinfo=timezone.utc)
                 
                 # Get product and direction from entry or use defaults
-                product = getattr(entry, 'product', 'MOIL10') or 'MOIL10'
-                direction = getattr(entry, 'direction', 'BUY') or 'BUY'
+                product = entry.product or 'MOIL10'
+                direction = entry.direction or 'BUY'
                 
                 trade_log = {
                     "id": trade_id,
