@@ -3933,7 +3933,7 @@ export const ProfitTrackerPage = () => {
                             {day.status === 'completed' ? (
                               day.isErrorTrade ? (
                                 <TooltipProvider>
-                                  <Tooltip>
+                                  <ShadcnTooltip>
                                     <TooltipTrigger asChild>
                                       <span className="font-mono text-orange-400 inline-flex items-center gap-1 cursor-help">
                                         <AlertTriangle className="w-3.5 h-3.5" />
@@ -3945,7 +3945,7 @@ export const ProfitTrackerPage = () => {
                                       {day.errorType && <p className="text-xs text-zinc-400">Type: {day.errorType}</p>}
                                       {day.errorExplanation && <p className="text-xs">{day.errorExplanation}</p>}
                                     </TooltipContent>
-                                  </Tooltip>
+                                  </ShadcnTooltip>
                                 </TooltipProvider>
                               ) : (
                                 <span className={`font-mono ${day.actualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
