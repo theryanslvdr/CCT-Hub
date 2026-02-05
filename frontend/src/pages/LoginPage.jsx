@@ -182,11 +182,19 @@ export const LoginPage = () => {
         setVerifiedUser(res.data.user);
         setStep('password');
         setFailedAttempts(0);
+      } else if (res.data.is_deactivated) {
+        // User is deactivated in Heartbeat
+        toast.error(res.data.message || 'Your Heartbeat account has been deactivated. Please contact support.');
+        setStep('error');
       } else {
         setFailedAttempts(prev => prev + 1);
         setStep('error');
       }
     } catch (error) {
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || '';
+      if (errorMessage.toLowerCase().includes('deactivated')) {
+        toast.error(errorMessage);
+      }
       setFailedAttempts(prev => prev + 1);
       setStep('error');
     } finally {
