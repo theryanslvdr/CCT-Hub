@@ -142,15 +142,43 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
-## Pending Tasks
+### Session 71 (2026-02-05) - Error Trade UI Enhancement + Migration Feature Removal ✅
 
-### P1: Run Trade Direction Migration in Production
-- The migration endpoint is ready at `POST /api/admin/migrate-trade-directions`
-- UI is available at Admin Settings > Security > Data Migration
-- Needs to be run in production where historical trade data exists
+#### Error Trade UI Enhancement - COMPLETED ✅
+- **Feature**: Added visual distinction for error trades in Daily Projection table
+- **Implementation**:
+  - Error trades now display actual profit in **orange color** instead of green/red
+  - Added **warning icon (AlertTriangle)** next to the profit amount
+  - Hoverable **tooltip** shows "Error Trade Correction" title, error type, and explanation
+- **Technical Changes**:
+  - Added `isErrorTrade`, `errorType`, `errorExplanation` properties to day objects in projection
+  - Imported Shadcn Tooltip (aliased as `ShadcnTooltip` to avoid conflict with Recharts Tooltip)
+  - Conditional rendering in Actual Profit column based on `day.isErrorTrade`
+- **Files Modified**:
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` - Added error trade UI with tooltip
+
+#### Data Migration Feature Removal - COMPLETED ✅
+- **Reason**: User confirmed the trade direction fix is working in production; migration feature added unnecessary complexity
+- **What was removed**:
+  - `migrationLoading` state variable
+  - `handleMigrateTradeDirections()` function
+  - "Data Migration" card UI from Admin Settings > Security tab
+  - `migrateTradeDirections` API function from `/app/frontend/src/lib/api.js`
+- **Backend endpoint preserved**: `/api/admin/migrate-trade-directions` remains for potential manual use
+- **Files Modified**:
+  - `/app/frontend/src/pages/admin/AdminSettingsPage.jsx`
+  - `/app/frontend/src/lib/api.js`
+
+## Pending Tasks
 
 ### P1: Verify "No Trade Members" Widget
 - Logic implemented but needs production data verification
+
+### P1: Apply Mobile UI to Other Dialogs
+- The modern full-screen mobile UI created for "Simulate Error" needs to be applied to:
+  - Simulate Deposit dialog
+  - Simulate Withdrawal dialog  
+  - Simulate Commission dialog
 
 ## Backlog
 - Backend refactoring (break down `server.py` into routes)
