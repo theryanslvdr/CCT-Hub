@@ -7086,9 +7086,6 @@ async def migrate_trade_directions(user: dict = Depends(require_master_admin)):
     except Exception as e:
         logger.error(f"Migration error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Migration error: {str(e)}")
-        "updated": updated_count,
-        "skipped": skipped_count
-    }
 
 
 # ==================== DEBT MANAGEMENT ROUTES ====================
