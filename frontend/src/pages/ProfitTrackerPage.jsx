@@ -1857,6 +1857,7 @@ export const ProfitTrackerPage = () => {
     setErrorProfit('');
     setErrorProduct('MOIL10');
     setErrorDirection('BUY');
+    setErrorDate(new Date().toISOString().split('T')[0]);
   };
 
   // Dream Daily Profit Calculator
