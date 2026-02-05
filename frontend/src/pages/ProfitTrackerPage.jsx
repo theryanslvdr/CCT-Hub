@@ -2263,6 +2263,133 @@ export const ProfitTrackerPage = () => {
           />
         )}
         
+        {/* Simulate Error Dialog */}
+        <Dialog open={errorDialogOpen} onOpenChange={(open) => { if (!open) resetErrorDialog(); else setErrorDialogOpen(true); }}>
+          <DialogContent className="glass-card border-zinc-800 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-400" /> Report Error Trade
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                <p className="text-sm text-red-400">
+                  Report a trading error (wrong product, wrong time, etc.). 
+                  This will be logged and affect your account value. Admins will be notified.
+                </p>
+              </div>
+              
+              {/* Error Type Selection */}
+              <div>
+                <Label className="text-zinc-300">Error Type</Label>
+                <Select value={errorType} onValueChange={setErrorType}>
+                  <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                    <SelectValue placeholder="Select error type..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-700">
+                    <SelectItem value="wrong_product" className="text-white">Wrong Product Selection</SelectItem>
+                    <SelectItem value="wrong_time" className="text-white">Wrong Trade Time</SelectItem>
+                    <SelectItem value="wrong_direction" className="text-white">Wrong Direction (BUY/SELL)</SelectItem>
+                    <SelectItem value="other" className="text-white">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Product Selection */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-zinc-300">Product</Label>
+                  <Select value={errorProduct} onValueChange={setErrorProduct}>
+                    <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-700">
+                      <SelectItem value="MOIL10" className="text-white">MOIL10</SelectItem>
+                      <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
+                      <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
+                      <SelectItem value="ETHUSD" className="text-white">ETHUSD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Direction</Label>
+                  <Select value={errorDirection} onValueChange={setErrorDirection}>
+                    <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-700">
+                      <SelectItem value="BUY" className="text-emerald-400">BUY</SelectItem>
+                      <SelectItem value="SELL" className="text-red-400">SELL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {/* Profit/Loss Amount */}
+              <div>
+                <Label className="text-zinc-300">Profit/Loss Amount (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={errorProfit}
+                    onChange={(e) => setErrorProfit(e.target.value)}
+                    placeholder="Enter negative for loss (e.g., -50)"
+                    className="input-dark pl-7"
+                    data-testid="error-profit-input"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">Enter negative value for losses (e.g., -50 for $50 loss)</p>
+              </div>
+              
+              {/* Explanation - Required for "Other" type */}
+              <div>
+                <Label className="text-zinc-300">
+                  Explanation {errorType === 'other' ? <span className="text-red-400">*</span> : '(optional)'}
+                </Label>
+                <Input
+                  value={errorExplanation}
+                  onChange={(e) => setErrorExplanation(e.target.value)}
+                  placeholder="Describe what happened..."
+                  className="input-dark mt-1"
+                  data-testid="error-explanation-input"
+                />
+              </div>
+              
+              {/* Preview */}
+              {errorProfit && (
+                <div className={`p-3 rounded-lg ${parseFloat(errorProfit) >= 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'} border`}>
+                  <p className="text-sm text-zinc-300">
+                    This will {parseFloat(errorProfit) >= 0 ? 'add' : 'subtract'}{' '}
+                    <span className={`font-mono font-bold ${parseFloat(errorProfit) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      ${Math.abs(parseFloat(errorProfit)).toFixed(2)}
+                    </span>{' '}
+                    {parseFloat(errorProfit) >= 0 ? 'to' : 'from'} your account value.
+                  </p>
+                </div>
+              )}
+              
+              <Button 
+                onClick={handleSubmitErrorTrade} 
+                disabled={submittingError}
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+                data-testid="submit-error-button"
+              >
+                {submittingError ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4 mr-2" /> Log Error Trade
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        
         {/* Simulate Deposit Dialog - Now triggered from popup */}
         <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
           <DialogContent className="glass-card border-zinc-800 max-w-md">
