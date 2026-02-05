@@ -1814,6 +1814,50 @@ export const ProfitTrackerPage = () => {
     setCommissionDate(new Date().toISOString().split('T')[0]);
   };
 
+  // Handle Error Trade Submission
+  const handleSubmitErrorTrade = async () => {
+    if (!errorType) {
+      toast.error('Please select an error type');
+      return;
+    }
+    if (errorType === 'other' && !errorExplanation) {
+      toast.error('Please provide an explanation for the error');
+      return;
+    }
+    if (!errorProfit && errorProfit !== '0') {
+      toast.error('Please enter the profit/loss amount');
+      return;
+    }
+    
+    setSubmittingError(true);
+    try {
+      await api.post('/trade/log-error', {
+        error_type: errorType,
+        error_explanation: errorExplanation || null,
+        actual_profit: parseFloat(errorProfit),
+        product: errorProduct,
+        direction: errorDirection,
+        date: new Date().toISOString().split('T')[0]
+      });
+      toast.success('Error trade logged successfully! Admins have been notified.');
+      resetErrorDialog();
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to log error trade');
+    } finally {
+      setSubmittingError(false);
+    }
+  };
+
+  const resetErrorDialog = () => {
+    setErrorDialogOpen(false);
+    setErrorType('');
+    setErrorExplanation('');
+    setErrorProfit('');
+    setErrorProduct('MOIL10');
+    setErrorDirection('BUY');
+  };
+
   // Dream Daily Profit Calculator
   const calculateRequiredBalance = (targetDailyProfit) => {
     if (!targetDailyProfit || parseFloat(targetDailyProfit) <= 0) return 0;
