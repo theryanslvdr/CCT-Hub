@@ -133,19 +133,13 @@ export const AdminMembersPage = () => {
 
   // Simulate member view
   const handleSimulateMember = async (member) => {
-    toast.info('Starting simulation for ' + member.full_name);
-    console.log('handleSimulateMember called with member:', member);
     try {
-      console.log('Calling getMemberSimulation API for member:', member.id);
       const res = await adminAPI.getMemberSimulation(member.id);
-      console.log('API response:', res.data);
       setSimulationData(res.data);
       setSelectedMember(member);
       setSimulateDialogOpen(true);
-      console.log('simulateDialogOpen set to true');
     } catch (error) {
-      console.error('Error in handleSimulateMember:', error);
-      toast.error('Failed to load member simulation data: ' + error.message);
+      toast.error('Failed to load member simulation data');
     }
   };
 
