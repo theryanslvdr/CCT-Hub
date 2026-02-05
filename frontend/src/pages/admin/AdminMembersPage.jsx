@@ -1539,6 +1539,9 @@ export const AdminMembersPage = () => {
                       total_profit: simulationData.total_profit,
                       allowed_dashboards: selectedMember.allowed_dashboards,
                       license_type: selectedMember.license_type || null,
+                      // Include trading type and start date for "New Trader" filtering
+                      trading_type: simulationData.member?.trading_type || selectedMember.trading_type,
+                      trading_start_date: simulationData.member?.trading_start_date || selectedMember.trading_start_date,
                     });
                     setSimulateDialogOpen(false);
                     toast.success(`Now simulating ${selectedMember.full_name}'s view`);
