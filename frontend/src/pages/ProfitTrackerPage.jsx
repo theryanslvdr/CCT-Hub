@@ -2193,65 +2193,223 @@ export const ProfitTrackerPage = () => {
         <div className="w-full md:w-auto md:flex-1">
         
         {/* Simulate Actions Popup */}
-        <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
-          <DialogTrigger asChild>
-            <Button className="btn-primary gap-2 w-full md:w-auto" data-testid="simulate-actions-button">
-              <Calculator className="w-4 h-4" /> Simulate Actions
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card border-zinc-800 max-w-sm">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-blue-400" /> Simulate Actions
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 mt-4">
-              <Button 
-                className="w-full btn-primary gap-2 justify-start" 
-                onClick={() => { setSimulateActionsOpen(false); setDepositDialogOpen(true); }}
-                data-testid="simulate-deposit-button"
-              >
-                <Plus className="w-4 h-4" /> Simulate Deposit
+        {/* Desktop: Dialog, Mobile: Full-screen overlay */}
+        <div className="hidden md:block">
+          <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
+            <DialogTrigger asChild>
+              <Button className="btn-primary gap-2 w-full md:w-auto" data-testid="simulate-actions-button">
+                <Calculator className="w-4 h-4" /> Simulate Actions
               </Button>
-              <Button 
-                variant="outline"
-                className="w-full btn-secondary gap-2 justify-start" 
-                onClick={() => { setSimulateActionsOpen(false); setWithdrawalDialogOpen(true); }}
-                data-testid="simulate-withdrawal-button"
-              >
-                <ArrowUpFromLine className="w-4 h-4" /> Simulate Withdrawal
-              </Button>
-              <Button 
-                variant="outline"
-                className="w-full btn-secondary gap-2 justify-start" 
-                onClick={() => { setSimulateActionsOpen(false); setCommissionDialogOpen(true); }}
-                data-testid="simulate-commission-button"
-              >
-                <Award className="w-4 h-4" /> Simulate Commission
-              </Button>
-              {/* Simulate Error Button */}
-              <Button 
-                variant="outline"
-                className="w-full btn-secondary gap-2 justify-start border-red-500/50 hover:bg-red-500/10" 
-                onClick={() => { setSimulateActionsOpen(false); setErrorDialogOpen(true); }}
-                data-testid="simulate-error-button"
-              >
-                <AlertTriangle className="w-4 h-4 text-red-400" /> Simulate Error
-              </Button>
-              {/* VSD Button - Master Admin Only */}
-              {isMasterAdmin() && (
+            </DialogTrigger>
+            <DialogContent className="glass-card border-zinc-800 max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Calculator className="w-5 h-5 text-blue-400" /> Simulate Actions
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 mt-4">
+                <Button 
+                  className="w-full btn-primary gap-2 justify-start" 
+                  onClick={() => { setSimulateActionsOpen(false); setDepositDialogOpen(true); }}
+                  data-testid="simulate-deposit-button"
+                >
+                  <Plus className="w-4 h-4" /> Simulate Deposit
+                </Button>
                 <Button 
                   variant="outline"
-                  className="w-full btn-secondary gap-2 justify-start border-purple-500/50 hover:bg-purple-500/10" 
-                  onClick={() => { setSimulateActionsOpen(false); loadVSDData(); setVsdDialogOpen(true); }}
-                  data-testid="licensee-vsd-button"
+                  className="w-full btn-secondary gap-2 justify-start" 
+                  onClick={() => { setSimulateActionsOpen(false); setWithdrawalDialogOpen(true); }}
+                  data-testid="simulate-withdrawal-button"
                 >
-                  <Users className="w-4 h-4 text-purple-400" /> Licensee VSD
+                  <ArrowUpFromLine className="w-4 h-4" /> Simulate Withdrawal
                 </Button>
-              )}
+                <Button 
+                  variant="outline"
+                  className="w-full btn-secondary gap-2 justify-start" 
+                  onClick={() => { setSimulateActionsOpen(false); setCommissionDialogOpen(true); }}
+                  data-testid="simulate-commission-button"
+                >
+                  <Award className="w-4 h-4" /> Simulate Commission
+                </Button>
+                {/* Simulate Error Button */}
+                <Button 
+                  variant="outline"
+                  className="w-full btn-secondary gap-2 justify-start border-red-500/50 hover:bg-red-500/10" 
+                  onClick={() => { setSimulateActionsOpen(false); setErrorDialogOpen(true); }}
+                  data-testid="simulate-error-button"
+                >
+                  <AlertTriangle className="w-4 h-4 text-red-400" /> Simulate Error
+                </Button>
+                {/* VSD Button - Master Admin Only */}
+                {isMasterAdmin() && (
+                  <Button 
+                    variant="outline"
+                    className="w-full btn-secondary gap-2 justify-start border-purple-500/50 hover:bg-purple-500/10" 
+                    onClick={() => { setSimulateActionsOpen(false); loadVSDData(); setVsdDialogOpen(true); }}
+                    data-testid="licensee-vsd-button"
+                  >
+                    <Users className="w-4 h-4 text-purple-400" /> Licensee VSD
+                  </Button>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Mobile Simulate Actions Button */}
+        <div className="md:hidden w-full">
+          <Button 
+            className="btn-primary gap-2 w-full" 
+            onClick={() => setSimulateActionsOpen(true)}
+            data-testid="simulate-actions-button-mobile"
+          >
+            <Calculator className="w-4 h-4" /> Simulate Actions
+          </Button>
+        </div>
+
+        {/* Mobile Simulate Actions Full-Screen Overlay */}
+        {simulateActionsOpen && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden">
+              
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                      <Calculator className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">Simulate Actions</h1>
+                      <p className="text-sm text-zinc-500">Choose an action below</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setSimulateActionsOpen(false)}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area */}
+              <div className="flex-1 overflow-y-auto px-6 pb-32">
+                <div className="space-y-4">
+                  
+                  {/* Deposit Card */}
+                  <button
+                    onClick={() => { setSimulateActionsOpen(false); setDepositDialogOpen(true); }}
+                    className="relative w-full p-5 rounded-2xl border-2 border-emerald-500/30 bg-emerald-500/5 text-left transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-500/10 group overflow-hidden"
+                    data-testid="mobile-simulate-deposit"
+                  >
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-emerald-500/20 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity" />
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                        <Plus className="w-7 h-7 text-emerald-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">Simulate Deposit</h3>
+                        <p className="text-sm text-zinc-500">Add funds to your account</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                    </div>
+                  </button>
+
+                  {/* Withdrawal Card */}
+                  <button
+                    onClick={() => { setSimulateActionsOpen(false); setWithdrawalDialogOpen(true); }}
+                    className="relative w-full p-5 rounded-2xl border-2 border-orange-500/30 bg-orange-500/5 text-left transition-all duration-300 hover:border-orange-500/50 hover:bg-orange-500/10 group overflow-hidden"
+                    data-testid="mobile-simulate-withdrawal"
+                  >
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-orange-500/20 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity" />
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center">
+                        <ArrowUpFromLine className="w-7 h-7 text-orange-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">Simulate Withdrawal</h3>
+                        <p className="text-sm text-zinc-500">Withdraw funds from account</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                    </div>
+                  </button>
+
+                  {/* Commission Card */}
+                  <button
+                    onClick={() => { setSimulateActionsOpen(false); setCommissionDialogOpen(true); }}
+                    className="relative w-full p-5 rounded-2xl border-2 border-purple-500/30 bg-purple-500/5 text-left transition-all duration-300 hover:border-purple-500/50 hover:bg-purple-500/10 group overflow-hidden"
+                    data-testid="mobile-simulate-commission"
+                  >
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-purple-500/20 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity" />
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                        <Award className="w-7 h-7 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">Simulate Commission</h3>
+                        <p className="text-sm text-zinc-500">Add referral commission</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                    </div>
+                  </button>
+
+                  {/* Error Trade Card */}
+                  <button
+                    onClick={() => { setSimulateActionsOpen(false); setErrorDialogOpen(true); }}
+                    className="relative w-full p-5 rounded-2xl border-2 border-red-500/30 bg-red-500/5 text-left transition-all duration-300 hover:border-red-500/50 hover:bg-red-500/10 group overflow-hidden"
+                    data-testid="mobile-simulate-error"
+                  >
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-red-500/20 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity" />
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center">
+                        <AlertTriangle className="w-7 h-7 text-red-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">Simulate Error</h3>
+                        <p className="text-sm text-zinc-500">Report a trading error</p>
+                      </div>
+                      <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                    </div>
+                  </button>
+
+                  {/* VSD Card - Master Admin Only */}
+                  {isMasterAdmin() && (
+                    <button
+                      onClick={() => { setSimulateActionsOpen(false); loadVSDData(); setVsdDialogOpen(true); }}
+                      className="relative w-full p-5 rounded-2xl border-2 border-cyan-500/30 bg-cyan-500/5 text-left transition-all duration-300 hover:border-cyan-500/50 hover:bg-cyan-500/10 group overflow-hidden"
+                      data-testid="mobile-licensee-vsd"
+                    >
+                      <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-cyan-500/20 blur-3xl opacity-0 group-hover:opacity-50 transition-opacity" />
+                      <div className="relative z-10 flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center">
+                          <Users className="w-7 h-7 text-cyan-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-white mb-1">Licensee VSD</h3>
+                          <p className="text-sm text-zinc-500">Virtual Share Distribution</p>
+                        </div>
+                        <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                      </div>
+                    </button>
+                  )}
+
+                </div>
+              </div>
+
+              {/* Bottom safe area with close button */}
+              <div className="flex-shrink-0 p-6 pt-0 pb-8 bg-gradient-to-t from-black to-transparent">
+                <button
+                  onClick={() => setSimulateActionsOpen(false)}
+                  className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
         
         {/* VSD (Virtual Share Distribution) Dialog - Master Admin Only */}
         {isMasterAdmin() && (
