@@ -778,13 +778,21 @@ async def register(data: UserCreate):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Verify Heartbeat membership
+    # Verify Heartbeat membership and active status
     heartbeat_email = data.heartbeat_email or data.email
-    is_heartbeat_user = await verify_heartbeat_user(heartbeat_email)
-    if not is_heartbeat_user:
+    heartbeat_result = await verify_heartbeat_user(heartbeat_email)
+    
+    if not heartbeat_result.get("exists"):
         raise HTTPException(
             status_code=403, 
             detail="You must be a Heartbeat community member to register. Please join the community first."
+        )
+    
+    if not heartbeat_result.get("is_active"):
+        reason = heartbeat_result.get("reason", "Account is not active")
+        raise HTTPException(
+            status_code=403,
+            detail=f"Your Heartbeat account is deactivated. {reason}. Please contact support to reactivate your account."
         )
     
     # Determine role based on secret code
