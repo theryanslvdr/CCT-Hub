@@ -7021,6 +7021,7 @@ async def reactivate_user(user_id: str, user: dict = Depends(require_admin)):
 
 
 @admin_router.post("/migrate-trade-directions")
+@admin_router.get("/migrate-trade-directions")  # Also allow GET for easier testing
 async def migrate_trade_directions(user: dict = Depends(require_master_admin)):
     """
     One-time migration to fix historical trade log directions.
