@@ -54,6 +54,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Verified**: Both BUY and SELL can be selected successfully
 - **File Modified**: `/app/frontend/src/components/OnboardingWizardMobile.jsx`
 
+#### Heartbeat Deactivation Check - NEW ✅
+- **Issue**: Deactivated Heartbeat users could still access/register on the hub
+- **Solution**: Enhanced `verify_heartbeat_user()` to check user status in Heartbeat API
+- **Checks for**: `status` field (deactivated/suspended/banned/deleted/inactive/disabled), `is_active`, `suspended`, `banned` flags
+- **Blocking points**:
+  - **Login**: Returns 403 with message if Heartbeat account is deactivated
+  - **Registration**: Blocks registration with clear error message
+  - **Verify Heartbeat**: Returns `is_deactivated: true` for frontend handling
+- **Error messages**: Clear, user-friendly messages explaining the deactivation
+- **Files Modified**:
+  - `/app/backend/server.py` - Updated `verify_heartbeat_user()`, login, register, verify-heartbeat endpoints
+  - `/app/frontend/src/pages/LoginPage.jsx` - Handle deactivation in Heartbeat verification flow
+
 #### No Trade Members Widget Fix ✅
 - **Issue**: Widget showing no members with undeclared trades
 - **Root Cause**: API was querying `db.signals` (empty collection) instead of `db.trading_signals`
