@@ -360,22 +360,6 @@ export const AdminSettingsPage = () => {
     }
   };
 
-  // Handle trade direction migration
-  const handleMigrateTradeDirections = async () => {
-    if (!window.confirm('This will update historical trade directions to match their linked signals. Continue?')) return;
-    setMigrationLoading(true);
-    try {
-      const response = await adminAPI.migrateTradeDirections();
-      const data = response.data;
-      toast.success(`Migration complete: ${data.updated} trades updated, ${data.skipped} skipped`);
-    } catch (error) {
-      const errorMessage = error.response?.data?.detail || error.message || 'Migration failed';
-      toast.error(`Migration failed: ${errorMessage}`);
-    } finally {
-      setMigrationLoading(false);
-    }
-  };
-
   const handleTestEmailit = async () => {
     setTestingEmailit(true);
     try {
