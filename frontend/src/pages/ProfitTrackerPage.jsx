@@ -4005,25 +4005,45 @@ export const ProfitTrackerPage = () => {
                             ) : day.status === 'future' ? (
                               <span className="text-zinc-500 text-xs">-</span>
                             ) : day.isToday ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-                                onClick={() => handleOpenEnterAP(day)}
-                                data-testid={`enter-ap-${day.dateKey}`}
-                              >
-                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
-                              </Button>
+                              <TooltipProvider>
+                                <ShadcnTooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-6 w-6 md:w-auto text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20 p-0 md:px-2"
+                                      onClick={() => handleOpenEnterAP(day)}
+                                      data-testid={`enter-ap-${day.dateKey}`}
+                                    >
+                                      <Edit3 className="w-3 h-3 md:mr-1" />
+                                      <span className="hidden md:inline">Adjust Trade</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                    Adjust Trade
+                                  </TooltipContent>
+                                </ShadcnTooltip>
+                              </TooltipProvider>
                             ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-6 text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20"
-                                onClick={() => handleOpenEnterAP(day)}
-                                data-testid={`enter-ap-${day.dateKey}`}
-                              >
-                                <Edit3 className="w-3 h-3 mr-1" /> Adjust Trade
-                              </Button>
+                              <TooltipProvider>
+                                <ShadcnTooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-6 w-6 md:w-auto text-xs border-amber-500/50 text-amber-400 hover:bg-amber-500/20 p-0 md:px-2"
+                                      onClick={() => handleOpenEnterAP(day)}
+                                      data-testid={`enter-ap-${day.dateKey}`}
+                                    >
+                                      <Edit3 className="w-3 h-3 md:mr-1" />
+                                      <span className="hidden md:inline">Adjust Trade</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                    Adjust Trade
+                                  </TooltipContent>
+                                </ShadcnTooltip>
+                              </TooltipProvider>
                             )}
                           </td>
                         )}
