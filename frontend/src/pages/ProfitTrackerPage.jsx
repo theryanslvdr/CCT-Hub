@@ -1829,6 +1829,10 @@ export const ProfitTrackerPage = () => {
       toast.error('Please enter the profit/loss amount');
       return;
     }
+    if (!errorDate) {
+      toast.error('Please select a date');
+      return;
+    }
     
     setSubmittingError(true);
     try {
@@ -1838,7 +1842,7 @@ export const ProfitTrackerPage = () => {
         actual_profit: parseFloat(errorProfit),
         product: errorProduct,
         direction: errorDirection,
-        date: new Date().toISOString().split('T')[0]
+        date: errorDate
       });
       toast.success('Error trade logged successfully! Admins have been notified.');
       resetErrorDialog();
