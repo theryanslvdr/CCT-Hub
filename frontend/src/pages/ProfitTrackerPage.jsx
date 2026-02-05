@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LicenseeWelcomeScreen } from '@/components/LicenseeWelcomeScreen';
 import { toast } from 'sonner';
 import { 
@@ -374,6 +375,10 @@ const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLogs = {}
         isToday: isToday,
         hasTransaction: dayTransaction !== 0,
         transactionAmount: dayTransaction,
+        // Error trade properties
+        isErrorTrade: isErrorTrade,
+        errorType: errorType,
+        errorExplanation: errorExplanation,
       });
       
       // Add profit AND commission to running balance for next day's calculation
