@@ -987,8 +987,8 @@ export const AdminMembersPage = () => {
                           </div>
                         </div>
                         <Button
-                          onClick={() => {
-                            handleSimulateMember(selectedMember);
+                          onClick={async () => {
+                            await handleSimulateMember(selectedMember);
                             setViewDialogOpen(false);
                           }}
                           className="btn-secondary"
