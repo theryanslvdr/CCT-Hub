@@ -2228,10 +2228,10 @@ export const ProfitTrackerPage = () => {
         
         {/* Simulate Actions Popup */}
         {/* Desktop: Dialog, Mobile: Full-screen overlay */}
-        <div className="hidden md:block">
+        {!isMobile && (
           <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-primary gap-2 w-full md:w-auto" data-testid="simulate-actions-button">
+              <Button className="btn-primary gap-2 w-full md:w-auto hidden md:flex" data-testid="simulate-actions-button">
                 <Calculator className="w-4 h-4" /> Simulate Actions
               </Button>
             </DialogTrigger>
