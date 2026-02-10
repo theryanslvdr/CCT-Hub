@@ -669,6 +669,9 @@ export const ProfitTrackerPage = () => {
     ? simulatedTotalProfit
     : (summary?.total_actual_profit || 0);
   
+  // Mobile detection for responsive dialogs
+  const isMobile = useIsMobile();
+  
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [depositStep, setDepositStep] = useState('input');
