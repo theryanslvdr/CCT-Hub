@@ -2772,10 +2772,644 @@ export const ProfitTrackerPage = () => {
             </div>
           </div>
         )}
+
+        {/* Mobile Full-Screen Overlay for Deposit Dialog */}
+        {depositDialogOpen && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                      <Plus className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">
+                        {depositStep === 'input' && 'Simulate Deposit'}
+                        {depositStep === 'simulate' && 'Deposit Calculation'}
+                        {depositStep === 'confirm' && 'Confirm Deposit'}
+                      </h1>
+                      <p className="text-sm text-zinc-500">Add funds to your account</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={resetDepositDialog}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area - Scrollable */}
+              <div className="flex-1 overflow-y-auto px-6 pb-8">
+                <div className="space-y-6">
+                  {depositStep === 'input' && (
+                    <>
+                      {!manualDepositMode ? (
+                        <>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                              Binance USDT Amount
+                            </label>
+                            <div className="relative">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                              <input
+                                type="number"
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                                placeholder="0.00"
+                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                                data-testid="mobile-deposit-amount-input"
+                              />
+                            </div>
+                            <p className="text-xs text-zinc-500">Amount you're sending from Binance</p>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                              Notes (optional)
+                            </label>
+                            <input
+                              value={depositNotes}
+                              onChange={(e) => setDepositNotes(e.target.value)}
+                              placeholder="Add notes..."
+                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-emerald-500"
+                            />
+                          </div>
+                          <button 
+                            onClick={handleSimulateDeposit} 
+                            className="w-full py-4 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+                            data-testid="mobile-calculate-deposit"
+                          >
+                            <Calculator className="w-5 h-5" /> Calculate Deposit
+                          </button>
+                          <button 
+                            onClick={() => setManualDepositMode(true)}
+                            className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                          >
+                            Wrong Calculations? Enter your total deposit manually
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
+                            <p className="text-blue-400 font-medium">Manual Override Mode</p>
+                            <p className="text-xs text-zinc-400 mt-1">Enter the exact amount that will be added to your Merin balance.</p>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                              Total Deposit Amount (USDT)
+                            </label>
+                            <div className="relative">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                              <input
+                                type="number"
+                                value={manualDepositAmount}
+                                onChange={(e) => setManualDepositAmount(e.target.value)}
+                                placeholder="0.00"
+                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                              Notes (optional)
+                            </label>
+                            <input
+                              value={depositNotes}
+                              onChange={(e) => setDepositNotes(e.target.value)}
+                              placeholder="Add notes..."
+                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-blue-500"
+                            />
+                          </div>
+                          <button 
+                            onClick={() => {
+                              if (!manualDepositAmount || parseFloat(manualDepositAmount) <= 0) {
+                                toast.error('Please enter a valid amount');
+                                return;
+                              }
+                              setDepositSimulation({
+                                binanceAmount: parseFloat(manualDepositAmount),
+                                depositFee: 0,
+                                receiveAmount: parseFloat(manualDepositAmount),
+                                isManualOverride: true
+                              });
+                              setDepositStep('simulate');
+                            }} 
+                            className="w-full py-4 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors"
+                          >
+                            Continue
+                          </button>
+                          <button 
+                            onClick={() => setManualDepositMode(false)}
+                            className="w-full text-center text-sm text-zinc-500 hover:text-emerald-400 underline"
+                          >
+                            Back to automatic calculation
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {depositStep === 'simulate' && depositSimulation && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+                        {!depositSimulation.isManualOverride ? (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-zinc-400">Binance Amount</span>
+                              <span className="font-mono text-white text-lg">{formatMoney(depositSimulation.binanceAmount)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-red-400">
+                              <span>Deposit Fee ({(depositSimulation.depositFee / depositSimulation.binanceAmount * 100).toFixed(1)}%)</span>
+                              <span className="font-mono">-{formatMoney(depositSimulation.depositFee)}</span>
+                            </div>
+                            <div className="border-t border-zinc-700 pt-4 flex justify-between items-center">
+                              <span className="text-emerald-400 font-medium">You'll Receive</span>
+                              <span className="font-mono text-emerald-400 text-xl font-bold">{formatMoney(depositSimulation.receiveAmount)}</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <span className="text-emerald-400 font-medium">Manual Override Amount</span>
+                            <span className="font-mono text-emerald-400 text-xl font-bold">{formatMoney(depositSimulation.receiveAmount)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-zinc-500 text-center">
+                        This amount will be added to your Merin balance.
+                      </p>
+                      <div className="space-y-3">
+                        <button 
+                          onClick={() => setDepositStep('confirm')}
+                          className="w-full py-4 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors"
+                        >
+                          Proceed to Confirm
+                        </button>
+                        <button 
+                          onClick={() => { setDepositStep('input'); setDepositSimulation(null); }}
+                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {depositStep === 'confirm' && depositSimulation && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+                        <p className="text-amber-400 font-medium text-center mb-2">Confirm Your Deposit</p>
+                        <p className="text-sm text-zinc-400 text-center">
+                          Have you already made this deposit of {formatMoney(depositSimulation.receiveAmount)} in your Merin account?
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        <button 
+                          onClick={handleConfirmDeposit}
+                          className="w-full py-4 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+                          data-testid="mobile-confirm-deposit"
+                        >
+                          <CheckCircle2 className="w-5 h-5" /> Yes, I confirm
+                        </button>
+                        <button 
+                          onClick={() => setDepositStep('simulate')}
+                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                        >
+                          No, I'm just thinking
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Full-Screen Overlay for Withdrawal Dialog */}
+        {withdrawalDialogOpen && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center">
+                      <ArrowUpFromLine className="w-6 h-6 text-orange-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">
+                        {withdrawalStep === 'input' && 'Simulate Withdrawal'}
+                        {withdrawalStep === 'result' && 'Withdrawal Calculation'}
+                        {withdrawalStep === 'confirm' && 'Confirm Withdrawal'}
+                      </h1>
+                      <p className="text-sm text-zinc-500">Withdraw funds from account</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={resetWithdrawalDialog}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area - Scrollable */}
+              <div className="flex-1 overflow-y-auto px-6 pb-8">
+                <div className="space-y-6">
+                  {withdrawalStep === 'input' && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
+                        <p className="text-sm text-zinc-400">Current Merin Balance</p>
+                        <p className="text-2xl font-bold font-mono text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                          Withdrawal Amount (USDT)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                          <input
+                            type="number"
+                            value={withdrawalAmount}
+                            onChange={(e) => setWithdrawalAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                            data-testid="mobile-withdrawal-amount-input"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                          Notes (optional)
+                        </label>
+                        <input
+                          value={withdrawalNotes}
+                          onChange={(e) => setWithdrawalNotes(e.target.value)}
+                          placeholder="Withdrawal reason..."
+                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
+                        />
+                      </div>
+                      <button 
+                        onClick={handleSimulateWithdrawal}
+                        className="w-full py-4 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+                        data-testid="mobile-calculate-withdrawal"
+                      >
+                        <Calculator className="w-5 h-5" /> Calculate Fees
+                      </button>
+                    </>
+                  )}
+
+                  {withdrawalStep === 'result' && withdrawalResult && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-zinc-400">Gross Amount</span>
+                          <span className="font-mono text-white">{formatMoney(withdrawalResult.grossAmount)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-amber-400">
+                          <span>Withdrawal Fee ({(withdrawalResult.withdrawalFee / withdrawalResult.grossAmount * 100).toFixed(1)}%)</span>
+                          <span className="font-mono">-{formatMoney(withdrawalResult.withdrawalFee)}</span>
+                        </div>
+                        <div className="border-t border-zinc-700 pt-4 flex justify-between items-center">
+                          <span className="text-orange-400 font-medium">Net Withdrawal</span>
+                          <span className="font-mono text-orange-400 text-xl font-bold">{formatMoney(withdrawalResult.netAmount)}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <button 
+                          onClick={() => setWithdrawalStep('confirm')}
+                          className="w-full py-4 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors"
+                        >
+                          Proceed to Confirm
+                        </button>
+                        <button 
+                          onClick={() => { setWithdrawalStep('input'); setWithdrawalResult(null); }}
+                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {withdrawalStep === 'confirm' && withdrawalResult && (
+                    <>
+                      <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30">
+                        <p className="text-red-400 font-medium text-center mb-2">Confirm Your Withdrawal</p>
+                        <p className="text-sm text-zinc-400 text-center">
+                          {formatMoney(withdrawalResult.grossAmount)} will be deducted from your account.
+                          You'll receive {formatMoney(withdrawalResult.netAmount)} in your Binance.
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        <button 
+                          onClick={handleConfirmWithdrawal}
+                          className="w-full py-4 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                          data-testid="mobile-confirm-withdrawal"
+                        >
+                          <CheckCircle2 className="w-5 h-5" /> Yes, confirm withdrawal
+                        </button>
+                        <button 
+                          onClick={() => setWithdrawalStep('result')}
+                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                        >
+                          Go back
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Full-Screen Overlay for Commission Dialog */}
+        {commissionDialogOpen && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                      <Award className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">Simulate Commission</h1>
+                      <p className="text-sm text-zinc-500">Add referral commission</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setCommissionDialogOpen(false)}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area - Scrollable */}
+              <div className="flex-1 overflow-y-auto px-6 pb-8">
+                <div className="space-y-6">
+                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30">
+                    <p className="text-sm text-purple-400 leading-relaxed">
+                      Commission is recorded separately and added to your total profit, but not to your account balance.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Commission Amount (USDT)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={commissionAmount}
+                        onChange={(e) => setCommissionAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                        data-testid="mobile-commission-amount-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Notes (optional)
+                    </label>
+                    <input
+                      value={commissionNotes}
+                      onChange={(e) => setCommissionNotes(e.target.value)}
+                      placeholder="Commission details..."
+                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleAddCommission}
+                    className="w-full py-4 rounded-xl bg-purple-500 text-white font-bold hover:bg-purple-600 transition-colors flex items-center justify-center gap-2"
+                    data-testid="mobile-confirm-commission"
+                  >
+                    <Award className="w-5 h-5" /> Add Commission
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Full-Screen Overlay for Adjust Trade Dialog */}
+        {enterAPDialogOpen && enterAPDate && (
+          <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
+              {/* Header */}
+              <div className="flex-shrink-0 p-6 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center">
+                      <Edit3 className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">Adjust Trade</h1>
+                      <p className="text-sm text-zinc-500">{enterAPDate.dateStr}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setEnterAPDialogOpen(false)}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Area - Scrollable */}
+              <div className="flex-1 overflow-y-auto px-6 pb-8">
+                <div className="space-y-5">
+                  {/* Current calculated values */}
+                  <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">Calculated Balance Before</span>
+                      <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">Calculated Lot Size</span>
+                      <span className="font-mono text-purple-400">{truncateTo2Decimals(enterAPDate.lotSize).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-400">Target Profit</span>
+                      <span className="font-mono text-zinc-400">{formatMoney(enterAPDate.targetProfit)}</span>
+                    </div>
+                  </div>
+
+                  {/* Adjustment type selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Did you deposit or withdraw on this day?
+                    </label>
+                    <Select value={adjustmentType} onValueChange={setAdjustmentType}>
+                      <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-amber-500">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                        <SelectItem value="profit_only" className="text-white py-3">No, just enter profit</SelectItem>
+                        <SelectItem value="with_deposit" className="text-white py-3">Yes, I made a deposit</SelectItem>
+                        <SelectItem value="with_withdrawal" className="text-white py-3">Yes, I made a withdrawal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Deposit/Withdrawal amount */}
+                  {adjustmentType !== 'profit_only' && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                        {adjustmentType === 'with_deposit' ? 'Deposit' : 'Withdrawal'} Amount (USD)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={adjustmentAmount}
+                          onChange={(e) => setAdjustmentAmount(e.target.value)}
+                          placeholder="0.00"
+                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
+                          data-testid="mobile-adjustment-amount"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Manual balance adjustment */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Adjusted Balance Before Trade (optional)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={adjustedBalance}
+                        onChange={(e) => setAdjustedBalance(e.target.value)}
+                        placeholder={enterAPDate.balanceBefore?.toString() || '0'}
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
+                        data-testid="mobile-adjusted-balance"
+                      />
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      If the calculated balance is incorrect, enter the actual balance you had before this trade
+                    </p>
+                  </div>
+
+                  {/* Actual profit input */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Actual Profit (USD)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={enterAPValue}
+                        onChange={(e) => setEnterAPValue(e.target.value)}
+                        placeholder="Enter your actual profit"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                        data-testid="mobile-enter-ap-input"
+                      />
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      Enter positive for profit, negative for loss
+                    </p>
+                  </div>
+                  
+                  {/* Commission input */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+                      Commission for the Day (USD) - Optional
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg font-mono">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={enterAPCommission}
+                        onChange={(e) => setEnterAPCommission(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-cyan-500"
+                        data-testid="mobile-enter-ap-commission"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Summary of adjustments */}
+                  {(enterAPValue || adjustmentAmount || adjustedBalance || enterAPCommission) && (
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-sm">
+                      <p className="text-amber-400 font-medium">Adjustment Summary:</p>
+                      {adjustedBalance && adjustedBalance !== enterAPDate.balanceBefore?.toString() && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">New Balance Before</span>
+                          <span className="font-mono text-white">${parseFloat(adjustedBalance).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {adjustmentType !== 'profit_only' && adjustmentAmount && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">{adjustmentType === 'with_deposit' ? 'Deposit' : 'Withdrawal'}</span>
+                          <span className={`font-mono ${adjustmentType === 'with_deposit' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {adjustmentType === 'with_deposit' ? '+' : '-'}${parseFloat(adjustmentAmount).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {enterAPValue && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">Actual Profit</span>
+                          <span className={`font-mono ${parseFloat(enterAPValue) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {parseFloat(enterAPValue) >= 0 ? '+' : ''}${parseFloat(enterAPValue).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {enterAPCommission && parseFloat(enterAPCommission) > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">Commission</span>
+                          <span className="font-mono text-cyan-400">
+                            +${parseFloat(enterAPCommission).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="space-y-3 pt-2">
+                    <button 
+                      onClick={handleSubmitEnterAP}
+                      disabled={enterAPLoading || !enterAPValue}
+                      className="w-full py-4 rounded-xl bg-amber-500 text-white font-bold hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      data-testid="mobile-submit-enter-ap"
+                    >
+                      {enterAPLoading ? 'Saving...' : 'Save Adjustment'}
+                    </button>
+                    <button 
+                      onClick={() => setEnterAPDialogOpen(false)}
+                      className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
-        {/* Simulate Deposit Dialog - Now triggered from popup */}
+        {/* Simulate Deposit Dialog - Desktop Only */}
         <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {depositStep === 'input' && 'Simulate Deposit'}
