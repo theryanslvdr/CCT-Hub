@@ -1331,12 +1331,28 @@ async def simulate_withdrawal(data: WithdrawalSimulation, user: dict = Depends(g
     }
 
 @profit_router.delete("/reset")
-async def reset_profit_tracker(user: dict = Depends(get_current_user)):
-    """Reset all profit tracker data for the current user"""
+async def reset_profit_tracker(user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Reset all profit tracker data for the current user or a simulated member (Master Admin only)"""
+    # Determine target user
+    target_user_id = user["id"]
+    
+    # If user_id provided and requester is Master Admin, reset that user's data
+    if user_id and user.get("role") == "master_admin":
+        target_user_id = user_id
+    
     # Delete deposits
-    await db.deposits.delete_many({"user_id": user["id"]})
+    await db.deposits.delete_many({"user_id": target_user_id})
     # Delete trade logs
-    await db.trade_logs.delete_many({"user_id": user["id"]})
+    await db.trade_logs.delete_many({"user_id": target_user_id})
+    # Also reset user's onboarding status
+    await db.users.update_one(
+        {"id": target_user_id},
+        {"$set": {
+            "onboarding_completed": False,
+            "trading_type": None,
+            "trading_start_date": None
+        }}
+    )
     
     return {"message": "Profit tracker reset successfully", "deleted": True}
 
