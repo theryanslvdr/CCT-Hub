@@ -1379,8 +1379,8 @@ export const TradeMonitorPage = () => {
       </div>
     )}
     
-    {/* Spacer for fixed sticky bar on mobile */}
-    {signal && <div className="md:hidden h-12" />}
+    {/* Spacer for fixed sticky bar on mobile - increased to prevent content overlap */}
+    {signal && <div className="md:hidden h-16" />}
     
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Left Panel - Trade Monitor Controls */}
