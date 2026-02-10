@@ -1337,13 +1337,22 @@ async def reset_profit_tracker(user_id: Optional[str] = None, user: dict = Depen
     target_user_id = user["id"]
     
     # If user_id provided and requester is Master Admin, reset that user's data
-    if user_id and user.get("role") == "master_admin":
+    if user_id:
+        if user.get("role") != "master_admin":
+            raise HTTPException(status_code=403, detail="Only Master Admin can reset other users' data")
+        # Verify the target user exists before resetting
+        target_user = await db.users.find_one({"id": user_id})
+        if not target_user:
+            raise HTTPException(status_code=404, detail="Target user not found")
         target_user_id = user_id
+        logger.info(f"Master Admin {user['id']} resetting data for user {user_id}")
+    else:
+        logger.info(f"User {user['id']} resetting their own data")
     
     # Delete deposits
-    await db.deposits.delete_many({"user_id": target_user_id})
+    deleted_deposits = await db.deposits.delete_many({"user_id": target_user_id})
     # Delete trade logs
-    await db.trade_logs.delete_many({"user_id": target_user_id})
+    deleted_trades = await db.trade_logs.delete_many({"user_id": target_user_id})
     # Also reset user's onboarding status
     await db.users.update_one(
         {"id": target_user_id},
@@ -1354,7 +1363,13 @@ async def reset_profit_tracker(user_id: Optional[str] = None, user: dict = Depen
         }}
     )
     
-    return {"message": "Profit tracker reset successfully", "deleted": True}
+    return {
+        "message": "Profit tracker reset successfully", 
+        "deleted": True,
+        "target_user_id": target_user_id,
+        "deposits_deleted": deleted_deposits.deleted_count,
+        "trades_deleted": deleted_trades.deleted_count
+    }
 
 class WithdrawalRequest(BaseModel):
     amount: float
