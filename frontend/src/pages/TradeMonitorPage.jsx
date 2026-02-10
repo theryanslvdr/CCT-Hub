@@ -2266,8 +2266,8 @@ export const TradeMonitorPage = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="relative w-full bg-zinc-900 rounded-b-xl overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: 'calc(100vh - 200px)' }}>
+          <CardContent className="p-0 h-[calc(100%-80px)]">
+            <div className="relative w-full h-full bg-zinc-900 rounded-b-xl overflow-hidden">
               <iframe
                 src="https://www.meringlobaltrading.com/"
                 title="Merin Trading Platform"
