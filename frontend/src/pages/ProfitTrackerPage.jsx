@@ -1770,6 +1770,14 @@ export const ProfitTrackerPage = () => {
       return;
     }
 
+    // CRITICAL SAFETY CHECK: If simulating, we MUST have a valid memberId
+    // Otherwise we would accidentally reset the Master Admin's account!
+    if (simulatedView && !simulatedView.memberId) {
+      toast.error('Cannot reset: Simulated member ID is missing. Please exit simulation and try again.');
+      console.error('Reset blocked: simulatedView exists but memberId is missing', simulatedView);
+      return;
+    }
+
     try {
       // Verify password first (always Master Admin's password when simulating)
       const verifyRes = await api.post('/auth/verify-password', {
@@ -1782,10 +1790,19 @@ export const ProfitTrackerPage = () => {
       }
       
       // Reset tracker - pass user_id if simulating a member
-      const resetParams = simulatedView?.memberId ? { user_id: simulatedView.memberId } : {};
-      await api.delete('/profit/reset', { params: resetParams });
+      // IMPORTANT: Only pass user_id if we have a valid memberId from simulation
+      const targetUserId = simulatedView?.memberId || null;
       
-      toast.success('Profit tracker has been reset!');
+      if (simulatedView && targetUserId) {
+        // Simulating a member - reset THEIR data
+        await api.delete(`/profit/reset?user_id=${targetUserId}`);
+        toast.success(`${simulatedView.displayName || 'Member'}'s profit tracker has been reset!`);
+      } else {
+        // Not simulating - reset current user's data
+        await api.delete('/profit/reset');
+        toast.success('Profit tracker has been reset!');
+      }
+      
       resetResetDialog();
       
       // Open the onboarding wizard for reset flow
@@ -1796,6 +1813,7 @@ export const ProfitTrackerPage = () => {
         toast.error('Invalid password. Please try again.');
       } else {
         toast.error('Failed to reset tracker');
+        console.error('Reset error:', error);
       }
     }
   };
