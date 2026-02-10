@@ -1798,15 +1798,33 @@ export const TradeMonitorPage = () => {
       {/* Trade History Card - Mobile optimized with horizontal scroll */}
       <Card className="glass-card" data-testid="trade-history-card">
         <CardHeader className="flex flex-row items-center justify-between pb-2 md:pb-4">
-          <CardTitle className="text-white text-base md:text-lg">Trade History</CardTitle>
-          {/* Streak indicator */}
-          {streak.streak > 0 && (
-            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
-              <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
-              <span className="font-bold text-orange-400 text-sm md:text-base">{streak.streak}</span>
-              <span className="text-[10px] md:text-xs text-zinc-400 hidden sm:inline">streak</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 md:gap-3">
+            <CardTitle className="text-white text-base md:text-lg">Trade History</CardTitle>
+            <span className="text-xs text-zinc-500 hidden sm:inline">
+              ({new Date().toLocaleDateString('en-US', { month: 'long' })})
+            </span>
+          </div>
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Check Past Trades Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = '/profit-tracker'}
+              className="text-xs text-blue-400 hover:text-blue-300 h-7 px-2"
+              data-testid="check-past-trades-btn"
+            >
+              <Calendar className="w-3 h-3 mr-1" />
+              <span className="hidden sm:inline">Past Trades</span>
+            </Button>
+            {/* Streak indicator */}
+            {streak.streak > 0 && (
+              <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
+                <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
+                <span className="font-bold text-orange-400 text-sm md:text-base">{streak.streak}</span>
+                <span className="text-[10px] md:text-xs text-zinc-400 hidden sm:inline">streak</span>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="px-2 md:px-6">
           {tradeHistory.length > 0 ? (
