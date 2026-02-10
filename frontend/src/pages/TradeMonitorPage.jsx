@@ -1350,20 +1350,30 @@ export const TradeMonitorPage = () => {
     {signal && (
       <div className="md:hidden fixed top-16 left-0 right-0 z-40 px-4 py-2 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800" data-testid="mobile-sticky-signal">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`px-3 py-1.5 rounded-lg font-bold text-sm ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`px-2.5 py-1 rounded-lg font-bold text-xs ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
               {signal.direction === 'BUY' ? (
-                <TrendingUp className="w-4 h-4 inline mr-1" />
+                <TrendingUp className="w-3.5 h-3.5 inline mr-0.5" />
               ) : (
-                <TrendingDown className="w-4 h-4 inline mr-1" />
+                <TrendingDown className="w-3.5 h-3.5 inline mr-0.5" />
               )}
               {signal.direction}
             </div>
-            <span className="text-zinc-400 text-sm font-medium">{signal.product}</span>
+            <span className="text-zinc-400 text-xs font-medium">{signal.product}</span>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-zinc-500">Trade Time</p>
-            <p className="text-sm font-mono text-blue-400">{signal.trade_time}</p>
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              <p className="text-[10px] text-zinc-500">LOT</p>
+              <p className="text-xs font-mono text-white">{lotSize.toFixed(2)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-zinc-500">Exit</p>
+              <p className="text-xs font-mono text-emerald-400">${exitValue.toFixed(0)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-zinc-500">Time</p>
+              <p className="text-xs font-mono text-blue-400">{signal.trade_time}</p>
+            </div>
           </div>
         </div>
       </div>
