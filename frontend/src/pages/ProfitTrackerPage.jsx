@@ -2288,7 +2288,7 @@ export const ProfitTrackerPage = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
+        )}
 
         {/* Mobile Simulate Actions Button */}
         <div className="md:hidden w-full">
