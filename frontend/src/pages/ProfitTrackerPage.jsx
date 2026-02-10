@@ -3728,8 +3728,8 @@ export const ProfitTrackerPage = () => {
         </Dialog>
 
         {/* Commission Dialog - Desktop Only */}
-        <Dialog open={commissionDialogOpen} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
+        <Dialog open={commissionDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
+          <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <Award className="w-5 h-5 text-purple-400" /> Simulate Commission
