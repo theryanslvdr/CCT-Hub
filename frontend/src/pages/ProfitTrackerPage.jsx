@@ -1754,7 +1754,7 @@ export const ProfitTrackerPage = () => {
     }
 
     try {
-      // Verify password first
+      // Verify password first (always Master Admin's password when simulating)
       const verifyRes = await api.post('/auth/verify-password', {
         password: resetPassword,
       });
@@ -1764,8 +1764,9 @@ export const ProfitTrackerPage = () => {
         return;
       }
       
-      // Reset tracker
-      await api.delete('/profit/reset');
+      // Reset tracker - pass user_id if simulating a member
+      const resetParams = simulatedView?.memberId ? { user_id: simulatedView.memberId } : {};
+      await api.delete('/profit/reset', { params: resetParams });
       
       toast.success('Profit tracker has been reset!');
       resetResetDialog();
