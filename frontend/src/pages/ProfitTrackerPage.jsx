@@ -4775,8 +4775,8 @@ export const ProfitTrackerPage = () => {
       </Dialog>
 
       {/* Adjust Trade Dialog - Desktop Only */}
-      <Dialog open={enterAPDialogOpen} onOpenChange={setEnterAPDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
+      <Dialog open={enterAPDialogOpen && !isMobile} onOpenChange={setEnterAPDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Edit3 className="w-5 h-5 text-amber-400" /> Adjust Trade
