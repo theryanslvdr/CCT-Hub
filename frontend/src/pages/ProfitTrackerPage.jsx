@@ -26,6 +26,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { VSDDialog } from '@/components/VSDDialog';
 
+// Hook to detect mobile viewport
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
+};
+
 // Truncate to 2 decimal places without rounding
 const truncateTo2Decimals = (num) => {
   return Math.trunc(num * 100) / 100;
