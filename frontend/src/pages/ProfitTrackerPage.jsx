@@ -3270,10 +3270,12 @@ export const ProfitTrackerPage = () => {
       <OnboardingWizard
         isOpen={onboardingWizardOpen}
         onClose={() => setOnboardingWizardOpen(false)}
-        onComplete={(data) => {
+        onComplete={async (data) => {
           setOnboardingWizardOpen(false);
           setIsFirstTime(false);
-          loadData(); // Reload data after onboarding
+          // Wait a moment for backend to process, then reload all data
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await loadData(); // Reload data after onboarding
           toast.success('Your profit tracker is ready!');
         }}
         isReset={isResetOnboarding}
