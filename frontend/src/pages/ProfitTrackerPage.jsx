@@ -3425,8 +3425,8 @@ export const ProfitTrackerPage = () => {
         )}
         
         {/* Simulate Deposit Dialog - Desktop Only */}
-        <Dialog open={depositDialogOpen} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
+        <Dialog open={depositDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
+          <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {depositStep === 'input' && 'Simulate Deposit'}
