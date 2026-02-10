@@ -2639,15 +2639,12 @@ async def add_user_holiday(
         raise HTTPException(status_code=400, detail="This date is already marked as a holiday")
     
     # Check if there's already a trade logged for this date
-    date_start = holiday_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
-    date_end = holiday_date.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc)
+    # Use date string prefix matching to avoid timezone comparison issues
+    date_str = holiday_date.strftime("%Y-%m-%d")
     
     existing_trade = await db.trade_logs.find_one({
         "user_id": user["id"],
-        "created_at": {
-            "$gte": date_start.isoformat(),
-            "$lte": date_end.isoformat()
-        }
+        "created_at": {"$regex": f"^{date_str}"}
     })
     
     if existing_trade:
