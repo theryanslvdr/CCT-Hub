@@ -1846,10 +1846,12 @@ async def get_trade_history(
     page: int = 1, 
     page_size: int = 10,
     user_id: Optional[str] = None,
+    current_month_only: bool = True,  # Filter to current month by default
     user: dict = Depends(get_current_user)
 ):
     """Get paginated trade history with signal details.
     Admins can pass user_id to view another user's history (for simulation).
+    By default, only returns trades from the current month.
     """
     # Determine which user's history to fetch
     target_user_id = user["id"]
@@ -1860,12 +1862,22 @@ async def get_trade_history(
     
     skip = (page - 1) * page_size
     
+    # Build query - optionally filter to current month
+    query = {"user_id": target_user_id}
+    
+    if current_month_only:
+        now = datetime.now(timezone.utc)
+        # Get first day of current month
+        first_day = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_start = first_day.strftime("%Y-%m")
+        query["created_at"] = {"$regex": f"^{month_start}"}
+    
     # Get total count
-    total = await db.trade_logs.count_documents({"user_id": target_user_id})
+    total = await db.trade_logs.count_documents(query)
     
     # Get paginated trades
     trades = await db.trade_logs.find(
-        {"user_id": target_user_id}, 
+        query, 
         {"_id": 0}
     ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
     
