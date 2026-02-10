@@ -2191,15 +2191,12 @@ async def log_missed_trade(
         raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
     
     # Check if user already has a trade for this date
-    date_start = trade_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    date_end = trade_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+    # Use date string prefix matching to avoid timezone comparison issues
+    date_str = trade_date.strftime("%Y-%m-%d")
     
     existing_trade = await db.trade_logs.find_one({
         "user_id": user["id"],
-        "created_at": {
-            "$gte": date_start.isoformat(),
-            "$lte": date_end.isoformat()
-        }
+        "created_at": {"$regex": f"^{date_str}"}
     })
     
     if existing_trade:
