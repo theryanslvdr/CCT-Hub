@@ -3207,7 +3207,7 @@ export const ProfitTrackerPage = () => {
                     />
                   </div>
                   <button 
-                    onClick={handleAddCommission}
+                    onClick={handleSimulateCommission}
                     className="w-full py-4 rounded-xl bg-purple-500 text-white font-bold hover:bg-purple-600 transition-colors flex items-center justify-center gap-2"
                     data-testid="mobile-confirm-commission"
                   >
