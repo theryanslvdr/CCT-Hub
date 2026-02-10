@@ -3606,8 +3606,8 @@ export const ProfitTrackerPage = () => {
         </Dialog>
 
         {/* Withdrawal Dialog - Desktop Only */}
-        <Dialog open={withdrawalDialogOpen} onOpenChange={(open) => { if (!open) resetWithdrawalDialog(); else setWithdrawalDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
+        <Dialog open={withdrawalDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetWithdrawalDialog(); else setWithdrawalDialogOpen(true); }}>
+          <DialogContent className="glass-card border-zinc-800 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {withdrawalStep === 'input' && 'Simulate Withdrawal'}
