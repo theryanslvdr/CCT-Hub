@@ -6606,8 +6606,24 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
     """
     Complete the onboarding process for new or experienced traders.
     Creates initial deposits, withdrawals, and trade logs based on user input.
+    
+    If user already has data (reset scenario), this will add to existing data.
+    For clean reset, call DELETE /profit/reset first.
     """
     try:
+        # Check if this is a reset scenario - if user already completed onboarding before,
+        # we should check if their data was properly cleared
+        if user.get("onboarding_completed"):
+            # User already completed onboarding - this might be a re-submit
+            # Check if they have data (should have been cleared by reset)
+            existing_deposits = await db.deposits.count_documents({"user_id": user["id"]})
+            existing_trades = await db.trade_logs.count_documents({"user_id": user["id"]})
+            
+            # If they have data, this might be a duplicate submission - proceed anyway
+            # but log it for debugging
+            if existing_deposits > 0 or existing_trades > 0:
+                logger.warning(f"User {user['id']} completing onboarding with existing data: {existing_deposits} deposits, {existing_trades} trades")
+        
         # Track which deposits and trades we create
         created_deposits = []
         created_trades = []
