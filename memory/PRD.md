@@ -142,6 +142,33 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
+### Session 74 (2026-02-10) - Mobile Full-Screen Dialogs Enhancement ✅
+
+#### Mobile Simulate Dialogs - Full-Screen Overlay Implementation ✅
+- **Issue**: On iPhone 10, clicking "Simulate Deposit" from Simulate Actions menu showed nothing; Adjust Trade dialog couldn't scroll to see Save button
+- **Root Cause**: Shadcn Dialog component renders via portals that intercept clicks globally, even when wrapped in hidden divs
+- **Solution**: 
+  1. Added `useIsMobile()` hook to detect viewport < 768px
+  2. Desktop Dialogs conditionally rendered with `open={dialogOpen && !isMobile}`
+  3. Mobile uses custom full-screen overlays with `overflow-y-auto` for scrolling
+- **Dialogs Updated**:
+  - Simulate Deposit (green theme)
+  - Simulate Withdrawal (orange theme)
+  - Simulate Commission (purple theme)
+  - Adjust Trade (amber theme)
+- **Mobile Features**:
+  - Full-screen overlay with `z-[9999]`
+  - Header with icon, title, and close button
+  - Scrollable content area with `flex-1 overflow-y-auto`
+  - All form fields and buttons visible with scroll
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+  - Lines 30-40: Added `useIsMobile` hook
+  - Lines 2228-2290: Desktop Dialog conditional rendering
+  - Lines 2777-3400: Mobile full-screen overlays
+- **Bug Fixed by Testing Agent**: Commission dialog was calling undefined `handleAddCommission`, changed to `handleSimulateCommission`
+
+**Testing**: 100% pass rate (Iteration 84 - 6/6 mobile UI tests passed on iPhone 10 viewport)
+
 ### Session 73 (2026-02-10) - Seven Production Bug Fixes ✅
 
 #### Bug Fix #1: "Did Not Trade" Error on Fresh Days - FIXED ✅
