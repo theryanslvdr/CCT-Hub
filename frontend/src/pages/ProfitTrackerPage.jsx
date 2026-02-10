@@ -3220,7 +3220,7 @@ export const ProfitTrackerPage = () => {
         )}
 
         {/* Mobile Full-Screen Overlay for Adjust Trade Dialog */}
-        {enterAPDialogOpen && enterAPDate && (
+        {isMobile && enterAPDialogOpen && enterAPDate && (
           <div className="md:hidden fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
               {/* Header */}
