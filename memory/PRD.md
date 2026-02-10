@@ -142,6 +142,53 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
+### Session 73 (2026-02-10) - Seven Production Bug Fixes ✅
+
+#### Bug Fix #1: "Did Not Trade" Error on Fresh Days - FIXED ✅
+- **Issue**: Clicking "Did Not Trade" on fresh days showed "Trade already exists for this date" error
+- **Root Cause**: Date comparison using exact ISO date range was failing due to timezone mismatches
+- **Fix**: Changed to regex prefix matching (`$regex: ^{date_str}`)
+- **Files Modified**: `/app/backend/server.py` (lines 2419-2430)
+
+#### Bug Fix #2: Reset Tracker for Simulated Members - FIXED ✅
+- **Issue**: Reset Tracker required simulated member's password instead of Master Admin's password
+- **Fix**: Modified `/profit/reset` endpoint to accept optional `user_id` parameter; frontend passes `simulatedView.memberId`
+- **Files Modified**: 
+  - `/app/backend/server.py` (lines 1333-1357)
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 1750-1782)
+
+#### Bug Fix #3: Merin Iframe Responsive - FIXED ✅
+- **Issue**: Merin Trading Platform iframe didn't resize with browser window
+- **Fix**: Changed iframe container to use `h-[calc(100%-80px)]` and absolute positioning
+- **Files Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx` (lines 2244-2278)
+
+#### Bug Fix #4: Onboarding Data Not Updating (Lysha) - FIXED ✅
+- **Issue**: After reset + onboarding, account value and Daily Projection didn't update
+- **Fix**: Made onComplete callback await loadData() with 500ms delay for backend processing
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 3268-3283)
+
+#### Bug Fix #5: Mobile Sticky Signal - LOT & Exit - FIXED ✅
+- **Issue**: Mobile sticky signal only showed direction/product, missing LOT and Exit values
+- **Fix**: Added compact LOT size and projected exit display to sticky bar
+- **Files Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx` (lines 1351-1380)
+
+#### Bug Fix #6: Mobile Disclaimer Overlap - FIXED ✅
+- **Issue**: Content was hidden behind navbar and sticky signal on mobile
+- **Fix**: Increased spacer from `h-12` to `h-16`
+- **Files Modified**: `/app/frontend/src/pages/TradeMonitorPage.jsx` (line 1383)
+
+#### Bug Fix #7: Trade History Current Month Filter - FIXED ✅
+- **Issue**: Trade History showed all trades, needed current month only with pagination
+- **Fix**: 
+  - Backend: Added `current_month_only` parameter (default true)
+  - Frontend: Added month label and "Past Trades" button linking to /profit-tracker
+  - Streak still calculates from all-time trades
+- **Files Modified**: 
+  - `/app/backend/server.py` (lines 1844-1880)
+  - `/app/frontend/src/pages/TradeMonitorPage.jsx` (lines 1798-1830, 1990-2020)
+
+**Testing**: 100% pass rate (Iteration 83 - all 7 bugs verified fixed)
+
 ### Session 72 (2026-02-05) - Three Bug Fixes ✅
 
 #### Bug Fix #1: Trade Monitor Simulation - FIXED ✅
