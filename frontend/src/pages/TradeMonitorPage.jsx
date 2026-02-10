@@ -1990,7 +1990,7 @@ export const TradeMonitorPage = () => {
               {/* Pagination - Mobile optimized */}
               <div className="flex items-center justify-between mt-3 md:mt-4 pt-3 md:pt-4 border-t border-zinc-800">
                 <p className="text-[10px] md:text-sm text-zinc-500">
-                  {historyPage}/{historyTotalPages} <span className="hidden sm:inline">• {historyTotal} trades</span>
+                  Page {historyPage}/{historyTotalPages} <span className="hidden sm:inline">• {historyTotal} trades this month</span>
                 </p>
                 <div className="flex items-center gap-1 md:gap-2">
                   <Button
