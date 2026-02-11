@@ -8938,7 +8938,12 @@ async def root():
 
 @api_router.get("/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2026.02.11.v3",  # Version to verify deployment
+        "diagnostic_enabled": True
+    }
 
 # Include all routers
 api_router.include_router(auth_router)
