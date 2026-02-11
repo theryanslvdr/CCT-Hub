@@ -3943,10 +3943,16 @@ export const ProfitTrackerPage = () => {
         onComplete={async (data) => {
           setOnboardingWizardOpen(false);
           setIsFirstTime(false);
-          // Wait a moment for backend to process, then reload all data
+          // Wait a moment for backend to process
           await new Promise(resolve => setTimeout(resolve, 500));
-          await loadData(); // Reload data after onboarding
+          // Refresh user data from server to get updated trading_type and trading_start_date
+          await refreshUser();
+          // Reload all profit tracker data
+          await loadData();
           toast.success('Your profit tracker is ready!');
+          // Force page reload as a fallback to ensure all data is fresh
+          // This is a robust fix for the mobile onboarding bug
+          window.location.reload();
         }}
         isReset={isResetOnboarding}
       />
