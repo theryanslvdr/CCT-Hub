@@ -1772,7 +1772,7 @@ export const AdminMembersPage = () => {
               <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
               <span className="ml-3 text-zinc-400">Running diagnostic...</span>
             </div>
-          ) : diagnosticData ? (
+          ) : diagnosticData && diagnosticData.summary ? (
             <div className="space-y-6 mt-4">
               {/* User Info */}
               <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
