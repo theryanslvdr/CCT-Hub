@@ -3299,7 +3299,7 @@ async def get_members(
 # NOTE: Specific sub-routes must come BEFORE the generic {user_id} route
 # Otherwise FastAPI will match "diagnostic" as a user_id
 
-@admin_router.get("/members/{user_id}/diagnostic")
+@admin_router.get("/member-diagnostic/{user_id}")
 async def get_member_diagnostic(user_id: str, user: dict = Depends(require_admin)):
     """Get diagnostic information for a member's account to debug data issues"""
     
