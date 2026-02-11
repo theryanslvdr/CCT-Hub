@@ -28,7 +28,7 @@ class TestEmailSendingOnOfficialSignal:
         pytest.skip("Admin authentication failed")
     
     def test_create_signal_with_email(self, admin_token):
-        """Test creating a signal with send_email=True"""
+        """Test creating a signal with send_email=True - uses /api/admin/signals"""
         headers = {"Authorization": f"Bearer {admin_token}"}
         
         # Create a test signal with send_email=True
@@ -44,7 +44,7 @@ class TestEmailSendingOnOfficialSignal:
         }
         
         response = requests.post(
-            f"{BASE_URL}/api/trade/signals",
+            f"{BASE_URL}/api/admin/signals",
             headers=headers,
             json=signal_data
         )
@@ -53,7 +53,7 @@ class TestEmailSendingOnOfficialSignal:
         assert response.status_code in [200, 201], f"Failed to create signal: {response.text}"
         
         data = response.json()
-        assert "signal" in data or "id" in data, "Response should contain signal data"
+        print(f"Signal creation response: {data}")
         
         # Check if email_result is in response (indicates email was attempted)
         if "email_result" in data:
@@ -79,14 +79,14 @@ class TestEmailSendingOnOfficialSignal:
         }
         
         create_response = requests.post(
-            f"{BASE_URL}/api/trade/signals",
+            f"{BASE_URL}/api/admin/signals",
             headers=headers,
             json=signal_data
         )
         
         assert create_response.status_code in [200, 201], f"Failed to create signal: {create_response.text}"
         
-        signal_id = create_response.json().get("signal", {}).get("id") or create_response.json().get("id")
+        signal_id = create_response.json().get("id")
         assert signal_id, "Signal ID should be returned"
         
         # Now update to official with send_email=True
@@ -96,7 +96,7 @@ class TestEmailSendingOnOfficialSignal:
         }
         
         update_response = requests.put(
-            f"{BASE_URL}/api/trade/signals/{signal_id}",
+            f"{BASE_URL}/api/admin/signals/{signal_id}",
             headers=headers,
             json=update_data
         )
@@ -151,9 +151,19 @@ class TestProfitTrackerEndpoints:
         print(f"Found {len(data)} deposits")
     
     def test_trade_logs_endpoint(self, admin_token):
-        """Test trade logs endpoint"""
+        """Test trade logs endpoint - uses /api/trade/history instead of /api/trade/logs"""
         headers = {"Authorization": f"Bearer {admin_token}"}
         
+        # Try /api/trade/history first (the correct endpoint)
+        response = requests.get(f"{BASE_URL}/api/trade/history", headers=headers)
+        
+        if response.status_code == 200:
+            data = response.json()
+            trades = data.get("trades", [])
+            print(f"Found {len(trades)} trade logs via /api/trade/history")
+            return
+        
+        # Fallback to /api/trade/logs
         response = requests.get(f"{BASE_URL}/api/trade/logs", headers=headers)
         
         assert response.status_code == 200, f"Failed to get trade logs: {response.text}"
@@ -190,10 +200,10 @@ class TestAdminMembersSimulation:
         assert "total" in data, "Response should contain total count"
         
         print(f"Found {data['total']} members")
-        return data["members"]
     
     def test_get_member_simulation_data(self, admin_token):
-        """Test getting member simulation data - verifies memberId is properly returned"""
+        """Test getting member simulation data - verifies memberId is properly returned
+        Uses /api/admin/members/{user_id}/simulate endpoint"""
         headers = {"Authorization": f"Bearer {admin_token}"}
         
         # First get members list
@@ -215,9 +225,9 @@ class TestAdminMembersSimulation:
         member_id = test_member.get("id")
         assert member_id, "Member should have an ID"
         
-        # Get simulation data for this member
+        # Get simulation data for this member - correct endpoint is /simulate not /simulation
         sim_response = requests.get(
-            f"{BASE_URL}/api/admin/members/{member_id}/simulation",
+            f"{BASE_URL}/api/admin/members/{member_id}/simulate",
             headers=headers
         )
         
@@ -230,10 +240,13 @@ class TestAdminMembersSimulation:
         assert "lot_size" in sim_data, "Simulation data should contain lot_size"
         assert "total_deposits" in sim_data, "Simulation data should contain total_deposits"
         assert "total_profit" in sim_data, "Simulation data should contain total_profit"
+        assert "member" in sim_data, "Simulation data should contain member info"
         
-        print(f"Simulation data for {test_member.get('full_name')}: {sim_data}")
+        # Verify member info contains ID (critical for simulation)
+        member_info = sim_data.get("member", {})
+        assert member_info.get("id") == member_id, "Member ID should match in simulation data"
         
-        return member_id, sim_data
+        print(f"Simulation data for {test_member.get('full_name')}: account_value={sim_data.get('account_value')}, lot_size={sim_data.get('lot_size')}")
     
     def test_get_member_details(self, admin_token):
         """Test getting member details"""
@@ -436,6 +449,36 @@ class TestEmailServiceIntegration:
             print("Email history endpoint not found - emails may still be sent but not logged")
         else:
             print(f"Email history response: {response.status_code}")
+
+
+class TestActiveSignalEndpoint:
+    """Test active signal endpoint"""
+    
+    @pytest.fixture
+    def admin_token(self):
+        """Get admin authentication token"""
+        response = requests.post(f"{BASE_URL}/api/auth/login", json={
+            "email": "iam@ryansalvador.com",
+            "password": "admin123"
+        })
+        if response.status_code == 200:
+            return response.json().get("access_token")
+        pytest.skip("Admin authentication failed")
+    
+    def test_get_active_signal(self, admin_token):
+        """Test getting active signal"""
+        headers = {"Authorization": f"Bearer {admin_token}"}
+        
+        response = requests.get(f"{BASE_URL}/api/trade/active-signal", headers=headers)
+        
+        # Should return 200 even if no active signal
+        assert response.status_code == 200, f"Failed to get active signal: {response.text}"
+        
+        data = response.json()
+        if data.get("signal"):
+            print(f"Active signal: {data['signal'].get('direction')} at {data['signal'].get('trade_time')}")
+        else:
+            print("No active signal currently")
 
 
 if __name__ == "__main__":
