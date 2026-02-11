@@ -311,6 +311,12 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Pending Tasks
 
+### P0: Verify Balance Calculation Logic
+- User reported "Balance Before" showing incorrect values after reset
+- Frontend calculation logic in `generateDailyProjectionForMonth` may need review
+- Commission handling needs verification (commissions DO affect actual balance)
+- The balance should "catch up" to the actual Merin balance
+
 ### P1: Verify "No Trade Members" Widget
 - Logic implemented but needs production data verification
 
