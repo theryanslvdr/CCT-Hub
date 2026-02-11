@@ -3222,20 +3222,6 @@ async def delete_signal(signal_id: str, user: dict = Depends(require_admin)):
     return {"message": "Signal deleted"}
 
 # Enhanced Member Management
-@admin_router.get("/members")
-async def get_members(
-    page: int = 1,
-    limit: int = 20,
-    search: Optional[str] = None,
-    role: Optional[str] = None,
-    status: Optional[str] = None,
-    sort_account_value: Optional[str] = None,  # 'asc' or 'desc'
-    user: dict = Depends(require_admin)
-):
-
-    # DIAGNOSTIC ENDPOINT - Completely separate function to avoid any routing issues
-    pass  # This is just a marker, the actual diagnostic endpoint is below
-
 @admin_router.get("/run-diagnostic/{user_id}")
 async def run_account_diagnostic(user_id: str, user: dict = Depends(require_admin)):
     """Dedicated diagnostic endpoint - separate from member details to avoid routing conflicts"""
@@ -3318,15 +3304,14 @@ async def run_account_diagnostic(user_id: str, user: dict = Depends(require_admi
         ]
     }
 
-# Original members list endpoint continues here
-@admin_router.get("/members-list")
-async def get_members_list(
+@admin_router.get("/members")
+async def get_members(
     page: int = 1,
     limit: int = 20,
     search: Optional[str] = None,
     role: Optional[str] = None,
     status: Optional[str] = None,
-    sort_account_value: Optional[str] = None,
+    sort_account_value: Optional[str] = None,  # 'asc' or 'desc'
     user: dict = Depends(require_admin)
 ):
     query = {}
