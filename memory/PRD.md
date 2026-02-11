@@ -174,7 +174,19 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Fix**: Changed to `direction: Optional[str] = None`
 - **Files Modified**: `/app/backend/server.py` (line 200)
 
-**Testing**: 100% pass rate (Iteration 85 - 14/14 backend tests, all frontend verified)
+#### Bug Fix #5: Balance Calculation in Daily Projection - FIXED ✅
+- **Issue**: "Balance Before" values in Daily Projection table showed incorrect values, especially after reset
+- **Root Causes**:
+  1. `handleOpenDailyProjection` used `simulatedView?.userId` instead of `simulatedView?.memberId`
+  2. Backend-calculated balances were only applied to historical months, not current month
+  3. Cached balances weren't cleared after tracker reset
+- **Fixes**:
+  1. Changed `simulatedView?.userId` to `simulatedView?.memberId` (line 1148)
+  2. Removed `!isCurrentMonth` condition - backend balances now apply to ALL months (except today which uses live value)
+  3. Added `setBackendDailyBalances({})` after reset to clear cache (line 1818)
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+**Testing**: 100% pass rate (Iteration 86 - 10/10 backend tests, UI verified correct)
 
 ### Session 74 (2026-02-10) - Mobile Full-Screen Dialogs Enhancement ✅
 
