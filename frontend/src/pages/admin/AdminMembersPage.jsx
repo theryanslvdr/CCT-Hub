@@ -1725,6 +1725,230 @@ export const AdminMembersPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Diagnostic Dialog */}
+      <Dialog open={diagnosticDialogOpen} onOpenChange={setDiagnosticDialogOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-blue-400" />
+              Account Diagnostic - {diagnosticData?.user?.full_name || 'Loading...'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {diagnosticLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+              <span className="ml-3 text-zinc-400">Running diagnostic...</span>
+            </div>
+          ) : diagnosticData ? (
+            <div className="space-y-6 mt-4">
+              {/* User Info */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <h4 className="text-sm font-medium text-zinc-400 mb-3">User Information</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  <div>
+                    <p className="text-zinc-500">Email</p>
+                    <p className="text-white">{diagnosticData.user.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Trading Type</p>
+                    <p className="text-white capitalize">{diagnosticData.user.trading_type || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Trading Start</p>
+                    <p className="text-white">{diagnosticData.user.trading_start_date || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Onboarding</p>
+                    <p className={diagnosticData.user.onboarding_completed ? 'text-emerald-400' : 'text-amber-400'}>
+                      {diagnosticData.user.onboarding_completed ? 'Completed' : 'Not completed'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Streak Reset Date</p>
+                    <p className="text-white">{diagnosticData.user.streak_reset_date || 'Never'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <h4 className="text-sm font-medium text-zinc-400 mb-3">Account Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                    <p className="text-2xl font-bold text-emerald-400">${diagnosticData.summary.total_deposits.toLocaleString()}</p>
+                    <p className="text-xs text-zinc-400">Total Deposits</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                    <p className="text-2xl font-bold text-red-400">${diagnosticData.summary.total_withdrawals.toLocaleString()}</p>
+                    <p className="text-xs text-zinc-400">Total Withdrawals</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                    <p className="text-2xl font-bold text-blue-400">${diagnosticData.summary.total_profit.toLocaleString()}</p>
+                    <p className="text-xs text-zinc-400">Total Profit</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                    <p className="text-2xl font-bold text-purple-400">${diagnosticData.summary.total_commission.toLocaleString()}</p>
+                    <p className="text-xs text-zinc-400">Total Commission</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-400">Calculated Balance:</span>
+                    <span className="text-xl font-bold text-amber-400">${diagnosticData.summary.calculated_balance.toLocaleString()}</span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    (Deposits - Withdrawals + Profit + Commission)
+                  </p>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+                  <div className="text-center">
+                    <p className="text-white font-bold">{diagnosticData.summary.total_trades}</p>
+                    <p className="text-zinc-500">Total Entries</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-emerald-400 font-bold">{diagnosticData.summary.actual_trades}</p>
+                    <p className="text-zinc-500">Actual Trades</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-amber-400 font-bold">{diagnosticData.summary.did_not_trade_entries}</p>
+                    <p className="text-zinc-500">Did Not Trade</p>
+                  </div>
+                </div>
+                {diagnosticData.summary.reset_trades_count > 0 && (
+                  <div className="mt-3 p-2 rounded bg-red-500/20 border border-red-500/30">
+                    <p className="text-red-400 text-sm font-medium">
+                      ⚠️ {diagnosticData.summary.reset_trades_count} trade(s) were deleted/reset
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Recent Trades */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trades (Last 20)</h4>
+                {diagnosticData.trades.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-zinc-500 border-b border-zinc-800">
+                          <th className="text-left py-2 px-2">Date</th>
+                          <th className="text-right py-2 px-2">Profit</th>
+                          <th className="text-right py-2 px-2">Commission</th>
+                          <th className="text-center py-2 px-2">Type</th>
+                          <th className="text-left py-2 px-2">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {diagnosticData.trades.map((trade, idx) => (
+                          <tr key={idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                            <td className="py-2 px-2 text-white">{trade.date}</td>
+                            <td className={`py-2 px-2 text-right font-mono ${trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              ${trade.profit.toFixed(2)}
+                            </td>
+                            <td className="py-2 px-2 text-right font-mono text-purple-400">
+                              ${trade.commission.toFixed(2)}
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              {trade.did_not_trade ? (
+                                <span className="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400">DNT</span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400">Trade</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-2 text-zinc-400 truncate max-w-[150px]">{trade.notes}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-zinc-500 text-center py-4">No trades found</p>
+                )}
+              </div>
+
+              {/* Deposits */}
+              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Deposits/Withdrawals (Last 20)</h4>
+                {diagnosticData.deposits.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-zinc-500 border-b border-zinc-800">
+                          <th className="text-left py-2 px-2">Date</th>
+                          <th className="text-right py-2 px-2">Amount</th>
+                          <th className="text-center py-2 px-2">Type</th>
+                          <th className="text-left py-2 px-2">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {diagnosticData.deposits.map((dep, idx) => (
+                          <tr key={idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                            <td className="py-2 px-2 text-white">{dep.date}</td>
+                            <td className={`py-2 px-2 text-right font-mono ${dep.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {dep.amount >= 0 ? '+' : ''}${dep.amount.toFixed(2)}
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <span className={`px-2 py-0.5 rounded text-xs ${
+                                dep.type === 'initial' ? 'bg-blue-500/20 text-blue-400' :
+                                dep.amount >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                              }`}>
+                                {dep.type || (dep.amount >= 0 ? 'Deposit' : 'Withdrawal')}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-zinc-400 truncate max-w-[200px]">{dep.notes}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-zinc-500 text-center py-4">No deposits found</p>
+                )}
+              </div>
+
+              {/* Reset/Deleted Trades */}
+              {diagnosticData.reset_trades.length > 0 && (
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                  <h4 className="text-sm font-medium text-red-400 mb-3 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Deleted/Reset Trades
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-zinc-500 border-b border-red-500/30">
+                          <th className="text-left py-2 px-2">Reset At</th>
+                          <th className="text-left py-2 px-2">Original Date</th>
+                          <th className="text-right py-2 px-2">Original Profit</th>
+                          <th className="text-left py-2 px-2">Reset By</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {diagnosticData.reset_trades.map((rt, idx) => (
+                          <tr key={idx} className="border-b border-red-500/20">
+                            <td className="py-2 px-2 text-white">{rt.reset_at}</td>
+                            <td className="py-2 px-2 text-white">{rt.original_date}</td>
+                            <td className="py-2 px-2 text-right font-mono text-red-400">${rt.original_profit.toFixed(2)}</td>
+                            <td className="py-2 px-2 text-zinc-400">{rt.reset_by}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+          
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setDiagnosticDialogOpen(false)} className="btn-secondary">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
