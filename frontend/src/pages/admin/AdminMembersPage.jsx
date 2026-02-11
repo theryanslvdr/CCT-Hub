@@ -417,8 +417,8 @@ export const AdminMembersPage = () => {
     setDiagnosticData(null);
     setDiagnosticDialogOpen(true);
     try {
-      // Use existing members endpoint with diagnostic=true query param
-      const response = await api.get(`/admin/members/${userId}?diagnostic=true`);
+      // Use dedicated diagnostic endpoint
+      const response = await api.get(`/admin/run-diagnostic/${userId}`);
       setDiagnosticData(response.data);
     } catch (error) {
       console.error('Failed to run diagnostic:', error);
