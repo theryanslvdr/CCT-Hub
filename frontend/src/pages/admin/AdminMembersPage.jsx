@@ -1836,6 +1836,42 @@ export const AdminMembersPage = () => {
                     <p className="text-white">{diagnosticData.user.streak_reset_date || 'Never'}</p>
                   </div>
                 </div>
+                
+                {/* Quick Actions for Trading Start Date */}
+                {!diagnosticData.user.trading_start_date && diagnosticData.summary.actual_trades > 0 && (
+                  <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400" />
+                      <span className="text-amber-400 font-medium text-sm">Trading Start Date Not Set</span>
+                    </div>
+                    <p className="text-xs text-zinc-400 mb-3">
+                      This user has {diagnosticData.summary.actual_trades} trade(s) but no trading start date. 
+                      This can cause incorrect balance calculations in the Daily Projection table.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAutoFixTradingStart(diagnosticData.user.id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-1" />
+                        Auto-Fix (Use First Trade Date)
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setNewTradingStartDate('');
+                          setEditingTradingStart(true);
+                        }}
+                        className="btn-secondary"
+                      >
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Set Manually
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Summary Stats */}
