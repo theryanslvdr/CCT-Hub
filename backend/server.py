@@ -3382,56 +3382,6 @@ async def get_member_diagnostic(user_id: str, user: dict = Depends(require_admin
         ]
     }
 
-@admin_router.get("/members/{user_id}/deposits")
-async def get_member_deposits(user_id: str, user: dict = Depends(require_admin)):
-    """Get all deposits for a specific member (admin only)"""
-    member = await db.users.find_one({"id": user_id}, {"_id": 0})
-    if not member:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    deposits = await db.deposits.find(
-        {"user_id": user_id}, 
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
-    
-    return deposits
-
-@admin_router.get("/members/{user_id}/withdrawals")
-async def get_member_withdrawals(user_id: str, user: dict = Depends(require_admin)):
-    """Get all withdrawals for a specific member (admin only)"""
-    member = await db.users.find_one({"id": user_id}, {"_id": 0})
-    if not member:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    withdrawals = await db.deposits.find(
-        {"user_id": user_id, "amount": {"$lt": 0}}, 
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
-    
-    return withdrawals
-
-@admin_router.delete("/members/{user_id}/trades/{trade_id}")
-async def delete_member_trade(user_id: str, trade_id: str, user: dict = Depends(require_admin)):
-    """Delete a specific trade for a member (admin only)"""
-    # Verify the trade belongs to the specified user
-    trade = await db.trade_logs.find_one({"id": trade_id, "user_id": user_id}, {"_id": 0})
-    if not trade:
-        raise HTTPException(status_code=404, detail="Trade not found")
-    
-    # Store in reset_trades for audit trail
-    await db.reset_trades.insert_one({
-        "original_trade": trade,
-        "reset_by": user["id"],
-        "reset_by_name": user.get("full_name", "Admin"),
-        "reset_at": datetime.now(timezone.utc).isoformat(),
-        "reason": "Manual deletion by admin"
-    })
-    
-    # Delete the trade
-    await db.trade_logs.delete_one({"id": trade_id})
-    
-    return {"message": "Trade deleted successfully"}
-
 @admin_router.get("/members/{user_id}")
 async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
