@@ -3156,7 +3156,7 @@ export const ProfitTrackerPage = () => {
                       </div>
                       <div className="space-y-3">
                         <button 
-                          onClick={handleConfirmWithdrawal}
+                          onClick={handleCompleteWithdrawal}
                           className="w-full py-4 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                           data-testid="mobile-confirm-withdrawal"
                         >
