@@ -884,7 +884,40 @@ export const AdminMembersPage = () => {
                       <p className="text-xs text-zinc-500">Joined</p>
                       <p className="text-white font-medium">{new Date(memberDetails.user.created_at).toLocaleDateString()}</p>
                     </div>
+                    <div className="p-4 rounded-lg bg-zinc-900/50 col-span-2">
+                      <p className="text-xs text-zinc-500">User ID</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <code className="text-white font-mono text-sm bg-zinc-800 px-2 py-1 rounded flex-1 truncate">
+                          {memberDetails.user.id}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(memberDetails.user.id, 'User ID')}
+                          className="text-zinc-400 hover:text-white shrink-0"
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                    </div>
                   </div>
+                  
+                  {/* Run Diagnostic Button */}
+                  {isMasterAdmin() && (
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => handleRunDiagnostic(memberDetails.user.id)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        data-testid="run-diagnostic-button"
+                      >
+                        <Activity className="w-4 h-4 mr-2" />
+                        Run Account Diagnostic
+                      </Button>
+                      <p className="text-xs text-zinc-500 mt-2 text-center">
+                        View detailed trade history, deposits, and balance calculations
+                      </p>
+                    </div>
+                  )}
                 )}
 
                 {/* License Info in Profile */}
