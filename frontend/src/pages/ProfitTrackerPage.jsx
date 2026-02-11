@@ -638,7 +638,8 @@ export const ProfitTrackerPage = () => {
     getSimulatedTotalDeposits,
     getSimulatedTotalProfit,
     getSimulatedMemberName,
-    isMasterAdmin
+    isMasterAdmin,
+    refreshUser
   } = useAuth();
   const [summary, setSummary] = useState(null);
   const [deposits, setDeposits] = useState([]);
