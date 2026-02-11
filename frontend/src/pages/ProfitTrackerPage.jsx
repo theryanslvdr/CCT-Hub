@@ -1814,6 +1814,9 @@ export const ProfitTrackerPage = () => {
         toast.success('Profit tracker has been reset!');
       }
       
+      // CRITICAL: Clear cached backend daily balances to force fresh fetch after reset
+      setBackendDailyBalances({});
+      
       resetResetDialog();
       
       // Open the onboarding wizard for reset flow
