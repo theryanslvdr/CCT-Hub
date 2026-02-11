@@ -286,6 +286,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser,
     isAuthenticated: !!user,
     // Role helpers
     hasRole,
