@@ -856,6 +856,7 @@ export const AdminMembersPage = () => {
                     </div>
                   </div>
                 ) : (
+                  <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-lg bg-zinc-900/50">
                       <p className="text-xs text-zinc-500">Full Name</p>
@@ -918,7 +919,8 @@ export const AdminMembersPage = () => {
                       </p>
                     </div>
                   )}
-                </div>
+                  </>
+                )}
 
                 {/* License Info in Profile */}
                 {memberLicense && (
