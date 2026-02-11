@@ -74,6 +74,8 @@ export const AdminMembersPage = () => {
   const [diagnosticDialogOpen, setDiagnosticDialogOpen] = useState(false);
   const [diagnosticData, setDiagnosticData] = useState(null);
   const [diagnosticLoading, setDiagnosticLoading] = useState(false);
+  const [editingTradingStart, setEditingTradingStart] = useState(false);
+  const [newTradingStartDate, setNewTradingStartDate] = useState('');
   
   // Form states
   const [newRole, setNewRole] = useState('basic_admin');
