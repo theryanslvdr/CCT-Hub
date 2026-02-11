@@ -112,6 +112,20 @@ export const AuthProvider = ({ children }) => {
     storage.set('user', { ...user, ...userData });
   }, [user]);
 
+  // Refresh user data from server (useful after profile updates or onboarding)
+  const refreshUser = useCallback(async () => {
+    try {
+      const response = await api.get('/auth/me');
+      const freshUser = response.data;
+      setUser(freshUser);
+      storage.set('user', freshUser);
+      return { success: true, user: freshUser };
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return { success: false, error: error.message };
+    }
+  }, []);
+
   // Role-based access helpers
   const hasRole = useCallback((requiredRole) => {
     if (!user) return false;
