@@ -9026,8 +9026,8 @@ async def health_check():
     return {
         "status": "healthy", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "2026.02.11.v5",  # Version to verify deployment
-        "diagnostic_enabled": True
+        "version": "2026.02.11.v6",  # Version to verify deployment
+        "diagnostic_endpoint": "/api/admin/run-diagnostic/{user_id}"
     }
 
 # Include all routers
