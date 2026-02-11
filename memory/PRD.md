@@ -11,6 +11,57 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 75 (2026-02-11) - Critical Bug Fixes & Account Diagnostic Tool ✅
+
+#### Bug Fix #1: Email Not Sending for Official Signals - FIXED ✅
+- **Issue**: When marking a trading signal as official, email notifications were not being sent to members
+- **Root Cause**: `send_signal_email_to_members()` function was calling `send_email_via_emailit()` - a function that does NOT exist
+- **Fix**: Changed to use proper `send_email()` function from `services/email_service.py`
+- **Files Modified**: `/app/backend/server.py` (lines 603-616)
+
+#### Bug Fix #2: Mobile Onboarding Data Not Updating - FIXED ✅
+- **Issue**: User "Lysha" reported that after completing onboarding wizard, account value and Daily Projection were not updated
+- **Fix**: Added `refreshUser()` function to AuthContext + force page reload after onboarding
+- **Files Modified**: `/app/frontend/src/contexts/AuthContext.jsx`, `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+#### Bug Fix #3: Mobile Withdrawal Black Screen - FIXED ✅
+- **Issue**: Mobile simulate withdrawal button caused black screen when clicked
+- **Root Cause**: Button was calling `handleConfirmWithdrawal` which doesn't exist
+- **Fix**: Changed to `handleCompleteWithdrawal`
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+#### Bug Fix #4: Balance Calculation in Daily Projection - FIXED ✅
+- **Issue**: "Balance Before" values in Daily Projection table showed incorrect values
+- **Root Causes**: 
+  1. Used `simulatedView?.userId` instead of `simulatedView?.memberId`
+  2. Backend balances only applied to historical months, not current
+  3. Cached balances weren't cleared after reset
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
+
+#### Bug Fix #5: Trading Start Date Not Set - FIXED ✅
+- **Issue**: User Joshua Buñag's Daily Projection showed negative balances (Jan 15-21) because `trading_start_date` was not set
+- **Root Cause**: Without a trading start date, frontend defaulted to earlier dates with no data
+- **Fix**: Added two features:
+  1. **Auto-Fix Button**: `POST /api/admin/members/{user_id}/fix-trading-start` - automatically sets trading_start_date to the user's first trade date
+  2. **Manual Edit**: Added ability to manually edit trading_start_date in the diagnostic dialog
+- **Files Modified**: `/app/backend/server.py`, `/app/frontend/src/pages/admin/AdminMembersPage.jsx`
+
+#### NEW FEATURE: Account Diagnostic Tool ✅
+- **Purpose**: Debug user account issues directly from Admin Members page
+- **Features**:
+  - View User ID with copy button
+  - See trading type, start date, onboarding status, streak reset date
+  - Account summary: deposits, withdrawals, profit, commission, calculated balance
+  - Trade statistics: total entries, actual trades, did-not-trade count
+  - Recent trades table (last 20)
+  - Recent deposits/withdrawals table (last 20)
+  - **Deleted/Reset trades section** (if any trades were deleted)
+  - **Warning banner** when trading_start_date not set but user has trades
+  - **Auto-Fix and Manual Edit buttons** for trading_start_date
+- **Files Modified**: `/app/backend/server.py`, `/app/frontend/src/pages/admin/AdminMembersPage.jsx`
+
+**Testing**: 100% pass rate (Iterations 85 & 86)
+
 ### Session 70 (2026-02-04) - Mobile Wizard Verification + Trade Direction Migration Tool ✅
 
 #### Mobile Onboarding Wizard - Verified ✅
