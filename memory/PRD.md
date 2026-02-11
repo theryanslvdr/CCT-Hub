@@ -311,14 +311,16 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Pending Tasks
 
-### P0: Verify Balance Calculation Logic
-- User reported "Balance Before" showing incorrect values after reset
-- Frontend calculation logic in `generateDailyProjectionForMonth` may need review
-- Commission handling needs verification (commissions DO affect actual balance)
-- The balance should "catch up" to the actual Merin balance
-
 ### P1: Verify "No Trade Members" Widget
 - Logic implemented but needs production data verification
+
+### P1: Verify 7 Previous Production Bug Fixes
+- User needs to confirm these work in their production environment:
+  - "Did Not Trade" error fix
+  - Merin widget responsiveness
+  - Mobile sticky bar with LOT size
+  - Trade history pagination & filtering
+  - Mobile simulation dialogs
 
 ### P1: Apply Mobile UI to Other Dialogs
 - The modern full-screen mobile UI created for "Simulate Error" needs to be applied to:
