@@ -3297,13 +3297,16 @@ async def get_members(
     }
 
 @admin_router.get("/members/{user_id}")
-async def get_member_details(user_id: str, diagnostic: bool = False, user: dict = Depends(require_admin)):
+async def get_member_details(user_id: str, diagnostic: str = None, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Check if diagnostic mode - handle string "true" from query param
+    is_diagnostic = diagnostic is not None and diagnostic.lower() == "true"
+    
     # If diagnostic mode, return detailed diagnostic data
-    if diagnostic:
+    if is_diagnostic:
         # Get all trade logs
         all_trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
         trades_sorted = sorted(all_trades, key=lambda x: x.get("created_at", ""))
