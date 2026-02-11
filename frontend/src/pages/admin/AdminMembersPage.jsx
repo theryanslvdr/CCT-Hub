@@ -70,6 +70,11 @@ export const AdminMembersPage = () => {
   });
   const [changingLicense, setChangingLicense] = useState(false);
   
+  // Diagnostic state
+  const [diagnosticDialogOpen, setDiagnosticDialogOpen] = useState(false);
+  const [diagnosticData, setDiagnosticData] = useState(null);
+  const [diagnosticLoading, setDiagnosticLoading] = useState(false);
+  
   // Form states
   const [newRole, setNewRole] = useState('basic_admin');
   const [secretCode, setSecretCode] = useState('');
