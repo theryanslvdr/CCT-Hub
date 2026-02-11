@@ -3588,6 +3588,7 @@ class AdminUserUpdate(BaseModel):
     allowed_dashboards: Optional[List[str]] = None  # For super admin to assign dashboards
     role: Optional[str] = None  # For master admin to change roles
     email: Optional[str] = None  # For master admin to change email
+    trading_start_date: Optional[str] = None  # For master admin to set trading start date
 
 @admin_router.put("/members/{user_id}")
 async def update_member(user_id: str, data: AdminUserUpdate, user: dict = Depends(require_admin)):
@@ -3607,12 +3608,14 @@ async def update_member(user_id: str, data: AdminUserUpdate, user: dict = Depend
     if data.allowed_dashboards is not None and user.get("role") in ["super_admin", "master_admin"]:
         update_data["allowed_dashboards"] = data.allowed_dashboards
     
-    # Only master_admin can change roles and email
+    # Only master_admin can change roles, email, and trading_start_date
     if user.get("role") == "master_admin":
         if data.role:
             update_data["role"] = data.role
         if data.email:
             update_data["email"] = data.email.lower()
+        if data.trading_start_date:
+            update_data["trading_start_date"] = data.trading_start_date
     
     await db.users.update_one({"id": user_id}, {"$set": update_data})
     return {"message": "User updated"}
