@@ -432,6 +432,32 @@ export const AdminMembersPage = () => {
     toast.success(`${label} copied to clipboard`);
   };
 
+  // Auto-fix trading start date based on first trade
+  const handleAutoFixTradingStart = async (userId) => {
+    try {
+      const response = await api.post(`/admin/members/${userId}/fix-trading-start`);
+      toast.success(response.data.message);
+      // Refresh diagnostic data
+      handleRunDiagnostic(userId);
+    } catch (error) {
+      console.error('Failed to fix trading start date:', error);
+      toast.error(error.response?.data?.detail || 'Failed to fix trading start date');
+    }
+  };
+
+  // Manually update trading start date
+  const handleUpdateTradingStartDate = async (userId, newDate) => {
+    try {
+      await api.put(`/admin/members/${userId}`, { trading_start_date: newDate });
+      toast.success(`Trading start date updated to ${newDate}`);
+      // Refresh diagnostic data
+      handleRunDiagnostic(userId);
+    } catch (error) {
+      console.error('Failed to update trading start date:', error);
+      toast.error(error.response?.data?.detail || 'Failed to update trading start date');
+    }
+  };
+
   const getRoleIcon = (role) => {
     switch (role) {
       case 'super_admin': return <ShieldAlert className="w-4 h-4 text-amber-400" />;
