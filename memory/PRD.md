@@ -142,6 +142,40 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 **Testing**: 100% pass rate (Iteration 80 - 8/8 backend tests, all frontend verified)
 
+### Session 75 (2026-02-11) - Critical Bug Fixes: Email, Onboarding, Reset Safety ✅
+
+#### Bug Fix #1: Email Not Sending for Official Signals - FIXED ✅
+- **Issue**: When marking a trading signal as official, email notifications were not being sent to members
+- **Root Cause**: `send_signal_email_to_members()` function was calling `send_email_via_emailit()` - a function that does NOT exist
+- **Fix**: Changed to use proper `send_email()` function from `services/email_service.py`
+- **Files Modified**: `/app/backend/server.py` (lines 603-616)
+
+#### Bug Fix #2: Mobile Onboarding Data Not Updating - FIXED ✅
+- **Issue**: User "Lysha" reported that after completing onboarding wizard, account value and Daily Projection were not updated
+- **Root Cause**: Frontend was calling `loadData()` after onboarding but user context data wasn't refreshed
+- **Fix**: 
+  1. Added `refreshUser()` function to AuthContext that fetches fresh user data from `/auth/me`
+  2. Updated onboarding completion handler to call `refreshUser()` first, then `loadData()`, then force page reload
+- **Files Modified**: 
+  - `/app/frontend/src/contexts/AuthContext.jsx` (lines 110-128 - added refreshUser)
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (lines 643, 3939-3965)
+
+#### Bug Fix #3: Reset Tracker Safety Verification - VERIFIED ✅
+- **Issue**: Previous fix accidentally reset Master Admin's account when simulating user "Leilani"
+- **Verification**: Safety checks were added in Session 74, this session verified they are working:
+  - Frontend blocks reset if `simulatedView` exists but `memberId` is missing
+  - Backend requires Master Admin role to reset other users
+  - API requires explicit `user_id` parameter for simulated resets
+- **Status**: Testing agent confirmed simulation flow correctly passes memberId
+
+#### Bug Fix #4: TradeLogResponse Direction Field - FIXED ✅
+- **Issue**: `/api/trade/logs` endpoint was failing due to null direction values in legacy trade logs
+- **Root Cause**: TradeLogResponse model had `direction: str` (required) but some database records had null
+- **Fix**: Changed to `direction: Optional[str] = None`
+- **Files Modified**: `/app/backend/server.py` (line 200)
+
+**Testing**: 100% pass rate (Iteration 85 - 14/14 backend tests, all frontend verified)
+
 ### Session 74 (2026-02-10) - Mobile Full-Screen Dialogs Enhancement ✅
 
 #### Mobile Simulate Dialogs - Full-Screen Overlay Implementation ✅
