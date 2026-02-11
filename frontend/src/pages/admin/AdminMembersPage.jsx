@@ -918,7 +918,7 @@ export const AdminMembersPage = () => {
                       </p>
                     </div>
                   )}
-                )}
+                </div>
 
                 {/* License Info in Profile */}
                 {memberLicense && (
