@@ -3296,6 +3296,142 @@ async def get_members(
         "pages": (total + limit - 1) // limit
     }
 
+# NOTE: Specific sub-routes must come BEFORE the generic {user_id} route
+# Otherwise FastAPI will match "diagnostic" as a user_id
+
+@admin_router.get("/members/{user_id}/diagnostic")
+async def get_member_diagnostic(user_id: str, user: dict = Depends(require_admin)):
+    """Get diagnostic information for a member's account to debug data issues"""
+    
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get all trade logs
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    trades_sorted = sorted(trades, key=lambda x: x.get("created_at", ""))
+    
+    # Get all deposits
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    deposits_sorted = sorted(deposits, key=lambda x: x.get("created_at", ""))
+    
+    # Get reset/deleted trades
+    reset_trades = await db.reset_trades.find({"original_trade.user_id": user_id}, {"_id": 0}).to_list(100)
+    
+    # Calculate totals
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0)
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("amount", 0) < 0)
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)
+    
+    # Count did_not_trade entries
+    did_not_trade_count = len([t for t in trades if t.get("did_not_trade")])
+    actual_trades_count = len([t for t in trades if not t.get("did_not_trade")])
+    
+    calculated_balance = total_deposits - total_withdrawals + total_profit + total_commission
+    
+    return {
+        "user": {
+            "id": member.get("id"),
+            "email": member.get("email"),
+            "full_name": member.get("full_name"),
+            "onboarding_completed": member.get("onboarding_completed"),
+            "trading_type": member.get("trading_type"),
+            "trading_start_date": member.get("trading_start_date"),
+            "streak_reset_date": member.get("streak_reset_date")
+        },
+        "summary": {
+            "total_deposits": round(total_deposits, 2),
+            "total_withdrawals": round(total_withdrawals, 2),
+            "total_profit": round(total_profit, 2),
+            "total_commission": round(total_commission, 2),
+            "calculated_balance": round(calculated_balance, 2),
+            "total_trades": len(trades),
+            "actual_trades": actual_trades_count,
+            "did_not_trade_entries": did_not_trade_count,
+            "reset_trades_count": len(reset_trades)
+        },
+        "trades": [
+            {
+                "date": t.get("created_at", "")[:10],
+                "profit": t.get("actual_profit", 0),
+                "commission": t.get("commission", 0),
+                "did_not_trade": t.get("did_not_trade", False),
+                "lot_size": t.get("lot_size"),
+                "notes": t.get("notes", "")[:50]
+            }
+            for t in trades_sorted[-20:]  # Last 20 trades
+        ],
+        "deposits": [
+            {
+                "date": d.get("created_at", "")[:10],
+                "amount": d.get("amount", 0),
+                "type": d.get("type", ""),
+                "notes": d.get("notes", "")[:50]
+            }
+            for d in deposits_sorted[-20:]  # Last 20 deposits
+        ],
+        "reset_trades": [
+            {
+                "reset_at": r.get("reset_at", "")[:19],
+                "original_date": r.get("original_trade", {}).get("created_at", "")[:10],
+                "original_profit": r.get("original_trade", {}).get("actual_profit", 0),
+                "reset_by": r.get("reset_by_name", "")
+            }
+            for r in reset_trades[-10:]
+        ]
+    }
+
+@admin_router.get("/members/{user_id}/deposits")
+async def get_member_deposits(user_id: str, user: dict = Depends(require_admin)):
+    """Get all deposits for a specific member (admin only)"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    deposits = await db.deposits.find(
+        {"user_id": user_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return deposits
+
+@admin_router.get("/members/{user_id}/withdrawals")
+async def get_member_withdrawals(user_id: str, user: dict = Depends(require_admin)):
+    """Get all withdrawals for a specific member (admin only)"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    withdrawals = await db.deposits.find(
+        {"user_id": user_id, "amount": {"$lt": 0}}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return withdrawals
+
+@admin_router.delete("/members/{user_id}/trades/{trade_id}")
+async def delete_member_trade(user_id: str, trade_id: str, user: dict = Depends(require_admin)):
+    """Delete a specific trade for a member (admin only)"""
+    # Verify the trade belongs to the specified user
+    trade = await db.trade_logs.find_one({"id": trade_id, "user_id": user_id}, {"_id": 0})
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    
+    # Store in reset_trades for audit trail
+    await db.reset_trades.insert_one({
+        "original_trade": trade,
+        "reset_by": user["id"],
+        "reset_by_name": user.get("full_name", "Admin"),
+        "reset_at": datetime.now(timezone.utc).isoformat(),
+        "reason": "Manual deletion by admin"
+    })
+    
+    # Delete the trade
+    await db.trade_logs.delete_one({"id": trade_id})
+    
+    return {"message": "Trade deleted successfully"}
+
 @admin_router.get("/members/{user_id}")
 async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
