@@ -8944,7 +8944,7 @@ async def health_check():
     return {
         "status": "healthy", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "2026.02.11.v3",  # Version to verify deployment
+        "version": "2026.02.11.v4",  # Version to verify deployment
         "diagnostic_enabled": True
     }
 
