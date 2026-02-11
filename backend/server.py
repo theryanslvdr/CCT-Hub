@@ -3383,11 +3383,89 @@ async def get_member_diagnostic(user_id: str, user: dict = Depends(require_admin
     }
 
 @admin_router.get("/members/{user_id}")
-async def get_member_details(user_id: str, user: dict = Depends(require_admin)):
+async def get_member_details(user_id: str, diagnostic: bool = False, user: dict = Depends(require_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
     if not member:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # If diagnostic mode, return detailed diagnostic data
+    if diagnostic:
+        # Get all trade logs
+        all_trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+        trades_sorted = sorted(all_trades, key=lambda x: x.get("created_at", ""))
+        
+        # Get all deposits
+        all_deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+        deposits_sorted = sorted(all_deposits, key=lambda x: x.get("created_at", ""))
+        
+        # Get reset/deleted trades
+        reset_trades = await db.reset_trades.find({"original_trade.user_id": user_id}, {"_id": 0}).to_list(100)
+        
+        # Calculate totals
+        total_deposits_amt = sum(d.get("amount", 0) for d in all_deposits if d.get("amount", 0) > 0)
+        total_withdrawals = sum(abs(d.get("amount", 0)) for d in all_deposits if d.get("amount", 0) < 0)
+        total_profit = sum(t.get("actual_profit", 0) for t in all_trades)
+        total_commission = sum(t.get("commission", 0) for t in all_trades)
+        
+        # Count did_not_trade entries
+        did_not_trade_count = len([t for t in all_trades if t.get("did_not_trade")])
+        actual_trades_count = len([t for t in all_trades if not t.get("did_not_trade")])
+        
+        calculated_balance = total_deposits_amt - total_withdrawals + total_profit + total_commission
+        
+        return {
+            "user": {
+                "id": member.get("id"),
+                "email": member.get("email"),
+                "full_name": member.get("full_name"),
+                "onboarding_completed": member.get("onboarding_completed"),
+                "trading_type": member.get("trading_type"),
+                "trading_start_date": member.get("trading_start_date"),
+                "streak_reset_date": member.get("streak_reset_date")
+            },
+            "summary": {
+                "total_deposits": round(total_deposits_amt, 2),
+                "total_withdrawals": round(total_withdrawals, 2),
+                "total_profit": round(total_profit, 2),
+                "total_commission": round(total_commission, 2),
+                "calculated_balance": round(calculated_balance, 2),
+                "total_trades": len(all_trades),
+                "actual_trades": actual_trades_count,
+                "did_not_trade_entries": did_not_trade_count,
+                "reset_trades_count": len(reset_trades)
+            },
+            "trades": [
+                {
+                    "date": t.get("created_at", "")[:10] if t.get("created_at") else "",
+                    "profit": t.get("actual_profit", 0),
+                    "commission": t.get("commission", 0),
+                    "did_not_trade": t.get("did_not_trade", False),
+                    "lot_size": t.get("lot_size"),
+                    "notes": (t.get("notes", "") or "")[:50]
+                }
+                for t in trades_sorted[-20:]
+            ],
+            "deposits": [
+                {
+                    "date": d.get("created_at", "")[:10] if d.get("created_at") else "",
+                    "amount": d.get("amount", 0),
+                    "type": d.get("type", ""),
+                    "notes": (d.get("notes", "") or "")[:50]
+                }
+                for d in deposits_sorted[-20:]
+            ],
+            "reset_trades": [
+                {
+                    "reset_at": (r.get("reset_at", "") or "")[:19],
+                    "original_date": (r.get("original_trade", {}).get("created_at", "") or "")[:10],
+                    "original_profit": r.get("original_trade", {}).get("actual_profit", 0),
+                    "reset_by": r.get("reset_by_name", "")
+                }
+                for r in reset_trades[-10:]
+            ]
+        }
+    
+    # Regular member details response
     # Get user's trades
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(50)
     
