@@ -1787,7 +1787,43 @@ export const AdminMembersPage = () => {
                   </div>
                   <div>
                     <p className="text-zinc-500">Trading Start</p>
-                    <p className="text-white">{diagnosticData.user.trading_start_date || 'Not set'}</p>
+                    {editingTradingStart ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <Input
+                          type="date"
+                          value={newTradingStartDate}
+                          onChange={(e) => setNewTradingStartDate(e.target.value)}
+                          className="input-dark text-sm h-8"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            handleUpdateTradingStartDate(diagnosticData.user.id, newTradingStartDate);
+                            setEditingTradingStart(false);
+                          }}
+                          className="h-8 px-2 bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingTradingStart(false)}
+                          className="h-8 px-2"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <p className={diagnosticData.user.trading_start_date ? 'text-white' : 'text-amber-400'}>
+                          {diagnosticData.user.trading_start_date || 'Not set'}
+                        </p>
+                        {!diagnosticData.user.trading_start_date && (
+                          <span className="text-xs text-amber-400">⚠️</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-zinc-500">Onboarding</p>
