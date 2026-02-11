@@ -602,13 +602,22 @@ CrossCurrent Team"""
             user_body = user_body.replace("{trade_monitor_url}", trade_monitor_url)
             user_body = user_body.replace("{current_date}", current_date)
             
-            # Send email
-            await send_email_via_emailit(
+            # Send email using the email service
+            from services.email_service import send_email
+            result = await send_email(
+                db=db,
                 to_email=user.get("email"),
                 subject=user_subject,
-                html_content=user_body.replace("\n", "<br>") if "<" not in user_body else user_body
+                html_content=user_body.replace("\n", "<br>") if "<" not in user_body else user_body,
+                template_type="trading_signal",
+                log_email_record=True
             )
-            sent_count += 1
+            if result.get("success"):
+                sent_count += 1
+            else:
+                logger.error(f"Failed to send signal email to {user.get('email')}: {result.get('error')}")
+                failed_count += 1
+                continue  # Don't count as sent
             
         except Exception as e:
             logger.error(f"Failed to send signal email to {user.get('email')}: {e}")
