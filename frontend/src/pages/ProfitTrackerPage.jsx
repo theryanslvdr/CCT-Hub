@@ -1144,7 +1144,8 @@ export const ProfitTrackerPage = () => {
     
     try {
       setBackendBalancesLoading(true);
-      const userId = simulatedView?.userId || null;
+      // CRITICAL FIX: Use memberId, not userId, for simulated members
+      const userId = simulatedView?.memberId || null;
       const response = await profitAPI.getDailyBalances(startDate, endDate, userId);
       
       if (response.data?.daily_balances) {
