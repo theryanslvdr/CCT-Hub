@@ -197,7 +197,7 @@ class TradeLogResponse(BaseModel):
     id: str
     user_id: str
     lot_size: float
-    direction: str
+    direction: Optional[str] = None  # Made optional to handle legacy data with null direction
     projected_profit: float
     actual_profit: float
     commission: Optional[float] = 0  # Daily commission from referrals
