@@ -1361,16 +1361,25 @@ export const ProfitTrackerPage = () => {
       effectiveStartDate  // Pass effective start date for licensees
     );
     
-    // CRITICAL FIX: For historical months, use backend-calculated balances as the authoritative source
-    // This fixes the recurring balance calculation bug where frontend-calculated balances diverge
+    // CRITICAL FIX: Use backend-calculated balances as the authoritative source for ALL months
+    // This fixes the balance calculation bug where frontend-calculated balances diverge
+    // especially after a tracker reset
     const year = selectedMonth.monthDate.getFullYear();
     const monthNum = selectedMonth.monthDate.getMonth() + 1;
     const cacheKey = `${year}-${monthNum}`;
     const backendBalanceMap = backendDailyBalances[cacheKey];
     
-    if (backendBalanceMap && Object.keys(backendBalanceMap).length > 0 && !isCurrentMonth) {
+    // Apply backend balances for ALL months (including current) to ensure accuracy
+    // The only exception: for "today" we use the live effectiveAccountValue
+    if (backendBalanceMap && Object.keys(backendBalanceMap).length > 0) {
       // Override frontend-calculated balances with authoritative backend values
       return frontendProjection.map(day => {
+        // For today, use live account value (from effectiveAccountValue) instead of cached backend data
+        // because backend data might be stale if user just made a trade
+        if (day.isToday) {
+          return day; // Keep frontend calculation for today
+        }
+        
         const backendData = backendBalanceMap[day.dateKey];
         if (backendData) {
           // Use backend's authoritative balance calculation
