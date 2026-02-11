@@ -409,6 +409,29 @@ export const AdminMembersPage = () => {
     }
   };
 
+  // Run diagnostic for a member's account
+  const handleRunDiagnostic = async (userId) => {
+    setDiagnosticLoading(true);
+    setDiagnosticData(null);
+    setDiagnosticDialogOpen(true);
+    try {
+      const response = await api.get(`/admin/members/${userId}/diagnostic`);
+      setDiagnosticData(response.data);
+    } catch (error) {
+      console.error('Failed to run diagnostic:', error);
+      toast.error('Failed to run diagnostic: ' + (error.response?.data?.detail || error.message));
+      setDiagnosticDialogOpen(false);
+    } finally {
+      setDiagnosticLoading(false);
+    }
+  };
+
+  // Copy text to clipboard
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard`);
+  };
+
   const getRoleIcon = (role) => {
     switch (role) {
       case 'super_admin': return <ShieldAlert className="w-4 h-4 text-amber-400" />;
