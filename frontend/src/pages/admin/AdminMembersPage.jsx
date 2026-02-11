@@ -2043,6 +2043,17 @@ export const AdminMembersPage = () => {
                 </div>
               )}
             </div>
+          ) : diagnosticData && !diagnosticData.summary ? (
+            <div className="p-6 text-center">
+              <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-white mb-2">Invalid Diagnostic Response</h4>
+              <p className="text-zinc-400 mb-4">
+                The server returned an unexpected response format. Please ensure the backend is updated to version 2026.02.11.v4 or later.
+              </p>
+              <p className="text-xs text-zinc-500">
+                Check /api/health endpoint for current version.
+              </p>
+            </div>
           ) : null}
           
           <div className="flex justify-end mt-4">
