@@ -3643,6 +3643,54 @@ async def unsuspend_member(user_id: str, user: dict = Depends(require_admin)):
     )
     return {"message": "User unsuspended"}
 
+@admin_router.post("/members/{user_id}/fix-trading-start")
+async def fix_trading_start_date(user_id: str, user: dict = Depends(require_admin)):
+    """Auto-fix trading_start_date based on the user's first trade"""
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Only master admin can fix trading start date")
+    
+    member = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Find the user's first trade (excluding did_not_trade entries)
+    first_trade = await db.trade_logs.find_one(
+        {"user_id": user_id, "did_not_trade": {"$ne": True}},
+        {"_id": 0, "created_at": 1},
+        sort=[("created_at", 1)]
+    )
+    
+    if not first_trade:
+        # No trades found, check for first deposit instead
+        first_deposit = await db.deposits.find_one(
+            {"user_id": user_id},
+            {"_id": 0, "created_at": 1},
+            sort=[("created_at", 1)]
+        )
+        if first_deposit:
+            first_date = first_deposit.get("created_at", "")[:10]
+        else:
+            raise HTTPException(status_code=400, detail="No trades or deposits found for this user")
+    else:
+        first_date = first_trade.get("created_at", "")[:10]
+    
+    if not first_date:
+        raise HTTPException(status_code=400, detail="Could not determine first trade date")
+    
+    # Update the user's trading_start_date
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "trading_start_date": first_date,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": f"Trading start date set to {first_date}",
+        "trading_start_date": first_date
+    }
+
 @admin_router.delete("/members/{user_id}")
 async def delete_member(user_id: str, user: dict = Depends(require_super_admin)):
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
