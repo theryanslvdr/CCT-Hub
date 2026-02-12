@@ -1921,7 +1921,7 @@ export const ProfitTrackerPage = () => {
     setSyncValidationLoading(true);
     try {
       for (const day of syncValidation.missing_trade_days) {
-        await api.post('/trade/did-not-trade', null, { params: { trade_date: day.date } });
+        await api.post('/trade/did-not-trade', null, { params: { date: day.date } });
       }
       toast.success(`Marked ${syncValidation.missing_trade_days.length} days as "Did Not Trade"`);
       
