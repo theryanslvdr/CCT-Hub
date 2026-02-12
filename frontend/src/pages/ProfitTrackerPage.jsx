@@ -1896,6 +1896,7 @@ export const ProfitTrackerPage = () => {
       // Refresh validation
       const response = await api.get('/profit/sync-validation');
       setSyncValidation(response.data);
+      setDataHealth(response.data);
       
       // Check if we can move to next step
       if (response.data.missing_trade_days?.length === 0) {
@@ -1926,6 +1927,7 @@ export const ProfitTrackerPage = () => {
       // Refresh validation
       const response = await api.get('/profit/sync-validation');
       setSyncValidation(response.data);
+      setDataHealth(response.data);
       
       // Move to next step
       if (response.data.pre_start_trades?.length > 0) {
