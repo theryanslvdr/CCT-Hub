@@ -1508,16 +1508,19 @@ export const TradeMonitorPage = () => {
         {/* 2. LOT Size + Projected Exit (side by side) */}
         <div className="grid grid-cols-2 gap-3" data-testid="lot-exit-row">
           <Card className="glass-card" data-testid="lot-size-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-zinc-400">LOT Size</p>
-                  <p className="text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-start justify-between gap-1">
+                <div className="min-w-0">
+                  <p className="text-xs text-zinc-400 flex items-center gap-1">
+                    <Calculator className="w-3 h-3 text-purple-400 sm:hidden" />
+                    LOT Size
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
                     {lotSize.toFixed(2)}
                   </p>
                   <p className="text-[10px] text-zinc-500">Balance &divide; 980</p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <div className="hidden sm:flex w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 items-center justify-center flex-shrink-0">
                   <Calculator className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -1525,28 +1528,31 @@ export const TradeMonitorPage = () => {
           </Card>
 
           <Card className="glass-card" data-testid="projected-exit-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-zinc-400">Projected Exit</p>
-                  <p className="text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-start justify-between gap-1">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-zinc-400 flex items-center gap-1">
+                    <Rocket className="w-3 h-3 text-emerald-400 sm:hidden" />
+                    Projected Exit
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
                     {formatLargeNumber(exitValue)}
                   </p>
-                  <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                    <Rocket className="w-6 h-6 text-white" />
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDreamProfit(true)}
+                      className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-[10px] h-5 px-1.5"
+                      data-testid="open-dream-profit"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 mr-0.5" /> Dream
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowDreamProfit(true)}
-                    className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-xs h-7 px-2"
-                    data-testid="open-dream-profit"
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" /> Dream
-                  </Button>
+                </div>
+                <div className="hidden sm:flex w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 items-center justify-center flex-shrink-0">
+                  <Rocket className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
