@@ -1253,6 +1253,150 @@ async def update_notification_preferences(data: NotificationPreferences, user: d
     return {"message": "Notification preferences updated", "preferences": prefs}
 
 
+# ==================== PUSH NOTIFICATION ROUTES ====================
+
+class PushSubscription(BaseModel):
+    endpoint: str
+    keys: Dict[str, str]
+
+@users_router.post("/push-subscribe")
+async def push_subscribe(subscription: PushSubscription, user: dict = Depends(get_current_user)):
+    """Subscribe to push notifications"""
+    sub_data = {
+        "user_id": user["id"],
+        "endpoint": subscription.endpoint,
+        "keys": subscription.keys,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    # Upsert by endpoint to avoid duplicates
+    await db.push_subscriptions.update_one(
+        {"endpoint": subscription.endpoint},
+        {"$set": sub_data},
+        upsert=True
+    )
+    return {"message": "Push subscription saved"}
+
+@users_router.delete("/push-subscribe")
+async def push_unsubscribe(subscription: PushSubscription, user: dict = Depends(get_current_user)):
+    """Unsubscribe from push notifications"""
+    await db.push_subscriptions.delete_one({"endpoint": subscription.endpoint, "user_id": user["id"]})
+    return {"message": "Push subscription removed"}
+
+@users_router.get("/vapid-public-key")
+async def get_vapid_public_key():
+    """Return VAPID public key for frontend push subscription"""
+    key = os.environ.get("VAPID_PUBLIC_KEY", "")
+    return {"public_key": key}
+
+
+async def send_push_notification(user_id: str, title: str, body: str, url: str = "/", tag: str = None):
+    """Send a push notification to a specific user"""
+    from pywebpush import webpush, WebPushException
+    
+    vapid_private = os.environ.get("VAPID_PRIVATE_KEY")
+    vapid_subject = os.environ.get("VAPID_SUBJECT", "mailto:iam@ryansalvador.com")
+    
+    if not vapid_private:
+        logger.warning("VAPID_PRIVATE_KEY not set, skipping push notification")
+        return {"sent": 0, "failed": 0}
+    
+    # Check user's notification preferences
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "notification_preferences": 1})
+    
+    subscriptions = await db.push_subscriptions.find({"user_id": user_id}).to_list(20)
+    
+    import json
+    payload = json.dumps({
+        "title": title,
+        "body": body,
+        "url": url,
+        "tag": tag or "crosscurrent",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    
+    sent = 0
+    failed = 0
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info={"endpoint": sub["endpoint"], "keys": sub["keys"]},
+                data=payload,
+                vapid_private_key=vapid_private,
+                vapid_claims={"sub": vapid_subject},
+            )
+            sent += 1
+        except WebPushException as e:
+            logger.warning(f"Push notification failed for {user_id}: {e}")
+            # Remove invalid subscriptions (410 Gone)
+            if hasattr(e, 'response') and e.response and e.response.status_code in [404, 410]:
+                await db.push_subscriptions.delete_one({"endpoint": sub["endpoint"]})
+            failed += 1
+        except Exception as e:
+            logger.error(f"Push notification error: {e}")
+            failed += 1
+    
+    return {"sent": sent, "failed": failed}
+
+
+async def send_push_to_all_members(title: str, body: str, url: str = "/", tag: str = None, exclude_user_ids: list = None):
+    """Send push notification to all active members"""
+    query = {}
+    if exclude_user_ids:
+        query["user_id"] = {"$nin": exclude_user_ids}
+    
+    subscriptions = await db.push_subscriptions.find(query).to_list(1000)
+    
+    from pywebpush import webpush, WebPushException
+    import json
+    
+    vapid_private = os.environ.get("VAPID_PRIVATE_KEY")
+    vapid_subject = os.environ.get("VAPID_SUBJECT", "mailto:iam@ryansalvador.com")
+    
+    if not vapid_private:
+        return {"sent": 0, "failed": 0}
+    
+    payload = json.dumps({
+        "title": title,
+        "body": body,
+        "url": url,
+        "tag": tag or "crosscurrent",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    
+    sent = 0
+    failed = 0
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info={"endpoint": sub["endpoint"], "keys": sub["keys"]},
+                data=payload,
+                vapid_private_key=vapid_private,
+                vapid_claims={"sub": vapid_subject},
+            )
+            sent += 1
+        except WebPushException as e:
+            if hasattr(e, 'response') and e.response and e.response.status_code in [404, 410]:
+                await db.push_subscriptions.delete_one({"endpoint": sub["endpoint"]})
+            failed += 1
+        except Exception:
+            failed += 1
+    
+    return {"sent": sent, "failed": failed}
+
+
+@admin_router.post("/push-notify-all")
+async def admin_push_notify_all(request: Request, user: dict = Depends(require_admin)):
+    """Admin: Send push notification to all subscribed users"""
+    body = await request.json()
+    title = body.get("title", "CrossCurrent Alert")
+    message = body.get("message", "")
+    url = body.get("url", "/")
+    tag = body.get("tag", "admin")
+    
+    result = await send_push_to_all_members(title, message, url, tag)
+    return {"message": f"Push sent to {result['sent']} devices", **result}
+
+
 @users_router.put("/profile")
 async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_user)):
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
