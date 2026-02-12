@@ -6760,6 +6760,66 @@ async def get_licensee_daily_projection(
 # ==================== EMAIL TEMPLATES (EXTRACTED) ====================
 # Moved to routes/settings.py
 
+# ==================== PWA ICON MANAGEMENT ====================
+# These endpoints are also in routes/settings.py but duplicated here
+# for production compatibility during deployment transitions.
+
+@admin_router.post("/pwa-icon/upload")
+async def upload_pwa_icon_admin(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    """Upload PWA app icon via file upload"""
+    try:
+        content = await file.read()
+        import io
+        result = cloudinary.uploader.upload(
+            io.BytesIO(content),
+            folder="crosscurrent/branding",
+            public_id="pwa_icon",
+            overwrite=True,
+            resource_type="image",
+        )
+        url = result.get("secure_url")
+        await db.platform_settings.update_one({}, {"$set": {"pwa_icon_url": url}}, upsert=True)
+        return {"url": url}
+    except Exception as e:
+        logger.error(f"PWA icon upload failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+@admin_router.put("/pwa-icon/url")
+async def set_pwa_icon_url_admin(request: Request, user: dict = Depends(require_admin)):
+    """Set PWA icon directly via URL"""
+    body = await request.json()
+    url = body.get("url", "")
+    await db.platform_settings.update_one({}, {"$set": {"pwa_icon_url": url}}, upsert=True)
+    return {"url": url, "message": "PWA icon URL updated"}
+
+@admin_router.get("/pwa-manifest")
+async def get_pwa_manifest_admin():
+    """Serve dynamic PWA manifest"""
+    from fastapi.responses import JSONResponse
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    pwa_icon_url = settings.get("pwa_icon_url", "") if settings else ""
+    platform_name = settings.get("platform_name", "CrossCurrent") if settings else "CrossCurrent"
+    icons = []
+    if pwa_icon_url:
+        icons = [
+            {"src": pwa_icon_url, "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": pwa_icon_url, "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ]
+    else:
+        icons = [
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ]
+    manifest = {
+        "short_name": platform_name, "name": f"The {platform_name} Hub",
+        "description": "Your complete trading profit management platform",
+        "icons": icons, "start_url": "/", "display": "standalone",
+        "theme_color": "#09090b", "background_color": "#09090b",
+        "orientation": "any", "scope": "/",
+        "categories": ["finance", "productivity"], "prefer_related_applications": False,
+    }
+    return JSONResponse(content=manifest, headers={"Content-Type": "application/manifest+json"})
+
 # User endpoint to get their own license projections
 @profit_router.get("/license-projections")
 async def get_my_license_projections(user: dict = Depends(get_current_user)):
