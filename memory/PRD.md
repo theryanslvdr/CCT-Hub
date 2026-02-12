@@ -13,15 +13,13 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ### Session 80 (2026-02-12) - Trade Monitor Layout Redesign + Export Debug Data
 
-#### UI: Trade Monitor 2-Column Layout Redesign
-- Restructured page layout to 2-column grid (`lg:grid-cols-[1fr_340px]`)
-- **Left column**: Active Signal Card, LOT Size/Calculator/Projected Exit (3-column row), Trade Control
-- **Right sidebar (desktop)**: Multiplier panel (flex-1, tall), Dream button + Rocket icon, Sound toggle
-- Multiplier and Sound toggle remain inline on mobile (hidden sidebar with `lg:hidden`)
-- LOT Size + Calculator icon + Projected Exit now in a 3-part row matching the user-provided screenshot
-- Your Time, Today's Summary, Merin iframe remain in 3-column grid below
-- Trade History remains full width at bottom
-- **Testing**: Iteration 92 -- 100% pass rate (8/8 features verified)
+#### UI: Trade Monitor Complete Layout Redesign
+- Redesigned page into priority-based 2-column layout (`lg:grid-cols-[1fr_380px]`)
+- **Left column** (priority order): Active Signal (top), LOT Size + Projected Exit (side-by-side), Your Time + Today's Summary (side-by-side)
+- **Right column**: Merin Trading iframe (tall, spans full height of left content)
+- **Bottom (full width)**: Trade Control, Trade History
+- Sound toggle removed entirely per user request
+- **Testing**: Iteration 93 -- 100% pass rate (9/9 features verified)
 
 #### FEATURE: Export Debug Data
 - New backend endpoint: `GET /api/admin/export-debug-data/{user_id}`
