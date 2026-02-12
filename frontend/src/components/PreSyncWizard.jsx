@@ -342,9 +342,10 @@ export function PreSyncWizard({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="pre-sync-wizard-dialog">
+      <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="pre-sync-wizard-dialog" aria-describedby="sync-wizard-desc">
         <DialogHeader>
           <DialogTitle className="text-white text-base">Balance Sync Wizard</DialogTitle>
+          <p id="sync-wizard-desc" className="sr-only">Multi-step wizard to validate and sync your balance</p>
         </DialogHeader>
 
         <StepIndicator currentStep={step} />
