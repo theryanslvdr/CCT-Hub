@@ -1972,7 +1972,9 @@ export const ProfitTrackerPage = () => {
     setEnterAPDate({
       date: date,
       dateKey: date,
-      fromWizard: true
+      dateStr: date,
+      fromWizard: true,
+      balanceBefore: displayAccountValue
     });
     setEnterAPValue('');
     setEnterAPCommission('');
