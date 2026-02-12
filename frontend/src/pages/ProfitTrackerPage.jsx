@@ -4240,6 +4240,7 @@ export const ProfitTrackerPage = () => {
         onActualBalanceChange={setActualBalanceInput}
         onSync={handleBalanceOverride}
         syncLoading={balanceOverrideLoading}
+        isMobile={isMobile}
       />
 
       {/* Balance Verification Dialog - shown after onboarding to sync with Merin */}
