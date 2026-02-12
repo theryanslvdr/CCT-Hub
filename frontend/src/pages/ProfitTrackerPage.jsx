@@ -2134,7 +2134,19 @@ export const ProfitTrackerPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs text-zinc-400">Account Value</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-zinc-400">Account Value</p>
+                  {!isLicensee && !simulatedView && (
+                    <button
+                      onClick={() => openBalanceVerification(displayAccountValue)}
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+                      title="Sync with Merin balance"
+                      data-testid="sync-balance-btn"
+                    >
+                      Sync
+                    </button>
+                  )}
+                </div>
                 <ValueTooltip exactValue={formatFullCurrency(displayAccountValue)}>
                   {/* Desktop: Full amount, Mobile: Compact */}
                   <p className="text-2xl font-bold font-mono text-white mt-1">
