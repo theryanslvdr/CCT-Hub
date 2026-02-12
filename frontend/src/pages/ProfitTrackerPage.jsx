@@ -2468,6 +2468,11 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
+      {/* Data Health Badge */}
+      {!isLicensee && !simulatedView && dataHealth && (
+        <DataHealthBadge healthData={dataHealth} onClick={() => openBalanceVerification(displayAccountValue)} />
+      )}
+
       {/* Actions - Hidden for licensees who have their own Deposit/Withdrawal page */}
       {!isLicensee && (
       <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-3 md:gap-4">
