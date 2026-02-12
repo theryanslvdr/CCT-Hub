@@ -1910,7 +1910,9 @@ export const ProfitTrackerPage = () => {
         }
       }
     } catch (error) {
-      toast.error('Failed: ' + (error.response?.data?.detail || error.message));
+      const detail = error.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(d => d.msg || JSON.stringify(d)).join(', ') : error.message);
+      toast.error('Failed: ' + msg);
     }
   };
 
