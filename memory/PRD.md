@@ -11,6 +11,31 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 78 (2026-02-12) - Data Health Badge + Refactoring ✅
+
+#### ENHANCEMENT: Data Health Score Badge ✅
+- Shows data completeness percentage on Profit Tracker dashboard (e.g., "50% complete — 4 days missing")
+- Clicking the badge opens the Pre-Sync Wizard for quick resolution
+- Auto-refreshes after balance sync or marking days as "Did Not Trade"
+- Only shown for non-licensee, non-simulated users
+- **File**: `/app/frontend/src/components/DataHealthBadge.jsx`
+
+#### REFACTORING: Backend Route Extraction ✅
+- **Created `/app/backend/deps.py`**: Shared dependencies module (db, auth, JWT, role checks)
+- **Extracted `/app/backend/routes/currency.py`**: Currency exchange rates (CoinGecko USDT, conversion)
+- **Extracted `/app/backend/routes/debt.py`**: Debt management CRUD + repayment plan
+- **Extracted `/app/backend/routes/goals.py`**: Profit planner goals CRUD + contribution tracking
+- **server.py**: 9486 → 9126 lines (-360 lines)
+- All extracted routes verified working with 100% test pass rate
+
+#### REFACTORING: Frontend Component Extraction ✅
+- **Extracted `/app/frontend/src/components/TransactionRecords.jsx`**: 3 dialog components (DepositRecordsDialog, WithdrawalRecordsDialog, CommissionRecordsDialog)
+- **ProfitTrackerPage.jsx**: 5294 → 5219 lines (-75 lines)
+- Combined with PreSyncWizard and DataHealthBadge extractions: 4 new components extracted total
+
+#### Testing: Iteration 89 — 100% pass (9/9 backend, all frontend verified)
+
+
 ### Session 77 (2026-02-12) - Pre-Sync Validation Wizard ✅
 
 #### NEW FEATURE: Pre-Sync Validation Wizard ✅
