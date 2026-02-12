@@ -1891,7 +1891,7 @@ export const ProfitTrackerPage = () => {
   // Quick mark as "Did Not Trade" from wizard
   const handleQuickDidNotTrade = async (date) => {
     try {
-      await api.post('/trade/did-not-trade', null, { params: { trade_date: date } });
+      await api.post('/trade/did-not-trade', null, { params: { date: date } });
       toast.success(`Marked ${date} as "Did Not Trade"`);
       
       // Refresh validation
