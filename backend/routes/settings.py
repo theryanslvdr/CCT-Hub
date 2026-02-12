@@ -128,6 +128,27 @@ async def upload_favicon(file: UploadFile = File(...), user: dict = Depends(requ
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
+@router.post("/upload-pwa-icon")
+async def upload_pwa_icon(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    db = deps.db
+    try:
+        result = cloudinary.uploader.upload(
+            file.file,
+            folder="crosscurrent/branding",
+            public_id="pwa_icon",
+            overwrite=True,
+            transformation=[{"width": 512, "height": 512, "crop": "fill"}]
+        )
+        url = result.get("secure_url")
+        await db.platform_settings.update_one(
+            {},
+            {"$set": {"pwa_icon_url": url}},
+            upsert=True
+        )
+        return {"url": url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
 
 # ==================== EMAIL TEMPLATES ====================
 
