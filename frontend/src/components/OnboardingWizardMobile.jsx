@@ -440,12 +440,12 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
     setIsLoading(true);
     try {
       const tradeHistory = Object.entries(tradeEntries)
-        .filter(([_, entry]) => entry && !entry.missed && entry.actualProfit !== undefined)
+        .filter(([_, entry]) => entry)
         .map(([dateKey, entry]) => ({
           date: dateKey,
-          actual_profit: parseFloat(entry.actualProfit) || 0,
-          lot_size: entry.lotSize || 0,
-          projected_profit: entry.projectedProfit || 0,
+          actual_profit: (!entry.missed && entry.actualProfit !== undefined) ? parseFloat(entry.actualProfit) || 0 : null,
+          missed: entry.missed || false,
+          balance: entry.balance || null,
           product: entry.product || 'MOIL10',
           direction: entry.direction || 'BUY'
         }));
