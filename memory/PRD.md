@@ -11,6 +11,25 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 77 (2026-02-12) - Pre-Sync Validation Wizard ✅
+
+#### NEW FEATURE: Pre-Sync Validation Wizard ✅
+- **Purpose**: Multi-step wizard that ensures data integrity before allowing balance sync with Merin
+- **How it works**: When user clicks "Sync" on Account Value card, a 4-step wizard opens:
+  1. **Step 1 (Start Date)**: If trading_start_date is missing, user must set it. Shows suggested date auto-detected from first trade/deposit
+  2. **Step 2 (Missing Days)**: Shows unreported trading days. User can "Adjust" (enter trade data) or mark as "Did Not Trade" individually or in batch
+  3. **Step 3 (Pre-Start Warning)**: If trades exist before start date, user must acknowledge they won't affect calculations
+  4. **Step 4 (Sync)**: Shows calculated balance, input for actual Merin balance, adjustment preview, and "Sync Balance" button
+- **Step Indicator**: Visual progress bar with green checkmarks (done), blue highlight (active), gray (pending)
+- **API Endpoints**:
+  - `GET /api/profit/sync-validation` - Returns validation report with can_sync, issues, missing_trade_days, pre_start_trades, summary
+  - `POST /api/profit/set-trading-start-date` - Sets user's trading start date
+  - `POST /api/profit/balance-override` - Creates balance override entry (existing)
+- **Files Created**: `/app/frontend/src/components/PreSyncWizard.jsx`
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx` (import + JSX insertion)
+- **Testing**: 100% pass rate (Iteration 88 - 13/13 backend tests, all frontend verified)
+
+
 ### Session 76 (2026-02-12) - Balance Override Feature ✅
 
 #### NEW FEATURE: Balance Override / Merin Sync ✅
