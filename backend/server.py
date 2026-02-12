@@ -6991,6 +6991,230 @@ async def delete_balance_override(user: dict = Depends(get_current_user)):
     
     return {"message": f"Removed {result.deleted_count} balance override(s)"}
 
+@profit_router.get("/sync-validation")
+async def get_sync_validation(user: dict = Depends(get_current_user)):
+    """
+    Validate user's data completeness before allowing balance sync.
+    Returns a detailed report of what needs to be fixed.
+    """
+    user_id = user["id"]
+    user_data = await db.users.find_one({"id": user_id}, {"_id": 0})
+    
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    validation = {
+        "can_sync": True,
+        "issues": [],
+        "trading_start_date": user_data.get("trading_start_date"),
+        "missing_trade_days": [],
+        "pre_start_trades": [],
+        "summary": {
+            "total_trading_days": 0,
+            "reported_days": 0,
+            "missing_days": 0,
+            "pre_start_trade_count": 0
+        }
+    }
+    
+    # Step 1: Check trading start date
+    trading_start_date = user_data.get("trading_start_date")
+    if not trading_start_date:
+        validation["can_sync"] = False
+        validation["issues"].append({
+            "type": "no_start_date",
+            "severity": "blocker",
+            "message": "Trading start date is not set"
+        })
+        
+        # Try to auto-detect from first trade or deposit
+        first_trade = await db.trade_logs.find_one(
+            {"user_id": user_id, "did_not_trade": {"$ne": True}},
+            {"_id": 0, "created_at": 1},
+            sort=[("created_at", 1)]
+        )
+        first_deposit = await db.deposits.find_one(
+            {"user_id": user_id},
+            {"_id": 0, "created_at": 1},
+            sort=[("created_at", 1)]
+        )
+        
+        suggested_date = None
+        if first_trade and first_deposit:
+            trade_date = first_trade.get("created_at", "")[:10]
+            deposit_date = first_deposit.get("created_at", "")[:10]
+            suggested_date = min(trade_date, deposit_date)
+        elif first_trade:
+            suggested_date = first_trade.get("created_at", "")[:10]
+        elif first_deposit:
+            suggested_date = first_deposit.get("created_at", "")[:10]
+        
+        validation["suggested_start_date"] = suggested_date
+        return validation
+    
+    # Parse start date
+    try:
+        start_date = datetime.strptime(trading_start_date, "%Y-%m-%d")
+    except ValueError:
+        validation["can_sync"] = False
+        validation["issues"].append({
+            "type": "invalid_start_date",
+            "severity": "blocker",
+            "message": f"Invalid trading start date format: {trading_start_date}"
+        })
+        return validation
+    
+    # Step 2: Check for missing trade days
+    today = datetime.now(timezone.utc).date()
+    
+    # Get all trade logs for user
+    all_trades = await db.trade_logs.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Create a set of dates with trade entries
+    trade_dates = {}
+    for trade in all_trades:
+        date_key = trade.get("created_at", "")[:10]
+        if date_key:
+            trade_dates[date_key] = {
+                "has_profit": trade.get("actual_profit") is not None,
+                "did_not_trade": trade.get("did_not_trade", False),
+                "actual_profit": trade.get("actual_profit"),
+                "commission": trade.get("commission", 0)
+            }
+    
+    # Get global holidays
+    holidays = await db.global_holidays.find({}, {"_id": 0}).to_list(1000)
+    holiday_dates = set()
+    for h in holidays:
+        holiday_dates.add(h.get("date", "")[:10])
+    
+    # Get user holidays
+    user_holidays = await db.user_holidays.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    for h in user_holidays:
+        holiday_dates.add(h.get("date", "")[:10])
+    
+    # Iterate through each day from start date to today
+    current = start_date.date()
+    missing_days = []
+    
+    while current <= today:
+        date_str = current.strftime("%Y-%m-%d")
+        day_of_week = current.weekday()
+        
+        # Skip weekends (Saturday=5, Sunday=6)
+        if day_of_week >= 5:
+            current += timedelta(days=1)
+            continue
+        
+        # Skip holidays
+        if date_str in holiday_dates:
+            current += timedelta(days=1)
+            continue
+        
+        # Skip today (might not have traded yet)
+        if current == today:
+            current += timedelta(days=1)
+            continue
+        
+        # Check if this day has a trade entry
+        trade_info = trade_dates.get(date_str)
+        
+        if not trade_info:
+            # No entry at all
+            missing_days.append({
+                "date": date_str,
+                "status": "no_entry",
+                "message": "No trade entry for this day"
+            })
+        elif not trade_info["did_not_trade"] and not trade_info["has_profit"]:
+            # Has entry but no actual profit reported (and not marked as did_not_trade)
+            missing_days.append({
+                "date": date_str,
+                "status": "incomplete",
+                "message": "Trade entry exists but actual profit not reported"
+            })
+        
+        current += timedelta(days=1)
+    
+    validation["missing_trade_days"] = missing_days
+    validation["summary"]["missing_days"] = len(missing_days)
+    
+    if missing_days:
+        validation["can_sync"] = False
+        validation["issues"].append({
+            "type": "missing_trade_days",
+            "severity": "blocker",
+            "message": f"{len(missing_days)} trading day(s) without reported data",
+            "count": len(missing_days)
+        })
+    
+    # Calculate total trading days
+    total_days = 0
+    current = start_date.date()
+    while current <= today:
+        date_str = current.strftime("%Y-%m-%d")
+        day_of_week = current.weekday()
+        if day_of_week < 5 and date_str not in holiday_dates and current != today:
+            total_days += 1
+        current += timedelta(days=1)
+    
+    validation["summary"]["total_trading_days"] = total_days
+    validation["summary"]["reported_days"] = total_days - len(missing_days)
+    
+    # Step 3: Check for trades before start date
+    pre_start_trades = []
+    for trade in all_trades:
+        trade_date = trade.get("created_at", "")[:10]
+        if trade_date and trade_date < trading_start_date:
+            pre_start_trades.append({
+                "date": trade_date,
+                "actual_profit": trade.get("actual_profit", 0),
+                "commission": trade.get("commission", 0),
+                "did_not_trade": trade.get("did_not_trade", False)
+            })
+    
+    validation["pre_start_trades"] = sorted(pre_start_trades, key=lambda x: x["date"])
+    validation["summary"]["pre_start_trade_count"] = len(pre_start_trades)
+    
+    if pre_start_trades:
+        # This is a warning, not a blocker, but user must acknowledge
+        validation["issues"].append({
+            "type": "pre_start_trades",
+            "severity": "warning",
+            "message": f"{len(pre_start_trades)} trade(s) exist before your start date",
+            "count": len(pre_start_trades),
+            "requires_acknowledgment": True
+        })
+    
+    return validation
+
+@profit_router.post("/set-trading-start-date")
+async def set_trading_start_date(
+    trading_start_date: str = Body(..., embed=True),
+    user: dict = Depends(get_current_user)
+):
+    """Set or update the user's trading start date"""
+    user_id = user["id"]
+    
+    # Validate date format
+    try:
+        datetime.strptime(trading_start_date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "trading_start_date": trading_start_date,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": f"Trading start date set to {trading_start_date}"}
+
 @profit_router.post("/complete-onboarding")
 async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_current_user)):
     """
