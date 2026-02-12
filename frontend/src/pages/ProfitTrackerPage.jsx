@@ -1811,6 +1811,8 @@ export const ProfitTrackerPage = () => {
       // Clear cached balances and reload
       setBackendDailyBalances({});
       await loadData();
+      // Refresh health score
+      api.get('/profit/sync-validation').then(r => setDataHealth(r.data)).catch(() => {});
     } catch (error) {
       console.error('Failed to create balance override:', error);
       toast.error('Failed to sync balance: ' + (error.response?.data?.detail || error.message));
