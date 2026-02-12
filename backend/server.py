@@ -107,6 +107,15 @@ MASTER_ADMIN_SECRET = os.environ.get('MASTER_ADMIN_SECRET', '')
 # Super Admin Bypass Code (for hidden settings click feature) - No insecure fallback
 SUPER_ADMIN_BYPASS = os.environ.get('SUPER_ADMIN_BYPASS', '')
 
+# Initialize shared deps module
+import deps as _deps
+_deps.init(db, JWT_SECRET, SUPER_ADMIN_SECRET, MASTER_ADMIN_SECRET, SUPER_ADMIN_BYPASS)
+
+# Import extracted route modules
+from routes.currency import router as _currency_router
+from routes.debt import router as _debt_router
+from routes.goals import router as _goals_router
+
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
     'member': 1,        # Normal member - modular dashboard access
