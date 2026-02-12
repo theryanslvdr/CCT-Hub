@@ -693,6 +693,14 @@ export const ProfitTrackerPage = () => {
   const [actualBalanceInput, setActualBalanceInput] = useState('');
   const [balanceOverrideLoading, setBalanceOverrideLoading] = useState(false);
   
+  // Pre-Sync Validation Wizard states
+  const [syncWizardOpen, setSyncWizardOpen] = useState(false);
+  const [syncWizardStep, setSyncWizardStep] = useState(1); // 1: Start Date, 2: Missing Days, 3: Pre-Start Warning, 4: Sync
+  const [syncValidation, setSyncValidation] = useState(null);
+  const [syncValidationLoading, setSyncValidationLoading] = useState(false);
+  const [newStartDate, setNewStartDate] = useState('');
+  const [preStartAcknowledged, setPreStartAcknowledged] = useState(false);
+  
   // Backend-calculated daily balances (authoritative source for historical months)
   const [backendDailyBalances, setBackendDailyBalances] = useState({});
   const [backendBalancesLoading, setBackendBalancesLoading] = useState(false);
