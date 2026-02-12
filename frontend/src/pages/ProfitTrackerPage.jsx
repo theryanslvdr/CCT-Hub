@@ -4191,6 +4191,29 @@ export const ProfitTrackerPage = () => {
         isReset={isResetOnboarding}
       />
 
+      {/* Pre-Sync Validation Wizard */}
+      <PreSyncWizard
+        open={syncWizardOpen}
+        onOpenChange={setSyncWizardOpen}
+        step={syncWizardStep}
+        validation={syncValidation}
+        validationLoading={syncValidationLoading}
+        newStartDate={newStartDate}
+        onStartDateChange={setNewStartDate}
+        onSetStartDate={handleSetStartDate}
+        onMarkDidNotTrade={handleQuickDidNotTrade}
+        onMarkAllDidNotTrade={handleMarkAllDidNotTrade}
+        onAdjustTrade={openAdjustTradeFromWizard}
+        preStartAcknowledged={preStartAcknowledged}
+        onToggleAcknowledgePreStart={setPreStartAcknowledged}
+        onContinuePastPreStart={handleAcknowledgePreStartTrades}
+        calculatedBalance={calculatedBalance}
+        actualBalanceInput={actualBalanceInput}
+        onActualBalanceChange={setActualBalanceInput}
+        onSync={handleBalanceOverride}
+        syncLoading={balanceOverrideLoading}
+      />
+
       {/* Balance Verification Dialog - shown after onboarding to sync with Merin */}
       <Dialog open={balanceVerificationOpen} onOpenChange={setBalanceVerificationOpen}>
         <DialogContent className="glass-card border-zinc-800 max-w-md">
