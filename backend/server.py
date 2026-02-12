@@ -8302,6 +8302,116 @@ async def generate_performance_report_base64(
         logger.error(f"Failed to generate base64 report: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@admin_router.get("/daily-trade-summary")
+async def get_daily_trade_summary(date: Optional[str] = None, user: dict = Depends(require_admin)):
+    """Get a comprehensive daily trade summary for admin notifications - who traded, who missed, profits, commissions"""
+    if date:
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
+    else:
+        target_date = datetime.now(timezone.utc).date()
+    
+    date_str = target_date.strftime("%Y-%m-%d")
+    
+    # Get all active members
+    all_members = await db.users.find(
+        {"status": {"$ne": "deactivated"}, "role": {"$nin": ["master_admin"]}},
+        {"_id": 0, "password": 0}
+    ).to_list(500)
+    
+    # Get all trades for this date
+    trades = await db.trade_logs.find(
+        {"date": {"$regex": f"^{date_str}"}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Build member lookup
+    member_lookup = {m["id"]: m for m in all_members}
+    
+    # Categorize
+    traded = []
+    missed = []
+    did_not_trade = []
+    
+    traded_user_ids = set()
+    for t in trades:
+        uid = t.get("user_id")
+        traded_user_ids.add(uid)
+        member = member_lookup.get(uid, {})
+        entry = {
+            "user_id": uid,
+            "name": member.get("full_name", "Unknown"),
+            "email": member.get("email", ""),
+            "actual_profit": t.get("actual_profit", 0),
+            "commission": t.get("commission", 0),
+            "direction": t.get("direction", ""),
+            "lot_size": t.get("lot_size", 0),
+            "did_not_trade": t.get("did_not_trade", False),
+            "is_retroactive": t.get("is_retroactive", False),
+        }
+        if t.get("did_not_trade"):
+            did_not_trade.append(entry)
+        else:
+            traded.append(entry)
+    
+    # Members who have no trade entry at all
+    for m in all_members:
+        if m["id"] not in traded_user_ids and m.get("onboarding_completed"):
+            missed.append({
+                "user_id": m["id"],
+                "name": m.get("full_name", "Unknown"),
+                "email": m.get("email", ""),
+            })
+    
+    # Sort traded by profit desc
+    traded.sort(key=lambda x: x.get("actual_profit", 0), reverse=True)
+    
+    total_profit = sum(t.get("actual_profit", 0) for t in traded)
+    total_commission = sum(t.get("commission", 0) for t in traded)
+    
+    # Get the signal for this date
+    signal = await db.trading_signals.find_one(
+        {"created_at": {"$regex": f"^{date_str}"}},
+        {"_id": 0}
+    )
+    
+    return {
+        "date": date_str,
+        "signal": signal,
+        "traded": traded,
+        "missed": missed,
+        "did_not_trade": did_not_trade,
+        "stats": {
+            "total_traded": len(traded),
+            "total_missed": len(missed),
+            "total_did_not_trade": len(did_not_trade),
+            "total_profit": round(total_profit, 2),
+            "total_commission": round(total_commission, 2),
+            "total_members": len(all_members),
+        }
+    }
+
+@admin_router.post("/signals/force-notify")
+async def force_send_signal_email(request: Request, user: dict = Depends(require_admin)):
+    """Force send the active signal email to all members, respecting their notification preferences"""
+    signal = await db.trading_signals.find_one({"is_active": True}, {"_id": 0})
+    if not signal:
+        raise HTTPException(status_code=404, detail="No active signal found")
+    
+    frontend_url = request.headers.get("origin") or os.environ.get("FRONTEND_URL", "")
+    
+    try:
+        email_result = await send_signal_email_to_members(signal, frontend_url)
+        return {
+            "message": f"Signal email sent to {email_result.get('sent', 0)} members",
+            "sent": email_result.get("sent", 0),
+            "failed": email_result.get("failed", 0),
+            "total": email_result.get("total", 0),
+        }
+    except Exception as e:
+        logger.error(f"Failed to force send signal emails: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send emails: {str(e)}")
+
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
