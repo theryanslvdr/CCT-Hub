@@ -21,7 +21,11 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Sound toggle removed entirely per user request
 - **Testing**: Iteration 93 -- 100% pass rate (9/9 features verified)
 
-#### FEATURE: Export Debug Data
+#### REFACTORING: Backend Route Extraction (Continued)
+- Extracted BVE routes to `/app/backend/routes/bve.py` (338 lines)
+- Extracted Settings routes to `/app/backend/routes/settings.py` (413 lines) — includes platform settings, email templates, integration tests, email history
+- server.py: 9066 -> 8360 lines (706 lines removed)
+- All routes tested and verified working via curl
 - New backend endpoint: `GET /api/admin/export-debug-data/{user_id}`
 - Downloads comprehensive JSON file with: user profile, all trades, deposits, withdrawals, reset trades, balance overrides, commissions
 - Export button added to Admin Members page alongside Run Diagnostic button
