@@ -373,7 +373,8 @@ export function PreSyncWizard({
           <StepPreStartWarning
             validation={validation}
             acknowledged={preStartAcknowledged}
-            onAcknowledge={onAcknowledgePreStart}
+            onToggleAcknowledge={onToggleAcknowledgePreStart}
+            onContinue={onContinuePastPreStart}
           />
         )}
 
