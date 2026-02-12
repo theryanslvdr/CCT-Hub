@@ -116,6 +116,8 @@ from routes.currency import router as _currency_router
 from routes.debt import router as _debt_router
 from routes.goals import router as _goals_router
 from routes.api_center import router as _api_center_router
+from routes.bve import router as _bve_router
+from routes.settings import router as _settings_router
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
