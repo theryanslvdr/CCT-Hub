@@ -435,6 +435,27 @@ export const AdminMembersPage = () => {
     toast.success(`${label} copied to clipboard`);
   };
 
+  // Export debug data as downloadable JSON
+  const handleExportDebugData = async (userId, userName) => {
+    try {
+      toast.info('Exporting debug data...');
+      const response = await api.get(`/admin/export-debug-data/${userId}`);
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `debug-export-${(userName || userId).replace(/\s+/g, '_')}-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Debug data exported successfully');
+    } catch (error) {
+      console.error('Failed to export debug data:', error);
+      toast.error('Failed to export: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
   // Auto-fix trading start date based on first trade
   const handleAutoFixTradingStart = async (userId) => {
     try {
