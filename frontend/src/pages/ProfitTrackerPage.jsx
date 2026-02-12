@@ -4026,6 +4026,79 @@ export const ProfitTrackerPage = () => {
         isReset={isResetOnboarding}
       />
 
+      {/* Balance Verification Dialog - shown after onboarding to sync with Merin */}
+      <Dialog open={balanceVerificationOpen} onOpenChange={setBalanceVerificationOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Verify Your Balance
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+              <p className="text-sm text-zinc-400 mb-1">Your reported balance:</p>
+              <p className="text-3xl font-bold text-emerald-400">
+                ${calculatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            
+            <div className="border-t border-zinc-800 pt-4">
+              <p className="text-sm text-zinc-400 mb-3">
+                <span className="text-amber-400">Merin showing a different balance?</span><br/>
+                Enter your actual Merin balance below to sync. This will not affect your past trading history.
+              </p>
+              
+              <div>
+                <Label className="text-zinc-300">Actual Merin Balance (USDT)</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={actualBalanceInput}
+                    onChange={(e) => setActualBalanceInput(e.target.value)}
+                    placeholder="0.00"
+                    className="input-dark pl-7 text-lg"
+                    data-testid="actual-balance-input"
+                  />
+                </div>
+                {actualBalanceInput && parseFloat(actualBalanceInput) !== calculatedBalance && (
+                  <p className="text-xs mt-2 text-amber-400">
+                    Adjustment: {parseFloat(actualBalanceInput) > calculatedBalance ? '+' : ''}
+                    ${(parseFloat(actualBalanceInput) - calculatedBalance).toFixed(2)}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 btn-secondary" 
+                onClick={() => setBalanceVerificationOpen(false)}
+              >
+                Skip
+              </Button>
+              <Button 
+                onClick={handleBalanceOverride} 
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={balanceOverrideLoading}
+                data-testid="sync-balance-button"
+              >
+                {balanceOverrideLoading ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Syncing...</>
+                ) : (
+                  <><CheckCircle2 className="w-4 h-4 mr-2" /> Sync Balance</>
+                )}
+              </Button>
+            </div>
+            
+            <p className="text-xs text-zinc-500 text-center">
+              Future trade days will use this synced balance as the starting point.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Legacy Initial Balance Dialog - kept for backwards compatibility */}
       <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
         <DialogContent className="glass-card border-zinc-800">
