@@ -38,7 +38,18 @@ function App() {
   // Register service worker for PWA
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    }
+    // Dynamic manifest - try settings route, fallback to admin route, then static
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink) {
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/api/settings/manifest.json`)
+        .then(r => { if (r.ok) manifestLink.href = `${process.env.REACT_APP_BACKEND_URL}/api/settings/manifest.json`; else throw new Error(); })
+        .catch(() => {
+          fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/pwa-manifest`)
+            .then(r => { if (r.ok) manifestLink.href = `${process.env.REACT_APP_BACKEND_URL}/api/admin/pwa-manifest`; })
+            .catch(() => {});
+        });
     }
   }, []);
 
