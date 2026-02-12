@@ -136,7 +136,6 @@ profit_router = APIRouter(prefix="/profit", tags=["Profit Tracker"])
 trade_router = APIRouter(prefix="/trade", tags=["Trade Monitor"])
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
 settings_router = APIRouter(prefix="/settings", tags=["Settings"])
-api_center_router = APIRouter(prefix="/api-center", tags=["API Center"])
 bve_router = APIRouter(prefix="/bve", tags=["Beta Virtual Environment"])
 
 security = HTTPBearer()
