@@ -1397,6 +1397,64 @@ async def admin_push_notify_all(request: Request, user: dict = Depends(require_a
     return {"message": f"Push sent to {result['sent']} devices", **result}
 
 
+def schedule_pre_trade_notifications(trade_time: str, trade_timezone: str, product: str, direction: str):
+    """Schedule push notifications 10min and 5min before trade time"""
+    import pytz
+    from apscheduler.triggers.date import DateTrigger
+    from datetime import timedelta as td
+    
+    try:
+        tz = pytz.timezone(trade_timezone or "Asia/Manila")
+    except Exception:
+        tz = pytz.timezone("Asia/Manila")
+    
+    now = datetime.now(tz)
+    hour, minute = map(int, trade_time.split(":"))
+    trade_dt = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    
+    if trade_dt <= now:
+        logger.info("Trade time already passed, skipping pre-trade notifications")
+        return
+    
+    remind_10 = trade_dt - td(minutes=10)
+    if remind_10 > now:
+        try:
+            scheduler.add_job(
+                _send_pre_trade_push,
+                DateTrigger(run_date=remind_10),
+                id="pre_trade_10min",
+                replace_existing=True,
+                args=[10, product, direction, trade_time],
+            )
+            logger.info(f"Scheduled 10-min pre-trade notification at {remind_10}")
+        except Exception as e:
+            logger.error(f"Failed to schedule 10min notification: {e}")
+    
+    remind_5 = trade_dt - td(minutes=5)
+    if remind_5 > now:
+        try:
+            scheduler.add_job(
+                _send_pre_trade_push,
+                DateTrigger(run_date=remind_5),
+                id="pre_trade_5min",
+                replace_existing=True,
+                args=[5, product, direction, trade_time],
+            )
+            logger.info(f"Scheduled 5-min pre-trade notification at {remind_5}")
+        except Exception as e:
+            logger.error(f"Failed to schedule 5min notification: {e}")
+
+
+async def _send_pre_trade_push(minutes_before: int, product: str, direction: str, trade_time: str):
+    """Send pre-trade push notification"""
+    await send_push_to_all_members(
+        title=f"{minutes_before} Minutes to Trade!",
+        body=f"{direction} {product} at {trade_time} - Get ready!",
+        url="/trade-monitor",
+        tag=f"pre-trade-{minutes_before}min"
+    )
+
+
 @users_router.put("/profile")
 async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_user)):
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
