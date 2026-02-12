@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { VSDDialog } from '@/components/VSDDialog';
 import { PreSyncWizard } from '@/components/PreSyncWizard';
+import { DataHealthBadge } from '@/components/DataHealthBadge';
 
 // Hook to detect mobile viewport
 const useIsMobile = () => {
