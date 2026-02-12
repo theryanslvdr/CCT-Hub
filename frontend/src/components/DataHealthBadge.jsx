@@ -14,33 +14,25 @@ export function DataHealthBadge({ healthData, onClick }) {
     <button
       onClick={onClick}
       className={`
-        w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all
-        ${isComplete 
-          ? 'bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40' 
-          : 'bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/40'}
+        inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium transition-all cursor-pointer
+        ${isComplete
+          ? 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25'
+          : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'}
       `}
       data-testid="data-health-badge"
     >
-      <div className="flex items-center gap-2">
-        {isComplete ? (
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-        ) : (
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-        )}
-        <span className={isComplete ? 'text-emerald-400' : 'text-amber-400'}>
-          {percentage}% complete
-        </span>
-        <span className="text-zinc-500">
-          {isComplete
-            ? `All ${total_trading_days} days reported`
-            : `${missing_days} day${missing_days !== 1 ? 's' : ''} missing`}
-        </span>
-      </div>
+      {isComplete ? (
+        <ShieldCheck className="w-3 h-3" />
+      ) : (
+        <AlertTriangle className="w-3 h-3" />
+      )}
+      <span>{percentage}%</span>
       {!isComplete && (
-        <div className="flex items-center gap-1 text-amber-400/70">
-          <span>Fix</span>
-          <ChevronRight className="w-3 h-3" />
-        </div>
+        <>
+          <span className="text-zinc-500 hidden sm:inline">·</span>
+          <span className="text-zinc-500 hidden sm:inline">{missing_days} missing</span>
+          <ChevronRight className="w-2.5 h-2.5 opacity-60" />
+        </>
       )}
     </button>
   );
