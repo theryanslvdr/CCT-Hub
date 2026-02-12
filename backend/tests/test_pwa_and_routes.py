@@ -282,4 +282,6 @@ class TestExistingRoutes:
         )
         assert response.status_code == 200, f"Admin members failed: {response.status_code}"
         data = response.json()
-        assert isinstance(data, list), "Expected list of members"
+        # Response is {"members": [...], "page": 1, ...}
+        assert "members" in data, f"Expected members key: {list(data.keys())}"
+        assert isinstance(data["members"], list), "Expected members to be a list"
