@@ -7773,61 +7773,8 @@ async def migrate_trade_directions(user: dict = Depends(require_master_admin)):
 # ==================== DEBT, GOALS, CURRENCY ROUTES (EXTRACTED) ====================
 # Moved to routes/debt.py, routes/goals.py, routes/currency.py
 
-# ==================== SETTINGS ROUTES ====================
-
-@settings_router.get("/platform")
-async def get_platform_settings():
-    settings = await db.platform_settings.find_one({}, {"_id": 0})
-    if not settings:
-        settings = PlatformSettings().model_dump()
-    return settings
-
-@settings_router.put("/platform")
-async def update_platform_settings(data: PlatformSettings, user: dict = Depends(require_admin)):
-    await db.platform_settings.update_one(
-        {},
-        {"$set": data.model_dump()},
-        upsert=True
-    )
-    return {"message": "Settings updated"}
-
-@settings_router.post("/upload-logo")
-async def upload_logo(file: UploadFile = File(...), user: dict = Depends(require_admin)):
-    try:
-        result = cloudinary.uploader.upload(
-            file.file,
-            folder="crosscurrent/branding",
-            public_id="logo",
-            overwrite=True
-        )
-        url = result.get("secure_url")
-        await db.platform_settings.update_one(
-            {},
-            {"$set": {"logo_url": url}},
-            upsert=True
-        )
-        return {"url": url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
-@settings_router.post("/upload-favicon")
-async def upload_favicon(file: UploadFile = File(...), user: dict = Depends(require_admin)):
-    try:
-        result = cloudinary.uploader.upload(
-            file.file,
-            folder="crosscurrent/branding",
-            public_id="favicon",
-            overwrite=True
-        )
-        url = result.get("secure_url")
-        await db.platform_settings.update_one(
-            {},
-            {"$set": {"favicon_url": url}},
-            upsert=True
-        )
-        return {"url": url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+# ==================== SETTINGS ROUTES (EXTRACTED) ====================
+# Moved to routes/settings.py
 
 # ==================== API CENTER ROUTES (EXTRACTED) ====================
 # Moved to routes/api_center.py
