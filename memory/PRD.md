@@ -65,8 +65,8 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 ## Prioritized Backlog
 
 ### P0 - In Progress
-- Continue refactoring server.py (~9000 lines -> extract more routers: settings, bve, profit, admin)
-- Continue refactoring ProfitTrackerPage.jsx (~4800 lines -> extract ProjectionVision, dialogs)
+- Continue refactoring server.py (~8360 lines -> extract more routers: profit, admin, trade, auth)
+- Continue refactoring ProfitTrackerPage.jsx (~5200 lines -> deeply coupled dialogs make extraction complex)
 
 ### P1 - Upcoming
 - Progressive Web App (PWA) capabilities
