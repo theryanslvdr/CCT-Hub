@@ -82,6 +82,7 @@ function App() {
         </BVEProvider>
         </BrowserRouter>
         <Toaster position="top-right" richColors theme="dark" />
+        <PWAInstallBanner />
       </WebSocketProvider>
     </AuthProvider>
   );
