@@ -5064,15 +5064,15 @@ export const ProfitTrackerPage = () => {
               <div className="p-3 rounded-lg bg-zinc-900/50 space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Calculated Balance Before</span>
-                  <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore)}</span>
+                  <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore || 0)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Calculated Lot Size</span>
-                  <span className="font-mono text-purple-400">{truncateTo2Decimals(enterAPDate.lotSize).toFixed(2)}</span>
+                  <span className="font-mono text-purple-400">{truncateTo2Decimals(enterAPDate.lotSize || (enterAPDate.balanceBefore || 0) / 980).toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Target Profit</span>
-                  <span className="font-mono text-zinc-400">{formatMoney(enterAPDate.targetProfit)}</span>
+                  <span className="font-mono text-zinc-400">{formatMoney(enterAPDate.targetProfit || truncateTo2Decimals((enterAPDate.lotSize || (enterAPDate.balanceBefore || 0) / 980) * 15))}</span>
                 </div>
               </div>
 
