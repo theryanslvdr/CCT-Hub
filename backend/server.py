@@ -3250,6 +3250,7 @@ async def delete_signal(signal_id: str, user: dict = Depends(require_admin)):
 
 # Enhanced Member Management
 @admin_router.get("/run-diagnostic/{user_id}")
+@admin_router.post("/run-diagnostic/{user_id}")
 async def run_account_diagnostic(user_id: str, user: dict = Depends(require_admin)):
     """Dedicated diagnostic endpoint - separate from member details to avoid routing conflicts"""
     member = await db.users.find_one({"id": user_id}, {"_id": 0})
