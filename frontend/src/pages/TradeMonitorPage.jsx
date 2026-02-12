@@ -1384,7 +1384,7 @@ export const TradeMonitorPage = () => {
     
     <div className="space-y-6">
 
-      {/* Simulation Banner - Full width above the grid */}
+      {/* Simulation Banner */}
       {simulatedView && simulatedMemberName && (
         <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
           <div className="flex items-center gap-3">
@@ -1397,7 +1397,7 @@ export const TradeMonitorPage = () => {
         </div>
       )}
 
-      {/* Audio elements */}
+      {/* Audio elements (kept for trade-time auto-alerts) */}
       <audio ref={audioRef} loop>
         <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg" />
       </audio>
@@ -1405,18 +1405,19 @@ export const TradeMonitorPage = () => {
         <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
       </audio>
 
-    {/* Main 2-column layout: Left (signal/lot/control) + Right (multiplier/dream/sound) */}
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
-      {/* Left Column */}
+    {/* ═══════ TOP SECTION: 2-column (Left: priority info | Right: Merin) ═══════ */}
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
+
+      {/* ── Left Column: Signal → LOT/Exit → Time/Summary ── */}
       <div className="space-y-4">
 
-        {/* Active Signal Card */}
+        {/* 1. Active Signal Card (TOP PRIORITY) */}
         {signal ? (
           <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
             <CardHeader className="pb-2 px-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex items-center gap-2 text-base">
-                  <Radio className="w-4 h-4 text-blue-400 animate-pulse" /> 
+                  <Radio className="w-4 h-4 text-blue-400 animate-pulse" />
                   Active Signal
                 </CardTitle>
                 {signal.is_simulated && (
@@ -1432,7 +1433,7 @@ export const TradeMonitorPage = () => {
             </CardHeader>
             <CardContent className="px-4 pb-4">
               <div className="space-y-3">
-                {/* Direction Badge + Multiplier (mobile only) */}
+                {/* Direction + Multiplier row */}
                 <div className="flex items-center gap-3">
                   <div className={`flex-1 px-4 py-3 rounded-lg text-center font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                     <div className="flex items-center justify-center gap-2">
@@ -1441,14 +1442,13 @@ export const TradeMonitorPage = () => {
                     </div>
                     <p className="text-xs opacity-70 mt-1">{signal.product}</p>
                   </div>
-                  {/* Multiplier inline on mobile, hidden on desktop (shown in right panel) */}
-                  <div className="flex-1 px-4 py-3 rounded-lg bg-purple-500/10 text-center lg:hidden">
+                  <div className="flex-1 px-4 py-3 rounded-lg bg-purple-500/10 text-center">
                     <p className="text-[10px] text-zinc-500 uppercase">Multiplier</p>
                     <p className="text-xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
                   </div>
                 </div>
-                
-                {/* Time Row */}
+
+                {/* Trade Time + Your Time */}
                 <div className="flex gap-3">
                   <div className="flex-1 p-3 rounded-lg bg-zinc-900/50">
                     <p className="text-[10px] text-zinc-500 flex items-center gap-1">
@@ -1468,7 +1468,7 @@ export const TradeMonitorPage = () => {
                   )}
                 </div>
               </div>
-              
+
               {signal.notes && (
                 <p className="text-zinc-400 mt-3 p-2 bg-zinc-900/50 rounded-lg text-xs">{signal.notes}</p>
               )}
@@ -1485,62 +1485,155 @@ export const TradeMonitorPage = () => {
           </Card>
         )}
 
-        {/* LOT Size + Calculator + Projected Exit - 3 part row */}
-        <div className="grid grid-cols-3 gap-3" data-testid="lot-exit-row">
-          {/* LOT Size Card */}
+        {/* 2. LOT Size + Projected Exit (side by side) */}
+        <div className="grid grid-cols-2 gap-3" data-testid="lot-exit-row">
           <Card className="glass-card" data-testid="lot-size-card">
             <CardContent className="p-4">
-              <p className="text-xs text-zinc-400">LOT Size</p>
-              <p className="text-2xl sm:text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
-                {lotSize.toFixed(2)}
-              </p>
-              <p className="text-[10px] text-zinc-500">Balance &gt; {Math.round(accountValue)}</p>
-            </CardContent>
-          </Card>
-
-          {/* Center Calculator Icon Card */}
-          <Card className="glass-card flex items-center justify-center" data-testid="calculator-card">
-            <CardContent className="p-4 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Calculator className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-zinc-400">LOT Size</p>
+                  <p className="text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
+                    {lotSize.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">Balance &divide; 980</p>
+                </div>
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <Calculator className="w-6 h-6 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Projected Exit Value Card */}
           <Card className="glass-card" data-testid="projected-exit-card">
             <CardContent className="p-4">
-              <p className="text-xs text-zinc-400">Projected Exit</p>
-              <p className="text-2xl sm:text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
-                {formatLargeNumber(exitValue)}
-              </p>
-              <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-zinc-400">Projected Exit</p>
+                  <p className="text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
+                    {formatLargeNumber(exitValue)}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                    <Rocket className="w-6 h-6 text-white" />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDreamProfit(true)}
+                    className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-xs h-7 px-2"
+                    data-testid="open-dream-profit"
+                  >
+                    <Sparkles className="w-3 h-3 mr-1" /> Dream
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Trade Control */}
-        <Card className={`glass-card ${showExitAlert ? 'exit-section active' : ''}`} data-testid="trade-control-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-white">Trade Control</CardTitle>
-            {/* Sound toggle inline on mobile, hidden on desktop (shown in right panel) */}
+        {/* 3. Your Time + Today's Summary (side by side) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Card className="glass-card" data-testid="time-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white flex items-center gap-2 text-base">
+                <Clock className="w-4 h-4" /> Your Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-center overflow-hidden">
+                <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Philippines (Manila)</p>
+                <p className="text-3xl sm:text-4xl font-mono font-bold text-white tracking-wider" data-testid="ph-time">
+                  {formatTimeForTimezone(worldTime, 'Asia/Manila')}
+                </p>
+                {!isPhilippines && (
+                  <div className="mt-3 pt-3 border-t border-zinc-800">
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">
+                      Your Time ({userTimezone.split('/').pop()})
+                    </p>
+                    <p className="text-lg sm:text-xl font-mono text-zinc-400" data-testid="local-time">
+                      {formatTimeForTimezone(worldTime, userTimezone)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card" data-testid="todays-summary-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white text-base">Today&apos;s Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <p className="text-xs text-zinc-400">Actual Total</p>
+                  <p className="text-xl font-mono font-bold text-emerald-400" data-testid="actual-total">
+                    {formatLargeNumber(dailySummary?.total_actual || 0)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-900/50">
+                  <p className="text-xs text-zinc-400">P/L Diff</p>
+                  <p className={`text-xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="pl-difference">
+                    {(dailySummary?.difference || 0) >= 0 ? '+' : ''}{formatLargeNumber(dailySummary?.difference || 0)}
+                  </p>
+                </div>
+              </div>
+              <div className="hidden sm:block mt-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
+                <p className="text-xs text-zinc-300" data-testid="encouragement-message">{getDailyPerformanceMessage()}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+      </div> {/* End left column */}
+
+      {/* ── Right Column: Merin Trading (desktop — tall iframe alongside the left) ── */}
+      <Card className="glass-card hidden lg:flex flex-col" data-testid="merin-panel">
+        <CardHeader className="pb-2 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-white flex items-center gap-2 text-base">
+              <ExternalLink className="w-4 h-4 text-blue-400" />
+              Merin Trading
+            </CardTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => {
-                const newSoundEnabled = !soundEnabled;
-                setSoundEnabled(newSoundEnabled);
-                if (!newSoundEnabled) {
-                  if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-                  if (beepRef.current) { beepRef.current.pause(); beepRef.current.currentTime = 0; }
-                }
+                const iframe = document.querySelector('[data-testid="merin-iframe"]');
+                if (iframe) iframe.src = iframe.src;
               }}
-              className="text-zinc-400 lg:hidden"
-              data-testid="sound-toggle"
+              className="text-zinc-400 hover:text-blue-400 h-7 w-7"
+              data-testid="merin-refresh-button"
             >
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              <RefreshCw className="w-4 h-4" />
             </Button>
-          </CardHeader>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 flex-1 min-h-0">
+          <div className="relative w-full h-full min-h-[400px] bg-zinc-900 rounded-b-xl overflow-hidden">
+            <iframe
+              src="https://www.meringlobaltrading.com/"
+              title="Merin Trading Platform"
+              className="absolute inset-0 w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              data-testid="merin-iframe"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+    </div> {/* End 2-column grid */}
+
+    {/* ═══════ BOTTOM SECTION: Trade Control + Trade History (full width) ═══════ */}
+
+      {/* Trade Control */}
+      <Card className={`glass-card ${showExitAlert ? 'exit-section active' : ''}`} data-testid="trade-control-card">
+        <CardHeader>
+          <CardTitle className="text-white">Trade Control</CardTitle>
+        </CardHeader>
         <CardContent>
           {/* Show Performance Summary if trade already submitted today */}
           {dailySummary?.trades_count > 0 && !tradeEnded && !showCelebration ? (
