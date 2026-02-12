@@ -859,6 +859,45 @@ export const AdminSettingsPage = () => {
                 </div>
               </div>
 
+              {/* PWA App Icon */}
+              <div>
+                <Label className="text-zinc-300">PWA App Icon (home screen icon)</Label>
+                <p className="text-xs text-zinc-500 mt-1 mb-2">
+                  This icon appears on home screens when users install the app. Recommended: 512×512px PNG.
+                </p>
+                <div className="mt-2 flex items-center gap-4">
+                  {settings.pwa_icon_url ? (
+                    <div className="w-16 h-16 rounded-xl bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                      <img src={settings.pwa_icon_url} alt="PWA Icon" className="w-14 h-14 object-contain rounded-lg" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                      <Smartphone className="w-6 h-6 text-zinc-500" />
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handlePwaIconUpload}
+                      className="hidden"
+                      id="pwa-icon-upload"
+                      data-testid="pwa-icon-upload-input"
+                    />
+                    <label htmlFor="pwa-icon-upload">
+                      <Button asChild variant="outline" className="btn-secondary cursor-pointer">
+                        <span>
+                          <Upload className="w-4 h-4 mr-2" /> Upload PWA Icon
+                        </span>
+                      </Button>
+                    </label>
+                    {settings.pwa_icon_url && (
+                      <p className="text-xs text-emerald-400 mt-1">Icon set. Users need to reinstall to see changes.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Production Site URL */}
               <div>
                 <Label className="text-zinc-300">Production Site URL</Label>
