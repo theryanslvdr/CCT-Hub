@@ -873,15 +873,27 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                       <RotateCcw className="w-3 h-3 mr-1" /> Undo
                     </Button>
                   ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleMissedTrade}
-                      className="h-7 text-xs"
-                      disabled={currentEntry?.actualProfit !== undefined}
-                    >
-                      <X className="w-3 h-3 mr-1" /> Missed
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleMissedTrade}
+                        className="h-7 text-xs"
+                        disabled={currentEntry?.actualProfit !== undefined && currentEntry?.actualProfit !== 0}
+                      >
+                        <X className="w-3 h-3 mr-1" /> Missed
+                      </Button>
+                      {currentEntry?.actualProfit !== undefined && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleUndoMissedTrade}
+                          className="h-7 text-xs text-amber-400 hover:bg-amber-500/10"
+                        >
+                          <RotateCcw className="w-3 h-3 mr-1" /> Clear
+                        </Button>
+                      )}
+                    </div>
                   )}
                   
                   <div className="flex gap-1">
