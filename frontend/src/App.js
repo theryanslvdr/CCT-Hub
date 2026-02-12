@@ -29,6 +29,7 @@ import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
 import { AdminTransactionsPage } from "./pages/admin/AdminTransactionsPage";
 import { AdminLicensesPage } from "./pages/admin/AdminLicensesPage";
+import { DailyTradeSummaryPage } from "./pages/admin/DailyTradeSummaryPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
