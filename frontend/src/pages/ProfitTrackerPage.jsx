@@ -1771,6 +1771,43 @@ export const ProfitTrackerPage = () => {
     }
   };
 
+  // Balance Override handler - syncs calculated balance with actual Merin balance
+  const handleBalanceOverride = async () => {
+    const actualBalance = parseFloat(actualBalanceInput);
+    if (isNaN(actualBalance) || actualBalance < 0) {
+      toast.error('Please enter a valid balance amount');
+      return;
+    }
+    
+    setBalanceOverrideLoading(true);
+    try {
+      const response = await api.post('/profit/balance-override', {
+        actual_balance: actualBalance,
+        reason: 'Manual balance sync with Merin after onboarding'
+      });
+      
+      toast.success(`Balance synced! Adjustment of $${response.data.override.adjustment_amount.toFixed(2)} applied.`);
+      setBalanceVerificationOpen(false);
+      setActualBalanceInput('');
+      
+      // Clear cached balances and reload
+      setBackendDailyBalances({});
+      await loadData();
+    } catch (error) {
+      console.error('Failed to create balance override:', error);
+      toast.error('Failed to sync balance: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setBalanceOverrideLoading(false);
+    }
+  };
+
+  // Open Balance Verification dialog with calculated balance
+  const openBalanceVerification = (calcBalance) => {
+    setCalculatedBalance(calcBalance);
+    setActualBalanceInput(calcBalance.toFixed(2));
+    setBalanceVerificationOpen(true);
+  };
+
   // Reset handlers
   const handleResetConfirm = () => {
     setResetStep('password');
