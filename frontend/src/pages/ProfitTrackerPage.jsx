@@ -25,6 +25,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { VSDDialog } from '@/components/VSDDialog';
+import { PreSyncWizard } from '@/components/PreSyncWizard';
 
 // Hook to detect mobile viewport
 const useIsMobile = () => {
