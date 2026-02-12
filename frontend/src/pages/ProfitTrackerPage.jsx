@@ -4199,7 +4199,9 @@ export const ProfitTrackerPage = () => {
           
           // Calculate the expected balance from onboarding data
           const startingBalance = data?.starting_balance || 0;
-          const tradeProfits = (data?.trade_entries || []).reduce((sum, t) => sum + (t.profit || 0), 0);
+          const tradeProfits = (data?.trade_entries || [])
+            .filter(t => !t.missed)
+            .reduce((sum, t) => sum + (t.actual_profit || 0), 0);
           const deposits = (data?.transactions || [])
             .filter(t => t.type === 'deposit')
             .reduce((sum, t) => sum + (t.amount || 0), 0);
