@@ -11,6 +11,15 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 79 (2026-02-12) - Trade Monitor Layout Redesign ✅
+
+#### UI: Trade Monitor 3-Column Layout ✅
+- Moved Merin iframe from full-height right sidebar into a 3-column grid alongside "Your Time" and "Today's Summary" (all equal height)
+- Trade History card is now full-width below the 3-column grid
+- Mobile: Merin panel hidden, mobile button still available
+- **Testing**: Iteration 91 — 100% pass, all 10 features verified
+
+
 ### Session 78 (2026-02-12) - Data Health Badge + Refactoring ✅
 
 #### ENHANCEMENT: Data Health Score Badge ✅
