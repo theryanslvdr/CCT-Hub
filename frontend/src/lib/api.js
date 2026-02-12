@@ -287,6 +287,7 @@ export const settingsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  setPwaIconUrl: (url) => api.put('/settings/pwa-icon-url', { url }),
   // Email Templates
   getEmailTemplates: () => api.get('/settings/email-templates'),
   updateEmailTemplate: (type, data) => api.put(`/settings/email-templates/${type}`, data),
