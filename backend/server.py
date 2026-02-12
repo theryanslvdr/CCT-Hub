@@ -8557,11 +8557,21 @@ async def force_send_signal_email(request: Request, user: dict = Depends(require
     
     try:
         email_result = await send_signal_email_to_members(signal, frontend_url)
+        
+        # Also send push notification
+        push_result = await send_push_to_all_members(
+            title=f"Trading Signal: {signal.get('direction', '')} {signal.get('product', '')}",
+            body=f"Trade at {signal.get('trade_time', '')} | Multiplier: ×{signal.get('profit_multiplier', 15)}",
+            url="/trade-monitor",
+            tag="trading-signal"
+        )
+        
         return {
-            "message": f"Signal email sent to {email_result.get('sent', 0)} members",
+            "message": f"Signal email sent to {email_result.get('sent', 0)} members, push to {push_result.get('sent', 0)} devices",
             "sent": email_result.get("sent", 0),
             "failed": email_result.get("failed", 0),
             "total": email_result.get("total", 0),
+            "push_sent": push_result.get("sent", 0),
         }
     except Exception as e:
         logger.error(f"Failed to force send signal emails: {e}")
