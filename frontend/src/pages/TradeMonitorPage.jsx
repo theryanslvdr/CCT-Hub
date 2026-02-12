@@ -2367,7 +2367,7 @@ export const TradeMonitorPage = () => {
       
       {/* Mobile: Embedded Merin iframe (when user chooses "View in Hub") */}
       {showMerinIframe && (
-        <div className="lg:hidden mt-6 mb-24" data-testid="merin-mobile-iframe">
+        <div className="lg:hidden mt-6 mb-32 pb-4" data-testid="merin-mobile-iframe">
           <Card className="glass-card border-zinc-800">
             <CardHeader className="py-3 px-4 border-b border-zinc-800">
               <div className="flex items-center justify-between">
@@ -2387,7 +2387,7 @@ export const TradeMonitorPage = () => {
               <iframe
                 src="https://www.meringlobaltrading.com/"
                 title="Merin Trading Platform"
-                className="w-full h-[500px] border-0"
+                className="w-full h-[calc(100vh-250px)] min-h-[400px] border-0"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               />
             </CardContent>
