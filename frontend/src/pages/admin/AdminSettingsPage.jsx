@@ -30,6 +30,7 @@ export const AdminSettingsPage = () => {
     site_description: 'Trading profit management platform',
     favicon_url: '',
     logo_url: '',
+    pwa_icon_url: '',
     og_image_url: '',
     primary_color: '#3B82F6',
     accent_color: '#06B6D4',
