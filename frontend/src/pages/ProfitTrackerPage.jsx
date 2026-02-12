@@ -4415,6 +4415,9 @@ export const ProfitTrackerPage = () => {
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
             <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" /> Projection Vision
+            {!isLicensee && !simulatedView && dataHealth && (
+              <DataHealthBadge healthData={dataHealth} onClick={() => openBalanceVerification(displayAccountValue)} />
+            )}
           </CardTitle>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
