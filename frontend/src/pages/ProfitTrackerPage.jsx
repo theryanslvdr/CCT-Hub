@@ -1959,16 +1959,18 @@ export const ProfitTrackerPage = () => {
   const openAdjustTradeFromWizard = (date) => {
     // Close wizard temporarily
     setSyncWizardOpen(false);
-    // Open the adjust trade dialog for the specific date
-    setSelectedTradeForAdjustment({
+    // Open the existing Enter AP dialog for the specific date
+    setEnterAPDate({
       date: date,
       dateKey: date,
       fromWizard: true
     });
-    setAdjustProfitAmount('');
-    setAdjustCommissionAmount('');
-    setAdjustTradeDirection('');
-    setAdjustTradeDialogOpen(true);
+    setEnterAPValue('');
+    setEnterAPCommission('');
+    setAdjustmentType('profit_only');
+    setAdjustmentAmount('');
+    setAdjustedBalance('');
+    setEnterAPDialogOpen(true);
   };
 
   // Legacy openBalanceVerification - now opens wizard instead
