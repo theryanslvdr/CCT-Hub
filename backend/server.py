@@ -6944,7 +6944,7 @@ async def create_balance_override(data: BalanceOverrideData, user: dict = Depend
             },
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
-    }
+    )
     
     return {
         "message": "Balance override created successfully",
