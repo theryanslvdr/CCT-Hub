@@ -15,7 +15,7 @@ import {
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
   Activity, DollarSign, TrendingUp, Calendar, Crown, Play,
   Award, FileCheck, AlertTriangle, RefreshCw, Loader2, AlertCircle,
-  UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown
+  UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download
 } from 'lucide-react';
 import api, { adminAPI } from '@/lib/api';
 
