@@ -306,6 +306,49 @@ function StepSync({
   );
 }
 
+function WizardContent({ step, validation, validationLoading, newStartDate, onStartDateChange, onSetStartDate, onMarkDidNotTrade, onMarkAllDidNotTrade, onAdjustTrade, preStartAcknowledged, onToggleAcknowledgePreStart, onContinuePastPreStart, calculatedBalance, actualBalanceInput, onActualBalanceChange, onSync, syncLoading }) {
+  return (
+    <>
+      <StepIndicator currentStep={step} />
+      {step === 1 && (
+        <StepStartDate
+          validation={validation}
+          newStartDate={newStartDate}
+          onStartDateChange={onStartDateChange}
+          onSetStartDate={onSetStartDate}
+          loading={validationLoading}
+        />
+      )}
+      {step === 2 && (
+        <StepMissingDays
+          validation={validation}
+          onMarkDidNotTrade={onMarkDidNotTrade}
+          onMarkAllDidNotTrade={onMarkAllDidNotTrade}
+          onAdjustTrade={onAdjustTrade}
+          loading={validationLoading}
+        />
+      )}
+      {step === 3 && (
+        <StepPreStartWarning
+          validation={validation}
+          acknowledged={preStartAcknowledged}
+          onToggleAcknowledge={onToggleAcknowledgePreStart}
+          onContinue={onContinuePastPreStart}
+        />
+      )}
+      {step === 4 && (
+        <StepSync
+          calculatedBalance={calculatedBalance}
+          actualBalanceInput={actualBalanceInput}
+          onActualBalanceChange={onActualBalanceChange}
+          onSync={onSync}
+          loading={syncLoading}
+        />
+      )}
+    </>
+  );
+}
+
 export function PreSyncWizard({
   open,
   onOpenChange,
@@ -326,8 +369,21 @@ export function PreSyncWizard({
   onActualBalanceChange,
   onSync,
   syncLoading,
+  isMobile = false,
 }) {
+  if (!open) return null;
+
   if (validationLoading && !validation) {
+    if (isMobile) {
+      return (
+        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-400" />
+            <p className="text-sm text-zinc-400 mt-4">Validating your account...</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="glass-card border-zinc-800 max-w-md">
@@ -340,6 +396,50 @@ export function PreSyncWizard({
     );
   }
 
+  const contentProps = {
+    step, validation, validationLoading, newStartDate, onStartDateChange, onSetStartDate,
+    onMarkDidNotTrade, onMarkAllDidNotTrade, onAdjustTrade, preStartAcknowledged,
+    onToggleAcknowledgePreStart, onContinuePastPreStart, calculatedBalance,
+    actualBalanceInput, onActualBalanceChange, onSync, syncLoading,
+  };
+
+  // Mobile: Full-screen overlay (same style as Simulate Actions)
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300" data-testid="pre-sync-wizard-mobile">
+        <div className="h-full w-full flex flex-col bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden">
+          {/* Header */}
+          <div className="flex-shrink-0 p-6 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white">Balance Sync Wizard</h1>
+                  <p className="text-sm text-zinc-500">Step {step} of 4</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => onOpenChange(false)}
+                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                data-testid="close-sync-wizard-mobile"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto px-6 pb-32">
+            <WizardContent {...contentProps} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: Dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="pre-sync-wizard-dialog" aria-describedby="sync-wizard-desc">
@@ -347,47 +447,7 @@ export function PreSyncWizard({
           <DialogTitle className="text-white text-base">Balance Sync Wizard</DialogTitle>
           <p id="sync-wizard-desc" className="sr-only">Multi-step wizard to validate and sync your balance</p>
         </DialogHeader>
-
-        <StepIndicator currentStep={step} />
-
-        {step === 1 && (
-          <StepStartDate
-            validation={validation}
-            newStartDate={newStartDate}
-            onStartDateChange={onStartDateChange}
-            onSetStartDate={onSetStartDate}
-            loading={validationLoading}
-          />
-        )}
-
-        {step === 2 && (
-          <StepMissingDays
-            validation={validation}
-            onMarkDidNotTrade={onMarkDidNotTrade}
-            onMarkAllDidNotTrade={onMarkAllDidNotTrade}
-            onAdjustTrade={onAdjustTrade}
-            loading={validationLoading}
-          />
-        )}
-
-        {step === 3 && (
-          <StepPreStartWarning
-            validation={validation}
-            acknowledged={preStartAcknowledged}
-            onToggleAcknowledge={onToggleAcknowledgePreStart}
-            onContinue={onContinuePastPreStart}
-          />
-        )}
-
-        {step === 4 && (
-          <StepSync
-            calculatedBalance={calculatedBalance}
-            actualBalanceInput={actualBalanceInput}
-            onActualBalanceChange={onActualBalanceChange}
-            onSync={onSync}
-            loading={syncLoading}
-          />
-        )}
+        <WizardContent {...contentProps} />
       </DialogContent>
     </Dialog>
   );
