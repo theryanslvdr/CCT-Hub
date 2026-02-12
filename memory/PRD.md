@@ -14,11 +14,8 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 ### Session 78 (2026-02-12) - Data Health Badge + Refactoring ✅
 
 #### ENHANCEMENT: Data Health Score Badge ✅
-- Shows data completeness percentage on Profit Tracker dashboard (e.g., "50% complete — 4 days missing")
-- Clicking the badge opens the Pre-Sync Wizard for quick resolution
-- Auto-refreshes after balance sync or marking days as "Did Not Trade"
-- Only shown for non-licensee, non-simulated users
-- **File**: `/app/frontend/src/components/DataHealthBadge.jsx`
+- Compact amber pill inline with "Projection Vision" card title (e.g., "50% · 4 missing ›")
+- Clicking opens Pre-Sync Wizard; auto-refreshes after syncing or marking DNT
 
 #### REFACTORING: Backend Route Extraction ✅
 - **Created `/app/backend/deps.py`**: Shared dependencies module (db, auth, JWT, role checks)
