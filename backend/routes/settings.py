@@ -132,12 +132,16 @@ async def upload_favicon(file: UploadFile = File(...), user: dict = Depends(requ
 async def upload_pwa_icon(file: UploadFile = File(...), user: dict = Depends(require_admin)):
     db = deps.db
     try:
+        # Read file content first
+        content = await file.read()
+        import io
+        
         result = cloudinary.uploader.upload(
-            file.file,
+            io.BytesIO(content),
             folder="crosscurrent/branding",
             public_id="pwa_icon",
             overwrite=True,
-            transformation=[{"width": 512, "height": 512, "crop": "fill"}]
+            resource_type="image",
         )
         url = result.get("secure_url")
         await db.platform_settings.update_one(
@@ -147,7 +151,23 @@ async def upload_pwa_icon(file: UploadFile = File(...), user: dict = Depends(req
         )
         return {"url": url}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+class PWAIconURLUpdate(BaseModel):
+    url: str
+
+@router.put("/pwa-icon-url")
+async def set_pwa_icon_url(data: PWAIconURLUpdate, user: dict = Depends(require_admin)):
+    """Set PWA icon directly via URL (no upload needed)"""
+    db = deps.db
+    await db.platform_settings.update_one(
+        {},
+        {"$set": {"pwa_icon_url": data.url}},
+        upsert=True
+    )
+    return {"url": data.url, "message": "PWA icon URL updated"}
 
 @router.get("/manifest.json")
 async def get_pwa_manifest():
