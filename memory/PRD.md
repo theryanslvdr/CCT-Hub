@@ -1,99 +1,63 @@
-# CrossCurrent Finance Center - PRD
+# CrossCurrent Hub - Product Requirements Document
 
 ## Original Problem Statement
-Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monitor, Debt Management, Profit Planner, and Admin Dashboard.
+Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platform. Full-stack app with React frontend, FastAPI backend, and MongoDB. Features include profit tracking, trade monitoring, balance sync, admin panel, PWA support, and more.
 
 ## Architecture
-- **Backend**: FastAPI (Python) with MongoDB
-- **Frontend**: React with Tailwind CSS + Shadcn UI
-- **Auth**: JWT with Heartbeat API verification
-- **Integrations**: Cloudinary, Emailit, ExchangeRate-API, APScheduler, CoinGecko (USDT rates)
+- **Frontend**: React + Tailwind CSS + Shadcn/UI (port 3000)
+- **Backend**: FastAPI + MongoDB (port 8001, routes prefixed /api)
+- **Database**: MongoDB
+- **PWA**: manifest.json + service-worker.js
 
-## Completed Work
+## Key Files
+- `/app/backend/server.py` (~8400 lines) - Main backend, needs continued refactoring
+- `/app/frontend/src/pages/ProfitTrackerPage.jsx` (~5200 lines) - Main profit tracker
+- `/app/frontend/src/components/OnboardingWizardMobile.jsx` - Mobile onboarding
+- `/app/frontend/src/components/OnboardingWizard.jsx` - Desktop onboarding
+- `/app/frontend/src/components/PreSyncWizard.jsx` - Balance sync wizard (desktop + mobile)
+- `/app/frontend/src/lib/pwa.jsx` - PWA install + instructions
+- `/app/frontend/src/components/layout/Sidebar.jsx` - Navigation sidebar
 
-### Session 80 (2026-02-12) - Trade Monitor Layout Redesign + Export Debug Data
+## Credentials
+- Master Admin: iam@ryansalvador.com / admin123
 
-#### UI: Trade Monitor Complete Layout Redesign
-- Redesigned page into priority-based 2-column layout (`lg:grid-cols-[1fr_380px]`)
-- **Left column** (priority order): Active Signal (top), LOT Size + Projected Exit (side-by-side), Your Time + Today's Summary (side-by-side)
-- **Right column**: Merin Trading iframe (tall, spans full height of left content)
-- **Bottom (full width)**: Trade Control, Trade History
-- Sound toggle removed entirely per user request
-- **Testing**: Iteration 93 -- 100% pass rate (9/9 features verified)
+## What's Been Implemented
 
-#### FEATURE: Full PWA Implementation
-- Created `manifest.json` with app name "The CrossCurrent Hub", dark theme (#09090b), standalone display mode, 4 icon sizes
-- Created `sw.js` service worker with stale-while-revalidate for static assets, network-first for navigation, API bypass
-- Created `offline.html` branded offline fallback page
-- Generated PWA icons: 16px, 32px, 192px, 512px, apple-touch-icon (180px)
-- Added PWA meta tags to `index.html` (apple-mobile-web-app-capable, theme-color, etc.)
-- Created `PWAInstallBanner` component with custom "Add to Home Screen" prompt
-- Registered service worker in `App.js`
-- Page title updated to "The CrossCurrent Hub"
-- **Testing**: Iteration 94 -- 100% pass rate (30/30 backend + all frontend verified)
+### Session Feb 12, 2026 - Mobile Bug Fixes + PWA Instructions
+1. **Bug Fix: DNT button error** - Fixed param mismatch (trade_date -> date) in did-not-trade API calls
+2. **Bug Fix: Adjust button in wizard** - Redirected to existing Enter AP dialog (was using undeclared state)
+3. **Bug Fix: Balance not updating after onboarding** - Mobile wizard sent `trade_history` instead of `trade_entries` to backend
+4. **Bug Fix: Missed Trade button disabled** - Added Clear button, changed condition to allow re-selection
+5. **Bug Fix: Negative trade results** - Removed validation blocking negative actual profit values
+6. **Feature: Mobile Balance Sync Wizard** - Full-screen overlay matching Simulate functions style
+7. **Feature: PWA Install Instructions** - Device-detecting instructions dialog accessible from sidebar
+8. **Bug Fix: NaN display in Adjust Trade** - Added fallback calculations for wizard-sourced trade adjustments
 
-#### REFACTORING: Backend Route Extraction (Continued)
-- Extracted BVE routes to `/app/backend/routes/bve.py` (338 lines)
-- Extracted Settings routes to `/app/backend/routes/settings.py` (413 lines) — includes platform settings, email templates, integration tests, email history
-- server.py: 9066 -> 8360 lines (706 lines removed)
-- All routes tested and verified working via curl
-- New backend endpoint: `GET /api/admin/export-debug-data/{user_id}`
-- Downloads comprehensive JSON file with: user profile, all trades, deposits, withdrawals, reset trades, balance overrides, commissions
-- Export button added to Admin Members page alongside Run Diagnostic button
-- **Testing**: Verified working via curl and testing agent
-
-### Session 79 (2026-02-12) - Trade Monitor Layout Redesign (Previous)
-
-#### UI: Trade Monitor 3-Column Layout
-- Moved Merin iframe from full-height right sidebar into a 3-column grid alongside "Your Time" and "Today's Summary" (all equal height)
-- Trade History card is now full-width below the 3-column grid
-- Mobile: Merin panel hidden, mobile button still available
-- **Testing**: Iteration 91 -- 100% pass, all 10 features verified
-
-### Session 78 (2026-02-12) - Data Health Badge + Refactoring
-
-#### ENHANCEMENT: Data Health Score Badge
-- Compact amber pill inline with "Projection Vision" card title
-- Clicking opens Pre-Sync Wizard; auto-refreshes after syncing
-
-#### REFACTORING: Backend Route Extraction
-- Created `/app/backend/deps.py`: Shared dependencies module
-- Extracted `/app/backend/routers/currency.py`, `debt.py`, `goals.py`, `api_center.py`
-- server.py: 9486 -> 9026 lines
-
-#### REFACTORING: Frontend Component Extraction
-- Extracted TransactionRecords.jsx, PreSyncWizard.jsx, DataHealthBadge.jsx, SimulateActions.jsx
-- ProfitTrackerPage.jsx: 5294 -> 4800 lines
-
-### Session 77 (2026-02-12) - Pre-Sync Validation Wizard
-- Multi-step wizard for data integrity before balance sync
-
-### Session 76 (2026-02-12) - Balance Override Feature
-- Balance override/Merin sync functionality
-
-### Session 75 (2026-02-11) - Critical Bug Fixes & Account Diagnostic Tool
-
-## Known Issues
-- **Run Diagnostic (production)**: 404 in user's production environment - infrastructure issue, not code. Provide curl command for user to debug their own environment.
-- **Cloudinary**: File upload is placeholder/mocked.
+### Previous Sessions (Completed)
+- Dashboard layout redesign (TradeMonitorPage.jsx)
+- Data Export feature (admin panel)
+- Backend refactoring (settings.py, bve.py extracted from server.py)
+- Full PWA implementation ("The CrossCurrent Hub")
+- Pre-Sync Validation Wizard
+- Data Health Score badge
 
 ## Prioritized Backlog
 
-### P0 - In Progress
-- Continue refactoring server.py (~8360 lines -> extract more routers: profit, admin, trade, auth)
-- Continue refactoring ProfitTrackerPage.jsx (~5200 lines -> deeply coupled dialogs make extraction complex)
+### P0 (Critical)
+- None currently
 
-### P1 - Upcoming
-- Continue refactoring server.py (~8360 lines -> extract more routers: profit, admin, trade, auth)
-- Continue refactoring ProfitTrackerPage.jsx (~5200 lines)
-- Actual Cloudinary file upload implementation
+### P1 (High)
+- Push notification support with user preference settings
+- Continue backend refactoring (extract trade, profit, admin routes from server.py)
+- Provide curl command for "Run Diagnostic" production debugging
 
-### P2 - Future
-- Performance optimization
-- Additional admin tools
+### P2 (Medium)
+- Frontend refactoring of ProfitTrackerPage.jsx (consider Zustand for state management)
+- Cloudinary file upload implementation (currently placeholder)
 
-## Key API Endpoints
-- `POST /api/admin/run-diagnostic/{user_id}` - Live diagnostic summary
-- `GET /api/admin/export-debug-data/{user_id}` - Full JSON export for offline analysis
-- `GET /api/profit/validate-sync-readiness` - Pre-Sync Wizard backend
-- `POST /api/profit/balance-override` - Manual balance override
+### Known Issues
+- "Run Diagnostic" feature fails in production (infrastructure issue, not code)
+- Cloudinary integration is still a placeholder
+
+## 3rd Party Integrations
+- Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new
