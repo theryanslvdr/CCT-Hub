@@ -879,7 +879,7 @@ export const AdminSettingsPage = () => {
               <div>
                 <Label className="text-zinc-300">PWA App Icon (home screen icon)</Label>
                 <p className="text-xs text-zinc-500 mt-1 mb-2">
-                  This icon appears on home screens when users install the app. Recommended: 512×512px PNG.
+                  This icon appears on home screens when users install the app. Recommended: 512x512px PNG.
                 </p>
                 <div className="mt-2 flex items-center gap-4">
                   {settings.pwa_icon_url ? (
@@ -891,24 +891,38 @@ export const AdminSettingsPage = () => {
                       <Smartphone className="w-6 h-6 text-zinc-500" />
                     </div>
                   )}
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={handlePwaIconUpload}
-                      className="hidden"
-                      id="pwa-icon-upload"
-                      data-testid="pwa-icon-upload-input"
-                    />
-                    <label htmlFor="pwa-icon-upload">
-                      <Button asChild variant="outline" className="btn-secondary cursor-pointer">
-                        <span>
-                          <Upload className="w-4 h-4 mr-2" /> Upload PWA Icon
-                        </span>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={handlePwaIconUpload}
+                        className="hidden"
+                        id="pwa-icon-upload"
+                        data-testid="pwa-icon-upload-input"
+                      />
+                      <label htmlFor="pwa-icon-upload">
+                        <Button asChild variant="outline" className="btn-secondary cursor-pointer">
+                          <span>
+                            <Upload className="w-4 h-4 mr-2" /> Upload
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={settings.pwa_icon_url_input || ''}
+                        onChange={(e) => setSettings(prev => ({ ...prev, pwa_icon_url_input: e.target.value }))}
+                        placeholder="Or paste image URL here..."
+                        className="input-dark text-xs h-8"
+                        data-testid="pwa-icon-url-input"
+                      />
+                      <Button variant="outline" size="sm" className="btn-secondary h-8 px-3" onClick={handlePwaIconUrl} data-testid="pwa-icon-url-save">
+                        Set
                       </Button>
-                    </label>
+                    </div>
                     {settings.pwa_icon_url && (
-                      <p className="text-xs text-emerald-400 mt-1">Icon set. Users need to reinstall to see changes.</p>
+                      <p className="text-xs text-emerald-400">Icon set. Users need to reinstall to see changes.</p>
                     )}
                   </div>
                 </div>
