@@ -1,7 +1,8 @@
 """Profit Planner (Goals) routes."""
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 import uuid
 
 from deps import db, get_current_user
@@ -9,27 +10,49 @@ from deps import db, get_current_user
 router = APIRouter(prefix="/goals", tags=["Profit Planner"])
 
 
-@router.post("")
-async def create_goal(data: dict, user: dict = Depends(get_current_user)):
-    from server import GoalCreate, GoalResponse
-    parsed = GoalCreate(**data) if isinstance(data, dict) else data
+class GoalCreate(BaseModel):
+    name: str
+    target_amount: float
+    current_amount: Optional[float] = 0
+    target_date: Optional[datetime] = None
+    price_type: str = "fixed"
+    market_item: Optional[str] = None
+    currency: str = "USD"
+
+
+class GoalResponse(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    target_amount: float
+    current_amount: float
+    target_date: Optional[datetime]
+    price_type: str
+    market_item: Optional[str]
+    currency: str
+    progress_percentage: float
+    created_at: datetime
+
+
+@router.post("", response_model=GoalResponse)
+async def create_goal(data: GoalCreate, user: dict = Depends(get_current_user)):
     goal_id = str(uuid.uuid4())
     goal = {
         "id": goal_id,
         "user_id": user["id"],
-        "name": parsed.name,
-        "target_amount": parsed.target_amount,
-        "current_amount": parsed.current_amount,
-        "target_date": parsed.target_date.isoformat() if parsed.target_date else None,
-        "price_type": parsed.price_type,
-        "market_item": parsed.market_item,
-        "currency": parsed.currency,
+        "name": data.name,
+        "target_amount": data.target_amount,
+        "current_amount": data.current_amount,
+        "target_date": data.target_date.isoformat() if data.target_date else None,
+        "price_type": data.price_type,
+        "market_item": data.market_item,
+        "currency": data.currency,
         "contributions": [],
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.goals.insert_one(goal)
 
-    progress = (parsed.current_amount / parsed.target_amount * 100) if parsed.target_amount > 0 else 0
+    progress = (data.current_amount / data.target_amount * 100) if data.target_amount > 0 else 0
     return GoalResponse(
         **{
             **goal,
@@ -40,9 +63,8 @@ async def create_goal(data: dict, user: dict = Depends(get_current_user)):
     )
 
 
-@router.get("")
+@router.get("", response_model=List[GoalResponse])
 async def get_goals(user: dict = Depends(get_current_user)):
-    from server import GoalResponse
     goals = await db.goals.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
     result = []
     for g in goals:

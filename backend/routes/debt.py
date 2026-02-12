@@ -1,33 +1,50 @@
 """Debt management routes."""
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta
-from typing import List
+from typing import List, Optional
 import uuid
 
 from deps import db, get_current_user
 
-# Import models from server (will be moved later)
-import sys
-sys.path.insert(0, '/app/backend')
-
 router = APIRouter(prefix="/debt", tags=["Debt Management"])
 
 
-@router.post("")
-async def create_debt(data: dict, user: dict = Depends(get_current_user)):
-    from server import DebtCreate, DebtResponse
-    parsed = DebtCreate(**data) if isinstance(data, dict) else data
+class DebtCreate(BaseModel):
+    name: str
+    total_amount: float
+    minimum_payment: float
+    due_day: int
+    interest_rate: Optional[float] = 0
+    currency: str = "USD"
+
+
+class DebtResponse(BaseModel):
+    id: str
+    user_id: str
+    name: str
+    total_amount: float
+    remaining_amount: float
+    minimum_payment: float
+    due_day: int
+    interest_rate: float
+    currency: str
+    created_at: datetime
+
+
+@router.post("", response_model=DebtResponse)
+async def create_debt(data: DebtCreate, user: dict = Depends(get_current_user)):
     debt_id = str(uuid.uuid4())
     debt = {
         "id": debt_id,
         "user_id": user["id"],
-        "name": parsed.name,
-        "total_amount": parsed.total_amount,
-        "remaining_amount": parsed.total_amount,
-        "minimum_payment": parsed.minimum_payment,
-        "due_day": parsed.due_day,
-        "interest_rate": parsed.interest_rate,
-        "currency": parsed.currency,
+        "name": data.name,
+        "total_amount": data.total_amount,
+        "remaining_amount": data.total_amount,
+        "minimum_payment": data.minimum_payment,
+        "due_day": data.due_day,
+        "interest_rate": data.interest_rate,
+        "currency": data.currency,
         "payments": [],
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -35,9 +52,8 @@ async def create_debt(data: dict, user: dict = Depends(get_current_user)):
     return DebtResponse(**{**debt, "created_at": datetime.fromisoformat(debt["created_at"])})
 
 
-@router.get("")
+@router.get("", response_model=List[DebtResponse])
 async def get_debts(user: dict = Depends(get_current_user)):
-    from server import DebtResponse
     debts = await db.debts.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
     return [
         DebtResponse(
