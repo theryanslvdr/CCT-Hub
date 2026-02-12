@@ -955,7 +955,7 @@ export const AdminMembersPage = () => {
                   
                   {/* Run Diagnostic Button */}
                   {isMasterAdmin() && (
-                    <div className="mt-4">
+                    <div className="mt-4 space-y-2">
                       <Button
                         onClick={() => handleRunDiagnostic(memberDetails.user.id)}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -964,8 +964,17 @@ export const AdminMembersPage = () => {
                         <Activity className="w-4 h-4 mr-2" />
                         Run Account Diagnostic
                       </Button>
-                      <p className="text-xs text-zinc-500 mt-2 text-center">
-                        View detailed trade history, deposits, and balance calculations
+                      <Button
+                        onClick={() => handleExportDebugData(memberDetails.user.id, memberDetails.user.full_name)}
+                        variant="outline"
+                        className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                        data-testid="export-debug-data-button"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Export Debug Data
+                      </Button>
+                      <p className="text-xs text-zinc-500 mt-1 text-center">
+                        Diagnostic: view live summary. Export: download full JSON for offline analysis.
                       </p>
                     </div>
                   )}
