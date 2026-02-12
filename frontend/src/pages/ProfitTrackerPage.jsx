@@ -687,6 +687,12 @@ export const ProfitTrackerPage = () => {
   const [dailyProjectionOpen, setDailyProjectionOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   
+  // Balance Override states
+  const [balanceVerificationOpen, setBalanceVerificationOpen] = useState(false);
+  const [calculatedBalance, setCalculatedBalance] = useState(0);
+  const [actualBalanceInput, setActualBalanceInput] = useState('');
+  const [balanceOverrideLoading, setBalanceOverrideLoading] = useState(false);
+  
   // Backend-calculated daily balances (authoritative source for historical months)
   const [backendDailyBalances, setBackendDailyBalances] = useState({});
   const [backendBalancesLoading, setBackendBalancesLoading] = useState(false);
