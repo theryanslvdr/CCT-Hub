@@ -73,6 +73,7 @@ function App() {
             <Route path="/admin/api-center" element={<AdminAPICenterPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
+            <Route path="/admin/daily-summary" element={<DailyTradeSummaryPage />} />
           </Route>
 
           {/* Default redirect */}
