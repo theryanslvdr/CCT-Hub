@@ -1472,6 +1472,26 @@ export const TradeMonitorPage = () => {
               {signal.notes && (
                 <p className="text-zinc-400 mt-3 p-2 bg-zinc-900/50 rounded-lg text-xs">{signal.notes}</p>
               )}
+
+              {/* Admin: Force notify members button */}
+              {isMasterAdmin && signal.is_official && !signal.is_simulated && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-3 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 text-xs gap-2"
+                  onClick={async () => {
+                    try {
+                      const res = await api.post('/admin/signals/force-notify');
+                      toast.success(`Signal email sent to ${res.data.sent} members`);
+                    } catch (e) {
+                      toast.error(e.response?.data?.detail || 'Failed to send');
+                    }
+                  }}
+                  data-testid="force-notify-members-btn"
+                >
+                  <Send className="w-3.5 h-3.5" /> Notify All Members
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
