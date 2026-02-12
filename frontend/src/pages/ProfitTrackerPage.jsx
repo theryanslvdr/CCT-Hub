@@ -1563,6 +1563,10 @@ export const ProfitTrackerPage = () => {
       });
       
       toast.success('Trade adjusted successfully!');
+      
+      // Check if we came from the sync wizard
+      const fromWizard = enterAPDate?.fromWizard;
+      
       setEnterAPDialogOpen(false);
       setEnterAPValue('');
       setEnterAPCommission('');
@@ -1572,7 +1576,12 @@ export const ProfitTrackerPage = () => {
       setAdjustedBalance('');
       
       // Reload data to reflect the new trade
-      loadData();
+      await loadData();
+      
+      // Reopen the sync wizard if we came from there
+      if (fromWizard) {
+        startSyncWizard();
+      }
     } catch (error) {
       console.error('Failed to adjust trade:', error);
       toast.error(error.response?.data?.detail || 'Failed to adjust trade');
