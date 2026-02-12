@@ -40,6 +40,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   
   // Licensee simulation dialog state
   const [licenseeDialogOpen, setLicenseeDialogOpen] = useState(false);
+  const [pwaInstructionsOpen, setPwaInstructionsOpen] = useState(false);
   const [selectedLicenseType, setSelectedLicenseType] = useState(null);
   const [licensees, setLicensees] = useState([]);
   const [loadingLicensees, setLoadingLicensees] = useState(false);
