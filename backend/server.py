@@ -115,6 +115,7 @@ _deps.init(db, JWT_SECRET, SUPER_ADMIN_SECRET, MASTER_ADMIN_SECRET, SUPER_ADMIN_
 from routes.currency import router as _currency_router
 from routes.debt import router as _debt_router
 from routes.goals import router as _goals_router
+from routes.api_center import router as _api_center_router
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
