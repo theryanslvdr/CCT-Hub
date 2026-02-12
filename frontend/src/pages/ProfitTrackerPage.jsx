@@ -703,6 +703,9 @@ export const ProfitTrackerPage = () => {
   const [newStartDate, setNewStartDate] = useState('');
   const [preStartAcknowledged, setPreStartAcknowledged] = useState(false);
   
+  // Data Health Score
+  const [dataHealth, setDataHealth] = useState(null);
+  
   // Backend-calculated daily balances (authoritative source for historical months)
   const [backendDailyBalances, setBackendDailyBalances] = useState({});
   const [backendBalancesLoading, setBackendBalancesLoading] = useState(false);
