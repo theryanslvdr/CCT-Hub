@@ -283,11 +283,17 @@ export const settingsAPI = {
   uploadPwaIcon: (file) => {
     const formData = new FormData();
     formData.append('file', file);
+    // Try settings route first, fallback to admin route
     return api.post('/settings/upload-pwa-icon', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    }).catch(() => api.post('/admin/pwa-icon/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }));
   },
-  setPwaIconUrl: (url) => api.put('/settings/pwa-icon-url', { url }),
+  setPwaIconUrl: (url) => {
+    return api.put('/settings/pwa-icon-url', { url })
+      .catch(() => api.put('/admin/pwa-icon/url', { url }));
+  },
   // Email Templates
   getEmailTemplates: () => api.get('/settings/email-templates'),
   updateEmailTemplate: (type, data) => api.put(`/settings/email-templates/${type}`, data),
