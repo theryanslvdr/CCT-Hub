@@ -48,12 +48,6 @@ export const MobileNotice = ({
   if (showOnMobile) {
     return (
       <>
-        <div className="mb-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center">
-          <p className="text-sm text-amber-200">
-            <Smartphone className="w-4 h-4 inline mr-2" />
-            {featureName} works best on desktop. Some features may be limited.
-          </p>
-        </div>
         {children}
       </>
     );
