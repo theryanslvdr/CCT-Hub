@@ -1,0 +1,143 @@
+{
+  "summary": "Completed regression testing for iteration 90 after refactoring. Backend: 10/10 tests pass (100%). Frontend: All features working correctly. Data Health Badge is properly positioned inline with Projection Vision title as a compact amber pill. API Center routes extracted and working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_90.py",
+    "/app/test_reports/pytest/pytest_iteration_90.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "VERIFIED: Backend refactoring - all extracted routes working correctly:",
+    "  - GET /api/health returns healthy status",
+    "  - POST /api/auth/login returns access_token",
+    "  - GET /api/profit/summary returns account data (regression)",
+    "  - GET /api/profit/sync-validation returns validation data (regression)",
+    "  - GET /api/debt returns debts (extracted route)",
+    "  - GET /api/goals returns goals (extracted route)",
+    "  - GET /api/currency/rates returns exchange rates (extracted route)",
+    "  - POST /api/api-center/receive accepts webhook payload (NEWLY extracted route)",
+    "  - GET /api/settings/platform returns platform settings",
+    "VERIFIED: Data Health Badge positioned correctly:",
+    "  - Compact amber pill showing '50% · 4 missing' inline with 'Projection Vision' title",
+    "  - Located at line 4419 in ProfitTrackerPage.jsx inside CardTitle component",
+    "  - Clicking badge opens Pre-Sync Wizard dialog correctly",
+    "VERIFIED: Frontend features working:",
+    "  - Login flow works with iam@ryansalvador.com",
+    "  - Profit Tracker page loads with Account Value, Deposits, Projection Vision sections",
+    "  - Sync button (data-testid='sync-balance-btn') opens Pre-Sync Wizard",
+    "  - Access Records button shows Deposit/Withdrawal/Commission Records dialogs",
+    "  - Simulate Actions dialog opens with all simulation options",
+    "  - Trade Monitor page loads with Active Signal, Trade Control, and forex ticker"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_90.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (All features working correctly)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "None - used existing user data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 90 completed full regression testing after refactoring. All backend endpoints working including newly extracted API Center routes. Data Health Badge (data-testid='data-health-badge') shows as compact amber pill inline with 'Projection Vision' title. Key test data-testids: data-health-badge, pre-sync-wizard-dialog, sync-balance-btn. The test user Ryan Salvador has 4 missing trade days shown in Pre-Sync Wizard. Use JavaScript clicks for Sync button: await page.evaluate(() => document.querySelector('[data-testid=\"sync-balance-btn\"]').click()). Skip tour by clicking 'Skip Tour'.",
+  "verified_features": [
+    {
+      "feature": "GET /api/health",
+      "status": "WORKING",
+      "details": "Returns healthy status"
+    },
+    {
+      "feature": "POST /api/auth/login",
+      "status": "WORKING",
+      "details": "Returns access_token for valid credentials"
+    },
+    {
+      "feature": "GET /api/profit/summary",
+      "status": "WORKING",
+      "details": "Regression - returns account_value, total_deposits, total_trades"
+    },
+    {
+      "feature": "GET /api/profit/sync-validation",
+      "status": "WORKING",
+      "details": "Regression - returns can_sync, summary with trading days info"
+    },
+    {
+      "feature": "GET /api/debt",
+      "status": "WORKING",
+      "details": "Extracted route returns user debts list"
+    },
+    {
+      "feature": "GET /api/goals",
+      "status": "WORKING",
+      "details": "Extracted route returns user goals"
+    },
+    {
+      "feature": "GET /api/currency/rates",
+      "status": "WORKING",
+      "details": "Extracted route returns exchange rates"
+    },
+    {
+      "feature": "POST /api/api-center/receive",
+      "status": "WORKING",
+      "details": "NEWLY extracted route accepts webhook payload"
+    },
+    {
+      "feature": "GET /api/settings/platform",
+      "status": "WORKING",
+      "details": "Returns platform settings"
+    },
+    {
+      "feature": "Login flow",
+      "status": "WORKING",
+      "details": "Login form submits and redirects to dashboard"
+    },
+    {
+      "feature": "Profit Tracker page",
+      "status": "WORKING",
+      "details": "Loads with Account Value, Deposits, Projection Vision sections"
+    },
+    {
+      "feature": "Data Health Badge inline position",
+      "status": "WORKING",
+      "details": "Compact amber pill '50% · 4 missing' next to 'Projection Vision' title"
+    },
+    {
+      "feature": "Data Health Badge click -> Pre-Sync Wizard",
+      "status": "WORKING",
+      "details": "Opens Pre-Sync Wizard dialog showing 4 missing days"
+    },
+    {
+      "feature": "Sync button -> Pre-Sync Wizard",
+      "status": "WORKING",
+      "details": "JavaScript click opens Pre-Sync Wizard"
+    },
+    {
+      "feature": "Access Records -> Transaction dialogs",
+      "status": "WORKING",
+      "details": "Shows Deposit, Withdrawal, Commission Records dialogs"
+    },
+    {
+      "feature": "Simulate Actions dialog",
+      "status": "WORKING",
+      "details": "Opens with Deposit, Withdrawal, Commission, Error, VSD options"
+    },
+    {
+      "feature": "Trade Monitor page",
+      "status": "WORKING",
+      "details": "Loads with Active Signal, Trade Control, forex ticker"
+    }
+  ]
+}
