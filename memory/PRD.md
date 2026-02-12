@@ -84,7 +84,8 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - Continue refactoring ProfitTrackerPage.jsx (~5200 lines -> deeply coupled dialogs make extraction complex)
 
 ### P1 - Upcoming
-- Progressive Web App (PWA) capabilities
+- Continue refactoring server.py (~8360 lines -> extract more routers: profit, admin, trade, auth)
+- Continue refactoring ProfitTrackerPage.jsx (~5200 lines)
 - Actual Cloudinary file upload implementation
 
 ### P2 - Future
