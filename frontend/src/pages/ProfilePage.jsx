@@ -61,6 +61,61 @@ const NotifToggle = ({ item, value, onChange }) => {
   );
 };
 
+const PushNotificationToggle = () => {
+  const { isSubscribed, isSupported, permission, loading, subscribe, unsubscribe } = usePushNotifications();
+
+  if (!isSupported) {
+    return (
+      <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500">
+            <BellOff className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-sm text-zinc-400">Push notifications not supported</p>
+            <p className="text-xs text-zinc-600">Your browser doesn't support push notifications</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-3 rounded-lg bg-zinc-900/50 border border-blue-500/30 hover:border-blue-500/50 transition-colors" data-testid="push-notification-toggle">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSubscribed ? 'bg-blue-500/20 text-blue-400' : 'bg-zinc-800 text-zinc-400'}`}>
+            {isSubscribed ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white">Push Notifications</p>
+            <p className="text-xs text-zinc-500">
+              {isSubscribed ? 'Receiving push notifications on this device' : 
+               permission === 'denied' ? 'Blocked — enable in browser settings' :
+               'Enable to receive real-time alerts'}
+            </p>
+          </div>
+        </div>
+        <Switch
+          checked={isSubscribed}
+          disabled={loading || permission === 'denied'}
+          onCheckedChange={async (checked) => {
+            if (checked) {
+              const success = await subscribe();
+              if (success) toast.success('Push notifications enabled!');
+              else if (permission === 'denied') toast.error('Notifications blocked. Please enable in browser settings.');
+            } else {
+              const success = await unsubscribe();
+              if (success) toast.success('Push notifications disabled');
+            }
+          }}
+          data-testid="push-notification-switch"
+        />
+      </div>
+    </div>
+  );
+};
+
 export const ProfilePage = () => {
   const { user, updateUser, isSuperAdmin, isMasterAdmin } = useAuth();
   const isAdmin = isSuperAdmin() || isMasterAdmin();
