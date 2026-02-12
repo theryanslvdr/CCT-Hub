@@ -227,6 +227,9 @@ export const ProfilePage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Push Notifications Toggle */}
+          <PushNotificationToggle />
+          
           {loadingPrefs ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
