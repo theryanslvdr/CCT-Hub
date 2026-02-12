@@ -3372,6 +3372,18 @@ async def create_signal(data: TradingSignalCreate, request: Request, user: dict 
                 logger.info(f"Signal email sent to {email_result['sent']} members")
             except Exception as e:
                 logger.error(f"Failed to send signal emails: {e}")
+        
+        # Send push notification to all members
+        try:
+            push_result = await send_push_to_all_members(
+                title=f"Trading Signal: {data.direction} {data.product}",
+                body=f"Trade at {data.trade_time} | Multiplier: ×{data.profit_multiplier}",
+                url="/trade-monitor",
+                tag="trading-signal"
+            )
+            logger.info(f"Push notification sent to {push_result['sent']} devices")
+        except Exception as e:
+            logger.error(f"Failed to send push notifications: {e}")
     
     return TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"])})
 
