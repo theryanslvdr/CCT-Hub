@@ -1508,7 +1508,7 @@ export const ProfitTrackerPage = () => {
 
   // Handle submitting the adjusted trade
   const handleSubmitEnterAP = async () => {
-    if (!enterAPValue || parseFloat(enterAPValue) < 0) {
+    if (enterAPValue === '' || enterAPValue === undefined || enterAPValue === null || isNaN(parseFloat(enterAPValue))) {
       toast.error('Please enter a valid actual profit value');
       return;
     }
