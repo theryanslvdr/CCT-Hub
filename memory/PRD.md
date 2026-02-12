@@ -14,61 +14,43 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 ## Credentials
 - Master Admin: iam@ryansalvador.com / admin123
 
-## What's Been Implemented
+## What's Been Implemented (Feb 12, 2026)
 
-### Session Feb 12, 2026 (Current)
-
-**Mobile Bug Fixes (User Lysha):**
-1. DNT button error - Fixed param mismatch (trade_date -> date)
-2. Adjust button in wizard - Redirected to existing Enter AP dialog
-3. Balance not updating after onboarding - Mobile wizard sent `trade_history` instead of `trade_entries`
-4. Missed Trade button disabled - Added Clear button, fixed condition
-5. Negative trade results - Removed validation blocking negative values
+### Mobile Bug Fixes (User Lysha)
+1. DNT error "Failed: [object Object]" - Fixed param mismatch (trade_date -> date)
+2. Adjust button in wizard exits dialog - Redirected to existing Enter AP dialog
+3. Balance unchanged after onboarding - Mobile wizard sent `trade_history` instead of `trade_entries`
+4. Can't select Missed Trade after typing - Added Clear button, fixed disabled condition
+5. Negative trade results blocked - Removed `< 0` validation
 6. Mobile Balance Sync Wizard - Full-screen overlay matching Simulate style
+7. NaN in Adjust Trade dialog - Added fallback calculations
 
-**Mobile UI Fixes (Trade Monitor):**
-1. Desktop notice removed from mobile view (was hidden behind header)
-2. LOT Size card: Large icon hidden on mobile, inline icon added
-3. Projected Exit card: Dream button now inline inside card, not floating outside
-4. Merin iframe: "Open Merin" button hides when iframe is displayed, iframe height dynamic
+### Mobile UI Fixes (Trade Monitor)
+1. Desktop notice hidden behind header - Removed from mobile view
+2. LOT Size/Projected Exit cards - Icons inline on mobile, Dream button inside card
+3. Merin iframe - "Open Merin" button hides when iframe displayed, iframe fills viewport height
 
-**Notification System:**
-1. Notification Preferences in Profile: Trading Signal, 10/5-min Pre-Trade, Missed Trade (members) + Member Trade Submitted, Missed Trade, Profit Reports, Daily Summary (admins)
-2. Web Push Notifications: VAPID keys, subscribe/unsubscribe endpoints, push toggle in Profile
-3. Push notifications sent automatically when new trading signal is published
-4. Push notifications sent when admin force-notifies from signal card
+### Notification System
+1. **Notification Preferences** in Profile: Trading Signal, 10/5-min Pre-Trade, Missed Trade (members) + Member Trade Submitted, Missed Trade, Profit Reports, Daily Summary (admins)
+2. **Web Push Notifications**: VAPID keys, subscribe/unsubscribe, push toggle in Profile
+3. **Pre-trade push scheduling**: 10min and 5min reminders via APScheduler
+4. Auto-push when new trading signal published + force-notify button
 
-**Daily Trade Summary:**
-1. Admin page at `/admin/daily-summary` showing traded/missed/DNT members with profits
+### Daily Trade Summary
+1. Admin page `/admin/daily-summary` - who traded/missed/DNT with profits/commissions
 2. Notifications page links to daily summary for trade-related notifications
-3. Force Notify button on Active Signal card (master admin only)
+3. "Notify All Members" button on Active Signal card (master admin)
 
-**PWA Enhancements:**
-1. Dynamic manifest.json via `/api/settings/manifest.json` (supports custom icons)
+### PWA Enhancements
+1. Dynamic `manifest.json` via `/api/settings/manifest.json`
 2. PWA App Icon upload in Admin > Branding settings
 3. Device-detecting install instructions dialog
-4. "Install App" menu item in sidebar
-5. Service worker updated with push notification handlers
+4. "Install App" in sidebar menu
+5. Service worker with push notification handlers
 
-### Previous Sessions (Completed)
-- Dashboard layout redesign, Data Export feature
-- Backend refactoring (settings.py, bve.py extracted)
-- Pre-Sync Validation Wizard, Data Health Score
-
-## Prioritized Backlog
-
-### P1 (High)
-- Continue backend refactoring (extract trade, profit, admin routes from server.py ~8600 lines)
-- User verification of all implemented features
-
-### P2 (Medium)
-- Frontend refactoring of ProfitTrackerPage.jsx (consider Zustand)
-- Cloudinary file upload implementation (currently placeholder)
-- Pre-trade countdown push notifications (10min/5min before scheduled trade)
-
-## Known Issues
-- "Run Diagnostic" feature fails in production (infrastructure issue, not code)
-- Cloudinary integration is still a placeholder
+### Backend Refactoring (Partial)
+1. Created `/app/backend/helpers.py` for shared helper functions
+2. `settings.py` and `bve.py` previously extracted from server.py
 
 ## Key API Endpoints
 - `GET/PUT /api/users/notification-preferences`
@@ -79,6 +61,21 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 - `POST /api/admin/push-notify-all`
 - `GET /api/settings/manifest.json`
 - `POST /api/settings/upload-pwa-icon`
+- `POST /api/trade/did-not-trade?date=YYYY-MM-DD`
+
+## Remaining Backlog
+
+### P1 (High)
+- Continue backend refactoring (server.py still ~8600 lines)
+- User verification of all features in production
+
+### P2 (Medium)
+- Frontend refactoring of ProfitTrackerPage.jsx (consider Zustand)
+- Cloudinary file upload implementation
+
+## Known Issues
+- "Run Diagnostic" fails in production (infrastructure, not code)
+- Cloudinary integration is placeholder
 
 ## 3rd Party Integrations
-- Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush
+Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush
