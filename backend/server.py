@@ -6851,6 +6851,118 @@ class OnboardingData(BaseModel):
     trade_entries: Optional[List[OnboardingTradeEntry]] = []
     total_commission: Optional[float] = 0  # Total commission to be added at the end
 
+# Balance Override Model - for syncing with actual Merin balance
+class BalanceOverrideData(BaseModel):
+    actual_balance: float  # The actual balance from Merin
+    effective_date: Optional[str] = None  # Date from which this override applies (defaults to today)
+    reason: Optional[str] = "Manual balance sync with Merin"
+
+@profit_router.post("/balance-override")
+async def create_balance_override(data: BalanceOverrideData, user: dict = Depends(get_current_user)):
+    """
+    Create a balance override to sync the calculated balance with the actual Merin balance.
+    This does NOT affect past balances - only future calculations will use this as the starting point.
+    
+    The override works by calculating the difference between the system's calculated balance
+    and the actual Merin balance, then storing an adjustment that will be applied going forward.
+    """
+    user_id = user["id"]
+    
+    # Get current calculated balance
+    deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    total_deposits = sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0)
+    total_withdrawals = sum(abs(d.get("amount", 0)) for d in deposits if d.get("amount", 0) < 0)
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)
+    
+    calculated_balance = total_deposits - total_withdrawals + total_profit + total_commission
+    
+    # Calculate the adjustment needed
+    adjustment_amount = data.actual_balance - calculated_balance
+    
+    # Determine effective date
+    if data.effective_date:
+        effective_date = data.effective_date
+    else:
+        effective_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Store the balance override
+    override_id = str(uuid.uuid4())
+    override_record = {
+        "id": override_id,
+        "user_id": user_id,
+        "actual_balance": data.actual_balance,
+        "calculated_balance": round(calculated_balance, 2),
+        "adjustment_amount": round(adjustment_amount, 2),
+        "effective_date": effective_date,
+        "reason": data.reason,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user_id
+    }
+    
+    await db.balance_overrides.insert_one(override_record)
+    
+    # Also update the user's record with the latest override info
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "balance_override": {
+                "id": override_id,
+                "actual_balance": data.actual_balance,
+                "adjustment_amount": round(adjustment_amount, 2),
+                "effective_date": effective_date,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            },
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    }
+    
+    return {
+        "message": "Balance override created successfully",
+        "override": {
+            "id": override_id,
+            "actual_balance": data.actual_balance,
+            "calculated_balance": round(calculated_balance, 2),
+            "adjustment_amount": round(adjustment_amount, 2),
+            "effective_date": effective_date
+        }
+    }
+
+@profit_router.get("/balance-override")
+async def get_balance_override(user: dict = Depends(get_current_user)):
+    """Get the current balance override for the user"""
+    user_id = user["id"]
+    
+    # Get the most recent override
+    override = await db.balance_overrides.find_one(
+        {"user_id": user_id},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    if not override:
+        return {"has_override": False, "override": None}
+    
+    return {"has_override": True, "override": override}
+
+@profit_router.delete("/balance-override")
+async def delete_balance_override(user: dict = Depends(get_current_user)):
+    """Remove the balance override for the user"""
+    user_id = user["id"]
+    
+    # Remove all overrides for this user
+    result = await db.balance_overrides.delete_many({"user_id": user_id})
+    
+    # Remove from user record
+    await db.users.update_one(
+        {"id": user_id},
+        {"$unset": {"balance_override": ""}}
+    )
+    
+    return {"message": f"Removed {result.deleted_count} balance override(s)"}
+
 @profit_router.post("/complete-onboarding")
 async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_current_user)):
     """
