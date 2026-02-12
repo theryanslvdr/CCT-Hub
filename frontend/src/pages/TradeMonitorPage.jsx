@@ -1733,9 +1733,12 @@ export const TradeMonitorPage = () => {
         </CardContent>
       </Card>
 
-      {/* World Timer & Today's Summary - Single column on mobile */}
-      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
-        {/* World Timer - Compact on mobile */}
+      </div> {/* End left panel */}
+      </div> {/* End flex-row wrapper */}
+
+      {/* Your Time + Today's Summary + Merin - 3 columns on desktop */}
+      <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* World Timer */}
         <Card className="glass-card" data-testid="time-card">
           <CardHeader className="pb-2 md:pb-4">
             <CardTitle className="text-white flex items-center gap-2 text-base md:text-lg">
@@ -1744,15 +1747,12 @@ export const TradeMonitorPage = () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-center overflow-hidden">
-              {/* Primary: Philippine Time */}
               <p className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-wider mb-1 md:mb-2">
                 Philippines (Manila)
               </p>
-              <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-mono font-bold text-white tracking-wider" data-testid="ph-time">
+              <p className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-white tracking-wider" data-testid="ph-time">
                 {formatTimeForTimezone(worldTime, 'Asia/Manila')}
               </p>
-              
-              {/* Secondary: User's Local Time */}
               {!isPhilippines && (
                 <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-zinc-800">
                   <p className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-wider mb-1">
@@ -1767,7 +1767,7 @@ export const TradeMonitorPage = () => {
           </CardContent>
         </Card>
 
-        {/* Today's Summary - Compact on mobile */}
+        {/* Today's Summary */}
         <Card className="glass-card" data-testid="todays-summary-card">
           <CardHeader className="pb-2 md:pb-4">
             <CardTitle className="text-white text-base md:text-lg">Today&apos;s Summary</CardTitle>
@@ -1776,26 +1776,61 @@ export const TradeMonitorPage = () => {
             <div className="grid grid-cols-2 gap-2 md:gap-4">
               <div className="p-3 md:p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-xs md:text-sm text-zinc-400">Actual Total</p>
-                <p className="text-xl md:text-2xl lg:text-3xl font-mono font-bold text-emerald-400" data-testid="actual-total">
+                <p className="text-xl md:text-2xl font-mono font-bold text-emerald-400" data-testid="actual-total">
                   {formatLargeNumber(dailySummary?.total_actual || 0)}
                 </p>
               </div>
               <div className="p-3 md:p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-xs md:text-sm text-zinc-400">P/L Diff</p>
-                <p className={`text-xl md:text-2xl lg:text-3xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="pl-difference">
+                <p className={`text-xl md:text-2xl font-mono font-bold ${(dailySummary?.difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="pl-difference">
                   {(dailySummary?.difference || 0) >= 0 ? '+' : ''}{formatLargeNumber(dailySummary?.difference || 0)}
                 </p>
               </div>
             </div>
-            {/* Encouragement - Hidden on small mobile to save space */}
             <div className="hidden sm:block mt-3 md:mt-4 p-3 md:p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
               <p className="text-xs md:text-sm text-zinc-300" data-testid="encouragement-message">{getDailyPerformanceMessage()}</p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Merin Trading Platform - same height as siblings */}
+        <Card className="glass-card hidden lg:flex flex-col" data-testid="merin-panel">
+          <CardHeader className="pb-2 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex items-center gap-2 text-base">
+                <ExternalLink className="w-4 h-4 text-blue-400" />
+                Merin Trading
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const iframe = document.querySelector('[data-testid="merin-iframe"]');
+                  if (iframe) iframe.src = iframe.src;
+                }}
+                className="text-zinc-400 hover:text-blue-400 h-7 w-7"
+                data-testid="merin-refresh-button"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 min-h-0">
+            <div className="relative w-full h-full min-h-[200px] bg-zinc-900 rounded-b-xl overflow-hidden">
+              <iframe
+                src="https://www.meringlobaltrading.com/"
+                title="Merin Trading Platform"
+                className="absolute inset-0 w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                data-testid="merin-iframe"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Trade History Card - Mobile optimized with horizontal scroll */}
+      {/* Trade History Card - Full width */}
       <Card className="glass-card" data-testid="trade-history-card">
         <CardHeader className="flex flex-row items-center justify-between pb-2 md:pb-4">
           <div className="flex items-center gap-2 md:gap-3">
