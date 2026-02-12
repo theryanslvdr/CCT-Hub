@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userAPI, authAPI } from '@/lib/api';
 import api from '@/lib/api';
+import { usePushNotifications } from '@/lib/usePushNotifications';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { User, Globe, Lock, Save, Eye, EyeOff, Bell, Radio, Clock, AlertTriangle, Users, TrendingUp, BarChart3, Loader2 } from 'lucide-react';
+import { User, Globe, Lock, Save, Eye, EyeOff, Bell, Radio, Clock, AlertTriangle, Users, TrendingUp, BarChart3, Loader2, BellRing, BellOff } from 'lucide-react';
 
 const timezones = [
   { value: 'Asia/Manila', label: 'Philippines (GMT+8)' },
