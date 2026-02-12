@@ -11,6 +11,32 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 
 ## Completed Work
 
+### Session 76 (2026-02-12) - Balance Override Feature ✅
+
+#### NEW FEATURE: Balance Override / Merin Sync ✅
+- **Purpose**: Allow users to sync their calculated balance with their actual Merin balance after onboarding
+- **Problem Solved**: Commission values from onboarding were being added to future balances incorrectly
+- **How it works**:
+  1. After onboarding completion, a "Verify Your Balance" popup appears
+  2. Shows the calculated balance from onboarding data
+  3. User can enter their actual Merin balance if different
+  4. System calculates an adjustment amount
+  5. Future balance calculations apply this adjustment
+  6. **Past balances remain unchanged**
+- **API Endpoints**:
+  - `POST /api/profit/balance-override` - Create a balance override
+  - `GET /api/profit/balance-override` - Get current override
+  - `DELETE /api/profit/balance-override` - Remove override
+- **Frontend**: Balance Verification Dialog in ProfitTrackerPage
+- **Files Modified**: 
+  - `/app/backend/server.py` (lines 6853-6990 - new endpoints)
+  - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (Balance Verification Dialog)
+
+#### Account Diagnostic Tool - Dedicated Endpoint ✅
+- Created dedicated endpoint `GET /api/admin/run-diagnostic/{user_id}` 
+- Moved diagnostic logic to separate route to avoid routing conflicts
+- **Note**: Production deployment may require verification
+
 ### Session 75 (2026-02-11) - Critical Bug Fixes & Account Diagnostic Tool ✅
 
 #### Bug Fix #1: Email Not Sending for Official Signals - FIXED ✅
