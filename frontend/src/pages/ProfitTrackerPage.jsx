@@ -1796,6 +1796,7 @@ export const ProfitTrackerPage = () => {
       
       toast.success(`Balance synced! Adjustment of $${response.data.override.adjustment_amount.toFixed(2)} applied.`);
       setBalanceVerificationOpen(false);
+      setSyncWizardOpen(false);
       setActualBalanceInput('');
       
       // Clear cached balances and reload
@@ -1809,11 +1810,154 @@ export const ProfitTrackerPage = () => {
     }
   };
 
-  // Open Balance Verification dialog with calculated balance
+  // Start the Pre-Sync Validation Wizard
+  const startSyncWizard = async () => {
+    setSyncWizardOpen(true);
+    setSyncWizardStep(1);
+    setSyncValidationLoading(true);
+    setPreStartAcknowledged(false);
+    
+    try {
+      const response = await api.get('/profit/sync-validation');
+      setSyncValidation(response.data);
+      
+      // Determine which step to start at
+      if (!response.data.trading_start_date) {
+        setSyncWizardStep(1); // Need to set start date
+        setNewStartDate(response.data.suggested_start_date || '');
+      } else if (response.data.missing_trade_days?.length > 0) {
+        setSyncWizardStep(2); // Missing trade days
+      } else if (response.data.pre_start_trades?.length > 0) {
+        setSyncWizardStep(3); // Pre-start trades warning
+      } else {
+        setSyncWizardStep(4); // Ready to sync
+        setCalculatedBalance(displayAccountValue);
+        setActualBalanceInput(displayAccountValue.toFixed(2));
+      }
+    } catch (error) {
+      console.error('Failed to get sync validation:', error);
+      toast.error('Failed to validate: ' + (error.response?.data?.detail || error.message));
+      setSyncWizardOpen(false);
+    } finally {
+      setSyncValidationLoading(false);
+    }
+  };
+
+  // Set trading start date
+  const handleSetStartDate = async () => {
+    if (!newStartDate) {
+      toast.error('Please select a start date');
+      return;
+    }
+    
+    try {
+      await api.post('/profit/set-trading-start-date', { trading_start_date: newStartDate });
+      toast.success('Trading start date set!');
+      
+      // Refresh validation
+      setSyncValidationLoading(true);
+      const response = await api.get('/profit/sync-validation');
+      setSyncValidation(response.data);
+      
+      // Move to next step
+      if (response.data.missing_trade_days?.length > 0) {
+        setSyncWizardStep(2);
+      } else if (response.data.pre_start_trades?.length > 0) {
+        setSyncWizardStep(3);
+      } else {
+        setSyncWizardStep(4);
+        setCalculatedBalance(displayAccountValue);
+        setActualBalanceInput(displayAccountValue.toFixed(2));
+      }
+    } catch (error) {
+      toast.error('Failed to set start date: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setSyncValidationLoading(false);
+    }
+  };
+
+  // Quick mark as "Did Not Trade" from wizard
+  const handleQuickDidNotTrade = async (date) => {
+    try {
+      await api.post('/trade/did-not-trade', null, { params: { trade_date: date } });
+      toast.success(`Marked ${date} as "Did Not Trade"`);
+      
+      // Refresh validation
+      const response = await api.get('/profit/sync-validation');
+      setSyncValidation(response.data);
+      
+      // Check if we can move to next step
+      if (response.data.missing_trade_days?.length === 0) {
+        if (response.data.pre_start_trades?.length > 0) {
+          setSyncWizardStep(3);
+        } else {
+          setSyncWizardStep(4);
+          setCalculatedBalance(displayAccountValue);
+          setActualBalanceInput(displayAccountValue.toFixed(2));
+        }
+      }
+    } catch (error) {
+      toast.error('Failed: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
+  // Mark all missing days as "Did Not Trade"
+  const handleMarkAllDidNotTrade = async () => {
+    if (!syncValidation?.missing_trade_days?.length) return;
+    
+    setSyncValidationLoading(true);
+    try {
+      for (const day of syncValidation.missing_trade_days) {
+        await api.post('/trade/did-not-trade', null, { params: { trade_date: day.date } });
+      }
+      toast.success(`Marked ${syncValidation.missing_trade_days.length} days as "Did Not Trade"`);
+      
+      // Refresh validation
+      const response = await api.get('/profit/sync-validation');
+      setSyncValidation(response.data);
+      
+      // Move to next step
+      if (response.data.pre_start_trades?.length > 0) {
+        setSyncWizardStep(3);
+      } else {
+        setSyncWizardStep(4);
+        setCalculatedBalance(displayAccountValue);
+        setActualBalanceInput(displayAccountValue.toFixed(2));
+      }
+    } catch (error) {
+      toast.error('Failed to mark days: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setSyncValidationLoading(false);
+    }
+  };
+
+  // Proceed after acknowledging pre-start trades warning
+  const handleAcknowledgePreStartTrades = () => {
+    setPreStartAcknowledged(true);
+    setSyncWizardStep(4);
+    setCalculatedBalance(displayAccountValue);
+    setActualBalanceInput(displayAccountValue.toFixed(2));
+  };
+
+  // Open adjust trade dialog for a specific date from wizard
+  const openAdjustTradeFromWizard = (date) => {
+    // Close wizard temporarily
+    setSyncWizardOpen(false);
+    // Open the adjust trade dialog for the specific date
+    setSelectedTradeForAdjustment({
+      date: date,
+      dateKey: date,
+      fromWizard: true
+    });
+    setAdjustProfitAmount('');
+    setAdjustCommissionAmount('');
+    setAdjustTradeDirection('');
+    setAdjustTradeDialogOpen(true);
+  };
+
+  // Legacy openBalanceVerification - now opens wizard instead
   const openBalanceVerification = (calcBalance) => {
-    setCalculatedBalance(calcBalance);
-    setActualBalanceInput(calcBalance.toFixed(2));
-    setBalanceVerificationOpen(true);
+    startSyncWizard();
   };
 
   // Reset handlers
