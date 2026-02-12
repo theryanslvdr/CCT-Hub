@@ -1713,8 +1713,59 @@ export const TradeMonitorPage = () => {
         </CardContent>
       </Card>
 
-      </div> {/* End left panel */}
-      </div> {/* End flex-row wrapper */}
+      </div> {/* End left column */}
+
+      {/* Right Column - Multiplier Panel + Dream + Sound (desktop only) */}
+      <div className="hidden lg:flex flex-col gap-4" data-testid="right-sidebar-panel">
+        {/* Multiplier Card */}
+        <Card className="glass-card flex-1" data-testid="multiplier-panel">
+          <CardContent className="p-6 h-full flex flex-col items-center justify-center">
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Multiplier</p>
+            <p className="text-4xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
+          </CardContent>
+        </Card>
+
+        {/* Rocket + Dream Button */}
+        <Card className="glass-card" data-testid="dream-panel">
+          <CardContent className="p-4 flex items-center justify-end gap-3">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDreamProfit(true)}
+              className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-xs h-8 px-3"
+              data-testid="open-dream-profit"
+            >
+              <Sparkles className="w-3 h-3 mr-1" /> Dream
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Sound Toggle */}
+        <Card className="glass-card" data-testid="sound-panel">
+          <CardContent className="p-4 flex items-center justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                const newSoundEnabled = !soundEnabled;
+                setSoundEnabled(newSoundEnabled);
+                if (!newSoundEnabled) {
+                  if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+                  if (beepRef.current) { beepRef.current.pause(); beepRef.current.currentTime = 0; }
+                }
+              }}
+              className="text-zinc-400"
+              data-testid="sound-toggle-desktop"
+            >
+              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div> {/* End 2-column grid */}
 
       {/* Your Time + Today's Summary + Merin - 3 columns on desktop */}
       <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
