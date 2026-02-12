@@ -34,6 +34,13 @@ import { AdminLicensesPage } from "./pages/admin/AdminLicensesPage";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 function App() {
+  // Register service worker for PWA
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <WebSocketProvider>
