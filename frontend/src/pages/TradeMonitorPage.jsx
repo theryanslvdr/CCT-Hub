@@ -2392,7 +2392,7 @@ export const TradeMonitorPage = () => {
           </Card>
         </div>
       )}
-    </div>
+    </div> {/* end space-y-6 outer */}
     </MobileNotice>
   );
 };
