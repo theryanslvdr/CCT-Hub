@@ -3384,6 +3384,12 @@ async def create_signal(data: TradingSignalCreate, request: Request, user: dict 
             logger.info(f"Push notification sent to {push_result['sent']} devices")
         except Exception as e:
             logger.error(f"Failed to send push notifications: {e}")
+        
+        # Schedule pre-trade push notifications (10min and 5min before)
+        try:
+            schedule_pre_trade_notifications(data.trade_time, data.trade_timezone, data.product, data.direction)
+        except Exception as e:
+            logger.error(f"Failed to schedule pre-trade notifications: {e}")
     
     return TradingSignalResponse(**{**signal, "created_at": datetime.fromisoformat(signal["created_at"])})
 
