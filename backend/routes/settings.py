@@ -149,6 +149,45 @@ async def upload_pwa_icon(file: UploadFile = File(...), user: dict = Depends(req
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
+@router.get("/manifest.json")
+async def get_pwa_manifest():
+    """Serve dynamic PWA manifest with custom icon if set"""
+    from fastapi.responses import JSONResponse
+    db = deps.db
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
+    
+    pwa_icon_url = settings.get("pwa_icon_url", "") if settings else ""
+    platform_name = settings.get("platform_name", "CrossCurrent") if settings else "CrossCurrent"
+    
+    icons = []
+    if pwa_icon_url:
+        icons = [
+            {"src": pwa_icon_url, "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": pwa_icon_url, "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ]
+    else:
+        icons = [
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+        ]
+    
+    manifest = {
+        "short_name": platform_name,
+        "name": f"The {platform_name} Hub",
+        "description": "Your complete trading profit management platform",
+        "icons": icons,
+        "start_url": "/",
+        "display": "standalone",
+        "theme_color": "#09090b",
+        "background_color": "#09090b",
+        "orientation": "any",
+        "scope": "/",
+        "categories": ["finance", "productivity"],
+        "prefer_related_applications": False,
+    }
+    
+    return JSONResponse(content=manifest, headers={"Content-Type": "application/manifest+json"})
+
 
 # ==================== EMAIL TEMPLATES ====================
 
