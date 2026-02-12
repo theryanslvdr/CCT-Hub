@@ -2307,7 +2307,7 @@ export const TradeMonitorPage = () => {
       {/* Right Panel - Merin Trading Platform (moved to 3-column grid above) */}
       
       {/* Mobile: Merin Trading Platform Options */}
-      <div className="lg:hidden fixed bottom-20 left-4 right-4 z-40" data-testid="merin-mobile-section">
+      <div className={`lg:hidden fixed bottom-20 left-4 right-4 z-40 ${showMerinIframe ? 'hidden' : ''}`} data-testid="merin-mobile-section">
         {showMerinOptions ? (
           <div className="bg-zinc-900/95 backdrop-blur-lg rounded-xl border border-zinc-800 p-4 space-y-3 shadow-xl">
             <div className="flex items-center justify-between mb-2">
