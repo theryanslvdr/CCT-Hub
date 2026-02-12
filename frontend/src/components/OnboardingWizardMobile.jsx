@@ -458,7 +458,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
           amount: t.amount,
           date: format(t.date, 'yyyy-MM-dd')
         })),
-        trade_history: tradeHistory,
+        trade_entries: tradeHistory,
         total_commission: parseFloat(totalCommission) || 0,
         is_reset: isReset,
         user_type: userType
