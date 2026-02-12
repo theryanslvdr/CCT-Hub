@@ -691,6 +691,19 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </DropdownMenuItem>
               )}
               
+              {!window.matchMedia('(display-mode: standalone)').matches && (
+                <>
+                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuItem 
+                    onClick={() => setPwaInstructionsOpen(true)}
+                    className="cursor-pointer text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 focus:bg-blue-500/10"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Install App
+                  </DropdownMenuItem>
+                </>
+              )}
+
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 
                 onClick={handleLogout}
@@ -711,6 +724,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           Close Menu
         </button>
       </div>
+      <PWAInstallInstructions open={pwaInstructionsOpen} onOpenChange={setPwaInstructionsOpen} />
     </aside>
   );
 };
