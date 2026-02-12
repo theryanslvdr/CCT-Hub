@@ -346,16 +346,27 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
   // Handlers
   const handleTradeEntry = (field, value) => {
     if (!currentDateKey) return;
+    // For actualProfit, treat empty string as clearing the field
+    const processedValue = (field === 'actualProfit' && value === '') ? undefined : value;
     setTradeEntries(prev => ({
       ...prev,
       [currentDateKey]: {
         ...prev[currentDateKey],
-        [field]: value,
+        [field]: processedValue,
         balance: currentBalance,
         lotSize: currentLotSize,
         projectedProfit: currentProjected
       }
     }));
+  };
+
+  const handleClearEntry = () => {
+    if (!currentDateKey) return;
+    setTradeEntries(prev => {
+      const next = { ...prev };
+      delete next[currentDateKey];
+      return next;
+    });
   };
 
   const handleMissedTrade = () => {
