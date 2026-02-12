@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userAPI, authAPI } from '@/lib/api';
+import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { User, Globe, Lock, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Globe, Lock, Save, Eye, EyeOff, Bell, Radio, Clock, AlertTriangle, Users, TrendingUp, BarChart3, Loader2 } from 'lucide-react';
 
 const timezones = [
   { value: 'Asia/Manila', label: 'Philippines (GMT+8)' },
@@ -26,8 +28,41 @@ const timezones = [
   { value: 'UTC', label: 'UTC (GMT+0)' },
 ];
 
+const MEMBER_NOTIFICATION_ITEMS = [
+  { key: 'trading_signal', label: 'Trading Signal Alerts', desc: 'Get notified when a new trading signal is published', icon: Radio, color: 'text-blue-400' },
+  { key: 'pre_trade_10min', label: '10-Minute Pre-Trade Alert', desc: 'Reminder 10 minutes before scheduled trade time', icon: Clock, color: 'text-amber-400' },
+  { key: 'pre_trade_5min', label: '5-Minute Pre-Trade Alert', desc: 'Reminder 5 minutes before scheduled trade time', icon: Clock, color: 'text-orange-400' },
+  { key: 'missed_trade_report', label: 'Missed Trade Reports', desc: 'Get notified when you miss a trading day', icon: AlertTriangle, color: 'text-red-400' },
+];
+
+const ADMIN_NOTIFICATION_ITEMS = [
+  { key: 'member_trade_submitted', label: 'Member Trade Submitted', desc: 'When members submit their trade results', icon: Users, color: 'text-emerald-400' },
+  { key: 'member_missed_trade', label: 'Member Missed Trade', desc: 'When members miss their trades', icon: AlertTriangle, color: 'text-red-400' },
+  { key: 'member_profit_report', label: 'Member Profit Reports', desc: 'Profit and commission details per member', icon: TrendingUp, color: 'text-cyan-400' },
+  { key: 'daily_summary', label: 'Daily Trade Summary', desc: 'End-of-day summary of all trading activity', icon: BarChart3, color: 'text-purple-400' },
+];
+
+const NotifToggle = ({ item, value, onChange }) => {
+  const Icon = item.icon;
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors" data-testid={`notif-toggle-${item.key}`}>
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className={`w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 ${item.color}`}>
+          <Icon className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white">{item.label}</p>
+          <p className="text-xs text-zinc-500 truncate">{item.desc}</p>
+        </div>
+      </div>
+      <Switch checked={value} onCheckedChange={onChange} data-testid={`notif-switch-${item.key}`} />
+    </div>
+  );
+};
+
 export const ProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isSuperAdmin, isMasterAdmin } = useAuth();
+  const isAdmin = isSuperAdmin() || isMasterAdmin();
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [timezone, setTimezone] = useState(user?.timezone || 'Asia/Manila');
   const [saving, setSaving] = useState(false);
@@ -40,6 +75,11 @@ export const ProfilePage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Notification preferences
+  const [notifPrefs, setNotifPrefs] = useState(null);
+  const [loadingPrefs, setLoadingPrefs] = useState(true);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
@@ -47,20 +87,49 @@ export const ProfilePage = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const fetchPrefs = async () => {
+      try {
+        const res = await api.get('/users/notification-preferences');
+        setNotifPrefs(res.data.preferences);
+      } catch {
+        // Use defaults
+        setNotifPrefs(isAdmin ? {
+          trading_signal: true, pre_trade_10min: true, pre_trade_5min: true,
+          missed_trade_report: true, member_trade_submitted: true,
+          member_missed_trade: true, member_profit_report: true, daily_summary: true,
+        } : {
+          trading_signal: true, pre_trade_10min: true, pre_trade_5min: true, missed_trade_report: true,
+        });
+      } finally {
+        setLoadingPrefs(false);
+      }
+    };
+    fetchPrefs();
+  }, [isAdmin]);
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await userAPI.updateProfile({
-        full_name: fullName,
-        timezone: timezone,
-      });
-      
+      const response = await userAPI.updateProfile({ full_name: fullName, timezone });
       updateUser(response.data);
       toast.success('Profile updated successfully!');
-    } catch (error) {
+    } catch {
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveNotifPrefs = async () => {
+    setSavingPrefs(true);
+    try {
+      await api.put('/users/notification-preferences', notifPrefs);
+      toast.success('Notification preferences saved!');
+    } catch {
+      toast.error('Failed to save notification preferences');
+    } finally {
+      setSavingPrefs(false);
     }
   };
 
@@ -69,23 +138,17 @@ export const ProfilePage = () => {
       toast.error('Please fill in all password fields');
       return;
     }
-    
     if (newPassword !== confirmPassword) {
       toast.error('New passwords do not match');
       return;
     }
-    
     if (newPassword.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
     }
-    
     setChangingPassword(true);
     try {
-      await userAPI.changePassword({
-        current_password: currentPassword,
-        new_password: newPassword,
-      });
+      await userAPI.changePassword({ current_password: currentPassword, new_password: newPassword });
       toast.success('Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');
@@ -98,12 +161,12 @@ export const ProfilePage = () => {
   };
 
   const currentTime = new Date().toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: timezone,
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: timezone,
   });
+
+  const togglePref = (key) => {
+    setNotifPrefs(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -116,21 +179,11 @@ export const ProfilePage = () => {
         <CardContent className="space-y-6">
           <div>
             <Label className="text-zinc-300">Full Name</Label>
-            <Input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="input-dark mt-1"
-              data-testid="profile-name-input"
-            />
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="input-dark mt-1" data-testid="profile-name-input" />
           </div>
-
           <div>
             <Label className="text-zinc-300">Email</Label>
-            <Input
-              value={user?.email || ''}
-              disabled
-              className="input-dark mt-1 opacity-50 cursor-not-allowed"
-            />
+            <Input value={user?.email || ''} disabled className="input-dark mt-1 opacity-50 cursor-not-allowed" />
             <p className="text-xs text-zinc-500 mt-1">Email cannot be changed</p>
           </div>
         </CardContent>
@@ -152,21 +205,76 @@ export const ProfilePage = () => {
               </SelectTrigger>
               <SelectContent>
                 {timezones.map((tz) => (
-                  <SelectItem key={tz.value} value={tz.value}>
-                    {tz.label}
-                  </SelectItem>
+                  <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-zinc-500 mt-1">
-              This timezone will be used in the Trade Monitor
-            </p>
+            <p className="text-xs text-zinc-500 mt-1">This timezone will be used in the Trade Monitor</p>
           </div>
-
           <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
             <p className="text-xs text-zinc-500 mb-2">Current time in your timezone:</p>
             <p className="text-3xl font-mono font-bold text-white">{currentTime}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification Preferences */}
+      <Card className="glass-card" data-testid="notification-preferences-card">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Bell className="w-5 h-5" /> Notification Preferences
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {loadingPrefs ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+            </div>
+          ) : notifPrefs ? (
+            <>
+              {/* Trading Notifications */}
+              <div>
+                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3">Trading Notifications</p>
+                <div className="space-y-2">
+                  {MEMBER_NOTIFICATION_ITEMS.map(item => (
+                    <NotifToggle
+                      key={item.key}
+                      item={item}
+                      value={notifPrefs[item.key] ?? true}
+                      onChange={() => togglePref(item.key)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Admin Notifications */}
+              {isAdmin && (
+                <div>
+                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-3 mt-6">Admin Notifications</p>
+                  <div className="space-y-2">
+                    {ADMIN_NOTIFICATION_ITEMS.map(item => (
+                      <NotifToggle
+                        key={item.key}
+                        item={item}
+                        value={notifPrefs[item.key] ?? true}
+                        onChange={() => togglePref(item.key)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Button
+                onClick={handleSaveNotifPrefs}
+                className="btn-primary w-full mt-4 gap-2"
+                disabled={savingPrefs}
+                data-testid="save-notification-prefs-button"
+              >
+                <Bell className="w-4 h-4" />
+                {savingPrefs ? 'Saving...' : 'Save Notification Preferences'}
+              </Button>
+            </>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -189,16 +297,11 @@ export const ProfilePage = () => {
                 placeholder="Enter current password"
                 data-testid="current-password-input"
               />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
-              >
+              <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
                 {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
-
           <div>
             <Label className="text-zinc-300">New Password</Label>
             <div className="relative mt-1">
@@ -210,34 +313,16 @@ export const ProfilePage = () => {
                 placeholder="Enter new password"
                 data-testid="new-password-input"
               />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
-              >
+              <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
-
           <div>
             <Label className="text-zinc-300">Confirm New Password</Label>
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input-dark mt-1"
-              placeholder="Confirm new password"
-              data-testid="confirm-password-input"
-            />
+            <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-dark mt-1" placeholder="Confirm new password" data-testid="confirm-password-input" />
           </div>
-
-          <Button
-            onClick={handleChangePassword}
-            className="btn-secondary w-full"
-            disabled={changingPassword}
-            data-testid="change-password-button"
-          >
+          <Button onClick={handleChangePassword} className="btn-secondary w-full" disabled={changingPassword} data-testid="change-password-button">
             {changingPassword ? 'Changing...' : 'Change Password'}
           </Button>
         </CardContent>
@@ -245,12 +330,7 @@ export const ProfilePage = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          className="btn-primary gap-2"
-          disabled={saving}
-          data-testid="save-profile-button"
-        >
+        <Button onClick={handleSave} className="btn-primary gap-2" disabled={saving} data-testid="save-profile-button">
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Profile Changes'}
         </Button>
