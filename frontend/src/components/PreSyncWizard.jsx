@@ -175,7 +175,7 @@ function StepMissingDays({ validation, onMarkDidNotTrade, onMarkAllDidNotTrade, 
   );
 }
 
-function StepPreStartWarning({ validation, acknowledged, onAcknowledge }) {
+function StepPreStartWarning({ validation, acknowledged, onToggleAcknowledge, onContinue }) {
   const preStartTrades = validation?.pre_start_trades || [];
 
   return (
@@ -218,7 +218,7 @@ function StepPreStartWarning({ validation, acknowledged, onAcknowledge }) {
         <input
           type="checkbox"
           checked={acknowledged}
-          onChange={(e) => onAcknowledge(e.target.checked)}
+          onChange={(e) => onToggleAcknowledge(e.target.checked)}
           className="mt-1 accent-blue-500"
           data-testid="acknowledge-pre-start-checkbox"
         />
@@ -228,7 +228,7 @@ function StepPreStartWarning({ validation, acknowledged, onAcknowledge }) {
       </label>
 
       <Button
-        onClick={() => onAcknowledge(true)}
+        onClick={onContinue}
         disabled={!acknowledged}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         data-testid="acknowledge-pre-start-btn"
