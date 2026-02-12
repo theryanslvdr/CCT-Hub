@@ -22,8 +22,9 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
 - **Extracted `/app/backend/routes/currency.py`**: Currency exchange rates (CoinGecko USDT, conversion)
 - **Extracted `/app/backend/routes/debt.py`**: Debt management CRUD + repayment plan
 - **Extracted `/app/backend/routes/goals.py`**: Profit planner goals CRUD + contribution tracking
-- **server.py**: 9486 → 9126 lines (-360 lines)
-- All extracted routes verified working with 100% test pass rate
+- **Extracted `/app/backend/routes/api_center.py`**: API connections CRUD + webhook receiver
+- **server.py**: 9486 → 9026 lines (-460 lines)
+- All extracted routes verified working with 100% test pass rate (Iterations 89-90)
 
 #### REFACTORING: Frontend Component Extraction ✅
 - **Extracted `/app/frontend/src/components/TransactionRecords.jsx`**: 3 dialog components (DepositRecordsDialog, WithdrawalRecordsDialog, CommissionRecordsDialog)
