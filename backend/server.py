@@ -1204,6 +1204,55 @@ class ProfileUpdate(BaseModel):
     timezone: Optional[str] = None
     lot_size: Optional[float] = None
 
+class NotificationPreferences(BaseModel):
+    trading_signal: bool = True
+    pre_trade_10min: bool = True
+    pre_trade_5min: bool = True
+    missed_trade_report: bool = True
+    # Admin-only
+    member_trade_submitted: bool = False
+    member_missed_trade: bool = False
+    member_profit_report: bool = False
+    daily_summary: bool = False
+
+DEFAULT_MEMBER_PREFS = {
+    "trading_signal": True,
+    "pre_trade_10min": True,
+    "pre_trade_5min": True,
+    "missed_trade_report": True,
+}
+
+DEFAULT_ADMIN_PREFS = {
+    "trading_signal": True,
+    "pre_trade_10min": True,
+    "pre_trade_5min": True,
+    "missed_trade_report": True,
+    "member_trade_submitted": True,
+    "member_missed_trade": True,
+    "member_profit_report": True,
+    "daily_summary": True,
+}
+
+@users_router.get("/notification-preferences")
+async def get_notification_preferences(user: dict = Depends(get_current_user)):
+    prefs = user.get("notification_preferences")
+    is_admin = user.get("role") in ["master_admin", "super_admin"]
+    defaults = DEFAULT_ADMIN_PREFS if is_admin else DEFAULT_MEMBER_PREFS
+    if not prefs:
+        return {"preferences": defaults, "is_admin": is_admin}
+    merged = {**defaults, **prefs}
+    return {"preferences": merged, "is_admin": is_admin}
+
+@users_router.put("/notification-preferences")
+async def update_notification_preferences(data: NotificationPreferences, user: dict = Depends(get_current_user)):
+    prefs = data.dict()
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"notification_preferences": prefs, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Notification preferences updated", "preferences": prefs}
+
+
 @users_router.put("/profile")
 async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_user)):
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
