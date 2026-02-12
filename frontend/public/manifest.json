@@ -1,0 +1,38 @@
+{
+  "short_name": "CrossCurrent",
+  "name": "The CrossCurrent Hub",
+  "description": "Your complete trading profit management platform for Merin Trading",
+  "icons": [
+    {
+      "src": "favicon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#09090b",
+  "background_color": "#09090b",
+  "orientation": "any",
+  "scope": "/",
+  "categories": ["finance", "productivity"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
