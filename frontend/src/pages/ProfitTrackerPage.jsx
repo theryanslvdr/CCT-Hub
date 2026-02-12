@@ -837,6 +837,10 @@ export const ProfitTrackerPage = () => {
     }
     // Clear backend balance cache when simulation changes (to fetch fresh data)
     setBackendDailyBalances({});
+    // Fetch data health in background (non-licensee, non-simulated)
+    if (!simulatedView && !user?.license_type) {
+      api.get('/profit/sync-validation').then(r => setDataHealth(r.data)).catch(() => {});
+    }
   }, [simulatedView]);
 
   const checkLicenseeWelcome = async () => {
