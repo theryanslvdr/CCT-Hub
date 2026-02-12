@@ -32,10 +32,18 @@ Build a Finance Center for CrossCurrent traders with Profit Tracker, Trade Monit
   - `/app/backend/server.py` (lines 6853-6990 - new endpoints)
   - `/app/frontend/src/pages/ProfitTrackerPage.jsx` (Balance Verification Dialog)
 
-#### Account Diagnostic Tool - Dedicated Endpoint ✅
-- Created dedicated endpoint `GET /api/admin/run-diagnostic/{user_id}` 
-- Moved diagnostic logic to separate route to avoid routing conflicts
-- **Note**: Production deployment may require verification
+#### Account Diagnostic Tool - Fixed with POST ✅
+- Created dedicated endpoint `GET/POST /api/admin/run-diagnostic/{user_id}` 
+- Changed frontend to use POST instead of GET to avoid caching issues
+- **Files Modified**: 
+  - `/app/backend/server.py` (added POST decorator)
+  - `/app/frontend/src/pages/admin/AdminMembersPage.jsx` (changed to api.post)
+
+#### Sync Balance Button Added to Profit Tracker ✅
+- Added small "Sync" button next to Account Value card
+- Only visible for non-simulated, non-licensee users
+- Opens the Balance Verification dialog for manual sync
+- **Files Modified**: `/app/frontend/src/pages/ProfitTrackerPage.jsx`
 
 ### Session 75 (2026-02-11) - Critical Bug Fixes & Account Diagnostic Tool ✅
 
