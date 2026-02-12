@@ -3338,6 +3338,46 @@ async def run_account_diagnostic(user_id: str, user: dict = Depends(require_admi
         ]
     }
 
+@admin_router.get("/export-debug-data/{user_id}")
+async def export_debug_data(user_id: str, user: dict = Depends(require_admin)):
+    """Export comprehensive user data for debugging - downloadable JSON"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    all_trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(5000)
+    all_deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(5000)
+    all_withdrawals = await db.withdrawals.find({"user_id": user_id}, {"_id": 0}).to_list(5000)
+    reset_trades = await db.reset_trades.find({"original_trade.user_id": user_id}, {"_id": 0}).to_list(500)
+    balance_overrides = await db.balance_overrides.find({"user_id": user_id}, {"_id": 0}).to_list(100)
+    commissions = await db.commissions.find({"user_id": user_id}, {"_id": 0}).to_list(5000)
+    
+    from datetime import datetime, timezone
+    return {
+        "export_meta": {
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "exported_by": user.get("email"),
+            "target_user_id": user_id,
+            "version": "1.0"
+        },
+        "user_profile": member,
+        "trades": sorted(all_trades, key=lambda x: x.get("created_at", "")),
+        "deposits": sorted(all_deposits, key=lambda x: x.get("created_at", "")),
+        "withdrawals": sorted(all_withdrawals, key=lambda x: x.get("created_at", "")),
+        "reset_trades": reset_trades,
+        "balance_overrides": balance_overrides,
+        "commissions": commissions,
+        "summary": {
+            "total_trades": len(all_trades),
+            "total_deposits": len(all_deposits),
+            "total_withdrawals": len(all_withdrawals),
+            "total_resets": len(reset_trades),
+            "total_overrides": len(balance_overrides)
+        }
+    }
+
+
+
 @admin_router.get("/members")
 async def get_members(
     page: int = 1,
