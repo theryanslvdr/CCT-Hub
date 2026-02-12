@@ -4005,10 +4005,23 @@ export const ProfitTrackerPage = () => {
           await refreshUser();
           // Reload all profit tracker data
           await loadData();
+          
+          // Calculate the expected balance from onboarding data
+          const startingBalance = data?.starting_balance || 0;
+          const tradeProfits = (data?.trade_entries || []).reduce((sum, t) => sum + (t.profit || 0), 0);
+          const deposits = (data?.transactions || [])
+            .filter(t => t.type === 'deposit')
+            .reduce((sum, t) => sum + (t.amount || 0), 0);
+          const withdrawals = (data?.transactions || [])
+            .filter(t => t.type === 'withdrawal')
+            .reduce((sum, t) => sum + (t.amount || 0), 0);
+          const totalCommission = data?.total_commission || 0;
+          
+          const calculatedTotal = startingBalance + tradeProfits + deposits - withdrawals + totalCommission;
+          
+          // Show balance verification popup
           toast.success('Your profit tracker is ready!');
-          // Force page reload as a fallback to ensure all data is fresh
-          // This is a robust fix for the mobile onboarding bug
-          window.location.reload();
+          openBalanceVerification(calculatedTotal);
         }}
         isReset={isResetOnboarding}
       />
