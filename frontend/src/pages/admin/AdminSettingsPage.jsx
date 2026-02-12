@@ -529,6 +529,19 @@ export const AdminSettingsPage = () => {
     }
   };
 
+  const handlePwaIconUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const res = await settingsAPI.uploadPwaIcon(file);
+      setSettings(prev => ({ ...prev, pwa_icon_url: res.data.url }));
+      toast.success('PWA icon uploaded! Users will see the new icon after reinstalling the app.');
+    } catch (error) {
+      toast.error('Failed to upload PWA icon');
+    }
+  };
+
   const toggleKeyVisibility = (key) => {
     setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
   };
