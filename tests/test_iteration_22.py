@@ -15,7 +15,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://validation-wizard-1.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://profit-tracker-ui.preview.emergentagent.com')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
