@@ -280,6 +280,13 @@ export const settingsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  uploadPwaIcon: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/settings/upload-pwa-icon', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   // Email Templates
   getEmailTemplates: () => api.get('/settings/email-templates'),
   updateEmailTemplate: (type, data) => api.put(`/settings/email-templates/${type}`, data),
