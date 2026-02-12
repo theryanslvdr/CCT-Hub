@@ -893,13 +893,23 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                     {/* Footer actions */}
                     {!currentEntry?.missed && (
                       <div className="border-t border-zinc-800 px-4 py-3 flex justify-between items-center">
-                        <button
-                          onClick={handleMissedTrade}
-                          disabled={currentEntry?.actualProfit !== undefined}
-                          className="text-sm text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
-                        >
-                          <X className="w-4 h-4" /> Missed Trade
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={handleMissedTrade}
+                            disabled={currentEntry?.actualProfit !== undefined && currentEntry?.actualProfit !== ''}
+                            className="text-sm text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            <X className="w-4 h-4" /> Missed Trade
+                          </button>
+                          {currentEntry?.actualProfit !== undefined && (
+                            <button
+                              onClick={handleClearEntry}
+                              className="text-sm text-amber-500 hover:text-amber-400 flex items-center gap-1"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" /> Clear
+                            </button>
+                          )}
+                        </div>
                         <span className="text-xs text-zinc-600">
                           LOT: {currentLotSize.toFixed(2)}
                         </span>
