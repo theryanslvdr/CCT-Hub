@@ -536,9 +536,25 @@ export const AdminSettingsPage = () => {
     try {
       const res = await settingsAPI.uploadPwaIcon(file);
       setSettings(prev => ({ ...prev, pwa_icon_url: res.data.url }));
-      toast.success('PWA icon uploaded! Users will see the new icon after reinstalling the app.');
+      toast.success('PWA icon uploaded! Users will see the new icon after reinstalling.');
     } catch (error) {
-      toast.error('Failed to upload PWA icon');
+      const detail = error.response?.data?.detail;
+      toast.error(`Upload failed: ${typeof detail === 'string' ? detail : 'Try using the URL method instead'}`);
+    }
+  };
+
+  const handlePwaIconUrl = async () => {
+    const url = settings.pwa_icon_url_input || '';
+    if (!url.startsWith('http')) {
+      toast.error('Please enter a valid URL starting with http');
+      return;
+    }
+    try {
+      await settingsAPI.setPwaIconUrl(url);
+      setSettings(prev => ({ ...prev, pwa_icon_url: url, pwa_icon_url_input: '' }));
+      toast.success('PWA icon URL saved! Users will see the new icon after reinstalling.');
+    } catch (error) {
+      toast.error('Failed to save icon URL');
     }
   };
 
