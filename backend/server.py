@@ -1641,6 +1641,9 @@ async def get_daily_balances(
     This is used by the frontend's Daily Projection table to show accurate
     "Balance Before" values for each trading day.
     
+    If a balance_override exists, it will be applied to dates on or after the override's effective_date.
+    Past balances (before the override date) remain unchanged.
+    
     Args:
         start_date: Start date (YYYY-MM-DD)
         end_date: End date (YYYY-MM-DD)
@@ -1663,6 +1666,19 @@ async def get_daily_balances(
     
     if start > end:
         raise HTTPException(status_code=400, detail="start_date must be before end_date")
+    
+    # Check for balance override
+    balance_override = await db.balance_overrides.find_one(
+        {"user_id": target_user_id},
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    
+    override_date = None
+    override_adjustment = 0
+    if balance_override:
+        override_date = balance_override.get("effective_date")
+        override_adjustment = balance_override.get("adjustment_amount", 0)
     
     # Get all deposits and trades for the user up to end_date
     end_date_str = end.replace(hour=23, minute=59, second=59).strftime("%Y-%m-%dT%H:%M:%S")
@@ -1722,10 +1738,21 @@ async def get_daily_balances(
             running_balance += trade_data.get("profit", 0)
             running_balance += trade_data.get("commission", 0)
     
+    # Apply balance override if the start date is on or after the override date
+    override_applied = False
+    if override_date and start_date_str >= override_date:
+        running_balance += override_adjustment
+        override_applied = True
+    
     # Now iterate through the requested date range
     current_date = start
     while current_date <= end:
         date_key = current_date.strftime("%Y-%m-%d")
+        
+        # Check if we need to apply the override starting from this date
+        if not override_applied and override_date and date_key >= override_date:
+            running_balance += override_adjustment
+            override_applied = True
         
         # Apply deposits/withdrawals first (they affect balance BEFORE the trade)
         day_deposit = deposits_by_date.get(date_key, 0)
