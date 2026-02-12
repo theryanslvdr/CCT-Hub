@@ -9044,7 +9044,7 @@ api_router.include_router(_debt_router)
 api_router.include_router(_goals_router)
 api_router.include_router(_currency_router)
 api_router.include_router(settings_router)
-api_router.include_router(api_center_router)
+api_router.include_router(_api_center_router)
 api_router.include_router(bve_router)
 
 app.include_router(api_router)
