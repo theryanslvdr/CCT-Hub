@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
