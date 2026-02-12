@@ -1383,33 +1383,34 @@ export const TradeMonitorPage = () => {
     {signal && <div className="md:hidden h-16" />}
     
     <div className="space-y-6">
-    <div className="flex flex-col lg:flex-row gap-6">
-      {/* Left Panel - Trade Monitor Controls */}
-      <div className="flex-1 space-y-6 lg:overflow-y-auto lg:pr-4">
-        {/* Simulation Banner */}
-        {simulatedView && simulatedMemberName && (
-          <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Eye className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-amber-400 font-medium">Simulating: {simulatedMemberName}</p>
-                  <p className="text-xs text-amber-400/70">Account Value: ${formatLargeNumber(accountValue)} • LOT Size: {lotSize.toFixed(2)}</p>
-                </div>
-              </div>
+
+      {/* Simulation Banner - Full width above the grid */}
+      {simulatedView && simulatedMemberName && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30" data-testid="simulation-banner">
+          <div className="flex items-center gap-3">
+            <Eye className="w-5 h-5 text-amber-400" />
+            <div>
+              <p className="text-amber-400 font-medium">Simulating: {simulatedMemberName}</p>
+              <p className="text-xs text-amber-400/70">Account Value: ${formatLargeNumber(accountValue)} • LOT Size: {lotSize.toFixed(2)}</p>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Audio elements */}
-        <audio ref={audioRef} loop>
-          <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg" />
-        </audio>
-        <audio ref={beepRef}>
-          <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
-        </audio>
+      {/* Audio elements */}
+      <audio ref={audioRef} loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg" />
+      </audio>
+      <audio ref={beepRef}>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg" />
+      </audio>
 
-        {/* Active Signal Card - Mobile optimized */}
+    {/* Main 2-column layout: Left (signal/lot/control) + Right (multiplier/dream/sound) */}
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
+      {/* Left Column */}
+      <div className="space-y-4">
+
+        {/* Active Signal Card */}
         {signal ? (
           <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
             <CardHeader className="pb-2 px-4">
@@ -1430,9 +1431,8 @@ export const TradeMonitorPage = () => {
               </p>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              {/* Signal Info Grid - Single column on mobile */}
               <div className="space-y-3">
-                {/* Direction Badge - Prominent */}
+                {/* Direction Badge + Multiplier (mobile only) */}
                 <div className="flex items-center gap-3">
                   <div className={`flex-1 px-4 py-3 rounded-lg text-center font-bold ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                     <div className="flex items-center justify-center gap-2">
@@ -1441,7 +1441,8 @@ export const TradeMonitorPage = () => {
                     </div>
                     <p className="text-xs opacity-70 mt-1">{signal.product}</p>
                   </div>
-                  <div className="flex-1 px-4 py-3 rounded-lg bg-purple-500/10 text-center">
+                  {/* Multiplier inline on mobile, hidden on desktop (shown in right panel) */}
+                  <div className="flex-1 px-4 py-3 rounded-lg bg-purple-500/10 text-center lg:hidden">
                     <p className="text-[10px] text-zinc-500 uppercase">Multiplier</p>
                     <p className="text-xl font-mono font-bold text-purple-400">×{profitMultiplier}</p>
                   </div>
@@ -1484,84 +1485,62 @@ export const TradeMonitorPage = () => {
           </Card>
         )}
 
-      {/* LOT Size & Projected Exit Value Cards - Single column on mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* LOT Size Card */}
-        <Card className="glass-card" data-testid="lot-size-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-xs text-zinc-400">LOT Size</p>
-                <p className="text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
-                  {lotSize.toFixed(2)}
-                </p>
-                <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+        {/* LOT Size + Calculator + Projected Exit - 3 part row */}
+        <div className="grid grid-cols-3 gap-3" data-testid="lot-exit-row">
+          {/* LOT Size Card */}
+          <Card className="glass-card" data-testid="lot-size-card">
+            <CardContent className="p-4">
+              <p className="text-xs text-zinc-400">LOT Size</p>
+              <p className="text-2xl sm:text-3xl font-mono font-bold text-purple-400 mt-1" data-testid="lot-size-value">
+                {lotSize.toFixed(2)}
+              </p>
+              <p className="text-[10px] text-zinc-500">Balance &gt; {Math.round(accountValue)}</p>
+            </CardContent>
+          </Card>
+
+          {/* Center Calculator Icon Card */}
+          <Card className="glass-card flex items-center justify-center" data-testid="calculator-card">
+            <CardContent className="p-4 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                 <Calculator className="w-6 h-6 text-white" />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Projected Exit Value Card */}
-        <Card className="glass-card" data-testid="projected-exit-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-xs text-zinc-400">Projected Exit</p>
-                <p className="text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
-                  {formatLargeNumber(exitValue)}
-                </p>
-                <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
-              </div>
-              <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                  <Rocket className="w-6 h-6 text-white" />
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDreamProfit(true)}
-                  className="text-purple-400 border-purple-400/30 hover:bg-purple-400/10 text-xs h-7 px-2"
-                  data-testid="open-dream-profit"
-                >
-                  <Sparkles className="w-3 h-3 mr-1" /> Dream
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Projected Exit Value Card */}
+          <Card className="glass-card" data-testid="projected-exit-card">
+            <CardContent className="p-4">
+              <p className="text-xs text-zinc-400">Projected Exit</p>
+              <p className="text-2xl sm:text-3xl font-mono font-bold text-emerald-400 mt-1" data-testid="projected-exit-value">
+                {formatLargeNumber(exitValue)}
+              </p>
+              <p className="text-[10px] text-zinc-500">LOT × {profitMultiplier}</p>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Trade Control */}
-      <Card className={`glass-card ${showExitAlert ? 'exit-section active' : ''}`} data-testid="trade-control-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-white">Trade Control</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              const newSoundEnabled = !soundEnabled;
-              setSoundEnabled(newSoundEnabled);
-              // If muting, stop any currently playing audio immediately
-              if (!newSoundEnabled) {
-                if (audioRef.current) {
-                  audioRef.current.pause();
-                  audioRef.current.currentTime = 0;
+        {/* Trade Control */}
+        <Card className={`glass-card ${showExitAlert ? 'exit-section active' : ''}`} data-testid="trade-control-card">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-white">Trade Control</CardTitle>
+            {/* Sound toggle inline on mobile, hidden on desktop (shown in right panel) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                const newSoundEnabled = !soundEnabled;
+                setSoundEnabled(newSoundEnabled);
+                if (!newSoundEnabled) {
+                  if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+                  if (beepRef.current) { beepRef.current.pause(); beepRef.current.currentTime = 0; }
                 }
-                if (beepRef.current) {
-                  beepRef.current.pause();
-                  beepRef.current.currentTime = 0;
-                }
-              }
-            }}
-            className="text-zinc-400"
-            data-testid="sound-toggle"
-          >
-            {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </Button>
-        </CardHeader>
+              }}
+              className="text-zinc-400 lg:hidden"
+              data-testid="sound-toggle"
+            >
+              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+          </CardHeader>
         <CardContent>
           {/* Show Performance Summary if trade already submitted today */}
           {dailySummary?.trades_count > 0 && !tradeEnded && !showCelebration ? (
