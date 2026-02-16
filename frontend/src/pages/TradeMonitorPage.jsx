@@ -360,6 +360,15 @@ export const TradeMonitorPage = () => {
         setProfitSummary(profitRes.data);
       }
       setStreak(streakRes.data);
+      
+      // Check signal block status (only for non-admin members, not in BVE)
+      if (!isInBVE && !userId && user?.role === 'member') {
+        try {
+          const blockRes = await tradeAPI.getSignalBlockStatus();
+          setSignalBlocked(blockRes.data.blocked);
+          setSignalBlockInfo(blockRes.data);
+        } catch { /* ignore */ }
+      }
     } catch (error) {
       console.error('Failed to load trade data:', error);
     }
