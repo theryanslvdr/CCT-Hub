@@ -173,6 +173,10 @@ export const TradeMonitorPage = () => {
   
   // Missed Trade Popup state
   const [showMissedTradePopup, setShowMissedTradePopup] = useState(false);
+  
+  // Signal Block state
+  const [signalBlocked, setSignalBlocked] = useState(false);
+  const [signalBlockInfo, setSignalBlockInfo] = useState(null);
   const [missedTradeChecked, setMissedTradeChecked] = useState(false);
   
   // Trade History state
