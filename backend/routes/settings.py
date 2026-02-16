@@ -55,6 +55,23 @@ class PlatformSettings(BaseModel):
     meta_title: str = "CrossCurrent Finance Center"
     meta_description: str = "Your complete trading profit management platform"
     features: List[str] = []
+    # Notice Banner
+    notice_banner_enabled: bool = False
+    notice_banner_text: str = ""
+    notice_banner_bg_color: str = "#3B82F6"
+    notice_banner_text_color: str = "#FFFFFF"
+    notice_banner_link_text: str = ""
+    notice_banner_link_url: str = ""
+    notice_banner_pages: List[str] = []
+    # Promotion Popup
+    promo_popup_enabled: bool = False
+    promo_popup_preset: str = "announcement"
+    promo_popup_title: str = ""
+    promo_popup_body: str = ""
+    promo_popup_image_url: str = ""
+    promo_popup_cta_text: str = "Learn More"
+    promo_popup_cta_url: str = ""
+    promo_popup_frequency: str = "once_per_session"
 
 class EmailTemplateUpdate(BaseModel):
     subject: str
