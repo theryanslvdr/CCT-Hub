@@ -8732,7 +8732,19 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
         if isinstance(unblocked_until, str):
             unblocked_until = datetime.fromisoformat(unblocked_until)
         if unblocked_until > datetime.now(timezone.utc):
-            return {"blocked": False, "reason": "admin_override", "missing_days": 0}
+            return {"blocked": False, "reason": "admin_override", "missing_days": 0, "habit_gate_locked": False}
+
+    # Check habit gate: if there are gate habits, user must complete at least one today
+    habit_gate_locked = False
+    gate_habits = await db.habits.find({"active": True, "is_gate": True}, {"_id": 0, "id": 1}).to_list(100)
+    if gate_habits:
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        gate_ids = [h["id"] for h in gate_habits]
+        completed = await db.habit_completions.count_documents(
+            {"user_id": user_id, "habit_id": {"$in": gate_ids}, "date": today_str}
+        )
+        if completed == 0:
+            habit_gate_locked = True
 
     today = datetime.now(timezone.utc).date()
     seven_days_ago = today - timedelta(days=7)
