@@ -20,13 +20,12 @@ import {
   TreePine, Calendar as CalendarIcon, TrendingUp, Shield, Database, Smartphone
 } from 'lucide-react';
 import { CustomEmailTemplates } from '@/components/admin/CustomEmailTemplates';
+import { HabitManagerCard } from './settings/HabitManagerCard';
+import { AffiliateManagerCard } from './settings/AffiliateManagerCard';
+import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
 
-const ACTION_TYPES = [
-  { value: 'send_invite', label: 'Send Invite (copy message)' },
-  { value: 'link_click', label: 'Visit Link' },
-  { value: 'generic', label: 'Generic Task' },
-];
+export const AdminSettingsPage = () => {
 
 const HabitManagerCard = () => {
   const [habits, setHabits] = useState([]);
