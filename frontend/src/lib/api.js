@@ -310,6 +310,24 @@ export const settingsAPI = {
   // Notice Banner & Promotion Popup (public)
   getNoticeBanner: () => api.get('/settings/notice-banner'),
   getPromotionPopup: () => api.get('/settings/promotion-popup'),
+  trackBannerEvent: (eventType, bannerType) => api.post('/settings/banner-analytics/track', null, { params: { event_type: eventType, banner_type: bannerType } }),
+  getBannerAnalytics: (days = 30) => api.get('/settings/banner-analytics', { params: { days } }),
+};
+
+// Habit Tracker APIs
+export const habitAPI = {
+  getHabits: () => api.get('/habits/'),
+  completeHabit: (habitId) => api.post(`/habits/${habitId}/complete`),
+  uncompleteHabit: (habitId) => api.post(`/habits/${habitId}/uncomplete`),
+};
+
+// Admin Habit APIs
+export const adminHabitAPI = {
+  getHabits: () => api.get('/admin/habits'),
+  createHabit: (data) => api.post('/admin/habits', data),
+  updateHabit: (habitId, data) => api.put(`/admin/habits/${habitId}`, data),
+  deleteHabit: (habitId) => api.delete(`/admin/habits/${habitId}`),
+  activateHabit: (habitId) => api.post(`/admin/habits/${habitId}/activate`),
 };
 
 // BVE (Beta Virtual Environment) APIs
