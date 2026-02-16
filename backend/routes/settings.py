@@ -171,6 +171,51 @@ async def get_promotion_popup():
         "frequency": settings.get("promo_popup_frequency", "once_per_session"),
     }
 
+
+# ==================== BANNER ANALYTICS ====================
+
+@router.post("/banner-analytics/track")
+async def track_banner_event(
+    event_type: str,  # "impression" or "dismiss"
+    banner_type: str,  # "notice_banner" or "promo_popup"
+):
+    """Track an impression or dismiss event for banners/popups."""
+    db = deps.db
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    await db.banner_analytics.update_one(
+        {"date": today, "banner_type": banner_type},
+        {"$inc": {f"{event_type}s": 1}},
+        upsert=True,
+    )
+    return {"ok": True}
+
+
+@router.get("/banner-analytics")
+async def get_banner_analytics(days: int = 30, user: dict = Depends(require_admin)):
+    """Get banner analytics for the past N days."""
+    db = deps.db
+    cutoff = (datetime.now(timezone.utc) - __import__("datetime").timedelta(days=days)).strftime("%Y-%m-%d")
+    rows = await db.banner_analytics.find(
+        {"date": {"$gte": cutoff}}, {"_id": 0}
+    ).sort("date", -1).to_list(200)
+
+    # Aggregate per banner_type
+    summary = {}
+    for row in rows:
+        bt = row.get("banner_type", "unknown")
+        if bt not in summary:
+            summary[bt] = {"impressions": 0, "dismissals": 0, "days_active": 0}
+        summary[bt]["impressions"] += row.get("impressions", 0)
+        summary[bt]["dismissals"] += row.get("dismissals", 0)
+        summary[bt]["days_active"] += 1
+
+    for bt in summary:
+        imp = summary[bt]["impressions"]
+        dis = summary[bt]["dismissals"]
+        summary[bt]["dismiss_rate"] = round((dis / imp * 100) if imp else 0, 1)
+
+    return {"days": days, "summary": summary, "daily": rows}
+
 @router.post("/upload-logo")
 async def upload_logo(file: UploadFile = File(...), user: dict = Depends(require_admin)):
     db = deps.db
