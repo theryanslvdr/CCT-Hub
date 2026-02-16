@@ -19,7 +19,7 @@ import {
   TrendingUp, TrendingDown, Volume2, VolumeX, ArrowRight, Send,
   Sparkles, ExternalLink, Rocket, Radio, FlaskConical, Flame,
   ChevronLeft, ChevronRight, Edit2, Check, X, Calendar, Eye, RefreshCw,
-  RotateCcw, MessageSquare, Loader2, Plus, Trash2
+  RotateCcw, MessageSquare, Loader2, Plus, Trash2, Lock, Camera, CheckCircle2, ClipboardCopy
 } from 'lucide-react';
 
 // Haptic feedback utility
