@@ -16,69 +16,60 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 
 ## What's Been Implemented
 
-### Phase 2 Features (Feb 2026) - Banners & Popups
+### Banner Analytics Enhancement (Feb 2026)
+- `POST /api/settings/banner-analytics/track` - tracks impressions/dismissals (no auth)
+- `GET /api/settings/banner-analytics` - admin dashboard with views, dismissals, dismiss rate, days active
+- Integrated tracking into NoticeBanner and PromotionPopup components
+- BannerAnalyticsCard in admin Banners & Popups tab
 
-#### Notice Banner
-- Admin Settings > Banners & Popups tab
-- Customizable text, background color, text color, optional link
-- Page-specific targeting via checkboxes (Dashboard, Profit Tracker, Trade Monitor, Profit Planner, Debt Manager, Profile, Notifications)
-- Dismissible per session (sessionStorage)
-- Live preview in admin settings
-- Endpoints: `GET /api/settings/notice-banner` (public)
+### Phase 3: Habit Tracker - Soft Gate (Feb 2026)
+- **Member-facing**: `/habits` page with daily task list, completion toggle, gate status badge
+- **Admin**: Habit management in Admin Settings > Habits tab (CRUD)
+- **3 action types**: send_invite (with copy message), link_click, generic
+- **Gate mechanism**: Gate habits block trading signal until at least one is completed daily
+- **Signal integration**: signal-block-status API returns `habit_gate_locked` field
+- **TradeMonitorPage**: Shows habit-specific blocked message with "Go to Daily Habits" CTA
+- **Sidebar**: "Daily Habits" nav item with CheckSquare icon
+- **Default seeded habit**: "Send 1 invite today" (send_invite type, gate enabled)
 
-#### Promotion Pop-up
-- 3 preset styles: Announcement (blue), Promo (amber), Feature Update (emerald)
-- Title, body text, image URL, CTA button with custom URL
-- Frequency control: once per session, once per day, every page load
-- Endpoints: `GET /api/settings/promotion-popup` (public)
+### Phase 2: Banners & Popups (Feb 2026)
+- Notice Banner: Admin-configurable sticky bar with page targeting, colors, link, dismiss
+- Promotion Popup: 3 presets (Announcement/Promo/Feature Update), image, CTA, frequency control
+- Admin UI: Banners & Popups tab in Admin Settings
 
-### Phase 1 Features (Feb 2026) - Signal Blocking & Version Banner
-
-#### Trading Signal Blocking
-- `GET /api/trade/signal-block-status` - checks if member blocked (7+ days unreported)
-- `POST /api/admin/members/{user_id}/unblock-signal` - admin manual override
-- Frontend: Signal-blocked-card overlay on TradeMonitorPage
-- Frontend: Unblock button in AdminMembersPage member details
-
-#### Version Banner
-- `GET /api/version` - returns build_version UUID (changes on restart/deploy)
-- Frontend: `VersionBanner` component checks every 60 seconds
-- Shows "Refresh Now" banner on version mismatch
+### Phase 1: Signal Blocking & Version Banner (Feb 2026)
+- Signal blocking: Auto-block after 7+ days unreported profit data, admin manual unblock
+- Version banner: Detects new deployments via build_version UUID, forces refresh
 
 ### Previously Implemented
 - Mobile bug fixes, PWA install flow, web push notifications
-- Notification system, daily trade summary
-- PWA icon customization, production hotfixes
-- Mobile UI fixes
+- Notification system, daily trade summary, PWA icon customization
+- Production hotfixes, mobile UI fixes
 
 ## Key API Endpoints
 - `GET /api/version` - Build version (no auth)
-- `GET /api/trade/signal-block-status` - Signal block (auth)
+- `GET /api/trade/signal-block-status` - Signal block + habit gate (auth)
 - `POST /api/admin/members/{user_id}/unblock-signal` - Admin unblock
-- `GET /api/settings/notice-banner` - Notice banner config (no auth)
+- `GET /api/settings/notice-banner` - Banner config (no auth)
 - `GET /api/settings/promotion-popup` - Popup config (no auth)
-- `PUT /api/settings/platform` - Save all settings (admin)
+- `POST /api/settings/banner-analytics/track` - Track events (no auth)
+- `GET /api/settings/banner-analytics` - Analytics (admin)
+- `GET /api/habits/` - Member habits + gate status (auth)
+- `POST /api/habits/{id}/complete` - Complete habit (auth)
+- `POST /api/habits/{id}/uncomplete` - Undo habit (auth)
+- `GET/POST/PUT/DELETE /api/admin/habits` - Admin habit CRUD
 
 ## Upcoming Tasks
 
-### Phase 3: Habit Tracker (P2)
-- "Soft gate" - completing one daily task unlocks trading signal
-- Admin interface to manage/add habits
-- Pre-written invite task as default
-
-### Phase 4: Affiliate Center (P3)
+### Phase 4: Affiliate Center (P1)
 - Resource hub: conversation starters, story templates, marketing materials
 - FAQ section
 - Chatbase chatbot embed ("ConSim")
 
 ## Backlog
-- Backend refactoring of `server.py` (incremental, ~8600+ lines)
+- Backend refactoring of `server.py` (incremental, ~8900+ lines)
 - Frontend refactoring of ProfitTrackerPage.jsx
 - Cloudinary file upload implementation (placeholder)
-
-## Known Issues
-- Cloudinary integration is placeholder
-- Reset Tracker admin flow (user verification pending)
 
 ## 3rd Party Integrations
 Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (Planned)
