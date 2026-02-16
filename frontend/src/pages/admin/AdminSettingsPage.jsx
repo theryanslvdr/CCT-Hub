@@ -26,11 +26,6 @@ import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
 
 export const AdminSettingsPage = () => {
-  const [habits, setHabits] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true });
 
   const loadHabits = async () => {
     try {
