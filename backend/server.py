@@ -122,6 +122,8 @@ from routes.api_center import router as _api_center_router
 from routes.bve import router as _bve_router
 from routes.settings import router as _settings_router
 from routes.habits import router as _habits_router, admin_habit_router as _admin_habits_router
+from routes.affiliate import router as _affiliate_router, admin_affiliate_router as _admin_affiliate_router
+from routes.activity_feed import admin_activity_router as _admin_activity_router
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
@@ -8899,6 +8901,9 @@ api_router.include_router(trade_router)
 api_router.include_router(admin_router)
 api_router.include_router(_habits_router)
 api_router.include_router(_admin_habits_router)
+api_router.include_router(_affiliate_router)
+api_router.include_router(_admin_affiliate_router)
+api_router.include_router(_admin_activity_router)
 api_router.include_router(_debt_router)
 api_router.include_router(_goals_router)
 api_router.include_router(_currency_router)
