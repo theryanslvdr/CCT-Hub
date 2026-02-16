@@ -9140,6 +9140,15 @@ async def get_activity_feed(since: str = "", limit: int = 50, user: dict = Depen
         trade_filter, {"_id": 0, "user_id": 1, "user_name": 1, "actual_profit": 1, "created_at": 1, "trade_type": 1}
     ).sort("created_at", -1).limit(limit).to_list(limit)
 
+    # Resolve missing user_name in trade logs
+    trade_user_ids = [tl["user_id"] for tl in trade_logs if not tl.get("user_name") and tl.get("user_id")]
+    if trade_user_ids:
+        extra_users = await db.users.find(
+            {"id": {"$in": list(set(trade_user_ids))}}, {"_id": 0, "id": 1, "full_name": 1}
+        ).to_list(200)
+        for u in extra_users:
+            users_map[u["id"]] = u["full_name"]
+
     for tl in trade_logs:
         profit = tl.get("actual_profit", 0)
         trade_type = tl.get("trade_type", "trade")
