@@ -335,4 +335,9 @@ export const emailAPI = {
   send: (to, subject, body) => api.post('/send-email', null, { params: { to, subject, body } }),
 };
 
+// Version check API (no auth required)
+export const versionAPI = {
+  getVersion: () => api.get('/version'),
+};
+
 export default api;
