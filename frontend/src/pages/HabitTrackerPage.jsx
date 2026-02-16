@@ -97,6 +97,31 @@ const HabitTrackerPage = () => {
         </div>
       </div>
 
+      {/* Streak badges */}
+      <div className="grid grid-cols-3 gap-3" data-testid="streak-badges">
+        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <Flame className={`w-5 h-5 ${streak.current_streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
+          </div>
+          <p className="text-2xl font-bold text-white">{streak.current_streak}</p>
+          <p className="text-[11px] text-zinc-500">Current Streak</p>
+        </div>
+        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <Trophy className={`w-5 h-5 ${streak.longest_streak > 0 ? 'text-amber-400' : 'text-zinc-600'}`} />
+          </div>
+          <p className="text-2xl font-bold text-white">{streak.longest_streak}</p>
+          <p className="text-[11px] text-zinc-500">Best Streak</p>
+        </div>
+        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <Calendar className="w-5 h-5 text-blue-400" />
+          </div>
+          <p className="text-2xl font-bold text-white">{streak.total_days}</p>
+          <p className="text-[11px] text-zinc-500">Total Days</p>
+        </div>
+      </div>
+
       {/* Progress */}
       <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
         <div
