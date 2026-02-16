@@ -177,6 +177,13 @@ export const TradeMonitorPage = () => {
   // Signal Block state
   const [signalBlocked, setSignalBlocked] = useState(false);
   const [signalBlockInfo, setSignalBlockInfo] = useState(null);
+  
+  // Habit gate overlay state
+  const [habitGateHabits, setHabitGateHabits] = useState([]);
+  const [habitGateStep, setHabitGateStep] = useState('tasks'); // 'tasks' | 'onit' | 'done'
+  const [habitGateActive, setHabitGateActive] = useState(null); // selected habit
+  const [habitScreenshot, setHabitScreenshot] = useState(null);
+  const [habitUploading, setHabitUploading] = useState(false);
   const [missedTradeChecked, setMissedTradeChecked] = useState(false);
   
   // Trade History state
