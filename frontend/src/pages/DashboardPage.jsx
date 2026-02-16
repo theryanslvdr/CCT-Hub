@@ -711,6 +711,11 @@ export const DashboardPage = () => {
         {isAdmin() && !isSimulating && (
           <MissedTradersWidget />
         )}
+
+        {/* Live Activity Feed - Admin only */}
+        {isAdmin() && !isSimulating && (
+          <ActivityFeed />
+        )}
         
         {/* Your Stats - only show if simulating OR not admin */}
         {(!isAdmin() || isSimulating) && (
