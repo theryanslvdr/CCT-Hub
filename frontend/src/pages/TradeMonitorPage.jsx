@@ -374,6 +374,14 @@ export const TradeMonitorPage = () => {
           const blockRes = await tradeAPI.getSignalBlockStatus();
           setSignalBlocked(blockRes.data.blocked);
           setSignalBlockInfo(blockRes.data);
+          // Load habits for the gate overlay
+          if (blockRes.data.blocked && blockRes.data.habit_gate_locked) {
+            try {
+              const habitsRes = await habitAPI.getHabits();
+              const gateHabits = (habitsRes.data.habits || []).filter(h => h.is_gate);
+              setHabitGateHabits(gateHabits);
+            } catch { /* ignore */ }
+          }
         } catch { /* ignore */ }
       }
     } catch (error) {
