@@ -8723,7 +8723,7 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
 
     # Admins are never blocked
     if user_role in ("admin", "basic_admin", "super_admin", "master_admin"):
-        return {"blocked": False, "reason": None, "missing_days": 0}
+        return {"blocked": False, "reason": None, "missing_days": 0, "habit_gate_locked": False}
 
     # Check admin manual override
     user_doc = await db.users.find_one({"id": user_id}, {"_id": 0, "signal_unblocked_until": 1, "created_at": 1})
