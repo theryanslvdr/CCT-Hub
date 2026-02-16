@@ -2665,6 +2665,9 @@ export const AdminSettingsPage = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Analytics Card */}
+              <BannerAnalyticsCard />
             </div>
           )}
         </div>
