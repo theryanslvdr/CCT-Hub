@@ -8705,6 +8705,101 @@ async def force_send_signal_email(request: Request, user: dict = Depends(require
         raise HTTPException(status_code=500, detail=f"Failed to send emails: {str(e)}")
 
 
+# ==================== VERSION / DEPLOY DETECTION ====================
+
+@api_router.get("/version")
+async def get_build_version():
+    """Returns the current build version (changes on every server restart/deploy)."""
+    return {"build_version": BUILD_VERSION}
+
+# ==================== SIGNAL BLOCK STATUS ====================
+
+@trade_router.get("/signal-block-status")
+async def get_signal_block_status(user: dict = Depends(get_current_user)):
+    """Check if the current member is blocked from viewing trading signals due to unreported profit tracker data."""
+    user_id = user["id"]
+    user_role = user.get("role", "member")
+
+    # Admins are never blocked
+    if user_role in ("admin", "basic_admin", "super_admin", "master_admin"):
+        return {"blocked": False, "reason": None, "missing_days": 0}
+
+    # Check admin manual override
+    user_doc = await db.users.find_one({"id": user_id}, {"_id": 0, "signal_unblocked_until": 1, "created_at": 1})
+    if user_doc and user_doc.get("signal_unblocked_until"):
+        unblocked_until = user_doc["signal_unblocked_until"]
+        if isinstance(unblocked_until, str):
+            unblocked_until = datetime.fromisoformat(unblocked_until)
+        if unblocked_until > datetime.now(timezone.utc):
+            return {"blocked": False, "reason": "admin_override", "missing_days": 0}
+
+    today = datetime.now(timezone.utc).date()
+    seven_days_ago = today - timedelta(days=7)
+
+    # Find user's most recent trade log entry
+    last_trade = await db.trade_logs.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "created_at": 1},
+        sort=[("created_at", -1)]
+    )
+
+    if last_trade:
+        last_date_str = last_trade["created_at"][:10]  # YYYY-MM-DD
+        last_trade_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
+    else:
+        # Never traded — use account creation date
+        created_at = user_doc.get("created_at", "") if user_doc else ""
+        if created_at:
+            last_trade_date = datetime.fromisoformat(created_at.replace("Z", "+00:00")).date() if isinstance(created_at, str) else created_at.date()
+        else:
+            last_trade_date = seven_days_ago
+
+    days_since_last = (today - last_trade_date).days
+
+    if days_since_last < 7:
+        return {"blocked": False, "reason": None, "missing_days": days_since_last}
+
+    # Were there any official signals in the unreported gap?
+    gap_start = (last_trade_date + timedelta(days=1)).isoformat()
+    gap_end = today.isoformat()
+
+    signals_in_gap = await db.trading_signals.count_documents({
+        "created_at": {"$gte": gap_start, "$lte": gap_end + "T23:59:59"},
+        "is_official": True
+    })
+
+    if signals_in_gap == 0:
+        return {"blocked": False, "reason": "no_signals", "missing_days": days_since_last}
+
+    return {
+        "blocked": True,
+        "reason": "unreported_week",
+        "missing_days": days_since_last,
+        "last_report_date": last_trade_date.isoformat(),
+        "signals_in_gap": signals_in_gap,
+        "message": f"You have {days_since_last} days of unreported profit tracker data. Please update your profit tracker to unlock the trading signal."
+    }
+
+# ==================== ADMIN: UNBLOCK SIGNAL ====================
+
+@admin_router.post("/members/{user_id}/unblock-signal")
+async def admin_unblock_signal(user_id: str, days: int = 7, user: dict = Depends(require_admin)):
+    """Master/Super admin manually unblocks a member's signal view for N days."""
+    target = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    unblock_until = datetime.now(timezone.utc) + timedelta(days=days)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"signal_unblocked_until": unblock_until.isoformat()}}
+    )
+
+    return {
+        "message": f"Signal unblocked for {target.get('full_name', user_id)} until {unblock_until.isoformat()[:10]}",
+        "unblocked_until": unblock_until.isoformat()
+    }
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
@@ -8716,8 +8811,8 @@ async def health_check():
     return {
         "status": "healthy", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "2026.02.12.v2",  # Version to verify deployment
-        "features": ["balance-override", "diagnostic-post", "sync-button"]
+        "version": "2026.02.12.v2",
+        "features": ["balance-override", "diagnostic-post", "sync-button", "signal-blocking", "version-banner"]
     }
 
 # Include all routers
