@@ -1441,28 +1441,128 @@ export const TradeMonitorPage = () => {
 
         {/* 1. Active Signal Card (TOP PRIORITY) */}
         {signalBlocked && signal ? (
-          <Card className="glass-card border-2 border-orange-500/30" data-testid="signal-blocked-card">
-            <CardContent className="p-6 text-center space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-7 h-7 text-orange-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-orange-300">Signal Blocked</h3>
-                <p className="text-sm text-zinc-400 mt-2 max-w-xs mx-auto">
-                  {signalBlockInfo?.reason === 'habit_gate'
-                    ? 'Complete your daily habit to unlock today\'s trading signal.'
-                    : signalBlockInfo?.message || `You have ${signalBlockInfo?.missing_days || 7}+ days of unreported profit tracker data.`}
-                </p>
-              </div>
-              {signalBlockInfo?.reason === 'habit_gate' ? (
-                <Button
-                  data-testid="go-to-habits-btn"
-                  onClick={() => window.location.href = '/habits'}
-                  className="bg-teal-500 hover:bg-teal-600 text-white gap-2"
-                >
-                  <ArrowRight className="w-4 h-4" /> Go to Daily Habits
-                </Button>
-              ) : (
+          signalBlockInfo?.reason === 'habit_gate' || signalBlockInfo?.habit_gate_locked ? (
+            /* ── Interactive Habit Gate Overlay ── */
+            <Card className="glass-card border-2 border-teal-500/30" data-testid="habit-gate-card">
+              <CardContent className="p-5 space-y-4">
+                {habitGateStep === 'tasks' && (
+                  <>
+                    <div className="text-center">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-teal-500/10 flex items-center justify-center mb-3">
+                        <Lock className="w-6 h-6 text-teal-400" />
+                      </div>
+                      <h3 className="text-base font-semibold text-teal-300">Complete a Task to Unlock</h3>
+                      <p className="text-xs text-zinc-500 mt-1">Finish one daily habit to reveal today's signal</p>
+                    </div>
+                    <div className="space-y-2">
+                      {habitGateHabits.map(habit => (
+                        <div key={habit.id} className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/40 transition-colors" data-testid={`gate-habit-${habit.id}`}>
+                          <p className="text-sm font-medium text-white">{habit.title}</p>
+                          {habit.description && <p className="text-xs text-zinc-500 mt-1">{habit.description}</p>}
+                          {habit.action_type === 'send_invite' && habit.action_data && (
+                            <div className="mt-2 p-2 bg-zinc-800/60 rounded text-xs text-zinc-400 whitespace-pre-wrap line-clamp-2">{habit.action_data}</div>
+                          )}
+                          <Button
+                            size="sm"
+                            className="mt-2 bg-teal-600 hover:bg-teal-700 text-white gap-1.5 w-full"
+                            onClick={() => { setHabitGateActive(habit); setHabitGateStep('onit'); }}
+                            data-testid={`gate-onit-${habit.id}`}
+                          >
+                            On it!
+                          </Button>
+                        </div>
+                      ))}
+                      {habitGateHabits.length === 0 && (
+                        <p className="text-xs text-zinc-500 text-center py-2">No habits configured. Ask your admin.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {habitGateStep === 'onit' && habitGateActive && (
+                  <>
+                    <div className="text-center">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-blue-500/10 flex items-center justify-center mb-3">
+                        <Camera className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <h3 className="text-base font-semibold text-blue-300">Working on: {habitGateActive.title}</h3>
+                      <p className="text-xs text-zinc-500 mt-1">Upload a screenshot (optional) then mark done</p>
+                    </div>
+
+                    {habitGateActive.action_type === 'send_invite' && habitGateActive.action_data && (
+                      <div className="p-3 bg-zinc-900/60 rounded-lg border border-zinc-800">
+                        <p className="text-xs text-zinc-500 mb-1">Copy and send this message:</p>
+                        <p className="text-sm text-zinc-300 whitespace-pre-wrap">{habitGateActive.action_data}</p>
+                        <Button variant="ghost" size="sm" className="mt-2 text-blue-400 gap-1" onClick={() => { navigator.clipboard.writeText(habitGateActive.action_data); toast.success('Copied!'); }} data-testid="gate-copy-msg">
+                          <ClipboardCopy className="w-3.5 h-3.5" /> Copy Message
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Screenshot upload */}
+                    <div className="border border-dashed border-zinc-700 rounded-lg p-4 text-center">
+                      {habitScreenshot ? (
+                        <div className="space-y-2">
+                          <img src={URL.createObjectURL(habitScreenshot)} alt="Screenshot" className="max-h-32 mx-auto rounded" />
+                          <Button variant="ghost" size="sm" className="text-xs text-zinc-400" onClick={() => setHabitScreenshot(null)}>Remove</Button>
+                        </div>
+                      ) : (
+                        <label className="cursor-pointer block">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setHabitScreenshot(e.target.files[0])} data-testid="gate-screenshot-input" />
+                          <Camera className="w-8 h-8 text-zinc-600 mx-auto mb-1" />
+                          <p className="text-xs text-zinc-500">Tap to upload screenshot (optional)</p>
+                        </label>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="flex-1 text-zinc-400" onClick={() => { setHabitGateStep('tasks'); setHabitGateActive(null); setHabitScreenshot(null); }}>
+                        Back
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                        disabled={habitUploading}
+                        onClick={async () => {
+                          setHabitUploading(true);
+                          try {
+                            let screenshotUrl = '';
+                            if (habitScreenshot) {
+                              const upRes = await habitAPI.uploadScreenshot(habitScreenshot);
+                              screenshotUrl = upRes.data.url;
+                            }
+                            await habitAPI.completeHabit(habitGateActive.id, screenshotUrl);
+                            setSignalBlocked(false);
+                            setHabitGateStep('done');
+                            toast.success('Task completed! Signal unlocked.');
+                          } catch {
+                            toast.error('Failed to complete task');
+                          }
+                          setHabitUploading(false);
+                        }}
+                        data-testid="gate-task-done"
+                      >
+                        {habitUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                        Task Done
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            /* ── Profit Tracker Block ── */
+            <Card className="glass-card border-2 border-orange-500/30" data-testid="signal-blocked-card">
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <AlertTriangle className="w-7 h-7 text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-orange-300">Signal Blocked</h3>
+                  <p className="text-sm text-zinc-400 mt-2 max-w-xs mx-auto">
+                    {signalBlockInfo?.message || `You have ${signalBlockInfo?.missing_days || 7}+ days of unreported profit tracker data.`}
+                  </p>
+                </div>
                 <Button
                   data-testid="go-to-profit-tracker-btn"
                   onClick={() => window.location.href = '/profit-tracker'}
@@ -1470,14 +1570,14 @@ export const TradeMonitorPage = () => {
                 >
                   <ArrowRight className="w-4 h-4" /> Go to Profit Tracker
                 </Button>
-              )}
-              {signalBlockInfo?.last_report_date && signalBlockInfo?.reason !== 'habit_gate' && (
-                <p className="text-xs text-zinc-600">
-                  Last report: {new Date(signalBlockInfo.last_report_date).toLocaleDateString()}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                {signalBlockInfo?.last_report_date && (
+                  <p className="text-xs text-zinc-600">
+                    Last report: {new Date(signalBlockInfo.last_report_date).toLocaleDateString()}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )
         ) : signal ? (
           <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
             <CardHeader className="pb-2 px-4">
