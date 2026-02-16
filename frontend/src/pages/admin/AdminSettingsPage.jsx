@@ -28,11 +28,7 @@ export const AdminSettingsPage = () => {
   const { user, isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
     platform_name: 'CrossCurrent',
-
-  const handleSave = async () => {
-    if (!form.title.trim()) { toast.error('Title required'); return; }
-    try {
-      if (editingId) {
+    tagline: 'Finance Center',
         await adminHabitAPI.updateHabit(editingId, form);
         toast.success('Habit updated');
       } else {
