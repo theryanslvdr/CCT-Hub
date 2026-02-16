@@ -8801,6 +8801,121 @@ async def admin_unblock_signal(user_id: str, days: int = 7, user: dict = Depends
         "unblocked_until": unblock_until.isoformat()
     }
 
+# ==================== HABIT TRACKER ====================
+
+class HabitCreate(BaseModel):
+    title: str
+    description: str = ""
+    action_type: str = "generic"  # "send_invite", "generic", "link_click"
+    action_data: str = ""  # pre-written message or URL
+    is_gate: bool = True  # if True, completing this unlocks the signal
+
+@habit_router.get("/")
+async def get_habits(user: dict = Depends(get_current_user)):
+    """Get all active habits and the user's completion status for today."""
+    habits = await db.habits.find({"active": True}, {"_id": 0}).to_list(100)
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    completions = await db.habit_completions.find(
+        {"user_id": user["id"], "date": today}, {"_id": 0}
+    ).to_list(100)
+    completed_ids = {c["habit_id"] for c in completions}
+
+    gate_habits = [h for h in habits if h.get("is_gate")]
+    gate_complete = any(h["id"] in completed_ids for h in gate_habits) if gate_habits else True
+
+    return {
+        "habits": habits,
+        "completions_today": list(completed_ids),
+        "gate_unlocked": gate_complete,
+        "date": today,
+    }
+
+@habit_router.post("/{habit_id}/complete")
+async def complete_habit(habit_id: str, user: dict = Depends(get_current_user)):
+    """Mark a habit as completed for today."""
+    habit = await db.habits.find_one({"id": habit_id, "active": True}, {"_id": 0})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    existing = await db.habit_completions.find_one(
+        {"user_id": user["id"], "habit_id": habit_id, "date": today}
+    )
+    if existing:
+        return {"message": "Already completed today", "already": True}
+
+    await db.habit_completions.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "habit_id": habit_id,
+        "date": today,
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"message": "Habit completed!", "already": False}
+
+@habit_router.post("/{habit_id}/uncomplete")
+async def uncomplete_habit(habit_id: str, user: dict = Depends(get_current_user)):
+    """Undo a habit completion for today."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    await db.habit_completions.delete_one(
+        {"user_id": user["id"], "habit_id": habit_id, "date": today}
+    )
+    return {"message": "Habit unmarked"}
+
+# Admin: manage habits
+@admin_router.get("/habits")
+async def admin_get_habits(user: dict = Depends(require_admin)):
+    """Get all habits (including inactive)."""
+    habits = await db.habits.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"habits": habits}
+
+@admin_router.post("/habits")
+async def admin_create_habit(data: HabitCreate, user: dict = Depends(require_admin)):
+    """Create a new habit."""
+    habit = {
+        "id": str(uuid.uuid4()),
+        "title": data.title,
+        "description": data.description,
+        "action_type": data.action_type,
+        "action_data": data.action_data,
+        "is_gate": data.is_gate,
+        "active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user["id"],
+    }
+    await db.habits.insert_one(habit)
+    habit.pop("_id", None)
+    return habit
+
+@admin_router.put("/habits/{habit_id}")
+async def admin_update_habit(habit_id: str, data: HabitCreate, user: dict = Depends(require_admin)):
+    """Update a habit."""
+    result = await db.habits.update_one(
+        {"id": habit_id},
+        {"$set": {
+            "title": data.title,
+            "description": data.description,
+            "action_type": data.action_type,
+            "action_data": data.action_data,
+            "is_gate": data.is_gate,
+        }}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Habit not found")
+    return {"message": "Habit updated"}
+
+@admin_router.delete("/habits/{habit_id}")
+async def admin_delete_habit(habit_id: str, user: dict = Depends(require_admin)):
+    """Deactivate a habit (soft delete)."""
+    await db.habits.update_one({"id": habit_id}, {"$set": {"active": False}})
+    return {"message": "Habit deactivated"}
+
+@admin_router.post("/habits/{habit_id}/activate")
+async def admin_activate_habit(habit_id: str, user: dict = Depends(require_admin)):
+    """Reactivate a habit."""
+    await db.habits.update_one({"id": habit_id}, {"$set": {"active": True}})
+    return {"message": "Habit activated"}
+
 # ==================== MAIN SETUP ====================
 
 @api_router.get("/")
