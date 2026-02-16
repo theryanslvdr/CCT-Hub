@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
 import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
 import { ContentProtection } from '@/components/ContentProtection';
+import { NoticeBanner } from '@/components/NoticeBanner';
+import { PromotionPopup } from '@/components/PromotionPopup';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Settings, ExternalLink, X, Info, CheckCircle, Bell } from 'lucide-react';
