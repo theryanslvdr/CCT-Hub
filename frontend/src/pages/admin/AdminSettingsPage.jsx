@@ -2901,6 +2901,13 @@ export const AdminSettingsPage = () => {
               <BannerAnalyticsCard />
             </div>
           )}
+
+          {/* Habit Tracker - Master Admin Only */}
+          {activeTab === 'habits' && isMasterAdmin && (
+            <div className="space-y-6">
+              <HabitManagerCard />
+            </div>
+          )}
         </div>
       </div>
     </div>
