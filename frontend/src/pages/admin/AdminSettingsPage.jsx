@@ -24,16 +24,8 @@ import { HabitManagerCard } from './settings/HabitManagerCard';
 import { AffiliateManagerCard } from './settings/AffiliateManagerCard';
 import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
-
 export const AdminSettingsPage = () => {
-
-  const loadHabits = async () => {
-    try {
-      const res = await adminHabitAPI.getHabits();
-      setHabits(res.data.habits || []);
-    } catch { /* ignore */ }
-    setLoading(false);
-  };
+  const { user, isMasterAdmin, isSuperAdmin } = useAuth();
 
   useEffect(() => { loadHabits(); }, []);
 
