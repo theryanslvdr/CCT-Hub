@@ -165,6 +165,7 @@ export const adminAPI = {
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
   unblockSignal: (userId, days = 7) => api.post(`/admin/members/${userId}/unblock-signal`, null, { params: { days } }),
+  getActivityFeed: (since = '', limit = 50) => api.get('/admin/activity-feed', { params: { since, limit } }),
   // Global holidays (Master Admin)
   getGlobalHolidays: () => api.get('/admin/global-holidays'),
   addGlobalHoliday: (date, reason) => api.post('/admin/global-holidays', null, { params: { date, reason } }),
