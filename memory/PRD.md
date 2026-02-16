@@ -1,60 +1,95 @@
 # CrossCurrent Hub - Product Requirements Document
 
 ## Original Problem Statement
-Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platform. Full-stack app with React frontend, FastAPI backend, and MongoDB.
+A multi-phase financial trading dashboard platform with admin-configurable features:
+- Trading signal blocking, "New Version" banner
+- Admin-configurable notice banners and promotion pop-ups with analytics
+- Full-featured habit tracker with streaks and signal gating
+- Affiliate center with admin-managed resources and Chatbase embed
+- Interactive habit gate flow with screenshot uploads
+- Live admin activity feed and push notifications for habit completions
+- PWA push notification support
 
-## Architecture
-- **Frontend**: React + Tailwind CSS + Shadcn/UI (port 3000)
-- **Backend**: FastAPI + MongoDB (port 8001, routes prefixed /api)
-- **PWA**: Dynamic manifest + service worker
-- **Push Notifications**: Web Push API with VAPID keys + pywebpush
+## Core Architecture
+- **Backend:** FastAPI (Python) on port 8001
+- **Frontend:** React on port 3000  
+- **Database:** MongoDB (crosscurrent_finance)
+- **Auth:** JWT-based, admin roles: master_admin, super_admin, basic_admin
 
-## Credentials
-- Master Admin: iam@ryansalvador.com / admin123
+## Key Credentials
+- Master Admin: `iam@ryansalvador.com` / `admin123`
+- Login returns `access_token` field
 
-## All 4 Phases Complete + Enhancements
+## What's Implemented (All features complete)
+1. **Phase 1:** Trading Signal Blocking + "New Version" Banner
+2. **Phase 2:** Admin-configurable Banners, Popups + Analytics
+3. **Phase 3:** Habit Tracker with Streaks + Signal Gate
+4. **Phase 4:** Affiliate Center + Chatbase placeholder
+5. **Interactive Habit Gate** on TradeMonitorPage
+6. **Live Activity Feed** on Admin Dashboard
+7. **PWA Push Notifications** (fixed VAPID key bug)
+8. **Admin Habit Notifications** (push on member habit completion)
 
-### Phase 1: Signal Blocking & Version Banner
-- Auto-block signal after 7+ unreported days, admin manual unblock
-- Version banner: detects deployments via build_version UUID
+## Backend Route Architecture (Post-Refactoring)
+```
+/app/backend/
+├── server.py          (8705 lines - main server, still contains auth/profit/trade/admin routers)
+├── deps.py            (Auth functions, JWT handling)
+├── helpers.py         (Push notification helpers: send_push_to_admins, send_push_notification, send_push_to_all_members)
+├── database.py        (MongoDB connection singleton)
+├── models/
+│   ├── user.py        (UserCreate, UserResponse, TokenResponse, etc.)
+│   ├── trade.py       (Trade models)
+│   ├── common.py      (Deposit, Debt models)
+│   └── settings.py    (Settings models)
+└── routes/
+    ├── habits.py      ✅ EXTRACTED (habits + admin habit management)
+    ├── affiliate.py   ✅ EXTRACTED (affiliate resources + chatbase config)
+    ├── activity_feed.py ✅ EXTRACTED (admin activity feed)
+    ├── users.py       ✅ EXTRACTED (notification prefs, push subscriptions, profile, password)
+    ├── settings.py    ✅ (previously extracted)
+    ├── currency.py    ✅ (previously extracted)
+    ├── debt.py        ✅ (previously extracted)
+    ├── goals.py       ✅ (previously extracted)
+    ├── api_center.py  ✅ (previously extracted)
+    └── bve.py         ✅ (previously extracted)
+```
 
-### Phase 2: Banners & Popups
-- Notice Banner: page-targeted, customizable colors, link, dismissible
-- Promotion Popup: 3 presets, image, CTA, frequency control
-- Banner Analytics: impressions, dismissals, dismiss rate tracking
+## Frontend Component Architecture (Post-Refactoring)
+```
+/app/frontend/src/pages/admin/
+├── AdminSettingsPage.jsx    (2713 lines - reduced from 3131)
+└── settings/
+    ├── HabitManagerCard.jsx      ✅ EXTRACTED (~130 lines)
+    ├── AffiliateManagerCard.jsx  ✅ EXTRACTED (~155 lines)
+    └── BannerAnalyticsCard.jsx   ✅ EXTRACTED (~60 lines)
+```
 
-### Phase 3: Habit Tracker (Soft Gate)
-- Daily tasks, 3 action types (send_invite, link_click, generic)
-- Gate habits block signal until completed
-- **Interactive Gate Overlay** on Trade Monitor: "On it!" → screenshot upload → "Task Done" → signal revealed
-- Habit Streaks: current/longest streak, total days badges
-- Admin CRUD via Settings > Habits tab
+## Bug Fixes Applied
+- ✅ **P0:** PWA Push Notification fix (VAPID key in .env was concatenated)
+- ✅ **P1:** Admin reset protection (recurring regression - admins can no longer self-reset)
+- ✅ **LOW:** Broken image in Activity Feed (onError handler + length check)
 
-### Phase 4: Affiliate Center
-- Resource hub at /affiliate with 4 categories (all users can access)
-- Copy-to-clipboard on all resources
-- Chatbase chatbot embed (ConSim)
-- **Admin inline "Add Resource"** + delete buttons on each tab
-
-### Member Activity Feed (Enhancement)
-- Live feed on Admin Dashboard, polls every 8 seconds
-- Shows habit completions (with screenshot thumbnails) and trade logs
-- Green pulsing "Listening" indicator, pulse animation on new items
-- `GET /api/admin/activity-feed?since=&limit=` with polling support
-- Resolves user names from DB for trade logs with missing names
-
-## Key API Endpoints
-- Signal: `GET /api/trade/signal-block-status`, `POST /api/admin/members/{id}/unblock-signal`
-- Banners: `GET /api/settings/notice-banner`, `GET /api/settings/promotion-popup`, `POST /api/settings/banner-analytics/track`
-- Habits: `GET /api/habits/`, `GET /api/habits/streak`, `POST /api/habits/{id}/complete`, `POST /api/habits/upload-screenshot`
-- Affiliate: `GET /api/affiliate-resources`, `GET /api/affiliate-chatbase-public`
-- Activity: `GET /api/admin/activity-feed`
-- Version: `GET /api/version`
-
-## Backlog
-- Backend refactoring of `server.py` (~9500+ lines)
-- Frontend refactoring of ProfitTrackerPage.jsx
-- Cloudinary file upload (placeholder)
+## Mocked Integrations
+- **Cloudinary:** File uploads stored locally in `/app/backend/uploads/`
+- **Chatbase:** Placeholder iframe in Affiliate Center
 
 ## 3rd Party Integrations
-Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (configurable)
+- **pywebpush:** VAPID-encrypted web push notifications
+- **Heartbeat API:** User verification for registration
+
+## Remaining P2 Refactoring Backlog
+1. Extract `auth_router` from server.py → `routes/auth.py`
+2. Extract `trade_router` from server.py → `routes/trade.py`
+3. Extract `profit_router` from server.py → `routes/profit.py`
+4. Extract `admin_router` from server.py → `routes/admin.py`
+5. Refactor `ProfitTrackerPage.jsx` (5235 lines) - address prop-drilling
+6. Further break down `AdminSettingsPage.jsx` tab contents
+
+## Future / Nice-to-Have
+- Replace local file uploads with Cloudinary
+- Chatbase bot embed (production integration)
+
+## Test Reports
+- iteration_106: P0 notification fix verified
+- iteration_107: Full regression after refactoring (17/17 backend, all frontend ✅)
