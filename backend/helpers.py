@@ -68,3 +68,53 @@ async def create_member_notification(notification_type: str, title: str, message
 def calculate_exit_value(lot_size: float) -> float:
     """Calculate projected exit value: LOT * 15 (profit multiplier)"""
     return lot_size * 15
+
+
+async def send_push_to_admins(title: str, body: str, url: str = "/", tag: str = None):
+    """Send push notification to all admin users."""
+    import json
+    import os
+    db = deps.db
+    admin_users = await db.users.find(
+        {"role": {"$in": ["admin", "basic_admin", "super_admin", "master_admin"]}, "is_deactivated": {"$ne": True}},
+        {"_id": 0, "id": 1}
+    ).to_list(50)
+    admin_ids = [u["id"] for u in admin_users]
+    if not admin_ids:
+        return {"sent": 0, "failed": 0}
+
+    subscriptions = await db.push_subscriptions.find({"user_id": {"$in": admin_ids}}).to_list(200)
+
+    from pywebpush import webpush, WebPushException
+
+    vapid_private = os.environ.get("VAPID_PRIVATE_KEY")
+    vapid_subject = os.environ.get("VAPID_SUBJECT", "mailto:iam@ryansalvador.com")
+    if not vapid_private:
+        return {"sent": 0, "failed": 0}
+
+    payload = json.dumps({
+        "title": title, "body": body, "url": url,
+        "tag": tag or "admin-alert",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+
+    sent = 0
+    failed = 0
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info={"endpoint": sub["endpoint"], "keys": sub["keys"]},
+                data=payload,
+                vapid_private_key=vapid_private,
+                vapid_claims={"sub": vapid_subject},
+                content_encoding="aes128gcm",
+            )
+            sent += 1
+        except WebPushException as e:
+            if hasattr(e, 'response') and e.response and e.response.status_code in [404, 410]:
+                await db.push_subscriptions.delete_one({"endpoint": sub["endpoint"]})
+            failed += 1
+        except Exception:
+            failed += 1
+
+    return {"sent": sent, "failed": failed}
