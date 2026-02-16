@@ -7,6 +7,7 @@ import { TradeCountdownProvider } from "./contexts/TradeCountdownContext";
 import { BVEProvider } from "./contexts/BVEContext";
 import { Toaster } from "./components/ui/sonner";
 import { PWAInstallBanner } from "./lib/pwa";
+import { VersionBanner } from "./components/VersionBanner";
 
 // Pages
 import { LoginPage } from "./pages/LoginPage";
@@ -96,6 +97,7 @@ function App() {
         </BrowserRouter>
         <Toaster position="top-right" richColors theme="dark" />
         <PWAInstallBanner />
+        <VersionBanner />
       </WebSocketProvider>
     </AuthProvider>
   );
