@@ -3118,6 +3118,11 @@ export const AdminSettingsPage = () => {
               <HabitManagerCard />
             </div>
           )}
+
+          {/* Affiliate Center - Master Admin Only */}
+          {activeTab === 'affiliate' && isMasterAdmin && (
+            <AffiliateManagerCard />
+          )}
         </div>
       </div>
     </div>
