@@ -113,20 +113,6 @@ class TestNotificationSubscription:
         # Should be 200 or some validation error, not 404
         assert response.status_code != 404, "Endpoint /api/users/push-subscribe should exist"
         print(f"✅ Push subscribe endpoint exists (status: {response.status_code})")
-    
-    def test_user_push_subscribe_endpoint(self, admin_token):
-        """POST /api/users/push-subscribe - the actual push subscription endpoint"""
-        response = requests.post(
-            f"{BASE_URL}/api/users/push-subscribe",
-            headers={"Authorization": f"Bearer {admin_token}"},
-            json={
-                "endpoint": "https://test.example.com/push",
-                "keys": {"p256dh": "test", "auth": "test"}
-            }
-        )
-        # Should be 200 or some validation error, not 404
-        assert response.status_code != 404, "Endpoint /api/users/push-subscribe should exist"
-        print(f"✅ User push subscribe endpoint exists (status: {response.status_code})")
 
 class TestAdminEndpoints:
     """Admin-specific API tests"""
