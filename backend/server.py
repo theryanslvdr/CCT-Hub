@@ -9161,7 +9161,7 @@ async def get_activity_feed(since: str = "", limit: int = 50, user: dict = Depen
         activities.append({
             "type": "trade_logged",
             "user_id": tl.get("user_id", ""),
-            "user_name": tl.get("user_name", "Unknown"),
+            "user_name": tl.get("user_name") or users_map.get(tl.get("user_id", ""), "Unknown"),
             "detail": detail,
             "screenshot_url": "",
             "timestamp": tl.get("created_at", ""),
