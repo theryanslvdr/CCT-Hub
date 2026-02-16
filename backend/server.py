@@ -124,6 +124,7 @@ from routes.settings import router as _settings_router
 from routes.habits import router as _habits_router, admin_habit_router as _admin_habits_router
 from routes.affiliate import router as _affiliate_router, admin_affiliate_router as _admin_affiliate_router
 from routes.activity_feed import admin_activity_router as _admin_activity_router
+from routes.users import router as _users_router
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
@@ -8610,7 +8611,7 @@ async def health_check():
 
 # Include all routers
 api_router.include_router(auth_router)
-api_router.include_router(users_router)
+api_router.include_router(_users_router)
 api_router.include_router(profit_router)
 api_router.include_router(trade_router)
 api_router.include_router(admin_router)
