@@ -26,8 +26,10 @@ class UserResponse(BaseModel):
     profile_picture: Optional[str] = None
     lot_size: Optional[float] = None
     timezone: Optional[str] = "UTC"
-    allowed_dashboards: Optional[List[str]] = None  # For normal members - modular access
-    license_type: Optional[str] = None  # For licensees: "extended" or "honorary"
+    allowed_dashboards: Optional[List[str]] = None
+    license_type: Optional[str] = None
+    trading_start_date: Optional[str] = None
+    trading_type: Optional[str] = None
 
 
 class TokenResponse(BaseModel):
