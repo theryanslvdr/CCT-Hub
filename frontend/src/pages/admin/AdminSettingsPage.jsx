@@ -2393,6 +2393,280 @@ export const AdminSettingsPage = () => {
               </Card>
             </div>
           )}
+
+          {/* Banners & Popups - Master Admin Only */}
+          {activeTab === 'banners' && isMasterAdmin && (
+            <div className="space-y-6">
+              {/* Notice Banner Card */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Megaphone className="w-5 h-5 text-purple-400" /> Notice Banner
+                  </CardTitle>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    A sticky announcement bar shown at the top of selected pages. Members can dismiss it per session.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-zinc-300">Enable Notice Banner</Label>
+                    <Switch
+                      checked={settings.notice_banner_enabled || false}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, notice_banner_enabled: checked }))}
+                      data-testid="notice-banner-toggle"
+                    />
+                  </div>
+
+                  {settings.notice_banner_enabled && (
+                    <div className="space-y-4 pt-2">
+                      <div>
+                        <Label className="text-zinc-300">Banner Text</Label>
+                        <Input
+                          value={settings.notice_banner_text || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_text: e.target.value }))}
+                          placeholder="e.g., Trading hours changed to 3:00 PM starting next week"
+                          className="input-dark mt-1"
+                          data-testid="notice-banner-text"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-zinc-300">Background Color</Label>
+                          <div className="flex gap-2 mt-1">
+                            <input
+                              type="color"
+                              value={settings.notice_banner_bg_color || '#3B82F6'}
+                              onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_bg_color: e.target.value }))}
+                              className="w-10 h-10 rounded border border-zinc-700 cursor-pointer bg-transparent"
+                            />
+                            <Input
+                              value={settings.notice_banner_bg_color || '#3B82F6'}
+                              onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_bg_color: e.target.value }))}
+                              className="input-dark flex-1"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-zinc-300">Text Color</Label>
+                          <div className="flex gap-2 mt-1">
+                            <input
+                              type="color"
+                              value={settings.notice_banner_text_color || '#FFFFFF'}
+                              onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_text_color: e.target.value }))}
+                              className="w-10 h-10 rounded border border-zinc-700 cursor-pointer bg-transparent"
+                            />
+                            <Input
+                              value={settings.notice_banner_text_color || '#FFFFFF'}
+                              onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_text_color: e.target.value }))}
+                              className="input-dark flex-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-zinc-300">Link Text (optional)</Label>
+                          <Input
+                            value={settings.notice_banner_link_text || ''}
+                            onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_link_text: e.target.value }))}
+                            placeholder="e.g., Learn More"
+                            className="input-dark mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-zinc-300">Link URL (optional)</Label>
+                          <Input
+                            value={settings.notice_banner_link_url || ''}
+                            onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_link_url: e.target.value }))}
+                            placeholder="https://..."
+                            className="input-dark mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Page checkboxes */}
+                      <div>
+                        <Label className="text-zinc-300 mb-2 block">Show on Pages</Label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {[
+                            { key: 'dashboard', label: 'Dashboard' },
+                            { key: 'profit_tracker', label: 'Profit Tracker' },
+                            { key: 'trade_monitor', label: 'Trade Monitor' },
+                            { key: 'goals', label: 'Profit Planner' },
+                            { key: 'debt', label: 'Debt Manager' },
+                            { key: 'profile', label: 'Profile' },
+                            { key: 'notifications', label: 'Notifications' },
+                          ].map(page => {
+                            const checked = (settings.notice_banner_pages || []).includes(page.key);
+                            return (
+                              <label key={page.key} className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/50 border border-zinc-800 cursor-pointer hover:border-zinc-600 transition-colors">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={(e) => {
+                                    const pages = settings.notice_banner_pages || [];
+                                    setSettings(prev => ({
+                                      ...prev,
+                                      notice_banner_pages: e.target.checked
+                                        ? [...pages, page.key]
+                                        : pages.filter(p => p !== page.key)
+                                    }));
+                                  }}
+                                  className="rounded border-zinc-600 bg-zinc-800 text-blue-500"
+                                  data-testid={`notice-page-${page.key}`}
+                                />
+                                <span className="text-sm text-zinc-300">{page.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-zinc-500 mt-2">If no pages are selected, the banner will show on all pages.</p>
+                      </div>
+
+                      {/* Preview */}
+                      {settings.notice_banner_text && (
+                        <div>
+                          <Label className="text-zinc-300 mb-2 block">Preview</Label>
+                          <div
+                            className="rounded-lg px-4 py-2.5 flex items-center justify-center gap-3 text-sm"
+                            style={{ backgroundColor: settings.notice_banner_bg_color, color: settings.notice_banner_text_color }}
+                          >
+                            <span className="font-medium">{settings.notice_banner_text}</span>
+                            {settings.notice_banner_link_text && (
+                              <span className="underline font-semibold">{settings.notice_banner_link_text}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Promotion Popup Card */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-amber-400" /> Promotion Pop-up
+                  </CardTitle>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    A modal dialog shown to members on login. Configure with presets, images, and call-to-action buttons.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-zinc-300">Enable Promotion Pop-up</Label>
+                    <Switch
+                      checked={settings.promo_popup_enabled || false}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, promo_popup_enabled: checked }))}
+                      data-testid="promo-popup-toggle"
+                    />
+                  </div>
+
+                  {settings.promo_popup_enabled && (
+                    <div className="space-y-4 pt-2">
+                      {/* Preset */}
+                      <div>
+                        <Label className="text-zinc-300">Preset Style</Label>
+                        <div className="grid grid-cols-3 gap-2 mt-1">
+                          {[
+                            { key: 'announcement', label: 'Announcement', color: 'border-blue-500/50 bg-blue-500/10 text-blue-400' },
+                            { key: 'promo', label: 'Promo', color: 'border-amber-500/50 bg-amber-500/10 text-amber-400' },
+                            { key: 'feature_update', label: 'Feature Update', color: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' },
+                          ].map(preset => (
+                            <button
+                              key={preset.key}
+                              onClick={() => setSettings(prev => ({ ...prev, promo_popup_preset: preset.key }))}
+                              className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                                settings.promo_popup_preset === preset.key ? preset.color : 'border-zinc-700 bg-zinc-900/50 text-zinc-400'
+                              }`}
+                              data-testid={`promo-preset-${preset.key}`}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-zinc-300">Title</Label>
+                        <Input
+                          value={settings.promo_popup_title || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, promo_popup_title: e.target.value }))}
+                          placeholder="e.g., New Feature Available!"
+                          className="input-dark mt-1"
+                          data-testid="promo-popup-title-input"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-zinc-300">Body Text</Label>
+                        <Textarea
+                          value={settings.promo_popup_body || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, promo_popup_body: e.target.value }))}
+                          placeholder="Describe your announcement or promotion..."
+                          className="input-dark mt-1"
+                          rows={3}
+                          data-testid="promo-popup-body-input"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-zinc-300">Image URL (optional)</Label>
+                        <Input
+                          value={settings.promo_popup_image_url || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, promo_popup_image_url: e.target.value }))}
+                          placeholder="https://example.com/image.jpg"
+                          className="input-dark mt-1"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-zinc-300">CTA Button Text</Label>
+                          <Input
+                            value={settings.promo_popup_cta_text || ''}
+                            onChange={(e) => setSettings(prev => ({ ...prev, promo_popup_cta_text: e.target.value }))}
+                            placeholder="Learn More"
+                            className="input-dark mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-zinc-300">CTA Button URL</Label>
+                          <Input
+                            value={settings.promo_popup_cta_url || ''}
+                            onChange={(e) => setSettings(prev => ({ ...prev, promo_popup_cta_url: e.target.value }))}
+                            placeholder="https://..."
+                            className="input-dark mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Frequency */}
+                      <div>
+                        <Label className="text-zinc-300">Show Frequency</Label>
+                        <Select
+                          value={settings.promo_popup_frequency || 'once_per_session'}
+                          onValueChange={(v) => setSettings(prev => ({ ...prev, promo_popup_frequency: v }))}
+                        >
+                          <SelectTrigger className="input-dark mt-1" data-testid="promo-frequency-select">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="once_per_session">Once per session</SelectItem>
+                            <SelectItem value="once_per_day">Once per day</SelectItem>
+                            <SelectItem value="always">Every page load</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
