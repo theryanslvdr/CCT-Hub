@@ -16,44 +16,50 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 
 ## What's Been Implemented
 
-### Phase 1 Features (Feb 2026)
+### Phase 2 Features (Feb 2026) - Banners & Popups
+
+#### Notice Banner
+- Admin Settings > Banners & Popups tab
+- Customizable text, background color, text color, optional link
+- Page-specific targeting via checkboxes (Dashboard, Profit Tracker, Trade Monitor, Profit Planner, Debt Manager, Profile, Notifications)
+- Dismissible per session (sessionStorage)
+- Live preview in admin settings
+- Endpoints: `GET /api/settings/notice-banner` (public)
+
+#### Promotion Pop-up
+- 3 preset styles: Announcement (blue), Promo (amber), Feature Update (emerald)
+- Title, body text, image URL, CTA button with custom URL
+- Frequency control: once per session, once per day, every page load
+- Endpoints: `GET /api/settings/promotion-popup` (public)
+
+### Phase 1 Features (Feb 2026) - Signal Blocking & Version Banner
 
 #### Trading Signal Blocking
-- `GET /api/trade/signal-block-status` - checks if member is blocked (7+ days unreported profit data)
-- `POST /api/admin/members/{user_id}/unblock-signal` - admin manual override (N days)
-- Admins are never blocked
-- Auto-unblocks when user submits profit tracker data
-- Frontend: Signal-blocked-card overlay on TradeMonitorPage with "Go to Profit Tracker" CTA
-- Frontend: Unblock button in AdminMembersPage member details (Actions tab)
+- `GET /api/trade/signal-block-status` - checks if member blocked (7+ days unreported)
+- `POST /api/admin/members/{user_id}/unblock-signal` - admin manual override
+- Frontend: Signal-blocked-card overlay on TradeMonitorPage
+- Frontend: Unblock button in AdminMembersPage member details
 
-#### Version Banner ("New Version Deployed")
-- `GET /api/version` - returns `build_version` UUID (changes on every server restart/deploy)
-- Frontend: `VersionBanner` component checks version every 60 seconds
-- Shows persistent banner with "Refresh Now" button when version mismatch detected
-- Stores cached version in localStorage for comparison
+#### Version Banner
+- `GET /api/version` - returns build_version UUID (changes on restart/deploy)
+- Frontend: `VersionBanner` component checks every 60 seconds
+- Shows "Refresh Now" banner on version mismatch
 
 ### Previously Implemented
-- Mobile bug fixes (onboarding, balance sync, profit tracker)
-- PWA install instructions & dynamic manifest
-- Notification system (preferences, web push, pre-trade reminders)
-- Daily trade summary page
-- PWA icon customization
-- Production hotfix for PWA endpoints
-- Mobile UI fixes (Trade Monitor)
+- Mobile bug fixes, PWA install flow, web push notifications
+- Notification system, daily trade summary
+- PWA icon customization, production hotfixes
+- Mobile UI fixes
 
 ## Key API Endpoints
-- `GET /api/version` - Build version check (no auth)
-- `GET /api/trade/signal-block-status` - Signal block status (auth)
-- `POST /api/admin/members/{user_id}/unblock-signal` - Admin unblock (admin auth)
-- `GET/PUT /api/users/notification-preferences`
-- `GET /api/settings/manifest.json`
-- `POST /api/trade/did-not-trade`
+- `GET /api/version` - Build version (no auth)
+- `GET /api/trade/signal-block-status` - Signal block (auth)
+- `POST /api/admin/members/{user_id}/unblock-signal` - Admin unblock
+- `GET /api/settings/notice-banner` - Notice banner config (no auth)
+- `GET /api/settings/promotion-popup` - Popup config (no auth)
+- `PUT /api/settings/platform` - Save all settings (admin)
 
 ## Upcoming Tasks
-
-### Phase 2: Banners & Popups (P1)
-- Customizable sticky notice banner (admin-configurable, dismissible)
-- Promotion pop-up (presets, images, text, buttons, admin-managed)
 
 ### Phase 3: Habit Tracker (P2)
 - "Soft gate" - completing one daily task unlocks trading signal
@@ -66,14 +72,13 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 - Chatbase chatbot embed ("ConSim")
 
 ## Backlog
-- Backend refactoring of `server.py` (incremental approach, ~8600+ lines)
-- Frontend refactoring of ProfitTrackerPage.jsx (state management needed)
+- Backend refactoring of `server.py` (incremental, ~8600+ lines)
+- Frontend refactoring of ProfitTrackerPage.jsx
 - Cloudinary file upload implementation (placeholder)
 
 ## Known Issues
-- "Run Diagnostic" fails in production (infrastructure)
 - Cloudinary integration is placeholder
-- Reset Tracker admin account flow (user verification pending)
+- Reset Tracker admin flow (user verification pending)
 
 ## 3rd Party Integrations
 Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (Planned)
