@@ -27,12 +27,7 @@ import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 export const AdminSettingsPage = () => {
   const { user, isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
-
-  const resetForm = () => {
-    setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true });
-    setEditingId(null);
-    setShowForm(false);
-  };
+    platform_name: 'CrossCurrent',
 
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error('Title required'); return; }
