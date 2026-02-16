@@ -32,6 +32,7 @@ import { AdminTransactionsPage } from "./pages/admin/AdminTransactionsPage";
 import { AdminLicensesPage } from "./pages/admin/AdminLicensesPage";
 import { DailyTradeSummaryPage } from "./pages/admin/DailyTradeSummaryPage";
 import HabitTrackerPage from "./pages/HabitTrackerPage";
+import AffiliateCenterPage from "./pages/AffiliateCenterPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
