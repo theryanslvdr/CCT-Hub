@@ -127,6 +127,7 @@ export const tradeAPI = {
     return api.get('/trade/streak', { params });
   },
   getActiveSignal: () => api.get('/trade/active-signal'),
+  getSignalBlockStatus: () => api.get('/trade/signal-block-status'),
   getDailySummary: (userId = null) => {
     const params = userId ? { user_id: userId } : {};
     return api.get('/trade/daily-summary', { params });
@@ -163,6 +164,7 @@ export const adminAPI = {
   updateMember: (userId, data) => api.put(`/admin/members/${userId}`, data),
   upgradeRole: (data) => api.post('/admin/upgrade-role', data),
   downgradeRole: (userId) => api.post(`/admin/downgrade-role/${userId}`),
+  unblockSignal: (userId, days = 7) => api.post(`/admin/members/${userId}/unblock-signal`, null, { params: { days } }),
   // Global holidays (Master Admin)
   getGlobalHolidays: () => api.get('/admin/global-holidays'),
   addGlobalHoliday: (date, reason) => api.post('/admin/global-holidays', null, { params: { date, reason } }),
