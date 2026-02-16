@@ -140,7 +140,6 @@ app = FastAPI(title="CrossCurrent Finance Center API", redirect_slashes=False)
 # Create routers
 api_router = APIRouter(prefix="/api")
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
-users_router = APIRouter(prefix="/users", tags=["Users"])
 profit_router = APIRouter(prefix="/profit", tags=["Profit Tracker"])
 trade_router = APIRouter(prefix="/trade", tags=["Trade Monitor"])
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
