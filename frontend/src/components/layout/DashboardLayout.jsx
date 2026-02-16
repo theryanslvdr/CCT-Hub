@@ -273,6 +273,9 @@ export const DashboardLayout = () => {
           disableRightClick={platformSettings?.content_protection_disable_rightclick !== false}
           disableShortcuts={platformSettings?.content_protection_disable_shortcuts !== false}
         />
+
+        {/* Promotion Popup (admin-configurable, session/day frequency) */}
+        <PromotionPopup />
         
         {/* Onboarding Tour */}
         <OnboardingTour isOpen={showTour} onClose={completeTour} />
