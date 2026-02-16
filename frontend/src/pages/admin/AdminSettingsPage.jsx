@@ -608,6 +608,7 @@ export const AdminSettingsPage = () => {
             { key: 'emails', icon: Mail, label: 'Email' },
             { key: 'announcements', icon: Megaphone, label: 'News' },
             { key: 'trading', icon: TrendingUp, label: 'Trading' },
+            { key: 'banners', icon: Megaphone, label: 'Banners' },
             { key: 'security', icon: Shield, label: 'Security' },
             { key: 'holidays', icon: TreePine, label: 'Holidays' },
             { key: 'maintenance', icon: Wrench, label: 'Maint' },
