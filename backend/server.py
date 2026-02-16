@@ -8902,7 +8902,7 @@ async def _calc_habit_streak(user_id: str) -> dict:
     }
 
 @habit_router.post("/{habit_id}/complete")
-async def complete_habit(habit_id: str, user: dict = Depends(get_current_user)):
+async def complete_habit(habit_id: str, screenshot_url: str = "", user: dict = Depends(get_current_user)):
     """Mark a habit as completed for today."""
     habit = await db.habits.find_one({"id": habit_id, "active": True}, {"_id": 0})
     if not habit:
@@ -8921,8 +8921,21 @@ async def complete_habit(habit_id: str, user: dict = Depends(get_current_user)):
         "habit_id": habit_id,
         "date": today,
         "completed_at": datetime.now(timezone.utc).isoformat(),
+        "screenshot_url": screenshot_url,
     })
     return {"message": "Habit completed!", "already": False}
+
+@habit_router.post("/upload-screenshot")
+async def upload_habit_screenshot(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    """Upload a screenshot for habit completion proof. Stores as base64 data URL."""
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+    import base64
+    b64 = base64.b64encode(contents).decode()
+    content_type = file.content_type or "image/png"
+    data_url = f"data:{content_type};base64,{b64}"
+    return {"url": data_url}
 
 @habit_router.post("/{habit_id}/uncomplete")
 async def uncomplete_habit(habit_id: str, user: dict = Depends(get_current_user)):
