@@ -726,6 +726,15 @@ export const AdminSettingsPage = () => {
                 >
                   <TreePine className="w-4 h-4" /> Global Trading
                 </button>
+                <button
+                  onClick={() => setActiveTab('banners')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    activeTab === 'banners' ? 'bg-purple-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  }`}
+                  data-testid="tab-banners"
+                >
+                  <Megaphone className="w-4 h-4" /> Banners & Popups
+                </button>
               </>
             )}
           </div>
