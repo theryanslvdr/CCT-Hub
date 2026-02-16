@@ -1281,61 +1281,6 @@ async def _send_pre_trade_push(minutes_before: int, product: str, direction: str
     )
 
 
-@users_router.put("/profile")
-async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_user)):
-    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
-    if data.full_name:
-        update_data["full_name"] = data.full_name
-    if data.timezone:
-        update_data["timezone"] = data.timezone
-    if data.lot_size is not None:
-        update_data["lot_size"] = data.lot_size
-    
-    await db.users.update_one({"id": user["id"]}, {"$set": update_data})
-    
-    # Return updated user
-    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
-    return updated_user
-
-class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
-
-@users_router.post("/change-password")
-async def change_password(data: PasswordChange, user: dict = Depends(get_current_user)):
-    # Get user with password
-    full_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
-    if not full_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Verify current password
-    if not verify_password(data.current_password, full_user["password"]):
-        raise HTTPException(status_code=400, detail="Current password is incorrect")
-    
-    # Update password
-    new_hash = hash_password(data.new_password)
-    await db.users.update_one(
-        {"id": user["id"]},
-        {"$set": {"password": new_hash, "updated_at": datetime.now(timezone.utc).isoformat()}}
-    )
-    
-    return {"message": "Password changed successfully"}
-
-@users_router.post("/profile-picture")
-async def upload_profile_picture(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
-    try:
-        result = cloudinary.uploader.upload(
-            file.file,
-            folder="crosscurrent/profile-pictures",
-            public_id=f"user_{user['id']}",
-            overwrite=True
-        )
-        url = result.get("secure_url")
-        await db.users.update_one({"id": user["id"]}, {"$set": {"profile_picture": url}})
-        return {"url": url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
-
 # ==================== PROFIT TRACKER ROUTES ====================
 
 @profit_router.post("/deposits", response_model=DepositResponse)
