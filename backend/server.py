@@ -8874,60 +8874,6 @@ async def admin_unblock_signal(user_id: str, days: int = 7, user: dict = Depends
 
 # Habit tracker routes extracted to routes/habits.py
 
-# Admin: manage habits
-@admin_router.get("/habits")
-async def admin_get_habits(user: dict = Depends(require_admin)):
-    """Get all habits (including inactive)."""
-    habits = await db.habits.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    return {"habits": habits}
-
-@admin_router.post("/habits")
-async def admin_create_habit(data: HabitCreate, user: dict = Depends(require_admin)):
-    """Create a new habit."""
-    habit = {
-        "id": str(uuid.uuid4()),
-        "title": data.title,
-        "description": data.description,
-        "action_type": data.action_type,
-        "action_data": data.action_data,
-        "is_gate": data.is_gate,
-        "active": True,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": user["id"],
-    }
-    await db.habits.insert_one(habit)
-    habit.pop("_id", None)
-    return habit
-
-@admin_router.put("/habits/{habit_id}")
-async def admin_update_habit(habit_id: str, data: HabitCreate, user: dict = Depends(require_admin)):
-    """Update a habit."""
-    result = await db.habits.update_one(
-        {"id": habit_id},
-        {"$set": {
-            "title": data.title,
-            "description": data.description,
-            "action_type": data.action_type,
-            "action_data": data.action_data,
-            "is_gate": data.is_gate,
-        }}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Habit not found")
-    return {"message": "Habit updated"}
-
-@admin_router.delete("/habits/{habit_id}")
-async def admin_delete_habit(habit_id: str, user: dict = Depends(require_admin)):
-    """Deactivate a habit (soft delete)."""
-    await db.habits.update_one({"id": habit_id}, {"$set": {"active": False}})
-    return {"message": "Habit deactivated"}
-
-@admin_router.post("/habits/{habit_id}/activate")
-async def admin_activate_habit(habit_id: str, user: dict = Depends(require_admin)):
-    """Reactivate a habit."""
-    await db.habits.update_one({"id": habit_id}, {"$set": {"active": True}})
-    return {"message": "Habit activated"}
-
 # ==================== AFFILIATE CENTER ====================
 
 class AffiliateResourceCreate(BaseModel):
