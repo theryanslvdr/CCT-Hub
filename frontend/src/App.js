@@ -79,6 +79,7 @@ function App() {
             <Route path="/licensee-account" element={<LicenseeAccountPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/habits" element={<HabitTrackerPage />} />
+            <Route path="/affiliate" element={<AffiliateCenterPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
