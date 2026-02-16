@@ -8836,11 +8836,69 @@ async def get_habits(user: dict = Depends(get_current_user)):
     gate_habits = [h for h in habits if h.get("is_gate")]
     gate_complete = any(h["id"] in completed_ids for h in gate_habits) if gate_habits else True
 
+    # Calculate streak
+    streak = await _calc_habit_streak(user["id"])
+
     return {
         "habits": habits,
         "completions_today": list(completed_ids),
         "gate_unlocked": gate_complete,
         "date": today,
+        "streak": streak,
+    }
+
+@habit_router.get("/streak")
+async def get_habit_streak(user: dict = Depends(get_current_user)):
+    """Get the user's habit streak info."""
+    return await _calc_habit_streak(user["id"])
+
+async def _calc_habit_streak(user_id: str) -> dict:
+    """Calculate consecutive days this user completed at least one habit."""
+    # Get all unique dates with completions, sorted desc
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$group": {"_id": "$date"}},
+        {"$sort": {"_id": -1}},
+        {"$limit": 400},
+    ]
+    dates_docs = await db.habit_completions.aggregate(pipeline).to_list(400)
+    if not dates_docs:
+        return {"current_streak": 0, "longest_streak": 0, "total_days": 0}
+
+    dates = sorted([d["_id"] for d in dates_docs], reverse=True)
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Current streak: consecutive days ending today or yesterday
+    current_streak = 0
+    check_date = datetime.strptime(today_str, "%Y-%m-%d").date()
+    # Allow starting from today or yesterday
+    if dates[0] != today_str:
+        yesterday = (check_date - timedelta(days=1)).isoformat()
+        if dates[0] != yesterday:
+            current_streak = 0
+        else:
+            check_date = check_date - timedelta(days=1)
+
+    date_set = set(dates)
+    while check_date.isoformat() in date_set:
+        current_streak += 1
+        check_date -= timedelta(days=1)
+
+    # Longest streak
+    longest = 0
+    run = 0
+    all_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in dates])
+    for i, d in enumerate(all_dates):
+        if i == 0 or (d - all_dates[i-1]).days == 1:
+            run += 1
+        else:
+            run = 1
+        longest = max(longest, run)
+
+    return {
+        "current_streak": current_streak,
+        "longest_streak": longest,
+        "total_days": len(dates),
     }
 
 @habit_router.post("/{habit_id}/complete")
