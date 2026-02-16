@@ -49,12 +49,14 @@ export const PromotionPopup = () => {
 
         setPopup(res.data);
         setOpen(true);
+        settingsAPI.trackBannerEvent('impression', 'promo_popup').catch(() => {});
       })
       .catch(() => {});
   }, []);
 
   const handleClose = () => {
     setOpen(false);
+    settingsAPI.trackBannerEvent('dismiss', 'promo_popup').catch(() => {});
     if (popup) {
       sessionStorage.setItem(SESSION_KEY, '1');
       if (popup.frequency === 'once_per_day') {
