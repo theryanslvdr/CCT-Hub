@@ -3,7 +3,7 @@ import { habitAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy } from 'lucide-react';
+import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy, Flame, Trophy, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 const HabitTrackerPage = () => {
@@ -12,6 +12,7 @@ const HabitTrackerPage = () => {
   const [completions, setCompletions] = useState([]);
   const [gateUnlocked, setGateUnlocked] = useState(true);
   const [date, setDate] = useState('');
+  const [streak, setStreak] = useState({ current_streak: 0, longest_streak: 0, total_days: 0 });
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(null);
 
@@ -22,6 +23,7 @@ const HabitTrackerPage = () => {
       setCompletions(res.data.completions_today || []);
       setGateUnlocked(res.data.gate_unlocked);
       setDate(res.data.date);
+      if (res.data.streak) setStreak(res.data.streak);
     } catch {
       toast.error('Failed to load habits');
     }
