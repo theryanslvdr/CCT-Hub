@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { tradeAPI, profitAPI, adminAPI } from '@/lib/api';
+import { tradeAPI, profitAPI, adminAPI, habitAPI } from '@/lib/api';
 import api from '@/lib/api';
 import { formatNumber, calculateExitValue, getPerformanceMessage } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
