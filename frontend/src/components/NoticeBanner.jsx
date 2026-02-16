@@ -13,6 +13,7 @@ const routeToPageKey = {
   '/debt': 'debt',
   '/profile': 'profile',
   '/notifications': 'notifications',
+  '/habits': 'habits',
 };
 
 export const NoticeBanner = () => {
