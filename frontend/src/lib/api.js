@@ -317,6 +317,7 @@ export const settingsAPI = {
 // Habit Tracker APIs
 export const habitAPI = {
   getHabits: () => api.get('/habits/'),
+  getStreak: () => api.get('/habits/streak'),
   completeHabit: (habitId) => api.post(`/habits/${habitId}/complete`),
   uncompleteHabit: (habitId) => api.post(`/habits/${habitId}/uncomplete`),
 };
