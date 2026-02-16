@@ -26,8 +26,6 @@ import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
 
 export const AdminSettingsPage = () => {
-
-const HabitManagerCard = () => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
