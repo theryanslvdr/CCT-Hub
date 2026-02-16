@@ -105,6 +105,62 @@ async def update_platform_settings(data: PlatformSettings, user: dict = Depends(
     )
     return {"message": "Settings updated"}
 
+
+@router.get("/notice-banner")
+async def get_notice_banner():
+    """Public endpoint for members to fetch the active notice banner config."""
+    db = deps.db
+    settings = await db.platform_settings.find_one({}, {
+        "_id": 0,
+        "notice_banner_enabled": 1,
+        "notice_banner_text": 1,
+        "notice_banner_bg_color": 1,
+        "notice_banner_text_color": 1,
+        "notice_banner_link_text": 1,
+        "notice_banner_link_url": 1,
+        "notice_banner_pages": 1,
+    })
+    if not settings or not settings.get("notice_banner_enabled"):
+        return {"enabled": False}
+    return {
+        "enabled": True,
+        "text": settings.get("notice_banner_text", ""),
+        "bg_color": settings.get("notice_banner_bg_color", "#3B82F6"),
+        "text_color": settings.get("notice_banner_text_color", "#FFFFFF"),
+        "link_text": settings.get("notice_banner_link_text", ""),
+        "link_url": settings.get("notice_banner_link_url", ""),
+        "pages": settings.get("notice_banner_pages", []),
+    }
+
+
+@router.get("/promotion-popup")
+async def get_promotion_popup():
+    """Public endpoint for members to fetch the active promotion popup config."""
+    db = deps.db
+    settings = await db.platform_settings.find_one({}, {
+        "_id": 0,
+        "promo_popup_enabled": 1,
+        "promo_popup_preset": 1,
+        "promo_popup_title": 1,
+        "promo_popup_body": 1,
+        "promo_popup_image_url": 1,
+        "promo_popup_cta_text": 1,
+        "promo_popup_cta_url": 1,
+        "promo_popup_frequency": 1,
+    })
+    if not settings or not settings.get("promo_popup_enabled"):
+        return {"enabled": False}
+    return {
+        "enabled": True,
+        "preset": settings.get("promo_popup_preset", "announcement"),
+        "title": settings.get("promo_popup_title", ""),
+        "body": settings.get("promo_popup_body", ""),
+        "image_url": settings.get("promo_popup_image_url", ""),
+        "cta_text": settings.get("promo_popup_cta_text", "Learn More"),
+        "cta_url": settings.get("promo_popup_cta_url", ""),
+        "frequency": settings.get("promo_popup_frequency", "once_per_session"),
+    }
+
 @router.post("/upload-logo")
 async def upload_logo(file: UploadFile = File(...), user: dict = Depends(require_admin)):
     db = deps.db
