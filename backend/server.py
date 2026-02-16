@@ -8770,7 +8770,7 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
     days_since_last = (today - last_trade_date).days
 
     if days_since_last < 7:
-        return {"blocked": False, "reason": None, "missing_days": days_since_last}
+        return {"blocked": habit_gate_locked, "reason": "habit_gate" if habit_gate_locked else None, "missing_days": days_since_last, "habit_gate_locked": habit_gate_locked}
 
     # Were there any official signals in the unreported gap?
     gap_start = (last_trade_date + timedelta(days=1)).isoformat()
@@ -8782,7 +8782,7 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
     })
 
     if signals_in_gap == 0:
-        return {"blocked": False, "reason": "no_signals", "missing_days": days_since_last}
+        return {"blocked": habit_gate_locked, "reason": "habit_gate" if habit_gate_locked else "no_signals", "missing_days": days_since_last, "habit_gate_locked": habit_gate_locked}
 
     return {
         "blocked": True,
@@ -8790,6 +8790,7 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
         "missing_days": days_since_last,
         "last_report_date": last_trade_date.isoformat(),
         "signals_in_gap": signals_in_gap,
+        "habit_gate_locked": habit_gate_locked,
         "message": f"You have {days_since_last} days of unreported profit tracker data. Please update your profit tracker to unlock the trading signal."
     }
 
