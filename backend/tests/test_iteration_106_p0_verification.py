@@ -52,15 +52,18 @@ class TestHabitEndpoints:
     """Habit tracker API tests"""
     
     def test_get_habits_list(self, admin_token):
-        """GET /api/habits/ - returns habits list"""
+        """GET /api/habits/ - returns habits object with habits list"""
         response = requests.get(
             f"{BASE_URL}/api/habits/",
             headers={"Authorization": f"Bearer {admin_token}"}
         )
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        print(f"✅ Habits list returned: {len(data)} habits")
+        # The endpoint returns an object with 'habits' array
+        assert isinstance(data, dict)
+        assert "habits" in data
+        assert isinstance(data["habits"], list)
+        print(f"✅ Habits list returned: {len(data['habits'])} habits")
         return data
     
     def test_habit_completion_triggers_admin_push_logic(self, admin_token):
@@ -73,7 +76,8 @@ class TestHabitEndpoints:
         if habits_response.status_code != 200:
             pytest.skip("Could not get habits list")
         
-        habits = habits_response.json()
+        data = habits_response.json()
+        habits = data.get("habits", [])
         if not habits:
             pytest.skip("No habits available to test completion")
         
@@ -96,17 +100,19 @@ class TestNotificationSubscription:
     """Push notification subscription tests"""
     
     def test_push_subscribe_endpoint_exists(self, admin_token):
-        """POST /api/notifications/subscribe - endpoint should exist"""
-        # Test with empty/invalid data to verify endpoint exists
+        """POST /api/users/push-subscribe - the actual push subscription endpoint"""
+        # Note: The actual endpoint is /api/users/push-subscribe, not /api/notifications/subscribe
         response = requests.post(
-            f"{BASE_URL}/api/notifications/subscribe",
+            f"{BASE_URL}/api/users/push-subscribe",
             headers={"Authorization": f"Bearer {admin_token}"},
-            json={}
+            json={
+                "endpoint": "https://test.example.com/push",
+                "keys": {"p256dh": "test", "auth": "test"}
+            }
         )
-        # 422 (validation error) or 400 (bad request) means endpoint exists
-        # 404 would mean endpoint doesn't exist
-        assert response.status_code != 404, "Endpoint /api/notifications/subscribe should exist"
-        print(f"✅ Notification subscribe endpoint exists (status: {response.status_code})")
+        # Should be 200 or some validation error, not 404
+        assert response.status_code != 404, "Endpoint /api/users/push-subscribe should exist"
+        print(f"✅ Push subscribe endpoint exists (status: {response.status_code})")
     
     def test_user_push_subscribe_endpoint(self, admin_token):
         """POST /api/users/push-subscribe - the actual push subscription endpoint"""
