@@ -1212,6 +1212,38 @@ export const AdminMembersPage = () => {
                     </div>
                   )}
 
+                  {/* Unblock Trading Signal - Admin only */}
+                  {selectedMember?.id !== user?.id && selectedMember?.role === 'member' && (
+                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-orange-500/20">
+                            <AlertTriangle className="w-5 h-5 text-orange-400" />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">Unblock Signal</p>
+                            <p className="text-xs text-zinc-500">Manually unblock this member's trading signal for 7 days</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const res = await adminAPI.unblockSignal(selectedMember.id, 7);
+                              toast.success(res.data.message);
+                            } catch (e) {
+                              toast.error(e.response?.data?.detail || 'Failed to unblock');
+                            }
+                          }}
+                          variant="outline"
+                          className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                          data-testid="unblock-signal-btn"
+                        >
+                          <Radio className="w-4 h-4 mr-1" /> Unblock
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Deactivate/Reactivate User - Admin only */}
                   {selectedMember?.id !== user?.id && (
                     <div className="p-4 rounded-lg bg-zinc-900/50">
