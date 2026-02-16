@@ -13,6 +13,7 @@ from helpers import send_push_to_admins
 logger = logging.getLogger("server")
 
 router = APIRouter(prefix="/habits", tags=["Habit Tracker"])
+admin_habit_router = APIRouter(prefix="/admin", tags=["Admin - Habits"])
 
 
 class HabitCreate(BaseModel):
