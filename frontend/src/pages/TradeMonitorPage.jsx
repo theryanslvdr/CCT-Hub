@@ -1434,17 +1434,29 @@ export const TradeMonitorPage = () => {
               <div>
                 <h3 className="text-lg font-semibold text-orange-300">Signal Blocked</h3>
                 <p className="text-sm text-zinc-400 mt-2 max-w-xs mx-auto">
-                  {signalBlockInfo?.message || `You have ${signalBlockInfo?.missing_days || 7}+ days of unreported profit tracker data.`}
+                  {signalBlockInfo?.reason === 'habit_gate'
+                    ? 'Complete your daily habit to unlock today\'s trading signal.'
+                    : signalBlockInfo?.message || `You have ${signalBlockInfo?.missing_days || 7}+ days of unreported profit tracker data.`}
                 </p>
               </div>
-              <Button
-                data-testid="go-to-profit-tracker-btn"
-                onClick={() => window.location.href = '/profit-tracker'}
-                className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
-              >
-                <ArrowRight className="w-4 h-4" /> Go to Profit Tracker
-              </Button>
-              {signalBlockInfo?.last_report_date && (
+              {signalBlockInfo?.reason === 'habit_gate' ? (
+                <Button
+                  data-testid="go-to-habits-btn"
+                  onClick={() => window.location.href = '/habits'}
+                  className="bg-teal-500 hover:bg-teal-600 text-white gap-2"
+                >
+                  <ArrowRight className="w-4 h-4" /> Go to Daily Habits
+                </Button>
+              ) : (
+                <Button
+                  data-testid="go-to-profit-tracker-btn"
+                  onClick={() => window.location.href = '/profit-tracker'}
+                  className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
+                >
+                  <ArrowRight className="w-4 h-4" /> Go to Profit Tracker
+                </Button>
+              )}
+              {signalBlockInfo?.last_report_date && signalBlockInfo?.reason !== 'habit_gate' && (
                 <p className="text-xs text-zinc-600">
                   Last report: {new Date(signalBlockInfo.last_report_date).toLocaleDateString()}
                 </p>
