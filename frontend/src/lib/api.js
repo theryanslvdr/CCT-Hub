@@ -307,6 +307,9 @@ export const settingsAPI = {
   testEmailit: () => api.post('/settings/test-emailit'),
   testCloudinary: () => api.post('/settings/test-cloudinary'),
   testHeartbeat: () => api.post('/settings/test-heartbeat'),
+  // Notice Banner & Promotion Popup (public)
+  getNoticeBanner: () => api.get('/settings/notice-banner'),
+  getPromotionPopup: () => api.get('/settings/promotion-popup'),
 };
 
 // BVE (Beta Virtual Environment) APIs
