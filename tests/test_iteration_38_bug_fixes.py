@@ -12,7 +12,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://diag-staging.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://signal-gate.preview.emergentagent.com')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
