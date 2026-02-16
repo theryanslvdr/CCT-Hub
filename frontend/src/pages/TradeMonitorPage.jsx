@@ -1425,7 +1425,33 @@ export const TradeMonitorPage = () => {
       <div className="space-y-4">
 
         {/* 1. Active Signal Card (TOP PRIORITY) */}
-        {signal ? (
+        {signalBlocked && signal ? (
+          <Card className="glass-card border-2 border-orange-500/30" data-testid="signal-blocked-card">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-7 h-7 text-orange-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-orange-300">Signal Blocked</h3>
+                <p className="text-sm text-zinc-400 mt-2 max-w-xs mx-auto">
+                  {signalBlockInfo?.message || `You have ${signalBlockInfo?.missing_days || 7}+ days of unreported profit tracker data.`}
+                </p>
+              </div>
+              <Button
+                data-testid="go-to-profit-tracker-btn"
+                onClick={() => window.location.href = '/profit-tracker'}
+                className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
+              >
+                <ArrowRight className="w-4 h-4" /> Go to Profit Tracker
+              </Button>
+              {signalBlockInfo?.last_report_date && (
+                <p className="text-xs text-zinc-600">
+                  Last report: {new Date(signalBlockInfo.last_report_date).toLocaleDateString()}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ) : signal ? (
           <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
             <CardHeader className="pb-2 px-4">
               <div className="flex items-center justify-between">
