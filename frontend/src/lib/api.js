@@ -318,8 +318,13 @@ export const settingsAPI = {
 export const habitAPI = {
   getHabits: () => api.get('/habits/'),
   getStreak: () => api.get('/habits/streak'),
-  completeHabit: (habitId) => api.post(`/habits/${habitId}/complete`),
+  completeHabit: (habitId, screenshotUrl = '') => api.post(`/habits/${habitId}/complete`, null, { params: { screenshot_url: screenshotUrl } }),
   uncompleteHabit: (habitId) => api.post(`/habits/${habitId}/uncomplete`),
+  uploadScreenshot: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/habits/upload-screenshot', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
 };
 
 // Admin Habit APIs
