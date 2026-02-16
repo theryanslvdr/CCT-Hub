@@ -140,6 +140,7 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
 profit_router = APIRouter(prefix="/profit", tags=["Profit Tracker"])
 trade_router = APIRouter(prefix="/trade", tags=["Trade Monitor"])
 admin_router = APIRouter(prefix="/admin", tags=["Admin"])
+habit_router = APIRouter(prefix="/habits", tags=["Habit Tracker"])
 
 security = HTTPBearer()
 
