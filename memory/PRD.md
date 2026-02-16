@@ -12,7 +12,7 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 ## Credentials
 - Master Admin: iam@ryansalvador.com / admin123
 
-## All 4 Phases Complete
+## All 4 Phases Complete + Enhancements
 
 ### Phase 1: Signal Blocking & Version Banner
 - Auto-block signal after 7+ unreported days, admin manual unblock
@@ -28,30 +28,33 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 - Gate habits block signal until completed
 - Habit Streaks: current streak, longest streak, total days badges
 - Admin CRUD via Settings > Habits tab
+- **Interactive Gate Overlay on Trade Monitor**: "On it!" → screenshot upload (optional) → "Task Done" → signal revealed
 
 ### Phase 4: Affiliate Center
-- Resource hub at /affiliate with 4 categories
-- Conversation Starters, Story Templates, Marketing Materials, FAQs
+- Resource hub at /affiliate with 4 categories (all users can see)
 - Copy-to-clipboard on all resources
 - Chatbase chatbot embed (ConSim) configurable by admin
-- Admin CRUD via Settings > Affiliate tab
+- **Admin inline "Add Resource"** button on each tab + delete per resource
+- Admin full CRUD via Settings > Affiliate tab
+
+### Enhancements
+- Habit Streaks (flame/trophy/calendar badges)
+- Banner Analytics (views, dismissals, dismiss rate)
+- Screenshot upload for habit completion proof (POST /api/habits/upload-screenshot)
 
 ## Key API Endpoints
-- `GET /api/version` - Build version
-- `GET /api/trade/signal-block-status` - Signal block + habit gate
-- `GET /api/settings/notice-banner` - Banner config
-- `GET /api/settings/promotion-popup` - Popup config
-- `POST /api/settings/banner-analytics/track` - Track events
-- `GET /api/settings/banner-analytics` - Analytics
-- `GET /api/habits/` - Habits + streak
-- `GET /api/habits/streak` - Streak data
-- `GET /api/affiliate-resources` - Grouped resources
-- `GET /api/affiliate-chatbase-public` - Chatbase config
+- `GET /api/version`, `GET /api/trade/signal-block-status`
+- `GET /api/settings/notice-banner`, `GET /api/settings/promotion-popup`
+- `POST /api/settings/banner-analytics/track`, `GET /api/settings/banner-analytics`
+- `GET /api/habits/`, `GET /api/habits/streak`
+- `POST /api/habits/{id}/complete`, `POST /api/habits/upload-screenshot`
+- `GET /api/affiliate-resources`, `GET /api/affiliate-chatbase-public`
+- Admin: `/api/admin/habits`, `/api/admin/affiliate-resources`, `/api/admin/affiliate-chatbase`
 
 ## Backlog
-- Backend refactoring of `server.py` (incremental, ~9200+ lines)
+- Backend refactoring of `server.py` (incremental, ~9400+ lines)
 - Frontend refactoring of ProfitTrackerPage.jsx
 - Cloudinary file upload implementation (placeholder)
 
 ## 3rd Party Integrations
-Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (configurable via admin)
+Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (configurable)
