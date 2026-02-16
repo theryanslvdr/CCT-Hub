@@ -77,6 +77,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/licensee-account" element={<LicenseeAccountPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/habits" element={<HabitTrackerPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
