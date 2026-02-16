@@ -3,8 +3,8 @@ Settings routes - extracted from server.py
 Includes: platform settings, email templates, integration tests, email history
 """
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, field_validator
+from typing import Optional, List, Any
 from datetime import datetime, timezone
 import uuid
 import os
