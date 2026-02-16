@@ -23,6 +23,9 @@ import pytz
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Build version - generated on server startup, changes on every restart/deploy
+BUILD_VERSION = str(uuid.uuid4())
+
 # Import services
 from services import (
     send_email, get_license_invite_email, get_admin_notification_email,
