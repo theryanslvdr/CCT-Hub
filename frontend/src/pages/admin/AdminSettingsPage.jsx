@@ -670,6 +670,7 @@ export const AdminSettingsPage = () => {
             { key: 'announcements', icon: Megaphone, label: 'News' },
             { key: 'trading', icon: TrendingUp, label: 'Trading' },
             { key: 'banners', icon: Megaphone, label: 'Banners' },
+            { key: 'habits', icon: CheckCircle2, label: 'Habits' },
             { key: 'security', icon: Shield, label: 'Security' },
             { key: 'holidays', icon: TreePine, label: 'Holidays' },
             { key: 'maintenance', icon: Wrench, label: 'Maint' },
