@@ -14,68 +14,66 @@ Financial trading dashboard ("The CrossCurrent Hub") for the Merin Trading Platf
 ## Credentials
 - Master Admin: iam@ryansalvador.com / admin123
 
-## What's Been Implemented (Feb 12, 2026)
+## What's Been Implemented
 
-### Mobile Bug Fixes (User Lysha)
-1. DNT error "Failed: [object Object]" - Fixed param mismatch (trade_date -> date)
-2. Adjust button in wizard exits dialog - Redirected to existing Enter AP dialog
-3. Balance unchanged after onboarding - Mobile wizard sent `trade_history` instead of `trade_entries`
-4. Can't select Missed Trade after typing - Added Clear button, fixed disabled condition
-5. Negative trade results blocked - Removed `< 0` validation
-6. Mobile Balance Sync Wizard - Full-screen overlay matching Simulate style
-7. NaN in Adjust Trade dialog - Added fallback calculations
+### Phase 1 Features (Feb 2026)
 
-### Mobile UI Fixes (Trade Monitor)
-1. Desktop notice hidden behind header - Removed from mobile view
-2. LOT Size/Projected Exit cards - Icons inline on mobile, Dream button inside card
-3. Merin iframe - "Open Merin" button hides when iframe displayed, iframe fills viewport height
+#### Trading Signal Blocking
+- `GET /api/trade/signal-block-status` - checks if member is blocked (7+ days unreported profit data)
+- `POST /api/admin/members/{user_id}/unblock-signal` - admin manual override (N days)
+- Admins are never blocked
+- Auto-unblocks when user submits profit tracker data
+- Frontend: Signal-blocked-card overlay on TradeMonitorPage with "Go to Profit Tracker" CTA
+- Frontend: Unblock button in AdminMembersPage member details (Actions tab)
 
-### Notification System
-1. **Notification Preferences** in Profile: Trading Signal, 10/5-min Pre-Trade, Missed Trade (members) + Member Trade Submitted, Missed Trade, Profit Reports, Daily Summary (admins)
-2. **Web Push Notifications**: VAPID keys, subscribe/unsubscribe, push toggle in Profile
-3. **Pre-trade push scheduling**: 10min and 5min reminders via APScheduler
-4. Auto-push when new trading signal published + force-notify button
+#### Version Banner ("New Version Deployed")
+- `GET /api/version` - returns `build_version` UUID (changes on every server restart/deploy)
+- Frontend: `VersionBanner` component checks version every 60 seconds
+- Shows persistent banner with "Refresh Now" button when version mismatch detected
+- Stores cached version in localStorage for comparison
 
-### Daily Trade Summary
-1. Admin page `/admin/daily-summary` - who traded/missed/DNT with profits/commissions
-2. Notifications page links to daily summary for trade-related notifications
-3. "Notify All Members" button on Active Signal card (master admin)
-
-### PWA Enhancements
-1. Dynamic `manifest.json` via `/api/settings/manifest.json`
-2. PWA App Icon upload in Admin > Branding settings
-3. Device-detecting install instructions dialog
-4. "Install App" in sidebar menu
-5. Service worker with push notification handlers
-
-### Backend Refactoring (Partial)
-1. Created `/app/backend/helpers.py` for shared helper functions
-2. `settings.py` and `bve.py` previously extracted from server.py
+### Previously Implemented
+- Mobile bug fixes (onboarding, balance sync, profit tracker)
+- PWA install instructions & dynamic manifest
+- Notification system (preferences, web push, pre-trade reminders)
+- Daily trade summary page
+- PWA icon customization
+- Production hotfix for PWA endpoints
+- Mobile UI fixes (Trade Monitor)
 
 ## Key API Endpoints
+- `GET /api/version` - Build version check (no auth)
+- `GET /api/trade/signal-block-status` - Signal block status (auth)
+- `POST /api/admin/members/{user_id}/unblock-signal` - Admin unblock (admin auth)
 - `GET/PUT /api/users/notification-preferences`
-- `GET /api/users/vapid-public-key`
-- `POST/DELETE /api/users/push-subscribe`
-- `GET /api/admin/daily-trade-summary`
-- `POST /api/admin/signals/force-notify`
-- `POST /api/admin/push-notify-all`
 - `GET /api/settings/manifest.json`
-- `POST /api/settings/upload-pwa-icon`
-- `POST /api/trade/did-not-trade?date=YYYY-MM-DD`
+- `POST /api/trade/did-not-trade`
 
-## Remaining Backlog
+## Upcoming Tasks
 
-### P1 (High)
-- Continue backend refactoring (server.py still ~8600 lines)
-- User verification of all features in production
+### Phase 2: Banners & Popups (P1)
+- Customizable sticky notice banner (admin-configurable, dismissible)
+- Promotion pop-up (presets, images, text, buttons, admin-managed)
 
-### P2 (Medium)
-- Frontend refactoring of ProfitTrackerPage.jsx (consider Zustand)
-- Cloudinary file upload implementation
+### Phase 3: Habit Tracker (P2)
+- "Soft gate" - completing one daily task unlocks trading signal
+- Admin interface to manage/add habits
+- Pre-written invite task as default
+
+### Phase 4: Affiliate Center (P3)
+- Resource hub: conversation starters, story templates, marketing materials
+- FAQ section
+- Chatbase chatbot embed ("ConSim")
+
+## Backlog
+- Backend refactoring of `server.py` (incremental approach, ~8600+ lines)
+- Frontend refactoring of ProfitTrackerPage.jsx (state management needed)
+- Cloudinary file upload implementation (placeholder)
 
 ## Known Issues
-- "Run Diagnostic" fails in production (infrastructure, not code)
+- "Run Diagnostic" fails in production (infrastructure)
 - Cloudinary integration is placeholder
+- Reset Tracker admin account flow (user verification pending)
 
 ## 3rd Party Integrations
-Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush
+Heartbeat, Emailit, APScheduler, Cloudinary (Placeholder), CoinGecko, react-quill-new, pywebpush, Chatbase (Planned)
