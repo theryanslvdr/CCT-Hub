@@ -2935,6 +2935,7 @@ export const AdminSettingsPage = () => {
                             { key: 'profit_tracker', label: 'Profit Tracker' },
                             { key: 'trade_monitor', label: 'Trade Monitor' },
                             { key: 'habits', label: 'Daily Habits' },
+                            { key: 'affiliate', label: 'Affiliate Center' },
                             { key: 'goals', label: 'Profit Planner' },
                             { key: 'debt', label: 'Debt Manager' },
                             { key: 'profile', label: 'Profile' },
