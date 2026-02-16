@@ -968,6 +968,15 @@ export const AdminSettingsPage = () => {
                 >
                   <CheckCircle2 className="w-4 h-4" /> Habit Tracker
                 </button>
+                <button
+                  onClick={() => setActiveTab('affiliate')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    activeTab === 'affiliate' ? 'bg-cyan-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  }`}
+                  data-testid="tab-affiliate"
+                >
+                  <ExternalLink className="w-4 h-4" /> Affiliate Center
+                </button>
               </>
             )}
           </div>
