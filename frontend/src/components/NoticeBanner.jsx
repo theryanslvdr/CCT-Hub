@@ -14,6 +14,7 @@ const routeToPageKey = {
   '/profile': 'profile',
   '/notifications': 'notifications',
   '/habits': 'habits',
+  '/affiliate': 'affiliate',
 };
 
 export const NoticeBanner = () => {
