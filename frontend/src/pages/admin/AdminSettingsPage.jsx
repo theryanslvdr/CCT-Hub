@@ -26,8 +26,7 @@ import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
 export const AdminSettingsPage = () => {
   const { user, isMasterAdmin, isSuperAdmin } = useAuth();
-
-  useEffect(() => { loadHabits(); }, []);
+  const [settings, setSettings] = useState({
 
   const resetForm = () => {
     setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true });
