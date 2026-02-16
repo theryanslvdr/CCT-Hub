@@ -151,6 +151,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker', id: 'profit_tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor', hideForLicensee: true },
+    { path: '/habits', icon: CheckSquare, label: 'Daily Habits', id: 'habits' },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
   ];
 
