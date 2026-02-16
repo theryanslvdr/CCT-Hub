@@ -8973,6 +8973,20 @@ async def complete_habit(habit_id: str, screenshot_url: str = "", user: dict = D
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "screenshot_url": screenshot_url,
     })
+
+    # Notify admins via push notification (fire-and-forget)
+    try:
+        user_name = user.get("full_name", "A member")
+        habit_title = habit.get("title", "a habit")
+        await send_push_to_admins(
+            title=f"{user_name} completed a habit",
+            body=f'Completed "{habit_title}"',
+            url="/dashboard",
+            tag=f"habit-{user['id']}-{today}",
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send admin push for habit completion: {e}")
+
     return {"message": "Habit completed!", "already": False}
 
 @habit_router.post("/upload-screenshot")
