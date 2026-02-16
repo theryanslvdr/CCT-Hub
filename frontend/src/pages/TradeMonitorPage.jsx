@@ -290,7 +290,7 @@ export const TradeMonitorPage = () => {
     // 3. User hasn't already entered the trade
     // 4. User hasn't already logged profit (tradeEnded = true means they're in profit entry)
     // 5. We haven't already shown the missed trade popup
-    if (!signal || tradeEntered || tradeEnded || missedTradeChecked || showCelebration) {
+    if (!signal || tradeEntered || tradeEnded || missedTradeChecked || showCelebration || signalBlocked) {
       return;
     }
     
