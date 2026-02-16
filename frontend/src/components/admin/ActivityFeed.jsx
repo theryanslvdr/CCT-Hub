@@ -37,10 +37,10 @@ const ActivityItem = ({ activity, isNew }) => {
           {isNew && <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse shrink-0" />}
         </div>
         <p className="text-xs text-zinc-400 mt-0.5">{activity.detail}</p>
-        {activity.screenshot_url && activity.screenshot_url.startsWith('data:') && (
+        {activity.screenshot_url && activity.screenshot_url.length > 50 && (
           <div className="mt-2 flex items-center gap-1.5">
             <Camera className="w-3 h-3 text-zinc-500" />
-            <img src={activity.screenshot_url} alt="Proof" className="max-h-16 rounded border border-zinc-700" />
+            <img src={activity.screenshot_url} alt="Proof" className="max-h-16 rounded border border-zinc-700" onError={(e) => e.target.style.display='none'} />
           </div>
         )}
       </div>

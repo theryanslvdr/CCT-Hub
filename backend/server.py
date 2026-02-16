@@ -1653,6 +1653,8 @@ async def simulate_withdrawal(data: WithdrawalSimulation, user: dict = Depends(g
 @profit_router.delete("/reset")
 async def reset_profit_tracker(user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
     """Reset all profit tracker data for the current user or a simulated member (Master Admin only)"""
+    admin_roles = {"master_admin", "super_admin", "basic_admin"}
+    
     # Determine target user
     target_user_id = user["id"]
     
@@ -1664,9 +1666,15 @@ async def reset_profit_tracker(user_id: Optional[str] = None, user: dict = Depen
         target_user = await db.users.find_one({"id": user_id})
         if not target_user:
             raise HTTPException(status_code=404, detail="Target user not found")
+        # Prevent resetting any admin account
+        if target_user.get("role") in admin_roles:
+            raise HTTPException(status_code=403, detail="Admin accounts cannot be reset")
         target_user_id = user_id
         logger.info(f"Master Admin {user['id']} resetting data for user {user_id}")
     else:
+        # Prevent admins from resetting their own account
+        if user.get("role") in admin_roles:
+            raise HTTPException(status_code=403, detail="Admin accounts cannot be reset. This action is only available for member accounts.")
         logger.info(f"User {user['id']} resetting their own data")
     
     # Delete deposits
