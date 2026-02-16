@@ -5,7 +5,6 @@ import { X, ExternalLink } from 'lucide-react';
 
 const DISMISS_KEY = 'notice_banner_dismissed';
 
-// Map route paths to page keys used in admin config
 const routeToPageKey = {
   '/dashboard': 'dashboard',
   '/profit-tracker': 'profit_tracker',
@@ -20,6 +19,7 @@ export const NoticeBanner = () => {
   const [banner, setBanner] = useState(null);
   const [dismissed, setDismissed] = useState(false);
   const location = useLocation();
+  const tracked = React.useRef(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(DISMISS_KEY)) {
@@ -33,9 +33,18 @@ export const NoticeBanner = () => {
       .catch(() => {});
   }, []);
 
+  // Track impression once per session
+  useEffect(() => {
+    if (banner && !tracked.current) {
+      tracked.current = true;
+      settingsAPI.trackBannerEvent('impression', 'notice_banner').catch(() => {});
+    }
+  }, [banner]);
+
   const handleDismiss = () => {
     setDismissed(true);
     sessionStorage.setItem(DISMISS_KEY, '1');
+    settingsAPI.trackBannerEvent('dismiss', 'notice_banner').catch(() => {});
   };
 
   if (!banner || dismissed) return null;
