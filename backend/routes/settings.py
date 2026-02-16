@@ -73,6 +73,16 @@ class PlatformSettings(BaseModel):
     promo_popup_cta_url: str = ""
     promo_popup_frequency: str = "once_per_session"
 
+    # Coerce None to "" for all str fields
+    @field_validator('*', mode='before')
+    @classmethod
+    def coerce_none(cls, v: Any, info) -> Any:
+        if v is None and info.field_name in cls.model_fields:
+            field = cls.model_fields[info.field_name]
+            if field.annotation is str:
+                return ""
+        return v
+
 class EmailTemplateUpdate(BaseModel):
     subject: str
     body: str
