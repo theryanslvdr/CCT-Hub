@@ -119,12 +119,15 @@ class TestAffiliateResources(TestAuth):
         assert response.status_code == 200, f"Failed: {response.text}"
         data = response.json()
         
-        # Verify response has enabled and bot_id fields
+        # Verify response has enabled field
         assert "enabled" in data, "Missing enabled field"
-        assert "bot_id" in data, "Missing bot_id field"
         assert isinstance(data["enabled"], bool), "enabled should be boolean"
         
-        print(f"Chatbase public: enabled={data['enabled']}, bot_id={data['bot_id']}")
+        # bot_id is only returned when enabled=True (by design)
+        if data["enabled"]:
+            assert "bot_id" in data, "Missing bot_id field when enabled"
+        
+        print(f"Chatbase public: enabled={data['enabled']}, bot_id={data.get('bot_id', 'N/A')}")
 
 
 class TestAdminAffiliateResources(TestAuth):
