@@ -331,6 +331,21 @@ export const adminHabitAPI = {
   activateHabit: (habitId) => api.post(`/admin/habits/${habitId}/activate`),
 };
 
+// Affiliate Center APIs
+export const affiliateAPI = {
+  getResources: () => api.get('/affiliate-resources'),
+  getChatbase: () => api.get('/affiliate-chatbase-public'),
+};
+
+export const adminAffiliateAPI = {
+  getResources: () => api.get('/admin/affiliate-resources'),
+  createResource: (data) => api.post('/admin/affiliate-resources', data),
+  updateResource: (id, data) => api.put(`/admin/affiliate-resources/${id}`, data),
+  deleteResource: (id) => api.delete(`/admin/affiliate-resources/${id}`),
+  getChatbase: () => api.get('/admin/affiliate-chatbase'),
+  updateChatbase: (bot_id, enabled) => api.put('/admin/affiliate-chatbase', null, { params: { bot_id, enabled } }),
+};
+
 // BVE (Beta Virtual Environment) APIs
 export const bveAPI = {
   enter: () => api.post('/bve/enter'),
