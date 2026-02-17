@@ -311,15 +311,18 @@ class TestRegressionAdminHabits:
         assert response.status_code == 200, f"Failed to get admin habits: {response.text}"
         data = response.json()
         
-        # Response should be a list
-        assert isinstance(data, list), "Response should be a list"
-        print(f"Number of admin habits: {len(data)}")
+        # Response is a dict with 'habits' key
+        assert isinstance(data, dict), "Response should be a dict"
+        assert "habits" in data, "Response should have 'habits' key"
+        habits = data.get("habits", [])
+        print(f"Number of admin habits: {len(habits)}")
         print(f"✓ GET /api/admin/habits works correctly")
     
     def test_12_post_admin_habit(self, admin_headers):
         """Test POST /api/admin/habits"""
+        # Using correct field name 'title' instead of 'name'
         test_habit = {
-            "name": "TEST_Iteration113_Habit",
+            "title": "TEST_Iteration113_Habit",
             "description": "Test habit for iteration 113",
             "category": "health",
             "frequency": "daily",
