@@ -471,8 +471,9 @@ export default function FamilyAccountsPage() {
   const [activeTab, setActiveTab] = useState('members');
 
   const isSimulating = !!simulatedView;
-  const effectiveUser = simulatedView || user;
-  const isAdmin = user?.role === 'master_admin' && !isSimulating;
+  const isAdminSimulation = isSimulating && user?.role === 'master_admin';
+  const effectiveLicenseType = simulatedView?.license_type || user?.license_type;
+  const effectiveUserId = simulatedView?.memberId || simulatedView?.id || user?.id;
 
   const loadData = useCallback(async () => {
     try {
