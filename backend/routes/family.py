@@ -589,3 +589,44 @@ async def admin_get_family_member_projections(user_id: str, member_id: str, user
         "starting_amount": member.get("starting_amount", 0),
         "current_balance": account_value
     }
+
+
+class FamilyMemberResetBalance(BaseModel):
+    starting_amount: Optional[float] = None
+    effective_start_date: Optional[str] = None
+
+
+@admin_family_router.put("/members/{user_id}/{member_id}/reset")
+async def admin_reset_family_member(user_id: str, member_id: str, data: FamilyMemberResetBalance, user: dict = Depends(require_admin)):
+    """Admin resets a family member's starting balance and/or start date."""
+    db = deps.db
+
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can reset family member balances")
+
+    member = await db.family_members.find_one(
+        {"id": member_id, "parent_user_id": user_id, "is_active": True}
+    )
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
+
+    updates = {}
+    if data.starting_amount is not None:
+        if data.starting_amount < 0:
+            raise HTTPException(status_code=400, detail="Starting amount cannot be negative")
+        updates["starting_amount"] = data.starting_amount
+    if data.effective_start_date is not None:
+        try:
+            datetime.strptime(data.effective_start_date, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+        updates["effective_start_date"] = data.effective_start_date
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.family_members.update_one({"id": member_id}, {"$set": updates})
+
+    return {"message": "Family member updated", "updates": updates}
+
