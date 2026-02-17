@@ -27,27 +27,55 @@ class HabitCreate(BaseModel):
 
 @router.get("/")
 async def get_habits(user: dict = Depends(get_current_user)):
-    """Get all active habits and the user's completion status for today."""
+    """Get all active habits and the user's completion status."""
     db = deps.db
     habits = await db.habits.find({"active": True}, {"_id": 0}).to_list(100)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    completions = await db.habit_completions.find(
+    today_date = datetime.strptime(today, "%Y-%m-%d").date()
+
+    # Get today's completions for display
+    completions_today = await db.habit_completions.find(
         {"user_id": user["id"], "date": today}, {"_id": 0}
     ).to_list(100)
-    completed_ids = {c["habit_id"] for c in completions}
+    completed_ids = {c["habit_id"] for c in completions_today}
 
+    # Check gate unlock: for each gate habit, check if completed within its validity window
     gate_habits = [h for h in habits if h.get("is_gate")]
-    gate_complete = any(h["id"] in completed_ids for h in gate_habits) if gate_habits else True
+    gate_unlocked = True
+    gate_deadline = None
+
+    if gate_habits:
+        gate_unlocked = False
+        # Find the best (most recent) valid completion across all gate habits
+        for gh in gate_habits:
+            validity = gh.get("validity_days", 1)
+            window_start = (today_date - timedelta(days=validity - 1)).isoformat()
+
+            recent = await db.habit_completions.find_one(
+                {"user_id": user["id"], "habit_id": gh["id"], "date": {"$gte": window_start}},
+                {"_id": 0, "date": 1}
+            )
+            if recent:
+                gate_unlocked = True
+                # Calculate when this completion expires
+                completion_date = datetime.strptime(recent["date"], "%Y-%m-%d").date()
+                expires = completion_date + timedelta(days=validity)
+                if gate_deadline is None or expires > gate_deadline:
+                    gate_deadline = expires
 
     streak = await _calc_habit_streak(user["id"])
 
-    return {
+    result = {
         "habits": habits,
         "completions_today": list(completed_ids),
-        "gate_unlocked": gate_complete,
+        "gate_unlocked": gate_unlocked,
         "date": today,
         "streak": streak,
     }
+    if gate_deadline:
+        result["gate_deadline"] = gate_deadline.isoformat()
+
+    return result
 
 
 @router.get("/streak")
