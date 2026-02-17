@@ -1486,6 +1486,15 @@ export const AdminMembersPage = () => {
                 </div>
               )}
 
+              {memberLicense.license_type === 'honorary_fa' && (
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+                  <p className="text-blue-400 font-medium mb-1">Honorary FA (Family Account)</p>
+                  <p className="text-zinc-400">
+                    Family Account license. Licensee can add up to 5 family members with independent profit tracking.
+                  </p>
+                </div>
+              )}
+
               <Button 
                 onClick={handleRemoveLicense}
                 variant="outline"
