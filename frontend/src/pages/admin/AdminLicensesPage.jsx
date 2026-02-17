@@ -1096,11 +1096,19 @@ export const AdminLicensesPage = () => {
                   <SelectItem value="honorary">
                     <span className="text-amber-400">Honorary Licensee</span>
                   </SelectItem>
+                  <SelectItem value="honorary_fa">
+                    <span className="text-blue-400">Honorary FA (Family Account)</span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {createForm.license_type === 'honorary' && (
                 <p className="text-xs text-zinc-500 mt-1">
                   Honorary licensees use standard profit calculations (deposits + profits - withdrawals)
+                </p>
+              )}
+              {createForm.license_type === 'honorary_fa' && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  Family Account: Licensee can add up to 5 family members, each with their own profit tracking
                 </p>
               )}
             </div>
