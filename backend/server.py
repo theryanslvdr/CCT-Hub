@@ -6739,7 +6739,8 @@ async def get_master_admin_trades(
         else:
             query["created_at"] = {"$lte": end_dt.isoformat()}
     
-    # Get master admin's trades
+    # Get master admin's trades (exclude did_not_trade entries)
+    query["did_not_trade"] = {"$ne": True}
     trades = await db.trade_logs.find(query, {"_id": 0}).to_list(1000)
     
     # Create a dictionary of dates with trades
