@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Loader2, FileText, XCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Loader2, FileText, XCircle, CheckCircle2, Clock } from 'lucide-react';
 
 const ACTION_TYPES = [
   { value: 'send_invite', label: 'Send Invite (copy message)' },
@@ -21,26 +21,34 @@ export const HabitManagerCard = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true });
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    title: '', description: '', action_type: 'generic',
+    action_data: '', is_gate: true, validity_days: 1
+  });
 
   const loadHabits = async () => {
     try {
       const res = await adminHabitAPI.getHabits();
       setHabits(res.data.habits || []);
-    } catch { /* ignore */ }
+    } catch (err) {
+      console.error('Load habits error:', err);
+    }
     setLoading(false);
   };
 
   useEffect(() => { loadHabits(); }, []);
 
   const resetForm = () => {
-    setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true });
+    setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true, validity_days: 1 });
     setEditingId(null);
     setShowForm(false);
+    setSaving(false);
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) { toast.error('Title required'); return; }
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    setSaving(true);
     try {
       if (editingId) {
         await adminHabitAPI.updateHabit(editingId, form);
@@ -51,11 +59,20 @@ export const HabitManagerCard = () => {
       }
       resetForm();
       loadHabits();
-    } catch { toast.error('Failed to save habit'); }
+    } catch (err) {
+      const detail = err?.response?.data?.detail || err?.message || 'Unknown error';
+      console.error('Save habit error:', err?.response?.status, detail);
+      toast.error(`Failed to save habit: ${detail}`);
+      setSaving(false);
+    }
   };
 
   const handleEdit = (h) => {
-    setForm({ title: h.title, description: h.description || '', action_type: h.action_type, action_data: h.action_data || '', is_gate: h.is_gate });
+    setForm({
+      title: h.title, description: h.description || '',
+      action_type: h.action_type, action_data: h.action_data || '',
+      is_gate: h.is_gate, validity_days: h.validity_days || 1
+    });
     setEditingId(h.id);
     setShowForm(true);
   };
@@ -70,7 +87,9 @@ export const HabitManagerCard = () => {
         toast.success('Habit activated');
       }
       loadHabits();
-    } catch { toast.error('Failed'); }
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || 'Failed');
+    }
   };
 
   return (
@@ -93,7 +112,7 @@ export const HabitManagerCard = () => {
           <div className="p-4 rounded-lg bg-zinc-900/60 border border-teal-500/30 space-y-3" data-testid="habit-form">
             <Input value={form.title} onChange={(e) => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Habit title (e.g., Send 1 invite today)" className="input-dark" data-testid="habit-title-input" />
             <Textarea value={form.description} onChange={(e) => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="input-dark" rows={2} />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label className="text-zinc-300 text-xs">Action Type</Label>
                 <Select value={form.action_type} onValueChange={(v) => setForm(p => ({ ...p, action_type: v }))}>
@@ -102,6 +121,17 @@ export const HabitManagerCard = () => {
                     {ACTION_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <Label className="text-zinc-300 text-xs flex items-center gap-1"><Clock className="w-3 h-3" /> Valid for (days)</Label>
+                <Input
+                  type="number" min={1} max={365}
+                  value={form.validity_days}
+                  onChange={(e) => setForm(p => ({ ...p, validity_days: Math.max(1, parseInt(e.target.value) || 1) }))}
+                  className="input-dark mt-1"
+                  data-testid="habit-validity-days"
+                />
+                <p className="text-[10px] text-zinc-500 mt-0.5">Signal stays unlocked this many days after completion</p>
               </div>
               <div className="flex items-center gap-2 pt-5">
                 <Switch checked={form.is_gate} onCheckedChange={(v) => setForm(p => ({ ...p, is_gate: v }))} />
@@ -113,7 +143,10 @@ export const HabitManagerCard = () => {
             )}
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" size="sm" onClick={resetForm}>Cancel</Button>
-              <Button size="sm" onClick={handleSave} className="bg-teal-600 hover:bg-teal-700" data-testid="save-habit-btn">{editingId ? 'Update' : 'Create'}</Button>
+              <Button size="sm" onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700" data-testid="save-habit-btn">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                {editingId ? 'Update' : 'Create'}
+              </Button>
             </div>
           </div>
         )}
@@ -129,6 +162,11 @@ export const HabitManagerCard = () => {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-white">{h.title}</p>
                   {h.is_gate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Gate</span>}
+                  {(h.validity_days || 1) > 1 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 flex items-center gap-0.5">
+                      <Clock className="w-2.5 h-2.5" /> {h.validity_days}d
+                    </span>
+                  )}
                   {!h.active && <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">Inactive</span>}
                 </div>
                 <p className="text-xs text-zinc-500 mt-0.5">{ACTION_TYPES.find(t => t.value === h.action_type)?.label || h.action_type}</p>
