@@ -209,6 +209,7 @@ async def admin_update_habit(habit_id: str, data: HabitCreate, user: dict = Depe
             "action_type": data.action_type,
             "action_data": data.action_data,
             "is_gate": data.is_gate,
+            "validity_days": max(1, data.validity_days),
         }}
     )
     if result.matched_count == 0:
