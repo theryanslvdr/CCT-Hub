@@ -154,6 +154,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/habits', icon: CheckSquare, label: 'Daily Habits', id: 'habits' },
     { path: '/affiliate', icon: Share2, label: 'Affiliate Center', id: 'affiliate' },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
+    { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
