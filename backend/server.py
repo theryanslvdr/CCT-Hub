@@ -4959,8 +4959,8 @@ async def create_license(data: LicenseCreate, user: dict = Depends(require_admin
         raise HTTPException(status_code=400, detail="User already has an active license")
     
     # Validate license type
-    if data.license_type not in ["extended", "honorary"]:
-        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended' or 'honorary'")
+    if data.license_type not in ["extended", "honorary", "honorary_fa"]:
+        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended', 'honorary', or 'honorary_fa'")
     
     # Determine start date
     if data.start_date:
