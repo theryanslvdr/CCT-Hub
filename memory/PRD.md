@@ -9,6 +9,7 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 - Interactive habit gate flow with screenshot uploads
 - Live admin activity feed and push notifications for habit completions
 - PWA push notification support
+- Licensee management (Extended & Honorary) with profit tracking
 
 ## Core Architecture
 - **Backend:** FastAPI (Python) on port 8001
@@ -20,7 +21,7 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 - Master Admin: `iam@ryansalvador.com` / `admin123`
 - Login returns `access_token` field
 
-## What's Implemented (All features complete)
+## What's Implemented
 1. **Phase 1:** Trading Signal Blocking + "New Version" Banner
 2. **Phase 2:** Admin-configurable Banners, Popups + Analytics
 3. **Phase 3:** Habit Tracker with Streaks + Signal Gate
@@ -29,69 +30,56 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 6. **Live Activity Feed** on Admin Dashboard
 7. **PWA Push Notifications** (fixed VAPID key bug)
 8. **Admin Habit Notifications** (push on member habit completion)
+9. **Honorary Licensee Profit Tracker** - Dynamic account value calculation with quarterly compounding
 
-## Backend Route Architecture (Post-Refactoring)
+## Recent Bug Fixes (Feb 17, 2026)
+- **P0: Honorary Licensee Profit Tracker** - Fixed 3 critical bugs:
+  - Manager Traded column: Fixed by filtering out `did_not_trade` entries from master admin trade queries
+  - Account value sync: Fixed by implementing `calculate_honorary_licensee_value()` for dynamic calculation
+  - Profit stuck at $0: Fixed by calculating profit from dynamic account_value instead of stale `current_amount`
+- **P1: Admin Habits 404**: Admin habit CRUD endpoints confirmed working in preview (POST/GET/DELETE /api/admin/habits)
+
+## Pending/Upcoming Tasks
+### P0 - Immediate
+- **Family Account Feature**: Design & implement family accounts for Honorary Licensees (plan required before coding)
+
+### P1 - High Priority
+- **Failed to Save Habit (Live Site)**: Recurring 404 on user's live site. Endpoints work in preview. Need user's network logs to debug production-specific issue.
+
+### P2 - Backlog
+- Backend Refactoring: Extract remaining routers (auth, trade, admin) from server.py
+- Frontend Refactoring: Break down AdminSettingsPage.jsx and ProfitTrackerPage.jsx
+- Cloudinary integration for file uploads
+- Chatbase integration placeholder
+
+## Key Technical Details
+- Honorary licensee account_value is dynamically calculated using quarterly compounding via `calculate_honorary_licensee_value()` in `/app/backend/utils/calculations.py`
+- All master admin trade queries now filter out `did_not_trade` entries with `{"did_not_trade": {"$ne": True}}`
+- Licensee daily projection endpoint now returns field names consistent with simulation endpoint (start_value, lot_size, daily_profit)
+
+## Backend Route Architecture
 ```
 /app/backend/
-├── server.py          (8705 lines - main server, still contains auth/profit/trade/admin routers)
+├── server.py          (Main server - auth/profit/trade/admin routers)
+├── utils/calculations.py (Financial calculations including calculate_honorary_licensee_value)
 ├── deps.py            (Auth functions, JWT handling)
-├── helpers.py         (Push notification helpers: send_push_to_admins, send_push_notification, send_push_to_all_members)
+├── helpers.py         (Push notification helpers)
 ├── database.py        (MongoDB connection singleton)
-├── models/
-│   ├── user.py        (UserCreate, UserResponse, TokenResponse, etc.)
-│   ├── trade.py       (Trade models)
-│   ├── common.py      (Deposit, Debt models)
-│   └── settings.py    (Settings models)
 └── routes/
-    ├── habits.py      ✅ EXTRACTED (habits + admin habit management)
-    ├── affiliate.py   ✅ EXTRACTED (affiliate resources + chatbase config)
-    ├── activity_feed.py ✅ EXTRACTED (admin activity feed)
-    ├── users.py       ✅ EXTRACTED (notification prefs, push subscriptions, profile, password)
-    ├── settings.py    ✅ (previously extracted)
-    ├── currency.py    ✅ (previously extracted)
-    ├── debt.py        ✅ (previously extracted)
-    ├── goals.py       ✅ (previously extracted)
-    ├── api_center.py  ✅ (previously extracted)
-    └── bve.py         ✅ (previously extracted)
+    ├── habits.py      (habits + user habit operations)
+    ├── affiliate.py   (affiliate resources)
+    ├── activity_feed.py (admin activity feed)
+    ├── users.py       (notification prefs, profile)
+    ├── settings.py    (platform settings)
+    ├── admin.py       (admin operations)
+    └── ...other extracted routers
 ```
-
-## Frontend Component Architecture (Post-Refactoring)
-```
-/app/frontend/src/pages/admin/
-├── AdminSettingsPage.jsx    (2713 lines - reduced from 3131)
-└── settings/
-    ├── HabitManagerCard.jsx      ✅ EXTRACTED (~130 lines)
-    ├── AffiliateManagerCard.jsx  ✅ EXTRACTED (~155 lines)
-    └── BannerAnalyticsCard.jsx   ✅ EXTRACTED (~60 lines)
-```
-
-## Bug Fixes Applied
-- **P0:** PWA Push Notification fix (VAPID key in .env was concatenated)
-- **P1:** Admin reset protection (recurring regression - admins can no longer self-reset)
-- **LOW:** Broken image in Activity Feed (onError handler + length check)
-- **CRITICAL:** Members couldn't see Habit Tracker or Affiliate Center (allowed_dashboards missing 'habits'/'affiliate'). Fixed: updated all DB records, registration defaults, and sidebar filtering
-- **CRITICAL:** Soft-gate habit tracker not showing during admin simulation (signal block check now works for simulated member views)
-
-## Mocked Integrations
-- **Cloudinary:** File uploads stored locally in `/app/backend/uploads/`
-- **Chatbase:** Placeholder iframe in Affiliate Center
 
 ## 3rd Party Integrations
 - **pywebpush:** VAPID-encrypted web push notifications
-- **Heartbeat API:** User verification for registration
+- **Chatbase:** Placeholder iframe (not integrated)
+- **Cloudinary:** Placeholder (not integrated)
 
-## Remaining P2 Refactoring Backlog
-1. Extract `auth_router` from server.py → `routes/auth.py`
-2. Extract `trade_router` from server.py → `routes/trade.py`
-3. Extract `profit_router` from server.py → `routes/profit.py`
-4. Extract `admin_router` from server.py → `routes/admin.py`
-5. Refactor `ProfitTrackerPage.jsx` (5235 lines) - address prop-drilling
-6. Further break down `AdminSettingsPage.jsx` tab contents
-
-## Future / Nice-to-Have
-- Replace local file uploads with Cloudinary
-- Chatbase bot embed (production integration)
-
-## Test Reports
-- iteration_106: P0 notification fix verified
-- iteration_107: Full regression after refactoring (17/17 backend, all frontend ✅)
+## Mocked Features
+- Cloudinary file upload integration
+- Chatbase integration in Affiliate Center
