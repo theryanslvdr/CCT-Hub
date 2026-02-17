@@ -88,9 +88,16 @@ const HabitTrackerPage = () => {
         </div>
         <div className="flex items-center gap-2">
           {gateUnlocked ? (
-            <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full" data-testid="gate-status-unlocked">
-              <Unlock className="w-4 h-4" /> Signal Unlocked
-            </span>
+            <div className="text-right">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full" data-testid="gate-status-unlocked">
+                <Unlock className="w-4 h-4" /> Signal Unlocked
+              </span>
+              {gateDeadline && (
+                <p className="text-[10px] text-zinc-500 mt-1 pr-1">
+                  Valid until {new Date(gateDeadline).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           ) : (
             <span className="flex items-center gap-1.5 text-sm font-medium text-orange-400 bg-orange-500/10 px-3 py-1.5 rounded-full" data-testid="gate-status-locked">
               <Lock className="w-4 h-4" /> Complete a task to unlock
