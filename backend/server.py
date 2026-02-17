@@ -5086,12 +5086,15 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
     master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
     master_trade_logs = {}
     if master_admin:
-        trades = await db.trade_logs.find({"user_id": master_admin["id"]}, {"_id": 0}).to_list(1000)
+        trades = await db.trade_logs.find(
+            {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}},
+            {"_id": 0, "created_at": 1, "trade_date": 1, "actual_profit": 1, "commission": 1}
+        ).to_list(1000)
         for trade in trades:
             date_key = trade.get("trade_date") or trade.get("created_at", "")[:10]
             if date_key:
                 master_trade_logs[date_key] = {
-                    "traded": trade.get("has_traded", True),
+                    "traded": True,
                     "actual_profit": trade.get("actual_profit", 0),
                     "commission": trade.get("commission", 0)
                 }
