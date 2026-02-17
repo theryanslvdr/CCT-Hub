@@ -4089,7 +4089,7 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
     licensed_user_ids = set(lic["user_id"] for lic in all_licenses)
     honorary_user_ids = set(
         lic["user_id"] for lic in all_licenses 
-        if lic.get("license_type") == "honorary"
+        if lic.get("license_type") in ("honorary", "honorary_fa")
     )
     extended_user_ids = set(
         lic["user_id"] for lic in all_licenses 
