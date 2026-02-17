@@ -54,10 +54,11 @@ class TestFamilyAccountFeature:
         )
         assert response.status_code == 200, f"Get member failed: {response.text}"
         data = response.json()
-        member = data.get("member", {})
-        assert member.get("license_type") == "honorary_fa", f"Expected honorary_fa, got {member.get('license_type')}"
-        print(f"PASS: Rizza Miles license_type = {member.get('license_type')}")
-        return member
+        # The member data is nested under "user" key in the response
+        user_data = data.get("user", {})
+        license_type = user_data.get("license_type")
+        assert license_type == "honorary_fa", f"Expected honorary_fa, got {license_type}"
+        print(f"PASS: Rizza Miles license_type = {license_type}")
 
     # ===================== Test 2: Get Family Members =====================
     def test_02_get_family_members(self, admin_headers):
@@ -309,8 +310,9 @@ class TestFamilyAccountFeature:
 
     def test_10_regression_admin_habits_post(self, admin_headers):
         """Regression: POST /api/admin/habits still works"""
+        # Habits schema requires 'title' not 'name'
         test_habit = {
-            "name": "TEST_Regression_Habit",
+            "title": "TEST_Regression_Habit",
             "category": "health",
             "description": "Test habit for regression"
         }
@@ -319,7 +321,7 @@ class TestFamilyAccountFeature:
             headers=admin_headers,
             json=test_habit
         )
-        assert response.status_code == 200, f"Create habit failed: {response.status_code}"
+        assert response.status_code == 200, f"Create habit failed: {response.status_code} - {response.text}"
         habit_id = response.json().get("habit", {}).get("id")
         print(f"PASS: POST /api/admin/habits created habit with id={habit_id}")
         
@@ -330,13 +332,13 @@ class TestFamilyAccountFeature:
 
     def test_11_regression_admin_habits_delete(self, admin_headers):
         """Regression: DELETE /api/admin/habits/{id} still works"""
-        # Create a habit to delete
+        # Create a habit to delete (using 'title' field)
         response = requests.post(
             f"{BASE_URL}/api/admin/habits",
             headers=admin_headers,
-            json={"name": "TEST_ToDelete", "category": "other"}
+            json={"title": "TEST_ToDelete", "category": "other"}
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, f"Create habit failed: {response.status_code}"
         habit_id = response.json().get("habit", {}).get("id")
         
         # Delete it
