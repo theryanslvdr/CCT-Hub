@@ -361,6 +361,13 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   Honorary Licensee View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
+                  onClick={() => handleLicenseeSimulationClick('honorary_fa')}
+                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  <Users className="w-4 h-4 mr-2 text-blue-400" />
+                  Honorary FA (Family) View
+                </DropdownMenuItem>
+                <DropdownMenuItem 
                   onClick={() => handleLicenseeSimulationClick('extended')}
                   className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
                 >
