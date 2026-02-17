@@ -5558,7 +5558,7 @@ async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(
     await db.license_invites.insert_one(invite)
     
     # Generate registration URL
-    frontend_url = os.environ.get("FRONTEND_URL", "https://notify-admin-6.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://trader-column-fix.preview.emergentagent.com")
     registration_url = f"{frontend_url}/register/license/{invite_code}"
     
     return {
@@ -5697,7 +5697,7 @@ Best regards,
 CrossCurrent Team"""
         }
     
-    frontend_url = os.environ.get("FRONTEND_URL", "https://notify-admin-6.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://trader-column-fix.preview.emergentagent.com")
     registration_url = f"{frontend_url}/register/license/{invite['code']}"
     
     # Replace template variables

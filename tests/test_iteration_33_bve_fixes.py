@@ -12,7 +12,7 @@ import requests
 import os
 import json
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://notify-admin-6.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://trader-column-fix.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
