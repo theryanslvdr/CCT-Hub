@@ -8750,6 +8750,8 @@ api_router.include_router(_currency_router)
 api_router.include_router(_settings_router)
 api_router.include_router(_api_center_router)
 api_router.include_router(_bve_router)
+api_router.include_router(_family_router)
+api_router.include_router(_admin_family_router)
 
 app.include_router(api_router)
 
