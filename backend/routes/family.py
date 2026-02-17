@@ -461,7 +461,7 @@ async def admin_approve_family_withdrawal(withdrawal_id: str, user: dict = Depen
     try:
         await send_push_notification(
             db, withdrawal["parent_user_id"],
-            f"Withdrawal Approved",
+            "Withdrawal Approved",
             f"{withdrawal['family_member_name']}'s withdrawal of ${withdrawal['amount']:.2f} has been approved by admin."
         )
     except Exception as e:
@@ -499,7 +499,7 @@ async def admin_reject_family_withdrawal(withdrawal_id: str, reason: str = "", u
     try:
         await send_push_notification(
             db, withdrawal["parent_user_id"],
-            f"Withdrawal Rejected",
+            "Withdrawal Rejected",
             f"{withdrawal['family_member_name']}'s withdrawal was rejected: {reason or 'No reason given'}"
         )
     except Exception as e:
