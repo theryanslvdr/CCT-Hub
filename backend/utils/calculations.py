@@ -156,9 +156,11 @@ async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> fl
     ).to_list(1000)
     
     total_licensee_funds = 0.0
-    for license in active_licenses:
-        # Use current_amount if available, otherwise use starting_amount
-        amount = license.get("current_amount", license.get("starting_amount", 0))
+    for lic in active_licenses:
+        if lic.get("license_type") == "honorary":
+            amount = await calculate_honorary_licensee_value(db, lic)
+        else:
+            amount = lic.get("current_amount", lic.get("starting_amount", 0))
         total_licensee_funds += amount
     
     return round(total_licensee_funds, 2)
