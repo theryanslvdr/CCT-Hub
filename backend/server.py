@@ -6499,55 +6499,78 @@ async def get_licensee_daily_projection(
         if dep_date:
             deposit_by_date[dep_date] = deposit_by_date.get(dep_date, 0) + dep.get("amount", 0)
     
-    # Build projection table starting from effective_start_date
+    # Get trade overrides for this license
+    overrides = {}
+    license_id = license.get("id")
+    if license_id:
+        async for override in db.licensee_trade_overrides.find({"license_id": license_id}, {"_id": 0}):
+            overrides[override["date"]] = override
+    
+    # Build projection table with quarterly compounding (matching simulation endpoint format)
     projections = []
     current_balance = license.get("starting_amount", 0)
     
     # Parse start date
     try:
-        start_dt = datetime.strptime(effective_start, "%Y-%m-%d")
+        start_dt = datetime.strptime(effective_start, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     except:
         start_dt = datetime.now(timezone.utc)
     
-    end_dt = datetime.now(timezone.utc)
+    end_dt = datetime.now(timezone.utc) + timedelta(days=365)
+    
+    # Track quarter for quarterly compounding
+    current_quarter = get_quarter(start_dt)
+    current_year = start_dt.year
+    quarter_lot_size = round(current_balance / 980, 2)
+    quarter_daily_profit = round(quarter_lot_size * 15, 2)
     
     current_dt = start_dt
     while current_dt <= end_dt:
+        # Skip weekends
+        if current_dt.weekday() >= 5:
+            current_dt += timedelta(days=1)
+            continue
+        
         date_str = current_dt.strftime("%Y-%m-%d")
         
-        # Check if master admin traded this day
-        manager_traded = date_str in traded_dates
+        # Check for new quarter - recalculate lot size and daily profit
+        new_quarter = get_quarter(current_dt)
+        new_year = current_dt.year
+        if new_year != current_year or new_quarter != current_quarter:
+            quarter_lot_size = round(current_balance / 980, 2)
+            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            current_quarter = new_quarter
+            current_year = new_year
         
         # Check for deposits on this date
         deposit_amount = deposit_by_date.get(date_str, 0)
-        
-        # Calculate projected profit based on manager traded status
-        if manager_traded:
-            # Use 0.5% daily profit (standard projection)
-            projected_profit = round(current_balance * 0.005, 2)
-        else:
-            projected_profit = None  # Show "--" in frontend
-        
-        # Add deposit first
         if deposit_amount > 0:
             current_balance += deposit_amount
         
-        projection = {
+        # Check if manager traded (override takes precedence)
+        override = overrides.get(date_str)
+        if override:
+            manager_traded = override.get("traded", False)
+        elif date_str in traded_dates:
+            manager_traded = True
+        else:
+            manager_traded = False
+        
+        projections.append({
             "date": date_str,
-            "day_of_week": current_dt.strftime("%A"),
-            "starting_balance": round(current_balance, 2),
+            "start_value": current_balance,
+            "account_value": current_balance + quarter_daily_profit if manager_traded else current_balance,
+            "lot_size": quarter_lot_size,
+            "daily_profit": quarter_daily_profit,
             "manager_traded": manager_traded,
-            "projected_profit": projected_profit,
+            "has_override": override is not None,
             "deposit": deposit_amount if deposit_amount > 0 else None
-        }
+        })
         
-        # Update balance for next day
-        if manager_traded and projected_profit:
-            current_balance += projected_profit
+        # Update balance for next day (only if manager traded AND day is in the past or today)
+        if manager_traded and current_dt <= datetime.now(timezone.utc):
+            current_balance += quarter_daily_profit
         
-        projection["ending_balance"] = round(current_balance, 2)
-        
-        projections.append(projection)
         current_dt += timedelta(days=1)
     
     return {
