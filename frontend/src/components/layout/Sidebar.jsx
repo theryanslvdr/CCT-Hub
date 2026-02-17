@@ -178,6 +178,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   // Check if user or simulated view is a licensee
   const isLicenseeView = simulatedView?.license_type || user?.license_type;
 
+  // Check if user is honorary_fa licensee
+  const isHonoraryFa = (simulatedView?.license_type || user?.license_type) === 'honorary_fa';
+
   // Filter nav items based on user's allowed dashboards (if member)
   const getVisibleMemberItems = () => {
     // For members or simulated view, filter based on allowed dashboards
@@ -194,11 +197,15 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       if (item.licenseeOnly && !isLicenseeView) {
         return false;
       }
-      // For admins NOT in simulation, show all items except licensee-only
-      if (isAdmin() && !simulatedView) {
-        return !item.licenseeOnly;
+      // Family Accounts only for honorary_fa licensees
+      if (item.honoraryFaOnly && !isHonoraryFa) {
+        return false;
       }
-      return effectiveDashboards.includes(item.id) || (item.licenseeOnly && isLicenseeView);
+      // For admins NOT in simulation, show all items except licensee-only/family-only
+      if (isAdmin() && !simulatedView) {
+        return !item.licenseeOnly && !item.honoraryFaOnly;
+      }
+      return effectiveDashboards.includes(item.id) || (item.licenseeOnly && isLicenseeView) || (item.honoraryFaOnly && isHonoraryFa);
     });
   };
 
