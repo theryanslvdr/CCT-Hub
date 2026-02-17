@@ -384,10 +384,12 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   <DialogTitle className="text-white flex items-center gap-2">
                     {selectedLicenseType === 'honorary' ? (
                       <Star className="w-5 h-5 text-amber-400" />
+                    ) : selectedLicenseType === 'honorary_fa' ? (
+                      <Users className="w-5 h-5 text-blue-400" />
                     ) : (
                       <Sparkles className="w-5 h-5 text-purple-400" />
                     )}
-                    Simulate {selectedLicenseType === 'honorary' ? 'Honorary' : 'Extended'} Licensee
+                    Simulate {selectedLicenseType === 'honorary' ? 'Honorary' : selectedLicenseType === 'honorary_fa' ? 'Honorary FA' : 'Extended'} Licensee
                   </DialogTitle>
                   <DialogDescription className="text-zinc-400">
                     Choose how you want to simulate this licensee view.
