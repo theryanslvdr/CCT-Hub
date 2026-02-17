@@ -75,7 +75,9 @@ class TestMemberVisibilityFixes:
             habit = data["habits"][0]
             # Verify habit structure
             assert "id" in habit, "Habit missing 'id' field"
-            assert "name" in habit, "Habit missing 'name' field"
+            assert "title" in habit, "Habit missing 'title' field"
+            # is_gate indicates whether habit is part of signal gate
+            assert "is_gate" in habit, "Habit missing 'is_gate' field"
     
     def test_habits_streak_endpoint(self):
         """Test GET /api/habits/streak returns streak info"""
