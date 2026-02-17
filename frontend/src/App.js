@@ -33,6 +33,7 @@ import { AdminLicensesPage } from "./pages/admin/AdminLicensesPage";
 import { DailyTradeSummaryPage } from "./pages/admin/DailyTradeSummaryPage";
 import HabitTrackerPage from "./pages/HabitTrackerPage";
 import AffiliateCenterPage from "./pages/AffiliateCenterPage";
+import FamilyAccountsPage from "./pages/FamilyAccountsPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
