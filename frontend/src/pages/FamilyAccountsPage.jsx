@@ -224,7 +224,7 @@ function WithdrawalDialog({ open, onClose, member, onSubmit }) {
 }
 
 // Family Member Detail View (Profit Tracker)
-function MemberDetailView({ member, onBack }) {
+function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
   const [projections, setProjections] = useState([]);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -237,7 +237,9 @@ function MemberDetailView({ member, onBack }) {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await familyAPI.getMemberProjections(member.id);
+        const res = isAdminSimulation && parentUserId
+          ? await familyAPI.adminGetMemberProjections(parentUserId, member.id)
+          : await familyAPI.getMemberProjections(member.id);
         setProjections(res.data.projections || []);
         setCurrentBalance(res.data.current_balance || 0);
       } catch (err) {
@@ -247,7 +249,7 @@ function MemberDetailView({ member, onBack }) {
       }
     };
     load();
-  }, [member.id]);
+  }, [member.id, isAdminSimulation, parentUserId]);
 
   const filteredProjections = projections.filter(p => p.date?.startsWith(selectedMonth));
   const tradedDays = filteredProjections.filter(p => p.manager_traded).length;
