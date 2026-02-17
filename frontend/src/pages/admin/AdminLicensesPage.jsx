@@ -1786,7 +1786,7 @@ export const AdminLicensesPage = () => {
             {selectedLicense && (
               <div className="p-3 rounded-lg bg-zinc-900/50 text-sm mb-4">
                 <p className="text-zinc-400">Email: <span className="text-white">{selectedLicense.user_email}</span></p>
-                <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : 'text-amber-400'}>{selectedLicense.license_type}</span></p>
+                <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : selectedLicense.license_type === 'honorary_fa' ? 'text-blue-400' : 'text-amber-400'}>{selectedLicense.license_type === 'honorary_fa' ? 'Honorary FA' : selectedLicense.license_type}</span></p>
               </div>
             )}
             
