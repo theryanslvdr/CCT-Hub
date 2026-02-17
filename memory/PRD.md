@@ -66,9 +66,11 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 ```
 
 ## Bug Fixes Applied
-- ✅ **P0:** PWA Push Notification fix (VAPID key in .env was concatenated)
-- ✅ **P1:** Admin reset protection (recurring regression - admins can no longer self-reset)
-- ✅ **LOW:** Broken image in Activity Feed (onError handler + length check)
+- **P0:** PWA Push Notification fix (VAPID key in .env was concatenated)
+- **P1:** Admin reset protection (recurring regression - admins can no longer self-reset)
+- **LOW:** Broken image in Activity Feed (onError handler + length check)
+- **CRITICAL:** Members couldn't see Habit Tracker or Affiliate Center (allowed_dashboards missing 'habits'/'affiliate'). Fixed: updated all DB records, registration defaults, and sidebar filtering
+- **CRITICAL:** Soft-gate habit tracker not showing during admin simulation (signal block check now works for simulated member views)
 
 ## Mocked Integrations
 - **Cloudinary:** File uploads stored locally in `/app/backend/uploads/`
