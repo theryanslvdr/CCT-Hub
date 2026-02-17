@@ -368,8 +368,10 @@ export const TradeMonitorPage = () => {
       }
       setStreak(streakRes.data);
       
-      // Check signal block status (only for non-admin members, not in BVE)
-      if (!isInBVE && !userId && user?.role === 'member') {
+      // Check signal block status (for members and simulated member views)
+      const isMemberRole = user?.role === 'member';
+      const isSimulatingMember = simulatedView?.role === 'member' && !simulatedView?.memberId;
+      if (!isInBVE && !userId && (isMemberRole || isSimulatingMember)) {
         try {
           const blockRes = await tradeAPI.getSignalBlockStatus();
           setSignalBlocked(blockRes.data.blocked);
