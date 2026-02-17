@@ -1,6 +1,100 @@
 """Calculation utility functions for trading, LOT size, etc."""
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
+import logging
+
+logger = logging.getLogger("server")
+
+
+def _get_quarter(date: datetime) -> int:
+    return (date.month - 1) // 3 + 1
+
+
+async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
+    """Dynamically calculate current account value for an honorary licensee
+    using quarterly compounding and master admin trade days.
+    
+    Returns the current balance (starting_amount + accumulated profits).
+    """
+    starting_amount = license_doc.get("starting_amount", 0)
+    effective_start = license_doc.get("effective_start_date") or license_doc.get("start_date")
+    if not effective_start:
+        return starting_amount
+
+    # Parse start date
+    try:
+        if "T" in str(effective_start):
+            start_date = datetime.fromisoformat(str(effective_start).replace("Z", "+00:00"))
+        else:
+            start_date = datetime.strptime(str(effective_start)[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
+    except Exception:
+        return starting_amount
+
+    # Get master admin trade logs (exclude did_not_trade entries)
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+    if not master_admin:
+        return starting_amount
+
+    master_trades = await db.trade_logs.find(
+        {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}},
+        {"_id": 0, "created_at": 1, "trade_date": 1}
+    ).to_list(10000)
+
+    traded_dates = set()
+    for trade in master_trades:
+        trade_date = trade.get("trade_date") or str(trade.get("created_at", ""))[:10]
+        if trade_date:
+            traded_dates.add(trade_date)
+
+    # Get trade overrides for this license
+    overrides = {}
+    license_id = license_doc.get("id")
+    if license_id:
+        async for override in db.licensee_trade_overrides.find({"license_id": license_id}, {"_id": 0}):
+            overrides[override["date"]] = override
+
+    # Calculate with quarterly compounding
+    current_balance = starting_amount
+    current_quarter = _get_quarter(start_date)
+    current_year = start_date.year
+    quarter_lot_size = round(current_balance / 980, 2)
+    quarter_daily_profit = round(quarter_lot_size * 15, 2)
+
+    current_date = start_date
+    today = datetime.now(timezone.utc)
+
+    while current_date <= today:
+        if current_date.weekday() >= 5:
+            current_date += timedelta(days=1)
+            continue
+
+        date_str = current_date.strftime("%Y-%m-%d")
+
+        new_quarter = _get_quarter(current_date)
+        new_year = current_date.year
+        if new_year != current_year or new_quarter != current_quarter:
+            quarter_lot_size = round(current_balance / 980, 2)
+            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            current_quarter = new_quarter
+            current_year = new_year
+
+        # Check override first, then master trade
+        override = overrides.get(date_str)
+        if override:
+            manager_traded = override.get("traded", False)
+        elif date_str in traded_dates:
+            manager_traded = True
+        else:
+            manager_traded = False
+
+        if manager_traded:
+            current_balance += quarter_daily_profit
+
+        current_date += timedelta(days=1)
+
+    return round(current_balance, 2)
 
 
 async def calculate_account_value(
@@ -12,22 +106,10 @@ async def calculate_account_value(
     """
     Calculate account value for a user.
     
-    For licensees: Returns license.current_amount (their virtual share of Master Admin's pool)
+    For honorary licensees: Dynamically calculates from projections
+    For extended licensees: Returns license.current_amount
     For regular users/Master Admin: Returns total_deposits - total_withdrawals + total_profit + total_commission
-    
-    NOTE: Licensee funds are ALREADY INCLUDED in Master Admin's account value (they deposited into it).
-    We do NOT add licensee funds on top - that would be double-counting.
-    
-    Args:
-        db: Database connection
-        user_id: User's ID
-        user: Optional user dict (to avoid extra DB lookup)
-        include_licensee_check: Whether to check if user is a licensee
-    
-    Returns:
-        Account value as float
     """
-    # Check if user is a licensee
     if include_licensee_check:
         if user is None:
             user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -38,15 +120,13 @@ async def calculate_account_value(
                 {"_id": 0}
             )
             if license:
+                if license.get("license_type") == "honorary":
+                    return await calculate_honorary_licensee_value(db, license)
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
-    # Regular user / Master Admin calculation: sum all deposit amounts (positive = deposit, negative = withdrawal)
-    # Then add total profit + total commission from trades
-    # NOTE: For Master Admin, licensee deposits are already in the deposits collection
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
-    # Sum all deposit amounts - negative amounts are withdrawals
     total_net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_commission = sum(t.get("commission", 0) for t in trades)
