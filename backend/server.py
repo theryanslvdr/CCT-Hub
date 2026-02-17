@@ -3985,6 +3985,21 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     # Calculate LOT size
     lot_size = round(account_value / 980, 2) if account_value > 0 else 0
     
+    # Get family members for honorary_fa licensees
+    family_members = []
+    if member.get("license_type") == "honorary_fa":
+        raw_members = await db.family_members.find(
+            {"parent_user_id": user_id, "is_active": True}, {"_id": 0}
+        ).to_list(100)
+        from routes.family import calculate_family_member_value
+        for fm in raw_members:
+            fm_value = await calculate_family_member_value(db, fm)
+            family_members.append({
+                **fm,
+                "account_value": fm_value,
+                "profit": round(fm_value - fm.get("starting_amount", 0), 2)
+            })
+
     return {
         "member": member,
         "account_value": account_value,
@@ -3996,6 +4011,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
         "trades": trades[:20],
         "debts": debts,
         "goals": goals,
+        "family_members": family_members,
         "summary": {
             "total_trades": len(trades),
             "winning_trades": len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]]),
