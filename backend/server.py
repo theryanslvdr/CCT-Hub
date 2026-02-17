@@ -3639,8 +3639,9 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
                 else:
                     account_value = starting_amount
             else:
-                # Honorary licensees use stored current_amount
-                account_value = round(license.get("current_amount", starting_amount), 2)
+                # Honorary licensees: dynamically calculate current_amount
+                from utils.calculations import calculate_honorary_licensee_value
+                account_value = await calculate_honorary_licensee_value(db, license)
             
             # For licensees, profit = current_amount - starting_amount
             licensee_profit = round(account_value - starting_amount, 2)
