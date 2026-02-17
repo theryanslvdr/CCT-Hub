@@ -12,7 +12,7 @@ from deps import get_current_user, require_admin
 logger = logging.getLogger("server")
 
 router = APIRouter(prefix="/family", tags=["Family Accounts"])
-admin_family_router = APIRouter(prefix="/family", tags=["Admin Family Accounts"])
+admin_family_router = APIRouter(prefix="/admin/family", tags=["Admin Family Accounts"])
 
 
 # ==================== MODELS ====================
