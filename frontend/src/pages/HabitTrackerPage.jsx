@@ -205,7 +205,11 @@ const HabitTrackerPage = () => {
                     {habit.is_gate && !done && (
                       <p className="text-xs text-orange-400 mt-2 flex items-center gap-1">
                         <Lock className="w-3 h-3" /> Completing this unlocks your daily signal
+                        {(habit.validity_days || 1) > 1 && <span className="text-zinc-500 ml-1">for {habit.validity_days} days</span>}
                       </p>
+                    )}
+                    {habit.is_gate && done && (habit.validity_days || 1) > 1 && (
+                      <p className="text-xs text-emerald-500/70 mt-2">Signal unlocked for {habit.validity_days} days</p>
                     )}
                   </div>
                 </div>
