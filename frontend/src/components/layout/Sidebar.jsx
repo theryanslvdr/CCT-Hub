@@ -180,7 +180,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   // Filter nav items based on user's allowed dashboards (if member)
   const getVisibleMemberItems = () => {
     // For members or simulated view, filter based on allowed dashboards
-    const effectiveDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || ['dashboard', 'profit_tracker', 'trade_monitor', 'habits', 'affiliate', 'profile'];
+    const baseDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || [];
+    // Always include habits and affiliate for all users
+    const effectiveDashboards = [...new Set([...baseDashboards, 'habits', 'affiliate', 'dashboard', 'profile'])];
     
     return memberNavItems.filter(item => {
       // Hide Trade Monitor for licensees (both simulated and actual)
