@@ -3966,7 +3966,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     if member.get("license_type"):
         license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
         if license:
-            if license.get("license_type") == "honorary":
+            if license.get("license_type") in ("honorary", "honorary_fa"):
                 from utils.calculations import calculate_honorary_licensee_value
                 account_value = await calculate_honorary_licensee_value(db, license)
             else:
