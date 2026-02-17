@@ -5552,8 +5552,8 @@ async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(
     if user["role"] != "master_admin":
         raise HTTPException(status_code=403, detail="Only Master Admin can create license invites")
     
-    if data.license_type not in ["extended", "honorary"]:
-        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended' or 'honorary'")
+    if data.license_type not in ["extended", "honorary", "honorary_fa"]:
+        raise HTTPException(status_code=400, detail="Invalid license type. Must be 'extended', 'honorary', or 'honorary_fa'")
     
     invite_code = generate_invite_code()
     valid_until = calculate_validity_date(data.valid_duration)
