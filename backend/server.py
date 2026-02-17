@@ -340,6 +340,7 @@ class LicenseType(str, Enum):
     STANDARD = "standard"
     EXTENDED = "extended"
     HONORARY = "honorary"
+    HONORARY_FA = "honorary_fa"
 
 class LicenseCreate(BaseModel):
     user_id: str
