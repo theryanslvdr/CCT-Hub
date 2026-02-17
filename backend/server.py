@@ -8509,16 +8509,28 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
         if unblocked_until > datetime.now(timezone.utc):
             return {"blocked": False, "reason": "admin_override", "missing_days": 0, "habit_gate_locked": False}
 
-    # Check habit gate: if there are gate habits, user must complete at least one today
+    # Check habit gate: if there are gate habits, user must have completed one within its validity window
     habit_gate_locked = False
-    gate_habits = await db.habits.find({"active": True, "is_gate": True}, {"_id": 0, "id": 1}).to_list(100)
+    gate_deadline = None
+    gate_habits = await db.habits.find({"active": True, "is_gate": True}, {"_id": 0, "id": 1, "validity_days": 1}).to_list(100)
     if gate_habits:
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        gate_ids = [h["id"] for h in gate_habits]
-        completed = await db.habit_completions.count_documents(
-            {"user_id": user_id, "habit_id": {"$in": gate_ids}, "date": today_str}
-        )
-        if completed == 0:
+        today_date = datetime.now(timezone.utc).date()
+        gate_unlocked = False
+        for gh in gate_habits:
+            validity = gh.get("validity_days", 1)
+            window_start = (today_date - timedelta(days=validity - 1)).isoformat()
+            recent = await db.habit_completions.find_one(
+                {"user_id": user_id, "habit_id": gh["id"], "date": {"$gte": window_start}},
+                {"_id": 0, "date": 1}
+            )
+            if recent:
+                gate_unlocked = True
+                completion_date = datetime.strptime(recent["date"], "%Y-%m-%d").date()
+                expires = completion_date + timedelta(days=validity)
+                if gate_deadline is None or expires > gate_deadline:
+                    gate_deadline = expires
+        if not gate_unlocked:
             habit_gate_locked = True
 
     today = datetime.now(timezone.utc).date()
