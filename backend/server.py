@@ -121,7 +121,7 @@ from routes.goals import router as _goals_router
 from routes.api_center import router as _api_center_router
 from routes.bve import router as _bve_router
 from routes.settings import router as _settings_router
-from routes.habits import router as _habits_router, admin_habit_router as _admin_habits_router
+from routes.habits import router as _habits_router
 from routes.affiliate import router as _affiliate_router, admin_affiliate_router as _admin_affiliate_router
 from routes.activity_feed import admin_activity_router as _admin_activity_router
 from routes.users import router as _users_router
