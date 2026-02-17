@@ -6460,11 +6460,11 @@ async def get_licensee_daily_projection(
     master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
     master_admin_id = master_admin["id"] if master_admin else None
     
-    # Get all master admin trades
+    # Get all master admin trades (exclude did_not_trade entries)
     master_trades = []
     if master_admin_id:
         master_trades = await db.trade_logs.find(
-            {"user_id": master_admin_id},
+            {"user_id": master_admin_id, "did_not_trade": {"$ne": True}},
             {"_id": 0, "trade_date": 1, "created_at": 1}
         ).to_list(10000)
     
