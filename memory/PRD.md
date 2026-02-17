@@ -9,7 +9,8 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 - Interactive habit gate flow with screenshot uploads
 - Live admin activity feed and push notifications for habit completions
 - PWA push notification support
-- Licensee management (Extended & Honorary) with profit tracking
+- Licensee management (Extended, Honorary, Honorary FA) with profit tracking
+- Family Account feature for Honorary FA licensees
 
 ## Core Architecture
 - **Backend:** FastAPI (Python) on port 8001
@@ -31,54 +32,61 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 7. **PWA Push Notifications** (fixed VAPID key bug)
 8. **Admin Habit Notifications** (push on member habit completion)
 9. **Honorary Licensee Profit Tracker** - Dynamic account value calculation with quarterly compounding
+10. **Family Account Feature (Honorary FA)** - Complete CRUD + projections + withdrawal flow
 
-## Recent Bug Fixes (Feb 17, 2026)
-- **P0: Honorary Licensee Profit Tracker** - Fixed 3 critical bugs:
-  - Manager Traded column: Fixed by filtering out `did_not_trade` entries from master admin trade queries
-  - Account value sync: Fixed by implementing `calculate_honorary_licensee_value()` for dynamic calculation
-  - Profit stuck at $0: Fixed by calculating profit from dynamic account_value instead of stale `current_amount`
-- **P1: Admin Habits 404**: Admin habit CRUD endpoints confirmed working in preview (POST/GET/DELETE /api/admin/habits)
+## Recent Implementation (Feb 17, 2026)
+
+### Profit Tracker Bug Fixes (P0)
+- Fixed Manager Traded column by filtering `did_not_trade` entries
+- Fixed account value sync with dynamic `calculate_honorary_licensee_value()`
+- Fixed profit stuck at $0 — now calculated from dynamic account_value
+
+### Family Account Feature (P0) — NEW
+**Backend:**
+- New license type: `honorary_fa` (Family Account variant)
+- New `/app/backend/routes/family.py` with full CRUD endpoints
+- Family members stored in `family_members` collection
+- Each family member has independent profit tracking (quarterly compounding)
+- 3-stage withdrawal flow: family → parent approval → admin approval
+- Push notifications at each withdrawal stage
+- Max 5 family members per licensee
+
+**Frontend:**
+- New `FamilyAccountsPage.jsx` with member cards, detail view, withdrawal management
+- Route `/family-accounts` registered in App.js
+- Sidebar navigation shows "Family Accounts" only for honorary_fa licensees
+- AdminLicensesPage updated with honorary_fa option in create/change forms
+
+**API Endpoints:**
+- `POST /api/admin/family/members/{user_id}` — Admin adds family member
+- `GET /api/admin/family/members/{user_id}` — Admin lists family members
+- `GET /api/admin/family/members/{user_id}/{member_id}/projections` — Admin views projections
+- `GET/POST/PUT/DELETE /api/family/members` — Licensee CRUD
+- `GET /api/family/members/{id}/projections` — Licensee views member projections
+- `POST /api/family/members/{id}/withdraw` — Withdrawal request
+- `PUT /api/family/withdrawals/{id}/approve` — Parent approves
+- `GET/PUT /api/admin/family/withdrawals` — Admin manages withdrawals
 
 ## Pending/Upcoming Tasks
-### P0 - Immediate
-- **Family Account Feature**: Design & implement family accounts for Honorary Licensees (plan required before coding)
-
 ### P1 - High Priority
-- **Failed to Save Habit (Live Site)**: Recurring 404 on user's live site. Endpoints work in preview. Need user's network logs to debug production-specific issue.
+- **Failed to Save Habit (Live Site)**: 404 on user's live site. Works in preview. Deployment issue.
 
 ### P2 - Backlog
-- Backend Refactoring: Extract remaining routers (auth, trade, admin) from server.py
-- Frontend Refactoring: Break down AdminSettingsPage.jsx and ProfitTrackerPage.jsx
+- Backend Refactoring: Extract remaining routers from server.py
+- Frontend Refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
 - Cloudinary integration for file uploads
 - Chatbase integration placeholder
 
-## Key Technical Details
-- Honorary licensee account_value is dynamically calculated using quarterly compounding via `calculate_honorary_licensee_value()` in `/app/backend/utils/calculations.py`
-- All master admin trade queries now filter out `did_not_trade` entries with `{"did_not_trade": {"$ne": True}}`
-- Licensee daily projection endpoint now returns field names consistent with simulation endpoint (start_value, lot_size, daily_profit)
-
-## Backend Route Architecture
-```
-/app/backend/
-├── server.py          (Main server - auth/profit/trade/admin routers)
-├── utils/calculations.py (Financial calculations including calculate_honorary_licensee_value)
-├── deps.py            (Auth functions, JWT handling)
-├── helpers.py         (Push notification helpers)
-├── database.py        (MongoDB connection singleton)
-└── routes/
-    ├── habits.py      (habits + user habit operations)
-    ├── affiliate.py   (affiliate resources)
-    ├── activity_feed.py (admin activity feed)
-    ├── users.py       (notification prefs, profile)
-    ├── settings.py    (platform settings)
-    ├── admin.py       (admin operations)
-    └── ...other extracted routers
-```
+## Key DB Collections
+- `users` — license_type field: "extended", "honorary", "honorary_fa"
+- `licenses` — active license documents
+- `family_members` — {id, parent_user_id, parent_license_id, name, relationship, email, starting_amount, effective_start_date, is_active}
+- `family_withdrawals` — {id, family_member_id, parent_user_id, amount, status, created_at, parent_approved_at, admin_approved_at}
+- `trade_logs` — master admin trade logs (did_not_trade entries filtered)
+- `licensee_trade_overrides` — manual overrides for traded/not-traded days
 
 ## 3rd Party Integrations
 - **pywebpush:** VAPID-encrypted web push notifications
-- **Chatbase:** Placeholder iframe (not integrated)
-- **Cloudinary:** Placeholder (not integrated)
 
 ## Mocked Features
 - Cloudinary file upload integration
