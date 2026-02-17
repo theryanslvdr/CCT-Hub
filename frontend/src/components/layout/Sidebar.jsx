@@ -185,11 +185,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const getVisibleMemberItems = () => {
     // For members or simulated view, filter based on allowed dashboards
     const baseDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || [];
-    // Always include habits and affiliate for all users
-    const effectiveDashboards = [...new Set([...baseDashboards, 'habits', 'affiliate', 'dashboard', 'profile'])];
+    // For licensees, only include dashboard and profile (no habits/affiliate)
+    const alwaysInclude = isLicenseeView
+      ? ['dashboard', 'profile']
+      : ['dashboard', 'profile', 'habits', 'affiliate'];
+    const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
     
     return memberNavItems.filter(item => {
-      // Hide Trade Monitor for licensees (both simulated and actual)
+      // Hide items flagged for licensees (Trade Monitor, Habits, Affiliate)
       if (item.hideForLicensee && isLicenseeView) {
         return false;
       }
