@@ -3647,30 +3647,25 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
             licensee_profit = round(account_value - starting_amount, 2)
             
             # Count Master Admin trades (days when manager traded that benefited this licensee)
-            # Get master admin's trade logs - count distinct dates from created_at
+            # Exclude did_not_trade entries
             master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
             if master_admin:
-                # Count distinct trading days from effective_start_date
                 effective_start = license.get("effective_start_date", license.get("start_date"))
                 
-                # Build match condition
-                match_cond = {"user_id": master_admin["id"]}
+                match_cond = {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}}
                 if effective_start:
-                    # Convert effective_start to datetime for comparison
                     if isinstance(effective_start, str):
                         start_dt = datetime.strptime(effective_start[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
                     else:
                         start_dt = effective_start.replace(tzinfo=timezone.utc)
                     match_cond["created_at"] = {"$gte": start_dt.isoformat()}
                 
-                # Get distinct trading days (by date string from created_at)
                 master_trades = await db.trade_logs.find(match_cond, {"_id": 0, "created_at": 1}).to_list(1000)
-                # Count unique dates (YYYY-MM-DD format)
                 unique_dates = set()
                 for trade in master_trades:
                     created = trade.get("created_at", "")
                     if created:
-                        date_str = str(created)[:10]  # Get YYYY-MM-DD
+                        date_str = str(created)[:10]
                         unique_dates.add(date_str)
                 licensee_trades = len(unique_dates)
             
