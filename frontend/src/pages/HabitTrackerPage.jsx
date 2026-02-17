@@ -11,6 +11,7 @@ const HabitTrackerPage = () => {
   const [habits, setHabits] = useState([]);
   const [completions, setCompletions] = useState([]);
   const [gateUnlocked, setGateUnlocked] = useState(true);
+  const [gateDeadline, setGateDeadline] = useState(null);
   const [date, setDate] = useState('');
   const [streak, setStreak] = useState({ current_streak: 0, longest_streak: 0, total_days: 0 });
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ const HabitTrackerPage = () => {
       setHabits(res.data.habits || []);
       setCompletions(res.data.completions_today || []);
       setGateUnlocked(res.data.gate_unlocked);
+      setGateDeadline(res.data.gate_deadline || null);
       setDate(res.data.date);
       if (res.data.streak) setStreak(res.data.streak);
     } catch {
