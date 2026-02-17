@@ -1527,6 +1527,11 @@ export const AdminMembersPage = () => {
                         <span className="text-amber-400">Honorary Licensee</span>
                       </div>
                     </SelectItem>
+                    <SelectItem value="honorary_fa">
+                      <div className="flex items-center gap-2">
+                        <span className="text-blue-400">Honorary FA (Family Account)</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
