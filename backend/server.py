@@ -1165,7 +1165,7 @@ async def set_password_for_member(data: SetPasswordRequest):
             "is_suspended": False,
             "lot_size": 0.01,
             "timezone": "Asia/Manila",
-            "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "profile"]
+            "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "habits", "affiliate", "profile"]
         }
         await db.users.insert_one(new_user)
         return {"message": "Account created successfully"}
