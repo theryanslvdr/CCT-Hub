@@ -22,6 +22,7 @@ class HabitCreate(BaseModel):
     action_type: str = "generic"
     action_data: str = ""
     is_gate: bool = True
+    validity_days: int = 1
 
 
 @router.get("/")
