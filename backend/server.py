@@ -8557,7 +8557,10 @@ async def get_signal_block_status(user: dict = Depends(get_current_user)):
     days_since_last = (today - last_trade_date).days
 
     if days_since_last < 7:
-        return {"blocked": habit_gate_locked, "reason": "habit_gate" if habit_gate_locked else None, "missing_days": days_since_last, "habit_gate_locked": habit_gate_locked}
+        resp = {"blocked": habit_gate_locked, "reason": "habit_gate" if habit_gate_locked else None, "missing_days": days_since_last, "habit_gate_locked": habit_gate_locked}
+        if gate_deadline:
+            resp["gate_deadline"] = gate_deadline.isoformat()
+        return resp
 
     # Were there any official signals in the unreported gap?
     gap_start = (last_trade_date + timedelta(days=1)).isoformat()
