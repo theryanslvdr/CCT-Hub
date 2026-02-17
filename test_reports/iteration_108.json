@@ -1,0 +1,68 @@
+{
+  "summary": "Iteration 108: Member Visibility Bug Fixes - All 3 bugs verified fixed. Backend 7/7 tests passed, frontend navigation verified. Admin/Member simulation views correctly show Daily Habits and Affiliate Center links.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/auth/licensee-register (line 5837)",
+        "issue": "Licensee registration missing 'habits' and 'affiliate' in allowed_dashboards defaults. Regular registration (line 1168) has them. Frontend compensates at line 185 but backend should be consistent.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_108_member_visibility.py",
+    "/app/test_reports/pytest/pytest_iteration_108.xml"
+  ],
+  "action_items": [
+    "Optional: Add 'habits' and 'affiliate' to line 5837 in server.py for licensee registration consistency"
+  ],
+  "critical_code_review_comments": [
+    "✅ Sidebar.jsx line 185: Always adds 'habits' and 'affiliate' to effectiveDashboards - FIX VERIFIED",
+    "✅ server.py line 1168: Regular registration includes 'habits' and 'affiliate' - FIX VERIFIED",
+    "✅ All existing members in DB have 'habits' and 'affiliate' in allowed_dashboards - VERIFIED",
+    "⚠️ server.py line 5837: Licensee registration still missing 'habits' and 'affiliate' - MINOR ISSUE (frontend compensates)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_108_member_visibility.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100% (all 3 bug fixes verified working)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Three member visibility bugs verified fixed: 1) All members have 'habits' and 'affiliate' in allowed_dashboards, 2) Sidebar always shows Daily Habits & Affiliate Center even in member simulation, 3) Signal block check works for simulated views. Minor: licensee registration (line 5837) could be updated to include 'habits'/'affiliate' for consistency.",
+  "verified_bugs_fixed": [
+    {
+      "bug": "Habit Tracker page not visible to members",
+      "status": "FIXED",
+      "verification": "Members have 'habits' in allowed_dashboards, sidebar always includes it"
+    },
+    {
+      "bug": "Affiliate Center not visible to members", 
+      "status": "FIXED",
+      "verification": "Members have 'affiliate' in allowed_dashboards, sidebar always includes it"
+    },
+    {
+      "bug": "Soft-gate habit tracker not showing when trading signal is published",
+      "status": "FIXED",
+      "verification": "Signal block check works for member simulation views (line 374 TradeMonitorPage.jsx)"
+    }
+  ],
+  "mocked_apis": {
+    "Cloudinary": "Local file storage",
+    "Chatbase": "Placeholder iframe"
+  }
+}
