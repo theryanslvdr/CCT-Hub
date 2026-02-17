@@ -108,6 +108,26 @@ export const profitAPI = {
   getLicenseeProjectionsForLicense: (licenseId) => api.get(`/admin/licenses/${licenseId}/projections`),
 };
 
+// Family Account APIs
+export const familyAPI = {
+  getMembers: () => api.get('/family/members'),
+  addMember: (data) => api.post('/family/members', data),
+  updateMember: (id, data) => api.put(`/family/members/${id}`, data),
+  removeMember: (id) => api.delete(`/family/members/${id}`),
+  getMemberProjections: (id) => api.get(`/family/members/${id}/projections`),
+  requestWithdrawal: (memberId, data) => api.post(`/family/members/${memberId}/withdraw`, data),
+  getWithdrawals: () => api.get('/family/withdrawals'),
+  approveWithdrawal: (id) => api.put(`/family/withdrawals/${id}/approve`),
+  rejectWithdrawal: (id, reason) => api.put(`/family/withdrawals/${id}/reject`, null, { params: { reason } }),
+  // Admin endpoints
+  adminGetMembers: (userId) => api.get(`/admin/family/members/${userId}`),
+  adminAddMember: (userId, data) => api.post(`/admin/family/members/${userId}`, data),
+  adminGetMemberProjections: (userId, memberId) => api.get(`/admin/family/members/${userId}/${memberId}/projections`),
+  adminGetWithdrawals: () => api.get('/admin/family/withdrawals'),
+  adminApproveWithdrawal: (id) => api.put(`/admin/family/withdrawals/${id}/approve`),
+  adminRejectWithdrawal: (id, reason) => api.put(`/admin/family/withdrawals/${id}/reject`, null, { params: { reason } }),
+};
+
 // Trade Monitor APIs
 export const tradeAPI = {
   logTrade: (data) => api.post('/trade/log', data),
