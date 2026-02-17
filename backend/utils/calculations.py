@@ -289,8 +289,10 @@ async def get_user_financial_summary(
     
     # Calculate account value
     if is_licensee and license_info:
-        account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
-        # For licensees, total_deposits is the starting amount
+        if license_info.get("license_type") == "honorary":
+            account_value = await calculate_honorary_licensee_value(db, license_info)
+        else:
+            account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
         total_deposits = license_info.get("starting_amount", 0)
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
