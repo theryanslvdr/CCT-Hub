@@ -187,6 +187,7 @@ async def admin_create_habit(data: HabitCreate, user: dict = Depends(require_adm
         "action_type": data.action_type,
         "action_data": data.action_data,
         "is_gate": data.is_gate,
+        "validity_days": max(1, data.validity_days),
         "active": True,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": user["id"],
