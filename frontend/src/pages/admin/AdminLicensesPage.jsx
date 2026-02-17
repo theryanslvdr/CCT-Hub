@@ -658,7 +658,7 @@ export const AdminLicensesPage = () => {
               <div>
                 <p className="text-sm text-zinc-400">Honorary</p>
                 <p className="text-2xl font-bold text-amber-400">
-                  {licenses.filter(l => l.license_type === 'honorary' && l.is_active).length}
+                  {licenses.filter(l => (l.license_type === 'honorary' || l.license_type === 'honorary_fa') && l.is_active).length}
                 </p>
               </div>
               <Award className="w-8 h-8 text-amber-400" />
