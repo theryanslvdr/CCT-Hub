@@ -477,10 +477,9 @@ export default function FamilyAccountsPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const isAdminViewing = isSimulating && user?.role === 'master_admin';
       const [membersRes, withdrawalsRes] = await Promise.all([
-        isAdminViewing
-          ? familyAPI.adminGetMembers(simulatedView.id)
+        isAdminSimulation && effectiveUserId
+          ? familyAPI.adminGetMembers(effectiveUserId)
           : familyAPI.getMembers(),
         familyAPI.getWithdrawals().catch(() => ({ data: { withdrawals: [] } }))
       ]);
@@ -493,7 +492,7 @@ export default function FamilyAccountsPage() {
     } finally {
       setLoading(false);
     }
-  }, [isSimulating, user, simulatedView]);
+  }, [isAdminSimulation, effectiveUserId]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
