@@ -1554,6 +1554,15 @@ export const AdminMembersPage = () => {
                 </div>
               )}
 
+              {licenseForm.license_type === 'honorary_fa' && (
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+                  <p className="text-blue-400 font-medium mb-1">Honorary FA (Family Account)</p>
+                  <p className="text-zinc-400">
+                    Licensee can add up to 5 family members, each with their own starting amount and independent profit tracking.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <Label className="text-zinc-300">Starting Amount (USDT)</Label>
                 <div className="relative mt-1">
