@@ -1641,6 +1641,7 @@ export const AdminLicensesPage = () => {
                   <SelectContent>
                     <SelectItem value="extended">Extended Licensee</SelectItem>
                     <SelectItem value="honorary">Honorary Licensee</SelectItem>
+                    <SelectItem value="honorary_fa">Honorary FA (Family Account)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
