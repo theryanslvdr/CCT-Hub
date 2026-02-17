@@ -195,7 +195,10 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
     
     for license in active_licenses:
         licensee_user = await db.users.find_one({"id": license["user_id"]}, {"_id": 0, "full_name": 1})
-        current_amount = license.get("current_amount", license.get("starting_amount", 0))
+        if license.get("license_type") == "honorary":
+            current_amount = await calculate_honorary_licensee_value(db, license)
+        else:
+            current_amount = license.get("current_amount", license.get("starting_amount", 0))
         starting_amount = license.get("starting_amount", 0)
         # Total profit for licensee = current_amount - starting_amount (projected profits accumulated when manager traded)
         total_profit = round(current_amount - starting_amount, 2)
