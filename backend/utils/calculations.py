@@ -120,7 +120,7 @@ async def calculate_account_value(
                 {"_id": 0}
             )
             if license:
-                if license.get("license_type") == "honorary":
+                if license.get("license_type") in ("honorary", "honorary_fa"):
                     return await calculate_honorary_licensee_value(db, license)
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
