@@ -4117,10 +4117,16 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
         user_profit = sum(t.get("actual_profit", 0) for t in trades)
         
-        # For licensees, use license.current_amount as account value
+        # For licensees, use dynamic calculation for account value
         if is_licensed:
             license = next((lic for lic in all_licenses if lic["user_id"] == user_id), None)
-            user_account_value = license.get("current_amount", license.get("starting_amount", 0)) if license else 0
+            if license and license.get("license_type") == "honorary":
+                from utils.calculations import calculate_honorary_licensee_value
+                user_account_value = await calculate_honorary_licensee_value(db, license)
+            elif license:
+                user_account_value = license.get("current_amount", license.get("starting_amount", 0))
+            else:
+                user_account_value = 0
         else:
             user_account_value = total_deposits - total_withdrawals + user_profit
         
