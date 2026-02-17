@@ -5236,7 +5236,7 @@ async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, u
     if not old_license.get("is_active"):
         raise HTTPException(status_code=400, detail="Cannot change an inactive license")
     
-    if data.new_license_type not in ["extended", "honorary"]:
+    if data.new_license_type not in ["extended", "honorary", "honorary_fa"]:
         raise HTTPException(status_code=400, detail="Invalid license type")
     
     # Deactivate old license
