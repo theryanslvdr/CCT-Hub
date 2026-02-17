@@ -114,7 +114,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       simulateMemberView({ 
         role: 'member', 
         license_type: selectedLicenseType, 
-        displayName: `${selectedLicenseType === 'honorary' ? 'Honorary' : 'Extended'} Licensee (Demo)`,
+        displayName: `${selectedLicenseType === 'honorary' ? 'Honorary' : selectedLicenseType === 'honorary_fa' ? 'Honorary FA' : 'Extended'} Licensee (Demo)`,
         accountValue: 5000,
         lotSize: 0.05,
         totalDeposits: 5000,
