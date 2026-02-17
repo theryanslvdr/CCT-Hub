@@ -5834,7 +5834,7 @@ async def register_with_license(
         "password": hashed_password.decode('utf-8'),
         "full_name": full_name,
         "role": "member",
-        "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "profile"],
+        "allowed_dashboards": ["dashboard", "profit_tracker", "trade_monitor", "habits", "affiliate", "profile"],
         "timezone": "Asia/Manila",
         "lot_size": 0.01,
         "is_verified": False,
