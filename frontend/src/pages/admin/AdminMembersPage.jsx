@@ -516,6 +516,13 @@ export const AdminMembersPage = () => {
         </span>
       );
     }
+    if (license.license_type === 'honorary_fa') {
+      return (
+        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          FA
+        </span>
+      );
+    }
     return null;
   };
 
