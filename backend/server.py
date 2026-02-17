@@ -3473,7 +3473,7 @@ async def get_members(
             if u.get("license_type"):
                 license = await db.licenses.find_one({"user_id": u["id"], "is_active": True}, {"_id": 0})
                 if license:
-                    if license.get("license_type") == "honorary":
+                    if license.get("license_type") in ("honorary", "honorary_fa"):
                         from utils.calculations import calculate_honorary_licensee_value
                         user_data["account_value"] = await calculate_honorary_licensee_value(db, license)
                     else:
