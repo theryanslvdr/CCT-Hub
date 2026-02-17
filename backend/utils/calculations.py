@@ -157,7 +157,7 @@ async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> fl
     
     total_licensee_funds = 0.0
     for lic in active_licenses:
-        if lic.get("license_type") == "honorary":
+        if lic.get("license_type") in ("honorary", "honorary_fa"):
             amount = await calculate_honorary_licensee_value(db, lic)
         else:
             amount = lic.get("current_amount", lic.get("starting_amount", 0))
@@ -195,7 +195,7 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
     
     for license in active_licenses:
         licensee_user = await db.users.find_one({"id": license["user_id"]}, {"_id": 0, "full_name": 1})
-        if license.get("license_type") == "honorary":
+        if license.get("license_type") in ("honorary", "honorary_fa"):
             current_amount = await calculate_honorary_licensee_value(db, license)
         else:
             current_amount = license.get("current_amount", license.get("starting_amount", 0))
@@ -294,7 +294,7 @@ async def get_user_financial_summary(
     
     # Calculate account value
     if is_licensee and license_info:
-        if license_info.get("license_type") == "honorary":
+        if license_info.get("license_type") in ("honorary", "honorary_fa"):
             account_value = await calculate_honorary_licensee_value(db, license_info)
         else:
             account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
