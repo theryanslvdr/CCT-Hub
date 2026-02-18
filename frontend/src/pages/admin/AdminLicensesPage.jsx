@@ -957,6 +957,18 @@ export const AdminLicensesPage = () => {
                               >
                                 <RotateCcw className="w-4 h-4" />
                               </Button>
+                              {license.license_type === 'honorary_fa' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleOpenAddFamily(license)}
+                                  className="text-zinc-400 hover:text-blue-400"
+                                  title="Add Family Member"
+                                  data-testid={`add-family-${license.id}`}
+                                >
+                                  <Users className="w-4 h-4" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
