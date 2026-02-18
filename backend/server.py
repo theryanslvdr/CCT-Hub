@@ -4043,6 +4043,8 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
         "debts": debts,
         "goals": goals,
         "family_members": family_members,
+        "license_type": license.get("license_type") if license else member.get("license_type"),
+        "is_licensee": license is not None,
         "summary": {
             "total_trades": len(trades),
             "winning_trades": len([t for t in trades if t.get("performance") in ["exceeded", "perfect"]]),
