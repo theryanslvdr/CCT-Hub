@@ -280,18 +280,23 @@ async def get_user_financial_summary(
     is_licensee = False
     license_info = None
     
-    # Check for licensee
+    # Check for licensee - always check licenses collection (don't rely on user.license_type which may be stale)
     if user is None:
         user = await db.users.find_one({"id": user_id}, {"_id": 0})
     
-    if user and user.get("license_type"):
-        license = await db.licenses.find_one(
-            {"user_id": user_id, "is_active": True},
-            {"_id": 0}
-        )
-        if license:
-            is_licensee = True
-            license_info = license
+    license = await db.licenses.find_one(
+        {"user_id": user_id, "is_active": True},
+        {"_id": 0}
+    )
+    if license:
+        is_licensee = True
+        license_info = license
+    elif user and user.get("license_type"):
+        is_licensee = True
+        license_info = None
+    else:
+        is_licensee = False
+        license_info = None
     
     # Get deposits and trades
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
