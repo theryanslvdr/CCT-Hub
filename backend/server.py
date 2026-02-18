@@ -3716,7 +3716,7 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
     
     # Get family member count for honorary_fa licensees
     family_member_count = 0
-    if member.get("license_type") == "honorary_fa":
+    if license and license.get("license_type") == "honorary_fa":
         family_member_count = await db.family_members.count_documents(
             {"parent_user_id": user_id, "is_active": True}
         )
@@ -3730,7 +3730,7 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
             "total_deposits": round(total_deposits, 2),
             "account_value": account_value,
             "performance_rate": performance_rate,
-            "is_licensee": member.get("license_type") is not None,
+            "is_licensee": is_licensee_member and license is not None,
             "family_member_count": family_member_count
         },
         "recent_trades": trades[:10],
