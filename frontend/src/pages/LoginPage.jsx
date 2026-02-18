@@ -71,7 +71,7 @@ export const LoginPage = () => {
     }
   };
 
-  if (isAuthenticated && !loading) {
+  if (isAuthenticated && !loading && !showForceChangePassword) {
     return <Navigate to="/dashboard" replace />;
   }
 
