@@ -4002,16 +4002,16 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     account_value = round(total_deposits - total_withdrawals + total_profit, 2)
     
     # For licensees, use dynamic calculation for accurate account value
-    if member.get("license_type"):
-        license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
-        if license:
-            if license.get("license_type") in ("honorary", "honorary_fa"):
-                from utils.calculations import calculate_honorary_licensee_value
-                account_value = await calculate_honorary_licensee_value(db, license)
-            else:
-                account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
-            total_deposits = round(license.get("starting_amount", 0), 2)
-            total_profit = round(account_value - total_deposits, 2)
+    # Always check licenses collection directly (don't rely on user.license_type)
+    license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
+    if license:
+        if license.get("license_type") in ("honorary", "honorary_fa"):
+            from utils.calculations import calculate_honorary_licensee_value
+            account_value = await calculate_honorary_licensee_value(db, license)
+        else:
+            account_value = round(license.get("current_amount", license.get("starting_amount", 0)), 2)
+        total_deposits = round(license.get("starting_amount", 0), 2)
+        total_profit = round(account_value - total_deposits, 2)
     
     # Calculate LOT size
     lot_size = round(account_value / 980, 2) if account_value > 0 else 0
