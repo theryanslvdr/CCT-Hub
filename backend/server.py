@@ -6398,11 +6398,19 @@ async def create_licensee_withdrawal(
     await db.licensee_transactions.insert_one(transaction)
     
     # IMMEDIATELY deduct from licensee's balance
-    new_balance = current_balance - amount
-    await db.licenses.update_one(
-        {"id": license["id"]},
-        {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
-    )
+    # For honorary, we reduce starting_amount since current value is computed dynamically
+    if license.get("license_type") in ("honorary", "honorary_fa"):
+        new_starting = license.get("starting_amount", 0) - amount
+        await db.licenses.update_one(
+            {"id": license["id"]},
+            {"$set": {"starting_amount": max(new_starting, 0), "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    else:
+        new_balance = current_balance - amount
+        await db.licenses.update_one(
+            {"id": license["id"]},
+            {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
     
     # Also update user's account_value
     await db.users.update_one(
