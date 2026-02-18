@@ -123,6 +123,21 @@ export const DashboardPage = () => {
     }
   }, [isSimulating, simulatedMemberId, simulatedAccountValue, simulatedTotalProfit, isInBVE]);
 
+  // Load licensee-specific data (year projections + family members)
+  const loadLicenseeData = useCallback(async () => {
+    if (!isLicenseeView) return;
+    try {
+      const [projRes, famRes] = await Promise.allSettled([
+        profitAPI.getLicenseeYearProjections(),
+        familyAPI.getMembers(),
+      ]);
+      if (projRes.status === 'fulfilled') setYearProjections(projRes.value.data);
+      if (famRes.status === 'fulfilled') setFamilyMembers(famRes.value.data?.members || []);
+    } catch (e) {
+      console.error('Failed to load licensee data:', e);
+    }
+  }, [isLicenseeView]);
+
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData, simulatedView, isInBVE]); // Also re-run when simulatedView or BVE mode changes
