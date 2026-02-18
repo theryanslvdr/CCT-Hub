@@ -140,7 +140,11 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [loadDashboardData, simulatedView, isInBVE]); // Also re-run when simulatedView or BVE mode changes
+  }, [loadDashboardData, simulatedView, isInBVE]);
+
+  useEffect(() => {
+    loadLicenseeData();
+  }, [loadLicenseeData, summary]);
 
   // Define KPI cards - filter based on licensee view
   const allKpiCards = [
