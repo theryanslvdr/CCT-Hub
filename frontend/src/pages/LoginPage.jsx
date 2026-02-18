@@ -150,12 +150,37 @@ export const LoginPage = () => {
     const result = await login(email, password);
     
     if (result.success) {
-      toast.success('Welcome back!');
+      if (result.must_change_password) {
+        setShowForceChangePassword(true);
+      } else {
+        toast.success('Welcome back!');
+      }
     } else {
       setError(result.error);
     }
     
     setIsLoading(false);
+  };
+
+  const handleForceChangePassword = async () => {
+    if (forceNewPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (forceNewPassword !== forceConfirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setForceChanging(true);
+    try {
+      await api.post('/auth/force-change-password', { new_password: forceNewPassword });
+      toast.success('Password updated successfully!');
+      setShowForceChangePassword(false);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setForceChanging(false);
+    }
   };
 
   const handleOpenNoAccount = async () => {
