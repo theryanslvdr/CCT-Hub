@@ -16,7 +16,7 @@ import {
   FileText, Send, RotateCcw, Link2, Upload, ArrowUpCircle,
   ArrowDownCircle, MessageSquare, Image, Loader2, AlertCircle, UserCog
 } from 'lucide-react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, familyAPI } from '@/lib/api';
 
 export const AdminLicensesPage = () => {
   const { isMasterAdmin } = useAuth();
@@ -34,6 +34,11 @@ export const AdminLicensesPage = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [selectedLicense, setSelectedLicense] = useState(null);
   const [activeTab, setActiveTab] = useState('invites');
+  
+  // Family member dialog state (admin adds on behalf of licensee)
+  const [addFamilyDialogOpen, setAddFamilyDialogOpen] = useState(false);
+  const [familyForm, setFamilyForm] = useState({ name: '', relationship: '', starting_amount: '' });
+  const [addingFamilyMember, setAddingFamilyMember] = useState(false);
   
   // Email dialog state
   const [emailTo, setEmailTo] = useState('');
