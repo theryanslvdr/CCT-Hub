@@ -273,8 +273,8 @@ class TestRizzaAccountValueConsistency:
         
     def test_admin_simulation_matches_direct_login(self, admin_headers, rizza_headers):
         """Test admin simulation shows same value as direct login"""
-        # Get value from admin simulate endpoint
-        sim_response = requests.post(
+        # Get value from admin simulate endpoint (GET not POST)
+        sim_response = requests.get(
             f"{BASE_URL}/api/admin/members/{RIZZA_USER_ID}/simulate",
             headers=admin_headers
         )
@@ -313,8 +313,8 @@ class TestAdminLicensesPageData:
         
         license_current_amount = rizza_license.get("current_amount", 0)
         
-        # Get from simulate endpoint
-        sim_response = requests.post(
+        # Get from simulate endpoint (GET not POST)
+        sim_response = requests.get(
             f"{BASE_URL}/api/admin/members/{RIZZA_USER_ID}/simulate",
             headers=admin_headers
         )
