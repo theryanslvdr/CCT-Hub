@@ -61,13 +61,13 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { access_token, user: userData } = response.data;
+      const { access_token, user: userData, must_change_password } = response.data;
       
       storage.set('token', access_token);
       storage.set('user', userData);
       setUser(userData);
       
-      return { success: true, user: userData };
+      return { success: true, user: userData, must_change_password: !!must_change_password };
     } catch (error) {
       return { 
         success: false, 
