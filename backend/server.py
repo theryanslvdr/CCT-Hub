@@ -994,6 +994,22 @@ async def verify_user_password(data: VerifyPasswordRequest, user: dict = Depends
     is_valid = bcrypt.checkpw(data.password.encode(), db_user["password"].encode())
     return {"valid": is_valid}
 
+class ForceChangePasswordRequest(BaseModel):
+    new_password: str
+
+@auth_router.post("/force-change-password")
+async def force_change_password(data: ForceChangePasswordRequest, user: dict = Depends(get_current_user)):
+    """Change password for a user who was assigned a temporary password"""
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    new_hash = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password": new_hash, "must_change_password": False, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Password changed successfully"}
+
 class HeartbeatVerifyRequest(BaseModel):
     email: str
 
