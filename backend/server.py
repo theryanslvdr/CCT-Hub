@@ -4958,30 +4958,36 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
         lic["user_email"] = user_info.get("email", "")
         lic["user_timezone"] = user_info.get("timezone", "Asia/Manila")
         
-        # Calculate current amount for extended licensees
-        if lic["license_type"] == "extended" and lic.get("is_active"):
-            # Parse start_date - handle both string and datetime formats
-            start_date_raw = lic.get("start_date", "")
-            if isinstance(start_date_raw, str):
-                # Parse date string like "2026-01-01" as UTC
-                start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            else:
-                start_date = start_date_raw.replace(tzinfo=timezone.utc)
-            
-            today = datetime.now(timezone.utc)
-            days_since_start = (today - start_date).days
-            if days_since_start > 0:
-                projections = calculate_extended_license_projections(
-                    lic["starting_amount"], 
-                    start_date, 
-                    min(days_since_start + 1, 365)
-                )
-                if projections:
-                    lic["current_amount"] = projections[-1]["account_value"]
+        # Calculate current amount dynamically based on license type
+        if lic.get("is_active"):
+            if lic["license_type"] in ("honorary", "honorary_fa"):
+                # Dynamic calculation for honorary licensees
+                from utils.calculations import calculate_honorary_licensee_value
+                lic["current_amount"] = await calculate_honorary_licensee_value(db, lic)
+            elif lic["license_type"] == "extended":
+                # Parse start_date - handle both string and datetime formats
+                start_date_raw = lic.get("start_date", "")
+                if isinstance(start_date_raw, str):
+                    start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                else:
+                    start_date = start_date_raw.replace(tzinfo=timezone.utc)
+                
+                today = datetime.now(timezone.utc)
+                days_since_start = (today - start_date).days
+                if days_since_start > 0:
+                    projections = calculate_extended_license_projections(
+                        lic["starting_amount"], 
+                        start_date, 
+                        min(days_since_start + 1, 365)
+                    )
+                    if projections:
+                        lic["current_amount"] = projections[-1]["account_value"]
+                    else:
+                        lic["current_amount"] = lic["starting_amount"]
                 else:
                     lic["current_amount"] = lic["starting_amount"]
             else:
-                lic["current_amount"] = lic["starting_amount"]
+                lic["current_amount"] = lic.get("starting_amount", 0)
         else:
             lic["current_amount"] = lic.get("starting_amount", 0)
         
