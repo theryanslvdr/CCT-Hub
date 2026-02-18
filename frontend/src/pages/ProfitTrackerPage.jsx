@@ -659,10 +659,10 @@ export const ProfitTrackerPage = () => {
   const simulatedTotalProfit = getSimulatedTotalProfit();
   const simulatedMemberName = getSimulatedMemberName();
   
-  // Effective values - use simulated if in simulation mode
-  const effectiveAccountValue = simulatedAccountValue !== null 
-    ? simulatedAccountValue 
-    : (summary?.account_value || 0);
+  // Effective values - use fetched summary value (authoritative) over stale simulation context
+  const effectiveAccountValue = summary?.account_value 
+    ? summary.account_value 
+    : (simulatedAccountValue !== null ? simulatedAccountValue : 0);
   const effectiveLotSize = simulatedLotSize !== null 
     ? truncateTo2Decimals(simulatedLotSize) 
     : truncateTo2Decimals(effectiveAccountValue / 980);
