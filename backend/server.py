@@ -889,7 +889,7 @@ async def register(data: UserCreate):
         )
     )
 
-@auth_router.post("/login", response_model=TokenResponse)
+@auth_router.post("/login")
 async def login(data: UserLogin):
     user = await db.users.find_one({"email": data.email.lower()}, {"_id": 0})
     if not user:
