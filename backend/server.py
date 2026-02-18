@@ -942,21 +942,27 @@ async def login(data: UserLogin):
     
     token = create_token(user["id"], user["email"], user["role"])
     
-    return TokenResponse(
-        access_token=token,
-        user=UserResponse(
-            id=user["id"],
-            email=user["email"],
-            full_name=user["full_name"],
-            role=user["role"],
-            created_at=datetime.fromisoformat(user["created_at"]) if isinstance(user["created_at"], str) else user["created_at"],
-            profile_picture=user.get("profile_picture"),
-            lot_size=user.get("lot_size"),
-            timezone=user.get("timezone", "UTC"),
-            allowed_dashboards=user.get("allowed_dashboards"),
-            license_type=user.get("license_type")
-        )
-    )
+    response_data = {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "full_name": user["full_name"],
+            "role": user["role"],
+            "created_at": user["created_at"] if isinstance(user["created_at"], str) else user["created_at"].isoformat(),
+            "profile_picture": user.get("profile_picture"),
+            "lot_size": user.get("lot_size"),
+            "timezone": user.get("timezone", "UTC"),
+            "allowed_dashboards": user.get("allowed_dashboards"),
+            "license_type": user.get("license_type"),
+        },
+    }
+    
+    if user.get("must_change_password"):
+        response_data["must_change_password"] = True
+    
+    return response_data
 
 @auth_router.get("/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
