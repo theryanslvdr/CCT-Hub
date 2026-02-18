@@ -6362,8 +6362,12 @@ async def create_licensee_withdrawal(
     if not license:
         raise HTTPException(status_code=403, detail="Only licensed users can use this feature")
     
-    # Check if user has sufficient balance using the license's current_amount
-    current_balance = license.get("current_amount", license.get("starting_amount", 0))
+    # Check if user has sufficient balance - use dynamic calculation for honorary
+    if license.get("license_type") in ("honorary", "honorary_fa"):
+        from utils.calculations import calculate_honorary_licensee_value
+        current_balance = await calculate_honorary_licensee_value(db, license)
+    else:
+        current_balance = license.get("current_amount", license.get("starting_amount", 0))
     
     if amount > current_balance:
         raise HTTPException(status_code=400, detail=f"Insufficient balance. Current balance: ${current_balance:,.2f}")
