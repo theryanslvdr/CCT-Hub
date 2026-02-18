@@ -526,6 +526,53 @@ export const LoginPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Force Change Password Dialog */}
+      <Dialog open={showForceChangePassword} onOpenChange={() => {}}>
+        <DialogContent className="bg-zinc-900 border-zinc-800" data-testid="force-change-password-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Key className="w-5 h-5 text-amber-400" /> Password Reset Required
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Your admin has assigned you a temporary password. Please set a new password to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <Label className="text-zinc-300">New Password</Label>
+              <Input
+                type="password"
+                value={forceNewPassword}
+                onChange={(e) => setForceNewPassword(e.target.value)}
+                placeholder="Enter new password (min 6 chars)"
+                className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                data-testid="force-new-password-input"
+              />
+            </div>
+            <div>
+              <Label className="text-zinc-300">Confirm Password</Label>
+              <Input
+                type="password"
+                value={forceConfirmPassword}
+                onChange={(e) => setForceConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                data-testid="force-confirm-password-input"
+              />
+            </div>
+            <Button
+              onClick={handleForceChangePassword}
+              disabled={forceChanging || forceNewPassword.length < 6 || forceNewPassword !== forceConfirmPassword}
+              className="w-full btn-primary"
+              data-testid="force-change-password-submit"
+            >
+              {forceChanging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
+              Set New Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
