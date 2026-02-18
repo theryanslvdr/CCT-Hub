@@ -295,7 +295,7 @@ class TestAdminMemberDetails:
         return response.json()["access_token"]
     
     def test_01_member_details_shows_dynamic_value(self, admin_token):
-        """Admin member details should show dynamically calculated account_value"""
+        """Admin member details 'stats' should show dynamically calculated account_value"""
         response = requests.get(
             f"{BASE_URL}/api/admin/members/{RIZZA_USER_ID}",
             headers={"Authorization": f"Bearer {admin_token}"}
@@ -306,13 +306,19 @@ class TestAdminMemberDetails:
         assert response.status_code == 200, f"Member details failed: {response.text}"
         data = response.json()
         
-        account_value = data.get("account_value", 0)
-        print(f"Member details account_value: ${account_value}")
+        # The endpoint returns nested structure with stats.account_value
+        stats = data.get("stats", {})
+        account_value = stats.get("account_value", 0)
+        is_licensee = stats.get("is_licensee", False)
         
-        # Should be dynamically calculated, not stale $5,000
+        print(f"Member details stats.account_value: ${account_value}")
+        print(f"Is licensee: {is_licensee}")
+        
+        # Should be dynamically calculated (~$6,530), not stale $5,000
         assert account_value > EXPECTED_ACCOUNT_VALUE_MIN, f"Account value ${account_value} too low - may be stale"
+        assert is_licensee == True, "Should be marked as licensee"
         
-        print(f"PASSED: Admin member details shows dynamic value: ${account_value}")
+        print(f"PASSED: Admin member details shows dynamic value in stats: ${account_value}")
 
 
 class TestSetTempPasswordEndpoint:
