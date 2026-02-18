@@ -34,6 +34,12 @@ export const LoginPage = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [customLink, setCustomLink] = useState('');
   const [creating, setCreating] = useState(false);
+  
+  // Forced password change states
+  const [showForceChangePassword, setShowForceChangePassword] = useState(false);
+  const [forceNewPassword, setForceNewPassword] = useState('');
+  const [forceConfirmPassword, setForceConfirmPassword] = useState('');
+  const [forceChanging, setForceChanging] = useState(false);
 
   // Load platform settings for logo and maintenance mode
   useEffect(() => {
