@@ -6471,12 +6471,19 @@ async def get_licensee_welcome_info(user: dict = Depends(get_current_user)):
     master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "full_name": 1})
     master_admin_name = master_admin.get("full_name", "Master Admin") if master_admin else "Master Admin"
     
+    # Calculate current balance dynamically for honorary licensees
+    if license.get("license_type") in ("honorary", "honorary_fa"):
+        from utils.calculations import calculate_honorary_licensee_value
+        current_balance = await calculate_honorary_licensee_value(db, license)
+    else:
+        current_balance = license.get("current_amount", license.get("starting_amount", 0))
+    
     return {
         "is_licensee": True,
         "has_seen_welcome": has_seen,
         "licensee_name": user.get("full_name", "Licensee"),
         "starting_balance": license.get("starting_amount", 0),
-        "current_balance": license.get("current_amount", license.get("starting_amount", 0)),
+        "current_balance": round(current_balance, 2),
         "effective_start_date": license.get("effective_start_date", license.get("start_date")),
         "license_type": license.get("license_type"),
         "master_admin_name": master_admin_name
