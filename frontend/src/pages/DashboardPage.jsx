@@ -32,6 +32,10 @@ export const DashboardPage = () => {
   const [rates, setRates] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Licensee-specific data
+  const [yearProjections, setYearProjections] = useState(null);
+  const [familyMembers, setFamilyMembers] = useState([]);
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
