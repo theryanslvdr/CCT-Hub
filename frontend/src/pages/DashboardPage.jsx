@@ -377,7 +377,7 @@ export const DashboardPage = () => {
       </div>
 
       {/* Tabbed Interface for Members */}
-      {isMember && (
+      {isMember && !isLicenseeView && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1" data-testid="dashboard-tabs">
             <TabsTrigger 
@@ -461,44 +461,20 @@ export const DashboardPage = () => {
                         {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
                       </p>
                     </div>
-                    {/* Hide LOT Size and Projected Daily for licensees - they don't trade */}
-                    {!isLicenseeView && (
-                      <>
-                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                          <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
-                          <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                            {((summary?.account_value || 0) / 980).toFixed(2)}
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
-                        </div>
-                        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                          <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
-                          <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                            {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">LOT × 15 multiplier</p>
-                        </div>
-                      </>
-                    )}
-                    {/* For licensees, show additional relevant stats */}
-                    {isLicenseeView && (
-                      <>
-                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                          <p className="text-xs text-blue-400 uppercase tracking-wider">Total Trades</p>
-                          <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
-                            {summary?.total_trades || 0}
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">Days manager traded</p>
-                        </div>
-                        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                          <p className="text-xs text-purple-400 uppercase tracking-wider">Actual vs Projected</p>
-                          <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                            {summary?.performance_rate?.toFixed(1) || 0}%
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">Growth rate</p>
-                        </div>
-                      </>
-                    )}
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                      <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
+                      <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                        {((summary?.account_value || 0) / 980).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                      <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
+                      <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                        {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-1">LOT x 15 multiplier</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -558,13 +534,10 @@ export const DashboardPage = () => {
                       <span className="text-zinc-400">Total Trades</span>
                       <span className="text-xl font-mono text-cyan-400">{summary?.total_trades || 0}</span>
                     </div>
-                    {/* Hide Current LOT Size for licensees */}
-                    {!isLicenseeView && (
-                      <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
-                        <span className="text-zinc-400">Current LOT Size</span>
-                        <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
-                      </div>
-                    )}
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                      <span className="text-zinc-400">Current LOT Size</span>
+                      <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -587,8 +560,7 @@ export const DashboardPage = () => {
                         <tr>
                           <th>Date</th>
                           <th>Direction</th>
-                          {/* Hide LOT Size for licensees */}
-                          {!isLicenseeView && <th>LOT Size</th>}
+                          <th>LOT Size</th>
                           <th>Projected</th>
                           <th>Actual</th>
                           <th>Difference</th>
@@ -604,8 +576,7 @@ export const DashboardPage = () => {
                                 {trade.direction}
                               </span>
                             </td>
-                            {/* Hide LOT Size for licensees */}
-                            {!isLicenseeView && <td className="font-mono">{trade.lot_size}</td>}
+                            <td className="font-mono">{trade.lot_size}</td>
                             <td className="font-mono">${formatNumber(trade.projected_profit)}</td>
                             <td className="font-mono">${formatNumber(trade.actual_profit)}</td>
                             <td className={`font-mono ${trade.profit_difference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -682,6 +653,175 @@ export const DashboardPage = () => {
             </div>
           </TabsContent>
         </Tabs>
+      )}
+
+      {/* Licensee Dashboard - Year Projections & Family Members */}
+      {(isMember || isSimulating) && isLicenseeView && (
+        <div className="space-y-6">
+          {/* Year-by-Year Growth Projections */}
+          <Card className="glass-card" data-testid="licensee-year-projections">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-400" /> Growth Projections
+              </CardTitle>
+              <p className="text-sm text-zinc-400">Projected values based on quarterly compounding at current trade frequency</p>
+            </CardHeader>
+            <CardContent>
+              {yearProjections ? (
+                <>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    {yearProjections.projections?.map((p) => {
+                      const colors = {
+                        1: { border: 'border-blue-500/30', bg: 'from-blue-500/15 to-blue-500/5', text: 'text-blue-400', label: 'text-blue-300' },
+                        2: { border: 'border-emerald-500/30', bg: 'from-emerald-500/15 to-emerald-500/5', text: 'text-emerald-400', label: 'text-emerald-300' },
+                        3: { border: 'border-purple-500/30', bg: 'from-purple-500/15 to-purple-500/5', text: 'text-purple-400', label: 'text-purple-300' },
+                        5: { border: 'border-amber-500/30', bg: 'from-amber-500/15 to-amber-500/5', text: 'text-amber-400', label: 'text-amber-300' },
+                      };
+                      const c = colors[p.years] || colors[1];
+                      return (
+                        <div key={p.years} className={`p-4 rounded-xl bg-gradient-to-b ${c.bg} border ${c.border}`} data-testid={`projection-${p.years}yr`}>
+                          <p className={`text-xs uppercase tracking-wider font-semibold ${c.label}`}>
+                            {p.years} Year{p.years > 1 ? 's' : ''}
+                          </p>
+                          <p className={`text-xl md:text-2xl font-bold font-mono mt-2 ${c.text}`}>
+                            {formatCurrencyCompact(p.projected_value)}
+                          </p>
+                          <p className="text-[10px] md:text-xs text-zinc-500 mt-1 hidden md:block">
+                            {formatCurrency(p.projected_value, 'USD')}
+                          </p>
+                          <div className="mt-2 flex items-center gap-1">
+                            <ArrowUpRight className={`w-3 h-3 ${c.text}`} />
+                            <span className={`text-xs font-mono ${c.text}`}>+{p.growth_percent}%</span>
+                          </div>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">
+                            Profit: {formatCurrencyCompact(p.total_profit)}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Projection chart */}
+                  <div className="mt-6">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={yearProjections.projections?.map(p => ({
+                        name: `${p.years}yr`,
+                        value: p.projected_value,
+                        profit: p.total_profit
+                      })) || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
+                        <YAxis stroke="#71717A" fontSize={12} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                          formatter={(value) => formatCurrency(value, 'USD')}
+                        />
+                        <Bar dataKey="value" fill="#3B82F6" name="Projected Value" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-zinc-500">
+                  Loading projections...
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Family Members Stats */}
+          <Card className="glass-card" data-testid="licensee-family-stats">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-400" /> Family Account Members
+              </CardTitle>
+              {familyMembers.length > 0 && (
+                <p className="text-sm text-zinc-400">{familyMembers.length} member{familyMembers.length !== 1 ? 's' : ''} under your account</p>
+              )}
+            </CardHeader>
+            <CardContent>
+              {familyMembers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full data-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Starting Amount</th>
+                        <th>Current Value</th>
+                        <th>Profit</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {familyMembers.map((member) => {
+                        const profit = (member.current_value || member.starting_amount || 0) - (member.starting_amount || 0);
+                        return (
+                          <tr key={member.id} data-testid={`family-member-${member.id}`}>
+                            <td>
+                              <div>
+                                <p className="font-medium text-white">{member.name}</p>
+                                <p className="text-xs text-zinc-500">{member.relationship || 'Family'}</p>
+                              </div>
+                            </td>
+                            <td className="font-mono">{formatCurrency(member.starting_amount || 0, 'USD')}</td>
+                            <td className="font-mono text-blue-400">{formatCurrency(member.current_value || member.starting_amount || 0, 'USD')}</td>
+                            <td className={`font-mono ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {profit >= 0 ? '+' : ''}{formatCurrency(profit, 'USD')}
+                            </td>
+                            <td>
+                              <span className={`px-2 py-1 rounded-full text-xs ${member.is_active !== false ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-700 text-zinc-400'}`}>
+                                {member.is_active !== false ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-zinc-400">No family members yet</p>
+                  <p className="text-xs text-zinc-500 mt-1">Add family members from the Family Accounts page</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Licensee Stats Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                  <p className="text-xs text-emerald-400 uppercase tracking-wider">Current Profit</p>
+                  <p className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                    {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                  <p className="text-xs text-blue-400 uppercase tracking-wider">Days Manager Traded</p>
+                  <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                    {summary?.total_trades || 0}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                  <p className="text-xs text-purple-400 uppercase tracking-wider">Performance Rate</p>
+                  <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
+                    {formatNumber(summary?.performance_rate || 0, 1)}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
 
       {/* Original Layout for Admins (no tabs) */}
