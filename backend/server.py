@@ -4962,8 +4962,13 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
         if lic.get("is_active"):
             if lic["license_type"] in ("honorary", "honorary_fa"):
                 # Dynamic calculation for honorary licensees
-                from utils.calculations import calculate_honorary_licensee_value
-                lic["current_amount"] = await calculate_honorary_licensee_value(db, lic)
+                try:
+                    from utils.calculations import calculate_honorary_licensee_value
+                    lic["current_amount"] = await calculate_honorary_licensee_value(db, lic)
+                except Exception as e:
+                    import logging
+                    logging.getLogger("server").error(f"Failed to calculate honorary value for {lic.get('user_id')}: {e}")
+                    lic["current_amount"] = lic.get("current_amount") or lic.get("starting_amount", 0)
             elif lic["license_type"] == "extended":
                 # Parse start_date - handle both string and datetime formats
                 start_date_raw = lic.get("start_date", "")
