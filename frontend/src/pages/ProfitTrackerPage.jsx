@@ -659,19 +659,17 @@ export const ProfitTrackerPage = () => {
   const simulatedTotalProfit = getSimulatedTotalProfit();
   const simulatedMemberName = getSimulatedMemberName();
   
-  // Effective values - use fetched summary value (authoritative) over stale simulation context
+  // Effective values - always prefer fetched summary (API-sourced, dynamic) over stale simulation context
   const effectiveAccountValue = summary?.account_value 
     ? summary.account_value 
     : (simulatedAccountValue !== null ? simulatedAccountValue : 0);
-  const effectiveLotSize = simulatedLotSize !== null 
-    ? truncateTo2Decimals(simulatedLotSize) 
-    : truncateTo2Decimals(effectiveAccountValue / 980);
-  const effectiveTotalDeposits = simulatedTotalDeposits !== null
-    ? simulatedTotalDeposits
-    : (summary?.total_deposits || 0);
-  const effectiveTotalProfit = simulatedTotalProfit !== null
-    ? simulatedTotalProfit
-    : (summary?.total_actual_profit || 0);
+  const effectiveLotSize = truncateTo2Decimals(effectiveAccountValue / 980);
+  const effectiveTotalDeposits = summary?.total_deposits 
+    ? summary.total_deposits
+    : (simulatedTotalDeposits !== null ? simulatedTotalDeposits : 0);
+  const effectiveTotalProfit = summary?.total_actual_profit != null
+    ? summary.total_actual_profit
+    : (simulatedTotalProfit !== null ? simulatedTotalProfit : 0);
   
   // Mobile detection for responsive dialogs
   const isMobile = useIsMobile();
