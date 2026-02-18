@@ -5354,6 +5354,12 @@ async def reset_license_balance(license_id: str, data: ResetStartingAmountReques
         raise HTTPException(status_code=400, detail="Cannot reset an inactive license")
     
     old_amount = license.get("current_amount", license.get("starting_amount", 0))
+    
+    # For honorary licensees, dynamically calculate the old amount
+    if license.get("license_type") in ("honorary", "honorary_fa"):
+        from utils.calculations import calculate_honorary_licensee_value
+        old_amount = await calculate_honorary_licensee_value(db, license)
+    
     difference = data.new_amount - old_amount
     
     # Update license
