@@ -4018,7 +4018,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     
     # Get family members for honorary_fa licensees
     family_members = []
-    if member.get("license_type") == "honorary_fa":
+    if license and license.get("license_type") == "honorary_fa":
         raw_members = await db.family_members.find(
             {"parent_user_id": user_id, "is_active": True}, {"_id": 0}
         ).to_list(100)
