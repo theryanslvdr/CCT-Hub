@@ -19,24 +19,29 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
     starting_amount = license_doc.get("starting_amount", 0)
     effective_start = license_doc.get("effective_start_date") or license_doc.get("start_date")
     if not effective_start:
+        logger.warning(f"Honorary licensee {license_doc.get('user_id')}: No start date found, returning starting_amount={starting_amount}")
         return starting_amount
 
     # Parse start date
     try:
-        if "T" in str(effective_start):
-            start_date = datetime.fromisoformat(str(effective_start).replace("Z", "+00:00"))
+        start_str = str(effective_start)
+        if "T" in start_str:
+            start_date = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
         else:
-            start_date = datetime.strptime(str(effective_start)[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            start_date = datetime.strptime(start_str[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
         if start_date.tzinfo is None:
             start_date = start_date.replace(tzinfo=timezone.utc)
-    except Exception:
+    except Exception as e:
+        logger.error(f"Honorary licensee {license_doc.get('user_id')}: Failed to parse start date '{effective_start}': {e}")
         return starting_amount
 
     # Get master admin trade logs (exclude did_not_trade entries)
     master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
     if not master_admin:
+        logger.warning(f"Honorary licensee {license_doc.get('user_id')}: No master_admin user found")
         return starting_amount
 
+    # Fetch all trades - include both logged trades and those not marked as did_not_trade
     master_trades = await db.trade_logs.find(
         {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}},
         {"_id": 0, "created_at": 1, "trade_date": 1}
@@ -44,9 +49,19 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
 
     traded_dates = set()
     for trade in master_trades:
-        trade_date = trade.get("trade_date") or str(trade.get("created_at", ""))[:10]
+        # Try trade_date first, then extract from created_at
+        trade_date = trade.get("trade_date")
+        if not trade_date:
+            created = trade.get("created_at")
+            if created:
+                if isinstance(created, datetime):
+                    trade_date = created.strftime("%Y-%m-%d")
+                else:
+                    trade_date = str(created)[:10]
         if trade_date:
-            traded_dates.add(trade_date)
+            traded_dates.add(str(trade_date)[:10])
+
+    logger.info(f"Honorary licensee {license_doc.get('user_id')}: start={effective_start}, starting_amount={starting_amount}, traded_dates_count={len(traded_dates)}, master_admin_id={master_admin['id']}")
 
     # Get trade overrides for this license
     overrides = {}
@@ -64,6 +79,7 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
 
     current_date = start_date
     today = datetime.now(timezone.utc)
+    trade_days_counted = 0
 
     while current_date <= today:
         if current_date.weekday() >= 5:
@@ -91,10 +107,13 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
 
         if manager_traded:
             current_balance += quarter_daily_profit
+            trade_days_counted += 1
 
         current_date += timedelta(days=1)
 
-    return round(current_balance, 2)
+    result = round(current_balance, 2)
+    logger.info(f"Honorary licensee {license_doc.get('user_id')}: Calculated value={result} (trade_days_counted={trade_days_counted}, profit={round(result - starting_amount, 2)})")
+    return result
 
 
 async def calculate_account_value(
