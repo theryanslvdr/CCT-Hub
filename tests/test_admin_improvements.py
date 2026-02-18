@@ -12,7 +12,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://trader-column-fix.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://honorary-tracker.preview.emergentagent.com')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"

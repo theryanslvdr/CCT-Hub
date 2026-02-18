@@ -1,174 +1,136 @@
 <analysis>**original_problem_statement:**
-The user has two main requests:
-1.  **Bug Fix:** An Honorary Licensee named Rizza Miles () has a malfunctioning profit tracker. Specifically, the Manager Traded column incorrectly shows 'x' on days the manager has traded, the account value is not syncing between the Profit Tracker page and the Dashboard, and the profit is stuck at /bin/bash despite 20 trading days being logged. The fix must also work when the master admin simulates the user.
-2.  **New Feature:** A Family Account function for Honorary Licensees. This feature would allow a licensee to enroll a family member under their account without creating a new, separate login. The family account should be accessible from within the main licensee's dashboard.
-
-The user has requested a phased plan and suggestions for the Family Account feature before implementation begins.
+The user's core problem is a critical data discrepancy for Honorary Licensees.
+1.  **Original Bug (Recurring):** An Honorary Licensee named Rizza Miles () has a malfunctioning profit tracker. When she logs in directly, her account value is a stale, incorrect amount (), her profit is stuck at /bin/bash, and the Manager Traded column is filled with 'x's incorrectly.
+2.  **Discrepancy:** The fixes implemented so far have corrected this data when a master admin simulates Rizza's account, but the issue persists when Rizza logs in herself. The simulation banner also shows the incorrect stale account value.
+3.  **New Feature (Completed, but see bug below):** A Family Account function for Honorary Licensees, allowing them to add family members under their account. The master admin must convert the license and can manage members. Licensees can add members and must approve family member withdrawals.
+4.  **New Feature (Completed):** The master admin must be able to reset the  and  for any licensee. This should correctly recalculate and update their profit projection table.
+5.  **New Bug:** On the user's live site, adding a family member results in a Not Found error, as the new backend routes have not been deployed.
+6.  **Visibility Rule:** The Habit Tracker and Affiliate Center must be hidden from all licensee-type accounts (both in direct login and simulation).
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack platform with a FastAPI backend, React frontend, and MongoDB database. It includes a habit tracker that acts as a gate for trading signals, an affiliate center, an admin dashboard with a live activity feed, and push notifications. The agent has recently completed a significant amount of work, including fixing PWA notifications, refactoring parts of the backend and frontend, and implementing a  feature for habits. However, a recurring bug related to saving habits persists, and new critical issues regarding the profit tracker have been reported.
+The application has a FastAPI backend and React frontend. The previous agent implemented a significant refactor of the profit calculation logic, moving from a static  for Honorary Licensees to a dynamic calculation based on daily trade projections. The full Family Account feature has been built on the backend and frontend, including admin management and a dedicated page for licensees. Admin tools to reset a licensee's start date and starting balance have also been implemented and verified to work correctly on the backend.
+
+However, the core issue is that these new dynamic calculations were primarily applied to endpoints used by the admin and during admin simulation, but were missed on the primary endpoints that the licensee user calls when they log in directly.
 
 **Last working item**:
--   **Last item agent was working:** The user reported a critical bug with the profit tracker for Honorary Licensees and requested a new Family Account feature. The agent had just begun investigating the profit tracker bug by querying the database to inspect the data for the user . This immediately followed an attempt to fix a recurring Failed to Save Habit error, which the user reports is still occurring on their live site.
--   **Status:** NOT STARTED
--   **Agent Testing Done:** N
--   **Which testing method agent to use?**  after implementation to conduct comprehensive testing on the profit tracker fix, the new Family Account feature, and to regress the Failed to Save Habit and admin simulation flows.
+-   **Last item agent was working:** Debugging a critical data discrepancy. The user reported that while the profit tracker looks correct when an admin simulates a licensee, it remains broken and shows stale data when the licensee logs in directly. The agent had just started analyzing a user-provided screenshot showing the three places the stale data appears (Dashboard, Profit Tracker Page, Simulation Banner) and was about to trace the data flow for a direct licensee login.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** Y (but it was incomplete)
+-   **Which testing method agent to use?** . **Crucially**, the testing plan must include scenarios for **both** direct licensee login and admin simulation to confirm data consistency.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Profit Tracker bug for Honorary Licensee (P0)**
--   **Issue 2: Recurring Failed to Save Habit error (P1)**
--   **Issue 3: Major Backend Refactoring (P2)**
--   **Issue 4: Refactor  (P2)**
+-   **Issue 1: Profit Tracker Data Discrepancy for Direct Licensee Login (P0)**
+-   **Issue 2: Family Account Endpoints Not Found on Live Site (P1)**
+-   **Issue 3: Recurring Failed to Save Habit error (P2)**
 
 **Issues Detail:**
--   **Issue 1: Profit Tracker bug for Honorary Licensee (P0)**
-    -   **Attempted fixes:** None. Investigation just started.
+-   **Issue 1: Profit Tracker Data Discrepancy for Direct Licensee Login (P0)**
+    -   **Attempted fixes:** The agent refactored multiple backend endpoints (e.g., , admin-related endpoints) to use a new dynamic calculation function, . This fixed the view for the admin but not the user.
     -   **Next debug checklist:**
-        1.  Examine the profit tracker data retrieval logic in , specifically how  is determined and how  is calculated and synced.
-        2.  Trace the data flow from the  endpoint to the  and  components.
-        3.  Verify that the logic correctly handles the  state for admins.
-        4.  Replicate the state of user  to reproduce the issue locally.
-    -   **Why fix this issue and what will be achieved with the fix?** Core financial tracking functionality is broken for a specific user role, leading to incorrect data and a critical loss of trust in the platform's features.
-    -   **Status:** NOT STARTED
+        1.  Identify the exact API endpoints called by  and  when a licensee user logs in directly. These are likely  and .
+        2.  View the code for these endpoints in . They were likely missed during the refactoring and are still returning the stale  from the database  collection.
+        3.  Modify these user-facing endpoints to use the new  helper function from , ensuring data consistency with the simulation view.
+        4.  Inspect the  endpoint. The simulation banner's stale value comes from here; this endpoint also needs to use the dynamic calculation.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the most critical bug. The platform's core financial data is incorrect for a key user role, rendering the profit tracker useless and untrustworthy.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Both.
+
+-   **Issue 2: Family Account Endpoints Not Found on Live Site (P1)**
+    -   **Attempted fixes:** None. The agent correctly diagnosed the issue from a  file provided by the user.
+    -   **Next debug checklist:** This is not a code issue. The agent needs to inform the user that a redeployment of the backend is required to make the new  and  routes available on their live environment.
+    -   **Why fix this issue and what will be achieved with the fix?** The newly developed Family Account feature is completely unusable on the user's live site.
+    -   **Status:** BLOCKED (Requires user to redeploy)
     -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Should Test frontend/backend/both after fix?** N/A (Deployment issue)
 
--   **Issue 2: Recurring Failed to Save Habit error (P1)**
-    -   **Attempted fixes:** The agent moved the admin habit CRUD endpoints from the extracted  file back into  to be registered on the main . This was done to rule out any import order or deployment inconsistencies between the preview and live environments. The agent verified the fix worked via  and browser testing in the preview environment, but the user reports the error persists on the live site as a Not Found error.
-    -   **Next debug checklist:**
-        1.  Ask the user for a screenshot of the browser's developer console (specifically the Network tab) when the error occurs on their live site. This is needed to confirm the exact API endpoint being called and the server's response.
-        2.  Review the API call path in  to ensure it's correct.
-        3.  Investigate any potential differences between the preview and production deployment configurations.
-    -   **Why fix this issue and what will be achieved with the fix?** It's a recurring, high-priority bug that prevents admins from managing a core application feature.
-    -   **Status:** IN PROGRESS
+-   **Issue 3: Recurring Failed to Save Habit error (P2)**
+    -   **Attempted fixes:** The agent confirmed the  endpoint works in the preview environment.
+    -   **Next debug checklist:** This is also likely a deployment issue, similar to Issue 2. The code on the preview environment is more recent than what is deployed on the user's live site.
+    -   **Why fix this issue and what will be achieved with the fix?** A core admin function is broken on the live site.
+    -   **Status:** BLOCKED (Requires user to redeploy)
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both.
-
--   **Issue 3: Major Backend Refactoring (P2)**
-    -   **Attempted fixes:** The , , , and  routers have been successfully extracted from  into the  directory.
-    -   **Next debug checklist:** Continue the refactoring process by extracting the remaining routers (, , ) from .
-    -   **Why fix this issue and what will be achieved with the fix?** To improve maintainability, reduce complexity, and make the large  file manageable.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend.
-    -   **Blocked on other issue:** Blocked by P0 and P1 issues.
-
--   **Issue 4: Refactor  (P2)**
-    -   **Attempted fixes:** The inline components , , and  were extracted into separate files in .
-    -   **Next debug checklist:** Break down the main  file further by extracting the content of each tab (, , , etc.) into its own component.
-    -   **Why fix this issue and what will be achieved with the fix?** To reduce the size and complexity of the massive  component, improving readability and maintainability.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Frontend.
-    -   **Blocked on other issue:** Blocked by P0 and P1 issues.
+    -   **Should Test frontend/backend/both after fix?** N/A (Deployment issue)
 
 **In progress Task List**:
--   None. All work has been re-prioritized based on the latest user message.
+-   None.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   **Plan Family Account Feature (P0):** Propose a multi-phase plan to the user for approval, covering:
-        -   **Phase 1: Data Model & UX:** Design the database schema changes (e.g., a sub-document or a linked collection for family members) and mock up the user flow for managing and switching between accounts.
-        -   **Phase 2: Backend:** Implement API endpoints for creating, managing, and accessing family accounts.
-        -   **Phase 3: Frontend:** Build the UI for the feature within the licensee's dashboard.
-        -   **Phase 4: Testing:** Comprehensive end-to-end testing, including admin simulation.
 -   **Future Tasks:**
-    -   Complete the backend refactoring of .
-    -   Complete the frontend refactoring of  and .
-    -   Implement the planned Cloudinary integration for file uploads.
-    -   Implement the placeholder Chatbase integration.
+    -   Complete the major backend refactoring of  by extracting the remaining routers. (P2)
+    -   Complete the frontend refactoring of  and . (P2)
+    -   Implement the placeholder Cloudinary and Chatbase integrations. (P3)
 
 **Completed work in this session**
--   Verified the PWA push notification fix and the admin habit completion notification feature.
--   Fixed a recurring regression where admins could reset their own profit trackers.
--   Fixed visibility issues for the Habit Tracker and Affiliate Center pages for non-admin members.
--   Ensured the habit-based signal gate works correctly during admin simulation.
--   Implemented a validity_days feature, allowing habits to unlock the trading signal for a set number of days.
--   Partially refactored  by extracting four routers (, , , ).
--   Partially refactored  by extracting three sub-components.
-
-**Earlier issues found/mentioned but not fixed**
--   The refactoring of  to address prop-drilling is pending.
--   The placeholder Cloudinary integration for file uploads has not been implemented.
-
-**Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Reset Tracker Incorrectly Resets Admin Account.
--   **Recurrence count:** 2+
--   **Status:** RESOLVED (A fix was implemented and tested in this session).
+-   **Profit Tracker Logic Refactor (Partial Fix):** Re-architected backend to dynamically calculate Honorary Licensee account values based on trade history. This fix currently only works in the admin's simulated view.
+-   **Family Account Feature (End-to-End):**
+    -   **Backend:** Created  license type, built all APIs for admin conversion, licensee member management, withdrawal approvals, and dynamic value calculations ().
+    -   **Frontend:** Built the Family Accounts page for licensees, and integrated  management into the admin dashboard ().
+-   **Admin Reset Functionality:** Implemented and verified backend endpoints for admins to reset a licensee's (and family member's)  and .
+-   **UI/UX Fixes:**
+    -   Correctly hid Habit Tracker and Affiliate Center from all licensee views.
+    -   Enabled 1:1 admin simulation of Honorary FA licensees, allowing admins to see their Family Accounts page.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend Refactoring:** Extracting  instances from a monolithic  into a structured  directory to improve modularity.
--   **Frontend Component Extraction:** Breaking down large, complex React components into smaller, single-responsibility components to improve readability and maintainability.
--   **Role-Based Logic:** Debugging and implementing features that behave differently based on user roles (e.g., Honorary Licensee) and states (e.g., ).
--   **Stateful Business Logic:** Implementing a  feature that makes a feature's availability dependent on the timestamp of a user's last action.
+-   **Data Discrepancy:** The central challenge is the difference in data seen by an admin (correct, dynamic) versus a direct user (incorrect, stale).
+-   **Role-Based Data Fetching:** The root of the bug is that different API endpoints are used for different user roles/contexts (admin vs. user, simulated vs. direct), and the fix was not applied universally.
+-   **Dynamic Financial Calculation:** A key function  was created to compute account value from a series of daily projections, which needs to be the single source of truth.
 
 **key DB schema**
--   **users:** The  array was updated to include 'habits' and 'affiliate'. This collection is central to the new profit tracker bug and the Family Account feature request. A schema modification will be required for Family Accounts.
--   **habits:** Added a  field to support the new flexible signal gate logic.
+-   **users:** The  field (enum) now supports  and . The  field is the source of the stale data for honorary licensees and should not be trusted for display.
+-   **family_members:** New collection to store family members linked to a parent licensee. Stores , , , , etc.
 
 **All files of reference**
--    (Contains the profit tracker logic and was modified to address the recurring habit bug).
--    (Frontend for the buggy profit tracker).
--    (Displays the account value that is out of sync).
--    (Handles the Add Habit API call that is reportedly failing).
--    (Likely contains logic related to fetching user data, including for simulation).
-
-**Areas that need refactoring**:
--   : Remains the highest priority for refactoring due to its large size and complexity.
--   : Still a very large component that needs to be broken down by tabs.
--   : Has known prop-drilling issues that should be addressed.
-
-**key api endpoints**
--    (Core endpoint for the P0 profit tracker bug).
--    (Endpoint for the P1 recurring Failed to Save Habit bug).
--    (Crucial for testing fixes, as requested by the user).
+-    (Location of the buggy user-facing endpoints and the fixed admin-facing ones).
+-    (Contains the correct  function that needs to be used everywhere).
+-    (Frontend page showing incorrect data for the user).
+-    (Frontend page showing incorrect data for the user).
+-    (To trace which API calls are made from the frontend pages).
 
 **Critical Info for New Agent**
-1.  **Prioritize User Requests:** Your immediate focus must be on the user's two latest requests: fixing the **Profit Tracker bug (P0)** and creating a plan for the **Family Account feature (P0)**. Do not proceed with refactoring or other tasks until these are addressed.
-2.  **Plan Before Coding:** The user explicitly asked for a plan/proposal for the Family Account feature *before* you begin implementation. You must present this plan using  for approval.
-3.  **Recurring Habit Bug:** The Failed to Save Habit error is persistent and critical. The user reports a Not Found error on their live site, which you could not reproduce in the preview environment. This points to a potential environmental difference. Your next step for this issue should be to gather more information from the user's live environment (e.g., a network log from their browser's developer tools).
-4.  **Simulation is Key:** The user stressed that all fixes, especially for the profit tracker, must work correctly when the master admin is simulating a user. All testing must validate this specific scenario.
+1.  **Your Top Priority (P0):** Fix the data discrepancy. The previous agent correctly built the dynamic calculation logic but failed to apply it to the user-facing API endpoints. Your task is to identify those specific endpoints (, , etc.) in  and integrate the  function, so the direct user sees the same correct data as the simulating admin.
+2.  **Deployment Issues:** The Family Account creation failed and Failed to Save Habit bugs are due to the user's live environment running outdated code. You must clearly communicate to the user that a **re-deployment** of the backend is necessary to fix these. Do not attempt to fix them in code.
+3.  **Test Both Views:** When you test your fix for the data discrepancy, you MUST verify it from two perspectives: logging in as the master admin and simulating the user, AND logging in directly as the user (). Both views must show the identical, correct, dynamic data.
 
 **documents and test reports created in this job**
--    (Updated)
--   Test reports are available, with the latest successful one being from .
+-    (Updated with Family Account feature details)
+-    (Last backend test run for family member reset)
+-    (Last frontend test run for simulation view)
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **(LATEST)** User reports a critical bug with the Profit Tracker for an Honorary Licensee and requests a new Family Account feature, asking for a plan first. **Status: Investigation Started.**
--   User reports Failed to save habit: Not Found on the live site. **Status: In Progress.**
--   User confirms the  feature for habits, but still reports the Failed to Save Habit error. **Status: In Progress.**
--   User reports Failed to Add Habit. **Status: Investigated, could not reproduce.**
--   User reports three bugs: soft-gate not appearing, and habit/affiliate pages not visible to members. **Status: Resolved.**
--   User was about to finish the job before reporting the new bugs.
+-   **(LATEST)** User reported that Rizza Miles' account is still showing incorrect, stale profit numbers () when she logs in directly, even though it looks correct when the admin simulates her. Provided a screenshot showing the error in 3 places. **Status: Investigation Started.**
+-   User confirmed the understanding of the admin reset feature and reported a Not Found error when adding a family member, providing a HAR file. **Status: HAR file analyzed, deployment issue identified.**
+-   User requested the ability for the master admin to reset a licensee's  and . **Status: Implemented and Verified.**
+-   User clarified that  and  must be hidden from ALL licensees. **Status: Implemented.**
+-   User specified that admin simulation of an  must be a 1:1 view. **Status: Implemented.**
+-   User approved the plan for the Family Account feature and provided detailed requirements. **Status: Implemented.**
+-   User confirmed the profit tracker fix was successful in simulation but asked to proceed with the Family Account feature. **Status: Actioned.**
 
 **Project Health Check:**
 -   **Broken:**
-    -   Profit Tracker for Honorary Licensees.
-    -   Admin Add Habit functionality is reportedly broken on the user's live site.
+    -   Profit Tracker for direct licensee login (shows stale/incorrect data).
+    -   Family account creation on the user's live site (404 error due to deployment lag).
+    -   Admin Add Habit on the user's live site (404 error due to deployment lag).
 -   **Mocked:**
-    -   Cloudinary integration for file uploads.
-    -   Chatbase integration in the Affiliate Center.
+    -   Cloudinary and Chatbase integrations.
 
 **3rd Party Integrations**
 -   **pywebpush:** Used for sending VAPID-encrypted web push notifications.
--   **Chatbase:** (Planned) A placeholder iframe exists for embedding a Chatbase bot.
+-   **Chatbase:** (Planned) A placeholder iframe exists.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. The last run was after implementing the habit  feature, which passed.
+-   **Testing agent used after significant changes:** YES. However, the test plans were insufficient as they did not cover direct login scenarios, only admin/simulation, which allowed the main bug to be missed.
 -   **Test files created:** None.
--   **Known regressions:** A recurring bug (Failed to Save Habit) is active. The Reset Tracker admin self-reset bug was a regression that has now been fixed.
+-   **Known regressions:** The primary profit tracker bug is a regression in the sense that the initial fix was incomplete and did not solve the problem from the user's perspective.
 
 **Credentials to test flow:**
 -   **Role:** Master Admin
 -   **Email:** 
 -   **Password:** 
--   **Target User for Bug:** Rizza Miles () - Honorary Licensee.
-
-**What agent forgot to execute**
--   The agent has not yet created the plan for the Family Account feature as requested by the user.
--   The agent has not been able to definitively resolve the recurring Failed to Save Habit bug, as it persists on the user's live environment.</analysis>
+-   **Target User for Bug:** Rizza Miles () - Honorary Licensee. You will need her password to test direct login, which is likely  based on previous patterns, but you may need to ask the user or reset it if that fails.</analysis>

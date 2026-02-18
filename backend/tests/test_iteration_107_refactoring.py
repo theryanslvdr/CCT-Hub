@@ -15,7 +15,7 @@ import os
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 if not BASE_URL:
-    BASE_URL = "https://trader-column-fix.preview.emergentagent.com"
+    BASE_URL = "https://honorary-tracker.preview.emergentagent.com"
 
 
 class TestAuth:
