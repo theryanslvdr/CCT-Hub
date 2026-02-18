@@ -3633,14 +3633,22 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
     licensee_trades = 0
     performance_rate = 0
     
-    if member.get("license_type"):
-        # Get the most recent active license for this user
-        license = await db.licenses.find_one(
-            {"user_id": user_id, "is_active": True}, 
-            {"_id": 0},
-            sort=[("created_at", -1)]  # Get most recent license
-        )
-        if license:
+    # Always check for active license (don't rely on user.license_type which may be stale/missing)
+    license = await db.licenses.find_one(
+        {"user_id": user_id, "is_active": True}, 
+        {"_id": 0},
+        sort=[("created_at", -1)]
+    )
+    if license:
+        is_licensee_member = True
+    elif member.get("license_type"):
+        is_licensee_member = True
+        license = None
+    else:
+        is_licensee_member = False
+        license = None
+
+    if is_licensee_member and license:
             starting_amount = license.get("starting_amount", 0)
             
             # For extended licensees, calculate current_amount dynamically using projections
