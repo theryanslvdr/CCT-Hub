@@ -7403,6 +7403,88 @@ async def get_onboarding_status(user: dict = Depends(get_current_user)):
 
 
 
+@profit_router.get("/licensee/year-projections")
+async def get_licensee_year_projections(user: dict = Depends(get_current_user)):
+    """Get year-by-year growth projections for a licensee using quarterly compounding"""
+    license = await db.licenses.find_one(
+        {"user_id": user["id"], "is_active": True},
+        {"_id": 0}
+    )
+    if not license:
+        raise HTTPException(status_code=404, detail="No active license found")
+    
+    from utils.calculations import calculate_honorary_licensee_value
+    current_value = await calculate_honorary_licensee_value(db, license)
+    starting_amount = license.get("starting_amount", 0)
+    
+    # Get master admin trade frequency to estimate future trade days
+    master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+    traded_dates = set()
+    if master_admin:
+        trades = await db.trade_logs.find(
+            {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}},
+            {"_id": 0, "trade_date": 1, "created_at": 1}
+        ).to_list(10000)
+        for t in trades:
+            td = t.get("trade_date") or str(t.get("created_at", ""))[:10]
+            if td:
+                traded_dates.add(td)
+    
+    # Count weekdays in our history to get trade ratio
+    effective_start = license.get("effective_start_date") or license.get("start_date")
+    if effective_start:
+        try:
+            if "T" in str(effective_start):
+                start_dt = datetime.fromisoformat(str(effective_start).replace("Z", "+00:00"))
+            else:
+                start_dt = datetime.strptime(str(effective_start)[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except Exception:
+            start_dt = datetime.now(timezone.utc) - timedelta(days=30)
+    else:
+        start_dt = datetime.now(timezone.utc) - timedelta(days=30)
+    
+    today = datetime.now(timezone.utc)
+    total_weekdays = 0
+    d = start_dt
+    while d <= today:
+        if d.weekday() < 5:
+            total_weekdays += 1
+        d += timedelta(days=1)
+    
+    trade_ratio = len(traded_dates) / max(total_weekdays, 1)
+    weekdays_per_year = 260
+    est_trade_days_per_year = int(weekdays_per_year * trade_ratio)
+    
+    # Project forward using quarterly compounding (same formula)
+    projections = []
+    for years in [1, 2, 3, 5]:
+        balance = current_value
+        for q in range(years * 4):
+            lot_size = round(balance / 980, 2)
+            daily_profit = round(lot_size * 15, 2)
+            trade_days_per_quarter = est_trade_days_per_year // 4
+            balance += daily_profit * trade_days_per_quarter
+        
+        total_profit = round(balance - starting_amount, 2)
+        growth_pct = round(((balance / starting_amount) - 1) * 100, 1) if starting_amount > 0 else 0
+        
+        projections.append({
+            "years": years,
+            "projected_value": round(balance, 2),
+            "total_profit": total_profit,
+            "growth_percent": growth_pct
+        })
+    
+    return {
+        "current_value": round(current_value, 2),
+        "starting_amount": starting_amount,
+        "current_profit": round(current_value - starting_amount, 2),
+        "trade_ratio": round(trade_ratio, 2),
+        "est_trade_days_per_year": est_trade_days_per_year,
+        "projections": projections
+    }
+
+
 class SendEmailRequest(BaseModel):
     subject: str
     body: str
