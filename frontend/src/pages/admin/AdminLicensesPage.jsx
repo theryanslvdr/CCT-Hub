@@ -2165,6 +2165,75 @@ export const AdminLicensesPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Family Member Dialog (Admin on behalf of licensee) */}
+      <Dialog open={addFamilyDialogOpen} onOpenChange={setAddFamilyDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-400" /> Add Family Member
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLicense && (
+            <div className="space-y-4">
+              <p className="text-sm text-zinc-400">
+                Adding family member for <span className="text-white font-medium">{selectedLicense.user_name}</span>
+              </p>
+              <div>
+                <Label className="text-zinc-300">Member Name *</Label>
+                <Input
+                  value={familyForm.name}
+                  onChange={(e) => setFamilyForm({ ...familyForm, name: e.target.value })}
+                  placeholder="Full name"
+                  className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                  data-testid="admin-family-name-input"
+                />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Relationship</Label>
+                <Input
+                  value={familyForm.relationship}
+                  onChange={(e) => setFamilyForm({ ...familyForm, relationship: e.target.value })}
+                  placeholder="e.g., Spouse, Child, Parent"
+                  className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                  data-testid="admin-family-relationship-input"
+                />
+              </div>
+              <div>
+                <Label className="text-zinc-300">Starting Amount (USDT) *</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                  <Input
+                    type="number"
+                    value={familyForm.starting_amount}
+                    onChange={(e) => setFamilyForm({ ...familyForm, starting_amount: e.target.value })}
+                    placeholder="1000"
+                    className="bg-zinc-800 border-zinc-700 text-white pl-8"
+                    data-testid="admin-family-amount-input"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="flex gap-3 pt-2">
+                <Button variant="outline" onClick={() => setAddFamilyDialogOpen(false)} className="flex-1 btn-secondary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAddFamilyMember}
+                  disabled={addingFamilyMember || !familyForm.name || !familyForm.starting_amount}
+                  className="flex-1 btn-primary"
+                  data-testid="admin-add-family-submit"
+                >
+                  {addingFamilyMember ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Adding...</>
+                  ) : (
+                    <><Plus className="w-4 h-4 mr-2" /> Add Member</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
