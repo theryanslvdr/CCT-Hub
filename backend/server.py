@@ -6129,14 +6129,27 @@ async def complete_transaction(
     # If deposit and approved, add to user balance AND Master Admin balance  
     if tx["type"] == "deposit" and licensee and license:
         deposit_amount = abs(tx.get("final_amount", tx["amount"]))
-        current_balance = license.get("current_amount", license.get("starting_amount", 0))
-        new_balance = current_balance + deposit_amount
         
-        # Update license current_amount
-        await db.licenses.update_one(
-            {"id": license["id"]},
-            {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
-        )
+        # For honorary licensees, calculate current balance dynamically
+        if license.get("license_type") in ("honorary", "honorary_fa"):
+            from utils.calculations import calculate_honorary_licensee_value
+            current_balance = await calculate_honorary_licensee_value(db, license)
+        else:
+            current_balance = license.get("current_amount", license.get("starting_amount", 0))
+        
+        # For honorary licensees, update starting_amount (deposits increase the base)
+        if license.get("license_type") in ("honorary", "honorary_fa"):
+            new_starting = license.get("starting_amount", 0) + deposit_amount
+            await db.licenses.update_one(
+                {"id": license["id"]},
+                {"$set": {"starting_amount": new_starting, "current_amount": current_balance + deposit_amount, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+        else:
+            new_balance = current_balance + deposit_amount
+            await db.licenses.update_one(
+                {"id": license["id"]},
+                {"$set": {"current_amount": new_balance, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
         
         # Update user's account_value
         await db.users.update_one(
