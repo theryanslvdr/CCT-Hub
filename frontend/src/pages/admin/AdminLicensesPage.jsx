@@ -504,6 +504,34 @@ export const AdminLicensesPage = () => {
     setEditEffectiveDateDialogOpen(true);
   };
 
+  // Add family member on behalf of licensee handler
+  const handleOpenAddFamily = (license) => {
+    setSelectedLicense(license);
+    setFamilyForm({ name: '', relationship: '', starting_amount: '' });
+    setAddFamilyDialogOpen(true);
+  };
+
+  const handleAddFamilyMember = async () => {
+    if (!familyForm.name || !familyForm.starting_amount) {
+      toast.error('Name and starting amount are required');
+      return;
+    }
+    setAddingFamilyMember(true);
+    try {
+      await familyAPI.adminAddMember(selectedLicense.user_id, {
+        name: familyForm.name,
+        relationship: familyForm.relationship || 'Family',
+        starting_amount: parseFloat(familyForm.starting_amount),
+      });
+      toast.success(`Family member "${familyForm.name}" added for ${selectedLicense.user_name}`);
+      setAddFamilyDialogOpen(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to add family member');
+    } finally {
+      setAddingFamilyMember(false);
+    }
+  };
+
   const handleSaveEffectiveDate = async () => {
     if (!editEffectiveDateForm.effective_start_date) {
       toast.error('Please select a date');
