@@ -18,38 +18,30 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 5. 1:1 Admin Simulation for Honorary FA licensees
 6. Licensee Nav Restrictions - Habits & Affiliate hidden from ALL licensees
 7. Admin Reset: Starting Balance & Trade Start Date for both licensees and family members
-8. **Admin Temp Password with Forced Reset** - Admin sets temp password, user sees force-change dialog on login
-9. **P0 Fix: Profit Tracker Data Consistency** - All endpoints (direct login + admin simulation) now return dynamically calculated values for honorary licensees
-
-## Recent Changes (Feb 18, 2026)
-
-### P0 Bug Fix: Profit Tracker Data Discrepancy
-- **Root Cause:** `/api/profit/licensee/welcome-info` was returning stale `license.current_amount` instead of dynamically calculated value
-- **Fix:** Applied `calculate_honorary_licensee_value()` to welcome-info endpoint
-- **Verified:** Direct login and admin simulation now show identical account values ($6,530 for Rizza Miles)
-- All 4 endpoints now consistent: `/api/profit/summary`, `/api/profit/licensee/welcome-info`, `/api/admin/members/{id}`, `/api/admin/members/{id}/simulate`
-
-### Admin Temp Password Feature
-- `POST /api/admin/members/{user_id}/set-temp-password` - Sets temp password + `must_change_password` flag
-- `POST /api/auth/force-change-password` - User changes password after temp password login
-- Login endpoint returns `must_change_password: true` when applicable
-- Frontend shows forced password change dialog (non-dismissible) before redirect
-- Rizza Miles current password: `rizza123`
+8. Admin Temp Password with Forced Reset on first login
+9. **P0 Fix: Profit Tracker Data Consistency** - ALL endpoints return dynamically calculated values
+10. **Simulation Bug Fix** - `/api/admin/licenses` now computes dynamic values for honorary licensees (was returning stale `current_amount`)
+11. **Licensee Dashboard Redesign** - Year-by-year growth projections (1yr, 2yr, 3yr, 5yr) replace Trade Performance; Family Member Stats replace Recent Trades
+12. **Admin Add Family Member on Behalf** - Master admin can add family members for licensees from the Licenses page
 
 ## Key API Endpoints
 ### License Management
+- `GET /api/admin/licenses` - Returns all licenses with dynamically calculated values
 - `POST /api/admin/licenses/{id}/reset-balance` - Reset starting balance
 - `PUT /api/admin/licenses/{id}/effective-start-date` - Set trade start date
 - `POST /api/admin/licenses/{id}/change-type` - Convert license type
-- `GET /api/admin/licenses/{id}/projections` - View projections
 
 ### Family Accounts
 - `POST/GET /api/family/members` - Licensee CRUD
+- `POST /api/admin/family/members/{userId}` - Admin adds member on behalf of licensee
 - `GET /api/family/members/{id}/projections` - Member projections
 - `POST /api/family/members/{id}/withdraw` - Withdrawal request
-- `PUT /api/family/withdrawals/{id}/approve` - Parent approves
-- `GET/POST /api/admin/family/members/{userId}` - Admin CRUD
-- `PUT /api/admin/family/members/{userId}/{memberId}/reset` - Admin reset
+
+### Profit & Projections
+- `GET /api/profit/summary` - Dynamic financial summary
+- `GET /api/profit/licensee/year-projections` - 1yr, 2yr, 3yr, 5yr growth projections
+- `GET /api/profit/licensee/welcome-info` - Dynamic current_balance for honorary
+- `GET /api/profit/licensee/daily-projection` - Daily trade projections
 
 ### Auth
 - `POST /api/admin/members/{user_id}/set-temp-password` - Admin sets temp password
@@ -57,11 +49,11 @@ A multi-phase financial trading dashboard platform with admin-configurable featu
 
 ## Pending Tasks
 ### P1
-- Live site needs deployment of latest code - Family accounts, reset features, temp password, and P0 fix will not work until redeployed
-- Failed to Save Habit (Live Site) - 404 in production, works in preview. Needs redeployment.
+- Live site needs redeployment - all new features (family accounts, temp password, P0 fix, dashboard redesign, simulation fix) require redeployment
+- "Failed to Save Habit" on live site - resolved by redeployment
 
 ### P2 - Backlog
-- Backend refactoring (extract auth/trade/admin routers from server.py)
+- Backend refactoring (extract remaining routers from server.py)
 - Frontend refactoring (AdminSettingsPage.jsx, ProfitTrackerPage.jsx)
 - Cloudinary/Chatbase integrations
 
