@@ -1227,6 +1227,75 @@ async def secret_upgrade(data: SecretUpgradeRequest, user: dict = Depends(get_cu
     
     return {"message": "Successfully upgraded to Super Admin"}
 
+# --- Forgot Password Flow ---
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+@auth_router.post("/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    """Request a password reset token for the given email."""
+    user = await db.users.find_one({"email": data.email.strip().lower()}, {"_id": 0})
+    if not user:
+        # Return success even if email not found (security best practice)
+        return {"message": "If that email exists, a reset token has been generated.", "token": None}
+    
+    reset_token = str(uuid.uuid4())
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    
+    await db.password_resets.insert_one({
+        "user_id": user["id"],
+        "email": user["email"],
+        "token": reset_token,
+        "expires_at": expires_at,
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # NOTE: No email service integrated yet. Token is returned in the response
+    # and should be communicated to the user by the admin.
+    return {
+        "message": "If that email exists, a reset token has been generated.",
+        "token": reset_token,
+        "expires_in_minutes": 60
+    }
+
+@auth_router.post("/reset-password")
+async def reset_password(data: ResetPasswordRequest):
+    """Reset password using a valid reset token."""
+    reset_record = await db.password_resets.find_one(
+        {"token": data.token, "used": False},
+        {"_id": 0}
+    )
+    if not reset_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    if datetime.fromisoformat(reset_record["expires_at"]) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    hashed = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": reset_record["user_id"]},
+        {"$set": {
+            "password": hashed,
+            "must_change_password": False,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    await db.password_resets.update_one(
+        {"token": data.token},
+        {"$set": {"used": True, "used_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Password has been reset successfully"}
+
 # ==================== USER ROUTES ====================
 
 # Users routes extracted to routes/users.py
