@@ -104,7 +104,7 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
     try {
       const payload = editMember
         ? { name, relationship, email: email || null }
-        : { name, relationship, email: email || null, starting_amount: parseFloat(startingAmount), effective_start_date: startDate || undefined };
+        : { name, relationship, email: email || null, starting_amount: parseFloat(startingAmount), deposit_date: startDate || undefined };
       await onSubmit(payload, editMember?.id);
       onClose();
     } catch (err) {
