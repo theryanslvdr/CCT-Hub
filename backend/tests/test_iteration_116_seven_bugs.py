@@ -61,7 +61,7 @@ class TestIssue1_3_4_StaleData:
             "email": LICENSEE_EMAIL,
             "password": LICENSEE_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_profit_summary_has_dynamic_values(self, licensee_token):
         """Verify /api/profit/summary returns dynamic account_value around $6530"""
@@ -106,7 +106,7 @@ class TestIssue2_IncorrectProfit:
             "email": LICENSEE_EMAIL,
             "password": LICENSEE_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_profit_summary_actual_profit_not_zero(self, licensee_token):
         """Verify total_actual_profit field is > $0 for licensee"""
@@ -132,7 +132,7 @@ class TestIssue3_ProjectionHistory:
             "email": LICENSEE_EMAIL,
             "password": LICENSEE_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_daily_projection_starts_from_effective_date(self, licensee_token):
         """Verify /api/profit/licensee/daily-projection starts from 2026-01-20"""
@@ -236,7 +236,7 @@ class TestIssue5_YearProjections:
             "email": LICENSEE_EMAIL,
             "password": LICENSEE_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_year_projections_endpoint(self, licensee_token):
         """Verify /api/profit/licensee/year-projections returns data"""
@@ -409,7 +409,7 @@ class TestTotalTradesCount:
             "email": LICENSEE_EMAIL,
             "password": LICENSEE_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_total_trades_is_master_admin_trade_days(self, licensee_token):
         """Verify total_trades reflects master admin trading days"""
