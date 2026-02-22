@@ -14,7 +14,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://honorary-tracker.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://profit-calc-repair.preview.emergentagent.com')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
