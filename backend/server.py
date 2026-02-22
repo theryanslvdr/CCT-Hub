@@ -4971,49 +4971,56 @@ def get_first_trading_day_of_quarter(year: int, quarter: int) -> datetime:
 def calculate_extended_license_projections(starting_amount: float, start_date: datetime, days_to_project: int = 365) -> List[Dict]:
     """
     Calculate projections for Extended Licensee using quarterly compounding.
-    Daily profit AND lot size are fixed within each quarter and recalculated at quarter start.
+    Daily profit is fixed within each quarter and recalculated at quarter start.
+    Uses proper trading days (weekdays excluding US market holidays).
     """
+    from utils.trading_days import get_holidays_for_range, is_trading_day as is_trading_day_with_holidays
+    
+    holidays = get_holidays_for_range(start_date.year, start_date.year + 6)
+    
     projections = []
     current_date = start_date
     current_amount = starting_amount
     current_quarter = get_quarter(start_date)
     current_year = start_date.year
     
-    # Calculate initial quarter's values (FIXED for entire quarter)
+    # Calculate initial quarter's values
+    quarter_daily_profit = round((current_amount / 980) * 15, 2)
     quarter_lot_size = round(current_amount / 980, 2)
-    quarter_daily_profit = round(quarter_lot_size * 15, 2)
     quarter_start_amount = current_amount
     
     trading_days_processed = 0
     
     while trading_days_processed < days_to_project:
+        # Skip non-trading days
+        if not is_trading_day_with_holidays(current_date, holidays):
+            current_date += timedelta(days=1)
+            continue
+        
         # Check if we've moved to a new quarter
         new_quarter = get_quarter(current_date)
         new_year = current_date.year
         
         if new_year != current_year or new_quarter != current_quarter:
-            # Recalculate lot size and daily profit for new quarter using accumulated amount
+            quarter_daily_profit = round((current_amount / 980) * 15, 2)
             quarter_lot_size = round(current_amount / 980, 2)
-            quarter_daily_profit = round(quarter_lot_size * 15, 2)
             quarter_start_amount = current_amount
             current_quarter = new_quarter
             current_year = new_year
         
-        if is_trading_day(current_date):
-            current_amount = round(current_amount + quarter_daily_profit, 2)
-            
-            projections.append({
-                "date": current_date.strftime("%Y-%m-%d"),
-                "quarter": f"Q{current_quarter} {current_year}",
-                "lot_size": quarter_lot_size,  # FIXED for entire quarter
-                "daily_profit": quarter_daily_profit,  # FIXED for entire quarter
-                "account_value": current_amount,
-                "cumulative_profit": round(current_amount - starting_amount, 2),
-                "is_trading_day": True
-            })
-            
-            trading_days_processed += 1
+        current_amount = round(current_amount + quarter_daily_profit, 2)
         
+        projections.append({
+            "date": current_date.strftime("%Y-%m-%d"),
+            "quarter": f"Q{current_quarter} {current_year}",
+            "lot_size": quarter_lot_size,
+            "daily_profit": quarter_daily_profit,
+            "account_value": current_amount,
+            "cumulative_profit": round(current_amount - starting_amount, 2),
+            "is_trading_day": True
+        })
+        
+        trading_days_processed += 1
         current_date += timedelta(days=1)
     
     return projections
