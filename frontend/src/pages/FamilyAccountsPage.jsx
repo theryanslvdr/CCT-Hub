@@ -513,9 +513,9 @@ export default function FamilyAccountsPage() {
       await familyAPI.updateMember(memberId, data);
       toast.success('Family member updated');
     } else {
-      // Use admin endpoint when simulating, licensee endpoint for direct login
-      if (isAdminSimulation && effectiveUserId) {
-        await familyAPI.adminAddMember(effectiveUserId, data);
+      // Use admin endpoint when simulating a real licensee
+      if (isAdminSimulation && simulatedUserId) {
+        await familyAPI.adminAddMember(simulatedUserId, data);
       } else {
         await familyAPI.addMember(data);
       }
@@ -527,8 +527,8 @@ export default function FamilyAccountsPage() {
   const handleRemove = async (member) => {
     if (!window.confirm(`Remove ${member.name} from family accounts?`)) return;
     try {
-      if (isAdminSimulation && effectiveUserId) {
-        await familyAPI.adminRemoveMember(effectiveUserId, member.id);
+      if (isAdminSimulation && simulatedUserId) {
+        await familyAPI.adminRemoveMember(simulatedUserId, member.id);
       } else {
         await familyAPI.removeMember(member.id);
       }
