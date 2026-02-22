@@ -5287,12 +5287,17 @@ async def update_license(license_id: str, starting_amount: Optional[float] = Non
 
 class ChangeLicenseTypeRequest(BaseModel):
     new_license_type: str
-    new_starting_amount: float
+    new_starting_amount: Optional[float] = None
     notes: Optional[str] = None
 
 @admin_router.post("/licenses/{license_id}/change-type")
 async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, user: dict = Depends(require_admin)):
-    """Change license type - creates new license and invalidates old one (Master Admin only)"""
+    """Change license type - preserves all financial data (Master Admin only)
+    
+    When converting honorary -> honorary_fa (or vice versa), all historical data
+    (start_date, starting_amount, effective_start_date, trade history, growth) is preserved.
+    Only the license_type field changes.
+    """
     if user["role"] != "master_admin":
         raise HTTPException(status_code=403, detail="Only Master Admin can change license types")
     
@@ -5307,7 +5312,26 @@ async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, u
     if data.new_license_type not in ["extended", "honorary", "honorary_fa"]:
         raise HTTPException(status_code=400, detail="Invalid license type")
     
-    # Deactivate old license
+    old_type = old_license.get("license_type")
+    
+    # For honorary <-> honorary_fa conversions, preserve ALL data in-place
+    honorary_types = {"honorary", "honorary_fa"}
+    if old_type in honorary_types and data.new_license_type in honorary_types:
+        update_fields = {
+            "license_type": data.new_license_type,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if data.notes:
+            update_fields["notes"] = data.notes
+        
+        await db.licenses.update_one({"id": license_id}, {"$set": update_fields})
+        await db.users.update_one(
+            {"id": old_license["user_id"]},
+            {"$set": {"license_type": data.new_license_type}}
+        )
+        return {"message": f"License converted from {old_type} to {data.new_license_type} (data preserved)", "new_license_id": license_id}
+    
+    # For other conversions (e.g., extended -> honorary), deactivate old and create new
     await db.licenses.update_one(
         {"id": license_id},
         {"$set": {
@@ -5317,24 +5341,26 @@ async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, u
         }}
     )
     
-    # Create new license
+    # Preserve financial data from old license where possible
+    starting_amount = data.new_starting_amount if data.new_starting_amount is not None else old_license.get("starting_amount", 0)
+    
     new_license_id = str(uuid.uuid4())
     new_license = {
         "id": new_license_id,
         "user_id": old_license["user_id"],
         "license_type": data.new_license_type,
-        "starting_amount": data.new_starting_amount,
-        "current_amount": data.new_starting_amount,
-        "start_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "starting_amount": starting_amount,
+        "current_amount": starting_amount,
+        "start_date": old_license.get("start_date", datetime.now(timezone.utc).strftime("%Y-%m-%d")),
+        "effective_start_date": old_license.get("effective_start_date"),
         "is_active": True,
-        "notes": data.notes or f"Changed from {old_license['license_type']} license",
+        "notes": data.notes or f"Changed from {old_type} license",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": user["id"],
         "previous_license_id": license_id
     }
     await db.licenses.insert_one(new_license)
     
-    # Update user record
     await db.users.update_one(
         {"id": old_license["user_id"]},
         {"$set": {"license_type": data.new_license_type}}

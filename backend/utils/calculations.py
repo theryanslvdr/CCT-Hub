@@ -340,6 +340,26 @@ async def get_user_financial_summary(
     else:
         perf_rate = 0
 
+    # For licensees, count master admin trade days as "total_trades"
+    trade_count = len(trades)
+    if is_licensee and license_info:
+        try:
+            master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1})
+            if master_admin:
+                effective_start = license_info.get("effective_start_date") or license_info.get("start_date")
+                match_cond = {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}}
+                if effective_start:
+                    match_cond["created_at"] = {"$gte": str(effective_start)[:10]}
+                master_trades = await db.trade_logs.find(match_cond, {"_id": 0, "created_at": 1, "trade_date": 1}).to_list(10000)
+                unique_dates = set()
+                for mt in master_trades:
+                    td = mt.get("trade_date") or str(mt.get("created_at", ""))[:10]
+                    if td:
+                        unique_dates.add(td[:10])
+                trade_count = len(unique_dates)
+        except Exception as e:
+            logger.error(f"Failed to count master admin trades for licensee {user_id}: {e}")
+
     return {
         "total_deposits": round(total_deposits, 2),
         "total_withdrawals": round(total_withdrawals, 2),
@@ -348,7 +368,7 @@ async def get_user_financial_summary(
         "total_commission": round(total_commission, 2),
         "total_projected_profit": round(total_projected, 2),
         "account_value": account_value,
-        "total_trades": len(trades),
+        "total_trades": trade_count,
         "is_licensee": is_licensee,
         "license_type": license_info.get("license_type") if license_info else None,
         "performance_rate": perf_rate,
