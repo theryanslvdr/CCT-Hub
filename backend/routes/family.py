@@ -673,6 +673,34 @@ async def admin_reset_family_member(user_id: str, member_id: str, data: FamilyMe
 
 
 
+@admin_family_router.put("/members/{user_id}/{member_id}")
+async def admin_update_family_member(user_id: str, member_id: str, data: FamilyMemberUpdate, user: dict = Depends(require_admin)):
+    """Admin can update a family member's basic info on behalf of a licensee."""
+    db = deps.db
+    if user.get("role") != "master_admin":
+        raise HTTPException(status_code=403, detail="Only Master Admin can update family members")
+
+    member = await db.family_members.find_one(
+        {"id": member_id, "parent_user_id": user_id, "is_active": True}
+    )
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
+
+    updates = {}
+    if data.name is not None:
+        updates["name"] = data.name
+    if data.relationship is not None:
+        updates["relationship"] = data.relationship
+    if data.email is not None:
+        updates["email"] = data.email
+
+    if updates:
+        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.family_members.update_one({"id": member_id}, {"$set": updates})
+
+    return {"message": "Family member updated by admin"}
+
+
 @admin_family_router.delete("/members/{user_id}/{member_id}")
 async def admin_remove_family_member(user_id: str, member_id: str, user: dict = Depends(require_admin)):
     """Admin can remove a family member on behalf of a licensee."""
