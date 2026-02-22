@@ -514,7 +514,7 @@ export default function FamilyAccountsPage() {
     if (memberId) {
       // Use admin endpoint for updates when simulating
       if (isAdminSimulation && simulatedUserId) {
-        await familyAPI.adminResetFamilyMember(simulatedUserId, memberId, data);
+        await familyAPI.adminUpdateMember(simulatedUserId, memberId, data);
       } else {
         await familyAPI.updateMember(memberId, data);
       }
