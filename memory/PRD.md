@@ -14,6 +14,16 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 - **Member**: Regular trader with profit tracking
 - **Licensee (Honorary/Honorary FA/Extended)**: Managed accounts whose value grows based on master admin trades
 
+## Core Financial Formula
+```
+Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15, 2)
+```
+- Daily profit is FIXED for the entire calendar quarter (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
+- Recalculated at each new quarter start using the accumulated account value
+- Trading days = weekdays excluding US market holidays (~250/year)
+- US Market Holidays: New Year's, MLK Day, Presidents' Day, Good Friday, Memorial Day, Juneteenth, Independence Day, Labor Day, Thanksgiving, Christmas
+- Weekend-to-weekday observance: Sat holidays → preceding Fri, Sun holidays → following Mon
+
 ## What's Been Implemented
 
 ### Core Features (Complete)
@@ -26,54 +36,42 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 - License management (create, edit, deactivate, change type)
 - Maintenance mode with master admin override
 - BVE (Beta Virtual Environment) mode
-- Year-by-year growth projections for licensees
 - Admin-initiated password reset (temp password, force change)
 - User-initiated "Forgot Password" flow (token-based)
 
+### Growth Projection System (Complete - Feb 22, 2026)
+- **Year Projections**: 1, 2, 3, 5 year projections with quarterly compounding
+- **Daily Projections**: Day-by-day breakdown showing past (actual trades) and future (projected)
+- **Holiday-aware**: US market holidays excluded from trading days
+- **Quarter breakdown**: Each projection shows per-quarter detail (trading days, daily profit, start/end values)
+- **Correct formula**: `round((balance/980)*15, 2)` — no intermediate lot_size rounding
+- **Trading days utility**: `/app/backend/utils/trading_days.py` handles holidays, Easter calc, observed dates
+
 ### Family Account System (Complete)
 - Family members (up to 5) for Honorary FA licensees
-- **Deposit date** required: trading starts NEXT TRADING DAY after deposit
-- Family member growth computed same as parent licensee (master admin trades, quarterly compounding)
-- Family member projections show full history from effective start date
-- Dashboard "Overall Account Growth" card: Your Account + Family Total + Combined Value + Combined Profit
-- Admin can add/edit/remove family members on behalf of licensees (via admin endpoints)
-- Admin simulation mode correctly uses admin API endpoints for ALL family operations (add, edit, remove)
+- Deposit date required: trading starts NEXT TRADING DAY after deposit
+- Family member growth computed same as parent licensee
+- Family member projections use same formula with holiday exclusion
+- Dashboard "Overall Account Growth" card
+- Admin can add/edit/remove family members via admin endpoints
+- Admin simulation mode uses correct admin API endpoints for ALL operations
 - Family member withdrawal flow (parent approval -> admin approval)
-- "Add Member" button now visible during admin simulation of honorary_fa users
 
 ### Robustness: License Check (Critical Fix)
-- ALL family endpoints use `verify_honorary_fa_license()` helper that queries `licenses` collection directly
+- ALL family endpoints use `verify_honorary_fa_license()` from licenses collection
 - Never relies on `user.license_type` field (unreliable in production)
-- Same pattern applied to all financial data endpoints
 
-### Bug Fixes Completed
-1. Stale Data Discrepancy - All endpoints use dynamic calculation
-2. Incorrect $0 Total Profit - Profit = account_value - starting_amount
-3. Total Trades = 0 for licensees - Now counts master admin trade days
-4. Incomplete Projection History - Frontend uses effectiveStartDate from license data
-5. Dashboard Stuck Loading - Error state with retry button
-6. Forgot Password - Full backend + frontend flow
-7. License Conversion Preservation - Honorary to Honorary FA in-place update
-8. Dashboard Growth Projections blank - Admin simulation uses user_id param
-9. Dashboard Family Members blank - Fixed key mismatch (members to family_members)
-10. Performance Overview/Recent Trades hidden for licensee dashboard
-11. Family member "Not Found" on add - Robust license check via licenses collection
-12. Admin simulation family member add - Frontend uses admin endpoints when simulating
-13. (Feb 22, 2026) Admin simulation "Add Member" button hidden - Now visible for admin + simulatedUserId
-14. (Feb 22, 2026) Admin edit family member used wrong endpoint - Now uses adminUpdateMember
-15. (Feb 22, 2026) Added admin PUT endpoint for family member basic info updates
+## Key API Endpoints
 
-## Key API Endpoints (Family & Auth)
+### Projections
+- `GET /api/profit/licensee/year-projections` - Year 1/2/3/5 projections with quarter breakdown
+- `GET /api/profit/licensee/daily-projection` - Daily entries (past: actual, future: projected)
+
+### Family & Auth
 - `POST /api/auth/forgot-password` - Generate reset token
 - `POST /api/auth/reset-password` - Reset password with token
-- `GET /api/family/members` - Licensee: get family members
-- `POST /api/family/members` - Licensee: add family member
-- `PUT /api/family/members/{id}` - Licensee: update family member
-- `DELETE /api/family/members/{id}` - Licensee: remove family member
-- `GET /api/admin/family/members/{user_id}` - Admin: get family members for user
-- `POST /api/admin/family/members/{user_id}` - Admin: add family member for user
-- `PUT /api/admin/family/members/{user_id}/{member_id}` - Admin: update family member info
-- `DELETE /api/admin/family/members/{user_id}/{member_id}` - Admin: remove family member
+- `GET/POST /api/family/members` - Licensee family management
+- `GET/POST/PUT/DELETE /api/admin/family/members/{user_id}[/{member_id}]` - Admin family management
 
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
