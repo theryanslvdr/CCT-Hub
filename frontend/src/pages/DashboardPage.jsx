@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { MissedTradersWidget } from '@/components/admin/MissedTradersWidget';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 export const DashboardPage = () => {
