@@ -512,7 +512,12 @@ export default function FamilyAccountsPage() {
 
   const handleAddOrEdit = async (data, memberId) => {
     if (memberId) {
-      await familyAPI.updateMember(memberId, data);
+      // Use admin endpoint for updates when simulating
+      if (isAdminSimulation && simulatedUserId) {
+        await familyAPI.adminResetFamilyMember(simulatedUserId, memberId, data);
+      } else {
+        await familyAPI.updateMember(memberId, data);
+      }
       toast.success('Family member updated');
     } else {
       // Use admin endpoint when simulating a real licensee
