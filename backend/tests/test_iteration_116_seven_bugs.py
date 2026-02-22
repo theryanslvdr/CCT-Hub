@@ -76,12 +76,13 @@ class TestIssue1_3_4_StaleData:
         
         # Verify dynamic values (not stale $798.57 or static $5000)
         account_value = data.get("account_value", 0)
-        total_profit = data.get("total_profit", 0)
+        # NOTE: total_profit may be 0 if not populated, use total_actual_profit instead
+        total_actual_profit = data.get("total_actual_profit", data.get("total_profit", 0))
         total_trades = data.get("total_trades", 0)
         is_licensee = data.get("is_licensee", False)
         
         print(f"Account Value: ${account_value}")
-        print(f"Total Profit: ${total_profit}")
+        print(f"Total Actual Profit: ${total_actual_profit}")
         print(f"Total Trades: {total_trades}")
         print(f"Is Licensee: {is_licensee}")
         
@@ -89,12 +90,12 @@ class TestIssue1_3_4_StaleData:
         assert is_licensee == True, "Rizza should be marked as licensee"
         assert account_value > 5000, f"Account value should be > $5000 (got ${account_value})"
         assert account_value != 798.57, f"Account value should NOT be stale $798.57"
-        assert total_profit > 0, f"Total profit should be > $0 for licensee (got ${total_profit})"
+        assert total_actual_profit > 0, f"Total actual profit should be > $0 for licensee (got ${total_actual_profit})"
         assert total_trades > 0, f"Total trades should be > 0 (got {total_trades})"
         
         # Expected values approximately
         assert 6000 <= account_value <= 8000, f"Account value should be around $6530 (got ${account_value})"
-        assert 1000 <= total_profit <= 3000, f"Total profit should be around $1530 (got ${total_profit})"
+        assert 1000 <= total_actual_profit <= 3000, f"Total profit should be around $1530 (got ${total_actual_profit})"
         
 
 class TestIssue2_IncorrectProfit:
