@@ -810,6 +810,51 @@ export const DashboardPage = () => {
             </CardContent>
           </Card>
 
+          {/* Combined Account Overview - shows licensee + family members total */}
+          {familyMembers.length > 0 && (
+            <Card className="glass-card" data-testid="combined-account-overview">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-blue-400" /> Overall Account Growth
+                </CardTitle>
+                <p className="text-sm text-zinc-400">Your account + family members combined</p>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const ownValue = summary?.account_value || 0;
+                  const familyTotal = familyMembers.reduce((sum, m) => sum + (m.account_value || m.starting_amount || 0), 0);
+                  const familyProfit = familyMembers.reduce((sum, m) => sum + (m.profit || 0), 0);
+                  const combinedValue = ownValue + familyTotal;
+                  const combinedProfit = (summary?.total_actual_profit || 0) + familyProfit;
+                  return (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-xl bg-gradient-to-b from-blue-500/15 to-blue-500/5 border border-blue-500/30">
+                        <p className="text-xs text-blue-300 uppercase tracking-wider font-semibold">Your Account</p>
+                        <p className="text-xl font-bold font-mono text-blue-400 mt-2">{formatCurrencyCompact(ownValue)}</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">{formatCurrency(ownValue, 'USD')}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-b from-purple-500/15 to-purple-500/5 border border-purple-500/30">
+                        <p className="text-xs text-purple-300 uppercase tracking-wider font-semibold">Family Total</p>
+                        <p className="text-xl font-bold font-mono text-purple-400 mt-2">{formatCurrencyCompact(familyTotal)}</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">{formatCurrency(familyTotal, 'USD')}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-b from-emerald-500/15 to-emerald-500/5 border border-emerald-500/30">
+                        <p className="text-xs text-emerald-300 uppercase tracking-wider font-semibold">Combined Value</p>
+                        <p className="text-xl font-bold font-mono text-emerald-400 mt-2">{formatCurrencyCompact(combinedValue)}</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">{formatCurrency(combinedValue, 'USD')}</p>
+                      </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-b from-amber-500/15 to-amber-500/5 border border-amber-500/30">
+                        <p className="text-xs text-amber-300 uppercase tracking-wider font-semibold">Combined Profit</p>
+                        <p className="text-xl font-bold font-mono text-amber-400 mt-2">{formatCurrencyCompact(combinedProfit)}</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">{formatCurrency(combinedProfit, 'USD')}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Licensee Stats Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="glass-card">
