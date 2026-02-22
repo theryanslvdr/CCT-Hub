@@ -612,7 +612,7 @@ export default function FamilyAccountsPage() {
           </h1>
           <p className="text-zinc-500 text-sm mt-1">Manage family members under your license</p>
         </div>
-        {!isAdminSimulation && (
+        {(!isAdminSimulation || (isAdminSimulation && simulatedUserId)) && !isDemoSimulation && (
           <Button onClick={() => { setEditMember(null); setShowForm(true); }}
             className="bg-blue-600 hover:bg-blue-700" data-testid="add-family-member-btn">
             <UserPlus className="w-4 h-4 mr-2" /> Add Member
