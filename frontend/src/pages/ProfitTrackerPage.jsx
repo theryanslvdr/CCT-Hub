@@ -859,9 +859,12 @@ export const ProfitTrackerPage = () => {
     
     try {
       const response = await profitAPI.getLicenseeWelcomeInfo();
-      if (response.data.is_licensee && !response.data.has_seen_welcome) {
+      // Always store the welcome info (needed for effective_start_date)
+      if (response.data.is_licensee) {
         setLicenseeWelcomeInfo(response.data);
-        setShowLicenseeWelcome(true);
+        if (!response.data.has_seen_welcome) {
+          setShowLicenseeWelcome(true);
+        }
       }
     } catch (error) {
       console.error('Failed to check licensee welcome:', error);
