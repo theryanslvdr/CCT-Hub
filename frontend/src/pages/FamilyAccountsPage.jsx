@@ -478,13 +478,20 @@ export default function FamilyAccountsPage() {
   const isSimulating = !!simulatedView;
   const isAdminSimulation = isSimulating && user?.role === 'master_admin';
   const effectiveLicenseType = simulatedView?.license_type || user?.license_type;
-  const effectiveUserId = simulatedView?.memberId || simulatedView?.id || user?.id;
+  // For admin simulation, we need the REAL licensee user_id (not admin's)
+  const simulatedUserId = simulatedView?.memberId || simulatedView?.id;
+  const effectiveUserId = simulatedUserId || user?.id;
+  const isDemoSimulation = isAdminSimulation && !simulatedUserId;
 
   const loadData = useCallback(async () => {
+    if (isDemoSimulation) {
+      setLoading(false);
+      return; // Can't load real family data in demo mode
+    }
     try {
       const [membersRes, withdrawalsRes] = await Promise.all([
-        isAdminSimulation && effectiveUserId
-          ? familyAPI.adminGetMembers(effectiveUserId)
+        isAdminSimulation && simulatedUserId
+          ? familyAPI.adminGetMembers(simulatedUserId)
           : familyAPI.getMembers(),
         familyAPI.getWithdrawals().catch(() => ({ data: { withdrawals: [] } }))
       ]);
@@ -492,12 +499,12 @@ export default function FamilyAccountsPage() {
       setWithdrawals(withdrawalsRes.data.withdrawals || []);
     } catch (err) {
       if (err?.response?.status !== 403) {
-        toast.error('Failed to load family accounts');
+        toast.error(err?.response?.data?.detail || 'Failed to load family accounts');
       }
     } finally {
       setLoading(false);
     }
-  }, [isAdminSimulation, effectiveUserId]);
+  }, [isAdminSimulation, simulatedUserId, isDemoSimulation]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
