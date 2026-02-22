@@ -648,6 +648,126 @@ export const LoginPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="forgot-password-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Key className="w-5 h-5 text-blue-400" />
+              {forgotStep === 'email' && 'Reset Your Password'}
+              {forgotStep === 'token' && 'Enter Reset Token'}
+              {forgotStep === 'success' && 'Password Reset Complete'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {forgotStep === 'email' && (
+              <div className="space-y-4">
+                <p className="text-zinc-400 text-sm">
+                  Enter your email address and we&apos;ll generate a password reset token.
+                </p>
+                <div>
+                  <Label className="text-zinc-300">Email Address</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                    <Input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      className="pl-10 input-dark"
+                      onKeyDown={(e) => e.key === 'Enter' && handleForgotPasswordRequest()}
+                      data-testid="forgot-email-input"
+                    />
+                  </div>
+                </div>
+                <Button
+                  onClick={handleForgotPasswordRequest}
+                  className="w-full btn-primary"
+                  disabled={forgotLoading}
+                  data-testid="forgot-submit-email"
+                >
+                  {forgotLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+                  Request Reset Token
+                </Button>
+              </div>
+            )}
+            {forgotStep === 'token' && (
+              <div className="space-y-4">
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-blue-400 text-sm">
+                    A reset token has been generated. If you don&apos;t have the token, please contact your administrator.
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Reset Token</Label>
+                  <Input
+                    type="text"
+                    value={resetToken}
+                    onChange={(e) => setResetToken(e.target.value)}
+                    placeholder="Paste your reset token"
+                    className="input-dark mt-1"
+                    data-testid="reset-token-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-zinc-300">New Password</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                    <Input
+                      type="password"
+                      value={resetNewPassword}
+                      onChange={(e) => setResetNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="pl-10 input-dark"
+                      data-testid="reset-new-password-input"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">Confirm Password</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                    <Input
+                      type="password"
+                      value={resetConfirmPassword}
+                      onChange={(e) => setResetConfirmPassword(e.target.value)}
+                      placeholder="Confirm password"
+                      className="pl-10 input-dark"
+                      data-testid="reset-confirm-password-input"
+                    />
+                  </div>
+                </div>
+                <Button
+                  onClick={handleResetPassword}
+                  className="w-full btn-primary"
+                  disabled={forgotLoading}
+                  data-testid="reset-password-submit"
+                >
+                  {forgotLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
+                  Reset Password
+                </Button>
+              </div>
+            )}
+            {forgotStep === 'success' && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
+                  <p className="text-emerald-400 font-medium">Password reset successfully!</p>
+                  <p className="text-zinc-400 text-sm mt-1">You can now log in with your new password.</p>
+                </div>
+                <Button
+                  onClick={() => setForgotPasswordOpen(false)}
+                  className="w-full btn-primary"
+                  data-testid="reset-done-btn"
+                >
+                  Back to Login
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
