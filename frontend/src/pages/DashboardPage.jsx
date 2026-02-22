@@ -846,8 +846,8 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* Original Layout for Admins (no tabs) */}
-      {!isMember && (
+      {/* Original Layout for Admins (no tabs) - hide when simulating a licensee */}
+      {!isMember && !isLicenseeView && (
         <>
           {/* Charts & No Trade Members Widget */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
