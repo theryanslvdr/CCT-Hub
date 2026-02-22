@@ -316,7 +316,7 @@ class TestLicenseConversionPreservation:
         restore_response = requests.post(
             f"{BASE_URL}/api/admin/licenses/{RIZZA_LICENSE_ID}/change-type",
             headers={"Authorization": f"Bearer {token}"},
-            json={"new_type": original_type}
+            json={"new_license_type": original_type}
         )
         
         assert restore_response.status_code == 200, f"Failed to restore type: {restore_response.text}"
