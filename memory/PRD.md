@@ -30,27 +30,34 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 - Admin-initiated password reset (temp password, force change)
 - User-initiated "Forgot Password" flow (token-based)
 
-### Family Account System (Complete - Feb 22, 2026)
+### Family Account System (Complete)
 - Family members (up to 5) for Honorary FA licensees
-- **Deposit date** required when adding member → effective trading starts NEXT TRADING DAY after deposit
-- Family member growth computed SAME as parent licensee (based on master admin trades, quarterly compounding)
-- Family member projections show full history from effective start date with manager traded flags
-- Family member balance is SEPARATE money from licensee
-- Dashboard "Overall Account Growth" card shows: Your Account + Family Total + Combined Value + Combined Profit
-- Admin can add family members on behalf of licensees
+- **Deposit date** required → trading starts NEXT TRADING DAY after deposit
+- Family member growth computed same as parent licensee (master admin trades, quarterly compounding)
+- Family member projections show full history from effective start date
+- Dashboard "Overall Account Growth" card: Your Account + Family Total + Combined Value + Combined Profit
+- Admin can add/remove family members on behalf of licensees (via admin endpoints)
+- Admin simulation mode correctly uses admin API endpoints for family operations
 - Family member withdrawal flow (parent approval → admin approval)
 
-### Bug Fixes Completed (Feb 22, 2026)
-1. **P0: Stale Data Discrepancy** - All endpoints use dynamic `calculate_honorary_licensee_value` consistently
-2. **P0: Incorrect $0 Total Profit** - Profit = `account_value - starting_amount` for licensees
-3. **P0: Total Trades = 0** - Now counts master admin trade days since licensee's effective start date
-4. **P1: Incomplete Projection History** - Frontend uses `effectiveStartDate` from license data for past months
-5. **P1: Dashboard Stuck Loading** - Added `projectionError` state with error UI and retry
-6. **P1: Forgot Password** - Full backend + frontend flow implemented
-7. **P2: License Conversion Preservation** - Honorary ↔ Honorary FA is in-place update
-8. **Dashboard: Growth Projections blank** - Fixed: admin simulation uses `user_id` param; direct login works correctly
-9. **Dashboard: Family Members blank** - Fixed: key was `members` instead of `family_members`
-10. **Dashboard: Performance Overview/Recent Trades visible** - Hidden when viewing licensee dashboard (including admin simulation)
+### Robustness: License Check (Critical Fix)
+- ALL family endpoints use `verify_honorary_fa_license()` helper that queries `licenses` collection directly
+- Never relies on `user.license_type` field (unreliable in production)
+- Same pattern applied to all financial data endpoints
+
+### Bug Fixes Completed
+1. Stale Data Discrepancy - All endpoints use dynamic calculation
+2. Incorrect $0 Total Profit - Profit = account_value - starting_amount
+3. Total Trades = 0 for licensees - Now counts master admin trade days
+4. Incomplete Projection History - Frontend uses effectiveStartDate from license data
+5. Dashboard Stuck Loading - Error state with retry button
+6. Forgot Password - Full backend + frontend flow
+7. License Conversion Preservation - Honorary ↔ Honorary FA in-place update
+8. Dashboard Growth Projections blank - Admin simulation uses user_id param
+9. Dashboard Family Members blank - Fixed key mismatch (members → family_members)
+10. Performance Overview/Recent Trades hidden for licensee dashboard
+11. Family member "Not Found" on add - Robust license check via licenses collection
+12. Admin simulation family member add - Frontend uses admin endpoints when simulating
 
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
@@ -60,7 +67,7 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 ### P2 - Improvements
 - Backend refactoring: Extract remaining routers from server.py
 - Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
-- Email integration for password reset tokens (currently token returned in API response)
+- Email integration for password reset tokens
 
 ### P3 - Future
 - Cloudinary integration for file uploads
