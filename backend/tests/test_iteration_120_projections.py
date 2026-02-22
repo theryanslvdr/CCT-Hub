@@ -37,7 +37,7 @@ class TestGrowthProjections:
             "password": ADMIN_PASSWORD
         })
         if resp.status_code == 200:
-            return resp.json().get("token")
+            return resp.json().get("access_token")
         pytest.skip(f"Admin login failed: {resp.status_code} - {resp.text}")
     
     @pytest.fixture(scope="class")
@@ -50,7 +50,7 @@ class TestGrowthProjections:
         if resp.status_code == 200:
             data = resp.json()
             return {
-                "token": data.get("token"),
+                "token": data.get("access_token"),
                 "user_id": data.get("user", {}).get("id")
             }
         pytest.skip(f"Licensee login failed: {resp.status_code} - {resp.text}")
@@ -390,7 +390,7 @@ class TestFamilyMemberProjections:
         if resp.status_code == 200:
             data = resp.json()
             return {
-                "token": data.get("token"),
+                "token": data.get("access_token"),
                 "user_id": data.get("user", {}).get("id")
             }
         pytest.skip(f"Licensee login failed: {resp.status_code} - {resp.text}")
@@ -496,7 +496,7 @@ class TestTradingDaysModule:
             "password": LICENSEE_PASSWORD
         })
         if resp.status_code == 200:
-            return {"token": resp.json().get("token")}
+            return {"token": resp.json().get("access_token")}
         pytest.skip("Login failed")
     
     def test_approximately_250_trading_days_per_year(self, licensee_auth):
