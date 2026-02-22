@@ -36,6 +36,7 @@ export const DashboardPage = () => {
   // Licensee-specific data
   const [yearProjections, setYearProjections] = useState(null);
   const [familyMembers, setFamilyMembers] = useState([]);
+  const [projectionError, setProjectionError] = useState(false);
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
@@ -127,14 +128,20 @@ export const DashboardPage = () => {
   const loadLicenseeData = useCallback(async () => {
     if (!isLicenseeView) return;
     try {
+      setProjectionError(false);
       const [projRes, famRes] = await Promise.allSettled([
         profitAPI.getLicenseeYearProjections(),
         familyAPI.getMembers(),
       ]);
-      if (projRes.status === 'fulfilled') setYearProjections(projRes.value.data);
+      if (projRes.status === 'fulfilled') {
+        setYearProjections(projRes.value.data);
+      } else {
+        setProjectionError(true);
+      }
       if (famRes.status === 'fulfilled') setFamilyMembers(famRes.value.data?.members || []);
     } catch (e) {
       console.error('Failed to load licensee data:', e);
+      setProjectionError(true);
     }
   }, [isLicenseeView]);
 
@@ -720,6 +727,12 @@ export const DashboardPage = () => {
                     </ResponsiveContainer>
                   </div>
                 </>
+              ) : projectionError ? (
+                <div className="h-[200px] flex flex-col items-center justify-center text-zinc-500 gap-2" data-testid="projection-error">
+                  <AlertTriangle className="w-8 h-8 text-amber-500/50" />
+                  <p>Failed to load projections</p>
+                  <button onClick={loadLicenseeData} className="text-blue-400 text-sm hover:underline">Retry</button>
+                </div>
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-zinc-500">
                   Loading projections...
