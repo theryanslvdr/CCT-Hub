@@ -1,61 +1,59 @@
 # CrossCurrent Hub - Product Requirements Document
 
 ## Original Problem Statement
-A multi-phase financial trading dashboard platform with admin-configurable features including licensee management, family accounts, and profit tracking with quarterly compounding.
+A financial tracking platform for the CrossCurrent trading community. Supports admin-managed honorary licensees, extended licensees, family accounts, and direct traders. Key feature: dynamic account value calculation for honorary licensees based on master admin trading performance.
 
 ## Core Architecture
-- **Backend:** FastAPI (Python) on port 8001
-- **Frontend:** React on port 3000  
-- **Database:** MongoDB (crosscurrent_finance)
-- **Auth:** JWT-based, admin roles: master_admin, super_admin, basic_admin
-- Master Admin: `iam@ryansalvador.com` / `admin123`
+- **Frontend:** React (Vite) with Shadcn/UI, TailwindCSS
+- **Backend:** FastAPI with Motor (async MongoDB)
+- **Database:** MongoDB
 
-## What's Implemented
-1. Phase 1-4: Signal blocking, banners, popups, habits, affiliate
-2. Interactive Habit Gate, Live Activity Feed, PWA Push Notifications
-3. Honorary Licensee Profit Tracker - Dynamic quarterly compounding
-4. Family Account Feature - CRUD, projections, 3-stage withdrawal flow
-5. 1:1 Admin Simulation for Honorary FA licensees
-6. Licensee Nav Restrictions - Habits & Affiliate hidden from ALL licensees
-7. Admin Reset: Starting Balance & Trade Start Date for both licensees and family members
-8. Admin Temp Password with Forced Reset on first login
-9. **P0 Fix: Profit Tracker Data Consistency** - ALL endpoints return dynamically calculated values
-10. **Simulation Bug Fix** - `/api/admin/licenses` now computes dynamic values for honorary licensees (was returning stale `current_amount`)
-11. **Licensee Dashboard Redesign** - Year-by-year growth projections (1yr, 2yr, 3yr, 5yr) replace Trade Performance; Family Member Stats replace Recent Trades
-12. **Admin Add Family Member on Behalf** - Master admin can add family members for licensees from the Licenses page
+## User Roles
+- **Master Admin** (iam@ryansalvador.com): Full control, manages all members/licensees
+- **Super Admin / Admin**: Limited admin capabilities
+- **Member**: Regular trader with profit tracking
+- **Licensee (Honorary/Honorary FA/Extended)**: Managed accounts whose value grows based on master admin trades
 
-## Key API Endpoints
-### License Management
-- `GET /api/admin/licenses` - Returns all licenses with dynamically calculated values
-- `POST /api/admin/licenses/{id}/reset-balance` - Reset starting balance
-- `PUT /api/admin/licenses/{id}/effective-start-date` - Set trade start date
-- `POST /api/admin/licenses/{id}/change-type` - Convert license type
+## What's Been Implemented
 
-### Family Accounts
-- `POST/GET /api/family/members` - Licensee CRUD
-- `POST /api/admin/family/members/{userId}` - Admin adds member on behalf of licensee
-- `GET /api/family/members/{id}/projections` - Member projections
-- `POST /api/family/members/{id}/withdraw` - Withdrawal request
+### Core Features (Complete)
+- User authentication with JWT tokens
+- Admin dashboard with member management
+- Trade logging and profit tracking (Projection Vision)
+- Deposit/Withdrawal management
+- Currency conversion (USDT/PHP/EUR/GBP)
+- Signal management (active trade signals)
+- Family Account system (Honorary FA licensees)
+- Admin-initiated password reset (temp password, force change)
+- License management (create, edit, deactivate, change type)
+- Maintenance mode with master admin override
+- BVE (Beta Virtual Environment) mode
+- Year-by-year growth projections for licensees
+- Admin "Add Family Member" on behalf of licensee
 
-### Profit & Projections
-- `GET /api/profit/summary` - Dynamic financial summary
-- `GET /api/profit/licensee/year-projections` - 1yr, 2yr, 3yr, 5yr growth projections
-- `GET /api/profit/licensee/welcome-info` - Dynamic current_balance for honorary
-- `GET /api/profit/licensee/daily-projection` - Daily trade projections
-
-### Auth
-- `POST /api/admin/members/{user_id}/set-temp-password` - Admin sets temp password
-- `POST /api/auth/force-change-password` - User changes temp password
-
-## Pending Tasks
-### P1
-- Live site needs redeployment - all new features (family accounts, temp password, P0 fix, dashboard redesign, simulation fix) require redeployment
-- "Failed to Save Habit" on live site - resolved by redeployment
-
-### P2 - Backlog
-- Backend refactoring (extract remaining routers from server.py)
-- Frontend refactoring (AdminSettingsPage.jsx, ProfitTrackerPage.jsx)
-- Cloudinary/Chatbase integrations
+### Bug Fixes Completed (Feb 22, 2026)
+1. **P0: Stale Data Discrepancy** - Fixed: All endpoints now use dynamic `calculate_honorary_licensee_value` consistently. Dashboard, Profit Tracker, and Sidebar all show correct dynamic values for licensees.
+2. **P0: Incorrect $0 Total Profit** - Fixed: `get_user_financial_summary` now correctly calculates profit as `account_value - starting_amount` for licensees.
+3. **P0: Total Trades shows 0 for licensees** - Fixed: Now counts master admin trade days since licensee's effective start date.
+4. **P1: Incomplete Projection History** - Fixed: Frontend `generateMonthlyProjection` now uses `effectiveStartDate` from license data to show past months even without personal trades.
+5. **P1: Dashboard Stuck Loading Projections** - Fixed: Added `projectionError` state with error UI and retry button.
+6. **P1: Forgot Password** - Implemented: Backend endpoints (`POST /api/auth/forgot-password`, `POST /api/auth/reset-password`) + Frontend UI on login page.
+7. **P2: License Conversion Data Preservation** - Fixed: Honorary ↔ Honorary FA conversion is now in-place update (preserves license ID, starting_amount, effective_start_date, all financial data).
+8. **P2: Admin Add Family Member** - Verified working.
 
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
+
+## Prioritized Backlog
+
+### P1 - Next Up
+- (None currently - all critical bugs resolved)
+
+### P2 - Improvements
+- Backend refactoring: Extract remaining routers from server.py
+- Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
+- Email integration for password reset tokens (currently token returned in API response)
+
+### P3 - Future
+- Cloudinary integration for file uploads
+- Chatbase integration for chat support
