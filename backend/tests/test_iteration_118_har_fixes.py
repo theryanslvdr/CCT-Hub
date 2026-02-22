@@ -282,8 +282,10 @@ class TestAdminYearProjections:
         
         if len(data["projections"]) > 0:
             projection = data["projections"][0]
-            assert "date" in projection
-            assert "account_value" in projection
+            # Year projections use 'years', 'projected_value', 'total_profit', 'growth_percent'
+            assert "years" in projection
+            assert "projected_value" in projection
+            assert "total_profit" in projection
 
 
 class TestCleanup:
