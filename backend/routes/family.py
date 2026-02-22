@@ -22,7 +22,8 @@ class FamilyMemberCreate(BaseModel):
     relationship: str  # spouse, child, sibling, parent, other
     email: Optional[str] = None
     starting_amount: float
-    effective_start_date: Optional[str] = None  # YYYY-MM-DD
+    deposit_date: Optional[str] = None  # YYYY-MM-DD - trading starts next trading day after this
+    effective_start_date: Optional[str] = None  # YYYY-MM-DD (legacy, overridden by deposit_date)
 
 class FamilyMemberUpdate(BaseModel):
     name: Optional[str] = None

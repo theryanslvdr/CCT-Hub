@@ -7545,10 +7545,15 @@ async def get_onboarding_status(user: dict = Depends(get_current_user)):
 
 
 @profit_router.get("/licensee/year-projections")
-async def get_licensee_year_projections(user: dict = Depends(get_current_user)):
-    """Get year-by-year growth projections for a licensee using quarterly compounding"""
+async def get_licensee_year_projections(user_id: Optional[str] = None, user: dict = Depends(get_current_user)):
+    """Get year-by-year growth projections for a licensee using quarterly compounding.
+    Admin can pass ?user_id=xxx to get projections for a specific licensee."""
+    target_user_id = user["id"]
+    if user_id and user.get("role") in ("master_admin", "super_admin", "admin"):
+        target_user_id = user_id
+    
     license = await db.licenses.find_one(
-        {"user_id": user["id"], "is_active": True},
+        {"user_id": target_user_id, "is_active": True},
         {"_id": 0}
     )
     if not license:
