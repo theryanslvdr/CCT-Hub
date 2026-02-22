@@ -266,7 +266,7 @@ class TestIssue6_LicenseConversion:
             "email": ADMIN_EMAIL,
             "password": ADMIN_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_honorary_fa_to_honorary_conversion_preserves_data(self, admin_token):
         """Test that honorary_fa -> honorary conversion preserves all data in-place"""
@@ -371,7 +371,7 @@ class TestIssue7_AdminFamilyMember:
             "email": ADMIN_EMAIL,
             "password": ADMIN_PASSWORD
         })
-        return response.json().get("token")
+        return response.json().get("access_token")
     
     def test_admin_can_add_family_member_endpoint_exists(self, admin_token):
         """Test POST /api/admin/family/members/{userId} endpoint exists"""
