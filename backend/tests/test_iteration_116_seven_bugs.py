@@ -277,10 +277,13 @@ class TestIssue6_LicenseConversion:
         get_response = requests.get(f"{BASE_URL}/api/admin/licenses", headers=headers)
         assert get_response.status_code == 200
         
-        licenses = get_response.json()
+        # Response is wrapped in {"licenses": [...]}
+        response_data = get_response.json()
+        licenses = response_data.get("licenses", response_data) if isinstance(response_data, dict) else response_data
+        
         rizza_license = None
         for lic in licenses:
-            if lic.get("id") == RIZZA_LICENSE_ID:
+            if isinstance(lic, dict) and lic.get("id") == RIZZA_LICENSE_ID:
                 rizza_license = lic
                 break
         
@@ -319,11 +322,12 @@ class TestIssue6_LicenseConversion:
         
         # Step 3: Verify data was preserved by getting the license again
         get_response2 = requests.get(f"{BASE_URL}/api/admin/licenses", headers=headers)
-        licenses2 = get_response2.json()
+        response_data2 = get_response2.json()
+        licenses2 = response_data2.get("licenses", response_data2) if isinstance(response_data2, dict) else response_data2
         
         updated_license = None
         for lic in licenses2:
-            if lic.get("id") == RIZZA_LICENSE_ID:
+            if isinstance(lic, dict) and lic.get("id") == RIZZA_LICENSE_ID:
                 updated_license = lic
                 break
         
@@ -350,11 +354,12 @@ class TestIssue6_LicenseConversion:
         
         # Verify revert worked
         get_response3 = requests.get(f"{BASE_URL}/api/admin/licenses", headers=headers)
-        licenses3 = get_response3.json()
+        response_data3 = get_response3.json()
+        licenses3 = response_data3.get("licenses", response_data3) if isinstance(response_data3, dict) else response_data3
         
         final_license = None
         for lic in licenses3:
-            if lic.get("id") == RIZZA_LICENSE_ID:
+            if isinstance(lic, dict) and lic.get("id") == RIZZA_LICENSE_ID:
                 final_license = lic
                 break
         
