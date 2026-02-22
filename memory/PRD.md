@@ -23,31 +23,39 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 - Deposit/Withdrawal management
 - Currency conversion (USDT/PHP/EUR/GBP)
 - Signal management (active trade signals)
-- Family Account system (Honorary FA licensees)
-- Admin-initiated password reset (temp password, force change)
 - License management (create, edit, deactivate, change type)
 - Maintenance mode with master admin override
 - BVE (Beta Virtual Environment) mode
 - Year-by-year growth projections for licensees
-- Admin "Add Family Member" on behalf of licensee
+- Admin-initiated password reset (temp password, force change)
+- User-initiated "Forgot Password" flow (token-based)
+
+### Family Account System (Complete - Feb 22, 2026)
+- Family members (up to 5) for Honorary FA licensees
+- **Deposit date** required when adding member → effective trading starts NEXT TRADING DAY after deposit
+- Family member growth computed SAME as parent licensee (based on master admin trades, quarterly compounding)
+- Family member projections show full history from effective start date with manager traded flags
+- Family member balance is SEPARATE money from licensee
+- Dashboard "Overall Account Growth" card shows: Your Account + Family Total + Combined Value + Combined Profit
+- Admin can add family members on behalf of licensees
+- Family member withdrawal flow (parent approval → admin approval)
 
 ### Bug Fixes Completed (Feb 22, 2026)
-1. **P0: Stale Data Discrepancy** - Fixed: All endpoints now use dynamic `calculate_honorary_licensee_value` consistently. Dashboard, Profit Tracker, and Sidebar all show correct dynamic values for licensees.
-2. **P0: Incorrect $0 Total Profit** - Fixed: `get_user_financial_summary` now correctly calculates profit as `account_value - starting_amount` for licensees.
-3. **P0: Total Trades shows 0 for licensees** - Fixed: Now counts master admin trade days since licensee's effective start date.
-4. **P1: Incomplete Projection History** - Fixed: Frontend `generateMonthlyProjection` now uses `effectiveStartDate` from license data to show past months even without personal trades.
-5. **P1: Dashboard Stuck Loading Projections** - Fixed: Added `projectionError` state with error UI and retry button.
-6. **P1: Forgot Password** - Implemented: Backend endpoints (`POST /api/auth/forgot-password`, `POST /api/auth/reset-password`) + Frontend UI on login page.
-7. **P2: License Conversion Data Preservation** - Fixed: Honorary ↔ Honorary FA conversion is now in-place update (preserves license ID, starting_amount, effective_start_date, all financial data).
-8. **P2: Admin Add Family Member** - Verified working.
+1. **P0: Stale Data Discrepancy** - All endpoints use dynamic `calculate_honorary_licensee_value` consistently
+2. **P0: Incorrect $0 Total Profit** - Profit = `account_value - starting_amount` for licensees
+3. **P0: Total Trades = 0** - Now counts master admin trade days since licensee's effective start date
+4. **P1: Incomplete Projection History** - Frontend uses `effectiveStartDate` from license data for past months
+5. **P1: Dashboard Stuck Loading** - Added `projectionError` state with error UI and retry
+6. **P1: Forgot Password** - Full backend + frontend flow implemented
+7. **P2: License Conversion Preservation** - Honorary ↔ Honorary FA is in-place update
+8. **Dashboard: Growth Projections blank** - Fixed: admin simulation uses `user_id` param; direct login works correctly
+9. **Dashboard: Family Members blank** - Fixed: key was `members` instead of `family_members`
+10. **Dashboard: Performance Overview/Recent Trades visible** - Hidden when viewing licensee dashboard (including admin simulation)
 
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
 
 ## Prioritized Backlog
-
-### P1 - Next Up
-- (None currently - all critical bugs resolved)
 
 ### P2 - Improvements
 - Backend refactoring: Extract remaining routers from server.py
