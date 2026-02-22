@@ -274,6 +274,54 @@ export const LoginPage = () => {
     setHeartbeatEmail('');
   };
 
+  const handleForgotPasswordRequest = async () => {
+    if (!forgotEmail.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const res = await api.post('/auth/forgot-password', { email: forgotEmail.trim() });
+      if (res.data.token) {
+        setResetToken(res.data.token);
+      }
+      setForgotStep('token');
+      toast.success('Reset token generated. Contact your admin for the token if needed.');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to request password reset');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetToken.trim()) {
+      toast.error('Please enter the reset token');
+      return;
+    }
+    if (resetNewPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      await api.post('/auth/reset-password', {
+        token: resetToken.trim(),
+        new_password: resetNewPassword
+      });
+      setForgotStep('success');
+      toast.success('Password reset successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to reset password');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 grid-bg">
       <div className="glass-card w-full max-w-md p-8">
