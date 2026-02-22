@@ -1,0 +1,93 @@
+{
+  "summary": "Iteration 117: Family Member System Overhaul + Dashboard Fixes - All 8 backend tests PASSED, all frontend UI tests PASSED. Family member dynamic account_value working, deposit date -> effective_start_date calculation correct, dashboard Growth Projections and Family Members cards showing correctly, Performance Overview/Recent Trades hidden for licensees.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dialog components", "issues": ["Console warnings about DialogContent requiring DialogTitle for accessibility - minor, does not affect functionality"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_117_family_dashboard.py",
+    "/app/test_reports/pytest/pytest_iteration_117.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✅ Family member account_value is dynamically computed from master admin trades (verified: Maria Miles Starting=$2000, Current=$2612, Profit=$612)",
+    "✅ Deposit date to effective_start_date calculation works correctly - Saturday 2026-01-17 -> Monday 2026-01-19, Friday 2026-02-20 -> Monday 2026-02-23",
+    "✅ Admin year projections endpoint accepts user_id param for simulation - GET /api/profit/licensee/year-projections?user_id=xxx works",
+    "✅ Family member projections include past trade data with manager_traded flag",
+    "✅ Dashboard Growth Projections card shows 4 year values (1yr=$72.6K, 2yr=$808K, 3yr=$9.00M, 5yr=$1.11B)",
+    "✅ Dashboard Family Account Members card shows Maria Miles with dynamic account_value and profit",
+    "✅ Dashboard Overall Account Growth card shows Your Account + Family Total + Combined Value + Combined Profit",
+    "✅ Performance Overview and Recent Trades cards are correctly hidden for licensee dashboard",
+    "✅ Family Accounts page shows 'Deposit Date *' as required field with helper text about next trading day",
+    "✅ License conversion honorary <-> honorary_fa preserves all data (license_id, starting_amount, effective_start_date)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_117_family_dashboard.py"
+  ],
+  "success_rate": {
+    "backend": "100% (8/8 tests passed)",
+    "frontend": "100% - All dashboard elements verified"
+  },
+  "test_credentials": {
+    "admin_email": "iam@ryansalvador.com",
+    "admin_password": "admin123",
+    "rizza_email": "rizza.miles@gmail.com",
+    "rizza_password": "rizza123",
+    "rizza_user_id": "19ccb9d7-139f-4918-a662-ad72483010b1",
+    "rizza_license_id": "3365cca7-9ed8-40d4-9d73-0b9c43f34e8e",
+    "maria_miles_id": "9fe01ee8-e21a-4391-906e-e48c9f139e92"
+  },
+  "seed_data_creation": "Test family members created and deleted during testing (TEST_SaturdayDeposit, TEST_FridayDeposit)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 117 verified all family member system changes and dashboard fixes. Rizza Miles (honorary_fa licensee) has 1 family member (Maria Miles) with dynamic account values. Dashboard shows Growth Projections (4 year cards), Family Members table, and Overall Account Growth section. Performance Overview and Recent Trades are hidden for licensees. Add family member form requires Deposit Date which converts to next trading day for effective_start_date.",
+  "verified_features": {
+    "family_member_dynamic_value": {
+      "status": "VERIFIED",
+      "details": "Maria Miles: Starting=$2000, Account Value=$2612, Profit=$612 (30.6% growth based on master admin trades)"
+    },
+    "deposit_date_to_effective_start": {
+      "status": "VERIFIED",
+      "details": "Saturday deposit -> Monday start, Friday deposit -> Monday start (skips weekends)"
+    },
+    "admin_year_projections_user_id": {
+      "status": "VERIFIED",
+      "details": "GET /api/profit/licensee/year-projections?user_id=xxx returns projections for specified licensee"
+    },
+    "family_member_projections": {
+      "status": "VERIFIED",
+      "details": "GET /api/family/members/{id}/projections returns daily projections with manager_traded flag"
+    },
+    "dashboard_growth_projections": {
+      "status": "VERIFIED",
+      "details": "4 year cards showing: 1yr=$72.6K, 2yr=$808K, 3yr=$9.00M, 5yr=$1.11B"
+    },
+    "dashboard_family_members": {
+      "status": "VERIFIED",
+      "details": "Table shows Maria Miles with Account Value, Profit, Status"
+    },
+    "dashboard_combined_overview": {
+      "status": "VERIFIED",
+      "details": "Your Account=$6.53K, Family Total=$2.61K, Combined Value=$9.14K, Combined Profit=$2.14K"
+    },
+    "dashboard_hidden_cards": {
+      "status": "VERIFIED",
+      "details": "Performance Overview and Recent Trades cards NOT visible for licensee dashboard"
+    },
+    "add_family_member_form": {
+      "status": "VERIFIED",
+      "details": "Shows 'Deposit Date *' label (required) with helper text about next trading day"
+    },
+    "license_conversion_preservation": {
+      "status": "VERIFIED",
+      "details": "honorary <-> honorary_fa conversion preserves license_id, starting_amount, effective_start_date"
+    }
+  }
+}
