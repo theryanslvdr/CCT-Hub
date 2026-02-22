@@ -323,23 +323,36 @@ async def get_user_financial_summary(
         else:
             account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
         total_deposits = license_info.get("starting_amount", 0)
+        # For licensees, profit is account_value - starting_amount (not from personal trades)
+        total_profit = round(account_value - total_deposits, 2)
+        total_projected = total_profit  # Projected same as actual for licensees
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
         # NOTE: For Master Admin, licensee deposits are already included in the deposits collection
         net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
         account_value = round(net_deposits + total_profit + total_commission, 2)
     
+    # Performance rate for licensees: account growth percentage
+    if is_licensee and license_info and total_deposits > 0:
+        perf_rate = round(((account_value / total_deposits) - 1) * 100, 2)
+    elif total_projected > 0:
+        perf_rate = round((total_profit / total_projected * 100), 2)
+    else:
+        perf_rate = 0
+
     return {
         "total_deposits": round(total_deposits, 2),
         "total_withdrawals": round(total_withdrawals, 2),
         "total_profit": round(total_profit, 2),
+        "total_actual_profit": round(total_profit, 2),
         "total_commission": round(total_commission, 2),
         "total_projected_profit": round(total_projected, 2),
         "account_value": account_value,
         "total_trades": len(trades),
         "is_licensee": is_licensee,
         "license_type": license_info.get("license_type") if license_info else None,
-        "performance_rate": round((total_profit / total_projected * 100) if total_projected > 0 else 0, 2)
+        "performance_rate": perf_rate,
+        "profit_difference": round(total_profit - total_projected, 2) if not is_licensee else 0
     }
 
 
