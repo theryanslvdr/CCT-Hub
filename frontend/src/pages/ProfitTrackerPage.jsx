@@ -470,7 +470,7 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
     const hasTradesInMonth = tradeKeys.some(key => key.startsWith(monthKey));
     const hasDepositsInMonth = depositDates.some(d => d?.startsWith(monthKey));
     
-    if (hasTradesInMonth || hasDepositsInMonth) {
+    if (hasTradesInMonth || hasDepositsInMonth || effectiveStartParsed) {
       // Get trades for this month
       const monthTrades = Object.entries(tradeLogs)
         .filter(([key]) => key.startsWith(monthKey))
