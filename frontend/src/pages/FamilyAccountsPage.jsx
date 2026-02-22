@@ -506,7 +506,12 @@ export default function FamilyAccountsPage() {
       await familyAPI.updateMember(memberId, data);
       toast.success('Family member updated');
     } else {
-      await familyAPI.addMember(data);
+      // Use admin endpoint when simulating, licensee endpoint for direct login
+      if (isAdminSimulation && effectiveUserId) {
+        await familyAPI.adminAddMember(effectiveUserId, data);
+      } else {
+        await familyAPI.addMember(data);
+      }
       toast.success('Family member added');
     }
     loadData();
@@ -515,6 +520,8 @@ export default function FamilyAccountsPage() {
   const handleRemove = async (member) => {
     if (!window.confirm(`Remove ${member.name} from family accounts?`)) return;
     try {
+      // Admin simulation currently doesn't have a separate remove endpoint
+      // but the licensee endpoint works since it checks parent_user_id
       await familyAPI.removeMember(member.id);
       toast.success('Family member removed');
       loadData();
