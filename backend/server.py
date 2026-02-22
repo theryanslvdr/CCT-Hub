@@ -5255,8 +5255,10 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
         overrides[override["date"]] = override
     
     # Generate projections for up to 2 years from start date
-    # IMPORTANT: For BOTH honorary and extended licensees, use QUARTERLY COMPOUNDING
-    # Lot size and daily profit are fixed for the entire quarter
+    # Formula: daily_profit = round((balance_at_quarter_start / 980) * 15, 2)
+    # Daily profit is FIXED for the entire quarter, recalculated at each new calendar quarter
+    from utils.trading_days import get_holidays_for_range, is_trading_day as is_trading_day_with_holidays
+    
     projections = []
     current_balance = starting_amount
     
@@ -5264,61 +5266,65 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
     current_quarter = get_quarter(start_date)
     current_year = start_date.year
     
-    # Calculate initial quarter's values (FIXED for entire quarter)
-    quarter_lot_size = round(current_balance / 980, 2)
-    quarter_daily_profit = round(quarter_lot_size * 15, 2)
+    # Calculate initial daily profit (without intermediate lot_size rounding)
+    quarter_daily_profit = round((current_balance / 980) * 15, 2)
     
     # Generate projections day by day
     current_date = start_date
-    end_date = datetime.now(timezone.utc) + timedelta(days=365)  # Up to 1 year from now
+    today = datetime.now(timezone.utc)
+    end_date = today + timedelta(days=365)
+    holidays = get_holidays_for_range(start_date.year, end_date.year + 1)
     
     while current_date <= end_date:
-        # Skip weekends
-        if current_date.weekday() >= 5:
+        # Skip non-trading days (weekends + holidays)
+        if not is_trading_day_with_holidays(current_date, holidays):
             current_date += timedelta(days=1)
             continue
         
         date_str = current_date.strftime("%Y-%m-%d")
         
-        # Check if we've moved to a new quarter - recalculate lot size and daily profit
+        # Check if we've moved to a new quarter - recalculate daily profit
         new_quarter = get_quarter(current_date)
         new_year = current_date.year
         
         if new_year != current_year or new_quarter != current_quarter:
-            # Recalculate lot size and daily profit for new quarter using accumulated balance
-            quarter_lot_size = round(current_balance / 980, 2)
-            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            quarter_daily_profit = round((current_balance / 980) * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
         
-        # Use FIXED quarter values (not recalculated daily)
-        lot_size = quarter_lot_size
+        lot_size = round(current_balance / 980, 2)
         daily_profit = quarter_daily_profit
         
-        # Check if manager traded (override takes precedence)
-        override = overrides.get(date_str)
-        master_trade = master_trade_logs.get(date_str)
+        is_future = current_date > today
         
-        if override:
-            manager_traded = override.get("traded", False)
-        elif master_trade:
-            manager_traded = master_trade.get("traded", True)
+        # Past dates: check actual trades. Future dates: assume manager trades.
+        if is_future:
+            manager_traded = True
         else:
-            manager_traded = False  # No trade record = didn't trade
+            override = overrides.get(date_str)
+            master_trade = master_trade_logs.get(date_str)
+            
+            if override:
+                manager_traded = override.get("traded", False)
+            elif master_trade:
+                manager_traded = master_trade.get("traded", True)
+            else:
+                manager_traded = False
         
         projections.append({
             "date": date_str,
-            "start_value": current_balance,
-            "account_value": current_balance + daily_profit if manager_traded else current_balance,
+            "start_value": round(current_balance, 2),
+            "account_value": round(current_balance + daily_profit, 2) if manager_traded else round(current_balance, 2),
             "lot_size": lot_size,
             "daily_profit": daily_profit,
             "manager_traded": manager_traded,
-            "has_override": override is not None
+            "is_projected": is_future,
+            "has_override": date_str in overrides
         })
         
-        # Update balance for next day (only if manager traded AND day is in the past or today)
-        if manager_traded and current_date <= datetime.now(timezone.utc):
-            current_balance = current_balance + daily_profit
+        # Update balance
+        if manager_traded:
+            current_balance = round(current_balance + daily_profit, 2)
         
         current_date += timedelta(days=1)
     
