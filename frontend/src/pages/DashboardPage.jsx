@@ -775,7 +775,7 @@ export const DashboardPage = () => {
                     </thead>
                     <tbody>
                       {familyMembers.map((member) => {
-                        const profit = (member.current_value || member.starting_amount || 0) - (member.starting_amount || 0);
+                        const profit = member.profit || 0;
                         return (
                           <tr key={member.id} data-testid={`family-member-${member.id}`}>
                             <td>
@@ -785,7 +785,7 @@ export const DashboardPage = () => {
                               </div>
                             </td>
                             <td className="font-mono">{formatCurrency(member.starting_amount || 0, 'USD')}</td>
-                            <td className="font-mono text-blue-400">{formatCurrency(member.current_value || member.starting_amount || 0, 'USD')}</td>
+                            <td className="font-mono text-blue-400">{formatCurrency(member.account_value || member.starting_amount || 0, 'USD')}</td>
                             <td className={`font-mono ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {profit >= 0 ? '+' : ''}{formatCurrency(profit, 'USD')}
                             </td>
