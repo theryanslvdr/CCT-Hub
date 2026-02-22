@@ -520,9 +520,11 @@ export default function FamilyAccountsPage() {
   const handleRemove = async (member) => {
     if (!window.confirm(`Remove ${member.name} from family accounts?`)) return;
     try {
-      // Admin simulation currently doesn't have a separate remove endpoint
-      // but the licensee endpoint works since it checks parent_user_id
-      await familyAPI.removeMember(member.id);
+      if (isAdminSimulation && effectiveUserId) {
+        await familyAPI.adminRemoveMember(effectiveUserId, member.id);
+      } else {
+        await familyAPI.removeMember(member.id);
+      }
       toast.success('Family member removed');
       loadData();
     } catch (err) {
