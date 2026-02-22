@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="21" skipped="0" tests="21" time="3.520" timestamp="2026-02-22T09:20:26.941141+00:00" hostname="agent-env-7455e260-5cde-44cd-9629-9a152a658677"><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_year_projections_returns_correct_structure" time="0.504"><failure message="AssertionError: Expected 200, got 401: {&quot;detail&quot;:&quot;Invalid token&quot;}&#10;assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:65: in test_year_projections_returns_correct_structure
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid token"}
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_year_projections_each_year_has_correct_fields" time="0.099"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:90: in test_year_projections_each_year_has_correct_fields
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_year_projections_quarter_breakdown_fields" time="0.128"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:115: in test_year_projections_quarter_breakdown_fields
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_year_projections_formula_verification" time="0.103"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:133: in test_year_projections_formula_verification
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_year_projections_growth_increases_over_time" time="0.123"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:153: in test_year_projections_growth_increases_over_time
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_returns_correct_structure" time="0.096"><failure message="AssertionError: Expected 200, got 401: {&quot;detail&quot;:&quot;Invalid token&quot;}&#10;assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:174: in test_daily_projection_returns_correct_structure
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid token"}
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_entry_fields" time="0.100"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:192: in test_daily_projection_entry_fields
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_past_dates_use_actual_trade_data" time="0.098"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:209: in test_daily_projection_past_dates_use_actual_trade_data
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_future_dates_are_projected" time="0.100"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:225: in test_daily_projection_future_dates_are_projected
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_quarter_boundaries_change_profit" time="0.157"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:244: in test_daily_projection_quarter_boundaries_change_profit
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_no_weekend_entries" time="0.090"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:277: in test_daily_projection_no_weekend_entries
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_excludes_major_holidays" time="0.135"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:292: in test_daily_projection_excludes_major_holidays
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_projection_excludes_christmas_2025" time="0.092"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:326: in test_daily_projection_excludes_christmas_2025
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_daily_profit_matches_formula" time="0.097"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:342: in test_daily_profit_matches_formula
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestGrowthProjections" name="test_account_value_grows_when_manager_trades" time="0.126"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:365: in test_account_value_grows_when_manager_trades
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestFamilyMemberProjections" name="test_get_family_members" time="0.418"><failure message="AssertionError: Expected 200, got 401: {&quot;detail&quot;:&quot;Invalid token&quot;}&#10;assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:403: in test_get_family_members
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid token"}
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestFamilyMemberProjections" name="test_family_member_projections_structure" time="0.088"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:415: in test_family_member_projections_structure
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestFamilyMemberProjections" name="test_family_member_projections_exclude_holidays" time="0.100"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:444: in test_family_member_projections_exclude_holidays
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestFamilyMemberProjections" name="test_family_member_projections_no_weekends" time="0.100"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:471: in test_family_member_projections_no_weekends
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestTradingDaysModule" name="test_approximately_250_trading_days_per_year" time="0.415"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:507: in test_approximately_250_trading_days_per_year
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase><testcase classname="tests.test_iteration_120_projections.TestTradingDaysModule" name="test_quarterly_compounding_increases_profit" time="0.101"><failure message="assert 401 == 200&#10; +  where 401 = &lt;Response [401]&gt;.status_code">tests/test_iteration_120_projections.py:525: in test_quarterly_compounding_increases_profit
+    assert resp.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = &lt;Response [401]&gt;.status_code</failure></testcase></testsuite></testsuites>
