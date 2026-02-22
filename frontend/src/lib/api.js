@@ -123,6 +123,7 @@ export const familyAPI = {
   // Admin endpoints
   adminGetMembers: (userId) => api.get(`/admin/family/members/${userId}`),
   adminAddMember: (userId, data) => api.post(`/admin/family/members/${userId}`, data),
+  adminUpdateMember: (userId, memberId, data) => api.put(`/admin/family/members/${userId}/${memberId}`, data),
   adminGetMemberProjections: (userId, memberId) => api.get(`/admin/family/members/${userId}/${memberId}/projections`),
   adminResetFamilyMember: (userId, memberId, data) => api.put(`/admin/family/members/${userId}/${memberId}/reset`, data),
   adminRemoveMember: (userId, memberId) => api.delete(`/admin/family/members/${userId}/${memberId}`),
