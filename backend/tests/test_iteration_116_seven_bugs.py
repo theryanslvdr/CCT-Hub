@@ -37,7 +37,7 @@ class TestAuthentication:
         print(f"Admin login response: {response.status_code}")
         assert response.status_code == 200, f"Admin login failed: {response.text}"
         data = response.json()
-        assert "token" in data, "No token in admin login response"
+        assert "access_token" in data, "No access_token in admin login response"
         assert data.get("user", {}).get("role") == "master_admin", "Admin should be master_admin"
         
     def test_licensee_login(self):
@@ -49,7 +49,7 @@ class TestAuthentication:
         print(f"Licensee login response: {response.status_code}")
         assert response.status_code == 200, f"Licensee login failed: {response.text}"
         data = response.json()
-        assert "token" in data, "No token in licensee login response"
+        assert "access_token" in data, "No access_token in licensee login response"
 
 
 class TestIssue1_3_4_StaleData:
