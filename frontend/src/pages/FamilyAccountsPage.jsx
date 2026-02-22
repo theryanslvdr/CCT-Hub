@@ -100,6 +100,10 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
       toast.error('Starting amount is required');
       return;
     }
+    if (!editMember && !startDate) {
+      toast.error('Deposit date is required');
+      return;
+    }
     setLoading(true);
     try {
       const payload = editMember
