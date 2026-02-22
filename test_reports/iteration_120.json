@@ -1,0 +1,92 @@
+{
+  "summary": "Iteration 120: Growth Projection Calculations Testing - All 21 tests PASSED. Verified corrected formula: daily_profit = round((balance/980)*15, 2) with quarterly compounding and US market holiday exclusions.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_120_projections.py",
+    "/app/test_reports/pytest/pytest_iteration_120.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_120_projections.py"
+  ],
+  "success_rate": {
+    "backend": "100% (21/21 tests passed)"
+  },
+  "test_credentials": {
+    "licensee_email": "rizza.miles@gmail.com",
+    "licensee_password": "rizza123",
+    "admin_email": "iam@ryansalvador.com",
+    "admin_password": "admin123"
+  },
+  "seed_data_creation": "None - used existing Rizza Miles licensee account and Maria Miles family member",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Growth projection calculations have been overhauled and verified. The key formula is: daily_profit = round((balance/980)*15, 2). This is FIXED for the entire quarter and recalculated at each new calendar quarter start (Apr 1, Jul 1, Oct 1, Jan 1). Projections use 250 trading days per year (weekdays minus US market holidays). All tests verified: (1) Year projections return correct structure with 1/2/3/5 year projections, (2) Daily projections show correct past vs future dates, (3) Quarter boundaries correctly change daily_profit, (4) All US market holidays are excluded (New Year, MLK Day, Presidents Day, Good Friday, Memorial Day, Juneteenth, Independence Day, Labor Day, Thanksgiving, Christmas), (5) Family member projections also use the correct formula with holidays excluded.",
+  "verified_features": {
+    "year_projections_structure": {
+      "status": "PASSED",
+      "details": "GET /api/profit/licensee/year-projections returns current_value, starting_amount, starting_daily_profit, trading_days_per_year=250, and projections array with years 1/2/3/5"
+    },
+    "year_projections_fields": {
+      "status": "PASSED",
+      "details": "Each year projection has projected_value, total_profit, profit_from_current, growth_percent, trading_days, quarter_breakdown"
+    },
+    "quarter_breakdown_structure": {
+      "status": "PASSED",
+      "details": "Each quarter in breakdown has quarter (Q1 2026 format), trading_days, daily_profit, start_value, end_value, quarter_profit"
+    },
+    "formula_verification": {
+      "status": "PASSED",
+      "details": "Starting daily profit = round((current_value / 980) * 15, 2). For Rizza ($5000 start): 76.53. For Maria ($2000 start): 30.61"
+    },
+    "growth_compounding": {
+      "status": "PASSED",
+      "details": "Projected values increase year over year due to quarterly compounding. Year 1: $106K, Year 2: $1.5M, Year 3: $22.7M, Year 5: $4.8B"
+    },
+    "daily_projection_structure": {
+      "status": "PASSED",
+      "details": "GET /api/profit/licensee/daily-projection returns projections array with effective_start_date, starting_amount, current_balance"
+    },
+    "daily_projection_past_vs_future": {
+      "status": "PASSED",
+      "details": "Past dates have is_projected=false with actual manager_traded status. Future dates have is_projected=true and manager_traded=true"
+    },
+    "quarter_boundaries": {
+      "status": "PASSED",
+      "details": "daily_profit changes at quarter boundaries. Example: March 31 (Q1): 76.53 -> April 1 (Q2): 130.41"
+    },
+    "weekend_exclusion": {
+      "status": "PASSED",
+      "details": "No Saturday or Sunday entries in projections"
+    },
+    "holiday_exclusion_2026": {
+      "status": "PASSED",
+      "details": "All 10 US market holidays excluded: 2026-01-01 (New Year), 2026-01-19 (MLK), 2026-02-16 (Presidents), 2026-04-03 (Good Friday), 2026-05-25 (Memorial), 2026-06-19 (Juneteenth), 2026-07-03 (July 4 observed), 2026-09-07 (Labor), 2026-11-26 (Thanksgiving), 2026-12-25 (Christmas)"
+    },
+    "independence_day_observed": {
+      "status": "PASSED",
+      "details": "July 4, 2026 is Saturday, so July 3 (Friday) is observed and excluded. July 1, 2, 6, 7 are present in projections."
+    },
+    "family_member_projections": {
+      "status": "PASSED",
+      "details": "Family member projections use same formula and exclude holidays. Maria Miles: starting_amount=$2000, current_balance=$2612.20"
+    },
+    "trading_days_per_year": {
+      "status": "PASSED",
+      "details": "Year projections correctly use 250 trading days per year (252 weekdays minus ~10 holidays)"
+    }
+  },
+  "api_responses_verified": {
+    "year_projections": "current_value=$6530.60, starting_daily_profit=$99.96 (current balance at test time)",
+    "daily_projection_count": "365+ days of projections from effective_start_date through 1 year future"
+  }
+}
