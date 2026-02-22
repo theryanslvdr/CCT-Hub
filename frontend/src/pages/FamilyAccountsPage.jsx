@@ -590,6 +590,13 @@ export default function FamilyAccountsPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-6" data-testid="family-accounts-page">
+      {/* Demo mode warning */}
+      {isDemoSimulation && (
+        <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+          <p className="font-medium">Demo Mode</p>
+          <p className="text-sm mt-1">To manage family members, select a specific Honorary FA licensee from the Simulate View dropdown.</p>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
