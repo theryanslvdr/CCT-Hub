@@ -153,6 +153,27 @@ async def get_family_member_projections(db, member_doc: dict) -> list:
     return projections
 
 
+# ==================== HELPER: Robust license check ====================
+
+async def verify_honorary_fa_license(db, user: dict) -> dict:
+    """Verify user has an active honorary_fa license by checking the licenses collection directly.
+    Returns the license document if valid, raises HTTPException otherwise."""
+    # First check user document (fast path)
+    if user.get("license_type") == "honorary_fa":
+        license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+        if license and license.get("license_type") == "honorary_fa":
+            return license
+    
+    # Fallback: check licenses collection directly (handles missing user.license_type)
+    license = await db.licenses.find_one(
+        {"user_id": user["id"], "is_active": True, "license_type": "honorary_fa"},
+        {"_id": 0}
+    )
+    if not license:
+        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can access family accounts")
+    return license
+
+
 # ==================== LICENSEE ENDPOINTS ====================
 
 @router.get("/members")
