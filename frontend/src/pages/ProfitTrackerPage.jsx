@@ -436,7 +436,13 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
   
   let startMonthOffset = 0;
   
-  if (allDates.length > 0) {
+  // For licensees with an effectiveStartDate, use that to determine history months
+  // even if they have no personal trade logs or deposits
+  if (effectiveStartParsed) {
+    const monthsDiff = (today.getFullYear() - effectiveStartParsed.getFullYear()) * 12 +
+                       (today.getMonth() - effectiveStartParsed.getMonth());
+    startMonthOffset = -monthsDiff;
+  } else if (allDates.length > 0) {
     const earliestDate = new Date(allDates[0]);
     const monthsDiff = (today.getFullYear() - earliestDate.getFullYear()) * 12 + 
                        (today.getMonth() - earliestDate.getMonth());
