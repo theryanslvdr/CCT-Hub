@@ -563,12 +563,15 @@ async def admin_add_family_member(user_id: str, data: FamilyMemberCreate, user: 
         raise HTTPException(status_code=403, detail="Only Master Admin can add family members for users")
 
     target = await db.users.find_one({"id": user_id}, {"_id": 0})
-    if not target or target.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=400, detail="Target user must be an Honorary FA licensee")
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
+    # Check licenses collection directly (user.license_type may be unreliable)
+    license = await db.licenses.find_one(
+        {"user_id": user_id, "is_active": True, "license_type": "honorary_fa"}, {"_id": 0}
+    )
     if not license:
-        raise HTTPException(status_code=400, detail="No active license found")
+        raise HTTPException(status_code=400, detail="Target user must be an Honorary FA licensee")
 
     existing_count = await db.family_members.count_documents(
         {"parent_user_id": user_id, "is_active": True}
