@@ -371,9 +371,7 @@ async def request_family_withdrawal(member_id: str, data: FamilyWithdrawalReques
 async def get_family_withdrawals(user: dict = Depends(get_current_user)):
     """Get all family withdrawal requests for the licensee."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can view family withdrawals")
+    await verify_honorary_fa_license(db, user)
 
     withdrawals = await db.family_withdrawals.find(
         {"parent_user_id": user["id"]}, {"_id": 0}
@@ -386,9 +384,7 @@ async def get_family_withdrawals(user: dict = Depends(get_current_user)):
 async def parent_approve_withdrawal(withdrawal_id: str, user: dict = Depends(get_current_user)):
     """Parent licensee approves a family member's withdrawal request."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can approve withdrawals")
+    await verify_honorary_fa_license(db, user)
 
     withdrawal = await db.family_withdrawals.find_one(
         {"id": withdrawal_id, "parent_user_id": user["id"]}, {"_id": 0}
@@ -425,9 +421,7 @@ async def parent_approve_withdrawal(withdrawal_id: str, user: dict = Depends(get
 async def parent_reject_withdrawal(withdrawal_id: str, reason: str = "", user: dict = Depends(get_current_user)):
     """Parent licensee rejects a family member's withdrawal request."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can reject withdrawals")
+    await verify_honorary_fa_license(db, user)
 
     withdrawal = await db.family_withdrawals.find_one(
         {"id": withdrawal_id, "parent_user_id": user["id"]}, {"_id": 0}
