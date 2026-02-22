@@ -102,18 +102,23 @@ async def get_family_member_projections(db, member_doc: dict) -> list:
             overrides[override["date"]] = override
 
     # Quarterly compounding projection
+    # Formula: daily_profit = round((balance_at_quarter_start / 980) * 15, 2)
+    from utils.trading_days import get_holidays_for_range, is_trading_day as is_trading_day_with_holidays
+    
     projections = []
     current_balance = starting_amount
     current_quarter = get_quarter(start_dt)
     current_year = start_dt.year
-    quarter_lot_size = round(current_balance / 980, 2)
-    quarter_daily_profit = round(quarter_lot_size * 15, 2)
+    quarter_daily_profit = round((current_balance / 980) * 15, 2)
 
     current_date = start_dt
-    end_date = datetime.now(timezone.utc) + timedelta(days=365)
+    today = datetime.now(timezone.utc)
+    end_date = today + timedelta(days=365)
+    holidays = get_holidays_for_range(start_dt.year, end_date.year + 1)
 
     while current_date <= end_date:
-        if current_date.weekday() >= 5:
+        # Skip non-trading days (weekends + holidays)
+        if not is_trading_day_with_holidays(current_date, holidays):
             current_date += timedelta(days=1)
             continue
 
@@ -122,31 +127,37 @@ async def get_family_member_projections(db, member_doc: dict) -> list:
         new_quarter = get_quarter(current_date)
         new_year = current_date.year
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_lot_size = round(current_balance / 980, 2)
-            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            quarter_daily_profit = round((current_balance / 980) * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
 
-        override = overrides.get(date_str)
-        if override:
-            manager_traded = override.get("traded", False)
-        elif date_str in traded_dates:
+        is_future = current_date > today
+
+        # Past dates: use actual trade data. Future dates: assume manager trades.
+        if is_future:
             manager_traded = True
         else:
-            manager_traded = False
+            override = overrides.get(date_str)
+            if override:
+                manager_traded = override.get("traded", False)
+            elif date_str in traded_dates:
+                manager_traded = True
+            else:
+                manager_traded = False
 
         projections.append({
             "date": date_str,
-            "start_value": current_balance,
-            "account_value": current_balance + quarter_daily_profit if manager_traded else current_balance,
-            "lot_size": quarter_lot_size,
+            "start_value": round(current_balance, 2),
+            "account_value": round(current_balance + quarter_daily_profit, 2) if manager_traded else round(current_balance, 2),
+            "lot_size": round(current_balance / 980, 2),
             "daily_profit": quarter_daily_profit,
             "manager_traded": manager_traded,
-            "has_override": override is not None
+            "is_projected": is_future,
+            "has_override": date_str in overrides
         })
 
-        if manager_traded and current_date <= datetime.now(timezone.utc):
-            current_balance += quarter_daily_profit
+        if manager_traded:
+            current_balance = round(current_balance + quarter_daily_profit, 2)
 
         current_date += timedelta(days=1)
 
