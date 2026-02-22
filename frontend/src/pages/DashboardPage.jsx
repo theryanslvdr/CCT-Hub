@@ -680,7 +680,7 @@ export const DashboardPage = () => {
               <CardTitle className="text-white flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-blue-400" /> Growth Projections
               </CardTitle>
-              <p className="text-sm text-zinc-400">Projected values based on quarterly compounding at current trade frequency</p>
+              <p className="text-sm text-zinc-400">Projected values based on quarterly compounding (250 trading days/year)</p>
             </CardHeader>
             <CardContent>
               {yearProjections ? (
