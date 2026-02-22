@@ -254,9 +254,7 @@ async def add_family_member(data: FamilyMemberCreate, user: dict = Depends(get_c
 async def update_family_member(member_id: str, data: FamilyMemberUpdate, user: dict = Depends(get_current_user)):
     """Update a family member's info."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can edit family members")
+    await verify_honorary_fa_license(db, user)
 
     member = await db.family_members.find_one(
         {"id": member_id, "parent_user_id": user["id"], "is_active": True}
@@ -282,9 +280,7 @@ async def update_family_member(member_id: str, data: FamilyMemberUpdate, user: d
 async def remove_family_member(member_id: str, user: dict = Depends(get_current_user)):
     """Deactivate a family member."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can remove family members")
+    await verify_honorary_fa_license(db, user)
 
     member = await db.family_members.find_one(
         {"id": member_id, "parent_user_id": user["id"], "is_active": True}
@@ -300,9 +296,7 @@ async def remove_family_member(member_id: str, user: dict = Depends(get_current_
 async def get_family_member_projections_endpoint(member_id: str, user: dict = Depends(get_current_user)):
     """Get daily projections for a specific family member."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can view family projections")
+    await verify_honorary_fa_license(db, user)
 
     member = await db.family_members.find_one(
         {"id": member_id, "parent_user_id": user["id"], "is_active": True}, {"_id": 0}
@@ -327,9 +321,7 @@ async def get_family_member_projections_endpoint(member_id: str, user: dict = De
 async def request_family_withdrawal(member_id: str, data: FamilyWithdrawalRequest, user: dict = Depends(get_current_user)):
     """Family member withdrawal request (requires parent then admin approval)."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can request withdrawals")
+    await verify_honorary_fa_license(db, user)
 
     member = await db.family_members.find_one(
         {"id": member_id, "parent_user_id": user["id"], "is_active": True}, {"_id": 0}
