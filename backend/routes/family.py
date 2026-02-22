@@ -180,10 +180,7 @@ async def verify_honorary_fa_license(db, user: dict) -> dict:
 async def get_family_members(user: dict = Depends(get_current_user)):
     """Get all family members for the current licensee."""
     db = deps.db
-
-    # Verify user is an honorary_fa licensee
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can access family accounts")
+    await verify_honorary_fa_license(db, user)
 
     members = await db.family_members.find(
         {"parent_user_id": user["id"], "is_active": True}, {"_id": 0}
@@ -207,9 +204,7 @@ async def get_family_members(user: dict = Depends(get_current_user)):
 async def add_family_member(data: FamilyMemberCreate, user: dict = Depends(get_current_user)):
     """Add a family member to the licensee's account."""
     db = deps.db
-
-    if user.get("license_type") != "honorary_fa":
-        raise HTTPException(status_code=403, detail="Only Honorary FA licensees can add family members")
+    license = await verify_honorary_fa_license(db, user)
 
     # Check family member limit (max 5)
     existing_count = await db.family_members.count_documents(
@@ -218,8 +213,9 @@ async def add_family_member(data: FamilyMemberCreate, user: dict = Depends(get_c
     if existing_count >= 5:
         raise HTTPException(status_code=400, detail="Maximum 5 family members allowed per account")
 
-    # Get parent license
-    license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
+    # Get parent license (already verified by verify_honorary_fa_license)
+    if not license:
+        license = await db.licenses.find_one({"user_id": user["id"], "is_active": True}, {"_id": 0})
     if not license:
         raise HTTPException(status_code=400, detail="No active license found")
 
