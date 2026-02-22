@@ -129,21 +129,30 @@ export const DashboardPage = () => {
     if (!isLicenseeView) return;
     try {
       setProjectionError(false);
+      
+      // For simulated views, use admin endpoints with user_id
+      const targetUserId = isSimulating ? simulatedMemberId : null;
+      
       const [projRes, famRes] = await Promise.allSettled([
-        profitAPI.getLicenseeYearProjections(),
-        familyAPI.getMembers(),
+        profitAPI.getLicenseeYearProjections(targetUserId),
+        isSimulating && simulatedMemberId
+          ? familyAPI.adminGetMembers(simulatedMemberId)
+          : familyAPI.getMembers(),
       ]);
       if (projRes.status === 'fulfilled') {
         setYearProjections(projRes.value.data);
       } else {
+        console.error('Projection load failed:', projRes.reason);
         setProjectionError(true);
       }
-      if (famRes.status === 'fulfilled') setFamilyMembers(famRes.value.data?.members || []);
+      if (famRes.status === 'fulfilled') {
+        setFamilyMembers(famRes.value.data?.family_members || []);
+      }
     } catch (e) {
       console.error('Failed to load licensee data:', e);
       setProjectionError(true);
     }
-  }, [isLicenseeView]);
+  }, [isLicenseeView, isSimulating, simulatedMemberId]);
 
   useEffect(() => {
     loadDashboardData();
