@@ -152,9 +152,10 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
                   className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-starting-amount-input" />
               </div>
               <div>
-                <Label className="text-zinc-400 text-xs">Effective Start Date (optional)</Label>
+                <Label className="text-zinc-400 text-xs">Deposit Date *</Label>
                 <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-start-date-input" />
+                  className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-deposit-date-input" />
+                <p className="text-zinc-500 text-[11px] mt-1">Trading starts on the next trading day after this date</p>
               </div>
             </>
           )}
