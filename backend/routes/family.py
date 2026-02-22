@@ -573,7 +573,16 @@ async def admin_add_family_member(user_id: str, data: FamilyMemberCreate, user: 
     if existing_count >= 5:
         raise HTTPException(status_code=400, detail="Maximum 5 family members allowed per account")
 
-    effective_start = data.effective_start_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    # Calculate effective_start_date from deposit_date (next trading day after deposit)
+    if data.deposit_date:
+        effective_start = get_next_trading_day(data.deposit_date)
+        deposit_date = data.deposit_date
+    elif data.effective_start_date:
+        effective_start = data.effective_start_date
+        deposit_date = data.effective_start_date
+    else:
+        deposit_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        effective_start = get_next_trading_day(deposit_date)
 
     member_id = str(uuid.uuid4())
     member = {
@@ -584,6 +593,7 @@ async def admin_add_family_member(user_id: str, data: FamilyMemberCreate, user: 
         "relationship": data.relationship,
         "email": data.email,
         "starting_amount": data.starting_amount,
+        "deposit_date": deposit_date,
         "effective_start_date": effective_start,
         "is_active": True,
         "created_at": datetime.now(timezone.utc).isoformat()
