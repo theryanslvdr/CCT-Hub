@@ -125,6 +125,7 @@ export const familyAPI = {
   adminAddMember: (userId, data) => api.post(`/admin/family/members/${userId}`, data),
   adminGetMemberProjections: (userId, memberId) => api.get(`/admin/family/members/${userId}/${memberId}/projections`),
   adminResetFamilyMember: (userId, memberId, data) => api.put(`/admin/family/members/${userId}/${memberId}/reset`, data),
+  adminRemoveMember: (userId, memberId) => api.delete(`/admin/family/members/${userId}/${memberId}`),
   adminGetWithdrawals: () => api.get('/admin/family/withdrawals'),
   adminApproveWithdrawal: (id) => api.put(`/admin/family/withdrawals/${id}/approve`),
   adminRejectWithdrawal: (id, reason) => api.put(`/admin/family/withdrawals/${id}/reject`, null, { params: { reason } }),
