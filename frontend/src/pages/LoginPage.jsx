@@ -41,6 +41,15 @@ export const LoginPage = () => {
   const [forceConfirmPassword, setForceConfirmPassword] = useState('');
   const [forceChanging, setForceChanging] = useState(false);
 
+  // Forgot Password states
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [forgotStep, setForgotStep] = useState('email'); // 'email', 'token', 'success'
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+
   // Load platform settings for logo and maintenance mode
   useEffect(() => {
     const loadSettings = async () => {
