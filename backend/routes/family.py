@@ -37,6 +37,20 @@ class FamilyWithdrawalRequest(BaseModel):
 
 # ==================== HELPER ====================
 
+def get_next_trading_day(date_str: str) -> str:
+    """Given a deposit date (YYYY-MM-DD), return the next trading day (weekday, skipping weekends)."""
+    try:
+        dt = datetime.strptime(date_str[:10], "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return date_str
+    # Move to the next day first
+    dt += timedelta(days=1)
+    # Skip weekends
+    while dt.weekday() >= 5:  # 5=Saturday, 6=Sunday
+        dt += timedelta(days=1)
+    return dt.strftime("%Y-%m-%d")
+
+
 async def calculate_family_member_value(db, member_doc: dict) -> float:
     """Calculate account value for a family member using the same logic as honorary licensees."""
     from utils.calculations import calculate_honorary_licensee_value
