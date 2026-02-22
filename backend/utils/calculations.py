@@ -71,11 +71,11 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
             overrides[override["date"]] = override
 
     # Calculate with quarterly compounding
+    # Formula: daily_profit = round((balance_at_quarter_start / 980) * 15, 2)
     current_balance = starting_amount
     current_quarter = _get_quarter(start_date)
     current_year = start_date.year
-    quarter_lot_size = round(current_balance / 980, 2)
-    quarter_daily_profit = round(quarter_lot_size * 15, 2)
+    quarter_daily_profit = round((current_balance / 980) * 15, 2)
 
     current_date = start_date
     today = datetime.now(timezone.utc)
@@ -91,8 +91,7 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
         new_quarter = _get_quarter(current_date)
         new_year = current_date.year
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_lot_size = round(current_balance / 980, 2)
-            quarter_daily_profit = round(quarter_lot_size * 15, 2)
+            quarter_daily_profit = round((current_balance / 980) * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
 
@@ -106,7 +105,7 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
             manager_traded = False
 
         if manager_traded:
-            current_balance += quarter_daily_profit
+            current_balance = round(current_balance + quarter_daily_profit, 2)
             trade_days_counted += 1
 
         current_date += timedelta(days=1)
