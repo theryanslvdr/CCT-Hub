@@ -573,7 +573,7 @@ export default function FamilyAccountsPage() {
     return (
       <div className="max-w-5xl mx-auto p-4 md:p-6" data-testid="family-accounts-page">
         <MemberDetailView member={viewingMember} onBack={() => setViewingMember(null)}
-          isAdminSimulation={isAdminSimulation} parentUserId={effectiveUserId} />
+          isAdminSimulation={isAdminSimulation} parentUserId={simulatedUserId || effectiveUserId} />
         {!isAdminSimulation && (
           <div className="mt-4">
             <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white"
