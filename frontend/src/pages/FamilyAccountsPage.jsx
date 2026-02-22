@@ -493,7 +493,9 @@ export default function FamilyAccountsPage() {
         isAdminSimulation && simulatedUserId
           ? familyAPI.adminGetMembers(simulatedUserId)
           : familyAPI.getMembers(),
-        familyAPI.getWithdrawals().catch(() => ({ data: { withdrawals: [] } }))
+        isAdminSimulation
+          ? familyAPI.adminGetWithdrawals().catch(() => ({ data: { withdrawals: [] } }))
+          : familyAPI.getWithdrawals().catch(() => ({ data: { withdrawals: [] } }))
       ]);
       setMembers(membersRes.data.family_members || []);
       setWithdrawals(withdrawalsRes.data.withdrawals || []);
