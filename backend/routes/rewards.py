@@ -392,11 +392,11 @@ async def run_system_check(user: dict = Depends(deps.require_master_admin)):
         await db.rewards_point_logs.delete_many({"user_id": test_user_id})
         await db.rewards_redemptions.delete_many({"user_id": test_user_id})
 
-    except AssertionError as e:
-        results.append({"step": "ASSERTION FAILED", "status": "fail", "error": str(e)})
+    except AssertionError as exc:
+        results.append({"step": "ASSERTION FAILED", "status": "fail", "error": str(exc)})
         overall_pass = False
-    except Exception as e:
-        results.append({"step": "UNEXPECTED ERROR", "status": "fail", "error": str(e)})
+    except Exception as exc:
+        results.append({"step": "UNEXPECTED ERROR", "status": "fail", "error": str(exc)})
         overall_pass = False
 
     return {
