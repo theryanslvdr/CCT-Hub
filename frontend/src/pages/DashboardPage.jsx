@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBVE } from '@/contexts/BVEContext';
-import { profitAPI, tradeAPI, currencyAPI, adminAPI, familyAPI } from '@/lib/api';
+import { profitAPI, tradeAPI, currencyAPI, adminAPI, familyAPI, rewardsAPI } from '@/lib/api';
 import api from '@/lib/api';
 import { formatCurrency, formatCurrencyCompact, formatNumber, formatNumberCompact } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { MissedTradersWidget } from '@/components/admin/MissedTradersWidget';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 export const DashboardPage = () => {
