@@ -93,6 +93,7 @@ function App() {
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/daily-summary" element={<DailyTradeSummaryPage />} />
+            <Route path="/admin/system-check" element={<SystemCheckPage />} />
           </Route>
 
           {/* Default redirect */}
