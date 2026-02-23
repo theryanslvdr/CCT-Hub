@@ -155,6 +155,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/affiliate', icon: Share2, label: 'Affiliate Center', id: 'affiliate', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
+    { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards' },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
@@ -173,6 +174,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   // Super/Master Admin only items
   const superAdminItems = [
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
+    { path: '/admin/rewards', icon: Star, label: 'Rewards Admin' },
     { path: '/admin/system-check', icon: Shield, label: 'System Check' },
   ];
 
