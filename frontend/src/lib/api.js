@@ -263,6 +263,8 @@ export const adminAPI = {
   }),
   updateLicenseeTransaction: (txId, data) => api.put(`/admin/licensee-transactions/${txId}`, data),
   deleteLicenseeTransaction: (txId) => api.delete(`/admin/licensee-transactions/${txId}`),
+  // Licensee Health Check (one-click diagnostic)
+  licenseeHealthCheck: () => api.post('/admin/licensee-health-check'),
 };
 
 // Licensee APIs (for licensed users)
