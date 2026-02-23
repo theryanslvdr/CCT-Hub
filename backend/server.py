@@ -7650,6 +7650,61 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
         raise HTTPException(status_code=500, detail=f"Projection calculation error: {str(e)}")
 
 
+@admin_router.post("/licensee-health-check")
+async def licensee_health_check(user: dict = Depends(require_admin)):
+    """One-click diagnostic: validates ALL active honorary licensees and their projections.
+    Returns per-user status and auto-fixes missing fields where possible."""
+    from utils.calculations import calculate_honorary_licensee_value
+    from utils.trading_days import project_quarterly_growth, get_holidays_for_range
+
+    results = []
+    fixed = 0
+    today = datetime.now(timezone.utc)
+    holidays = get_holidays_for_range(today.year, today.year + 6)
+
+    async for lic in db.licenses.find({"is_active": True, "license_type": {"$regex": "^honorary"}}, {"_id": 0}):
+        uid = lic.get("user_id")
+        user_doc = await db.users.find_one({"id": uid}, {"_id": 0, "email": 1, "first_name": 1, "last_name": 1}) if uid else None
+        email = user_doc.get("email", "?") if user_doc else "no_user"
+        entry = {"user_id": uid, "email": email, "license_type": lic.get("license_type"), "status": "ok", "issues": [], "fixes": []}
+
+        # Check start date
+        eff = lic.get("effective_start_date") or lic.get("start_date")
+        if not eff:
+            entry["issues"].append("missing_start_date")
+            if lic.get("created_at"):
+                await db.licenses.update_one({"user_id": uid, "is_active": True}, {"$set": {"start_date": str(lic["created_at"])[:10]}})
+                entry["fixes"].append("set_start_date_from_created_at")
+                fixed += 1
+            entry["status"] = "fixed" if entry["fixes"] else "broken"
+        if not uid:
+            entry["issues"].append("missing_user_id")
+            entry["status"] = "broken"
+
+        # Try projection
+        try:
+            cv = await calculate_honorary_licensee_value(db, lic)
+            entry["current_value"] = round(cv, 2)
+            proj = project_quarterly_growth(cv, today, 250, holidays)
+            entry["1yr_projection"] = round(proj["projected_value"], 2)
+        except Exception as e:
+            entry["issues"].append(f"projection_error: {str(e)}")
+            entry["status"] = "broken"
+
+        results.append(entry)
+
+    ok = sum(1 for r in results if r["status"] == "ok")
+    broken = sum(1 for r in results if r["status"] == "broken")
+    return {
+        "total": len(results),
+        "ok": ok,
+        "broken": broken,
+        "fixed": fixed,
+        "results": results
+    }
+
+
+
 class SendEmailRequest(BaseModel):
     subject: str
     body: str
