@@ -132,6 +132,17 @@ export const familyAPI = {
   adminRejectWithdrawal: (id, reason) => api.put(`/admin/family/withdrawals/${id}/reject`, null, { params: { reason } }),
 };
 
+// Rewards APIs
+export const rewardsAPI = {
+  getSummary: (userId) => api.get('/rewards/summary', { params: { user_id: userId } }),
+  getLeaderboard: (userId) => api.get('/rewards/leaderboard', { params: { user_id: userId } }),
+  getHistory: (userId = null, limit = 100) => api.get('/rewards/history', { params: { ...(userId ? { user_id: userId } : {}), limit } }),
+  // Admin
+  adminLookup: (params) => api.get('/rewards/admin/lookup', { params }),
+  adminSimulate: (data) => api.post('/rewards/admin/simulate', data),
+  systemCheck: () => api.post('/rewards/system-check'),
+};
+
 // Trade Monitor APIs
 export const tradeAPI = {
   logTrade: (data) => api.post('/trade/log', data),
