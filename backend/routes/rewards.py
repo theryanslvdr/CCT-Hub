@@ -216,7 +216,7 @@ async def credit_points(req: CreditRequest, _: bool = Depends(verify_internal_ke
     Protected - manually credit points to a user (admin/internal only)."""
     db = deps.db
 
-    awarded = await award_points(db, req.user_id, req.points, req.source, req.metadata)
+    await award_points(db, req.user_id, req.points, req.source, req.metadata)
 
     updated = await db.rewards_stats.find_one({"user_id": req.user_id}, {"_id": 0})
     return {
