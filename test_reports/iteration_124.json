@@ -1,0 +1,101 @@
+{
+  "summary": "Iteration 124: Bug Fix Verification - ALL TESTS PASSED. 3 bug fixes verified: 1) Licensee year-projections endpoint with try/except wrapper working correctly, 2) CrossCurrent Rewards card hidden for licensees, 3) 'Open Rewards & Store' link contains /store path. Backend: 10/10 tests passed. Frontend: All licensee features verified working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All dialogs/modals",
+        "issues": ["Console warnings about DialogContent requiring DialogTitle for accessibility - not critical but should be addressed for a11y compliance"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_124_bugfixes.py",
+    "/app/test_reports/pytest/pytest_iteration_124.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_iteration_124_bugfixes.py"],
+  "success_rate": {
+    "backend": "100% (10/10 bug fix tests passed)",
+    "frontend": "100% - All 3 bug fixes verified"
+  },
+  "test_credentials": {
+    "admin_email": "iam@ryansalvador.com",
+    "admin_password": "admin123",
+    "licensee_email": "rizza.miles@gmail.com",
+    "licensee_password": "rizza123"
+  },
+  "verified_bug_fixes": {
+    "bug_1_projection_failures": {
+      "issue": "Failed to load projections on licensee dashboard (RECURRING REGRESSION)",
+      "fix": "Backend projection endpoint hardened with try/except wrapper at line 7584-7650",
+      "frontend_fix": "Auto-retry mechanism added (2 retries) in loadLicenseeData at DashboardPage.jsx line 130-178",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "Backend test: test_licensee_direct_year_projections PASSED",
+        "Backend test: test_admin_view_licensee_year_projections PASSED",
+        "Backend test: test_all_honorary_licensees_projections_work PASSED (all 6 licensees)",
+        "Frontend: Rizza dashboard shows projections: 1yr=$106K, 2yr=$1.55M, 3yr=$22.7M, 5yr=$4.85B",
+        "Frontend: No 'Failed to load projections' error found on page"
+      ]
+    },
+    "bug_2_rewards_card_hidden": {
+      "issue": "CrossCurrent Rewards card should be HIDDEN for licensees (not part of rewards program)",
+      "fix": "Frontend condition at DashboardPage.jsx line 436: (isMember || isSimulating) && !isLicenseeView",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "Frontend: Rizza (licensee) dashboard - Rewards card NOT visible",
+        "Frontend: My Rewards nav item NOT visible in sidebar for licensee",
+        "Frontend: Admin dashboard - My Rewards nav IS visible (admin is not licensee)"
+      ]
+    },
+    "bug_3_rewards_store_link": {
+      "issue": "'Open Rewards & Store' link goes to homepage not store panel",
+      "fix": "Store link updated to /store path in DashboardPage.jsx and MyRewardsPage.jsx",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "My Rewards page: 'Open Rewards & Store' href = https://rewards.crosscur.rent/store?user_id=xxx",
+        "Link correctly contains /store path"
+      ]
+    },
+    "feature_licensee_health_check": {
+      "description": "One-click admin endpoint POST /api/admin/licensee-health-check",
+      "status": "VERIFIED WORKING",
+      "evidence": [
+        "Backend test: test_licensee_health_check_returns_all_licensees PASSED",
+        "Backend test: test_health_check_includes_projection_values PASSED",
+        "Returns: total, ok, broken, fixed counts + per-user status"
+      ]
+    }
+  },
+  "projection_values_verified": {
+    "rizza_miles": {
+      "account_value": 6530.60,
+      "total_profit": 1530.60,
+      "total_trades": 20,
+      "performance_rate": "30.6%",
+      "1_year_projection": "$106K",
+      "2_year_projection": "$1.55M",
+      "3_year_projection": "$22.7M",
+      "5_year_projection": "$4.85B"
+    }
+  },
+  "sidebar_visibility_for_licensee": {
+    "visible": ["Dashboard", "Profit Tracker", "Deposit/Withdrawal", "Family Accounts"],
+    "hidden": ["Trade Monitor", "Daily Habits", "Affiliate Center", "My Rewards"]
+  },
+  "seed_data_creation": "None - used existing licensee accounts",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 3 bug fixes verified working. Projection endpoint is now hardened with try/except and returns proper 404/500 errors instead of crashing. Rewards card visibility logic: (isMember || isSimulating) && !isLicenseeView - this ensures licensees don't see it. Admin simulation flow: Simulate View dropdown → Honorary Licensee View → Select specific licensee → Start Simulation. The simulation dropdown uses shadcn Select component - wait for options to load before selecting.",
+  "mocked_apis": {
+    "cloudinary": "MOCKED - Image upload is mocked",
+    "chatbase": "MOCKED - Analytics is mocked"
+  }
+}
