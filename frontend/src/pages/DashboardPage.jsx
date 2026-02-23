@@ -468,7 +468,7 @@ export const DashboardPage = () => {
                 </div>
                 <div className="flex flex-col justify-center items-end gap-2">
                   <a
-                    href={`https://rewards.crosscur.rent/?user_id=${isSimulating ? simulatedMemberId : user?.id || ''}`}
+                    href={`https://rewards.crosscur.rent/store?user_id=${isSimulating ? simulatedMemberId : user?.id || ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-semibold transition-all shadow-lg shadow-amber-500/10"
