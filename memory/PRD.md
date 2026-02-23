@@ -104,6 +104,13 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
   - 8 API integration tests (year projections, daily projections, summary consistency, admin access)
 - **Purpose:** Prevent recurring honorary licensee projection breakage (has broken 4+ times)
 - **Status:** All 21 tests PASSING
+- **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
+
+### Recurring Bug Mitigations (Feb 23, 2026)
+- Backend projection endpoint wrapped in bulletproof try/except — never returns 500 crash
+- Frontend auto-retry: `loadLicenseeData` retries up to 2 times with 1s delay before showing error
+- Guard: skips projection call when admin simulates without selecting a specific member
+- Rewards card hidden for licensees: `(isMember || isSimulating) && !isLicenseeView`
 
 ## Prioritized Backlog
 
