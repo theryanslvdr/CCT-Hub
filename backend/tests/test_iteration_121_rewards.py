@@ -40,7 +40,8 @@ def admin_token():
         json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD}
     )
     if response.status_code == 200:
-        return response.json().get("token")
+        data = response.json()
+        return data.get("access_token") or data.get("token")
     pytest.skip(f"Admin auth failed: {response.status_code}")
 
 
@@ -52,7 +53,8 @@ def licensee_token():
         json={"email": LICENSEE_EMAIL, "password": LICENSEE_PASSWORD}
     )
     if response.status_code == 200:
-        return response.json().get("token")
+        data = response.json()
+        return data.get("access_token") or data.get("token")
     pytest.skip(f"Licensee auth failed: {response.status_code}")
 
 
