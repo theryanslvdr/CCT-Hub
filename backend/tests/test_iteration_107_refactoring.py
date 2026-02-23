@@ -15,7 +15,7 @@ import os
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 if not BASE_URL:
-    BASE_URL = "https://family-member-patch.preview.emergentagent.com"
+    BASE_URL = "https://stupefied-elion-3.preview.emergentagent.com"
 
 
 class TestAuth:
