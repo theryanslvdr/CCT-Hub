@@ -891,6 +891,35 @@ export const DashboardPage = () => {
         </div>
       )}
 
+      {/* Rewards Button - for all members */}
+      {(isMember || isSimulating) && !isAdmin() && (
+        <Card className="glass-card" data-testid="rewards-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">CrossCurrent Rewards</p>
+                  <p className="text-xs text-zinc-400">Earn points, climb the leaderboard, redeem rewards</p>
+                </div>
+              </div>
+              <a
+                href={`https://rewards.crosscur.rent/?user_id=${user?.id || ''}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors"
+                data-testid="view-rewards-btn"
+              >
+                View Rewards & Store
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Original Layout for Admins (no tabs) - hide when simulating a licensee */}
       {!isMember && !isLicenseeView && (
         <>
