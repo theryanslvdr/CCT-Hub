@@ -156,7 +156,7 @@ export default function MyRewardsPage() {
 
       {/* CTA */}
       <a
-        href={`https://rewards.crosscur.rent/?user_id=${user?.id}`}
+        href={`https://rewards.crosscur.rent/store?user_id=${user?.id}`}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold transition-all"
