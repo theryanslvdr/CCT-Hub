@@ -973,8 +973,6 @@ export const DashboardPage = () => {
         </div>
       )}
 
-      {/* Rewards Button - for all members */}
-
       {/* Original Layout for Admins (no tabs) - hide when simulating a licensee */}
       {!isMember && !isLicenseeView && (
         <>
