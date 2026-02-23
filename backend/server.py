@@ -9095,9 +9095,56 @@ async def startup_db():
         await db.global_holidays.create_index("date", unique=True)  # For holiday lookups
         await db.trading_products.create_index("id")  # For product lookups
         await db.licenses.create_index([("user_id", 1), ("is_active", 1)])  # For license checks
+        # Rewards system indexes
+        await db.rewards_stats.create_index("user_id", unique=True)
+        await db.rewards_leaderboard.create_index([("month", 1), ("rank", 1)])
+        await db.rewards_leaderboard.create_index([("user_id", 1), ("month", 1)], unique=True)
+        await db.rewards_point_logs.create_index([("user_id", 1), ("created_at", -1)])
+        await db.rewards_promotions.create_index("is_active")
         logger.info("Database indexes created")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
+    
+    # Seed rewards promotion rules
+    try:
+        existing = await db.rewards_promotions.count_documents({})
+        if existing == 0:
+            from datetime import timezone as tz
+            now = datetime.now(tz.utc)
+            await db.rewards_promotions.insert_many([
+                {
+                    "id": "promo_continuous_base",
+                    "name": "Base Continuous Rewards",
+                    "type": "continuous",
+                    "start_date": "2020-01-01T00:00:00+00:00",
+                    "end_date": "2099-12-31T23:59:59+00:00",
+                    "multiplier": 1.0,
+                    "is_active": True,
+                    "rules_json": {
+                        "signup_verify": 25, "join_community": 5, "first_trade": 25,
+                        "first_daily_win": 10, "help_chat": 5, "qualified_referral": 150,
+                        "deposit": 50, "withdrawal": 5, "streak_5_day": 50,
+                        "milestone_10_trade": 125, "milestone_20_trade_streak": 20,
+                    },
+                    "created_at": now.isoformat(),
+                },
+                {
+                    "id": "promo_hot_summer",
+                    "name": "Hot Summer Night's Dream - March 2026",
+                    "type": "seasonal",
+                    "start_date": "2026-03-01T00:00:00+00:00",
+                    "end_date": "2026-03-31T23:59:59+00:00",
+                    "multiplier": 2.0,
+                    "is_active": True,
+                    "rules_json": {
+                        "deposit": True, "first_trade": True, "qualified_referral": True,
+                    },
+                    "created_at": now.isoformat(),
+                },
+            ])
+            logger.info("Seeded rewards promotion rules")
+    except Exception as e:
+        logger.warning(f"Rewards seed warning: {e}")
     
     # Initialize websocket service with database reference
     set_websocket_database(db)
