@@ -37,6 +37,8 @@ export const DashboardPage = () => {
   const [yearProjections, setYearProjections] = useState(null);
   const [familyMembers, setFamilyMembers] = useState([]);
   const [projectionError, setProjectionError] = useState(false);
+  const [rewardsSummary, setRewardsSummary] = useState(null);
+  const [rewardsLeaderboard, setRewardsLeaderboard] = useState(null);
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
