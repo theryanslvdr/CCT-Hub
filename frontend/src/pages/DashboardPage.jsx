@@ -911,31 +911,72 @@ export const DashboardPage = () => {
       )}
 
       {/* Rewards Button - for all members */}
-      {(isMember || isSimulating) && !isAdmin() && (
-        <Card className="glass-card" data-testid="rewards-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-amber-400" />
+      {/* Rewards section — visible for all members and in simulation */}
+      {(isMember || isSimulating) && (
+        <Card className="glass-card overflow-hidden" data-testid="rewards-card">
+          <div className="relative">
+            {/* Accent gradient bar */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500" />
+            <CardContent className="pt-6 pb-5 px-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Star className="w-5 h-5 text-amber-400" />
+                <span className="text-sm font-semibold text-white tracking-wide">CrossCurrent Rewards</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Points balance */}
+                <div data-testid="rewards-dash-points">
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Points</p>
+                  <p className="text-xl font-bold font-mono text-white mt-0.5">{(rewardsSummary?.lifetime_points || 0).toLocaleString()}</p>
+                  <p className="text-xs text-emerald-400 font-mono">~${(rewardsSummary?.estimated_usdt || 0).toFixed(2)} USDT</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">CrossCurrent Rewards</p>
-                  <p className="text-xs text-zinc-400">Earn points, climb the leaderboard, redeem rewards</p>
+                {/* Level */}
+                <div data-testid="rewards-dash-level">
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Level</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Award className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-bold text-white">{rewardsSummary?.level || 'Newbie'}</span>
+                  </div>
+                </div>
+                {/* Monthly Rank */}
+                <div data-testid="rewards-dash-rank">
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Monthly Rank</p>
+                  <p className="text-xl font-bold font-mono text-white mt-0.5">
+                    {rewardsLeaderboard?.current_rank ? `#${rewardsLeaderboard.current_rank}` : '--'}
+                  </p>
+                  {rewardsLeaderboard?.distance_to_next > 0 && (
+                    <p className="text-[10px] text-cyan-400 truncate">
+                      {rewardsLeaderboard.distance_to_next} pts to #{(rewardsLeaderboard.current_rank || 1) - 1}
+                    </p>
+                  )}
+                </div>
+                {/* CTA */}
+                <div className="flex flex-col justify-center items-end gap-2">
+                  <a
+                    href={`https://rewards.crosscur.rent/?user_id=${isSimulating ? simulatedMemberId : user?.id || ''}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-semibold transition-all shadow-lg shadow-amber-500/10"
+                    data-testid="open-rewards-store-btn"
+                  >
+                    Open Rewards & Store
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  <a href="/my-rewards" className="text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors" data-testid="view-all-rewards-link">
+                    View all rewards details →
+                  </a>
                 </div>
               </div>
-              <a
-                href={`https://rewards.crosscur.rent/?user_id=${user?.id || ''}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors"
-                data-testid="view-rewards-btn"
-              >
-                View Rewards & Store
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </CardContent>
+              {/* Motivational message */}
+              {rewardsLeaderboard?.suggested_message && (
+                <div className="mt-3 px-3 py-2 rounded-lg bg-blue-500/8 border border-blue-500/15">
+                  <p className="text-xs text-blue-300 flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 flex-shrink-0" />
+                    {rewardsLeaderboard.suggested_message}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </div>
         </Card>
       )}
 
