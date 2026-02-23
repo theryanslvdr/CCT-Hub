@@ -164,6 +164,23 @@ export const DashboardPage = () => {
     loadLicenseeData();
   }, [loadLicenseeData, summary]);
 
+  // Load rewards data
+  useEffect(() => {
+    const uid = isSimulating ? simulatedMemberId : user?.id;
+    if (!uid) return;
+    const loadRewards = async () => {
+      try {
+        const [sumRes, lbRes] = await Promise.allSettled([
+          rewardsAPI.getSummary(uid),
+          rewardsAPI.getLeaderboard(uid),
+        ]);
+        if (sumRes.status === 'fulfilled') setRewardsSummary(sumRes.value.data);
+        if (lbRes.status === 'fulfilled') setRewardsLeaderboard(lbRes.value.data);
+      } catch (e) { /* silent */ }
+    };
+    loadRewards();
+  }, [user?.id, isSimulating, simulatedMemberId]);
+
   // Define KPI cards - filter based on licensee view
   const allKpiCards = [
     {
