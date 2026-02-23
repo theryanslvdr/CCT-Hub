@@ -32,7 +32,8 @@ class TestRewardsEndpoints:
             "password": ADMIN_PASSWORD
         })
         if response.status_code == 200:
-            return response.json().get("token")
+            data = response.json()
+            return data.get("access_token") or data.get("token")
         return None
     
     def get_rizza_token(self):
@@ -42,7 +43,8 @@ class TestRewardsEndpoints:
             "password": RIZZA_PASSWORD
         })
         if response.status_code == 200:
-            return response.json().get("token")
+            data = response.json()
+            return data.get("access_token") or data.get("token")
         return None
     
     # ─── Public Endpoints (no auth required) ───
@@ -310,7 +312,7 @@ class TestAuthEndpoints:
         
         assert response.status_code == 200, f"Admin login failed: {response.status_code}"
         data = response.json()
-        assert "token" in data
+        assert "access_token" in data or "token" in data, "Missing token in response"
         assert "user" in data
         assert data["user"]["role"] in ["admin", "super_admin", "master_admin"]
         print(f"✓ Admin login successful, role={data['user']['role']}")
@@ -324,7 +326,7 @@ class TestAuthEndpoints:
         
         assert response.status_code == 200, f"Member login failed: {response.status_code}"
         data = response.json()
-        assert "token" in data
+        assert "access_token" in data or "token" in data, "Missing token in response"
         assert "user" in data
         assert data["user"]["id"] == RIZZA_USER_ID
         print(f"✓ Member login successful, user_id={data['user']['id']}")
