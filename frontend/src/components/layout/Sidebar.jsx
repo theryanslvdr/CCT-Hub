@@ -173,6 +173,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   // Super/Master Admin only items
   const superAdminItems = [
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
+    { path: '/admin/system-check', icon: Shield, label: 'System Check' },
   ];
 
   // Check if user or simulated view is a licensee
