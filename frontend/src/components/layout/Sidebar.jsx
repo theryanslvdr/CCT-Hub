@@ -190,8 +190,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     const baseDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || [];
     // For licensees, only include dashboard and profile (no habits/affiliate)
     const alwaysInclude = isLicenseeView
-      ? ['dashboard', 'profile']
-      : ['dashboard', 'profile', 'habits', 'affiliate'];
+      ? ['dashboard', 'profile', 'my_rewards']
+      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_rewards'];
     const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
     
     return memberNavItems.filter(item => {
