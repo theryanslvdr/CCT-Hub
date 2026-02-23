@@ -35,6 +35,8 @@ import HabitTrackerPage from "./pages/HabitTrackerPage";
 import AffiliateCenterPage from "./pages/AffiliateCenterPage";
 import FamilyAccountsPage from "./pages/FamilyAccountsPage";
 import SystemCheckPage from "./pages/admin/SystemCheckPage";
+import MyRewardsPage from "./pages/MyRewardsPage";
+import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -83,6 +85,7 @@ function App() {
             <Route path="/habits" element={<HabitTrackerPage />} />
             <Route path="/affiliate" element={<AffiliateCenterPage />} />
             <Route path="/family-accounts" element={<FamilyAccountsPage />} />
+            <Route path="/my-rewards" element={<MyRewardsPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
@@ -94,6 +97,7 @@ function App() {
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/daily-summary" element={<DailyTradeSummaryPage />} />
             <Route path="/admin/system-check" element={<SystemCheckPage />} />
+            <Route path="/admin/rewards" element={<RewardsAdminPage />} />
           </Route>
 
           {/* Default redirect */}
