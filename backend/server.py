@@ -7581,56 +7581,73 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
     Projections assume manager trades every trading day (weekdays excl. US market holidays).
     Admin can pass ?user_id=xxx to get projections for a specific licensee.
     """
-    from utils.trading_days import project_quarterly_growth, get_holidays_for_range
+    try:
+        from utils.trading_days import project_quarterly_growth, get_holidays_for_range
 
-    target_user_id = user["id"]
-    if user_id and user.get("role") in ("master_admin", "super_admin", "admin"):
-        target_user_id = user_id
-    
-    license = await db.licenses.find_one(
-        {"user_id": target_user_id, "is_active": True},
-        {"_id": 0}
-    )
-    if not license:
-        raise HTTPException(status_code=404, detail="No active license found")
-    
-    from utils.calculations import calculate_honorary_licensee_value
-    current_value = await calculate_honorary_licensee_value(db, license)
-    starting_amount = license.get("starting_amount", 0)
-    
-    today = datetime.now(timezone.utc)
-    holidays = get_holidays_for_range(today.year, today.year + 6)
-    
-    # Starting quarter daily profit (for display)
-    starting_daily_profit = round((current_value / 980) * 15, 2)
-    
-    # Project forward 1, 2, 3, 5 years (each year = 250 trading days)
-    projections = []
-    for years in [1, 2, 3, 5]:
-        trading_days = years * 250
-        result = project_quarterly_growth(current_value, today, trading_days, holidays)
+        target_user_id = user["id"]
+        if user_id and user.get("role") in ("master_admin", "super_admin", "admin", "basic_admin"):
+            target_user_id = user_id
         
-        total_profit = round(result["projected_value"] - starting_amount, 2)
-        growth_pct = round(((result["projected_value"] / starting_amount) - 1) * 100, 1) if starting_amount > 0 else 0
+        # Find any active honorary/honorary_fa license for this user
+        license = await db.licenses.find_one(
+            {"user_id": target_user_id, "is_active": True, "license_type": {"$regex": "^honorary"}},
+            {"_id": 0}
+        )
+        if not license:
+            # Fallback: any active license
+            license = await db.licenses.find_one(
+                {"user_id": target_user_id, "is_active": True},
+                {"_id": 0}
+            )
+        if not license:
+            raise HTTPException(status_code=404, detail="No active license found")
         
-        projections.append({
-            "years": years,
-            "projected_value": result["projected_value"],
-            "total_profit": total_profit,
-            "profit_from_current": result["total_profit"],
-            "growth_percent": growth_pct,
-            "trading_days": result["trading_days"],
-            "quarter_breakdown": result["quarter_breakdown"]
-        })
-    
-    return {
-        "current_value": round(current_value, 2),
-        "starting_amount": starting_amount,
-        "current_profit": round(current_value - starting_amount, 2),
-        "starting_daily_profit": starting_daily_profit,
-        "trading_days_per_year": 250,
-        "projections": projections
-    }
+        from utils.calculations import calculate_honorary_licensee_value
+        current_value = await calculate_honorary_licensee_value(db, license)
+        starting_amount = license.get("starting_amount", 0)
+        
+        # Guard against zero or negative values
+        if current_value <= 0:
+            current_value = starting_amount or 1.0
+        
+        today = datetime.now(timezone.utc)
+        holidays = get_holidays_for_range(today.year, today.year + 6)
+        
+        # Starting quarter daily profit (for display)
+        starting_daily_profit = round((current_value / 980) * 15, 2)
+        
+        # Project forward 1, 2, 3, 5 years (each year = 250 trading days)
+        projections = []
+        for years in [1, 2, 3, 5]:
+            trading_days = years * 250
+            result = project_quarterly_growth(current_value, today, trading_days, holidays)
+            
+            total_profit = round(result["projected_value"] - starting_amount, 2)
+            growth_pct = round(((result["projected_value"] / starting_amount) - 1) * 100, 1) if starting_amount > 0 else 0
+            
+            projections.append({
+                "years": years,
+                "projected_value": result["projected_value"],
+                "total_profit": total_profit,
+                "profit_from_current": result["total_profit"],
+                "growth_percent": growth_pct,
+                "trading_days": result["trading_days"],
+                "quarter_breakdown": result["quarter_breakdown"]
+            })
+        
+        return {
+            "current_value": round(current_value, 2),
+            "starting_amount": starting_amount,
+            "current_profit": round(current_value - starting_amount, 2),
+            "starting_daily_profit": starting_daily_profit,
+            "trading_days_per_year": 250,
+            "projections": projections
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Year projections failed for user_id={user_id or user.get('id')}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Projection calculation error: {str(e)}")
 
 
 class SendEmailRequest(BaseModel):
