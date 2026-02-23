@@ -127,32 +127,53 @@ export const DashboardPage = () => {
   }, [isSimulating, simulatedMemberId, simulatedAccountValue, simulatedTotalProfit, isInBVE]);
 
   // Load licensee-specific data (year projections + family members)
+  // AUTO-RETRY: retries up to 2 times to prevent transient failures
   const loadLicenseeData = useCallback(async () => {
     if (!isLicenseeView) return;
-    try {
-      setProjectionError(false);
-      
-      // For simulated views, use admin endpoints with user_id
-      const targetUserId = isSimulating ? simulatedMemberId : null;
-      
-      const [projRes, famRes] = await Promise.allSettled([
-        profitAPI.getLicenseeYearProjections(targetUserId),
-        isSimulating && simulatedMemberId
-          ? familyAPI.adminGetMembers(simulatedMemberId)
-          : familyAPI.getMembers(),
-      ]);
-      if (projRes.status === 'fulfilled') {
-        setYearProjections(projRes.value.data);
-      } else {
-        console.error('Projection load failed:', projRes.reason);
+    const maxRetries = 2;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        setProjectionError(false);
+        
+        // For simulated views, use admin endpoints with user_id
+        const targetUserId = isSimulating ? simulatedMemberId : null;
+        
+        // Don't call projection endpoint without a valid target for simulation
+        if (isSimulating && !simulatedMemberId) return;
+        
+        const [projRes, famRes] = await Promise.allSettled([
+          profitAPI.getLicenseeYearProjections(targetUserId),
+          isSimulating && simulatedMemberId
+            ? familyAPI.adminGetMembers(simulatedMemberId)
+            : familyAPI.getMembers(),
+        ]);
+        if (projRes.status === 'fulfilled') {
+          setYearProjections(projRes.value.data);
+          if (famRes.status === 'fulfilled') {
+            setFamilyMembers(famRes.value.data?.family_members || []);
+          }
+          return; // Success — stop retrying
+        } else {
+          if (attempt < maxRetries) {
+            console.warn(`Projection load attempt ${attempt + 1} failed, retrying...`);
+            await new Promise(r => setTimeout(r, 1000)); // 1s delay before retry
+            continue;
+          }
+          console.error('Projection load failed after retries:', projRes.reason);
+          setProjectionError(true);
+        }
+        if (famRes.status === 'fulfilled') {
+          setFamilyMembers(famRes.value.data?.family_members || []);
+        }
+        return;
+      } catch (e) {
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 1000));
+          continue;
+        }
+        console.error('Failed to load licensee data after retries:', e);
         setProjectionError(true);
       }
-      if (famRes.status === 'fulfilled') {
-        setFamilyMembers(famRes.value.data?.family_members || []);
-      }
-    } catch (e) {
-      console.error('Failed to load licensee data:', e);
-      setProjectionError(true);
     }
   }, [isLicenseeView, isSimulating, simulatedMemberId]);
 
