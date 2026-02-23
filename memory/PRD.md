@@ -70,8 +70,23 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - Frontend page at `/admin/system-check` with one-click validation
 
 **Frontend:**
-- "View Rewards & Store" button on licensee dashboard → `https://rewards.crosscur.rent/?user_id={USER_ID}`
+- Prominent Rewards card on main dashboard (points, USDT, level, monthly rank, CTA)
+- Dedicated `/my-rewards` page with full points view, level badge, rank, and history table
+- "Open Rewards & Store" CTA → `https://rewards.crosscur.rent/?user_id={USER_ID}`
+- "My Rewards" sidebar link for all members
 - System Check admin page in sidebar
+
+**Admin Rewards Tools (Feb 23, 2026):**
+- `/admin/rewards` page with User Rewards Lookup (search by email/user_id)
+- Simulate Points tool: test_trade, test_deposit, test_referral, manual_bonus
+- Full points history table for looked-up user
+- All simulated actions tagged as "Admin Test" in history
+- "Rewards Admin" sidebar link for admins
+
+**New API Endpoints:**
+- `GET /api/rewards/history` — JWT auth, returns points transaction log (members see own, admins see any)
+- `GET /api/rewards/admin/lookup` — Admin JWT, search by email/user_id, returns full profile + history
+- `POST /api/rewards/admin/simulate` — Admin JWT, simulate test_trade/deposit/referral/manual_bonus
 
 **Configuration:**
 - `REWARDS_INTERNAL_API_KEY` in backend .env
