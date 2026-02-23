@@ -297,6 +297,163 @@ async def event_community(req: EventCommunityRequest, _: bool = Depends(verify_i
     return {"success": True}
 
 
+# ─── POINTS HISTORY (auth via JWT) ───
+
+@router.get("/history")
+async def get_rewards_history(
+    user_id: Optional[str] = None,
+    limit: int = 100,
+    user: dict = Depends(deps.get_current_user),
+):
+    """GET /api/rewards/history — get points transaction log.
+    Members see their own history. Admins can pass ?user_id= to see any user."""
+    db = deps.db
+    admin_roles = {"basic_admin", "admin", "super_admin", "master_admin"}
+
+    target_uid = user["id"]
+    if user_id and user.get("role") in admin_roles:
+        target_uid = user_id
+    elif user_id and user_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Cannot view another user's history")
+
+    logs = await db.rewards_point_logs.find(
+        {"user_id": target_uid}, {"_id": 0}
+    ).sort("created_at", -1).to_list(limit)
+
+    # Compute running balance (oldest → newest, then reverse)
+    logs_asc = list(reversed(logs))
+    running = 0
+    for log in logs_asc:
+        running += log.get("points", 0)
+        log["balance_after"] = max(running, 0)
+    logs_asc.reverse()
+
+    return {"user_id": target_uid, "history": logs_asc}
+
+
+# ─── ADMIN REWARDS TOOLS (require admin JWT) ───
+
+@router.get("/admin/lookup")
+async def admin_rewards_lookup(
+    user_id: Optional[str] = None,
+    email: Optional[str] = None,
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin lookup — search by user_id or email, returns full rewards profile."""
+    db = deps.db
+
+    if not user_id and not email:
+        raise HTTPException(status_code=400, detail="Provide user_id or email")
+
+    if email and not user_id:
+        target = await db.users.find_one({"email": email}, {"_id": 0, "id": 1, "full_name": 1, "email": 1})
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id = target["id"]
+    else:
+        target = await db.users.find_one({"id": user_id}, {"_id": 0, "id": 1, "full_name": 1, "email": 1})
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0}) or {}
+    month_key = datetime.now(timezone.utc).strftime("%Y-%m")
+    lb_entry = await db.rewards_leaderboard.find_one(
+        {"user_id": user_id, "month": month_key}, {"_id": 0}
+    )
+
+    logs = await db.rewards_point_logs.find(
+        {"user_id": user_id}, {"_id": 0}
+    ).sort("created_at", -1).to_list(500)
+
+    # Running balance
+    logs_asc = list(reversed(logs))
+    running = 0
+    for log in logs_asc:
+        running += log.get("points", 0)
+        log["balance_after"] = max(running, 0)
+    logs_asc.reverse()
+
+    lifetime = stats.get("lifetime_points", 0)
+    return {
+        "user_id": user_id,
+        "full_name": target.get("full_name", ""),
+        "email": target.get("email", ""),
+        "lifetime_points": lifetime,
+        "monthly_points": stats.get("monthly_points", 0),
+        "level": stats.get("level", "Newbie"),
+        "estimated_usdt": round(lifetime / 100, 2),
+        "current_rank": lb_entry.get("rank", 0) if lb_entry else 0,
+        "lifetime_trades": stats.get("lifetime_trades", 0),
+        "lifetime_deposit_usdt": stats.get("lifetime_deposit_usdt", 0),
+        "current_streak_days": stats.get("current_streak_days", 0),
+        "best_streak_days": stats.get("best_streak_days", 0),
+        "qualified_referrals": stats.get("qualified_referrals", 0),
+        "history": logs_asc,
+    }
+
+
+@router.post("/admin/simulate")
+async def admin_simulate_points(
+    req: AdminSimulateRequest,
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin simulate — award points using the real rewards engine.
+    Actions: test_deposit, test_trade, test_referral, manual_bonus."""
+    db = deps.db
+
+    target = await db.users.find_one({"id": req.user_id}, {"_id": 0, "id": 1, "full_name": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    sim_meta = {"simulated_by": user["id"], "admin_test": True}
+
+    if req.action_type == "test_trade":
+        await process_trade_event(db, req.user_id)
+        # Tag the most recent log as simulated
+        await db.rewards_point_logs.update_many(
+            {"user_id": req.user_id, "metadata.admin_test": {"$exists": False}},
+            {"$set": {"metadata.admin_test": True, "metadata.simulated_by": user["id"]}},
+        )
+        action_label = "Simulated Trade"
+
+    elif req.action_type == "test_deposit":
+        amount = req.amount_usdt or 100.0
+        await process_deposit_event(db, req.user_id, amount)
+        await db.rewards_point_logs.update_one(
+            {"user_id": req.user_id, "source": "deposit"},
+            {"$set": {"metadata.admin_test": True, "metadata.simulated_by": user["id"]}},
+            sort=[("created_at", -1)],
+        )
+        action_label = f"Simulated Deposit (${amount})"
+
+    elif req.action_type == "test_referral":
+        await process_referral_qualified(db, req.user_id, f"sim_invitee_{uuid.uuid4().hex[:8]}")
+        action_label = "Simulated Referral"
+
+    elif req.action_type == "manual_bonus":
+        pts = req.points or 100
+        await award_points(db, req.user_id, pts, "manual_bonus", sim_meta)
+        action_label = f"Manual Bonus (+{pts} pts)"
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown action_type: {req.action_type}")
+
+    stats = await db.rewards_stats.find_one({"user_id": req.user_id}, {"_id": 0})
+    month_key = datetime.now(timezone.utc).strftime("%Y-%m")
+    lb_entry = await db.rewards_leaderboard.find_one(
+        {"user_id": req.user_id, "month": month_key}, {"_id": 0}
+    )
+
+    return {
+        "success": True,
+        "action": action_label,
+        "new_lifetime_points": stats.get("lifetime_points", 0) if stats else 0,
+        "new_monthly_points": stats.get("monthly_points", 0) if stats else 0,
+        "level": stats.get("level", "Newbie") if stats else "Newbie",
+        "current_rank": lb_entry.get("rank", 0) if lb_entry else 0,
+    }
+
+
 # ─── SYSTEM CHECK (admin auth via JWT) ───
 
 @router.post("/system-check")
