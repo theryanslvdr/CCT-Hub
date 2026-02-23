@@ -9042,6 +9042,7 @@ api_router.include_router(_api_center_router)
 api_router.include_router(_bve_router)
 api_router.include_router(_family_router)
 api_router.include_router(_admin_family_router)
+api_router.include_router(_rewards_router)
 
 app.include_router(api_router)
 
