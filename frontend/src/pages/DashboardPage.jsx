@@ -432,8 +432,8 @@ export const DashboardPage = () => {
         })}
       </div>
 
-      {/* Rewards section — prominent, right after KPI cards */}
-      {(isMember || isSimulating) && (
+      {/* Rewards section — prominent, right after KPI cards. HIDDEN for licensees. */}
+      {(isMember || isSimulating) && !isLicenseeView && (
         <Card className="glass-card overflow-hidden" data-testid="rewards-card">
           <div className="relative">
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500" />
