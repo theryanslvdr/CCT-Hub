@@ -75,6 +75,13 @@ class EventCommunityRequest(BaseModel):
     action: str  # "join_community", "first_daily_win", "help_chat"
 
 
+class AdminSimulateRequest(BaseModel):
+    user_id: str
+    action_type: str  # test_deposit, test_trade, test_referral, manual_bonus
+    points: Optional[int] = None  # only for manual_bonus
+    amount_usdt: Optional[float] = None  # for deposit/withdrawal sim
+
+
 # ─── PUBLIC ENDPOINTS (no auth) ───
 
 @router.get("/summary")
