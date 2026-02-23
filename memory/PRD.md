@@ -82,6 +82,14 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
 
+### Regression Tests (Feb 23, 2026)
+- **Created:** `/app/backend/tests/test_projection_regression.py` (21 tests)
+  - 10 unit tests for trading_days.py (holidays, trading day checks, quarterly growth)
+  - 3 unit tests for calculations.py (lot size, projected profit, performance)
+  - 8 API integration tests (year projections, daily projections, summary consistency, admin access)
+- **Purpose:** Prevent recurring honorary licensee projection breakage (has broken 4+ times)
+- **Status:** All 21 tests PASSING
+
 ## Prioritized Backlog
 
 ### P2 - Improvements
