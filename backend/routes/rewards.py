@@ -365,7 +365,7 @@ async def run_system_check(user: dict = Depends(deps.require_master_admin)):
         results.append({"step": "Leaderboard API", "status": "pass", "response": lb})
 
         # Step 8: Credit some extra points to enable redemption
-        credit_amount = MAX_FOR_REDEEM = 2000 - expected + 100  # Enough to redeem
+        credit_amount = 2000 - expected + 100  # Enough to redeem
         await award_points(db, test_user_id, credit_amount, "system_check_credit")
         expected += credit_amount
         stats = await db.rewards_stats.find_one({"user_id": test_user_id}, {"_id": 0})
