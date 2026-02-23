@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="19" skipped="0" tests="41" time="4.523" timestamp="2026-02-23T10:21:51.515963+00:00" hostname="agent-env-e7adc257-8e12-400e-958d-9670af39e383"><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_us_market_holidays_2026" time="0.178" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_holiday_range" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_is_trading_day_weekday" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_is_trading_day_weekend" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_is_trading_day_holiday" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_project_quarterly_growth_basic" time="0.001" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_project_quarterly_growth_formula" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_project_quarterly_growth_quarter_boundary" time="0.001" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_observe_holiday_saturday" time="0.000" /><testcase classname="tests.test_projection_regression.TestTradingDays" name="test_observe_holiday_sunday" time="0.000" /><testcase classname="tests.test_projection_regression.TestCalculations" name="test_lot_size" time="0.000" /><testcase classname="tests.test_projection_regression.TestCalculations" name="test_projected_profit" time="0.000" /><testcase classname="tests.test_projection_regression.TestCalculations" name="test_performance_categories" time="0.000" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_year_projections_as_admin_for_licensee" time="0.497" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_year_projections_as_licensee" time="0.415" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_daily_projection_as_licensee" time="0.448" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_licensee_summary_correct_values" time="0.416" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_admin_member_details_for_licensee" time="0.435" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_year_projections_no_license_404" time="0.419" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_projection_values_consistency" time="0.529" /><testcase classname="tests.test_projection_regression.TestProjectionAPIs" name="test_all_honorary_licensees_have_projections" time="0.573" /><testcase classname="tests.test_iteration_121_rewards.TestRewardsSummaryEndpoint" name="test_summary_returns_correct_json_shape" time="0.001"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary?user_id=test_rewards_user_45d98fed': No scheme supplied. Perhaps you meant https:///api/rewards/summary?user_id=test_rewards_user_45d98fed?">tests/test_iteration_121_rewards.py:75: in test_summary_returns_correct_json_shape
+    response = requests.get(f"{BASE_URL}/api/rewards/summary?user_id={TEST_USER_ID}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary?user_id=test_rewards_user_45d98fed': No scheme supplied. Perhaps you meant https:///api/rewards/summary?user_id=test_rewards_user_45d98fed?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestRewardsSummaryEndpoint" name="test_summary_new_user_returns_zeros" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary?user_id=test_new_user_aad843c5': No scheme supplied. Perhaps you meant https:///api/rewards/summary?user_id=test_new_user_aad843c5?">tests/test_iteration_121_rewards.py:91: in test_summary_new_user_returns_zeros
+    response = requests.get(f"{BASE_URL}/api/rewards/summary?user_id={new_user_id}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary?user_id=test_new_user_aad843c5': No scheme supplied. Perhaps you meant https:///api/rewards/summary?user_id=test_new_user_aad843c5?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestRewardsSummaryEndpoint" name="test_summary_without_user_id_fails" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary': No scheme supplied. Perhaps you meant https:///api/rewards/summary?">tests/test_iteration_121_rewards.py:106: in test_summary_without_user_id_fails
+    response = requests.get(f"{BASE_URL}/api/rewards/summary")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/summary': No scheme supplied. Perhaps you meant https:///api/rewards/summary?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestRewardsLeaderboardEndpoint" name="test_leaderboard_returns_correct_json_shape" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/leaderboard?user_id=test_rewards_user_45d98fed': No scheme supplied. Perhaps you meant https:///api/rewards/leaderboard?user_id=test_rewards_user_45d98fed?">tests/test_iteration_121_rewards.py:115: in test_leaderboard_returns_correct_json_shape
+    response = requests.get(f"{BASE_URL}/api/rewards/leaderboard?user_id={TEST_USER_ID}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/leaderboard?user_id=test_rewards_user_45d98fed': No scheme supplied. Perhaps you meant https:///api/rewards/leaderboard?user_id=test_rewards_user_45d98fed?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestRewardsLeaderboardEndpoint" name="test_leaderboard_new_user_has_zero_rank" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/leaderboard?user_id=test_lb_user_f7f7a427': No scheme supplied. Perhaps you meant https:///api/rewards/leaderboard?user_id=test_lb_user_f7f7a427?">tests/test_iteration_121_rewards.py:131: in test_leaderboard_new_user_has_zero_rank
+    response = requests.get(f"{BASE_URL}/api/rewards/leaderboard?user_id={new_user_id}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:73: in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/leaderboard?user_id=test_lb_user_f7f7a427': No scheme supplied. Perhaps you meant https:///api/rewards/leaderboard?user_id=test_lb_user_f7f7a427?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_redeem_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/redeem': No scheme supplied. Perhaps you meant https:///api/rewards/redeem?">tests/test_iteration_121_rewards.py:147: in test_redeem_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/redeem': No scheme supplied. Perhaps you meant https:///api/rewards/redeem?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_credit_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?">tests/test_iteration_121_rewards.py:156: in test_credit_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_trade_event_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/trade': No scheme supplied. Perhaps you meant https:///api/rewards/events/trade?">tests/test_iteration_121_rewards.py:165: in test_trade_event_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/trade': No scheme supplied. Perhaps you meant https:///api/rewards/events/trade?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_deposit_event_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/deposit': No scheme supplied. Perhaps you meant https:///api/rewards/events/deposit?">tests/test_iteration_121_rewards.py:174: in test_deposit_event_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/deposit': No scheme supplied. Perhaps you meant https:///api/rewards/events/deposit?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_signup_event_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?">tests/test_iteration_121_rewards.py:183: in test_signup_event_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithoutApiKey" name="test_referral_event_without_api_key_returns_403" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/referral-qualified': No scheme supplied. Perhaps you meant https:///api/rewards/events/referral-qualified?">tests/test_iteration_121_rewards.py:192: in test_referral_event_without_api_key_returns_403
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/referral-qualified': No scheme supplied. Perhaps you meant https:///api/rewards/events/referral-qualified?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithApiKey" name="test_credit_with_api_key_succeeds" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?">tests/test_iteration_121_rewards.py:205: in test_credit_with_api_key_succeeds
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestProtectedEndpointsWithApiKey" name="test_redeem_insufficient_points_returns_failure" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/redeem': No scheme supplied. Perhaps you meant https:///api/rewards/redeem?">tests/test_iteration_121_rewards.py:222: in test_redeem_insufficient_points_returns_failure
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/redeem': No scheme supplied. Perhaps you meant https:///api/rewards/redeem?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestEventEndpoints" name="test_signup_event_awards_25_points" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?">tests/test_iteration_121_rewards.py:244: in test_signup_event_awards_25_points
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestEventEndpoints" name="test_deposit_event_awards_points" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?">tests/test_iteration_121_rewards.py:264: in test_deposit_event_awards_points
+    requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestEventEndpoints" name="test_trade_event_awards_first_trade_bonus" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?">tests/test_iteration_121_rewards.py:293: in test_trade_event_awards_first_trade_bonus
+    requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestEventEndpoints" name="test_referral_qualified_awards_150_points" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?">tests/test_iteration_121_rewards.py:321: in test_referral_qualified_awards_150_points
+    requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/events/signup': No scheme supplied. Perhaps you meant https:///api/rewards/events/signup?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestSystemCheck" name="test_system_check_with_admin_jwt_passes" time="0.000"><error message="failed on setup with &quot;requests.exceptions.MissingSchema: Invalid URL '/api/auth/login': No scheme supplied. Perhaps you meant https:///api/auth/login?&quot;">tests/test_iteration_121_rewards.py:38: in admin_token
+    response = requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/auth/login': No scheme supplied. Perhaps you meant https:///api/auth/login?</error></testcase><testcase classname="tests.test_iteration_121_rewards.TestSystemCheck" name="test_system_check_without_auth_fails" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/system-check': No scheme supplied. Perhaps you meant https:///api/rewards/system-check?">tests/test_iteration_121_rewards.py:374: in test_system_check_without_auth_fails
+    response = requests.post(f"{BASE_URL}/api/rewards/system-check")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/system-check': No scheme supplied. Perhaps you meant https:///api/rewards/system-check?</failure></testcase><testcase classname="tests.test_iteration_121_rewards.TestRedeemWithSufficientPoints" name="test_redeem_with_sufficient_points_succeeds" time="0.000"><failure message="requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?">tests/test_iteration_121_rewards.py:387: in test_redeem_with_sufficient_points_succeeds
+    requests.post(
+/root/.venv/lib/python3.11/site-packages/requests/api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:575: in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/sessions.py:484: in prepare_request
+    p.prepare(
+/root/.venv/lib/python3.11/site-packages/requests/models.py:367: in prepare
+    self.prepare_url(url, params)
+/root/.venv/lib/python3.11/site-packages/requests/models.py:438: in prepare_url
+    raise MissingSchema(
+E   requests.exceptions.MissingSchema: Invalid URL '/api/rewards/credit': No scheme supplied. Perhaps you meant https:///api/rewards/credit?</failure></testcase></testsuite></testsuites>
