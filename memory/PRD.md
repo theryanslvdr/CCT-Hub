@@ -18,60 +18,66 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 ```
 Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15, 2)
 ```
-- Daily profit is FIXED for the entire calendar quarter (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec)
+- Daily profit is FIXED for the entire calendar quarter
 - Recalculated at each new quarter start using the accumulated account value
 - Trading days = weekdays excluding US market holidays (~250/year)
-- US Market Holidays: New Year's, MLK Day, Presidents' Day, Good Friday, Memorial Day, Juneteenth, Independence Day, Labor Day, Thanksgiving, Christmas
-- Weekend-to-weekday observance: Sat holidays → preceding Fri, Sun holidays → following Mon
 
 ## What's Been Implemented
 
 ### Core Features (Complete)
 - User authentication with JWT tokens
 - Admin dashboard with member management
-- Trade logging and profit tracking (Projection Vision)
+- Trade logging and profit tracking
 - Deposit/Withdrawal management
-- Currency conversion (USDT/PHP/EUR/GBP)
-- Signal management (active trade signals)
-- License management (create, edit, deactivate, change type)
-- Maintenance mode with master admin override
-- BVE (Beta Virtual Environment) mode
-- Admin-initiated password reset (temp password, force change)
-- User-initiated "Forgot Password" flow (token-based)
+- License management, Maintenance mode, BVE mode
+- Password reset (admin-initiated + user-initiated "Forgot Password")
 
-### Growth Projection System (Complete - Feb 22, 2026)
-- **Year Projections**: 1, 2, 3, 5 year projections with quarterly compounding
-- **Daily Projections**: Day-by-day breakdown showing past (actual trades) and future (projected)
-- **Holiday-aware**: US market holidays excluded from trading days
-- **Quarter breakdown**: Each projection shows per-quarter detail (trading days, daily profit, start/end values)
-- **Correct formula**: `round((balance/980)*15, 2)` — no intermediate lot_size rounding
-- **Trading days utility**: `/app/backend/utils/trading_days.py` handles holidays, Easter calc, observed dates
+### Growth Projection System (Complete)
+- Year Projections: 1, 2, 3, 5 year with quarterly compounding
+- Daily Projections: past (actual trades) + future (projected)
+- Holiday-aware (US market holidays excluded)
+- Trading days utility: `/app/backend/utils/trading_days.py`
 
 ### Family Account System (Complete)
 - Family members (up to 5) for Honorary FA licensees
-- Deposit date required: trading starts NEXT TRADING DAY after deposit
-- Family member growth computed same as parent licensee
-- Family member projections use same formula with holiday exclusion
-- Dashboard "Overall Account Growth" card
 - Admin can add/edit/remove family members via admin endpoints
-- Admin simulation mode uses correct admin API endpoints for ALL operations
-- Family member withdrawal flow (parent approval -> admin approval)
+- Dashboard combined account overview
 
-### Robustness: License Check (Critical Fix)
-- ALL family endpoints use `verify_honorary_fa_license()` from licenses collection
-- Never relies on `user.license_type` field (unreliable in production)
+### Rewards & Points System (Complete - Feb 23, 2026)
 
-## Key API Endpoints
+**Points System:**
+- Single currency: POINTS (100 pts = 1 USDT)
+- Continuous base points: signup(25), first_trade(25), deposit(50/50 USDT pro-rated), withdrawal(5/15 USDT), referral(150), streaks, milestones
+- Seasonal promotions: multiplier-based PromotionRule (DB-managed)
+- Level system: Newbie -> Trader -> Investor -> Connector -> Trade Novice -> Amateur -> Seasoned -> Pro -> Elite
 
-### Projections
-- `GET /api/profit/licensee/year-projections` - Year 1/2/3/5 projections with quarter breakdown
-- `GET /api/profit/licensee/daily-projection` - Daily entries (past: actual, future: projected)
+**Stable API Endpoints (DO NOT change URLs or field names):**
+1. `GET /api/rewards/summary?user_id={ID}` — Public, returns lifetime_points, monthly_points, level, estimated_usdt, min_redeem_points, is_redeemable
+2. `GET /api/rewards/leaderboard?user_id={ID}` — Public, returns current_rank, distance_to_next, next_user_name, suggested_message
+3. `POST /api/rewards/redeem` — Protected (X-INTERNAL-API-KEY), deducts points
+4. `POST /api/rewards/credit` — Protected (X-INTERNAL-API-KEY), adds points
 
-### Family & Auth
-- `POST /api/auth/forgot-password` - Generate reset token
-- `POST /api/auth/reset-password` - Reset password with token
-- `GET/POST /api/family/members` - Licensee family management
-- `GET/POST/PUT/DELETE /api/admin/family/members/{user_id}[/{member_id}]` - Admin family management
+**Event Hooks (all protected with X-INTERNAL-API-KEY):**
+- `POST /api/rewards/events/trade` — Process trade, streaks, milestones
+- `POST /api/rewards/events/deposit` — Process deposit points
+- `POST /api/rewards/events/withdrawal` — Process withdrawal points
+- `POST /api/rewards/events/signup` — Sign-up & verify (25 pts)
+- `POST /api/rewards/events/referral-qualified` — Qualified referral (150 pts)
+- `POST /api/rewards/events/community` — Community actions (join, daily win, help chat)
+
+**Admin System Check:**
+- `POST /api/rewards/system-check` — Admin JWT auth, runs 10-step health check
+- Frontend page at `/admin/system-check` with one-click validation
+
+**Frontend:**
+- "View Rewards & Store" button on licensee dashboard → `https://rewards.crosscur.rent/?user_id={USER_ID}`
+- System Check admin page in sidebar
+
+**Configuration:**
+- `REWARDS_INTERNAL_API_KEY` in backend .env
+- Seeded promotion rules: 1 continuous (base), 1 seasonal (March 2026 2x multiplier)
+
+**Collections:** rewards_stats, rewards_leaderboard, rewards_promotions, rewards_redemptions, rewards_point_logs
 
 ## Mocked Features
 - Cloudinary file upload, Chatbase integration
@@ -82,12 +88,13 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - Backend refactoring: Extract remaining routers from server.py
 - Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
 - Email integration for password reset tokens
+- Admin UI for PromotionRule management
 
 ### P3 - Future
-- Cloudinary integration for file uploads
-- Chatbase integration for chat support
+- Cloudinary integration, Chatbase integration
+- Rewards store UI (handled by rewards.crosscur.rent)
 
 ## Test Credentials
 - Master Admin: iam@ryansalvador.com / admin123
 - Licensee (Honorary FA): rizza.miles@gmail.com / rizza123
-- Rizza's user ID: 19ccb9d7-139f-4918-a662-ad72483010b1
+- Internal API Key: _CXCB2Y-ObBIZqqaCzmjEJU1zwe7DMHr8C-tzoef9h0
