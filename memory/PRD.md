@@ -107,10 +107,14 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
 ### Recurring Bug Mitigations (Feb 23, 2026)
-- Backend projection endpoint wrapped in bulletproof try/except — never returns 500 crash
+- **ROOT CAUSE FOUND**: All `license_type` checks were case-sensitive. Production DB may store "Honorary" (capital H) while code checked for "honorary" (lowercase). This caused ALL calculations to silently fall back to wrong values.
+- **Fix**: Created `_is_honorary()` helper in `calculations.py` — case-insensitive check used in ALL 20+ locations across `calculations.py` and `server.py`
+- **MongoDB queries**: All `license_type` regex queries now use `$options: "i"` for case-insensitive matching
+- Backend projection endpoint wrapped in try/except with FALLBACK projections — returns valid data even if primary calculation fails
 - Frontend auto-retry: `loadLicenseeData` retries up to 2 times with 1s delay before showing error
 - Guard: skips projection call when admin simulates without selecting a specific member
 - Rewards card hidden for licensees: `(isMember || isSimulating) && !isLicenseeView`
+- **One-click repair**: `POST /api/admin/licensee-health-check` validates all licensees and auto-fixes missing start dates
 
 ## Prioritized Backlog
 
