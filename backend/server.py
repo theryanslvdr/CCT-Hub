@@ -5476,7 +5476,7 @@ async def reset_license_balance(license_id: str, data: ResetStartingAmountReques
     old_amount = license.get("current_amount", license.get("starting_amount", 0))
     
     # For honorary licensees, dynamically calculate the old amount
-    if license.get("license_type") in ("honorary", "honorary_fa"):
+    if _is_honorary(license.get("license_type")):
         from utils.calculations import calculate_honorary_licensee_value
         old_amount = await calculate_honorary_licensee_value(db, license)
     
@@ -6489,7 +6489,7 @@ async def create_licensee_withdrawal(
         raise HTTPException(status_code=403, detail="Only licensed users can use this feature")
     
     # Check if user has sufficient balance - use dynamic calculation for honorary
-    if license.get("license_type") in ("honorary", "honorary_fa"):
+    if _is_honorary(license.get("license_type")):
         from utils.calculations import calculate_honorary_licensee_value
         current_balance = await calculate_honorary_licensee_value(db, license)
     else:
@@ -6525,7 +6525,7 @@ async def create_licensee_withdrawal(
     
     # IMMEDIATELY deduct from licensee's balance
     # For honorary, we reduce starting_amount since current value is computed dynamically
-    if license.get("license_type") in ("honorary", "honorary_fa"):
+    if _is_honorary(license.get("license_type")):
         new_starting = license.get("starting_amount", 0) - amount
         await db.licenses.update_one(
             {"id": license["id"]},
@@ -6634,7 +6634,7 @@ async def get_licensee_welcome_info(user: dict = Depends(get_current_user)):
     master_admin_name = master_admin.get("full_name", "Master Admin") if master_admin else "Master Admin"
     
     # Calculate current balance dynamically for honorary licensees
-    if license.get("license_type") in ("honorary", "honorary_fa"):
+    if _is_honorary(license.get("license_type")):
         from utils.calculations import calculate_honorary_licensee_value
         current_balance = await calculate_honorary_licensee_value(db, license)
     else:
