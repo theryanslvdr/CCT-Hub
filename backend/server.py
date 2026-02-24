@@ -1527,6 +1527,17 @@ async def debug_profit_calculation(user: dict = Depends(get_current_user)):
             debug_info["master_admin_total_trade_days"] = len(traded_dates)
             debug_info["master_admin_trade_dates_sample"] = sorted(list(traded_dates))[:10]  # First 10
             debug_info["steps"].append(f"✓ Master admin has {len(traded_dates)} unique trade days")
+            
+            # If license found, show how many trades are AFTER the effective start date
+            if license:
+                eff_start = license.get("effective_start_date") or license.get("start_date")
+                if eff_start:
+                    start_str = str(eff_start)[:10]
+                    trades_after_start = [d for d in traded_dates if d >= start_str]
+                    debug_info["license_effective_start"] = start_str
+                    debug_info["trades_after_license_start"] = len(trades_after_start)
+                    debug_info["trades_after_start_sample"] = sorted(trades_after_start)[:10]
+                    debug_info["steps"].append(f"✓ {len(trades_after_start)} trades are on/after license start date ({start_str})")
         
         # Step 4: Calculate if honorary
         if license:
