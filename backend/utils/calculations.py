@@ -325,8 +325,12 @@ async def get_user_financial_summary(
     
     # Calculate account value
     if is_licensee and license_info:
-        if license_info.get("license_type") in ("honorary", "honorary_fa"):
-            account_value = await calculate_honorary_licensee_value(db, license_info)
+        if _is_honorary(license_info.get("license_type")):
+            try:
+                account_value = await calculate_honorary_licensee_value(db, license_info)
+            except Exception as e:
+                logger.error(f"Honorary calc failed for {user_id}, falling back to current_amount: {e}")
+                account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
         else:
             account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
         total_deposits = license_info.get("starting_amount", 0)
