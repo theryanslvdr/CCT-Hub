@@ -221,7 +221,7 @@ async def get_master_admin_financial_breakdown(db, user_id: str, user: Optional[
     
     for license in active_licenses:
         licensee_user = await db.users.find_one({"id": license["user_id"]}, {"_id": 0, "full_name": 1})
-        if license.get("license_type") in ("honorary", "honorary_fa"):
+        if _is_honorary(license.get("license_type")):
             current_amount = await calculate_honorary_licensee_value(db, license)
         else:
             current_amount = license.get("current_amount", license.get("starting_amount", 0))
