@@ -76,6 +76,7 @@ export const userAPI = {
 // Profit Tracker APIs
 export const profitAPI = {
   getSummary: () => api.get('/profit/summary'),
+  getDebugCalculation: () => api.get('/profit/debug-calculation'),
   getDeposits: () => api.get('/profit/deposits'),
   createDeposit: (data) => api.post('/profit/deposits', data),
   addDeposit: (data) => api.post('/profit/deposits', data),
