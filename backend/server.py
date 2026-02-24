@@ -5399,8 +5399,7 @@ async def change_license_type(license_id: str, data: ChangeLicenseTypeRequest, u
     old_type = old_license.get("license_type")
     
     # For honorary <-> honorary_fa conversions, preserve ALL data in-place
-    honorary_types = {"honorary", "honorary_fa"}
-    if old_type in honorary_types and data.new_license_type in honorary_types:
+    if _is_honorary(old_type) and _is_honorary(data.new_license_type):
         update_fields = {
             "license_type": data.new_license_type,
             "updated_at": datetime.now(timezone.utc).isoformat(),
