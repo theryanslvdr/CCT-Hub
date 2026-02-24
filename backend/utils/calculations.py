@@ -24,7 +24,13 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
     
     Returns the current balance (starting_amount + accumulated profits).
     """
-    starting_amount = license_doc.get("starting_amount", 0)
+    try:
+        starting_amount = float(license_doc.get("starting_amount", 0) or 0)
+    except (TypeError, ValueError):
+        starting_amount = 0.0
+    if starting_amount <= 0:
+        logger.warning(f"Honorary licensee {license_doc.get('user_id')}: invalid starting_amount={license_doc.get('starting_amount')}")
+        return 0.0
     effective_start = license_doc.get("effective_start_date") or license_doc.get("start_date")
     if not effective_start:
         logger.warning(f"Honorary licensee {license_doc.get('user_id')}: No start date found, returning starting_amount={starting_amount}")
