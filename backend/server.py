@@ -3787,7 +3787,7 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
     
     # Get family member count for honorary_fa licensees
     family_member_count = 0
-    if license and license.get("license_type") == "honorary_fa":
+    if license and _is_honorary(license.get("license_type")):
         family_member_count = await db.family_members.count_documents(
             {"parent_user_id": user_id, "is_active": True}
         )
@@ -4089,7 +4089,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     
     # Get family members for honorary_fa licensees
     family_members = []
-    if license and license.get("license_type") == "honorary_fa":
+    if license and _is_honorary(license.get("license_type")):
         raw_members = await db.family_members.find(
             {"parent_user_id": user_id, "is_active": True}, {"_id": 0}
         ).to_list(100)
