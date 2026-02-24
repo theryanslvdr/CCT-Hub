@@ -146,7 +146,7 @@ async def calculate_account_value(
                 {"_id": 0}
             )
             if license:
-                if license.get("license_type") in ("honorary", "honorary_fa"):
+                if _is_honorary(license.get("license_type")):
                     return await calculate_honorary_licensee_value(db, license)
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
@@ -183,7 +183,7 @@ async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> fl
     
     total_licensee_funds = 0.0
     for lic in active_licenses:
-        if lic.get("license_type") in ("honorary", "honorary_fa"):
+        if _is_honorary(lic.get("license_type")):
             amount = await calculate_honorary_licensee_value(db, lic)
         else:
             amount = lic.get("current_amount", lic.get("starting_amount", 0))
