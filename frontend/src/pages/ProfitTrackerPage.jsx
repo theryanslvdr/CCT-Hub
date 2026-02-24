@@ -510,7 +510,20 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
   months.push(...pastMonths);
   
   // Now add current and future months with projections
+  // IMPORTANT: Use QUARTERLY FIXED daily profit formula
+  // Daily Profit = round((Balance at Quarter Start / 980) * 15, 2)
+  // Daily profit is FIXED for entire quarter, only recalculated at new quarter boundaries
+  
   let balance = accountBalance || 0;
+  
+  // Helper to get quarter number (1-4) from a date
+  const getQuarter = (date) => Math.floor(date.getMonth() / 3) + 1;
+  
+  // Track current quarter for quarterly recalculation
+  let currentQuarter = getQuarter(today);
+  let currentYear = today.getFullYear();
+  // Calculate quarterly fixed daily profit at the START of this quarter
+  let quarterlyDailyProfit = Math.round(((balance / 980) * 15) * 100) / 100;
   
   for (let monthOffset = 0; monthOffset <= 60; monthOffset++) {
     const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
@@ -520,18 +533,27 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
     
     // Calculate trading days in this month
     let tradingDays = 0;
-    let monthBalance = balance;
+    let monthStartBalance = balance;
     const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
     
     // For current month, start from today
     let currentDate = isCurrentMonth ? new Date(today) : new Date(monthDate);
     
     while (currentDate <= lastDay) {
+      // Check if we've entered a new quarter - recalculate daily profit
+      const dateQuarter = getQuarter(currentDate);
+      const dateYear = currentDate.getFullYear();
+      if (dateYear !== currentYear || dateQuarter !== currentQuarter) {
+        // New quarter started - recalculate daily profit based on current balance
+        quarterlyDailyProfit = Math.round(((balance / 980) * 15) * 100) / 100;
+        currentQuarter = dateQuarter;
+        currentYear = dateYear;
+      }
+      
       if (isTradingDay(currentDate, globalHolidayDates)) {
         tradingDays++;
-        const lotSize = monthBalance / 980;
-        const dailyProfit = lotSize * 15;
-        monthBalance += dailyProfit;
+        // Use the FIXED quarterly daily profit, not a recalculated one
+        balance = Math.round((balance + quarterlyDailyProfit) * 100) / 100;
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -545,16 +567,14 @@ const generateMonthlyProjection = (accountBalance, tradeLogs = {}, globalHoliday
       monthDate: new Date(monthDate),
       monthKey: monthKey,
       monthName: monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      startBalance: balance,
-      endBalance: monthBalance,
-      lotSize: monthBalance / 980,
-      dailyProfit: (monthBalance / 980) * 15,
+      startBalance: monthStartBalance,
+      endBalance: balance,
+      lotSize: balance / 980,
+      dailyProfit: quarterlyDailyProfit, // Show the fixed quarterly daily profit
       tradingDays: tradingDays,
       isCurrentMonth: isCurrentMonth,
       isPastMonth: false,
     });
-    
-    balance = monthBalance;
   }
   
   return months;
