@@ -127,6 +127,7 @@ from routes.activity_feed import admin_activity_router as _admin_activity_router
 from routes.users import router as _users_router
 from routes.family import router as _family_router, admin_family_router as _admin_family_router
 from routes.rewards import router as _rewards_router
+from utils.calculations import _is_honorary
 
 # Role hierarchy (higher number = more permissions)
 ROLE_HIERARCHY = {
