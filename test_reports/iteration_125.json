@@ -1,0 +1,125 @@
+{
+  "summary": "Iteration 125: Case-Insensitive Honorary License Bug Fix VERIFIED - ALL CRITICAL TESTS PASSED. Backend: 14/14 tests passed verifying the fix for case-sensitive license_type checks. Frontend: Rizza dashboard shows correct Account Value ($6,530.60), Total Profit ($1,530.60), Performance (30.6%), and Growth Projections (1yr: $106K, 2yr: $1.55M, 3yr: $22.7M, 5yr: $4.85B). Rewards card correctly hidden for licensees. Store link contains '/store' path.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All dialogs/modals",
+        "issues": ["Console warnings about DialogContent requiring DialogTitle for accessibility - not critical but should be addressed for a11y compliance"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_125_honorary_fix.py",
+    "/app/test_reports/pytest/pytest_iteration_125_main.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "The _is_honorary() helper function at calculations.py line 13-18 properly handles case variations",
+    "All license_type checks in calculations.py and server.py now use _is_honorary()",
+    "MongoDB regex queries use $options: 'i' for case-insensitive matching",
+    "Fallback projections added to year-projections endpoint"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration_125_honorary_fix.py"],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "100% - All 5 bug fix features verified working"
+  },
+  "test_credentials": {
+    "admin_email": "iam@ryansalvador.com",
+    "admin_password": "admin123",
+    "licensee_email": "rizza.miles@gmail.com",
+    "licensee_password": "rizza123",
+    "rizza_user_id": "19ccb9d7-139f-4918-a662-ad72483010b1"
+  },
+  "verified_bug_fixes": {
+    "bug_1_profit_summary_zero_values": {
+      "issue": "Honorary licensee dashboard showed '$0.00 Total Profit', '0.0% Performance'",
+      "root_cause": "Case-sensitive license_type checks - 'honorary_fa' vs 'Honorary_FA'",
+      "fix": "_is_honorary() helper for case-insensitive checks at calculations.py line 13-18",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "GET /api/profit/summary returns account_value=6530.6 (not $0.00)",
+        "GET /api/profit/summary returns total_actual_profit=1530.6 (not $0.00)",
+        "GET /api/profit/summary returns performance_rate=30.6 (not 0.0%)",
+        "Frontend dashboard displays: Account Value=$6,530.60, Total Profit=$1,530.60, Performance=30.6%"
+      ]
+    },
+    "bug_2_failed_projections": {
+      "issue": "'Failed to load projections' on licensee dashboard",
+      "root_cause": "Projection calculation failed silently when license_type case didn't match",
+      "fix": "Case-insensitive regex queries with $options: 'i' + fallback projections",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "GET /api/profit/licensee/year-projections returns 4 projections with correct values",
+        "Frontend shows: 1yr=$106K, 2yr=$1.55M, 3yr=$22.7M, 5yr=$4.85B",
+        "No 'Failed to load projections' error found"
+      ]
+    },
+    "bug_3_health_check_broken_licensees": {
+      "issue": "Admin health check showed some licensees as 'broken'",
+      "fix": "All license_type checks now case-insensitive",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "POST /api/admin/licensee-health-check returns total=6, ok=6, broken=0",
+        "All 6 honorary licensees have status='ok'"
+      ]
+    },
+    "bug_4_rewards_card_visibility": {
+      "issue": "Rewards card should be hidden for licensees (not part of rewards program)",
+      "fix": "DashboardPage.jsx line 436: (isMember || isSimulating) && !isLicenseeView",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "Rizza (licensee) dashboard does NOT show Rewards card",
+        "Admin dashboard DOES show Rewards card"
+      ]
+    },
+    "bug_5_store_link_path": {
+      "issue": "'Open Rewards & Store' button linked to homepage not store panel",
+      "fix": "Store link updated to /store path in DashboardPage.jsx",
+      "status": "VERIFIED FIXED",
+      "evidence": [
+        "Store button href: https://rewards.crosscur.rent/store?user_id=xxx",
+        "Link contains '/store' path as expected"
+      ]
+    }
+  },
+  "all_honorary_licensees_verified": {
+    "total": 6,
+    "all_ok": true,
+    "licensees": [
+      {"user_id": "7cc2b490-5e55-433b-9ac6-45d5bdfaf732", "email": "test_user_092113@example.com", "status": "ok", "current_value": 13061.2},
+      {"user_id": "c0bc35c0-1112-4ca9-8c63-df8f8bafd11f", "email": "testlicensee@test.com", "status": "ok", "current_value": 2704.03},
+      {"user_id": "d19307ec-03fe-4973-af97-5ef035b97a18", "email": "testhon@test.com", "status": "ok", "current_value": 3918.4},
+      {"user_id": "bcbbbf94-321e-4bbb-b60e-fc286552b6d7", "email": "testhon2@test.com", "status": "ok", "current_value": 3918.4},
+      {"user_id": "04cd9299-2d58-4983-810a-1190923bbdaa", "email": "test_user_6ecc0922@example.com", "status": "ok", "current_value": 1306.2},
+      {"user_id": "19ccb9d7-139f-4918-a662-ad72483010b1", "email": "rizza.miles@gmail.com", "status": "ok", "current_value": 6530.6}
+    ]
+  },
+  "rizza_values_verified": {
+    "account_value": 6530.6,
+    "total_profit": 1530.6,
+    "starting_amount": 5000,
+    "performance_rate": "30.6%",
+    "total_trades": 20,
+    "projections": {
+      "1_year": 106016.32,
+      "2_year": 1553421.23,
+      "3_year": 22715183.04,
+      "5_year": 4854023957.68
+    }
+  },
+  "seed_data_creation": "None - used existing licensee accounts",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 5 bug fixes from the case-insensitive license_type issue are verified working. The _is_honorary() helper function handles all case variations correctly. All 6 honorary licensees return valid projections. Rewards card is correctly hidden for licensees but visible for non-licensees. Store link contains /store path. Admin simulation flow works: Simulate View dropdown > Honorary Licensee View > Select specific member > Start Simulation.",
+  "mocked_apis": {
+    "cloudinary": "MOCKED - Image upload is mocked",
+    "chatbase": "MOCKED - Analytics is mocked"
+  }
+}
