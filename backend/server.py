@@ -7662,7 +7662,7 @@ async def licensee_health_check(user: dict = Depends(require_admin)):
     today = datetime.now(timezone.utc)
     holidays = get_holidays_for_range(today.year, today.year + 6)
 
-    async for lic in db.licenses.find({"is_active": True, "license_type": {"$regex": "^honorary"}}, {"_id": 0}):
+    async for lic in db.licenses.find({"is_active": True, "license_type": {"$regex": "^honorary", "$options": "i"}}, {"_id": 0}):
         uid = lic.get("user_id")
         user_doc = await db.users.find_one({"id": uid}, {"_id": 0, "email": 1, "first_name": 1, "last_name": 1}) if uid else None
         email = user_doc.get("email", "?") if user_doc else "no_user"
