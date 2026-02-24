@@ -4076,7 +4076,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
     # Always check licenses collection directly (don't rely on user.license_type)
     license = await db.licenses.find_one({"user_id": user_id, "is_active": True}, {"_id": 0})
     if license:
-        if license.get("license_type") in ("honorary", "honorary_fa"):
+        if _is_honorary(license.get("license_type")):
             from utils.calculations import calculate_honorary_licensee_value
             account_value = await calculate_honorary_licensee_value(db, license)
         else:
@@ -6257,14 +6257,14 @@ async def complete_transaction(
         deposit_amount = abs(tx.get("final_amount", tx["amount"]))
         
         # For honorary licensees, calculate current balance dynamically
-        if license.get("license_type") in ("honorary", "honorary_fa"):
+        if _is_honorary(license.get("license_type")):
             from utils.calculations import calculate_honorary_licensee_value
             current_balance = await calculate_honorary_licensee_value(db, license)
         else:
             current_balance = license.get("current_amount", license.get("starting_amount", 0))
         
         # For honorary licensees, update starting_amount (deposits increase the base)
-        if license.get("license_type") in ("honorary", "honorary_fa"):
+        if _is_honorary(license.get("license_type")):
             new_starting = license.get("starting_amount", 0) + deposit_amount
             await db.licenses.update_one(
                 {"id": license["id"]},
