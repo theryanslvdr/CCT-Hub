@@ -7590,7 +7590,7 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
         
         # Find any active honorary/honorary_fa license for this user
         license = await db.licenses.find_one(
-            {"user_id": target_user_id, "is_active": True, "license_type": {"$regex": "^honorary"}},
+            {"user_id": target_user_id, "is_active": True, "license_type": {"$regex": "^honorary", "$options": "i"}},
             {"_id": 0}
         )
         if not license:
