@@ -174,7 +174,9 @@ class TestLicenseeHealthCheck:
             if result.get("user_id") == RIZZA_USER_ID:
                 rizza_found = True
                 assert result.get("status") == "ok", f"Rizza should have status 'ok', got {result.get('status')}"
-                assert result.get("account_value", 0) > 5000, f"Rizza account_value should be > 5000"
+                # Health check returns 'current_value' not 'account_value'
+                current_val = result.get("current_value", result.get("account_value", 0))
+                assert current_val > 5000, f"Rizza current_value should be > 5000, got {current_val}"
                 break
         
         assert rizza_found, "Rizza should be in health check results"
