@@ -5048,7 +5048,7 @@ async def get_all_licenses(user: dict = Depends(require_admin)):
         
         # Calculate current amount dynamically based on license type
         if lic.get("is_active"):
-            if lic["license_type"] in ("honorary", "honorary_fa"):
+            if _is_honorary(lic.get("license_type")):
                 # Dynamic calculation for honorary licensees
                 try:
                     from utils.calculations import calculate_honorary_licensee_value
