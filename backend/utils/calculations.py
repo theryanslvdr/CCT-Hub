@@ -297,16 +297,40 @@ async def get_user_financial_summary(
     if user is None:
         user = await db.users.find_one({"id": user_id}, {"_id": 0})
     
+    # Try multiple methods to find the license
     license = await db.licenses.find_one(
         {"user_id": user_id, "is_active": True},
         {"_id": 0}
     )
+    
+    # CRITICAL FIX: If no license found by user_id, try finding by user's email
+    # This handles edge cases where the license might be linked differently
+    if not license and user:
+        user_email = user.get("email")
+        if user_email:
+            # Try finding license by user email via licenses collection join
+            potential_licenses = await db.licenses.find(
+                {"is_active": True},
+                {"_id": 0}
+            ).to_list(1000)
+            
+            for lic in potential_licenses:
+                lic_user_id = lic.get("user_id")
+                if lic_user_id:
+                    lic_user = await db.users.find_one({"id": lic_user_id}, {"_id": 0, "email": 1})
+                    if lic_user and lic_user.get("email") == user_email:
+                        license = lic
+                        logger.warning(f"Found license for {user_email} via email lookup (user_id mismatch?): license.user_id={lic_user_id}, query user_id={user_id}")
+                        break
+    
     if license:
         is_licensee = True
         license_info = license
+        logger.info(f"get_user_financial_summary: User {user_id} has license: type={license.get('license_type')}, starting={license.get('starting_amount')}")
     elif user and user.get("license_type"):
         is_licensee = True
         license_info = None
+        logger.warning(f"get_user_financial_summary: User {user_id} has license_type={user.get('license_type')} but no license doc found")
     else:
         is_licensee = False
         license_info = None
@@ -330,19 +354,27 @@ async def get_user_financial_summary(
     total_commission = sum(t.get("commission", 0) for t in trades)
     
     # Calculate account value
+    account_value = 0.0
     if is_licensee and license_info:
-        if _is_honorary(license_info.get("license_type")):
+        license_type = license_info.get("license_type")
+        starting_amount = float(license_info.get("starting_amount", 0) or 0)
+        
+        if _is_honorary(license_type):
             try:
                 account_value = await calculate_honorary_licensee_value(db, license_info)
+                logger.info(f"get_user_financial_summary: Honorary calc for {user_id} returned {account_value}")
             except Exception as e:
                 logger.error(f"Honorary calc failed for {user_id}, falling back to current_amount: {e}")
                 account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
         else:
             account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
-        total_deposits = float(license_info.get("starting_amount", 0) or 0)
-        # For licensees, profit is account_value - starting_amount (not from personal trades)
-        total_profit = round(float(account_value) - total_deposits, 2)
+        
+        # For licensees, profit is account_value - starting_amount
+        total_deposits = starting_amount
+        total_profit = round(float(account_value) - starting_amount, 2)
         total_projected = total_profit  # Projected same as actual for licensees
+        
+        logger.info(f"get_user_financial_summary: Licensee {user_id} final values: account_value={account_value}, total_profit={total_profit}, starting_amount={starting_amount}")
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
         # NOTE: For Master Admin, licensee deposits are already included in the deposits collection
