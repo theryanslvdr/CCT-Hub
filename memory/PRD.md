@@ -110,20 +110,34 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
-### Recurring Bug Mitigations (Feb 23, 2026)
+### Recurring Bug Mitigations (Feb 23-24, 2026)
 - **ROOT CAUSE FOUND (FINAL)**: Multiple compounding issues:
   1. Case-sensitive `license_type` matching (all 20+ locations) — fixed with `_is_honorary()` helper
   2. **`get_member_details` endpoint** (used by admin simulation) had NO try/except around honorary calculation + no float() casts on MongoDB values → crashed silently, returned $0 profit
   3. MongoDB `Decimal128`/string type values not cast to `float` → arithmetic errors
   4. MongoDB regex queries case-sensitive → `$options: "i"` added
+  5. **Year Projection Calculation Bug (Feb 24)**: Was calculating projections from current balance only, user expected to see License Year End values from effective start date
 - **Fixes applied**:
   - `_is_honorary()` case-insensitive helper in `calculations.py` used in ALL locations
   - `get_member_details`: try/except around calculation with fallback, float() on ALL numeric fields
   - `get_user_financial_summary`: float() casts on all license values
-  - `year-projections`: fallback projections if primary calculation fails
+  - `year-projections`: Now returns BOTH projection types (license_year_projections + projections)
+  - Frontend quarterly compounding: `generateMonthlyProjection` fixed to use quarterly fixed daily profit
   - Frontend auto-retry (2x) + guard against simulation without selected member
   - Rewards card hidden for licensees
   - **One-click repair**: `POST /api/admin/licensee-health-check`
+
+### Year Projection Dual View (Feb 24, 2026)
+**Bug Report:** Year 1 showed $44,943 instead of expected ~$12,414 
+**Root Cause:** Projections only calculated from current balance, not from starting amount at effective start date
+**Fix (Option C):** Show BOTH types of projections
+- **Backend**: `/api/profit/licensee/year-projections` now returns:
+  - `projections` array: Forward from TODAY's current_value
+  - `license_year_projections` array: From effective_start_date using starting_amount
+- **Frontend Dashboard**: Two rows in Growth Projections card
+  - Cyan: License Year End (from start date)
+  - Blue: Forward Projections (from today's balance)
+- **Test file**: `/app/backend/tests/test_iteration_127_projection_fix.py`
 
 ## Prioritized Backlog
 
