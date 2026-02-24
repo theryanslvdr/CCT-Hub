@@ -3818,7 +3818,6 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
             "license_type": license.get("license_type") if license else None,
             "starting_amount": round(float(starting_amount), 2) if is_licensee_member and license else 0,
         },
-        },
         "recent_trades": trades[:10],
         "recent_deposits": deposits[:10]
     }
