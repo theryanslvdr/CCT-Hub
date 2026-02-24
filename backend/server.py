@@ -1420,19 +1420,28 @@ async def get_profit_summary(user: dict = Depends(get_current_user)):
     """
     from utils.calculations import get_user_financial_summary
     
-    summary = await get_user_financial_summary(db, user["id"], user)
+    user_id = user["id"]
+    logger.info(f"GET /profit/summary called for user_id={user_id}, email={user.get('email')}, role={user.get('role')}")
     
-    return {
-        "total_deposits": summary["total_deposits"],
-        "total_projected_profit": summary["total_projected_profit"],
-        "total_actual_profit": summary["total_profit"],
-        "profit_difference": round(summary["total_profit"] - summary["total_projected_profit"], 2),
-        "account_value": summary["account_value"],
-        "total_trades": summary["total_trades"],
-        "performance_rate": summary["performance_rate"],
-        "is_licensee": summary.get("is_licensee", False),
-        "license_type": summary.get("license_type")
-    }
+    try:
+        summary = await get_user_financial_summary(db, user_id, user)
+        
+        logger.info(f"GET /profit/summary response for {user_id}: account_value={summary.get('account_value')}, total_profit={summary.get('total_profit')}, is_licensee={summary.get('is_licensee')}")
+        
+        return {
+            "total_deposits": summary["total_deposits"],
+            "total_projected_profit": summary["total_projected_profit"],
+            "total_actual_profit": summary["total_profit"],
+            "profit_difference": round(summary["total_profit"] - summary["total_projected_profit"], 2),
+            "account_value": summary["account_value"],
+            "total_trades": summary["total_trades"],
+            "performance_rate": summary["performance_rate"],
+            "is_licensee": summary.get("is_licensee", False),
+            "license_type": summary.get("license_type")
+        }
+    except Exception as e:
+        logger.error(f"GET /profit/summary FAILED for {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to calculate summary: {str(e)}")
 
 @profit_router.post("/calculate-exit")
 async def calculate_exit(lot_size: float):
