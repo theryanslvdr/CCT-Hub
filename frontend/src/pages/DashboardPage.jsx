@@ -788,42 +788,91 @@ export const DashboardPage = () => {
             <CardContent>
               {yearProjections ? (
                 <>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                    {yearProjections.projections?.map((p) => {
-                      const colors = {
-                        1: { border: 'border-blue-500/30', bg: 'from-blue-500/15 to-blue-500/5', text: 'text-blue-400', label: 'text-blue-300' },
-                        2: { border: 'border-emerald-500/30', bg: 'from-emerald-500/15 to-emerald-500/5', text: 'text-emerald-400', label: 'text-emerald-300' },
-                        3: { border: 'border-purple-500/30', bg: 'from-purple-500/15 to-purple-500/5', text: 'text-purple-400', label: 'text-purple-300' },
-                        5: { border: 'border-amber-500/30', bg: 'from-amber-500/15 to-amber-500/5', text: 'text-amber-400', label: 'text-amber-300' },
-                      };
-                      const c = colors[p.years] || colors[1];
-                      return (
-                        <div key={p.years} className={`p-4 rounded-xl bg-gradient-to-b ${c.bg} border ${c.border}`} data-testid={`projection-${p.years}yr`}>
-                          <p className={`text-xs uppercase tracking-wider font-semibold ${c.label}`}>
-                            {p.years} Year{p.years > 1 ? 's' : ''}
-                          </p>
-                          <p className={`text-xl md:text-2xl font-bold font-mono mt-2 ${c.text}`}>
-                            {formatCurrencyCompact(p.projected_value)}
-                          </p>
-                          <p className="text-[10px] md:text-xs text-zinc-500 mt-1 hidden md:block">
-                            {formatCurrency(p.projected_value, 'USD')}
-                          </p>
-                          <div className="mt-2 flex items-center gap-1">
-                            <ArrowUpRight className={`w-3 h-3 ${c.text}`} />
-                            <span className={`text-xs font-mono ${c.text}`}>+{p.growth_percent}%</span>
+                  {/* License Year End Projections - From Start Date */}
+                  {yearProjections.license_year_projections && yearProjections.license_year_projections.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">License Year End</span>
+                        <span className="text-xs text-zinc-500">(from {yearProjections.effective_start_date})</span>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                        {yearProjections.license_year_projections.map((p) => {
+                          const colors = {
+                            1: { border: 'border-cyan-500/30', bg: 'from-cyan-500/15 to-cyan-500/5', text: 'text-cyan-400', label: 'text-cyan-300' },
+                            2: { border: 'border-teal-500/30', bg: 'from-teal-500/15 to-teal-500/5', text: 'text-teal-400', label: 'text-teal-300' },
+                            3: { border: 'border-sky-500/30', bg: 'from-sky-500/15 to-sky-500/5', text: 'text-sky-400', label: 'text-sky-300' },
+                            5: { border: 'border-indigo-500/30', bg: 'from-indigo-500/15 to-indigo-500/5', text: 'text-indigo-400', label: 'text-indigo-300' },
+                          };
+                          const c = colors[p.license_year] || colors[1];
+                          return (
+                            <div key={`license-${p.license_year}`} className={`p-4 rounded-xl bg-gradient-to-b ${c.bg} border ${c.border}`} data-testid={`license-year-${p.license_year}`}>
+                              <p className={`text-xs uppercase tracking-wider font-semibold ${c.label}`}>
+                                Year {p.license_year}
+                              </p>
+                              <p className={`text-xl md:text-2xl font-bold font-mono mt-2 ${c.text}`}>
+                                {formatCurrencyCompact(p.projected_value)}
+                              </p>
+                              <p className="text-[10px] md:text-xs text-zinc-500 mt-1 hidden md:block">
+                                {formatCurrency(p.projected_value, 'USD')}
+                              </p>
+                              <div className="mt-2 flex items-center gap-1">
+                                <ArrowUpRight className={`w-3 h-3 ${c.text}`} />
+                                <span className={`text-xs font-mono ${c.text}`}>+{p.growth_percent}%</span>
+                              </div>
+                              <p className="text-[10px] text-zinc-500 mt-0.5">
+                                Profit: {formatCurrencyCompact(p.total_profit)}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Forward Projections - From Today */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Forward Projections</span>
+                      <span className="text-xs text-zinc-500">(from today's balance)</span>
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                      {yearProjections.projections?.map((p) => {
+                        const colors = {
+                          1: { border: 'border-blue-500/30', bg: 'from-blue-500/15 to-blue-500/5', text: 'text-blue-400', label: 'text-blue-300' },
+                          2: { border: 'border-emerald-500/30', bg: 'from-emerald-500/15 to-emerald-500/5', text: 'text-emerald-400', label: 'text-emerald-300' },
+                          3: { border: 'border-purple-500/30', bg: 'from-purple-500/15 to-purple-500/5', text: 'text-purple-400', label: 'text-purple-300' },
+                          5: { border: 'border-amber-500/30', bg: 'from-amber-500/15 to-amber-500/5', text: 'text-amber-400', label: 'text-amber-300' },
+                        };
+                        const c = colors[p.years] || colors[1];
+                        return (
+                          <div key={p.years} className={`p-4 rounded-xl bg-gradient-to-b ${c.bg} border ${c.border}`} data-testid={`projection-${p.years}yr`}>
+                            <p className={`text-xs uppercase tracking-wider font-semibold ${c.label}`}>
+                              +{p.years} Year{p.years > 1 ? 's' : ''}
+                            </p>
+                            <p className={`text-xl md:text-2xl font-bold font-mono mt-2 ${c.text}`}>
+                              {formatCurrencyCompact(p.projected_value)}
+                            </p>
+                            <p className="text-[10px] md:text-xs text-zinc-500 mt-1 hidden md:block">
+                              {formatCurrency(p.projected_value, 'USD')}
+                            </p>
+                            <div className="mt-2 flex items-center gap-1">
+                              <ArrowUpRight className={`w-3 h-3 ${c.text}`} />
+                              <span className={`text-xs font-mono ${c.text}`}>+{p.growth_percent}%</span>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">
+                              Profit: {formatCurrencyCompact(p.total_profit)}
+                            </p>
                           </div>
-                          <p className="text-[10px] text-zinc-500 mt-0.5">
-                            Profit: {formatCurrencyCompact(p.total_profit)}
-                          </p>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                  {/* Projection chart */}
-                  <div className="mt-6">
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={yearProjections.projections?.map(p => ({
-                        name: `${p.years}yr`,
+                  
+                  {/* Projection chart - Use License Year projections */}
+                  <div className="mt-4">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={yearProjections.license_year_projections?.map(p => ({
+                        name: `Yr ${p.license_year}`,
                         value: p.projected_value,
                         profit: p.total_profit
                       })) || []}>
@@ -834,7 +883,7 @@ export const DashboardPage = () => {
                           contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
                           formatter={(value) => formatCurrency(value, 'USD')}
                         />
-                        <Bar dataKey="value" fill="#3B82F6" name="Projected Value" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="value" fill="#06B6D4" name="License Year End" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
