@@ -336,12 +336,12 @@ async def get_user_financial_summary(
                 account_value = await calculate_honorary_licensee_value(db, license_info)
             except Exception as e:
                 logger.error(f"Honorary calc failed for {user_id}, falling back to current_amount: {e}")
-                account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
+                account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
         else:
-            account_value = round(license_info.get("current_amount", license_info.get("starting_amount", 0)), 2)
-        total_deposits = license_info.get("starting_amount", 0)
+            account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
+        total_deposits = float(license_info.get("starting_amount", 0) or 0)
         # For licensees, profit is account_value - starting_amount (not from personal trades)
-        total_profit = round(account_value - total_deposits, 2)
+        total_profit = round(float(account_value) - total_deposits, 2)
         total_projected = total_profit  # Projected same as actual for licensees
     else:
         # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
