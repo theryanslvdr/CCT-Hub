@@ -892,7 +892,24 @@ export const DashboardPage = () => {
                 <div className="h-[200px] flex flex-col items-center justify-center text-zinc-500 gap-2" data-testid="projection-error">
                   <AlertTriangle className="w-8 h-8 text-amber-500/50" />
                   <p>Failed to load projections</p>
-                  <button onClick={loadLicenseeData} className="text-blue-400 text-sm hover:underline">Retry</button>
+                  <div className="flex gap-2">
+                    <button onClick={loadLicenseeData} className="text-blue-400 text-sm hover:underline">Retry</button>
+                    <span className="text-zinc-600">|</span>
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const res = await api.get('/profit/debug-calculation');
+                          console.log('Debug calculation:', res.data);
+                          alert('Debug info copied to console. Press F12 to view.\n\nSteps:\n' + (res.data.steps || []).join('\n'));
+                        } catch (e) {
+                          alert('Debug failed: ' + e.message);
+                        }
+                      }} 
+                      className="text-amber-400 text-sm hover:underline"
+                    >
+                      Debug My Account
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-zinc-500">
