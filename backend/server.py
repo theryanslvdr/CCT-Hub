@@ -7617,8 +7617,8 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
             raise HTTPException(status_code=404, detail="No active license found")
         
         from utils.calculations import calculate_honorary_licensee_value
-        current_value = await calculate_honorary_licensee_value(db, license)
-        starting_amount = license.get("starting_amount", 0)
+        current_value = float(await calculate_honorary_licensee_value(db, license))
+        starting_amount = float(license.get("starting_amount", 0) or 0)
         
         # Guard against zero or negative values
         if current_value <= 0:
