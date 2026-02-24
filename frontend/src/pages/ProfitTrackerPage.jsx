@@ -608,7 +608,9 @@ const groupMonthsByYear = (monthlyData) => {
   return orderedYears;
 };
 
-// Generate projection for specific periods
+// Generate projection for specific periods using QUARTERLY FIXED daily profit
+// Formula: Daily Profit = round((Balance at Quarter Start / 980) * 15, 2)
+// Daily profit is FIXED for entire quarter (~63 trading days), recalculated at new quarter
 const generateProjectionData = (accountBalance, selectedYears = 1) => {
   const projections = [];
   let balance = accountBalance || 0;
@@ -619,12 +621,12 @@ const generateProjectionData = (accountBalance, selectedYears = 1) => {
     { label: '6 Months', days: 132 },
   ];
   
-  // Add selected years
-  const yearDays = selectedYears * 264;
+  // Add selected years (250 trading days per year is standard)
+  const yearDays = selectedYears * 250;
   periods.push({ label: `${selectedYears} Year${selectedYears > 1 ? 's' : ''}`, days: yearDays });
   
   const currentLotSize = balance / 980;
-  const currentDailyProfit = currentLotSize * 15;
+  const currentDailyProfit = Math.round((currentLotSize * 15) * 100) / 100;
   
   projections.push({
     period: 'Today',
@@ -636,16 +638,27 @@ const generateProjectionData = (accountBalance, selectedYears = 1) => {
   let runningBalance = balance;
   let lastDays = 0;
   
+  // Quarterly compounding: recalculate daily profit every ~63 trading days (quarter)
+  const TRADING_DAYS_PER_QUARTER = 63;
+  let quarterlyDailyProfit = Math.round(((runningBalance / 980) * 15) * 100) / 100;
+  let daysInCurrentQuarter = 0;
+  
   for (const period of periods) {
     for (let day = lastDays; day < period.days; day++) {
-      const lotSize = runningBalance / 980;
-      const dailyProfit = lotSize * 15;
-      runningBalance += dailyProfit;
+      // Check if we've completed a quarter - recalculate daily profit
+      if (daysInCurrentQuarter >= TRADING_DAYS_PER_QUARTER) {
+        quarterlyDailyProfit = Math.round(((runningBalance / 980) * 15) * 100) / 100;
+        daysInCurrentQuarter = 0;
+      }
+      
+      // Use fixed quarterly daily profit
+      runningBalance = Math.round((runningBalance + quarterlyDailyProfit) * 100) / 100;
+      daysInCurrentQuarter++;
     }
     lastDays = period.days;
     
     const lotSize = runningBalance / 980;
-    const dailyProfit = lotSize * 15;
+    const dailyProfit = Math.round((lotSize * 15) * 100) / 100;
     
     projections.push({
       period: period.label,
