@@ -3790,7 +3790,7 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
             
             # For licensees, performance_rate is always 100% if they have profit (they get exactly projected)
             if starting_amount > 0:
-                performance_rate = round((account_value / starting_amount) * 100 - 100, 2)  # Growth rate
+                performance_rate = round((float(account_value) / float(starting_amount)) * 100 - 100, 2)  # Growth rate
     else:
         # Regular user performance rate
         total_projected = sum(t.get("projected_profit", 0) for t in trades)
