@@ -10,6 +10,14 @@ def _get_quarter(date: datetime) -> int:
     return (date.month - 1) // 3 + 1
 
 
+def _is_honorary(license_type) -> bool:
+    """Case-insensitive check: is this an honorary-type license?"""
+    if not license_type:
+        return False
+    lt = str(license_type).strip().lower()
+    return lt in ("honorary", "honorary_fa", "honorary-fa")
+
+
 async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
     """Dynamically calculate current account value for an honorary licensee
     using quarterly compounding and master admin trade days.
