@@ -3720,38 +3720,50 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
         license = None
 
     if is_licensee_member and license:
-            starting_amount = license.get("starting_amount", 0)
+            try:
+                starting_amount = float(license.get("starting_amount", 0) or 0)
+            except (TypeError, ValueError):
+                starting_amount = 0.0
             
             # For extended licensees, calculate current_amount dynamically using projections
             # This ensures consistency with /api/admin/licenses endpoint
-            if license.get("license_type") == "extended":
-                start_date_raw = license.get("start_date", "")
-                if isinstance(start_date_raw, str):
-                    start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-                else:
-                    start_date = start_date_raw.replace(tzinfo=timezone.utc)
-                
-                today = datetime.now(timezone.utc)
-                days_since_start = (today - start_date).days
-                if days_since_start > 0:
-                    projections = calculate_extended_license_projections(
-                        starting_amount, 
-                        start_date, 
-                        min(days_since_start + 1, 365)
-                    )
-                    if projections:
-                        account_value = projections[-1]["account_value"]
+            lt = (license.get("license_type") or "").strip().lower()
+            if lt == "extended":
+                try:
+                    start_date_raw = license.get("start_date", "")
+                    if isinstance(start_date_raw, str):
+                        start_date = datetime.strptime(start_date_raw[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                    else:
+                        start_date = start_date_raw.replace(tzinfo=timezone.utc)
+                    
+                    today = datetime.now(timezone.utc)
+                    days_since_start = (today - start_date).days
+                    if days_since_start > 0:
+                        projections = calculate_extended_license_projections(
+                            starting_amount, 
+                            start_date, 
+                            min(days_since_start + 1, 365)
+                        )
+                        if projections:
+                            account_value = projections[-1]["account_value"]
+                        else:
+                            account_value = starting_amount
                     else:
                         account_value = starting_amount
-                else:
-                    account_value = starting_amount
+                except Exception as e:
+                    logger.error(f"Extended license calc failed for {user_id}: {e}")
+                    account_value = float(license.get("current_amount", starting_amount) or starting_amount)
             else:
                 # Honorary licensees: dynamically calculate current_amount
-                from utils.calculations import calculate_honorary_licensee_value
-                account_value = await calculate_honorary_licensee_value(db, license)
+                try:
+                    from utils.calculations import calculate_honorary_licensee_value
+                    account_value = await calculate_honorary_licensee_value(db, license)
+                except Exception as e:
+                    logger.error(f"Honorary calc failed in member_details for {user_id}: {e}", exc_info=True)
+                    account_value = float(license.get("current_amount", starting_amount) or starting_amount)
             
             # For licensees, profit = current_amount - starting_amount
-            licensee_profit = round(account_value - starting_amount, 2)
+            licensee_profit = round(float(account_value) - starting_amount, 2)
             
             # Count Master Admin trades (days when manager traded that benefited this licensee)
             # Exclude did_not_trade entries
