@@ -13,7 +13,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://stupefied-elion-3.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://licensee-profit-fix.preview.emergentagent.com')
 
 # Test credentials
 ADMIN_EMAIL = "iam@ryansalvador.com"

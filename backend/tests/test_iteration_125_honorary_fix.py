@@ -7,7 +7,7 @@ import pytest
 import httpx
 import os
 
-API_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://stupefied-elion-3.preview.emergentagent.com")
+API_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://licensee-profit-fix.preview.emergentagent.com")
 ADMIN_EMAIL = "iam@ryansalvador.com"
 ADMIN_PASSWORD = "admin123"
 LICENSEE_EMAIL = "rizza.miles@gmail.com"
