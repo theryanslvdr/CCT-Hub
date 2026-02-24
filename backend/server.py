@@ -7726,13 +7726,27 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
                     "trading_days": result["trading_days"],
                     "quarter_breakdown": result["quarter_breakdown"]
                 })
+            # Also add license_year_projections for fallback
+            license_year_projections = []
+            for years in [1, 2, 3, 5]:
+                result = project_quarterly_growth(float(fallback_start), today, years * 250, holidays)
+                license_year_projections.append({
+                    "license_year": years,
+                    "projected_value": result["projected_value"],
+                    "total_profit": round(result["projected_value"] - float(fallback_start), 2),
+                    "growth_percent": round(((result["projected_value"] / max(float(fallback_start), 1)) - 1) * 100, 1),
+                    "trading_days": result["trading_days"],
+                    "from_start_date": today.strftime("%Y-%m-%d"),
+                })
             return {
                 "current_value": round(float(fallback_value), 2),
                 "starting_amount": float(fallback_start),
                 "current_profit": round(float(fallback_value) - float(fallback_start), 2),
                 "starting_daily_profit": round((float(fallback_value) / 980) * 15, 2),
                 "trading_days_per_year": 250,
+                "effective_start_date": today.strftime("%Y-%m-%d"),
                 "projections": projections,
+                "license_year_projections": license_year_projections,
                 "fallback": True
             }
         except Exception as e2:
