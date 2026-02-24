@@ -3808,13 +3808,16 @@ async def get_member_details(user_id: str, diagnostic: str = None, user: dict = 
         "user": member,
         "stats": {
             "total_trades": licensee_trades if licensee_profit is not None else total_trades,
-            "total_profit": licensee_profit if licensee_profit is not None else round(total_profit, 2),
-            "total_actual_profit": licensee_profit if licensee_profit is not None else round(total_profit, 2),
-            "total_deposits": round(total_deposits, 2),
-            "account_value": account_value,
-            "performance_rate": performance_rate,
+            "total_profit": round(float(licensee_profit), 2) if licensee_profit is not None else round(float(total_profit), 2),
+            "total_actual_profit": round(float(licensee_profit), 2) if licensee_profit is not None else round(float(total_profit), 2),
+            "total_deposits": round(float(total_deposits), 2),
+            "account_value": round(float(account_value), 2),
+            "performance_rate": round(float(performance_rate), 2),
             "is_licensee": is_licensee_member and license is not None,
-            "family_member_count": family_member_count
+            "family_member_count": family_member_count,
+            "license_type": license.get("license_type") if license else None,
+            "starting_amount": round(float(starting_amount), 2) if is_licensee_member and license else 0,
+        },
         },
         "recent_trades": trades[:10],
         "recent_deposits": deposits[:10]
