@@ -32,11 +32,15 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - License management, Maintenance mode, BVE mode
 - Password reset (admin-initiated + user-initiated "Forgot Password")
 
-### Growth Projection System (Complete)
+### Growth Projection System (Complete - Updated Feb 24, 2026)
 - Year Projections: 1, 2, 3, 5 year with quarterly compounding
+- **DUAL PROJECTION VIEW (Option C - Feb 24, 2026):**
+  1. **License Year End**: Balance at end of license Year 1/2/3/5 from `effective_start_date` using `starting_amount`
+  2. **Forward Projections**: Balance after 1/2/3/5 years from TODAY using current `account_value`
 - Daily Projections: past (actual trades) + future (projected)
 - Holiday-aware (US market holidays excluded)
 - Trading days utility: `/app/backend/utils/trading_days.py`
+- **Quarterly Compounding Fix**: Frontend `generateMonthlyProjection` now uses fixed daily profit per quarter (not daily recalculation)
 
 ### Family Account System (Complete)
 - Family members (up to 5) for Honorary FA licensees
