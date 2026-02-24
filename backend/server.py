@@ -4249,7 +4249,7 @@ async def get_team_analytics(user: dict = Depends(require_admin)):
         # For licensees, use dynamic calculation for account value
         if is_licensed:
             license = next((lic for lic in all_licenses if lic["user_id"] == user_id), None)
-            if license and license.get("license_type") in ("honorary", "honorary_fa"):
+            if license and _is_honorary(license.get("license_type")):
                 from utils.calculations import calculate_honorary_licensee_value
                 user_account_value = await calculate_honorary_licensee_value(db, license)
             elif license:
