@@ -1443,6 +1443,131 @@ async def get_profit_summary(user: dict = Depends(get_current_user)):
         logger.error(f"GET /profit/summary FAILED for {user_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to calculate summary: {str(e)}")
 
+
+@profit_router.get("/debug-calculation")
+async def debug_profit_calculation(user: dict = Depends(get_current_user)):
+    """DEBUG ENDPOINT: Returns detailed calculation breakdown for troubleshooting.
+    
+    This helps diagnose why a user's account value might be incorrect.
+    """
+    user_id = user["id"]
+    debug_info = {
+        "user_id": user_id,
+        "email": user.get("email"),
+        "role": user.get("role"),
+        "steps": []
+    }
+    
+    try:
+        # Step 1: Find license
+        license = await db.licenses.find_one(
+            {"user_id": user_id, "is_active": True},
+            {"_id": 0}
+        )
+        
+        if license:
+            debug_info["license_found"] = True
+            debug_info["license_data"] = {
+                "id": license.get("id"),
+                "user_id": license.get("user_id"),
+                "license_type": license.get("license_type"),
+                "starting_amount": license.get("starting_amount"),
+                "current_amount": license.get("current_amount"),
+                "effective_start_date": str(license.get("effective_start_date")),
+                "start_date": str(license.get("start_date")),
+                "is_active": license.get("is_active")
+            }
+            debug_info["steps"].append("✓ License document found")
+        else:
+            debug_info["license_found"] = False
+            debug_info["steps"].append("✗ No license found for user_id")
+            # Try to find any license in the system with similar email
+            user_email = user.get("email")
+            if user_email:
+                all_licenses = await db.licenses.find({"is_active": True}, {"_id": 0}).to_list(100)
+                for lic in all_licenses:
+                    lic_user = await db.users.find_one({"id": lic.get("user_id")}, {"_id": 0, "email": 1, "full_name": 1})
+                    if lic_user and lic_user.get("email") == user_email:
+                        debug_info["potential_license_match"] = {
+                            "license_user_id": lic.get("user_id"),
+                            "query_user_id": user_id,
+                            "reason": "Found license with matching email but different user_id"
+                        }
+                        break
+        
+        # Step 2: Find master admin
+        master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1, "email": 1})
+        if master_admin:
+            debug_info["master_admin_id"] = master_admin.get("id")
+            debug_info["steps"].append(f"✓ Master admin found: {master_admin.get('id')}")
+        else:
+            debug_info["master_admin_id"] = None
+            debug_info["steps"].append("✗ No master admin found")
+        
+        # Step 3: Count master admin trades
+        if master_admin:
+            all_master_trades = await db.trade_logs.find(
+                {"user_id": master_admin["id"], "did_not_trade": {"$ne": True}},
+                {"_id": 0, "created_at": 1, "trade_date": 1}
+            ).to_list(10000)
+            
+            traded_dates = set()
+            for trade in all_master_trades:
+                trade_date = trade.get("trade_date")
+                if not trade_date:
+                    created = trade.get("created_at")
+                    if created:
+                        if isinstance(created, datetime):
+                            trade_date = created.strftime("%Y-%m-%d")
+                        else:
+                            trade_date = str(created)[:10]
+                if trade_date:
+                    traded_dates.add(str(trade_date)[:10])
+            
+            debug_info["master_admin_total_trade_days"] = len(traded_dates)
+            debug_info["master_admin_trade_dates_sample"] = sorted(list(traded_dates))[:10]  # First 10
+            debug_info["steps"].append(f"✓ Master admin has {len(traded_dates)} unique trade days")
+        
+        # Step 4: Calculate if honorary
+        if license:
+            from utils.calculations import _is_honorary, calculate_honorary_licensee_value
+            is_hon = _is_honorary(license.get("license_type"))
+            debug_info["is_honorary"] = is_hon
+            
+            if is_hon:
+                debug_info["steps"].append(f"✓ License type '{license.get('license_type')}' is honorary")
+                
+                # Calculate value
+                try:
+                    calc_value = await calculate_honorary_licensee_value(db, license)
+                    debug_info["calculated_value"] = calc_value
+                    debug_info["calculated_profit"] = round(calc_value - float(license.get("starting_amount", 0) or 0), 2)
+                    debug_info["steps"].append(f"✓ Calculated value: ${calc_value}")
+                except Exception as e:
+                    debug_info["calculation_error"] = str(e)
+                    debug_info["steps"].append(f"✗ Calculation failed: {e}")
+            else:
+                debug_info["steps"].append(f"License type '{license.get('license_type')}' is NOT honorary - using current_amount")
+                debug_info["calculated_value"] = license.get("current_amount", license.get("starting_amount", 0))
+        
+        # Step 5: Get the actual summary
+        from utils.calculations import get_user_financial_summary
+        summary = await get_user_financial_summary(db, user_id, user)
+        debug_info["summary_result"] = {
+            "account_value": summary.get("account_value"),
+            "total_profit": summary.get("total_profit"),
+            "is_licensee": summary.get("is_licensee"),
+            "total_trades": summary.get("total_trades")
+        }
+        debug_info["steps"].append(f"✓ Final summary: account_value=${summary.get('account_value')}, profit=${summary.get('total_profit')}")
+        
+        return debug_info
+        
+    except Exception as e:
+        debug_info["error"] = str(e)
+        debug_info["steps"].append(f"✗ Error during debug: {e}")
+        return debug_info
+
 @profit_router.post("/calculate-exit")
 async def calculate_exit(lot_size: float):
     exit_value = calculate_exit_value(lot_size)
