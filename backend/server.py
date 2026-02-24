@@ -7594,6 +7594,10 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
     Daily profit is FIXED for the entire quarter, recalculated at each new calendar quarter.
     Projections assume manager trades every trading day (weekdays excl. US market holidays).
     Admin can pass ?user_id=xxx to get projections for a specific licensee.
+    
+    Returns TWO types of projections:
+    1. "projections" - Forward projections from TODAY's current balance (next 1/2/3/5 years)
+    2. "license_year_projections" - Balance at end of License Year 1/2/3/5 from effective start date
     """
     try:
         from utils.trading_days import project_quarterly_growth, get_holidays_for_range
@@ -7625,12 +7629,31 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
             current_value = starting_amount or 1.0
         
         today = datetime.now(timezone.utc)
-        holidays = get_holidays_for_range(today.year, today.year + 6)
+        
+        # Get effective start date for license year calculations
+        effective_start = license.get("effective_start_date") or license.get("start_date")
+        if effective_start:
+            try:
+                start_str = str(effective_start)
+                if "T" in start_str:
+                    effective_start_dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+                else:
+                    effective_start_dt = datetime.strptime(start_str[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                if effective_start_dt.tzinfo is None:
+                    effective_start_dt = effective_start_dt.replace(tzinfo=timezone.utc)
+            except Exception:
+                effective_start_dt = today
+        else:
+            effective_start_dt = today
+        
+        # Get holidays for the full range needed
+        start_year = min(effective_start_dt.year, today.year)
+        holidays = get_holidays_for_range(start_year, start_year + 10)
         
         # Starting quarter daily profit (for display)
         starting_daily_profit = round((current_value / 980) * 15, 2)
         
-        # Project forward 1, 2, 3, 5 years (each year = 250 trading days)
+        # === TYPE 1: Forward projections from TODAY's current balance ===
         projections = []
         for years in [1, 2, 3, 5]:
             trading_days = years * 250
@@ -7649,13 +7672,35 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
                 "quarter_breakdown": result["quarter_breakdown"]
             })
         
+        # === TYPE 2: License Year End projections from EFFECTIVE START DATE ===
+        # These show where the account will be at the end of License Year 1, 2, 3, 5
+        license_year_projections = []
+        for years in [1, 2, 3, 5]:
+            trading_days = years * 250
+            # Project from the original starting_amount and effective_start_date
+            result = project_quarterly_growth(starting_amount, effective_start_dt, trading_days, holidays)
+            
+            total_profit = round(result["projected_value"] - starting_amount, 2)
+            growth_pct = round(((result["projected_value"] / starting_amount) - 1) * 100, 1) if starting_amount > 0 else 0
+            
+            license_year_projections.append({
+                "license_year": years,
+                "projected_value": result["projected_value"],
+                "total_profit": total_profit,
+                "growth_percent": growth_pct,
+                "trading_days": result["trading_days"],
+                "from_start_date": effective_start_dt.strftime("%Y-%m-%d"),
+            })
+        
         return {
             "current_value": round(current_value, 2),
             "starting_amount": starting_amount,
             "current_profit": round(current_value - starting_amount, 2),
             "starting_daily_profit": starting_daily_profit,
             "trading_days_per_year": 250,
-            "projections": projections
+            "effective_start_date": effective_start_dt.strftime("%Y-%m-%d"),
+            "projections": projections,  # Forward from today
+            "license_year_projections": license_year_projections  # From effective start date
         }
     except HTTPException:
         raise
