@@ -91,6 +91,120 @@ const SOURCE_CATEGORY_MAP = {
 
 const ITEMS_PER_PAGE = 15;
 
+// Icon map for badge icons
+const BADGE_ICONS = {
+  'trending-up': TrendingUp,
+  'flame': Flame,
+  'star': Star,
+  'users': Users,
+  'wallet': Wallet,
+  'target': Target,
+  'award': Award,
+  'shield': Shield,
+  'trophy': Trophy,
+};
+
+const BADGE_CATEGORY_COLORS = {
+  trading: { bg: 'bg-blue-500/15', border: 'border-blue-500/40', text: 'text-blue-400', glow: 'shadow-blue-500/20' },
+  streaks: { bg: 'bg-orange-500/15', border: 'border-orange-500/40', text: 'text-orange-400', glow: 'shadow-orange-500/20' },
+  points: { bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
+  referrals: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
+  deposits: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
+};
+
+function BadgesSection({ userId }) {
+  const [badges, setBadges] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) return;
+    const load = async () => {
+      try {
+        const res = await rewardsAPI.getUserBadges();
+        setBadges(res.data?.badges || []);
+      } catch (e) {
+        console.error('Failed to load badges:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [userId]);
+
+  const earned = badges.filter(b => b.earned);
+  const locked = badges.filter(b => !b.earned);
+
+  if (loading) {
+    return (
+      <Card className="glass-card">
+        <CardContent className="py-8 flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (badges.length === 0) return null;
+
+  return (
+    <Card className="glass-card" data-testid="badges-section">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Shield className="w-5 h-5 text-amber-400" /> Badges & Achievements
+          <span className="text-xs text-zinc-500 font-normal ml-2">{earned.length}/{badges.length} earned</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Earned badges */}
+        {earned.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-zinc-400 uppercase tracking-wider mb-3">Earned</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {earned.map(badge => {
+                const Icon = BADGE_ICONS[badge.icon] || Award;
+                const colors = BADGE_CATEGORY_COLORS[badge.category] || BADGE_CATEGORY_COLORS.points;
+                return (
+                  <div
+                    key={badge.id}
+                    className={`p-3 rounded-xl ${colors.bg} border ${colors.border} text-center transition-transform hover:scale-105 shadow-lg ${colors.glow}`}
+                    data-testid={`badge-${badge.id}`}
+                    title={`${badge.description}\nEarned: ${badge.earned_at ? new Date(badge.earned_at).toLocaleDateString() : ''}`}
+                  >
+                    <Icon className={`w-7 h-7 mx-auto mb-1.5 ${colors.text}`} />
+                    <p className="text-xs font-semibold text-white truncate">{badge.name}</p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{badge.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Locked badges */}
+        {locked.length > 0 && (
+          <div>
+            <p className="text-xs text-zinc-400 uppercase tracking-wider mb-3">Locked</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {locked.map(badge => (
+                <div
+                  key={badge.id}
+                  className="p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 text-center opacity-50"
+                  data-testid={`badge-locked-${badge.id}`}
+                  title={badge.description}
+                >
+                  <Lock className="w-7 h-7 mx-auto mb-1.5 text-zinc-600" />
+                  <p className="text-xs font-semibold text-zinc-500 truncate">{badge.name}</p>
+                  <p className="text-[10px] text-zinc-600 mt-0.5 line-clamp-2">{badge.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function MyRewardsPage() {
   const { user } = useAuth();
   const [summary, setSummary] = useState(null);
