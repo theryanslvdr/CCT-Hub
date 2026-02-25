@@ -116,11 +116,25 @@ const BADGE_CATEGORY_COLORS = {
 function BadgesSection({ userId }) {
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const checkedRef = useRef(false);
 
   useEffect(() => {
     if (!userId) return;
     const load = async () => {
       try {
+        // Check for newly earned badges (triggers auto-award)
+        if (!checkedRef.current) {
+          checkedRef.current = true;
+          const checkRes = await rewardsAPI.checkBadges();
+          const newlyAwarded = checkRes.data?.newly_awarded || [];
+          newlyAwarded.forEach((badgeName) => {
+            toast.success(`New Badge Earned: ${badgeName}!`, {
+              description: 'Check your badges collection!',
+              duration: 6000,
+            });
+          });
+        }
+
         const res = await rewardsAPI.getUserBadges();
         setBadges(res.data?.badges || []);
       } catch (e) {
