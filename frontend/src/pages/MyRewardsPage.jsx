@@ -518,18 +518,8 @@ export default function MyRewardsPage() {
       {/* Badges Section */}
       <BadgesSection userId={user?.id} />
 
-      {/* CTA */}
-      <a
-        href={`https://rewards.crosscur.rent/store?email=${encodeURIComponent(user?.email || '')}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold transition-all"
-        data-testid="open-rewards-store-btn"
-      >
-        <Gift className="w-5 h-5" />
-        Open Rewards & Store
-        <ExternalLink className="w-4 h-4 ml-1" />
-      </a>
+      {/* CTA - Rewards Store */}
+      <StoreButton />
 
       {/* Points History */}
       <Card className="glass-card" data-testid="rewards-history-card">
