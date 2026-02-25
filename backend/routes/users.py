@@ -155,6 +155,17 @@ async def change_password(data: PasswordChange, user: dict = Depends(get_current
         {"id": user["id"]},
         {"$set": {"password": new_hash, "updated_at": datetime.now(timezone.utc).isoformat()}}
     )
+
+    # Auto-sync password change to rewards platform
+    try:
+        from services.rewards_sync_service import sync_user_to_rewards
+        updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+        if updated_user:
+            await sync_user_to_rewards(db, updated_user)
+    except Exception as e:
+        import logging
+        logging.getLogger("server").warning(f"Rewards sync on password change failed: {e}")
+
     return {"message": "Password changed successfully"}
 
 
