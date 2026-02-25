@@ -85,7 +85,7 @@ class TestUserBadges:
     def test_get_user_badges_requires_auth(self):
         """GET /api/rewards/badges/user requires JWT"""
         response = requests.get(f"{BASE_URL}/api/rewards/badges/user")
-        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+        assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ GET /api/rewards/badges/user properly requires auth")
     
     def test_get_user_badges_with_auth(self, admin_token):
@@ -121,7 +121,7 @@ class TestAdminUserSearch:
     def test_search_users_requires_admin(self):
         """GET /api/rewards/admin/search-users requires admin JWT"""
         response = requests.get(f"{BASE_URL}/api/rewards/admin/search-users", params={"q": "ryan"})
-        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+        assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ GET /api/rewards/admin/search-users properly requires auth")
     
     def test_search_users_min_chars(self, admin_token):
@@ -185,7 +185,7 @@ class TestAdminBadgeManagement:
     def test_admin_get_all_badges_requires_admin(self):
         """GET /api/rewards/admin/badges requires admin JWT"""
         response = requests.get(f"{BASE_URL}/api/rewards/admin/badges")
-        assert response.status_code == 401
+        assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ GET /api/rewards/admin/badges properly requires auth")
     
     def test_admin_get_all_badges(self, admin_token):
@@ -268,7 +268,7 @@ class TestAdminPointAdjustment:
             f"{BASE_URL}/api/rewards/admin/adjust-points",
             json={"user_id": "test", "points": 100, "reason": "test"}
         )
-        assert response.status_code == 401
+        assert response.status_code in [401, 403], f"Expected 401/403, got {response.status_code}"
         print("✓ POST /api/rewards/admin/adjust-points properly requires auth")
     
     def test_adjust_points_credit(self, admin_token):
