@@ -294,15 +294,9 @@ export const LoginPage = () => {
     }
     setForgotLoading(true);
     try {
-      const res = await api.post('/auth/forgot-password', { email: forgotEmail.trim() });
-      if (res.data.token) {
-        setResetToken(res.data.token);
-        setForgotStep('token');
-        toast.success('Reset token generated.');
-      } else {
-        // Email not found in the system
-        toast.error('No account found with this email address. Please check and try again.');
-      }
+      await api.post('/auth/forgot-password', { email: forgotEmail.trim() });
+      setForgotStep('sent');
+      toast.success('If that email exists, a reset link has been sent.');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to request password reset');
     } finally {
