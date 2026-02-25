@@ -110,13 +110,14 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
-### Recurring Bug Mitigations (Feb 23-24, 2026)
+### Recurring Bug Mitigations (Feb 23-25, 2026)
 - **ROOT CAUSE FOUND (FINAL)**: Multiple compounding issues:
   1. Case-sensitive `license_type` matching (all 20+ locations) — fixed with `_is_honorary()` helper
   2. **`get_member_details` endpoint** (used by admin simulation) had NO try/except around honorary calculation + no float() casts on MongoDB values → crashed silently, returned $0 profit
   3. MongoDB `Decimal128`/string type values not cast to `float` → arithmetic errors
   4. MongoDB regex queries case-sensitive → `$options: "i"` added
   5. **Year Projection Calculation Bug (Feb 24)**: Was calculating projections from current balance only, user expected to see License Year End values from effective start date
+  6. **FRONTEND BACKEND URL MISMATCH (Feb 25)**: Production frontend was calling OLD backend URL (`finance-hub-452.emergent.host`) instead of production backend (`hub.crosscur.rent`). Fixed `REACT_APP_BACKEND_URL` to point to custom domain.
 - **Fixes applied**:
   - `_is_honorary()` case-insensitive helper in `calculations.py` used in ALL locations
   - `get_member_details`: try/except around calculation with fallback, float() on ALL numeric fields
@@ -126,6 +127,18 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
   - Frontend auto-retry (2x) + guard against simulation without selected member
   - Rewards card hidden for licensees
   - **One-click repair**: `POST /api/admin/licensee-health-check`
+  - **Frontend BACKEND_URL**: Fixed to `https://hub.crosscur.rent`
+
+### Admin Diagnostic & Sync Tool (Feb 25, 2026)
+**Purpose:** Safeguard tool for master admin to diagnose and fix licensee calculation issues
+**Endpoints:**
+- `GET /api/diagnostic/licensee/{email}` - Public diagnostic endpoint (no auth needed)
+- `POST /api/admin/licensee/{user_id}/force-sync` - Force recalculate and update license value
+**Frontend:**
+- New "Diagnostic Tool" button in Admin Licenses page (`/admin/licenses`)
+- Shows step-by-step diagnostic results
+- "Force Sync" button to trigger recalculation
+- Quick select buttons for existing licensees
 
 ### Year Projection Dual View (Feb 24, 2026)
 **Bug Report:** Year 1 showed $44,943 instead of expected ~$12,414 
