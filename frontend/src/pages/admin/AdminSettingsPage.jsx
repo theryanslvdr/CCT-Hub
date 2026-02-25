@@ -759,6 +759,15 @@ export const AdminSettingsPage = () => {
                 >
                   <ExternalLink className="w-4 h-4" /> Affiliate Center
                 </button>
+                <button
+                  onClick={() => setActiveTab('diagnostics')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    activeTab === 'diagnostics' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  }`}
+                  data-testid="tab-diagnostics"
+                >
+                  <Database className="w-4 h-4" /> Diagnostics
+                </button>
               </>
             )}
           </div>
