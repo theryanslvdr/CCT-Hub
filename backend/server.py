@@ -1243,7 +1243,7 @@ async def forgot_password(data: ForgotPasswordRequest):
     user = await db.users.find_one({"email": data.email.strip().lower()}, {"_id": 0})
     if not user:
         # Return success even if email not found (security best practice)
-        return {"message": "If that email exists, a reset token has been generated.", "token": None}
+        return {"message": "If that email exists, a reset link has been sent."}
     
     reset_token = str(uuid.uuid4())
     expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
@@ -1257,13 +1257,38 @@ async def forgot_password(data: ForgotPasswordRequest):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
-    # NOTE: No email service integrated yet. Token is returned in the response
-    # and should be communicated to the user by the admin.
-    return {
-        "message": "If that email exists, a reset token has been generated.",
-        "token": reset_token,
-        "expires_in_minutes": 60
-    }
+    # Send password reset email via Emailit
+    try:
+        from services.email_service import send_email, get_password_reset_email
+        
+        # Build reset link using the frontend URL
+        frontend_url = os.environ.get("FRONTEND_URL", "")
+        if not frontend_url:
+            # Try to get from request headers or use known URL
+            settings = await db.platform_settings.find_one({}, {"_id": 0})
+            frontend_url = (settings or {}).get("frontend_url", "https://crosscur.rent")
+        
+        reset_link = f"{frontend_url}/login?reset_token={reset_token}"
+        email_content = get_password_reset_email(reset_link, user.get("full_name", ""))
+        
+        result = await send_email(
+            db=db,
+            to_email=user["email"],
+            subject=email_content["subject"],
+            html_content=email_content["html"],
+            text_content=email_content["text"],
+            template_type="password_reset",
+            metadata={"user_id": user["id"]}
+        )
+        
+        if result.get("success"):
+            logger.info(f"Password reset email sent to {user['email']}")
+        else:
+            logger.warning(f"Failed to send reset email: {result.get('error')}")
+    except Exception as e:
+        logger.error(f"Error sending password reset email: {e}")
+    
+    return {"message": "If that email exists, a reset link has been sent."}
 
 @auth_router.post("/reset-password")
 async def reset_password(data: ResetPasswordRequest):
