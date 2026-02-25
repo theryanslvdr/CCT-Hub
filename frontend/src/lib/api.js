@@ -139,9 +139,17 @@ export const rewardsAPI = {
   getLeaderboard: (userId) => api.get('/rewards/leaderboard', { params: { user_id: userId } }),
   getFullLeaderboard: (period = 'monthly', limit = 100) => api.get('/rewards/leaderboard/full', { params: { period, limit } }),
   getHistory: (userId = null, limit = 100) => api.get('/rewards/history', { params: { ...(userId ? { user_id: userId } : {}), limit } }),
+  // Badges
+  getBadgeDefinitions: () => api.get('/rewards/badges'),
+  getUserBadges: (userId = null) => api.get('/rewards/badges/user', { params: userId ? { user_id: userId } : {} }),
+  checkBadges: (userId = null) => api.post('/rewards/badges/check', null, { params: userId ? { user_id: userId } : {} }),
   // Admin
+  adminSearchUsers: (q) => api.get('/rewards/admin/search-users', { params: { q, limit: 10 } }),
   adminLookup: (params) => api.get('/rewards/admin/lookup', { params }),
   adminSimulate: (data) => api.post('/rewards/admin/simulate', data),
+  adminAdjustPoints: (data) => api.post('/rewards/admin/adjust-points', data),
+  adminGetBadges: () => api.get('/rewards/admin/badges'),
+  adminUpdateBadge: (badgeId, data) => api.put(`/rewards/admin/badges/${badgeId}`, data),
   systemCheck: () => api.post('/rewards/system-check'),
 };
 
