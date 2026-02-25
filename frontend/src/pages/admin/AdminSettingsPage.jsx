@@ -116,6 +116,18 @@ export const AdminSettingsPage = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [newProductName, setNewProductName] = useState('');
   const [savingProduct, setSavingProduct] = useState(false);
+  
+  // Diagnostics state
+  const [diagnosticEmail, setDiagnosticEmail] = useState('');
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
+  const [runningDiagnostic, setRunningDiagnostic] = useState(false);
+  const [syncingUser, setSyncingUser] = useState(false);
+  const [batchSyncing, setBatchSyncing] = useState(false);
+  const [batchSyncResults, setBatchSyncResults] = useState(null);
+  const [healthCheckResults, setHealthCheckResults] = useState(null);
+  const [runningHealthCheck, setRunningHealthCheck] = useState(false);
+  const [lastSyncDate, setLastSyncDate] = useState(null);
+  const [nextSyncRecommended, setNextSyncRecommended] = useState(null);
 
   useEffect(() => {
     loadSettings();
