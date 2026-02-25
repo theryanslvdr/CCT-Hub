@@ -17,7 +17,7 @@ import os
 import json
 from datetime import datetime, timedelta
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://licensee-profit-fix.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://points-history-beta.preview.emergentagent.com')
 
 class TestAuth:
     """Authentication tests"""

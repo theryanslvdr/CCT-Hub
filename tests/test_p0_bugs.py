@@ -9,7 +9,7 @@ import requests
 import os
 import uuid
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://licensee-profit-fix.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://points-history-beta.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "admin@crosscurrent.com"

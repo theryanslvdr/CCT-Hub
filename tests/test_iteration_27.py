@@ -14,7 +14,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://licensee-profit-fix.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://points-history-beta.preview.emergentagent.com')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"
