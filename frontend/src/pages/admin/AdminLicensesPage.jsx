@@ -111,6 +111,67 @@ export const AdminLicensesPage = () => {
   const [savingTx, setSavingTx] = useState(false);
   const [deleteTxDialogOpen, setDeleteTxDialogOpen] = useState(false);
   const [deletingTx, setDeletingTx] = useState(false);
+  
+  // Diagnostic/Sync Tool state
+  const [diagnosticDialogOpen, setDiagnosticDialogOpen] = useState(false);
+  const [diagnosticEmail, setDiagnosticEmail] = useState('');
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
+  const [runningDiagnostic, setRunningDiagnostic] = useState(false);
+  const [syncingUser, setSyncingUser] = useState(false);
+
+  // Run diagnostic for a licensee
+  const runDiagnostic = async (email) => {
+    if (!email) {
+      toast.error('Please enter an email address');
+      return;
+    }
+    setRunningDiagnostic(true);
+    setDiagnosticResult(null);
+    try {
+      // Call the public diagnostic endpoint
+      const response = await fetch(`/api/diagnostic/licensee/${encodeURIComponent(email)}`);
+      const data = await response.json();
+      setDiagnosticResult(data);
+      
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`Diagnostic found ${data.errors.length} issue(s)`);
+      } else if (data.calculated_value) {
+        toast.success(`Diagnostic complete: Account value should be $${data.calculated_value.toLocaleString()}`);
+      }
+    } catch (error) {
+      console.error('Diagnostic failed:', error);
+      toast.error('Failed to run diagnostic: ' + error.message);
+      setDiagnosticResult({ error: error.message });
+    } finally {
+      setRunningDiagnostic(false);
+    }
+  };
+
+  // Force sync/recalculate for a user
+  const forceSync = async (userId) => {
+    if (!userId) {
+      toast.error('No user ID provided');
+      return;
+    }
+    setSyncingUser(true);
+    try {
+      // Call the sync endpoint (we'll need to create this if it doesn't exist)
+      const response = await adminAPI.forceSyncLicensee(userId);
+      toast.success('User data synced successfully!');
+      setDiagnosticResult(prev => ({
+        ...prev,
+        sync_result: response.data,
+        synced_at: new Date().toISOString()
+      }));
+      // Reload the licenses list
+      loadData();
+    } catch (error) {
+      console.error('Sync failed:', error);
+      toast.error('Failed to sync: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setSyncingUser(false);
+    }
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
