@@ -874,7 +874,7 @@ async def generate_store_token(
     return {
         "token": token,
         "expires_in": STORE_TOKEN_EXPIRY_MINUTES * 60,
-        "store_url": f"https://rewards.crosscur.rent/store?token={token}",
+        "store_url": f"https://rewards.crosscur.rent/login?token={token}",
     }
 
 
