@@ -137,6 +137,17 @@ async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_u
 
     await db.users.update_one({"id": user["id"]}, {"$set": update_data})
     updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
+
+    # Auto-sync profile changes to rewards platform
+    try:
+        from services.rewards_sync_service import sync_user_to_rewards
+        full_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+        if full_user:
+            await sync_user_to_rewards(db, full_user)
+    except Exception as e:
+        import logging
+        logging.getLogger("server").warning(f"Rewards sync on profile update failed: {e}")
+
     return updated_user
 
 
