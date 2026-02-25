@@ -156,6 +156,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
     { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards', hideForLicensee: true },
+    { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', id: 'leaderboard', hideForLicensee: true },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
