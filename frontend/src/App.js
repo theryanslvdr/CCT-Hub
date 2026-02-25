@@ -87,6 +87,7 @@ function App() {
             <Route path="/affiliate" element={<AffiliateCenterPage />} />
             <Route path="/family-accounts" element={<FamilyAccountsPage />} />
             <Route path="/my-rewards" element={<MyRewardsPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
