@@ -359,14 +359,18 @@ async def get_user_financial_summary(
         license_type = license_info.get("license_type")
         starting_amount = float(license_info.get("starting_amount", 0) or 0)
         
+        logger.info(f"get_user_financial_summary: Checking honorary for {user_id}, license_type='{license_type}', _is_honorary result={_is_honorary(license_type)}")
+        
         if _is_honorary(license_type):
             try:
+                logger.info(f"get_user_financial_summary: Calling calculate_honorary_licensee_value for {user_id}")
                 account_value = await calculate_honorary_licensee_value(db, license_info)
                 logger.info(f"get_user_financial_summary: Honorary calc for {user_id} returned {account_value}")
             except Exception as e:
-                logger.error(f"Honorary calc failed for {user_id}, falling back to current_amount: {e}")
+                logger.error(f"Honorary calc failed for {user_id}, falling back to current_amount: {e}", exc_info=True)
                 account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
         else:
+            logger.warning(f"get_user_financial_summary: {user_id} has license_type '{license_type}' but _is_honorary returned False - using current_amount")
             account_value = float(license_info.get("current_amount", license_info.get("starting_amount", 0)) or 0)
         
         # For licensees, profit is account_value - starting_amount
