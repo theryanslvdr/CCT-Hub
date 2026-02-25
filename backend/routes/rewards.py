@@ -87,7 +87,7 @@ class AdminSimulateRequest(BaseModel):
 @router.get("/summary")
 async def get_rewards_summary(user_id: str):
     """GET /api/rewards/summary?user_id={USER_ID}
-    Public endpoint - returns user's rewards summary."""
+    Public endpoint - returns user's rewards summary including streak data."""
     db = deps.db
 
     stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
@@ -101,9 +101,17 @@ async def get_rewards_summary(user_id: str):
             "estimated_usdt": 0.0,
             "min_redeem_points": MIN_REDEEM_POINTS,
             "is_redeemable": False,
+            "current_streak": 0,
+            "best_streak": 0,
+            "referral_count": 0,
+            "total_trades": 0,
         }
 
     lifetime = stats.get("lifetime_points", 0)
+    
+    # Get referral count
+    referral_count = await db.referrals.count_documents({"referrer_id": user_id, "status": "qualified"})
+    
     return {
         "user_id": user_id,
         "lifetime_points": lifetime,
@@ -112,6 +120,10 @@ async def get_rewards_summary(user_id: str):
         "estimated_usdt": round(lifetime / 100, 2),
         "min_redeem_points": MIN_REDEEM_POINTS,
         "is_redeemable": lifetime >= MIN_REDEEM_POINTS,
+        "current_streak": stats.get("current_streak", 0),
+        "best_streak": stats.get("best_streak", 0),
+        "referral_count": referral_count,
+        "total_trades": stats.get("trade_count", 0),
     }
 
 
