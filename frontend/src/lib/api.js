@@ -268,6 +268,8 @@ export const adminAPI = {
   licenseeHealthCheck: () => api.post('/admin/licensee-health-check'),
   // Force sync/recalculate licensee data
   forceSyncLicensee: (userId) => api.post(`/admin/licensee/${userId}/force-sync`),
+  // Batch sync all licensees
+  batchSyncAllLicensees: () => api.post('/admin/licensee/batch-sync-all'),
   // Run diagnostic for a licensee by email
   runDiagnostic: (email) => api.get(`/diagnostic/licensee/${encodeURIComponent(email)}`),
 };
