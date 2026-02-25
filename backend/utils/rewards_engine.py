@@ -401,6 +401,9 @@ async def process_referral_qualified(db, inviter_id: str, invitee_id: str):
         new_level = compute_level(stats)
         await db.rewards_stats.update_one({"user_id": inviter_id}, {"$set": {"level": new_level}})
 
+    # Check and award any new badges
+    await check_and_award_badges(db, inviter_id)
+
 
 # ─── DEFAULT BADGE DEFINITIONS ───
 DEFAULT_BADGES = [
