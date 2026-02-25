@@ -151,6 +151,10 @@ export const rewardsAPI = {
   adminGetBadges: () => api.get('/rewards/admin/badges'),
   adminUpdateBadge: (badgeId, data) => api.put(`/rewards/admin/badges/${badgeId}`, data),
   generateStoreToken: () => api.post('/rewards/store-token'),
+  // Platform sync
+  adminSyncAllUsers: () => api.post('/rewards/admin/sync-all-users'),
+  adminSyncUser: (userId) => api.post(`/rewards/admin/sync-user/${userId}`),
+  adminGetSyncStatus: () => api.get('/rewards/admin/sync-status'),
   systemCheck: () => api.post('/rewards/system-check'),
 };
 
