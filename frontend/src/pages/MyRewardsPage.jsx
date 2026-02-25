@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { rewardsAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import { 
   Star, Trophy, TrendingUp, ArrowUpRight, Gift, Clock, Zap, Award, ExternalLink,
   Filter, Download, ChevronLeft, ChevronRight, Calendar, Flame, Target, Medal,
