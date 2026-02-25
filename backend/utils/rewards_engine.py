@@ -362,6 +362,9 @@ async def process_deposit_event(db, user_id: str, amount_usdt: float):
         new_level = compute_level(stats)
         await db.rewards_stats.update_one({"user_id": user_id}, {"$set": {"level": new_level}})
 
+    # Check and award any new badges
+    await check_and_award_badges(db, user_id)
+
 
 async def process_withdrawal_event(db, user_id: str, amount_usdt: float, recent_deposit_within_48h: bool = False):
     """Process a withdrawal event."""
