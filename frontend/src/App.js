@@ -36,6 +36,7 @@ import AffiliateCenterPage from "./pages/AffiliateCenterPage";
 import FamilyAccountsPage from "./pages/FamilyAccountsPage";
 import SystemCheckPage from "./pages/admin/SystemCheckPage";
 import MyRewardsPage from "./pages/MyRewardsPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
 
 // Layout
