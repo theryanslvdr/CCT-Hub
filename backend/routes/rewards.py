@@ -650,3 +650,191 @@ async def run_system_check(user: dict = Depends(deps.require_master_admin)):
         "results": results,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# ─── USER SEARCH (admin) ───
+
+@router.get("/admin/search-users")
+async def admin_search_users(
+    q: str = "",
+    limit: int = 10,
+    user: dict = Depends(deps.require_admin),
+):
+    """Search users by name or email for autocomplete dropdown."""
+    db = deps.db
+    if not q or len(q) < 2:
+        return {"users": []}
+
+    query = {
+        "$or": [
+            {"full_name": {"$regex": q, "$options": "i"}},
+            {"email": {"$regex": q, "$options": "i"}},
+        ]
+    }
+    users = await db.users.find(query, {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1}).limit(limit).to_list(limit)
+    return {"users": users}
+
+
+# ─── BADGES ENDPOINTS ───
+
+@router.get("/badges")
+async def get_badge_definitions():
+    """Get all active badge definitions (public)."""
+    db = deps.db
+    badges = await db.rewards_badge_definitions.find(
+        {"is_active": True}, {"_id": 0}
+    ).sort("sort_order", 1).to_list(100)
+    return {"badges": badges}
+
+
+@router.get("/badges/user")
+async def get_user_badges(
+    user_id: Optional[str] = None,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Get badges earned by a user. Members see own, admins can view any user."""
+    db = deps.db
+    admin_roles = {"basic_admin", "admin", "super_admin", "master_admin"}
+    target_uid = user["id"]
+    if user_id and user.get("role") in admin_roles:
+        target_uid = user_id
+    elif user_id and user_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Cannot view another user's badges")
+
+    earned = await db.rewards_user_badges.find(
+        {"user_id": target_uid}, {"_id": 0}
+    ).sort("earned_at", -1).to_list(100)
+
+    # Get all badge definitions for comparison
+    definitions = await db.rewards_badge_definitions.find(
+        {"is_active": True}, {"_id": 0}
+    ).sort("sort_order", 1).to_list(100)
+
+    earned_ids = {b["badge_id"] for b in earned}
+    earned_map = {b["badge_id"]: b for b in earned}
+
+    badges_with_status = []
+    for badge_def in definitions:
+        is_earned = badge_def["id"] in earned_ids
+        badges_with_status.append({
+            **badge_def,
+            "earned": is_earned,
+            "earned_at": earned_map[badge_def["id"]]["earned_at"] if is_earned else None,
+        })
+
+    return {"user_id": target_uid, "badges": badges_with_status}
+
+
+@router.post("/badges/check")
+async def check_badges_for_user(
+    user_id: Optional[str] = None,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Trigger badge check for a user. Returns newly awarded badges."""
+    db = deps.db
+    target_uid = user["id"]
+    admin_roles = {"basic_admin", "admin", "super_admin", "master_admin"}
+    if user_id and user.get("role") in admin_roles:
+        target_uid = user_id
+
+    newly_awarded = await check_and_award_badges(db, target_uid)
+    return {"user_id": target_uid, "newly_awarded": newly_awarded}
+
+
+# ─── ADMIN BADGE MANAGEMENT (master admin only) ───
+
+class BadgeUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    is_active: Optional[bool] = None
+    sort_order: Optional[int] = None
+
+
+@router.put("/admin/badges/{badge_id}")
+async def admin_update_badge(
+    badge_id: str,
+    req: BadgeUpdateRequest,
+    user: dict = Depends(deps.require_master_admin),
+):
+    """Master admin can customize badge names, descriptions, icons, and active status."""
+    db = deps.db
+
+    badge = await db.rewards_badge_definitions.find_one({"id": badge_id})
+    if not badge:
+        raise HTTPException(status_code=404, detail="Badge not found")
+
+    updates = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if req.name is not None:
+        updates["name"] = req.name
+    if req.description is not None:
+        updates["description"] = req.description
+    if req.icon is not None:
+        updates["icon"] = req.icon
+    if req.is_active is not None:
+        updates["is_active"] = req.is_active
+    if req.sort_order is not None:
+        updates["sort_order"] = req.sort_order
+
+    await db.rewards_badge_definitions.update_one(
+        {"id": badge_id}, {"$set": updates}
+    )
+
+    updated = await db.rewards_badge_definitions.find_one({"id": badge_id}, {"_id": 0})
+    return {"success": True, "badge": updated}
+
+
+@router.get("/admin/badges")
+async def admin_get_all_badges(
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin view of all badge definitions (including inactive)."""
+    db = deps.db
+    badges = await db.rewards_badge_definitions.find(
+        {}, {"_id": 0}
+    ).sort("sort_order", 1).to_list(200)
+    return {"badges": badges}
+
+
+# ─── ADMIN MANUAL POINT ADJUSTMENT WITH AUDIT ───
+
+class ManualAdjustRequest(BaseModel):
+    user_id: str
+    points: int
+    reason: str
+    is_deduction: bool = False
+
+
+@router.post("/admin/adjust-points")
+async def admin_adjust_points(
+    req: ManualAdjustRequest,
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin manual point adjustment with audit trail."""
+    db = deps.db
+
+    target = await db.users.find_one({"id": req.user_id}, {"_id": 0, "id": 1, "full_name": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    metadata = {
+        "adjusted_by": user["id"],
+        "adjusted_by_name": user.get("full_name", "Admin"),
+        "reason": req.reason,
+        "admin_adjustment": True,
+    }
+
+    if req.is_deduction:
+        await deduct_points(db, req.user_id, abs(req.points), "admin_adjustment_deduct", metadata)
+    else:
+        await award_points(db, req.user_id, abs(req.points), "admin_adjustment_credit", metadata)
+
+    # Check badges after adjustment
+    await check_and_award_badges(db, req.user_id)
+
+    stats = await db.rewards_stats.find_one({"user_id": req.user_id}, {"_id": 0})
+    return {
+        "success": True,
+        "new_lifetime_points": stats.get("lifetime_points", 0) if stats else 0,
+        "level": stats.get("level", "Newbie") if stats else "Newbie",
+    }
