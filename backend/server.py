@@ -876,6 +876,14 @@ async def register(data: UserCreate):
     except Exception as e:
         print(f"Failed to send email notification: {e}")
     
+    # Auto-sync new user to rewards platform
+    try:
+        from services.rewards_sync_service import sync_user_to_rewards
+        await sync_user_to_rewards(db, user)
+        logger.info(f"Auto-synced new user {data.email} to rewards platform")
+    except Exception as e:
+        logger.warning(f"Rewards sync failed for new user {data.email}: {e}")
+    
     token = create_token(user_id, data.email, role)
     
     return TokenResponse(
