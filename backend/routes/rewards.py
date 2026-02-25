@@ -1,9 +1,10 @@
 """Rewards API routes - stable endpoints for hub and rewards frontends."""
 import os
 import uuid
-from datetime import datetime, timezone
+import jwt as pyjwt
+from datetime import datetime, timezone, timedelta
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Header, Depends, Query
 from pydantic import BaseModel
 
 import deps
