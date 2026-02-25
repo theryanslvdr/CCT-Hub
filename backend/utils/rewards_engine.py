@@ -319,6 +319,9 @@ async def process_trade_event(db, user_id: str):
         await award_points(db, user_id, BASE_POINTS["milestone_20_trade_streak"], "milestone_20_trade_streak",
                            {"total_trades": lifetime_trades})
 
+    # Check and award any new badges
+    await check_and_award_badges(db, user_id)
+
 
 async def process_deposit_event(db, user_id: str, amount_usdt: float):
     """Process a deposit event: update stats and award points."""
