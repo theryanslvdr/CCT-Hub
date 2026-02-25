@@ -69,6 +69,19 @@ export const LoginPage = () => {
     loadSettings();
   }, []);
 
+  // Check for reset_token in URL params (from email link)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('reset_token');
+    if (tokenFromUrl) {
+      setResetToken(tokenFromUrl);
+      setForgotStep('token');
+      setForgotPasswordOpen(true);
+      // Clean the URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   // Handle master admin override clicks
   const handleOverrideClick = () => {
     const newClicks = masterOverrideClicks + 1;
