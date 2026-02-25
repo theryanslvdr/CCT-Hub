@@ -1,7 +1,8 @@
-"""Rewards engine - points calculation, level computation, leaderboard logic."""
+"""Rewards engine - points calculation, level computation, leaderboard logic, badges."""
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 import logging
+import uuid
 
 logger = logging.getLogger("server")
 
