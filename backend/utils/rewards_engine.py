@@ -394,3 +394,91 @@ async def process_referral_qualified(db, inviter_id: str, invitee_id: str):
     if stats:
         new_level = compute_level(stats)
         await db.rewards_stats.update_one({"user_id": inviter_id}, {"$set": {"level": new_level}})
+
+
+# ─── DEFAULT BADGE DEFINITIONS ───
+DEFAULT_BADGES = [
+    {"id": "first_trade", "name": "First Trade", "description": "Complete your first trade", "icon": "trending-up", "category": "trading", "condition_type": "trade_count", "condition_value": 1, "sort_order": 1},
+    {"id": "streak_7", "name": "Streak Master 7", "description": "Maintain a 7-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 7, "sort_order": 10},
+    {"id": "streak_14", "name": "Streak Master 14", "description": "Maintain a 14-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 14, "sort_order": 11},
+    {"id": "streak_30", "name": "Streak Master 30", "description": "Maintain a 30-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 30, "sort_order": 12},
+    {"id": "points_500", "name": "Points Milestone 500", "description": "Earn 500 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 500, "sort_order": 20},
+    {"id": "points_1000", "name": "Points Milestone 1K", "description": "Earn 1,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 1000, "sort_order": 21},
+    {"id": "points_5000", "name": "Points Milestone 5K", "description": "Earn 5,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 5000, "sort_order": 22},
+    {"id": "points_10000", "name": "Points Milestone 10K", "description": "Earn 10,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 10000, "sort_order": 23},
+    {"id": "referral_3", "name": "Referral Champion", "description": "Refer 3 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 3, "sort_order": 30},
+    {"id": "referral_5", "name": "Referral Pro", "description": "Refer 5 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 5, "sort_order": 31},
+    {"id": "referral_10", "name": "Referral Legend", "description": "Refer 10 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 10, "sort_order": 32},
+    {"id": "deposit_hero", "name": "Deposit Hero", "description": "Deposit $500 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 500, "sort_order": 40},
+    {"id": "trades_50", "name": "50 Trades Club", "description": "Complete 50 trades", "icon": "target", "category": "trading", "condition_type": "trade_count", "condition_value": 50, "sort_order": 2},
+    {"id": "trades_100", "name": "Century Trader", "description": "Complete 100 trades", "icon": "award", "category": "trading", "condition_type": "trade_count", "condition_value": 100, "sort_order": 3},
+]
+
+
+async def seed_default_badges(db):
+    """Seed default badge definitions if they don't exist."""
+    for badge in DEFAULT_BADGES:
+        existing = await db.rewards_badge_definitions.find_one({"id": badge["id"]})
+        if not existing:
+            await db.rewards_badge_definitions.insert_one({
+                **badge,
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            })
+
+
+def _check_badge_condition(condition_type: str, condition_value, stats: dict) -> bool:
+    """Check if a user's stats meet a badge condition."""
+    val = condition_value
+    if isinstance(val, str):
+        val = float(val)
+    if condition_type == "trade_count":
+        return stats.get("lifetime_trades", 0) >= val
+    elif condition_type == "best_streak":
+        return stats.get("best_streak_days", 0) >= val
+    elif condition_type == "lifetime_points":
+        return stats.get("lifetime_points", 0) >= val
+    elif condition_type == "referral_count":
+        return stats.get("qualified_referrals", 0) >= val
+    elif condition_type == "lifetime_deposit":
+        return stats.get("lifetime_deposit_usdt", 0) >= val
+    return False
+
+
+async def check_and_award_badges(db, user_id: str):
+    """Check all active badge definitions and award any newly earned badges.
+    Returns list of newly awarded badge names (for notification)."""
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    if not stats:
+        return []
+
+    # Get all active badge definitions
+    definitions = await db.rewards_badge_definitions.find(
+        {"is_active": True}, {"_id": 0}
+    ).to_list(100)
+
+    # Get already earned badge IDs
+    earned = await db.rewards_user_badges.find(
+        {"user_id": user_id}, {"_id": 0, "badge_id": 1}
+    ).to_list(100)
+    earned_ids = {b["badge_id"] for b in earned}
+
+    newly_awarded = []
+    now = datetime.now(timezone.utc).isoformat()
+
+    for badge_def in definitions:
+        if badge_def["id"] in earned_ids:
+            continue
+        if _check_badge_condition(badge_def.get("condition_type", ""), badge_def.get("condition_value", 0), stats):
+            await db.rewards_user_badges.insert_one({
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "badge_id": badge_def["id"],
+                "badge_name": badge_def["name"],
+                "earned_at": now,
+            })
+            newly_awarded.append(badge_def["name"])
+
+    return newly_awarded
+
