@@ -7953,6 +7953,65 @@ async def licensee_health_check(user: dict = Depends(require_admin)):
     }
 
 
+@admin_router.post("/licensee/{user_id}/force-sync")
+async def force_sync_licensee(user_id: str, user: dict = Depends(require_admin)):
+    """Force recalculate and sync a licensee's account value.
+    
+    This is a safeguard tool for admins to manually trigger recalculation
+    when the dashboard shows incorrect values.
+    """
+    from utils.calculations import calculate_honorary_licensee_value, _is_honorary
+    
+    # Find the user
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail=f"User not found: {user_id}")
+    
+    # Find their license
+    license = await db.licenses.find_one(
+        {"user_id": user_id, "is_active": True},
+        {"_id": 0}
+    )
+    if not license:
+        raise HTTPException(status_code=404, detail=f"No active license found for user: {user_id}")
+    
+    result = {
+        "user_id": user_id,
+        "email": target_user.get("email"),
+        "license_type": license.get("license_type"),
+        "starting_amount": float(license.get("starting_amount", 0) or 0),
+        "synced_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Calculate the current value
+    if _is_honorary(license.get("license_type")):
+        try:
+            calculated_value = await calculate_honorary_licensee_value(db, license)
+            result["calculated_value"] = round(calculated_value, 2)
+            result["calculated_profit"] = round(calculated_value - result["starting_amount"], 2)
+            
+            # Update the current_amount in the license document to match calculated value
+            await db.licenses.update_one(
+                {"user_id": user_id, "is_active": True},
+                {"$set": {"current_amount": round(calculated_value, 2), "last_synced": datetime.now(timezone.utc)}}
+            )
+            result["status"] = "synced"
+            result["message"] = f"Successfully synced. Account value: ${calculated_value:,.2f}"
+            
+            logger.info(f"Force sync for {user_id}: calculated_value={calculated_value}")
+            
+        except Exception as e:
+            result["status"] = "error"
+            result["error"] = str(e)
+            logger.error(f"Force sync failed for {user_id}: {e}")
+    else:
+        result["status"] = "skipped"
+        result["message"] = "Not an honorary license - no calculation needed"
+        result["calculated_value"] = float(license.get("current_amount", license.get("starting_amount", 0)) or 0)
+    
+    return result
+
+
 
 class SendEmailRequest(BaseModel):
     subject: str
