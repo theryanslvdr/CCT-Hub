@@ -211,6 +211,13 @@ export const DashboardPage = () => {
   }, [user?.id, isSimulating, simulatedMemberId]);
 
   // Define KPI cards - filter based on licensee view
+  // DEBUG: Log the summary state when cards are defined
+  console.log('=== KPI CARDS DEBUG ===');
+  console.log('summary state:', summary);
+  console.log('summary?.account_value:', summary?.account_value);
+  console.log('summary?.total_actual_profit:', summary?.total_actual_profit);
+  console.log('summary?.total_trades:', summary?.total_trades);
+  
   const allKpiCards = [
     {
       title: 'Account Value',
