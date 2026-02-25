@@ -582,6 +582,115 @@ export const AdminSettingsPage = () => {
     return value.slice(0, 4) + '••••••••' + value.slice(-4);
   };
 
+  // ===== DIAGNOSTIC FUNCTIONS =====
+  
+  // Load last sync date from localStorage
+  useEffect(() => {
+    const savedLastSync = localStorage.getItem('lastLicenseeSyncDate');
+    if (savedLastSync) {
+      setLastSyncDate(new Date(savedLastSync));
+      // Recommend sync every 7 days
+      const nextSync = new Date(savedLastSync);
+      nextSync.setDate(nextSync.getDate() + 7);
+      setNextSyncRecommended(nextSync);
+    }
+  }, []);
+
+  // Run diagnostic for a single licensee
+  const runDiagnostic = async (email) => {
+    if (!email) {
+      toast.error('Please enter an email address');
+      return;
+    }
+    setRunningDiagnostic(true);
+    setDiagnosticResult(null);
+    try {
+      const response = await fetch(`/api/diagnostic/licensee/${encodeURIComponent(email)}`);
+      const data = await response.json();
+      setDiagnosticResult(data);
+      
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`Diagnostic found ${data.errors.length} issue(s)`);
+      } else if (data.calculated_value) {
+        toast.success(`Diagnostic complete: Account value should be $${data.calculated_value.toLocaleString()}`);
+      }
+    } catch (error) {
+      console.error('Diagnostic failed:', error);
+      toast.error('Failed to run diagnostic: ' + error.message);
+      setDiagnosticResult({ error: error.message });
+    } finally {
+      setRunningDiagnostic(false);
+    }
+  };
+
+  // Force sync/recalculate for a single user
+  const forceSync = async (userId) => {
+    if (!userId) {
+      toast.error('No user ID provided');
+      return;
+    }
+    setSyncingUser(true);
+    try {
+      const response = await adminAPI.forceSyncLicensee(userId);
+      toast.success('User data synced successfully!');
+      setDiagnosticResult(prev => ({
+        ...prev,
+        sync_result: response.data,
+        synced_at: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Sync failed:', error);
+      toast.error('Failed to sync: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setSyncingUser(false);
+    }
+  };
+
+  // Run health check on all licensees
+  const runHealthCheck = async () => {
+    setRunningHealthCheck(true);
+    setHealthCheckResults(null);
+    try {
+      const response = await adminAPI.licenseeHealthCheck();
+      setHealthCheckResults(response.data);
+      if (response.data.broken > 0) {
+        toast.warning(`Found ${response.data.broken} licensee(s) with issues`);
+      } else {
+        toast.success(`All ${response.data.ok} licensees are healthy!`);
+      }
+    } catch (error) {
+      console.error('Health check failed:', error);
+      toast.error('Health check failed: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setRunningHealthCheck(false);
+    }
+  };
+
+  // Batch sync all licensees
+  const batchSyncAll = async () => {
+    setBatchSyncing(true);
+    setBatchSyncResults(null);
+    try {
+      const response = await adminAPI.batchSyncAllLicensees();
+      setBatchSyncResults(response.data);
+      
+      // Save sync date
+      const now = new Date();
+      localStorage.setItem('lastLicenseeSyncDate', now.toISOString());
+      setLastSyncDate(now);
+      const nextSync = new Date(now);
+      nextSync.setDate(nextSync.getDate() + 7);
+      setNextSyncRecommended(nextSync);
+      
+      toast.success(`Batch sync complete! ${response.data.synced} licensees updated.`);
+    } catch (error) {
+      console.error('Batch sync failed:', error);
+      toast.error('Batch sync failed: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setBatchSyncing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
