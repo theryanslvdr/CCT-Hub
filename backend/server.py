@@ -9341,9 +9341,143 @@ async def health_check():
     return {
         "status": "healthy", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "2026.02.25.v1",
+        "version": "2026.02.25.v2",
         "features": ["balance-override", "diagnostic-post", "sync-button", "signal-blocking", "version-banner"]
     }
+
+
+@api_router.get("/diagnostic/licensee/{email}")
+async def diagnostic_licensee(email: str):
+    """PUBLIC diagnostic endpoint to debug licensee calculation issues.
+    Returns detailed info about what the calculation sees for this user.
+    """
+    try:
+        from utils.calculations import _is_honorary, calculate_honorary_licensee_value
+        
+        result = {
+            "email": email,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "steps": [],
+            "errors": []
+        }
+        
+        # Step 1: Find user
+        user = await db.users.find_one({"email": email}, {"_id": 0})
+        if not user:
+            result["errors"].append(f"User with email '{email}' not found")
+            return result
+        
+        result["user_id"] = user.get("id")
+        result["user_role"] = user.get("role")
+        result["steps"].append(f"✓ Found user: {user.get('full_name')} (id={user.get('id')})")
+        
+        # Step 2: Find license
+        license = await db.licenses.find_one(
+            {"user_id": user.get("id"), "is_active": True},
+            {"_id": 0}
+        )
+        
+        if not license:
+            result["errors"].append(f"No active license found for user_id={user.get('id')}")
+            # Try to find ANY license for this user
+            any_license = await db.licenses.find_one({"user_id": user.get("id")}, {"_id": 0})
+            if any_license:
+                result["found_inactive_license"] = {
+                    "license_type": any_license.get("license_type"),
+                    "is_active": any_license.get("is_active"),
+                    "starting_amount": any_license.get("starting_amount")
+                }
+            return result
+        
+        result["license"] = {
+            "id": license.get("id"),
+            "license_type": license.get("license_type"),
+            "starting_amount": license.get("starting_amount"),
+            "current_amount": license.get("current_amount"),
+            "effective_start_date": str(license.get("effective_start_date")),
+            "start_date": str(license.get("start_date")),
+            "is_active": license.get("is_active")
+        }
+        result["steps"].append(f"✓ Found license: type={license.get('license_type')}, starting=${license.get('starting_amount')}")
+        
+        # Step 3: Check if honorary
+        license_type = license.get("license_type")
+        is_honorary = _is_honorary(license_type)
+        result["is_honorary"] = is_honorary
+        result["steps"].append(f"✓ _is_honorary('{license_type}') = {is_honorary}")
+        
+        # Step 4: Find master admin
+        master_admin = await db.users.find_one({"role": "master_admin"}, {"_id": 0, "id": 1, "email": 1, "full_name": 1})
+        if not master_admin:
+            result["errors"].append("No master_admin user found in database!")
+            return result
+        
+        result["master_admin"] = {
+            "id": master_admin.get("id"),
+            "email": master_admin.get("email"),
+            "name": master_admin.get("full_name")
+        }
+        result["steps"].append(f"✓ Found master_admin: {master_admin.get('email')} (id={master_admin.get('id')})")
+        
+        # Step 5: Count master admin trades
+        all_trades = await db.trade_logs.find(
+            {"user_id": master_admin["id"]},
+            {"_id": 0, "created_at": 1, "trade_date": 1, "did_not_trade": 1}
+        ).to_list(10000)
+        
+        result["master_admin_total_trades"] = len(all_trades)
+        
+        # Count unique trade days (excluding did_not_trade)
+        traded_dates = set()
+        did_not_trade_count = 0
+        for trade in all_trades:
+            if trade.get("did_not_trade") == True:
+                did_not_trade_count += 1
+                continue
+            trade_date = trade.get("trade_date")
+            if not trade_date:
+                created = trade.get("created_at")
+                if created:
+                    if isinstance(created, datetime):
+                        trade_date = created.strftime("%Y-%m-%d")
+                    else:
+                        trade_date = str(created)[:10]
+            if trade_date:
+                traded_dates.add(str(trade_date)[:10])
+        
+        result["master_admin_unique_trade_days"] = len(traded_dates)
+        result["master_admin_did_not_trade_days"] = did_not_trade_count
+        result["master_admin_trade_dates"] = sorted(list(traded_dates))[:20]  # First 20
+        result["steps"].append(f"✓ Master admin has {len(traded_dates)} unique trade days (out of {len(all_trades)} total records)")
+        
+        # Step 6: Check effective start date
+        effective_start = license.get("effective_start_date") or license.get("start_date")
+        if effective_start:
+            start_str = str(effective_start)[:10]
+            trades_after_start = [d for d in traded_dates if d >= start_str]
+            result["effective_start_date"] = start_str
+            result["trades_after_start"] = len(trades_after_start)
+            result["trades_after_start_dates"] = sorted(trades_after_start)[:15]
+            result["steps"].append(f"✓ {len(trades_after_start)} trades are on/after effective start ({start_str})")
+        else:
+            result["errors"].append("No effective_start_date or start_date found in license!")
+        
+        # Step 7: Calculate value if honorary
+        if is_honorary:
+            try:
+                calculated_value = await calculate_honorary_licensee_value(db, license)
+                starting_amount = float(license.get("starting_amount", 0) or 0)
+                result["calculated_value"] = calculated_value
+                result["calculated_profit"] = round(calculated_value - starting_amount, 2)
+                result["steps"].append(f"✓ Calculated value: ${calculated_value} (profit: ${round(calculated_value - starting_amount, 2)})")
+            except Exception as e:
+                result["errors"].append(f"calculate_honorary_licensee_value failed: {str(e)}")
+        
+        return result
+        
+    except Exception as e:
+        return {"error": str(e), "email": email}
+
 
 # Include all routers
 api_router.include_router(auth_router)
