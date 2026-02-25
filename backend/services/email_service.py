@@ -828,3 +828,74 @@ async def send_registration_notification_to_admins(user_name: str, user_email: s
         logger.error(f"Failed to send registration notifications: {e}")
     finally:
         client.close()
+
+
+def get_password_reset_email(reset_link: str, user_name: str = "") -> Dict[str, str]:
+    """Generate password reset email content."""
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #0f0f0f; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background: linear-gradient(135deg, #F59E0B, #D97706); color: white; padding: 24px; text-align: center; border-radius: 12px 12px 0 0; }}
+            .header h1 {{ margin: 0; font-size: 22px; }}
+            .content {{ background: #1a1a2e; padding: 32px; border-radius: 0 0 12px 12px; color: #e0e0e0; }}
+            .button {{ display: inline-block; background: linear-gradient(135deg, #F59E0B, #D97706); color: #000 !important; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin: 24px 0; }}
+            .code-box {{ background: #0d0d1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin: 16px 0; text-align: center; }}
+            .code {{ font-family: monospace; font-size: 14px; color: #F59E0B; word-break: break-all; }}
+            .footer {{ text-align: center; color: #666; font-size: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #333; }}
+            .warning {{ background: #2d1810; border-left: 4px solid #F59E0B; padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; font-size: 13px; color: #FCD34D; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Password Reset Request</h1>
+            </div>
+            <div class="content">
+                <p>Hi{' ' + user_name if user_name else ''},</p>
+                <p>We received a request to reset your CrossCurrent account password. Click the button below to set a new password:</p>
+                
+                <p style="text-align: center;">
+                    <a href="{reset_link}" class="button">Reset My Password</a>
+                </p>
+                
+                <div class="warning">
+                    This link expires in <strong>1 hour</strong>. If you didn't request this reset, you can safely ignore this email.
+                </div>
+                
+                <p style="color: #888; font-size: 13px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                <div class="code-box">
+                    <span class="code">{reset_link}</span>
+                </div>
+                
+                <div class="footer">
+                    <p>CrossCurrent Finance Center</p>
+                    <p>This is an automated message. Please do not reply.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    text = f"""Password Reset Request
+
+Hi{' ' + user_name if user_name else ''},
+
+We received a request to reset your CrossCurrent account password.
+
+Reset your password: {reset_link}
+
+This link expires in 1 hour. If you didn't request this, you can ignore this email.
+
+- CrossCurrent Finance Center
+"""
+    
+    return {
+        "subject": "Reset Your CrossCurrent Password",
+        "html": html,
+        "text": text,
+    }
