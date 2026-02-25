@@ -113,25 +113,20 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 ### Rewards Platform User Sync (Feb 25, 2026) - COMPLETE
 **Admin Batch Sync:**
 - "Sync All Users" button in Platform Settings > Diagnostics
-- Pushes all hub users to `rewards.crosscur.rent` via external API
+- Pushes all hub users to `rewards.crosscur.rent` via external API (POST /external/users)
 - Sync status dashboard: Hub Users, Synced, Rewards Platform count, Last Sync timestamp
-- `POST /api/rewards/admin/sync-all-users` (master admin), `POST /api/rewards/admin/sync-user/{id}` (admin), `GET /api/rewards/admin/sync-status`
 
 **Auto-Sync Hooks:**
 - New user registration → auto-pushed to rewards platform
 - Password change → synced to rewards platform  
 - Profile update → synced to rewards platform
 
-**Enhanced Store Token JWT:**
-- `POST /api/rewards/store-token` now includes `role` field for admin mapping
-- JWT payload: sub, email, name, role, level, points, iss, aud, exp
-
-**Rewards Platform Prompts (for user to paste):**
-- `/app/memory/REWARDS_PLATFORM_PROMPTS.md` contains 3 ready-to-paste prompts:
-  1. JWT SSO Auto-Login (primary flow)
-  2. POST /external/users endpoint (credential sync)
-  3. Shared JWT_SECRET setup
-- **Test Status:** 100% passed (iteration_131)
+**JWT SSO Auto-Login (VERIFIED WORKING):**
+- Hub generates JWT → redirects to `rewards.crosscur.rent/login?token=xxx`
+- Rewards platform verifies JWT via `POST /api/auth/sso` using `HUB_JWT_SECRET`
+- Auto-creates/matches user, sets admin flags, logs in, redirects to dashboard
+- Confirmed: Ryan Salvador auto-logged in as Super Admin on rewards platform
+- **Test Status:** 100% passed (iteration_131 + manual SSO verification)
 
 ### Badge Toasts, Email Reset, Rewards Store API (Feb 25, 2026) - COMPLETE
 **Badge Notification Toasts:**
