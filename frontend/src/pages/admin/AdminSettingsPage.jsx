@@ -3152,6 +3152,12 @@ export const AdminSettingsPage = () => {
                     </div>
                   )}
                 </div>
+
+                <div className="border-t border-zinc-800 my-4" />
+
+                {/* Rewards Platform Sync Section */}
+                <RewardsPlatformSync />
+
               </CardContent>
             </Card>
           )}
