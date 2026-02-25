@@ -2305,6 +2305,154 @@ export const AdminLicensesPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Diagnostic Tool Dialog */}
+      <Dialog open={diagnosticDialogOpen} onOpenChange={setDiagnosticDialogOpen}>
+        <DialogContent className="glass-card border-zinc-700 max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserCog className="w-5 h-5 text-cyan-400" /> Licensee Diagnostic Tool
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-400">
+              Enter a licensee's email to diagnose calculation issues. This tool shows exactly what the backend sees and can force a recalculation if needed.
+            </p>
+            
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter licensee email (e.g., user@example.com)"
+                value={diagnosticEmail}
+                onChange={(e) => setDiagnosticEmail(e.target.value)}
+                className="flex-1 bg-zinc-800/50 border-zinc-700"
+              />
+              <Button 
+                onClick={() => runDiagnostic(diagnosticEmail)}
+                disabled={runningDiagnostic || !diagnosticEmail}
+                className="gap-2"
+              >
+                {runningDiagnostic ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                Run Diagnostic
+              </Button>
+            </div>
+            
+            {/* Quick select from existing licenses */}
+            {licenses.length > 0 && (
+              <div>
+                <Label className="text-zinc-400 text-xs mb-2 block">Quick Select:</Label>
+                <div className="flex flex-wrap gap-2">
+                  {licenses.slice(0, 5).map(lic => (
+                    <Button
+                      key={lic.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setDiagnosticEmail(lic.user_email || '');
+                        runDiagnostic(lic.user_email);
+                      }}
+                      className="text-xs border-zinc-700 hover:bg-zinc-800"
+                    >
+                      {lic.user_name || lic.user_email || 'Unknown'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Diagnostic Results */}
+            {diagnosticResult && (
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-white">Diagnostic Results</h4>
+                  {diagnosticResult.user_id && (
+                    <Button
+                      onClick={() => forceSync(diagnosticResult.user_id)}
+                      disabled={syncingUser}
+                      size="sm"
+                      className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      {syncingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                      Force Sync
+                    </Button>
+                  )}
+                </div>
+                
+                {/* Steps */}
+                {diagnosticResult.steps && diagnosticResult.steps.length > 0 && (
+                  <div className="bg-zinc-900/50 rounded-lg p-3 space-y-1">
+                    {diagnosticResult.steps.map((step, i) => (
+                      <p key={i} className={`text-sm font-mono ${step.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {step}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Errors */}
+                {diagnosticResult.errors && diagnosticResult.errors.length > 0 && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                    <p className="text-red-400 font-medium flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" /> Issues Found:
+                    </p>
+                    <ul className="mt-2 space-y-1">
+                      {diagnosticResult.errors.map((err, i) => (
+                        <li key={i} className="text-sm text-red-300">• {err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Summary */}
+                {diagnosticResult.calculated_value && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-zinc-400">Starting Amount</p>
+                        <p className="text-lg font-bold text-white">${diagnosticResult.license?.starting_amount?.toLocaleString() || '0'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-zinc-400">Calculated Value</p>
+                        <p className="text-lg font-bold text-emerald-400">${diagnosticResult.calculated_value?.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-zinc-400">Profit</p>
+                        <p className="text-lg font-bold text-cyan-400">+${diagnosticResult.calculated_profit?.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-zinc-400">Trades After Start</p>
+                        <p className="text-lg font-bold text-white">{diagnosticResult.trades_after_start || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Sync Result */}
+                {diagnosticResult.sync_result && (
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                    <p className="text-blue-400 font-medium flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" /> Sync Complete
+                    </p>
+                    <p className="text-sm text-zinc-300 mt-1">{diagnosticResult.sync_result.message}</p>
+                  </div>
+                )}
+                
+                {/* Raw JSON (collapsible) */}
+                <details className="text-xs">
+                  <summary className="text-zinc-500 cursor-pointer hover:text-zinc-300">Show Raw Response</summary>
+                  <pre className="mt-2 bg-zinc-900 p-2 rounded overflow-x-auto text-zinc-400">
+                    {JSON.stringify(diagnosticResult, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDiagnosticDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </MobileNotice>
   );
