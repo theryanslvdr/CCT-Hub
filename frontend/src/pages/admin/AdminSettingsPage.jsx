@@ -2837,6 +2837,324 @@ export const AdminSettingsPage = () => {
           {activeTab === 'affiliate' && isMasterAdmin && (
             <AffiliateManagerCard />
           )}
+
+          {/* Diagnostics - Master Admin Only */}
+          {activeTab === 'diagnostics' && isMasterAdmin && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Database className="w-5 h-5 text-orange-400" /> System Diagnostics
+                </CardTitle>
+                <p className="text-sm text-zinc-400">
+                  Diagnose and fix licensee calculation issues. Run health checks and sync data.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Sync Status Banner */}
+                <div className={`rounded-lg p-4 border ${
+                  !lastSyncDate 
+                    ? 'bg-amber-500/10 border-amber-500/30' 
+                    : nextSyncRecommended && new Date() > nextSyncRecommended
+                      ? 'bg-red-500/10 border-red-500/30'
+                      : 'bg-emerald-500/10 border-emerald-500/30'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`font-medium ${
+                        !lastSyncDate 
+                          ? 'text-amber-400' 
+                          : nextSyncRecommended && new Date() > nextSyncRecommended
+                            ? 'text-red-400'
+                            : 'text-emerald-400'
+                      }`}>
+                        {!lastSyncDate 
+                          ? '⚠️ Never synced - Recommended to run batch sync'
+                          : nextSyncRecommended && new Date() > nextSyncRecommended
+                            ? '🔴 Sync overdue - Please run batch sync'
+                            : '✓ System in sync'
+                        }
+                      </p>
+                      <p className="text-sm text-zinc-400 mt-1">
+                        {lastSyncDate 
+                          ? `Last sync: ${lastSyncDate.toLocaleDateString()} ${lastSyncDate.toLocaleTimeString()}`
+                          : 'No sync history found'
+                        }
+                        {nextSyncRecommended && (
+                          <span className="ml-2">
+                            • Next recommended: {nextSyncRecommended.toLocaleDateString()}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={batchSyncAll}
+                      disabled={batchSyncing}
+                      className="gap-2 bg-orange-600 hover:bg-orange-700"
+                      data-testid="batch-sync-all-btn"
+                    >
+                      {batchSyncing ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Syncing...</>
+                      ) : (
+                        <><RefreshCw className="w-4 h-4" /> Batch Sync All</>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Batch Sync Results */}
+                {batchSyncResults && (
+                  <div className="bg-zinc-900/50 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-white">Batch Sync Results</h4>
+                      <span className="text-xs text-zinc-500">
+                        {new Date(batchSyncResults.synced_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-zinc-800 rounded-lg">
+                        <p className="text-2xl font-bold text-white">{batchSyncResults.total}</p>
+                        <p className="text-xs text-zinc-400">Total</p>
+                      </div>
+                      <div className="text-center p-3 bg-emerald-500/10 rounded-lg">
+                        <p className="text-2xl font-bold text-emerald-400">{batchSyncResults.synced}</p>
+                        <p className="text-xs text-zinc-400">Synced</p>
+                      </div>
+                      <div className="text-center p-3 bg-zinc-800 rounded-lg">
+                        <p className="text-2xl font-bold text-zinc-400">{batchSyncResults.skipped}</p>
+                        <p className="text-xs text-zinc-400">Skipped</p>
+                      </div>
+                      <div className="text-center p-3 bg-red-500/10 rounded-lg">
+                        <p className="text-2xl font-bold text-red-400">{batchSyncResults.errors}</p>
+                        <p className="text-xs text-zinc-400">Errors</p>
+                      </div>
+                    </div>
+                    {batchSyncResults.details && batchSyncResults.details.length > 0 && (
+                      <details className="mt-2">
+                        <summary className="text-sm text-zinc-400 cursor-pointer hover:text-zinc-300">
+                          View Details ({batchSyncResults.details.length} items)
+                        </summary>
+                        <div className="mt-2 max-h-60 overflow-y-auto">
+                          <table className="w-full text-xs">
+                            <thead className="text-zinc-500">
+                              <tr>
+                                <th className="text-left p-2">User</th>
+                                <th className="text-right p-2">Starting</th>
+                                <th className="text-right p-2">Calculated</th>
+                                <th className="text-right p-2">Profit</th>
+                                <th className="text-center p-2">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {batchSyncResults.details.map((detail, i) => (
+                                <tr key={i} className="border-t border-zinc-800">
+                                  <td className="p-2 text-zinc-300 font-mono">{detail.user_id?.slice(0, 8)}...</td>
+                                  <td className="p-2 text-right text-zinc-400">${detail.starting_amount?.toLocaleString()}</td>
+                                  <td className="p-2 text-right text-white">${detail.calculated_value?.toLocaleString()}</td>
+                                  <td className="p-2 text-right text-emerald-400">+${detail.profit?.toLocaleString()}</td>
+                                  <td className="p-2 text-center">
+                                    {detail.status === 'synced' ? (
+                                      <span className="text-emerald-400">✓</span>
+                                    ) : (
+                                      <span className="text-red-400">✗</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </details>
+                    )}
+                  </div>
+                )}
+
+                <div className="border-t border-zinc-800 my-4" />
+
+                {/* Health Check Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-medium text-white flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-blue-400" /> Licensee Health Check
+                      </h4>
+                      <p className="text-sm text-zinc-400 mt-1">
+                        Quick check to identify licensees with calculation issues
+                      </p>
+                    </div>
+                    <Button
+                      onClick={runHealthCheck}
+                      disabled={runningHealthCheck}
+                      variant="outline"
+                      className="gap-2"
+                      data-testid="health-check-btn"
+                    >
+                      {runningHealthCheck ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Checking...</>
+                      ) : (
+                        <><CheckCircle2 className="w-4 h-4" /> Run Health Check</>
+                      )}
+                    </Button>
+                  </div>
+
+                  {healthCheckResults && (
+                    <div className="bg-zinc-900/50 rounded-lg p-4">
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-400 font-bold text-xl">{healthCheckResults.ok}</span>
+                          <span className="text-zinc-400 text-sm">Healthy</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-red-400 font-bold text-xl">{healthCheckResults.broken}</span>
+                          <span className="text-zinc-400 text-sm">Issues</span>
+                        </div>
+                        {healthCheckResults.fixed > 0 && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-400 font-bold text-xl">{healthCheckResults.fixed}</span>
+                            <span className="text-zinc-400 text-sm">Fixed</span>
+                          </div>
+                        )}
+                      </div>
+                      {healthCheckResults.results && healthCheckResults.results.filter(r => r.status === 'broken').length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-sm text-red-400">Issues found:</p>
+                          {healthCheckResults.results.filter(r => r.status === 'broken').map((r, i) => (
+                            <div key={i} className="text-xs bg-red-500/10 p-2 rounded">
+                              <span className="text-zinc-300">{r.email || r.user_id}</span>
+                              {r.issues && r.issues.map((issue, j) => (
+                                <span key={j} className="text-red-300 ml-2">• {issue}</span>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-zinc-800 my-4" />
+
+                {/* Individual Diagnostic Section */}
+                <div>
+                  <h4 className="font-medium text-white flex items-center gap-2 mb-4">
+                    <Smartphone className="w-4 h-4 text-cyan-400" /> Individual Licensee Diagnostic
+                  </h4>
+                  
+                  <div className="flex gap-2 mb-4">
+                    <Input
+                      placeholder="Enter licensee email (e.g., user@example.com)"
+                      value={diagnosticEmail}
+                      onChange={(e) => setDiagnosticEmail(e.target.value)}
+                      className="flex-1 bg-zinc-800/50 border-zinc-700"
+                      data-testid="diagnostic-email-input"
+                    />
+                    <Button 
+                      onClick={() => runDiagnostic(diagnosticEmail)}
+                      disabled={runningDiagnostic || !diagnosticEmail}
+                      className="gap-2"
+                      data-testid="run-diagnostic-btn"
+                    >
+                      {runningDiagnostic ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Running...</>
+                      ) : (
+                        <><RefreshCw className="w-4 h-4" /> Run Diagnostic</>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Diagnostic Results */}
+                  {diagnosticResult && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-medium text-white">Diagnostic Results</h5>
+                        {diagnosticResult.user_id && (
+                          <Button
+                            onClick={() => forceSync(diagnosticResult.user_id)}
+                            disabled={syncingUser}
+                            size="sm"
+                            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                            data-testid="force-sync-btn"
+                          >
+                            {syncingUser ? (
+                              <><Loader2 className="w-4 h-4 animate-spin" /> Syncing...</>
+                            ) : (
+                              <><RefreshCw className="w-4 h-4" /> Force Sync</>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Steps */}
+                      {diagnosticResult.steps && diagnosticResult.steps.length > 0 && (
+                        <div className="bg-zinc-900/50 rounded-lg p-3 space-y-1">
+                          {diagnosticResult.steps.map((step, i) => (
+                            <p key={i} className={`text-sm font-mono ${step.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {step}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Errors */}
+                      {diagnosticResult.errors && diagnosticResult.errors.length > 0 && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                          <p className="text-red-400 font-medium flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" /> Issues Found:
+                          </p>
+                          <ul className="mt-2 space-y-1">
+                            {diagnosticResult.errors.map((err, i) => (
+                              <li key={i} className="text-sm text-red-300">• {err}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {/* Summary */}
+                      {diagnosticResult.calculated_value && (
+                        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                              <p className="text-xs text-zinc-400">Starting Amount</p>
+                              <p className="text-lg font-bold text-white">${diagnosticResult.license?.starting_amount?.toLocaleString() || '0'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-zinc-400">Calculated Value</p>
+                              <p className="text-lg font-bold text-emerald-400">${diagnosticResult.calculated_value?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-zinc-400">Profit</p>
+                              <p className="text-lg font-bold text-cyan-400">+${diagnosticResult.calculated_profit?.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-zinc-400">Trades After Start</p>
+                              <p className="text-lg font-bold text-white">{diagnosticResult.trades_after_start || 0}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Sync Result */}
+                      {diagnosticResult.sync_result && (
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                          <p className="text-blue-400 font-medium flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4" /> Sync Complete
+                          </p>
+                          <p className="text-sm text-zinc-300 mt-1">{diagnosticResult.sync_result.message}</p>
+                        </div>
+                      )}
+                      
+                      {/* Raw JSON */}
+                      <details className="text-xs">
+                        <summary className="text-zinc-500 cursor-pointer hover:text-zinc-300">Show Raw Response</summary>
+                        <pre className="mt-2 bg-zinc-900 p-2 rounded overflow-x-auto text-zinc-400 max-h-60">
+                          {JSON.stringify(diagnosticResult, null, 2)}
+                        </pre>
+                      </details>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
