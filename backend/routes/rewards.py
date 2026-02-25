@@ -839,3 +839,108 @@ async def admin_adjust_points(
         "new_lifetime_points": stats.get("lifetime_points", 0) if stats else 0,
         "level": stats.get("level", "Newbie") if stats else "Newbie",
     }
+
+
+# ─── REWARDS STORE CROSS-SITE AUTH ───
+
+STORE_JWT_SECRET = os.environ.get("JWT_SECRET", os.environ.get("SECRET_KEY", ""))
+STORE_TOKEN_EXPIRY_MINUTES = 10
+
+
+@router.post("/store-token")
+async def generate_store_token(
+    user: dict = Depends(deps.get_current_user),
+):
+    """Generate a signed JWT for seamless cross-site auth with the rewards store."""
+    db = deps.db
+
+    stats = await db.rewards_stats.find_one({"user_id": user["id"]}, {"_id": 0})
+
+    payload = {
+        "sub": user["id"],
+        "email": user.get("email", ""),
+        "name": user.get("full_name", ""),
+        "level": stats.get("level", "Newbie") if stats else "Newbie",
+        "points": stats.get("lifetime_points", 0) if stats else 0,
+        "iss": "crosscurrent-hub",
+        "aud": "crosscurrent-store",
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=STORE_TOKEN_EXPIRY_MINUTES),
+    }
+
+    token = pyjwt.encode(payload, STORE_JWT_SECRET, algorithm="HS256")
+
+    return {
+        "token": token,
+        "expires_in": STORE_TOKEN_EXPIRY_MINUTES * 60,
+        "store_url": f"https://rewards.crosscur.rent/store?token={token}",
+    }
+
+
+@router.post("/store-verify")
+async def verify_store_token(
+    token: str = Query(...),
+    x_internal_api_key: str = Header(None),
+):
+    """Called by the rewards store to verify a user token and get their profile.
+    Requires the internal API key for security."""
+    verify_internal_key(x_internal_api_key)
+
+    try:
+        payload = pyjwt.decode(
+            token, STORE_JWT_SECRET, algorithms=["HS256"],
+            audience="crosscurrent-store", issuer="crosscurrent-hub",
+        )
+    except pyjwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except pyjwt.InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
+    db = deps.db
+    user_id = payload.get("sub")
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "id": 1, "email": 1, "full_name": 1})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "valid": True,
+        "user": {
+            "id": user["id"],
+            "email": user.get("email"),
+            "name": user.get("full_name"),
+            "level": stats.get("level", "Newbie") if stats else "Newbie",
+            "lifetime_points": stats.get("lifetime_points", 0) if stats else 0,
+            "available_balance": stats.get("lifetime_points", 0) if stats else 0,
+        },
+    }
+
+
+@router.post("/store-deduct")
+async def store_deduct_points(
+    user_id: str = Query(...),
+    points: int = Query(..., gt=0),
+    item_name: str = Query("Store Redemption"),
+    x_internal_api_key: str = Header(None),
+):
+    """Called by the rewards store to deduct points when a user redeems an item."""
+    verify_internal_key(x_internal_api_key)
+    db = deps.db
+
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    if not stats or stats.get("lifetime_points", 0) < points:
+        raise HTTPException(status_code=400, detail="Insufficient points")
+
+    await deduct_points(db, user_id, points, "store_redemption", {
+        "item_name": item_name,
+        "source": "rewards_store",
+    })
+
+    updated_stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    return {
+        "success": True,
+        "deducted": points,
+        "remaining_points": updated_stats.get("lifetime_points", 0) if updated_stats else 0,
+    }
+
