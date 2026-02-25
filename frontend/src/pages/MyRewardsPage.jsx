@@ -220,6 +220,45 @@ function BadgesSection({ userId }) {
   );
 }
 
+function StoreButton() {
+  const [loading, setLoading] = useState(false);
+
+  const handleOpenStore = async () => {
+    setLoading(true);
+    try {
+      const res = await rewardsAPI.generateStoreToken();
+      const storeUrl = res.data?.store_url;
+      if (storeUrl) {
+        window.open(storeUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.error('Failed to generate store access token');
+      }
+    } catch (e) {
+      toast.error('Unable to connect to the rewards store');
+      console.error('Store token error:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleOpenStore}
+      disabled={loading}
+      className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold transition-all disabled:opacity-60"
+      data-testid="open-rewards-store-btn"
+    >
+      {loading ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        <Gift className="w-5 h-5" />
+      )}
+      {loading ? 'Connecting to Store...' : 'Open Rewards & Store'}
+      {!loading && <ExternalLink className="w-4 h-4 ml-1" />}
+    </button>
+  );
+}
+
 export default function MyRewardsPage() {
   const { user } = useAuth();
   const [summary, setSummary] = useState(null);
