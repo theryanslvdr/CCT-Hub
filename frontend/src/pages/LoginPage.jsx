@@ -733,7 +733,7 @@ export const LoginPage = () => {
               <div className="space-y-4">
                 <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                   <p className="text-blue-400 text-sm">
-                    A reset token has been generated. If you don&apos;t have the token, please contact your administrator.
+                    Enter the reset token from your email, then set your new password.
                   </p>
                 </div>
                 <div>
