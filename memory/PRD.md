@@ -110,6 +110,27 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
+### Rewards System Phase 1 & 2 Enhancements (Feb 25, 2026) - COMPLETE
+**Phase 1 - Points History (MyRewardsPage):**
+- Points Balance card with USDT estimate, Level card with progress bar
+- Monthly Rank card with distance to next position
+- Streak tracking (Current Streak, Best Streak)
+- Points History table with Date, Type, Source, Points, Balance
+- Time Period filters (All Time, 7 Days, 30 Days, 90 Days, Custom)
+- Activity Type filters, CSV Export, Pagination
+- **Test Status:** 100% passed (iteration_128)
+
+**Phase 2 - Leaderboard (LeaderboardPage):**
+- New page at `/leaderboard` with podium display for top 3
+- Period toggle between Monthly and All Time
+- Full rankings table with Rank, User, Level, Points, Change columns
+- User rank card showing position and distance to next rank
+- Sidebar link visible for all non-licensee members
+- Backend endpoint: `GET /api/rewards/leaderboard/full?period=monthly|alltime&limit=N`
+- **Test Status:** 100% passed (iteration_128)
+
+**Bug Fix:** Added 'leaderboard' to sidebar `alwaysInclude` list so all members can see it (not just admins)
+
 ### Recurring Bug Mitigations (Feb 23-25, 2026)
 - **ROOT CAUSE FOUND (FINAL)**: Multiple compounding issues:
   1. Case-sensitive `license_type` matching (all 20+ locations) — fixed with `_is_honorary()` helper
