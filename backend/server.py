@@ -9732,6 +9732,17 @@ async def startup_db():
     except Exception as e:
         logger.warning(f"Rewards seed warning: {e}")
     
+    # Seed default badge definitions
+    try:
+        from utils.rewards_engine import seed_default_badges
+        await seed_default_badges(db)
+        # Create badge indexes
+        await db.rewards_badge_definitions.create_index("id", unique=True)
+        await db.rewards_user_badges.create_index([("user_id", 1), ("badge_id", 1)], unique=True)
+        logger.info("Badge definitions seeded")
+    except Exception as e:
+        logger.warning(f"Badge seed warning: {e}")
+    
     # Initialize websocket service with database reference
     set_websocket_database(db)
     logger.info("WebSocket service initialized with database")
