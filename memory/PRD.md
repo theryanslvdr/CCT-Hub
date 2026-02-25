@@ -186,6 +186,10 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 
 ## Prioritized Backlog
 
+### P1 - Upcoming (Rewards Phases 3 & 4)
+- **Phase 3: Gamification & Engagement** - Badge/achievement system (login streaks, points milestones), notifications for new rewards
+- **Phase 4: Admin Tools Enhancement** - Overhaul `/admin/rewards` with filtering, manual point adjustment with audit trail, comprehensive transaction history
+
 ### P2 - Improvements
 - Backend refactoring: Extract remaining routers from server.py
 - Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
