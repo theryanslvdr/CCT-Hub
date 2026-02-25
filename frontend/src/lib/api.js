@@ -137,6 +137,7 @@ export const familyAPI = {
 export const rewardsAPI = {
   getSummary: (userId) => api.get('/rewards/summary', { params: { user_id: userId } }),
   getLeaderboard: (userId) => api.get('/rewards/leaderboard', { params: { user_id: userId } }),
+  getFullLeaderboard: (period = 'monthly', limit = 100) => api.get('/rewards/leaderboard/full', { params: { period, limit } }),
   getHistory: (userId = null, limit = 100) => api.get('/rewards/history', { params: { ...(userId ? { user_id: userId } : {}), limit } }),
   // Admin
   adminLookup: (params) => api.get('/rewards/admin/lookup', { params }),
