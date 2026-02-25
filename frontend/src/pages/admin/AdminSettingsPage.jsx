@@ -615,6 +615,7 @@ export const AdminSettingsPage = () => {
             { key: 'affiliate', icon: ExternalLink, label: 'Affiliate' },
             { key: 'security', icon: Shield, label: 'Security' },
             { key: 'holidays', icon: TreePine, label: 'Holidays' },
+            { key: 'diagnostics', icon: Database, label: 'Diagnostic' },
             { key: 'maintenance', icon: Wrench, label: 'Maint' },
           ].map((tab) => {
             const Icon = tab.icon;
