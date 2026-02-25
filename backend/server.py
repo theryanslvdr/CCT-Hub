@@ -8012,6 +8012,78 @@ async def force_sync_licensee(user_id: str, user: dict = Depends(require_admin))
     return result
 
 
+@admin_router.post("/licensee/batch-sync-all")
+async def batch_sync_all_licensees(user: dict = Depends(require_admin)):
+    """Batch sync/recalculate ALL active honorary licensees.
+    
+    This is a maintenance tool to ensure all licensee account values are up-to-date.
+    Should be run periodically (recommended: weekly).
+    """
+    from utils.calculations import calculate_honorary_licensee_value, _is_honorary
+    
+    # Find all active honorary licenses
+    licenses = await db.licenses.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    results = {
+        "total": len(licenses),
+        "synced": 0,
+        "skipped": 0,
+        "errors": 0,
+        "details": [],
+        "synced_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    for license in licenses:
+        license_type = license.get("license_type", "")
+        user_id = license.get("user_id")
+        
+        if not _is_honorary(license_type):
+            results["skipped"] += 1
+            continue
+        
+        try:
+            # Calculate the current value
+            calculated_value = await calculate_honorary_licensee_value(db, license)
+            starting_amount = float(license.get("starting_amount", 0) or 0)
+            
+            # Update the license
+            await db.licenses.update_one(
+                {"user_id": user_id, "is_active": True},
+                {"$set": {
+                    "current_amount": round(calculated_value, 2),
+                    "last_synced": datetime.now(timezone.utc)
+                }}
+            )
+            
+            results["synced"] += 1
+            results["details"].append({
+                "user_id": user_id,
+                "license_type": license_type,
+                "starting_amount": starting_amount,
+                "calculated_value": round(calculated_value, 2),
+                "profit": round(calculated_value - starting_amount, 2),
+                "status": "synced"
+            })
+            
+            logger.info(f"Batch sync: {user_id} -> ${calculated_value}")
+            
+        except Exception as e:
+            results["errors"] += 1
+            results["details"].append({
+                "user_id": user_id,
+                "license_type": license_type,
+                "status": "error",
+                "error": str(e)
+            })
+            logger.error(f"Batch sync error for {user_id}: {e}")
+    
+    logger.info(f"Batch sync complete: {results['synced']} synced, {results['skipped']} skipped, {results['errors']} errors")
+    
+    return results
+
 
 class SendEmailRequest(BaseModel):
     subject: str
