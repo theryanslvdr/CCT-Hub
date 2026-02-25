@@ -110,6 +110,29 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
+### Rewards Platform User Sync (Feb 25, 2026) - COMPLETE
+**Admin Batch Sync:**
+- "Sync All Users" button in Platform Settings > Diagnostics
+- Pushes all hub users to `rewards.crosscur.rent` via external API
+- Sync status dashboard: Hub Users, Synced, Rewards Platform count, Last Sync timestamp
+- `POST /api/rewards/admin/sync-all-users` (master admin), `POST /api/rewards/admin/sync-user/{id}` (admin), `GET /api/rewards/admin/sync-status`
+
+**Auto-Sync Hooks:**
+- New user registration → auto-pushed to rewards platform
+- Password change → synced to rewards platform  
+- Profile update → synced to rewards platform
+
+**Enhanced Store Token JWT:**
+- `POST /api/rewards/store-token` now includes `role` field for admin mapping
+- JWT payload: sub, email, name, role, level, points, iss, aud, exp
+
+**Rewards Platform Prompts (for user to paste):**
+- `/app/memory/REWARDS_PLATFORM_PROMPTS.md` contains 3 ready-to-paste prompts:
+  1. JWT SSO Auto-Login (primary flow)
+  2. POST /external/users endpoint (credential sync)
+  3. Shared JWT_SECRET setup
+- **Test Status:** 100% passed (iteration_131)
+
 ### Badge Toasts, Email Reset, Rewards Store API (Feb 25, 2026) - COMPLETE
 **Badge Notification Toasts:**
 - `POST /api/rewards/badges/check` runs on MyRewardsPage load, returns newly_awarded list
