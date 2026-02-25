@@ -114,6 +114,14 @@ export const DashboardPage = () => {
           currencyAPI.getRates('USDT'),
         ]);
 
+        // DEBUG: Log the API response to help diagnose display issues
+        console.log('=== DASHBOARD DEBUG ===');
+        console.log('API Response summaryRes.data:', summaryRes.data);
+        console.log('account_value from API:', summaryRes.data?.account_value);
+        console.log('total_actual_profit from API:', summaryRes.data?.total_actual_profit);
+        console.log('total_trades from API:', summaryRes.data?.total_trades);
+        console.log('is_licensee from API:', summaryRes.data?.is_licensee);
+        
         setSummary(summaryRes.data);
         setTrades(tradesRes.data);
         setSignal(signalRes.data.signal);
