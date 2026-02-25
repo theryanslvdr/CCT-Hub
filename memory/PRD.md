@@ -129,16 +129,27 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
   - **One-click repair**: `POST /api/admin/licensee-health-check`
   - **Frontend BACKEND_URL**: Fixed to `https://hub.crosscur.rent`
 
-### Admin Diagnostic & Sync Tool (Feb 25, 2026)
-**Purpose:** Safeguard tool for master admin to diagnose and fix licensee calculation issues
+### Admin Diagnostic & Sync Tool (Feb 25, 2026) - UPDATED
+**Location:** Platform Settings → Diagnostics tab (Master Admin only)
+**Purpose:** Comprehensive safeguard tool for master admin to diagnose and fix licensee calculation issues
+
+**Features:**
+1. **Sync Status Banner** - Shows last sync date and next recommended sync (every 7 days)
+2. **Batch Sync All** - Recalculates ALL honorary licensees in one click
+3. **Health Check** - Quick scan to identify licensees with calculation issues
+4. **Individual Diagnostic** - Enter email to see step-by-step diagnostic for a specific licensee
+5. **Force Sync** - Manually recalculate and update a single licensee's value
+
 **Endpoints:**
-- `GET /api/diagnostic/licensee/{email}` - Public diagnostic endpoint (no auth needed)
-- `POST /api/admin/licensee/{user_id}/force-sync` - Force recalculate and update license value
-**Frontend:**
-- New "Diagnostic Tool" button in Admin Licenses page (`/admin/licenses`)
-- Shows step-by-step diagnostic results
-- "Force Sync" button to trigger recalculation
-- Quick select buttons for existing licensees
+- `GET /api/diagnostic/licensee/{email}` - Public diagnostic (no auth needed)
+- `POST /api/admin/licensee/{user_id}/force-sync` - Force recalculation for one user
+- `POST /api/admin/licensee/batch-sync-all` - Batch sync all licensees
+- `POST /api/admin/licensee-health-check` - Run health check on all licensees
+
+**Scheduling:**
+- System tracks last sync date in localStorage
+- Recommends sync every 7 days
+- Shows warning banner when sync is overdue (red) or never done (amber)
 
 ### Year Projection Dual View (Feb 24, 2026)
 **Bug Report:** Year 1 showed $44,943 instead of expected ~$12,414 
