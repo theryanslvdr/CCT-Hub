@@ -110,6 +110,27 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
+### Rewards System Phase 3 & 4 (Feb 25, 2026) - COMPLETE
+**Phase 3 - Badges & Achievements:**
+- 14 default badge definitions: First Trade, Streak Master (7/14/30), Points Milestone (500/1K/5K/10K), Referral Champion (3/5/10), Deposit Hero, 50 Trades Club, Century Trader
+- Stored in `rewards_badge_definitions` collection (admin customizable names/descriptions)
+- Auto-awarded via `check_and_award_badges()` after trade/deposit/referral events
+- Earned badges stored in `rewards_user_badges` collection
+- Frontend: Badges & Achievements section on MyRewardsPage (earned with glow vs locked with lock icon)
+- Endpoints: `GET /api/rewards/badges`, `GET /api/rewards/badges/user` (JWT), `POST /api/rewards/badges/check`
+- **Test Status:** 100% passed (iteration_129)
+
+**Phase 4 - Admin Tools Enhancement:**
+- User search autocomplete: `GET /api/rewards/admin/search-users?q=name` with dropdown matches
+- Manual point adjustment with audit trail: `POST /api/rewards/admin/adjust-points` (Credit/Deduct with reason)
+- Transaction history with filters (All, Earned, Spent, Admin Actions) and pagination
+- Badge Management tab: Edit names/descriptions, enable/disable badges (`PUT /api/rewards/admin/badges/{id}`)
+- **Test Status:** 100% passed (iteration_129)
+
+**Bug Fixes:**
+- Rewards Store button now uses `email` parameter instead of `user_id` (external platform compatibility)
+- User lookup replaced with name-based autocomplete dropdown search
+
 ### Rewards System Phase 1 & 2 Enhancements (Feb 25, 2026) - COMPLETE
 **Phase 1 - Points History (MyRewardsPage):**
 - Points Balance card with USDT estimate, Level card with progress bar
