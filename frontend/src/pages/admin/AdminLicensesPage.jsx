@@ -676,9 +676,19 @@ export const AdminLicensesPage = () => {
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <Award className="w-6 h-6 text-purple-400" /> License Management
         </h1>
-        <Button onClick={() => setCreateDialogOpen(true)} className="btn-primary gap-2" data-testid="create-invite-btn">
-          <Plus className="w-4 h-4" /> Generate License Invite
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setDiagnosticDialogOpen(true)} 
+            variant="outline"
+            className="gap-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+            data-testid="diagnostic-tool-btn"
+          >
+            <UserCog className="w-4 h-4" /> Diagnostic Tool
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)} className="btn-primary gap-2" data-testid="create-invite-btn">
+            <Plus className="w-4 h-4" /> Generate License Invite
+          </Button>
+        </div>
       </div>
 
       {/* Pending Transactions Alert */}
