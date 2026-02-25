@@ -1,30 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { rewardsAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star, Trophy, TrendingUp, ArrowUpRight, Gift, Clock, Zap, Award, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  Star, Trophy, TrendingUp, ArrowUpRight, Gift, Clock, Zap, Award, ExternalLink,
+  Filter, Download, ChevronLeft, ChevronRight, Calendar, Flame, Target, Medal,
+  ArrowUp, Users, Loader2
+} from 'lucide-react';
+
+// Level configurations with points thresholds
+const LEVELS = [
+  { name: 'Newbie', minPoints: 0, color: 'zinc' },
+  { name: 'Trader', minPoints: 100, color: 'blue' },
+  { name: 'Trade Novice', minPoints: 500, color: 'cyan' },
+  { name: 'Amateur Trader', minPoints: 1500, color: 'teal' },
+  { name: 'Seasoned Trader', minPoints: 3000, color: 'orange' },
+  { name: 'Pro Trader', minPoints: 6000, color: 'amber' },
+  { name: 'Elite', minPoints: 12000, color: 'yellow' },
+  { name: 'Legend', minPoints: 25000, color: 'purple' },
+];
 
 const LEVEL_COLORS = {
-  'Newbie': { bg: 'from-zinc-500/20 to-zinc-600/10', border: 'border-zinc-500/30', text: 'text-zinc-300', badge: 'bg-zinc-700' },
-  'Trader': { bg: 'from-blue-500/20 to-blue-600/10', border: 'border-blue-500/30', text: 'text-blue-300', badge: 'bg-blue-900' },
-  'Investor': { bg: 'from-emerald-500/20 to-emerald-600/10', border: 'border-emerald-500/30', text: 'text-emerald-300', badge: 'bg-emerald-900' },
-  'Connector': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-300', badge: 'bg-purple-900' },
-  'Trade Novice': { bg: 'from-cyan-500/20 to-cyan-600/10', border: 'border-cyan-500/30', text: 'text-cyan-300', badge: 'bg-cyan-900' },
-  'Amateur Trader': { bg: 'from-teal-500/20 to-teal-600/10', border: 'border-teal-500/30', text: 'text-teal-300', badge: 'bg-teal-900' },
-  'Seasoned Trader': { bg: 'from-orange-500/20 to-orange-600/10', border: 'border-orange-500/30', text: 'text-orange-300', badge: 'bg-orange-900' },
-  'Pro Trader': { bg: 'from-amber-500/20 to-amber-600/10', border: 'border-amber-500/30', text: 'text-amber-300', badge: 'bg-amber-900' },
-  'Elite': { bg: 'from-yellow-500/20 to-yellow-600/10', border: 'border-yellow-500/30', text: 'text-yellow-300', badge: 'bg-yellow-900' },
+  'Newbie': { bg: 'from-zinc-500/20 to-zinc-600/10', border: 'border-zinc-500/30', text: 'text-zinc-300', badge: 'bg-zinc-700', progress: 'bg-zinc-500' },
+  'Trader': { bg: 'from-blue-500/20 to-blue-600/10', border: 'border-blue-500/30', text: 'text-blue-300', badge: 'bg-blue-900', progress: 'bg-blue-500' },
+  'Investor': { bg: 'from-emerald-500/20 to-emerald-600/10', border: 'border-emerald-500/30', text: 'text-emerald-300', badge: 'bg-emerald-900', progress: 'bg-emerald-500' },
+  'Connector': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
+  'Trade Novice': { bg: 'from-cyan-500/20 to-cyan-600/10', border: 'border-cyan-500/30', text: 'text-cyan-300', badge: 'bg-cyan-900', progress: 'bg-cyan-500' },
+  'Amateur Trader': { bg: 'from-teal-500/20 to-teal-600/10', border: 'border-teal-500/30', text: 'text-teal-300', badge: 'bg-teal-900', progress: 'bg-teal-500' },
+  'Seasoned Trader': { bg: 'from-orange-500/20 to-orange-600/10', border: 'border-orange-500/30', text: 'text-orange-300', badge: 'bg-orange-900', progress: 'bg-orange-500' },
+  'Pro Trader': { bg: 'from-amber-500/20 to-amber-600/10', border: 'border-amber-500/30', text: 'text-amber-300', badge: 'bg-amber-900', progress: 'bg-amber-500' },
+  'Elite': { bg: 'from-yellow-500/20 to-yellow-600/10', border: 'border-yellow-500/30', text: 'text-yellow-300', badge: 'bg-yellow-900', progress: 'bg-yellow-500' },
+  'Legend': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
 };
 
 const SOURCE_LABELS = {
   signup_verify: 'Sign Up & Verify',
   first_trade: 'First Trade Bonus',
+  trade: 'Trade',
   deposit: 'Deposit',
   withdrawal: 'Withdrawal',
   qualified_referral: 'Referral',
   streak_5_day: '5-Day Streak',
-  milestone_10_trade: '10-Trade Milestone',
-  milestone_20_trade_streak: 'Trade Milestone',
+  streak_10_day: '10-Day Streak',
+  streak_20_day: '20-Day Streak',
+  milestone_10_trade: '10 Trades Milestone',
+  milestone_20_trade_streak: '20 Trade Streak',
+  milestone_50_trade: '50 Trades Milestone',
+  milestone_100_trade: '100 Trades Milestone',
   join_community: 'Join Community',
   first_daily_win: 'Daily Win',
   help_chat: 'Help Chat',
@@ -35,12 +59,52 @@ const SOURCE_LABELS = {
   redeem: 'Redemption',
 };
 
+const SOURCE_CATEGORIES = {
+  all: 'All Activities',
+  trading: 'Trading',
+  deposits: 'Deposits & Withdrawals',
+  referrals: 'Referrals',
+  streaks: 'Streaks & Milestones',
+  bonus: 'Bonuses & Promotions',
+};
+
+const SOURCE_CATEGORY_MAP = {
+  trade: 'trading',
+  first_trade: 'trading',
+  deposit: 'deposits',
+  withdrawal: 'deposits',
+  qualified_referral: 'referrals',
+  streak_5_day: 'streaks',
+  streak_10_day: 'streaks',
+  streak_20_day: 'streaks',
+  milestone_10_trade: 'streaks',
+  milestone_20_trade_streak: 'streaks',
+  milestone_50_trade: 'streaks',
+  milestone_100_trade: 'streaks',
+  manual_bonus: 'bonus',
+  manual_promo: 'bonus',
+  signup_verify: 'bonus',
+  join_community: 'bonus',
+  first_daily_win: 'bonus',
+  help_chat: 'bonus',
+};
+
+const ITEMS_PER_PAGE = 15;
+
 export default function MyRewardsPage() {
   const { user } = useAuth();
   const [summary, setSummary] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filter & pagination state
+  const [dateFilter, setDateFilter] = useState('all'); // all, 7d, 30d, 90d, custom
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user?.id) return;
@@ -48,7 +112,7 @@ export default function MyRewardsPage() {
       const [sumRes, lbRes, histRes] = await Promise.allSettled([
         rewardsAPI.getSummary(user.id),
         rewardsAPI.getLeaderboard(user.id),
-        rewardsAPI.getHistory(null, 200),
+        rewardsAPI.getHistory(null, 500), // Get more history for filtering
       ]);
       if (sumRes.status === 'fulfilled') setSummary(sumRes.value.data);
       if (lbRes.status === 'fulfilled') setLeaderboard(lbRes.value.data);
@@ -62,10 +126,115 @@ export default function MyRewardsPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Calculate level progress
+  const levelProgress = useMemo(() => {
+    const points = summary?.lifetime_points || 0;
+    const currentLevel = LEVELS.findLast(l => points >= l.minPoints) || LEVELS[0];
+    const nextLevel = LEVELS.find(l => l.minPoints > points);
+    
+    if (!nextLevel) {
+      return { current: currentLevel, next: null, progress: 100, pointsToNext: 0 };
+    }
+    
+    const pointsInLevel = points - currentLevel.minPoints;
+    const pointsForLevel = nextLevel.minPoints - currentLevel.minPoints;
+    const progress = Math.min(100, Math.round((pointsInLevel / pointsForLevel) * 100));
+    
+    return {
+      current: currentLevel,
+      next: nextLevel,
+      progress,
+      pointsToNext: nextLevel.minPoints - points,
+    };
+  }, [summary?.lifetime_points]);
+
+  // Filter history based on selections
+  const filteredHistory = useMemo(() => {
+    let filtered = [...history];
+    
+    // Date filter
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      let startDate;
+      
+      if (dateFilter === '7d') {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (dateFilter === '30d') {
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else if (dateFilter === '90d') {
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      } else if (dateFilter === 'custom' && customStartDate) {
+        startDate = new Date(customStartDate);
+      }
+      
+      if (startDate) {
+        filtered = filtered.filter(row => {
+          const rowDate = new Date(row.created_at);
+          if (dateFilter === 'custom' && customEndDate) {
+            const endDate = new Date(customEndDate);
+            endDate.setHours(23, 59, 59, 999);
+            return rowDate >= startDate && rowDate <= endDate;
+          }
+          return rowDate >= startDate;
+        });
+      }
+    }
+    
+    // Source category filter
+    if (sourceFilter !== 'all') {
+      filtered = filtered.filter(row => {
+        const category = SOURCE_CATEGORY_MAP[row.source] || 'bonus';
+        return category === sourceFilter;
+      });
+    }
+    
+    return filtered;
+  }, [history, dateFilter, customStartDate, customEndDate, sourceFilter]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
+  const paginatedHistory = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredHistory.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredHistory, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilter, sourceFilter, customStartDate, customEndDate]);
+
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = ['Date', 'Type', 'Source', 'Points', 'Balance After'];
+    const rows = filteredHistory.map(row => [
+      row.created_at ? new Date(row.created_at).toISOString() : '',
+      row.points > 0 ? 'Earn' : 'Spend',
+      SOURCE_LABELS[row.source] || row.source,
+      row.points,
+      row.balance_after || 0,
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rewards-history-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Stats for filtered period
+  const periodStats = useMemo(() => {
+    const earned = filteredHistory.filter(r => r.points > 0).reduce((sum, r) => sum + r.points, 0);
+    const spent = filteredHistory.filter(r => r.points < 0).reduce((sum, r) => sum + Math.abs(r.points), 0);
+    return { earned, spent, net: earned - spent, transactions: filteredHistory.length };
+  }, [filteredHistory]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -76,7 +245,7 @@ export default function MyRewardsPage() {
     <div className="space-y-6 max-w-5xl mx-auto" data-testid="my-rewards-page">
       <div>
         <h1 className="text-2xl font-bold text-white">My Rewards</h1>
-        <p className="text-sm text-zinc-400 mt-1">Track your points, level, and rank</p>
+        <p className="text-sm text-zinc-400 mt-1">Track your points, level, rank, and activity</p>
       </div>
 
       {/* Top stats row */}
@@ -101,10 +270,10 @@ export default function MyRewardsPage() {
           </CardContent>
         </Card>
 
-        {/* Level */}
+        {/* Level with Progress */}
         <Card className="glass-card" data-testid="rewards-level-card">
           <CardContent className="pt-6">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Level</p>
                 <div className="mt-2">
@@ -112,12 +281,34 @@ export default function MyRewardsPage() {
                     {summary?.level || 'Newbie'}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-500 mt-2">Keep trading & depositing to level up</p>
               </div>
               <div className="p-3 rounded-xl bg-purple-500/10">
                 <Award className="w-6 h-6 text-purple-400" />
               </div>
             </div>
+            {/* Progress bar */}
+            {levelProgress.next && (
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                  <span>{levelProgress.current.name}</span>
+                  <span>{levelProgress.next.name}</span>
+                </div>
+                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${levelStyle.progress} transition-all duration-500`}
+                    style={{ width: `${levelProgress.progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 mt-1 text-center">
+                  <span className="text-cyan-400 font-mono">{levelProgress.pointsToNext.toLocaleString()}</span> pts to next level
+                </p>
+              </div>
+            )}
+            {!levelProgress.next && (
+              <p className="text-xs text-amber-400 mt-2 flex items-center gap-1">
+                <Medal className="w-3 h-3" /> Max level reached!
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -131,7 +322,8 @@ export default function MyRewardsPage() {
                   {leaderboard?.current_rank ? `#${leaderboard.current_rank}` : '--'}
                 </p>
                 {leaderboard?.distance_to_next > 0 && (
-                  <p className="text-xs text-cyan-400 mt-1">
+                  <p className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
+                    <ArrowUp className="w-3 h-3" />
                     {leaderboard.distance_to_next} pts to pass {leaderboard.next_user_name}
                   </p>
                 )}
@@ -142,6 +334,46 @@ export default function MyRewardsPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Streak & Activity Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+          <div className="flex items-center gap-2 text-orange-400 mb-1">
+            <Flame className="w-4 h-4" />
+            <span className="text-xs font-medium">Current Streak</span>
+          </div>
+          <p className="text-xl font-bold text-white font-mono">
+            {summary?.current_streak || 0} days
+          </p>
+        </div>
+        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+          <div className="flex items-center gap-2 text-emerald-400 mb-1">
+            <Target className="w-4 h-4" />
+            <span className="text-xs font-medium">Best Streak</span>
+          </div>
+          <p className="text-xl font-bold text-white font-mono">
+            {summary?.best_streak || 0} days
+          </p>
+        </div>
+        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+          <div className="flex items-center gap-2 text-blue-400 mb-1">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-xs font-medium">This Month</span>
+          </div>
+          <p className="text-xl font-bold text-white font-mono">
+            +{(summary?.monthly_points || 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+          <div className="flex items-center gap-2 text-purple-400 mb-1">
+            <Users className="w-4 h-4" />
+            <span className="text-xs font-medium">Referrals</span>
+          </div>
+          <p className="text-xl font-bold text-white font-mono">
+            {summary?.referral_count || 0}
+          </p>
+        </div>
       </div>
 
       {/* Motivational message */}
@@ -166,67 +398,206 @@ export default function MyRewardsPage() {
         Open Rewards & Store
         <ExternalLink className="w-4 h-4 ml-1" />
       </a>
-      <p className="text-xs text-zinc-500 text-center -mt-4">
-        Redeem points for USDT vouchers and items at rewards.crosscur.rent
-      </p>
 
       {/* Points History */}
       <Card className="glass-card" data-testid="rewards-history-card">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Clock className="w-5 h-5 text-zinc-400" /> Points History
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Clock className="w-5 h-5 text-zinc-400" /> Points History
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-1 text-xs"
+                data-testid="toggle-filters-btn"
+              >
+                <Filter className="w-3 h-3" /> Filters
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportToCSV}
+                className="gap-1 text-xs"
+                disabled={filteredHistory.length === 0}
+                data-testid="export-csv-btn"
+              >
+                <Download className="w-3 h-3" /> Export CSV
+              </Button>
+            </div>
+          </div>
+          
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="mt-4 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-4" data-testid="filters-panel">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Date Filter */}
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-2">Time Period</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: 'all', label: 'All Time' },
+                      { value: '7d', label: '7 Days' },
+                      { value: '30d', label: '30 Days' },
+                      { value: '90d', label: '90 Days' },
+                      { value: 'custom', label: 'Custom' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setDateFilter(opt.value)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          dateFilter === opt.value 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  {dateFilter === 'custom' && (
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="text-xs h-8 bg-zinc-800 border-zinc-700"
+                        placeholder="Start"
+                      />
+                      <Input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="text-xs h-8 bg-zinc-800 border-zinc-700"
+                        placeholder="End"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Source Filter */}
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-2">Activity Type</label>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(SOURCE_CATEGORIES).map(([value, label]) => (
+                      <button
+                        key={value}
+                        onClick={() => setSourceFilter(value)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          sourceFilter === value 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Period Stats */}
+              <div className="flex items-center gap-4 pt-3 border-t border-zinc-800">
+                <span className="text-xs text-zinc-500">Period Summary:</span>
+                <span className="text-xs text-emerald-400 font-mono">+{periodStats.earned.toLocaleString()} earned</span>
+                <span className="text-xs text-red-400 font-mono">-{periodStats.spent.toLocaleString()} spent</span>
+                <span className="text-xs text-zinc-300 font-mono">= {periodStats.net.toLocaleString()} net</span>
+                <span className="text-xs text-zinc-500">({periodStats.transactions} transactions)</span>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
-          {history.length === 0 ? (
+          {paginatedHistory.length === 0 ? (
             <div className="text-center py-10 text-zinc-500">
               <TrendingUp className="w-10 h-10 mx-auto mb-3 opacity-40" />
-              <p>No points activity yet.</p>
-              <p className="text-xs mt-1">Start trading or depositing to earn your first points!</p>
+              <p>No points activity {dateFilter !== 'all' || sourceFilter !== 'all' ? 'matching filters' : 'yet'}.</p>
+              <p className="text-xs mt-1">
+                {dateFilter === 'all' && sourceFilter === 'all' 
+                  ? 'Start trading or depositing to earn your first points!'
+                  : 'Try adjusting your filters to see more activity.'
+                }
+              </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm" data-testid="rewards-history-table">
-                <thead>
-                  <tr className="border-b border-zinc-800">
-                    <th className="text-left py-2 px-3 text-zinc-400 font-medium">Date</th>
-                    <th className="text-left py-2 px-3 text-zinc-400 font-medium">Type</th>
-                    <th className="text-left py-2 px-3 text-zinc-400 font-medium">Source</th>
-                    <th className="text-right py-2 px-3 text-zinc-400 font-medium">Points</th>
-                    <th className="text-right py-2 px-3 text-zinc-400 font-medium">Balance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((row, i) => {
-                    const pts = row.points || 0;
-                    const isEarn = pts > 0;
-                    const isAdmin = row.metadata?.admin_test;
-                    return (
-                      <tr key={i} className="border-b border-zinc-800/50 hover:bg-zinc-800/30" data-testid={`history-row-${i}`}>
-                        <td className="py-2 px-3 text-zinc-300 font-mono text-xs whitespace-nowrap">
-                          {row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '--'}
-                        </td>
-                        <td className="py-2 px-3">
-                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${isEarn ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-                            {isEarn ? 'Earn' : 'Spend'}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3 text-zinc-300 text-xs">
-                          {SOURCE_LABELS[row.source] || row.source}
-                          {isAdmin && <span className="ml-1 text-amber-400 text-[10px]">(Admin)</span>}
-                        </td>
-                        <td className={`py-2 px-3 text-right font-mono text-xs font-semibold ${isEarn ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {isEarn ? '+' : ''}{pts.toLocaleString()}
-                        </td>
-                        <td className="py-2 px-3 text-right font-mono text-xs text-zinc-300">
-                          {(row.balance_after ?? 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" data-testid="rewards-history-table">
+                  <thead>
+                    <tr className="border-b border-zinc-800">
+                      <th className="text-left py-2 px-3 text-zinc-400 font-medium">Date</th>
+                      <th className="text-left py-2 px-3 text-zinc-400 font-medium">Type</th>
+                      <th className="text-left py-2 px-3 text-zinc-400 font-medium">Source</th>
+                      <th className="text-right py-2 px-3 text-zinc-400 font-medium">Points</th>
+                      <th className="text-right py-2 px-3 text-zinc-400 font-medium">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedHistory.map((row, i) => {
+                      const pts = row.points || 0;
+                      const isEarn = pts > 0;
+                      const isAdmin = row.metadata?.admin_test;
+                      return (
+                        <tr key={i} className="border-b border-zinc-800/50 hover:bg-zinc-800/30" data-testid={`history-row-${i}`}>
+                          <td className="py-2 px-3 text-zinc-300 font-mono text-xs whitespace-nowrap">
+                            {row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '--'}
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${isEarn ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                              {isEarn ? 'Earn' : 'Spend'}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-zinc-300 text-xs">
+                            {SOURCE_LABELS[row.source] || row.source}
+                            {isAdmin && <span className="ml-1 text-amber-400 text-[10px]">(Admin)</span>}
+                          </td>
+                          <td className={`py-2 px-3 text-right font-mono text-xs font-semibold ${isEarn ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isEarn ? '+' : ''}{pts.toLocaleString()}
+                          </td>
+                          <td className="py-2 px-3 text-right font-mono text-xs text-zinc-300">
+                            {(row.balance_after ?? 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                  <p className="text-xs text-zinc-500">
+                    Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredHistory.length)} of {filteredHistory.length}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-sm text-zinc-400">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
