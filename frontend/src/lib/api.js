@@ -150,6 +150,7 @@ export const rewardsAPI = {
   adminAdjustPoints: (data) => api.post('/rewards/admin/adjust-points', data),
   adminGetBadges: () => api.get('/rewards/admin/badges'),
   adminUpdateBadge: (badgeId, data) => api.put(`/rewards/admin/badges/${badgeId}`, data),
+  generateStoreToken: () => api.post('/rewards/store-token'),
   systemCheck: () => api.post('/rewards/system-check'),
 };
 
