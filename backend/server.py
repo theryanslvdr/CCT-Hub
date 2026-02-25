@@ -9400,7 +9400,7 @@ async def health_check():
     return {
         "status": "healthy", 
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": "2026.02.25.v2",
+        "version": "2026.02.25.v3",
         "features": ["balance-override", "diagnostic-post", "sync-button", "signal-blocking", "version-banner"]
     }
 
