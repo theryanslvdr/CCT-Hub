@@ -10,7 +10,7 @@ import deps
 from utils.rewards_engine import (
     award_points, deduct_points, compute_level, BASE_POINTS,
     process_trade_event, process_deposit_event, process_withdrawal_event,
-    process_referral_qualified,
+    process_referral_qualified, check_and_award_badges, seed_default_badges,
 )
 
 router = APIRouter(prefix="/rewards", tags=["Rewards"])
