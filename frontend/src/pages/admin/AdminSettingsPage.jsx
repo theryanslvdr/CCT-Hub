@@ -23,6 +23,141 @@ import { HabitManagerCard } from './settings/HabitManagerCard';
 import { AffiliateManagerCard } from './settings/AffiliateManagerCard';
 import { BannerAnalyticsCard } from './settings/BannerAnalyticsCard';
 
+function RewardsPlatformSync() {
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSyncStatus();
+  }, []);
+
+  const loadSyncStatus = async () => {
+    try {
+      const res = await rewardsAPI.adminGetSyncStatus();
+      setSyncStatus(res.data);
+    } catch (e) {
+      console.error('Failed to load sync status:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBatchSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await rewardsAPI.adminSyncAllUsers();
+      setSyncResult(res.data?.summary);
+      toast.success(`Synced ${res.data?.summary?.success || 0} users to rewards platform`);
+      loadSyncStatus();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Batch sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <div data-testid="rewards-platform-sync-section">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="font-medium text-white flex items-center gap-2">
+            <Link className="w-4 h-4 text-purple-400" /> Rewards Platform Sync
+          </h4>
+          <p className="text-sm text-zinc-400 mt-1">
+            Sync hub users to <span className="text-zinc-300">rewards.crosscur.rent</span>. Hub is the source of truth.
+          </p>
+        </div>
+        <Button
+          onClick={handleBatchSync}
+          disabled={syncing}
+          className="gap-2 bg-purple-600 hover:bg-purple-700"
+          data-testid="rewards-sync-all-btn"
+        >
+          {syncing ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Syncing...</>
+          ) : (
+            <><RefreshCw className="w-4 h-4" /> Sync All Users</>
+          )}
+        </Button>
+      </div>
+
+      {/* Sync Status */}
+      {loading ? (
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+        </div>
+      ) : syncStatus && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="p-3 rounded-lg bg-zinc-800/50 text-center">
+            <p className="text-xl font-bold text-white">{syncStatus.hub_users ?? '--'}</p>
+            <p className="text-[10px] text-zinc-500 uppercase">Hub Users</p>
+          </div>
+          <div className="p-3 rounded-lg bg-zinc-800/50 text-center">
+            <p className="text-xl font-bold text-purple-400">{syncStatus.synced_users ?? '--'}</p>
+            <p className="text-[10px] text-zinc-500 uppercase">Synced</p>
+          </div>
+          <div className="p-3 rounded-lg bg-zinc-800/50 text-center">
+            <p className="text-xl font-bold text-cyan-400">{syncStatus.rewards_platform_users ?? '--'}</p>
+            <p className="text-[10px] text-zinc-500 uppercase">Rewards Platform</p>
+          </div>
+          <div className="p-3 rounded-lg bg-zinc-800/50 text-center">
+            <p className="text-xs font-medium text-zinc-300">
+              {syncStatus.last_batch_sync
+                ? new Date(syncStatus.last_batch_sync).toLocaleString()
+                : 'Never'}
+            </p>
+            <p className="text-[10px] text-zinc-500 uppercase">Last Batch Sync</p>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Results */}
+      {syncResult && (
+        <div className="bg-zinc-900/50 rounded-lg p-4 space-y-3" data-testid="rewards-sync-result">
+          <h5 className="text-sm font-medium text-white">Sync Results</h5>
+          <div className="grid grid-cols-4 gap-3 text-center">
+            <div className="p-2 bg-zinc-800 rounded">
+              <p className="text-lg font-bold text-white">{syncResult.total}</p>
+              <p className="text-[10px] text-zinc-500">Total</p>
+            </div>
+            <div className="p-2 bg-emerald-500/10 rounded">
+              <p className="text-lg font-bold text-emerald-400">{syncResult.success}</p>
+              <p className="text-[10px] text-zinc-500">Success</p>
+            </div>
+            <div className="p-2 bg-blue-500/10 rounded">
+              <p className="text-lg font-bold text-blue-400">{syncResult.created}</p>
+              <p className="text-[10px] text-zinc-500">Created</p>
+            </div>
+            <div className="p-2 bg-red-500/10 rounded">
+              <p className="text-lg font-bold text-red-400">{syncResult.failed}</p>
+              <p className="text-[10px] text-zinc-500">Failed</p>
+            </div>
+          </div>
+          {syncResult.errors?.length > 0 && (
+            <details className="text-xs">
+              <summary className="text-zinc-500 cursor-pointer hover:text-zinc-300">
+                Show {syncResult.errors.length} error(s)
+              </summary>
+              <div className="mt-2 space-y-1">
+                {syncResult.errors.map((err, i) => (
+                  <p key={i} className="text-red-300 bg-red-500/10 p-1.5 rounded">{err.email}: {err.error}</p>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+
+      <p className="text-[10px] text-zinc-600 mt-3">
+        Auto-sync: New signups, password changes, and profile updates are automatically pushed to the rewards platform.
+      </p>
+    </div>
+  );
+}
+
 export const AdminSettingsPage = () => {
   const { user, isMasterAdmin, isSuperAdmin } = useAuth();
   const [settings, setSettings] = useState({
