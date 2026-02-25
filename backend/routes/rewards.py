@@ -860,6 +860,7 @@ async def generate_store_token(
         "sub": user["id"],
         "email": user.get("email", ""),
         "name": user.get("full_name", ""),
+        "role": user.get("role", "member"),
         "level": stats.get("level", "Newbie") if stats else "Newbie",
         "points": stats.get("lifetime_points", 0) if stats else 0,
         "iss": "crosscurrent-hub",
