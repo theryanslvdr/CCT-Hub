@@ -945,3 +945,43 @@ async def store_deduct_points(
         "remaining_points": updated_stats.get("lifetime_points", 0) if updated_stats else 0,
     }
 
+
+
+# ─── REWARDS PLATFORM SYNC ENDPOINTS ───
+
+@router.post("/admin/sync-all-users")
+async def admin_sync_all_users(
+    user: dict = Depends(deps.require_master_admin),
+):
+    """Master admin: Batch sync all hub users to the rewards platform."""
+    from services.rewards_sync_service import batch_sync_all_users
+    db = deps.db
+    summary = await batch_sync_all_users(db)
+    return {"success": True, "summary": summary}
+
+
+@router.post("/admin/sync-user/{user_id}")
+async def admin_sync_single_user(
+    user_id: str,
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin: Sync a single hub user to the rewards platform."""
+    from services.rewards_sync_service import sync_user_to_rewards
+    db = deps.db
+    target = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = await sync_user_to_rewards(db, target)
+    return result
+
+
+@router.get("/admin/sync-status")
+async def admin_get_sync_status(
+    user: dict = Depends(deps.require_admin),
+):
+    """Admin: Get sync status between hub and rewards platform."""
+    from services.rewards_sync_service import get_sync_status
+    db = deps.db
+    status = await get_sync_status(db)
+    return status
+
