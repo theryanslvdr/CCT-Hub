@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { 
   Star, Trophy, TrendingUp, ArrowUpRight, Gift, Clock, Zap, Award, ExternalLink,
   Filter, Download, ChevronLeft, ChevronRight, Calendar, Flame, Target, Medal,
-  ArrowUp, Users, Loader2
+  ArrowUp, Users, Loader2, Shield, Lock, Wallet
 } from 'lucide-react';
 
 // Level configurations with points thresholds
