@@ -666,6 +666,7 @@ export const LoginPage = () => {
             <DialogTitle className="text-white flex items-center gap-2">
               <Key className="w-5 h-5 text-blue-400" />
               {forgotStep === 'email' && 'Reset Your Password'}
+              {forgotStep === 'sent' && 'Check Your Email'}
               {forgotStep === 'token' && 'Enter Reset Token'}
               {forgotStep === 'success' && 'Password Reset Complete'}
             </DialogTitle>
@@ -674,7 +675,7 @@ export const LoginPage = () => {
             {forgotStep === 'email' && (
               <div className="space-y-4">
                 <p className="text-zinc-400 text-sm">
-                  Enter your email address and we&apos;ll generate a password reset token.
+                  Enter your email address and we&apos;ll send you a password reset link.
                 </p>
                 <div>
                   <Label className="text-zinc-300">Email Address</Label>
@@ -698,7 +699,33 @@ export const LoginPage = () => {
                   data-testid="forgot-submit-email"
                 >
                   {forgotLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
-                  Request Reset Token
+                  Send Reset Link
+                </Button>
+              </div>
+            )}
+            {forgotStep === 'sent' && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+                  <Mail className="w-10 h-10 text-blue-400 mx-auto mb-2" />
+                  <p className="text-blue-300 font-medium">Reset link sent!</p>
+                  <p className="text-zinc-400 text-sm mt-1">
+                    If an account exists for <span className="text-zinc-300">{forgotEmail}</span>, you&apos;ll receive a password reset link shortly. Check your inbox and spam folder.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setForgotStep('token')}
+                  variant="outline"
+                  className="w-full"
+                  data-testid="enter-token-manually-btn"
+                >
+                  I have a reset token
+                </Button>
+                <Button
+                  onClick={() => { setForgotPasswordOpen(false); setForgotStep('email'); }}
+                  className="w-full btn-primary"
+                  data-testid="back-to-login-btn"
+                >
+                  Back to Login
                 </Button>
               </div>
             )}
