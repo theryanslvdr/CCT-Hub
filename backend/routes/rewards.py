@@ -191,6 +191,74 @@ async def get_rewards_leaderboard(user_id: str):
     }
 
 
+@router.get("/leaderboard/full")
+async def get_full_leaderboard(period: str = "monthly", limit: int = 100):
+    """GET /api/rewards/leaderboard/full?period=monthly|alltime&limit=100
+    Public endpoint - returns full leaderboard for display."""
+    db = deps.db
+    
+    leaderboard = []
+    
+    if period == "monthly":
+        month_key = datetime.now(timezone.utc).strftime("%Y-%m")
+        
+        # Get leaderboard entries for this month
+        entries = await db.rewards_leaderboard.find(
+            {"month": month_key},
+            {"_id": 0}
+        ).sort("rank", 1).limit(limit).to_list(limit)
+        
+        # Enrich with user data
+        for entry in entries:
+            user = await db.users.find_one({"id": entry["user_id"]}, {"_id": 0, "full_name": 1})
+            stats = await db.rewards_stats.find_one({"user_id": entry["user_id"]}, {"_id": 0, "level": 1})
+            
+            display_name = "Anonymous"
+            if user and user.get("full_name"):
+                name = user["full_name"]
+                parts = name.split()
+                display_name = f"{parts[0]} {parts[-1][0]}." if len(parts) > 1 else name
+            
+            leaderboard.append({
+                "user_id": entry["user_id"],
+                "rank": entry.get("rank", 0),
+                "points": entry.get("monthly_points", 0),
+                "display_name": display_name,
+                "level": stats.get("level", "Newbie") if stats else "Newbie",
+                "rank_change": entry.get("rank_change", 0),
+            })
+    else:
+        # All-time leaderboard - use lifetime_points from stats
+        all_stats = await db.rewards_stats.find(
+            {"lifetime_points": {"$gt": 0}},
+            {"_id": 0}
+        ).sort("lifetime_points", -1).limit(limit).to_list(limit)
+        
+        for i, stats in enumerate(all_stats, 1):
+            user = await db.users.find_one({"id": stats["user_id"]}, {"_id": 0, "full_name": 1})
+            
+            display_name = "Anonymous"
+            if user and user.get("full_name"):
+                name = user["full_name"]
+                parts = name.split()
+                display_name = f"{parts[0]} {parts[-1][0]}." if len(parts) > 1 else name
+            
+            leaderboard.append({
+                "user_id": stats["user_id"],
+                "rank": i,
+                "points": stats.get("lifetime_points", 0),
+                "display_name": display_name,
+                "level": stats.get("level", "Newbie"),
+                "rank_change": 0,  # N/A for all-time
+            })
+    
+    return {
+        "period": period,
+        "leaderboard": leaderboard,
+        "total": len(leaderboard),
+    }
+
+
 # ─── PROTECTED ENDPOINTS (require X-INTERNAL-API-KEY) ───
 
 @router.post("/redeem")
