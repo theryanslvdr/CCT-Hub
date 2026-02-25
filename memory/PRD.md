@@ -110,6 +110,25 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
+### Badge Toasts, Email Reset, Rewards Store API (Feb 25, 2026) - COMPLETE
+**Badge Notification Toasts:**
+- `POST /api/rewards/badges/check` runs on MyRewardsPage load, returns newly_awarded list
+- Celebratory toast shown for each newly earned badge during session
+- **Test Status:** 100% passed (iteration_130)
+
+**Email Password Reset (Emailit Integration):**
+- `POST /api/auth/forgot-password` now sends email with reset link via Emailit (no longer returns token in response)
+- Email template with branded design, reset button, 1-hour expiry warning
+- Frontend: "Send Reset Link" flow with email sent confirmation, URL param `?reset_token=xxx` auto-opens dialog
+- **Test Status:** 100% passed (iteration_130)
+
+**Rewards Store API (Cross-Site Auth):**
+- `POST /api/rewards/store-token` - Generates signed JWT (HS256, 10min expiry, aud=crosscurrent-store)
+- `POST /api/rewards/store-verify?token=xxx` - Store calls this to verify user and get profile (requires internal API key)
+- `POST /api/rewards/store-deduct?user_id=x&points=N` - Store calls this to deduct points on redemption
+- Frontend: "Open Rewards & Store" button generates token and opens `rewards.crosscur.rent/store?token=xxx`
+- **Test Status:** 100% passed (iteration_130)
+
 ### Rewards System Phase 3 & 4 (Feb 25, 2026) - COMPLETE
 **Phase 3 - Badges & Achievements:**
 - 14 default badge definitions: First Trade, Streak Master (7/14/30), Points Milestone (500/1K/5K/10K), Referral Champion (3/5/10), Deposit Hero, 50 Trades Club, Century Trader
