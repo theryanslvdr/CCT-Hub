@@ -4,11 +4,12 @@ import { rewardsAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { 
   Star, Trophy, TrendingUp, ArrowUpRight, Gift, Clock, Zap, Award, ExternalLink,
   Filter, Download, ChevronLeft, ChevronRight, Calendar, Flame, Target, Medal,
-  ArrowUp, Users, Loader2, Shield, Lock, Wallet
+  ArrowUp, Users, Loader2, Shield, Lock, Wallet, List, Coins
 } from 'lucide-react';
 
 // Level configurations with points thresholds
@@ -113,9 +114,128 @@ const BADGE_CATEGORY_COLORS = {
   deposits: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
 };
 
+// Rewards credit table — all actions and their point values
+const REWARDS_CREDIT_TABLE = [
+  { action: 'Sign Up & Verify Email', points: 25, category: 'Onboarding', icon: Shield },
+  { action: 'Join Community', points: 5, category: 'Onboarding', icon: Users },
+  { action: 'First Trade Bonus', points: 25, category: 'Trading', icon: TrendingUp },
+  { action: 'Daily First Winning Trade', points: 10, category: 'Trading', icon: Zap },
+  { action: 'Help in Chat', points: 5, category: 'Community', icon: Users },
+  { action: 'Qualified Referral', points: 150, category: 'Referrals', icon: Gift },
+  { action: 'Deposit (per $50 USDT)', points: 50, category: 'Deposits', icon: Wallet },
+  { action: 'Withdrawal', points: 5, category: 'Transactions', icon: ArrowUp },
+  { action: '5-Day Trading Streak', points: 50, category: 'Streaks', icon: Flame },
+  { action: '10-Trade Milestone', points: 125, category: 'Milestones', icon: Target },
+  { action: 'Every 20-Trade Milestone', points: 20, category: 'Milestones', icon: Award },
+];
+
+const USDT_PER_POINT = 0.01; // 1 point = $0.01 USDT
+
+function RewardsFullListDialog({ open, onOpenChange, badges }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-zinc-950 border-zinc-800" data-testid="rewards-full-list-dialog">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <Coins className="w-5 h-5 text-amber-400" /> Rewards & Credit Equivalents
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Points Actions Table */}
+        <div className="mt-2">
+          <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
+            <Star className="w-4 h-4 text-amber-400" /> Earning Actions
+          </h3>
+          <div className="rounded-lg border border-zinc-800 overflow-hidden">
+            <table className="w-full text-sm" data-testid="rewards-credit-table">
+              <thead>
+                <tr className="bg-zinc-900">
+                  <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Action</th>
+                  <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Category</th>
+                  <th className="text-right py-2.5 px-4 text-zinc-400 font-medium">Points</th>
+                  <th className="text-right py-2.5 px-4 text-zinc-400 font-medium">USDT Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {REWARDS_CREDIT_TABLE.map((row, i) => {
+                  const Icon = row.icon;
+                  return (
+                    <tr key={i} className="border-t border-zinc-800/50 hover:bg-zinc-900/40">
+                      <td className="py-2.5 px-4 text-zinc-200 flex items-center gap-2">
+                        <Icon className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                        {row.action}
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">{row.category}</span>
+                      </td>
+                      <td className="py-2.5 px-4 text-right font-mono text-amber-400 font-semibold">+{row.points}</td>
+                      <td className="py-2.5 px-4 text-right font-mono text-emerald-400 text-xs">${(row.points * USDT_PER_POINT).toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Badges Section */}
+        {badges.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-400" /> Achievement Badges
+            </h3>
+            <div className="rounded-lg border border-zinc-800 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-zinc-900">
+                    <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Badge</th>
+                    <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Requirement</th>
+                    <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Category</th>
+                    <th className="text-center py-2.5 px-4 text-zinc-400 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {badges.map((badge) => {
+                    const Icon = BADGE_ICONS[badge.icon] || Award;
+                    const colors = BADGE_CATEGORY_COLORS[badge.category] || BADGE_CATEGORY_COLORS.points;
+                    return (
+                      <tr key={badge.id} className="border-t border-zinc-800/50 hover:bg-zinc-900/40">
+                        <td className="py-2.5 px-4 text-zinc-200 flex items-center gap-2">
+                          <Icon className={`w-4 h-4 flex-shrink-0 ${badge.earned ? colors.text : 'text-zinc-600'}`} />
+                          <span className={badge.earned ? '' : 'text-zinc-500'}>{badge.name}</span>
+                        </td>
+                        <td className="py-2.5 px-4 text-zinc-400 text-xs">{badge.description}</td>
+                        <td className="py-2.5 px-4">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">{badge.category}</span>
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          {badge.earned ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">Earned</span>
+                          ) : (
+                            <Lock className="w-3.5 h-3.5 text-zinc-600 mx-auto" />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <p className="text-[10px] text-zinc-600 mt-4 text-center">
+          1 Point = ${USDT_PER_POINT.toFixed(2)} USDT equivalent
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function BadgesSection({ userId }) {
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFullList, setShowFullList] = useState(false);
   const checkedRef = useRef(false);
 
   useEffect(() => {
@@ -164,10 +284,19 @@ function BadgesSection({ userId }) {
   return (
     <Card className="glass-card" data-testid="badges-section">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Shield className="w-5 h-5 text-amber-400" /> Badges & Achievements
-          <span className="text-xs text-zinc-500 font-normal ml-2">{earned.length}/{badges.length} earned</span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white flex items-center gap-2">
+            <Shield className="w-5 h-5 text-amber-400" /> Badges & Achievements
+            <span className="text-xs text-zinc-500 font-normal ml-2">{earned.length}/{badges.length} earned</span>
+          </CardTitle>
+          <button
+            onClick={() => setShowFullList(true)}
+            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+            data-testid="see-full-list-btn"
+          >
+            <List className="w-3.5 h-3.5" /> See Full List
+          </button>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Earned badges */}
@@ -216,6 +345,7 @@ function BadgesSection({ userId }) {
           </div>
         )}
       </CardContent>
+      <RewardsFullListDialog open={showFullList} onOpenChange={setShowFullList} badges={badges} />
     </Card>
   );
 }

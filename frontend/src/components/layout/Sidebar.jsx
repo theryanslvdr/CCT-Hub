@@ -176,6 +176,10 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const superAdminItems = [
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
     { path: '/admin/rewards', icon: Star, label: 'Rewards Admin' },
+  ];
+
+  // Master Admin only items
+  const masterAdminItems = [
     { path: '/admin/system-check', icon: Shield, label: 'System Check' },
   ];
 
@@ -569,6 +573,20 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 {!collapsed && <span className="text-sm">{item.label}</span>}
               </NavLink>
             ))}
+
+            {/* Master Admin only items */}
+            {isMasterAdmin() && masterAdminItems.map((item) => (
+              <NavLink 
+                key={item.path} 
+                to={item.path} 
+                className={navLinkClass}
+                onClick={handleNavClick}
+                title={collapsed ? item.label : undefined}
+              >
+                <item.icon className="w-4 h-4" />
+                {!collapsed && <span className="text-sm">{item.label}</span>}
+              </NavLink>
+            ))}
           </div>
         </div>
       )}
@@ -605,8 +623,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Profile Settings
               </DropdownMenuItem>
               
-              {/* Admin-only items: Platform Settings & API Center */}
-              {isAdmin() && (
+              {/* Master Admin only: Platform Settings & API Center */}
+              {isMasterAdmin() && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
@@ -687,8 +705,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Profile Settings
               </DropdownMenuItem>
               
-              {/* Admin-only items: Platform Settings & API Center */}
-              {isAdmin() && (
+              {/* Master Admin only: Platform Settings & API Center */}
+              {isMasterAdmin() && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
