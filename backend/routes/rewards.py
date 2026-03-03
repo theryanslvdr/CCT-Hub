@@ -742,6 +742,195 @@ async def check_badges_for_user(
     return {"user_id": target_uid, "newly_awarded": newly_awarded}
 
 
+@router.post("/retroactive-scan")
+async def retroactive_badge_scan(
+    user_id: Optional[str] = None,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Scan a user's actual hub records and retroactively calculate rewards_stats,
+    then check and award all earned badges. Can be run by any user for themselves,
+    or by an admin for any user."""
+    db = deps.db
+    target_uid = user["id"]
+    admin_roles = {"basic_admin", "admin", "super_admin", "master_admin"}
+    if user_id and user.get("role") in admin_roles:
+        target_uid = user_id
+
+    stats_update = await _compute_real_stats(db, target_uid)
+
+    # Update rewards_stats with real data (merge, don't overwrite points)
+    existing = await db.rewards_stats.find_one({"user_id": target_uid}, {"_id": 0})
+
+    update_fields = {
+        "lifetime_trades": stats_update["lifetime_trades"],
+        "distinct_trade_days": stats_update["distinct_trade_days"],
+        "best_streak_days": max(
+            stats_update["best_streak_days"],
+            existing.get("best_streak_days", 0) if existing else 0
+        ),
+        "current_streak_days": stats_update["current_streak_days"],
+        "lifetime_deposit_usdt": stats_update["lifetime_deposit_usdt"],
+        "qualified_referrals": stats_update["qualified_referrals"],
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    await db.rewards_stats.update_one(
+        {"user_id": target_uid},
+        {"$set": update_fields, "$setOnInsert": {"user_id": target_uid, "level": 1, "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+
+    # Now check and award badges
+    newly_awarded = await check_and_award_badges(db, target_uid)
+
+    return {
+        "user_id": target_uid,
+        "stats": update_fields,
+        "newly_awarded": newly_awarded,
+    }
+
+
+@router.post("/retroactive-scan-all")
+async def retroactive_scan_all_users(
+    user: dict = Depends(deps.require_master_admin),
+):
+    """Scan ALL users and retroactively award badges. Master admin only."""
+    db = deps.db
+    users = await db.users.find({}, {"_id": 0, "id": 1}).to_list(1000)
+
+    results = []
+    for u in users:
+        uid = u["id"]
+        try:
+            stats_update = await _compute_real_stats(db, uid)
+            existing = await db.rewards_stats.find_one({"user_id": uid}, {"_id": 0})
+            update_fields = {
+                "lifetime_trades": stats_update["lifetime_trades"],
+                "distinct_trade_days": stats_update["distinct_trade_days"],
+                "best_streak_days": max(
+                    stats_update["best_streak_days"],
+                    existing.get("best_streak_days", 0) if existing else 0
+                ),
+                "current_streak_days": stats_update["current_streak_days"],
+                "lifetime_deposit_usdt": stats_update["lifetime_deposit_usdt"],
+                "qualified_referrals": stats_update["qualified_referrals"],
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
+            await db.rewards_stats.update_one(
+                {"user_id": uid},
+                {"$set": update_fields, "$setOnInsert": {"user_id": uid, "level": 1, "created_at": datetime.now(timezone.utc).isoformat()}},
+                upsert=True,
+            )
+            newly_awarded = await check_and_award_badges(db, uid)
+            results.append({"user_id": uid, "badges_awarded": len(newly_awarded), "newly_awarded": newly_awarded})
+        except Exception as e:
+            results.append({"user_id": uid, "error": str(e)})
+
+    return {"scanned": len(users), "results": results}
+
+
+async def _compute_real_stats(db, user_id: str) -> dict:
+    """Compute real user stats by scanning actual DB records."""
+    from utils.trading_days import get_holidays_for_range, is_trading_day
+
+    # 1. Count trades and distinct trade days
+    trade_count = await db.trade_logs.count_documents({"user_id": user_id})
+    
+    # Distinct trade days
+    date_agg = await db.trade_logs.aggregate([
+        {"$match": {"user_id": user_id}},
+        {"$project": {"date": {"$substr": ["$created_at", 0, 10]}}},
+        {"$group": {"_id": "$date"}},
+        {"$sort": {"_id": 1}},
+    ]).to_list(2000)
+    trade_dates = sorted([d["_id"] for d in date_agg])
+    distinct_days = len(trade_dates)
+
+    # 2. Calculate best streak from trade dates (skip weekends + holidays)
+    best_streak = 0
+    current_streak = 0
+    if trade_dates:
+        min_year = int(trade_dates[0][:4])
+        max_year = int(trade_dates[-1][:4])
+        holidays = get_holidays_for_range(min_year, max_year + 1)
+        date_set = set(trade_dates)
+
+        # Walk through all trading days from first trade to today
+        from datetime import date as date_type
+        first = date_type.fromisoformat(trade_dates[0])
+        today = date_type.today()
+        check = first
+        streak = 0
+        while check <= today:
+            # Skip non-trading days
+            if check.weekday() >= 5 or check.isoformat() in holidays:
+                check += timedelta(days=1)
+                continue
+            if check.isoformat() in date_set:
+                streak += 1
+                best_streak = max(best_streak, streak)
+            else:
+                streak = 0
+            check += timedelta(days=1)
+
+        # Calculate current streak walking backwards from today
+        current_streak = 0
+        check = today
+        # Move to last trading day if today isn't one
+        while check.weekday() >= 5 or check.isoformat() in holidays:
+            check -= timedelta(days=1)
+        # If didn't trade today, check yesterday
+        if check.isoformat() not in date_set:
+            check -= timedelta(days=1)
+            while check.weekday() >= 5 or check.isoformat() in holidays:
+                check -= timedelta(days=1)
+        # Count backwards
+        while check.isoformat() in date_set:
+            current_streak += 1
+            check -= timedelta(days=1)
+            while check.weekday() >= 5 or check.isoformat() in holidays:
+                check -= timedelta(days=1)
+
+    # 3. Count deposits
+    total_deposits = 0.0
+    try:
+        dep_agg = await db.deposits.aggregate([
+            {"$match": {"user_id": user_id, "status": "approved"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+        ]).to_list(1)
+        if dep_agg:
+            total_deposits = dep_agg[0].get("total", 0)
+    except Exception:
+        pass
+    # Also try profit_adjustments for deposits
+    try:
+        adj_agg = await db.profit_adjustments.aggregate([
+            {"$match": {"user_id": user_id, "type": "deposit"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+        ]).to_list(1)
+        if adj_agg:
+            total_deposits += adj_agg[0].get("total", 0)
+    except Exception:
+        pass
+
+    # 4. Count referrals
+    referral_count = 0
+    try:
+        referral_count = await db.users.count_documents({"referred_by": user_id})
+    except Exception:
+        pass
+
+    return {
+        "lifetime_trades": trade_count,
+        "distinct_trade_days": distinct_days,
+        "best_streak_days": best_streak,
+        "current_streak_days": current_streak,
+        "lifetime_deposit_usdt": total_deposits,
+        "qualified_referrals": referral_count,
+    }
+
+
+
 # ─── ADMIN BADGE MANAGEMENT (master admin only) ───
 
 class BadgeUpdateRequest(BaseModel):

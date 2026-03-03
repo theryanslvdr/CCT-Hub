@@ -105,6 +105,8 @@ const BADGE_ICONS = {
   'award': Award,
   'shield': Shield,
   'trophy': Trophy,
+  'calendar': Calendar,
+  'crown': Trophy,
 };
 
 const BADGE_CATEGORY_COLORS = {
@@ -113,6 +115,7 @@ const BADGE_CATEGORY_COLORS = {
   points: { bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
   referrals: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
   deposits: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
+  activity: { bg: 'bg-cyan-500/15', border: 'border-cyan-500/40', text: 'text-cyan-400', glow: 'shadow-cyan-500/20' },
 };
 
 // Rewards credit table — all actions and their point values
@@ -243,17 +246,29 @@ function BadgesSection({ userId }) {
     if (!userId) return;
     const load = async () => {
       try {
-        // Check for newly earned badges (triggers auto-award)
+        // Retroactive scan: recalculate real stats from DB and award badges
         if (!checkedRef.current) {
           checkedRef.current = true;
-          const checkRes = await rewardsAPI.checkBadges();
-          const newlyAwarded = checkRes.data?.newly_awarded || [];
-          newlyAwarded.forEach((badgeName) => {
-            toast.success(`New Badge Earned: ${badgeName}!`, {
-              description: 'Check your badges collection!',
-              duration: 6000,
+          try {
+            const scanRes = await rewardsAPI.retroactiveScan();
+            const newlyAwarded = scanRes.data?.newly_awarded || [];
+            newlyAwarded.forEach((badgeName) => {
+              toast.success(`New Badge Earned: ${badgeName}!`, {
+                description: 'Check your badges collection!',
+                duration: 6000,
+              });
             });
-          });
+          } catch (e) {
+            // Fallback to simple badge check if scan fails
+            const checkRes = await rewardsAPI.checkBadges();
+            const newlyAwarded = checkRes.data?.newly_awarded || [];
+            newlyAwarded.forEach((badgeName) => {
+              toast.success(`New Badge Earned: ${badgeName}!`, {
+                description: 'Check your badges collection!',
+                duration: 6000,
+              });
+            });
+          }
         }
 
         const res = await rewardsAPI.getUserBadges();

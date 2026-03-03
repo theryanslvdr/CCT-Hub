@@ -159,6 +159,9 @@ export const rewardsAPI = {
   // Streak Freezes
   getStreakFreezes: () => api.get('/rewards/streak-freezes'),
   purchaseStreakFreeze: (freezeType, quantity = 1) => api.post('/rewards/streak-freezes/purchase', { freeze_type: freezeType, quantity }),
+  // Retroactive badge scan
+  retroactiveScan: (userId = null) => api.post('/rewards/retroactive-scan', null, { params: userId ? { user_id: userId } : {} }),
+  retroactiveScanAll: () => api.post('/rewards/retroactive-scan-all'),
 };
 
 // Trade Monitor APIs

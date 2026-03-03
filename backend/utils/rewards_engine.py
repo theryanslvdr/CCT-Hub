@@ -407,20 +407,47 @@ async def process_referral_qualified(db, inviter_id: str, invitee_id: str):
 
 # ─── DEFAULT BADGE DEFINITIONS ───
 DEFAULT_BADGES = [
+    # Trading milestones
     {"id": "first_trade", "name": "First Trade", "description": "Complete your first trade", "icon": "trending-up", "category": "trading", "condition_type": "trade_count", "condition_value": 1, "sort_order": 1},
-    {"id": "streak_7", "name": "Streak Master 7", "description": "Maintain a 7-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 7, "sort_order": 10},
-    {"id": "streak_14", "name": "Streak Master 14", "description": "Maintain a 14-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 14, "sort_order": 11},
-    {"id": "streak_30", "name": "Streak Master 30", "description": "Maintain a 30-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 30, "sort_order": 12},
-    {"id": "points_500", "name": "Points Milestone 500", "description": "Earn 500 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 500, "sort_order": 20},
-    {"id": "points_1000", "name": "Points Milestone 1K", "description": "Earn 1,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 1000, "sort_order": 21},
-    {"id": "points_5000", "name": "Points Milestone 5K", "description": "Earn 5,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 5000, "sort_order": 22},
-    {"id": "points_10000", "name": "Points Milestone 10K", "description": "Earn 10,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 10000, "sort_order": 23},
-    {"id": "referral_3", "name": "Referral Champion", "description": "Refer 3 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 3, "sort_order": 30},
-    {"id": "referral_5", "name": "Referral Pro", "description": "Refer 5 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 5, "sort_order": 31},
-    {"id": "referral_10", "name": "Referral Legend", "description": "Refer 10 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 10, "sort_order": 32},
-    {"id": "deposit_hero", "name": "Deposit Hero", "description": "Deposit $500 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 500, "sort_order": 40},
-    {"id": "trades_50", "name": "50 Trades Club", "description": "Complete 50 trades", "icon": "target", "category": "trading", "condition_type": "trade_count", "condition_value": 50, "sort_order": 2},
-    {"id": "trades_100", "name": "Century Trader", "description": "Complete 100 trades", "icon": "award", "category": "trading", "condition_type": "trade_count", "condition_value": 100, "sort_order": 3},
+    {"id": "trades_10", "name": "Getting Started", "description": "Complete 10 trades", "icon": "target", "category": "trading", "condition_type": "trade_count", "condition_value": 10, "sort_order": 2},
+    {"id": "trades_25", "name": "Quarter Century", "description": "Complete 25 trades", "icon": "target", "category": "trading", "condition_type": "trade_count", "condition_value": 25, "sort_order": 3},
+    {"id": "trades_50", "name": "50 Trades Club", "description": "Complete 50 trades", "icon": "target", "category": "trading", "condition_type": "trade_count", "condition_value": 50, "sort_order": 4},
+    {"id": "trades_100", "name": "Century Trader", "description": "Complete 100 trades", "icon": "award", "category": "trading", "condition_type": "trade_count", "condition_value": 100, "sort_order": 5},
+    {"id": "trades_200", "name": "Trading Veteran", "description": "Complete 200 trades", "icon": "award", "category": "trading", "condition_type": "trade_count", "condition_value": 200, "sort_order": 6},
+    {"id": "trades_500", "name": "Trading Legend", "description": "Complete 500 trades", "icon": "crown", "category": "trading", "condition_type": "trade_count", "condition_value": 500, "sort_order": 7},
+
+    # Streak achievements
+    {"id": "streak_3", "name": "Streak Starter", "description": "Maintain a 3-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 3, "sort_order": 10},
+    {"id": "streak_7", "name": "Streak Master 7", "description": "Maintain a 7-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 7, "sort_order": 11},
+    {"id": "streak_14", "name": "Streak Master 14", "description": "Maintain a 14-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 14, "sort_order": 12},
+    {"id": "streak_30", "name": "Streak Master 30", "description": "Maintain a 30-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 30, "sort_order": 13},
+    {"id": "streak_50", "name": "Streak Champion", "description": "Maintain a 50-day trading streak", "icon": "flame", "category": "streaks", "condition_type": "best_streak", "condition_value": 50, "sort_order": 14},
+    {"id": "streak_100", "name": "Streak Legend", "description": "Maintain a 100-day trading streak", "icon": "crown", "category": "streaks", "condition_type": "best_streak", "condition_value": 100, "sort_order": 15},
+
+    # Points milestones
+    {"id": "points_100", "name": "Points Rookie", "description": "Earn 100 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 100, "sort_order": 20},
+    {"id": "points_500", "name": "Points Milestone 500", "description": "Earn 500 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 500, "sort_order": 21},
+    {"id": "points_1000", "name": "Points Milestone 1K", "description": "Earn 1,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 1000, "sort_order": 22},
+    {"id": "points_5000", "name": "Points Milestone 5K", "description": "Earn 5,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 5000, "sort_order": 23},
+    {"id": "points_10000", "name": "Points Milestone 10K", "description": "Earn 10,000 lifetime points", "icon": "star", "category": "points", "condition_type": "lifetime_points", "condition_value": 10000, "sort_order": 24},
+
+    # Referral achievements
+    {"id": "referral_1", "name": "First Referral", "description": "Refer your first qualified member", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 1, "sort_order": 30},
+    {"id": "referral_3", "name": "Referral Champion", "description": "Refer 3 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 3, "sort_order": 31},
+    {"id": "referral_5", "name": "Referral Pro", "description": "Refer 5 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 5, "sort_order": 32},
+    {"id": "referral_10", "name": "Referral Legend", "description": "Refer 10 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 10, "sort_order": 33},
+
+    # Deposit achievements
+    {"id": "deposit_100", "name": "First Deposit", "description": "Deposit $100 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 100, "sort_order": 40},
+    {"id": "deposit_hero", "name": "Deposit Hero", "description": "Deposit $500 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 500, "sort_order": 41},
+    {"id": "deposit_1000", "name": "High Roller", "description": "Deposit $1,000 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 1000, "sort_order": 42},
+    {"id": "deposit_5000", "name": "Whale", "description": "Deposit $5,000 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 5000, "sort_order": 43},
+
+    # Distinct trading days
+    {"id": "days_10", "name": "10 Days Active", "description": "Trade on 10 distinct days", "icon": "calendar", "category": "activity", "condition_type": "distinct_days", "condition_value": 10, "sort_order": 50},
+    {"id": "days_30", "name": "Monthly Warrior", "description": "Trade on 30 distinct days", "icon": "calendar", "category": "activity", "condition_type": "distinct_days", "condition_value": 30, "sort_order": 51},
+    {"id": "days_50", "name": "50 Days Strong", "description": "Trade on 50 distinct days", "icon": "calendar", "category": "activity", "condition_type": "distinct_days", "condition_value": 50, "sort_order": 52},
+    {"id": "days_100", "name": "Centurion", "description": "Trade on 100 distinct days", "icon": "shield", "category": "activity", "condition_type": "distinct_days", "condition_value": 100, "sort_order": 53},
 ]
 
 
@@ -452,6 +479,8 @@ def _check_badge_condition(condition_type: str, condition_value, stats: dict) ->
         return stats.get("qualified_referrals", 0) >= val
     elif condition_type == "lifetime_deposit":
         return stats.get("lifetime_deposit_usdt", 0) >= val
+    elif condition_type == "distinct_days":
+        return stats.get("distinct_trade_days", 0) >= val
     return False
 
 

@@ -2022,12 +2022,17 @@ export const TradeMonitorPage = () => {
               <Calendar className="w-3 h-3 mr-1" />
               <span className="hidden sm:inline">Past Trades</span>
             </Button>
-            {/* Streak indicator */}
-            {streak.streak > 0 && (
-              <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
-                <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
-                <span className="font-bold text-orange-400 text-sm md:text-base">{streak.streak}</span>
-                <span className="text-[10px] md:text-xs text-zinc-400 hidden sm:inline">streak</span>
+            {/* Streak indicator - always shown */}
+            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30" data-testid="streak-indicator">
+              <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400" />
+              <span className="font-bold text-orange-400 text-sm md:text-base">{streak.streak || 0}</span>
+              <span className="text-[10px] md:text-xs text-zinc-400 hidden sm:inline">streak</span>
+            </div>
+            {/* Total trade days */}
+            {historyTotal > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                <span className="font-bold text-blue-400 text-sm">{historyTotal}</span>
+                <span className="text-[10px] text-zinc-400 hidden sm:inline">trades</span>
               </div>
             )}
           </div>
@@ -2040,6 +2045,7 @@ export const TradeMonitorPage = () => {
                 <table className="w-full data-table">
                   <thead>
                     <tr>
+                      <th>Day</th>
                       <th>Date</th>
                       <th>Product</th>
                       <th>Direction</th>
@@ -2053,6 +2059,11 @@ export const TradeMonitorPage = () => {
                   <tbody>
                     {tradeHistory.map((trade) => (
                       <tr key={trade.id}>
+                        <td>
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xs">
+                            {trade.trade_day_number || '-'}
+                          </span>
+                        </td>
                         <td className="font-mono text-zinc-400">
                           {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </td>
@@ -2145,6 +2156,9 @@ export const TradeMonitorPage = () => {
                   <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-[10px]">
+                          {trade.trade_day_number || '-'}
+                        </span>
                         <span className="text-xs font-mono text-zinc-500">
                           {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>

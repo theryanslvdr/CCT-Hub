@@ -2093,7 +2093,7 @@ async def get_daily_balances(
             "target_profit": target_profit,
             "actual_profit": actual_profit if actual_profit else None,
             "commission": commission if commission else None,
-            "has_trade": actual_profit is not None and actual_profit != 0,
+            "has_trade": date_key in trades_by_date,
             "stored_lot_size": stored_lot_size,
             "stored_projected": stored_projected
         })
@@ -2259,6 +2259,17 @@ async def get_trade_history(
         signals_map = {s["id"]: s for s in signals}
     
     # Enrich with signal details (using pre-fetched signals)
+    # Also compute the running trade day number for each trade
+    # Get all distinct trade dates for this user to compute the day numbers
+    all_trade_dates_cursor = db.trade_logs.aggregate([
+        {"$match": {"user_id": target_user_id}},
+        {"$project": {"date": {"$substr": ["$created_at", 0, 10]}}},
+        {"$group": {"_id": "$date"}},
+        {"$sort": {"_id": 1}},
+    ])
+    all_trade_dates = [d["_id"] async for d in all_trade_dates_cursor]
+    date_to_day_number = {date: i + 1 for i, date in enumerate(all_trade_dates)}
+
     enriched_trades = []
     for trade in trades:
         signal_details = None
@@ -2275,6 +2286,7 @@ async def get_trade_history(
             # Use signal direction as the source of truth
             signal_direction = signal.get("direction", trade.get("direction"))
         
+        trade_date = trade.get("created_at", "")[:10]
         enriched_trades.append({
             **trade,
             "direction": signal_direction,  # Override with signal direction
@@ -2282,11 +2294,13 @@ async def get_trade_history(
             "created_at": datetime.fromisoformat(trade["created_at"]) if isinstance(trade["created_at"], str) else trade["created_at"],
             "signal_details": signal_details,
             "time_entered": trade.get("time_entered"),  # User-editable field
+            "trade_day_number": date_to_day_number.get(trade_date, 0),
         })
     
     return {
         "trades": enriched_trades,
         "total": total,
+        "total_trade_days": len(all_trade_dates),
         "page": page,
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size if total > 0 else 1
