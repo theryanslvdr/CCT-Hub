@@ -147,6 +147,11 @@ class NotificationType:
     TRANSACTION_STATUS = "transaction_status"
     TRADE_SIGNAL = "trade_signal"
     SYSTEM_ANNOUNCEMENT = "system_announcement"
+    
+    # Forum notifications
+    FORUM_NEW_COMMENT = "forum_new_comment"
+    FORUM_VOTE = "forum_vote"
+    FORUM_POST_CLOSED = "forum_post_closed"
 
 
 def create_notification(
@@ -236,3 +241,25 @@ async def notify_system_announcement(title: str, message: str, target_roles: Opt
             await manager.broadcast_to_role(notification, role)
     else:
         await manager.broadcast_to_all(notification)
+
+
+async def broadcast_forum_event(event_type: str, post_id: str, data: dict = None):
+    """Broadcast a forum event to all connected users (no persistence, no toast)."""
+    event = {
+        "id": str(uuid.uuid4()),
+        "type": event_type,
+        "post_id": post_id,
+        "data": data or {},
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    # Broadcast without persisting — these are ephemeral UI refresh signals
+    for user_id in list(manager.active_connections.keys()):
+        if user_id in manager.active_connections:
+            disconnected = []
+            for websocket in manager.active_connections[user_id]:
+                try:
+                    await websocket.send_json(event)
+                except Exception:
+                    disconnected.append(websocket)
+            for ws in disconnected:
+                manager.active_connections[user_id].remove(ws)

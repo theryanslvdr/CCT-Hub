@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/contexts/WebSocketContext';
 import { forumAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -117,6 +118,7 @@ function VoteButtons({ comment, userId, onVote }) {
 export default function ForumPostPage() {
   const { postId } = useParams();
   const { user, isAdmin } = useAuth();
+  const { lastForumEvent } = useWebSocket();
   const navigate = useNavigate();
 
   const [post, setPost] = useState(null);
@@ -142,6 +144,13 @@ export default function ForumPostPage() {
   }, [postId, navigate]);
 
   useEffect(() => { loadPost(); }, [loadPost]);
+
+  // Real-time: auto-refresh when a WebSocket forum event matches this post
+  useEffect(() => {
+    if (lastForumEvent && lastForumEvent.post_id === postId) {
+      loadPost();
+    }
+  }, [lastForumEvent, postId, loadPost]);
 
   const isOP = post?.author_id === user?.id;
   const canManage = isOP || isAdmin();

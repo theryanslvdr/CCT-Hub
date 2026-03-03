@@ -7,6 +7,12 @@ from pydantic import BaseModel
 
 import deps
 
+try:
+    from services.websocket_service import broadcast_forum_event
+except ImportError:
+    async def broadcast_forum_event(*args, **kwargs):
+        pass
+
 router = APIRouter(prefix="/forum", tags=["Forum"])
 
 
@@ -243,6 +249,13 @@ async def create_comment(
     await db.forum_posts.update_one({"id": post_id}, {"$inc": {"comment_count": 1}})
 
     await _enrich_author(comment)
+    
+    # Broadcast real-time event
+    await broadcast_forum_event("forum_new_comment", post_id, {
+        "comment_id": comment["id"],
+        "author_name": comment.get("author_name", "Someone"),
+    })
+    
     return comment
 
 
@@ -378,6 +391,12 @@ async def close_post(
 
     await db.forum_posts.update_one({"id": post_id}, update)
 
+    # Broadcast post closed event
+    await broadcast_forum_event("forum_post_closed", post_id, {
+        "closed_by": user.get("name") or user.get("email", "Admin"),
+        "points_awarded": len(points_awarded),
+    })
+
     return {
         "message": "Post closed successfully",
         "post_id": post_id,
@@ -507,6 +526,9 @@ async def vote_comment(
         if existing["vote_type"] == body.vote_type:
             # Same vote = remove (toggle off)
             await db.forum_votes.delete_one({"comment_id": comment_id, "user_id": user["id"]})
+            post = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0, "post_id": 1})
+            if post:
+                await broadcast_forum_event("forum_vote", post["post_id"], {"comment_id": comment_id})
             return {"action": "removed", "vote_type": body.vote_type}
         else:
             # Different vote = switch
@@ -514,6 +536,9 @@ async def vote_comment(
                 {"comment_id": comment_id, "user_id": user["id"]},
                 {"$set": {"vote_type": body.vote_type, "voter_name": voter_name, "updated_at": datetime.now(timezone.utc).isoformat()}},
             )
+            post = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0, "post_id": 1})
+            if post:
+                await broadcast_forum_event("forum_vote", post["post_id"], {"comment_id": comment_id})
             return {"action": "switched", "vote_type": body.vote_type}
     else:
         # New vote
@@ -527,6 +552,10 @@ async def vote_comment(
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         await db.forum_votes.insert_one(vote_doc)
+        # Broadcast vote event
+        post = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0, "post_id": 1})
+        if post:
+            await broadcast_forum_event("forum_vote", post["post_id"], {"comment_id": comment_id})
         return {"action": "created", "vote_type": body.vote_type}
 
 

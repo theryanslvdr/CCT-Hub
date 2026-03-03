@@ -19,6 +19,7 @@ export const useWebSocket = () => {
       clearNotifications: () => {},
       reconnect: () => {},
       loading: false,
+      lastForumEvent: null,
     };
   }
   return context;
@@ -30,6 +31,7 @@ export const WebSocketProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [lastForumEvent, setLastForumEvent] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const pingIntervalRef = useRef(null);
@@ -144,8 +146,13 @@ export const WebSocketProvider = ({ children }) => {
         if (event.data === 'pong') return; // Ignore pong responses
         
         try {
-          const notification = JSON.parse(event.data);
-          handleNotification(notification);
+          const data = JSON.parse(event.data);
+          // Check if it's a forum event (no toast, just state update)
+          if (data.type && data.type.startsWith('forum_')) {
+            setLastForumEvent(data);
+            return;
+          }
+          handleNotification(data);
         } catch (e) {
           console.error('Failed to parse WebSocket message:', e);
         }
@@ -248,6 +255,7 @@ export const WebSocketProvider = ({ children }) => {
     reconnect: connect,
     loading,
     refetch: fetchNotifications,
+    lastForumEvent,
   };
 
   return (
