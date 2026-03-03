@@ -17,6 +17,17 @@
 - New collection: `forum_votes`
 - New endpoints: `POST /api/forum/comments/{id}/vote`, `GET /api/forum/comments/{id}/voters`, `GET /api/forum/search-similar`
 
+### Real-time WebSocket Forum Updates
+- Backend: `broadcast_forum_event` in `websocket_service.py` — broadcasts `forum_new_comment`, `forum_vote`, `forum_post_closed` events
+- Frontend: `WebSocketContext` exposes `lastForumEvent` state; `ForumPostPage` auto-refreshes when matching event arrives
+- No toasts for forum events — just silent UI refresh
+
+### Frontend Refactoring: AdminSettingsPage
+- Reduced from 3368 to 1900 lines (43% reduction)
+- Extracted `EmailsTab.jsx` — self-contained email template editor + email history
+- Extracted `TradingTab.jsx` — self-contained products management + global holidays calendar
+- Extracted `DiagnosticsTab.jsx` — self-contained system diagnostics, batch sync, health check, rewards sync, scan all members
+
 ### Scan All Members Button
 - Verified "Scan All Members" retroactive rewards scan button on Admin Settings > Diagnostics tab
 - Backend endpoint `/api/rewards/retroactive-scan-all` working (scanned 15 users)

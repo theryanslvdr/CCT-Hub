@@ -402,9 +402,14 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 **Test Status:** 100% passed (iteration_138, 17/17 backend + frontend)
 
 ### P1 - Upcoming
-- Forum Enhancements: Top Contributors leaderboard page, real-time updates
+- Real-time WebSocket updates for forum comments (**DONE** - Mar 3, 2026)
+- Forum Enhancements: Voting, Similar Search, Top Contributors (**DONE** - Mar 3, 2026)
 
 ### P2 - Improvements
+- Frontend refactoring: AdminSettingsPage.jsx split (**DONE** - Mar 3, 2026: 3368→1900 lines, extracted EmailsTab, TradingTab, DiagnosticsTab)
+- Frontend refactoring: ProfitTrackerPage.jsx split (5280 lines — deferred, tightly coupled dialogs)
+- Backend refactoring: Extract remaining routers from server.py (9840 lines — deferred, high risk)
+- Admin UI for PromotionRule management
 - Backend refactoring: Extract remaining routers from server.py
 - Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
 - Email integration for password reset tokens
