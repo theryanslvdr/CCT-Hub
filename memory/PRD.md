@@ -359,8 +359,28 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 ## Prioritized Backlog
 
+### P0 - Community Forum (COMPLETE - Mar 3, 2026)
+**Backend (`/app/backend/routes/forum.py`):**
+- `GET /api/forum/posts` — List posts with filters (status, tag, search), pagination
+- `POST /api/forum/posts` — Create new post (title, content, tags)
+- `GET /api/forum/posts/{id}` — Get post with all comments, increments views
+- `POST /api/forum/posts/{id}/comments` — Add comment (blocked on closed posts)
+- `PUT /api/forum/posts/{id}/best-answer/{comment_id}` — Mark best answer (OP or admin)
+- `PUT /api/forum/posts/{id}/close` — Close post, award points (Best Answer: 50pts, Active Collaborators: 15pts each)
+- `DELETE /api/forum/posts/{id}` — Delete post and comments (OP or admin)
+- `GET /api/forum/stats` — Forum-wide stats and top contributors
+
+**Frontend:**
+- `ForumListPage.jsx` at `/forum` — Stats bar, search, filters (All/Open/Solved), top contributors, post cards with pagination
+- `ForumPostPage.jsx` at `/forum/:postId` — Post thread, comments, reply box, mark best answer, close dialog with collaborator selection
+- Sidebar & MobileMenu — "Community Forum" nav item with MessageSquare icon
+
+**Collections:** `forum_posts`, `forum_comments`
+**Points:** forum_best_answer (50pts), forum_active_collaborator (15pts)
+**Test Status:** 100% passed (iteration_137, 15/15 backend + frontend)
+
 ### P1 - Upcoming
-- None (Phases 1-4 complete)
+- Forum Enhancements: Top Contributors leaderboard page, real-time updates
 
 ### P2 - Improvements
 - Backend refactoring: Extract remaining routers from server.py

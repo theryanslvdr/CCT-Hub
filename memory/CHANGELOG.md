@@ -1,5 +1,19 @@
 # CrossCurrent Hub - Changelog
 
+## Mar 3, 2026 (Session 2)
+
+### Community Forum Feature
+- Built full-stack ticketing-style forum: create posts, comment, mark best answer, close with point awards
+- Backend: 8 endpoints in `routes/forum.py` (CRUD posts, comments, best answer, close, stats, delete)
+- Frontend: ForumListPage (stats, search, filters, pagination), ForumPostPage (thread view, close dialog, collaborator selection)
+- Points system: Best Answer = 50 pts, Active Collaborator = 15 pts each
+- Sidebar + MobileMenu: "Community Forum" link with MessageSquare icon
+- New collections: `forum_posts`, `forum_comments`
+
+### Scan All Members Button
+- Verified "Scan All Members" retroactive rewards scan button on Admin Settings > Diagnostics tab
+- Backend endpoint `/api/rewards/retroactive-scan-all` working (scanned 15 users)
+
 ## Mar 3, 2026
 
 ### Streak Freeze Feature
