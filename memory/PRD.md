@@ -17,8 +17,10 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 
 ## Core Financial Formula
 ```
-Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15, 2)
+Quarterly Fixed Daily Profit = truncate_lot_size(Account Value at Quarter Start) * 15
+LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT rounding)
 ```
+- LOT size uses truncation (floor to 2 decimals) to match frontend behavior
 - Daily profit is FIXED for the entire calendar quarter
 - Recalculated at each new quarter start using the accumulated account value
 - Trading days = weekdays excluding US market holidays (~250/year)
@@ -143,6 +145,39 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Test Status:** 100% passed (iteration_131 + manual SSO verification)
 
 ### Badge Toasts, Email Reset, Rewards Store API (Feb 25, 2026) - COMPLETE
+
+### Bug Fixes & Enhancements (Mar 3, 2026) - COMPLETE
+**Habit Proof Upload Fix:**
+- Changed `POST /api/habits/{id}/complete` to accept `screenshot_url` in request body (HabitCompleteRequest model) instead of query parameter
+- Fixes "Failed to complete task" error caused by base64 data URLs exceeding URL length limits
+- Backend maintains backward compatibility (supports both body and query param)
+
+**LOT Size Truncation Fix (Joy Sison's $0.30 bug):**
+- Changed ALL backend lot_size calculations from `round(x/980, 2)` to `math.trunc(x/980*100)/100`
+- Backend now uses truncation (floor) matching frontend `truncateTo2Decimals()` behavior
+- Example: $16.13 / 980 = 0.01646... → truncated to 0.01 (was rounded to 0.02)
+- Fixed in: `server.py` (truncate_lot_size helper + ~15 inline occurrences), `utils/calculations.py`
+
+**Trade Monitor Target vs Projected Exit Consistency:**
+- TARGET in Trade Control section now uses `exitValue` (frontend real-time calculation) instead of `dailySummary.total_projected` (backend stored value)
+- Both Projected Exit card and TARGET now show the same value
+
+**Streak Holiday Awareness Fix:**
+- Streak calculation (`_calc_habit_streak`) now skips weekends and US market holidays
+- Uses `get_holidays_for_range()` from `utils/trading_days.py`
+- Presidents' Day (Feb 16, 2026) no longer breaks streaks
+
+**Dashboard Account Value Hide/Reveal Toggle:**
+- Eye icon toggle next to currency KPI cards (Account Value, Total Profit)
+- When hidden: values show `****`, comparison metrics hidden
+- Persists in `localStorage('hideAccountValues')`
+- Icon switches between Eye (visible) and EyeOff (hidden)
+
+**Super Admin Simulation Fix:**
+- Master Admin's "Simulate View → Super Admin" now correctly shows admin sidebar items
+- MobileMenu updated: added Rewards Admin, removed Platform Settings from super admin items
+- Profile dropdown respects simulation role (hides Platform Settings, API Center, Licenses during super admin simulation)
+- **Test Status:** 100% passed (iteration_133, 11/11 backend tests)
 **Badge Notification Toasts:**
 - `POST /api/rewards/badges/check` runs on MyRewardsPage load, returns newly_awarded list
 - Celebratory toast shown for each newly earned badge during session
