@@ -154,6 +154,71 @@ function RewardsPlatformSync() {
       <p className="text-[10px] text-zinc-600 mt-3">
         Auto-sync: New signups, password changes, and profile updates are automatically pushed to the rewards platform.
       </p>
+
+      {/* Scan All Members for Badges & Points */}
+      <ScanAllMembersButton />
+    </div>
+  );
+}
+
+function ScanAllMembersButton() {
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleScanAll = async () => {
+    setScanning(true);
+    setResult(null);
+    try {
+      const res = await rewardsAPI.retroactiveScanAll();
+      const data = res.data;
+      const totalBadges = data.results?.reduce((sum, r) => sum + (r.badges_awarded || 0), 0) || 0;
+      setResult({ scanned: data.scanned, totalBadges, results: data.results });
+      toast.success(`Scanned ${data.scanned} users — ${totalBadges} new badges awarded`);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Scan failed');
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 pt-4 border-t border-zinc-800" data-testid="scan-all-members-section">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="font-medium text-white flex items-center gap-2">
+            <Database className="w-4 h-4 text-amber-400" /> Retroactive Rewards Scan
+          </h4>
+          <p className="text-sm text-zinc-400 mt-1">
+            Scan all members' hub records and award missed points &amp; badges.
+          </p>
+        </div>
+        <Button
+          onClick={handleScanAll}
+          disabled={scanning}
+          className="gap-2 bg-amber-600 hover:bg-amber-700"
+          data-testid="scan-all-members-btn"
+        >
+          {scanning ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Scanning...</>
+          ) : (
+            <><Zap className="w-4 h-4" /> Scan All Members</>
+          )}
+        </Button>
+      </div>
+      {result && (
+        <div className="mt-3 bg-zinc-900/50 rounded-lg p-3">
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="p-2 bg-zinc-800 rounded">
+              <p className="text-lg font-bold text-white">{result.scanned}</p>
+              <p className="text-[10px] text-zinc-500">Users Scanned</p>
+            </div>
+            <div className="p-2 bg-amber-500/10 rounded">
+              <p className="text-lg font-bold text-amber-400">{result.totalBadges}</p>
+              <p className="text-[10px] text-zinc-500">New Badges</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
