@@ -695,6 +695,19 @@ export const ProfitTrackerPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeSignal, setActiveSignal] = useState(null);
   
+  // Hide/Show financial amounts toggle - per-card control
+  const [hiddenCards, setHiddenCards] = useState({
+    accountValue: false,
+    deposits: false,
+    profit: false,
+    lotSize: false,
+    growth: false
+  });
+  
+  const toggleCardVisibility = (cardKey) => {
+    setHiddenCards(prev => ({ ...prev, [cardKey]: !prev[cardKey] }));
+  };
+  
   // Simulation values
   const simulatedAccountValue = getSimulatedAccountValue();
   const simulatedLotSize = getSimulatedLotSize();
@@ -760,9 +773,6 @@ export const ProfitTrackerPage = () => {
   const [showLicenseeWelcome, setShowLicenseeWelcome] = useState(false);
   const [licenseeWelcomeInfo, setLicenseeWelcomeInfo] = useState(null);
   const [licenseeProjections, setLicenseeProjections] = useState([]);
-  
-  // Hide/Show financial amounts toggle
-  const [hideAmounts, setHideAmounts] = useState(false);
   
   // Adjust Trade Dialog for past trades (renamed from Adjust Trade)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
@@ -2362,18 +2372,6 @@ export const ProfitTrackerPage = () => {
       )}
 
       {/* Summary Cards - For licensees: 4 cards (Account Value, Deposits, Total Profit, Account Growth), For others: 4 cards */}
-      <div className="flex items-center justify-between mb-2">
-        <div></div>
-        <button
-          onClick={() => setHideAmounts(!hideAmounts)}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors"
-          title={hideAmounts ? "Show amounts" : "Hide amounts"}
-          data-testid="toggle-amounts-visibility"
-        >
-          {hideAmounts ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">{hideAmounts ? 'Show' : 'Hide'}</span>
-        </button>
-      </div>
       <div className={`grid gap-3 ${isLicensee ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
         <Card className="glass-card" data-testid="account-value-card">
           <CardContent className="p-4">
@@ -2391,12 +2389,20 @@ export const ProfitTrackerPage = () => {
                       Sync
                     </button>
                   )}
+                  <button
+                    onClick={() => toggleCardVisibility('accountValue')}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                    title={hiddenCards.accountValue ? "Show value" : "Hide value"}
+                    data-testid="toggle-account-value"
+                  >
+                    {hiddenCards.accountValue ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  </button>
                 </div>
-                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : formatFullCurrency(displayAccountValue)}>
+                <ValueTooltip exactValue={hiddenCards.accountValue ? MASKED_VALUE : formatFullCurrency(displayAccountValue)}>
                   {/* Desktop: Full amount, Mobile: Compact */}
                   <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{maskAmount(formatLargeNumber(displayAccountValue), hideAmounts)}</span>
-                    <span className="md:hidden">{maskAmount(formatCompact(displayAccountValue), hideAmounts)}</span>
+                    <span className="hidden md:inline">{maskAmount(formatLargeNumber(displayAccountValue), hiddenCards.accountValue)}</span>
+                    <span className="md:hidden">{maskAmount(formatCompact(displayAccountValue), hiddenCards.accountValue)}</span>
                   </p>
                 </ValueTooltip>
               </div>
@@ -2424,14 +2430,22 @@ export const ProfitTrackerPage = () => {
                       <SelectItem value="GBP">GBP</SelectItem>
                     </SelectContent>
                   </Select>
+                  <button
+                    onClick={() => toggleCardVisibility('deposits')}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                    title={hiddenCards.deposits ? "Show value" : "Hide value"}
+                    data-testid="toggle-deposits"
+                  >
+                    {hiddenCards.deposits ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  </button>
                 </div>
-                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : `${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
+                <ValueTooltip exactValue={hiddenCards.deposits ? MASKED_VALUE : `${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
                   <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{maskAmount(`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}`, hideAmounts)}</span>
-                    <span className="md:hidden">{maskAmount(formatCompact(effectiveTotalDeposits), hideAmounts)}</span>
+                    <span className="hidden md:inline">{maskAmount(`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}`, hiddenCards.deposits)}</span>
+                    <span className="md:hidden">{maskAmount(formatCompact(effectiveTotalDeposits), hiddenCards.deposits)}</span>
                   </p>
                 </ValueTooltip>
-                <p className="text-[10px] text-zinc-500 hidden md:block">{hideAmounts ? '' : `≈ ${formatFullCurrency(effectiveTotalDeposits)} USDT`}</p>
+                <p className="text-[10px] text-zinc-500 hidden md:block">{hiddenCards.deposits ? '' : `≈ ${formatFullCurrency(effectiveTotalDeposits)} USDT`}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
                 <ArrowDownToLine className="w-5 h-5 text-white" />
@@ -2444,11 +2458,21 @@ export const ProfitTrackerPage = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs text-zinc-400">Total Profit</p>
-                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : formatFullCurrency(effectiveTotalProfit)}>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-zinc-400">Total Profit</p>
+                  <button
+                    onClick={() => toggleCardVisibility('profit')}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                    title={hiddenCards.profit ? "Show value" : "Hide value"}
+                    data-testid="toggle-profit"
+                  >
+                    {hiddenCards.profit ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  </button>
+                </div>
+                <ValueTooltip exactValue={hiddenCards.profit ? MASKED_VALUE : formatFullCurrency(effectiveTotalProfit)}>
                   <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    <span className="hidden md:inline">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatLargeNumber(effectiveTotalProfit)}`, hideAmounts)}</span>
-                    <span className="md:hidden">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatCompact(effectiveTotalProfit)}`, hideAmounts)}</span>
+                    <span className="hidden md:inline">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatLargeNumber(effectiveTotalProfit)}`, hiddenCards.profit)}</span>
+                    <span className="md:hidden">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatCompact(effectiveTotalProfit)}`, hiddenCards.profit)}</span>
                   </p>
                 </ValueTooltip>
               </div>
@@ -2465,9 +2489,19 @@ export const ProfitTrackerPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-zinc-400">LOT Size</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-zinc-400">LOT Size</p>
+                    <button
+                      onClick={() => toggleCardVisibility('lotSize')}
+                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                      title={hiddenCards.lotSize ? "Show value" : "Hide value"}
+                      data-testid="toggle-lot-size"
+                    >
+                      {hiddenCards.lotSize ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    </button>
+                  </div>
                   <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                    {maskAmount(effectiveLotSize.toFixed(2), hideAmounts)}
+                    {maskAmount(effectiveLotSize.toFixed(2), hiddenCards.lotSize)}
                   </p>
                   <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
                 </div>
@@ -2485,19 +2519,29 @@ export const ProfitTrackerPage = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-zinc-400">Account Growth</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-zinc-400">Account Growth</p>
+                    <button
+                      onClick={() => toggleCardVisibility('growth')}
+                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                      title={hiddenCards.growth ? "Show value" : "Hide value"}
+                      data-testid="toggle-growth"
+                    >
+                      {hiddenCards.growth ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    </button>
+                  </div>
                   <p className={`text-2xl font-bold font-mono mt-1 ${
                     licenseeAccountGrowth !== null && licenseeAccountGrowth >= 0 
                       ? 'text-emerald-400' 
                       : 'text-red-400'
                   }`}>
                     {licenseeAccountGrowth !== null 
-                      ? maskAmount(`${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`, hideAmounts)
+                      ? maskAmount(`${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`, hiddenCards.growth)
                       : '--'
                     }
                   </p>
                   <p className="text-[10px] text-zinc-500">
-                    From initial {maskAmount(formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0), hideAmounts)}
+                    From initial {maskAmount(formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0), hiddenCards.growth)}
                   </p>
                 </div>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${

@@ -158,13 +158,17 @@ async def calculate_account_value(
                 return round(license.get("current_amount", license.get("starting_amount", 0)), 2)
     
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    # CRITICAL FIX: Include withdrawals from the separate withdrawals collection
+    withdrawals = await db.withdrawals.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
     total_net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
+    # Subtract withdrawals from withdrawals collection (only non-rejected ones)
+    total_withdrawals = sum(w.get("amount", 0) for w in withdrawals if w.get("status") != "rejected")
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_commission = sum(t.get("commission", 0) for t in trades)
     
-    return round(total_net_deposits + total_profit + total_commission, 2)
+    return round(total_net_deposits - total_withdrawals + total_profit + total_commission, 2)
 
 
 async def calculate_total_managed_licensee_funds(db, master_admin_id: str) -> float:
@@ -338,6 +342,8 @@ async def get_user_financial_summary(
     
     # Get deposits and trades
     deposits = await db.deposits.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    # CRITICAL: Also get withdrawals from the separate withdrawals collection
+    withdrawals = await db.withdrawals.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     trades = await db.trade_logs.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
     
     # Calculate total deposits (positive amounts only)
@@ -345,11 +351,19 @@ async def get_user_financial_summary(
         d.get("amount", 0) for d in deposits 
         if d.get("amount", 0) > 0 and d.get("type") not in ["profit"]
     )
-    # Calculate total withdrawals (negative amounts - take absolute value)
-    total_withdrawals = sum(
+    # Calculate total withdrawals from both places:
+    # 1. Negative amounts in deposits collection (legacy/some cases)
+    # 2. Amounts in withdrawals collection (actual withdrawals)
+    total_withdrawals_from_deposits = sum(
         abs(d.get("amount", 0)) for d in deposits 
         if d.get("amount", 0) < 0 or d.get("is_withdrawal")
     )
+    total_withdrawals_from_withdrawals = sum(
+        w.get("amount", 0) for w in withdrawals
+        if w.get("status") != "rejected"  # Don't count rejected withdrawals
+    )
+    total_withdrawals = total_withdrawals_from_deposits + total_withdrawals_from_withdrawals
+    
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     total_projected = sum(t.get("projected_profit", 0) for t in trades)
     total_commission = sum(t.get("commission", 0) for t in trades)
@@ -381,10 +395,14 @@ async def get_user_financial_summary(
         
         logger.info(f"get_user_financial_summary: Licensee {user_id} final values: account_value={account_value}, total_profit={total_profit}, starting_amount={starting_amount}")
     else:
-        # Net deposits = total deposits - total withdrawals (or sum all amounts since negatives are withdrawals)
+        # Net deposits = total deposits - total withdrawals
         # NOTE: For Master Admin, licensee deposits are already included in the deposits collection
-        net_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
+        # CRITICAL FIX: Must include withdrawals from both deposits (negative) and withdrawals collection
+        net_deposits_from_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") not in ["profit"])
+        # Subtract withdrawals from the separate withdrawals collection
+        net_deposits = net_deposits_from_deposits - total_withdrawals_from_withdrawals
         account_value = round(net_deposits + total_profit + total_commission, 2)
+        logger.info(f"get_user_financial_summary: Non-licensee {user_id}: deposits_sum={net_deposits_from_deposits}, withdrawals_from_coll={total_withdrawals_from_withdrawals}, net_deposits={net_deposits}, profit={total_profit}, commission={total_commission}, account_value={account_value}")
     
     # Performance rate for licensees: account growth percentage
     if is_licensee and license_info and total_deposits > 0:

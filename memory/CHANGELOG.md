@@ -11,13 +11,19 @@
 - Images stored via Publitio CDN in organized folders (forum/posts/, forum/comments/)
 - Forum posts/comments now accept and display `images[]` array
 
-### Profit Tracker Hide/Show Amounts Toggle
-- Added eye icon toggle button near summary cards
-- Masks all financial amounts with "••••••" when hidden
-- Affects: Account Value, Deposits, Total Profit, LOT Size, Account Growth
-- Consistent with existing Dashboard privacy functionality
+### Profit Tracker Per-Card Hide/Show Toggle
+- Moved hide/show toggle INSIDE each summary card for individual control
+- Each card (Account Value, Deposits, Total Profit, LOT Size, Account Growth) has its own eye icon
+- Users can hide/show specific values independently
+- `hiddenCards` state object tracks visibility per card
 
-**Test Status:** 100% passed (iteration_140)
+### CRITICAL BUG FIX: Withdrawals Not Included in Balance Calculations
+- **Issue:** User reported Balance Before values were ~$6,000 too high
+- **Root Cause:** Withdrawals stored in `db.withdrawals` collection were not being queried
+- **Fixed:** `get_user_financial_summary()`, `calculate_account_value()`, and `/api/profit/daily-balances` now include withdrawals
+- **Impact:** Account values, Monthly Table, Trade Monitor LOT sizes all now correct
+
+**Test Status:** 100% passed (iteration_140) + additional visual verification
 
 ## Mar 3, 2026 (Session 2)
 

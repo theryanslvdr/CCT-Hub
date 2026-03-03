@@ -2009,6 +2009,16 @@ async def get_daily_balances(
         {"_id": 0}
     ).to_list(10000)
     
+    # CRITICAL FIX: Also get withdrawals from the separate withdrawals collection
+    withdrawals = await db.withdrawals.find(
+        {
+            "user_id": target_user_id,
+            "created_at": {"$lte": end_date_str},
+            "status": {"$ne": "rejected"}  # Don't count rejected withdrawals
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
     trades = await db.trade_logs.find(
         {
             "user_id": target_user_id,
@@ -2025,6 +2035,14 @@ async def get_daily_balances(
             if date_key not in deposits_by_date:
                 deposits_by_date[date_key] = 0
             deposits_by_date[date_key] += d.get("amount", 0)
+    
+    # CRITICAL FIX: Add withdrawals as negative amounts
+    for w in withdrawals:
+        date_key = w.get("created_at", "")[:10]
+        if date_key:
+            if date_key not in deposits_by_date:
+                deposits_by_date[date_key] = 0
+            deposits_by_date[date_key] -= w.get("amount", 0)  # Subtract withdrawal
     
     trades_by_date = {}
     for t in trades:

@@ -439,18 +439,33 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 ### Profit Tracker Hide/Show Amounts Toggle (Mar 3, 2026) - COMPLETE
 **Feature:**
-- Eye icon toggle button near summary cards on Profit Tracker page
-- Clicking "Hide" masks all financial amounts with "••••••"
-- Clicking "Show" reveals actual dollar amounts
-- Affects: Account Value, Deposits, Total Profit, LOT Size, Account Growth
+- Per-card eye icon toggle for each summary card (Account Value, Deposits, Total Profit, LOT Size, Account Growth)
+- Clicking the eye icon on each card individually hides/shows that specific value
+- Values masked with "••••••" when hidden
+- Each card can be independently controlled
 
 **Implementation:**
-- `hideAmounts` state in ProfitTrackerPage.jsx
-- `maskAmount()` helper function for conditional masking
-- Toggle button with `data-testid="toggle-amounts-visibility"`
-- Consistent with existing Dashboard hide/show functionality
+- `hiddenCards` state object in ProfitTrackerPage.jsx
+- `toggleCardVisibility(cardKey)` function for per-card control
+- Individual `data-testid` for each toggle: `toggle-account-value`, `toggle-deposits`, `toggle-profit`, `toggle-lot-size`, `toggle-growth`
 
-**Test Status:** Verified working via testing agent
+**Test Status:** Verified working via screenshot
+
+### Critical Bug Fix: Withdrawals Not Included in Balance Calculations (Mar 3, 2026) - FIXED
+**Issue:**
+- User reported incorrect Balance Before values in Monthly Table
+- Account value showed ~$37,607 when actual balance was ~$31,000
+- Root cause: Withdrawals stored in `db.withdrawals` collection were NOT being included in balance calculations
+
+**Fixed Files:**
+- `/app/backend/utils/calculations.py` — `get_user_financial_summary()` and `calculate_account_value()` now query and subtract from `db.withdrawals` collection
+- `/app/backend/server.py` — `/api/profit/daily-balances` endpoint now includes withdrawals in balance calculations
+
+**Impact:**
+- Account value calculations now correctly subtract withdrawals
+- Monthly Table "Balance Before" values now accurate
+- Trade Monitor LOT Size calculations now correct
+- Withdrawal preview now shows correct remaining balance
 
 ### P1 - Upcoming
 - Rewards Admin Dashboard UI (Backend complete, frontend pending)
