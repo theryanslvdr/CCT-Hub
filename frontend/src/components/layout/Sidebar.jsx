@@ -541,7 +541,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       </nav>
 
       {/* Admin Section - Anchored at bottom, above user profile */}
-      {isAdmin() && !simulatedView && (
+      {/* Show when: real admin (no simulation) OR simulating an admin role */}
+      {((isAdmin() && !simulatedView) || (simulatedView && ['basic_admin', 'super_admin', 'master_admin'].includes(simulatedView.role))) && (
         <div className="px-3 pb-2 border-t border-zinc-800/50 pt-3">
           <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-3">
             {!collapsed && 'Admin Section'}
@@ -560,8 +561,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </NavLink>
             ))}
             
-            {/* Super/Master Admin only items */}
-            {(isSuperAdmin() || isMasterAdmin()) && superAdminItems.map((item) => (
+            {/* Super/Master Admin only items - show for real super/master OR simulated super/master */}
+            {((!simulatedView && (isSuperAdmin() || isMasterAdmin())) || (simulatedView && ['super_admin', 'master_admin'].includes(simulatedView.role))) && superAdminItems.map((item) => (
               <NavLink 
                 key={item.path} 
                 to={item.path} 
@@ -574,8 +575,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </NavLink>
             ))}
 
-            {/* Master Admin only items */}
-            {isMasterAdmin() && masterAdminItems.map((item) => (
+            {/* Master Admin only items - show for real master OR simulated master */}
+            {((!simulatedView && isMasterAdmin()) || (simulatedView && simulatedView.role === 'master_admin')) && masterAdminItems.map((item) => (
               <NavLink 
                 key={item.path} 
                 to={item.path} 
@@ -623,8 +624,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Profile Settings
               </DropdownMenuItem>
               
-              {/* Master Admin only: Platform Settings & API Center */}
-              {isMasterAdmin() && (
+              {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
+              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
@@ -644,8 +645,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </>
               )}
               
-              {/* Master Admin only: Licenses */}
-              {isMasterAdmin() && (
+              {/* Master Admin only: Licenses - hide during non-master simulation */}
+              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <DropdownMenuItem 
                   onClick={handleLicensesClick}
                   className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"
@@ -705,8 +706,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Profile Settings
               </DropdownMenuItem>
               
-              {/* Master Admin only: Platform Settings & API Center */}
-              {isMasterAdmin() && (
+              {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
+              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
@@ -726,8 +727,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </>
               )}
               
-              {/* Master Admin only: Licenses */}
-              {isMasterAdmin() && (
+              {/* Master Admin only: Licenses - hide during non-master simulation */}
+              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <DropdownMenuItem 
                   onClick={handleLicensesClick}
                   className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"

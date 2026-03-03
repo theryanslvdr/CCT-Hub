@@ -9,8 +9,9 @@ A financial tracking platform for the CrossCurrent trading community. Supports a
 - **Database:** MongoDB
 
 ## User Roles
-- **Master Admin** (iam@ryansalvador.com): Full control, manages all members/licensees
-- **Super Admin / Admin**: Limited admin capabilities
+- **Master Admin** (iam@ryansalvador.com): Full control, manages all members/licensees. Has access to ALL features including System Check, Platform Settings, API Center, and Licenses.
+- **Super Admin**: Full admin capabilities EXCEPT System Check, Platform Settings, API Center, and Licenses. Can see Members, Trading Signals, Team Analytics, Transactions, and Rewards Admin.
+- **Basic Admin**: Basic admin capabilities (Members, Trading Signals, Team Analytics only)
 - **Member**: Regular trader with profit tracking
 - **Licensee (Honorary/Honorary FA/Extended)**: Managed accounts whose value grows based on master admin trades
 
