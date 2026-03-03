@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -157,6 +157,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
     { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards', hideForLicensee: true },
     { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', id: 'leaderboard', hideForLicensee: true },
+    { path: '/forum', icon: MessageSquare, label: 'Community Forum', id: 'forum', hideForLicensee: true },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
@@ -196,7 +197,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     // For licensees, only include dashboard and profile (no habits/affiliate)
     const alwaysInclude = isLicenseeView
       ? ['dashboard', 'profile', 'my_rewards']
-      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_rewards', 'leaderboard'];
+      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_rewards', 'leaderboard', 'forum'];
     const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
     
     return memberNavItems.filter(item => {

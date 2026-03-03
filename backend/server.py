@@ -128,6 +128,7 @@ from routes.activity_feed import admin_activity_router as _admin_activity_router
 from routes.users import router as _users_router
 from routes.family import router as _family_router, admin_family_router as _admin_family_router
 from routes.rewards import router as _rewards_router
+from routes.forum import router as _forum_router
 from utils.calculations import _is_honorary
 
 # Role hierarchy (higher number = more permissions)
@@ -9700,6 +9701,7 @@ api_router.include_router(_bve_router)
 api_router.include_router(_family_router)
 api_router.include_router(_admin_family_router)
 api_router.include_router(_rewards_router)
+api_router.include_router(_forum_router)
 
 app.include_router(api_router)
 

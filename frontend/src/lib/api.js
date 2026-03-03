@@ -167,6 +167,18 @@ export const rewardsAPI = {
   claimAction: (actionId) => api.post(`/rewards/claim/${actionId}`),
 };
 
+// Forum APIs
+export const forumAPI = {
+  listPosts: (params = {}) => api.get('/forum/posts', { params }),
+  createPost: (data) => api.post('/forum/posts', data),
+  getPost: (postId) => api.get(`/forum/posts/${postId}`),
+  createComment: (postId, data) => api.post(`/forum/posts/${postId}/comments`, data),
+  markBestAnswer: (postId, commentId) => api.put(`/forum/posts/${postId}/best-answer/${commentId}`),
+  closePost: (postId, data) => api.put(`/forum/posts/${postId}/close`, data),
+  deletePost: (postId) => api.delete(`/forum/posts/${postId}`),
+  getStats: () => api.get('/forum/stats'),
+};
+
 // Trade Monitor APIs
 export const tradeAPI = {
   logTrade: (data) => api.post('/trade/log', data),

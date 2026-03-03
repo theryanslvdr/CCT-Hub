@@ -38,6 +38,8 @@ import SystemCheckPage from "./pages/admin/SystemCheckPage";
 import MyRewardsPage from "./pages/MyRewardsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
+import ForumListPage from "./pages/ForumListPage";
+import ForumPostPage from "./pages/ForumPostPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -88,6 +90,8 @@ function App() {
             <Route path="/family-accounts" element={<FamilyAccountsPage />} />
             <Route path="/my-rewards" element={<MyRewardsPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/forum" element={<ForumListPage />} />
+            <Route path="/forum/:postId" element={<ForumPostPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />

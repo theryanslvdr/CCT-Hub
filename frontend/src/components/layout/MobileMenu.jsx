@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
   User, Settings, LogOut, X, Award, Wallet, Target, CreditCard,
-  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog
+  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -109,6 +109,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', hideForLicensee: true },
+    { path: '/forum', icon: MessageSquare, label: 'Community Forum' },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', licenseeOnly: true },
   ];
 
