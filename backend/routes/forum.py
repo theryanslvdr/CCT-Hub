@@ -27,6 +27,10 @@ class ClosePostRequest(BaseModel):
     active_collaborator_ids: List[str] = []
 
 
+class VoteRequest(BaseModel):
+    vote_type: str  # "up" or "down"
+
+
 # ─── Helpers ───
 
 async def _enrich_author(doc: dict) -> dict:
@@ -39,6 +43,36 @@ async def _enrich_author(doc: dict) -> dict:
             doc["author_name"] = user.get("name") or user.get("email", "Unknown")
             doc["author_role"] = user.get("role", "member")
     return doc
+
+
+async def _enrich_comment_votes(comment: dict, current_user_id: str = None) -> dict:
+    """Add vote data to a comment: upvotes, downvotes, voters, user's vote."""
+    db = deps.db
+    votes = await db.forum_votes.find(
+        {"comment_id": comment["id"]}, {"_id": 0}
+    ).to_list(length=500)
+
+    up_voters = []
+    down_voters = []
+    my_vote = None
+
+    for v in votes:
+        voter_name = v.get("voter_name", "Unknown")
+        entry = {"user_id": v["user_id"], "name": voter_name}
+        if v["vote_type"] == "up":
+            up_voters.append(entry)
+        else:
+            down_voters.append(entry)
+        if current_user_id and v["user_id"] == current_user_id:
+            my_vote = v["vote_type"]
+
+    comment["upvotes"] = len(up_voters)
+    comment["downvotes"] = len(down_voters)
+    comment["score"] = len(up_voters) - len(down_voters)
+    comment["up_voters"] = up_voters
+    comment["down_voters"] = down_voters
+    comment["my_vote"] = my_vote
+    return comment
 
 
 async def _award_forum_points(user_id: str, points: int, source: str, metadata: dict = None):
@@ -170,6 +204,7 @@ async def get_post(
 
     for c in comments:
         await _enrich_author(c)
+        await _enrich_comment_votes(c, user["id"])
 
     post["comments"] = comments
     return post
@@ -359,22 +394,55 @@ async def get_forum_stats(user: dict = Depends(deps.get_current_user)):
     closed_posts = await db.forum_posts.count_documents({"status": "closed"})
     total_comments = await db.forum_comments.count_documents({})
 
-    # Top contributors — users with most best answers
-    pipeline = [
+    # Top contributors — combine best answers + upvotes received
+    # 1. Best answers per user
+    ba_pipeline = [
         {"$match": {"is_best_answer": True}},
-        {"$group": {"_id": "$author_id", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": 5},
+        {"$group": {"_id": "$author_id", "best_answers": {"$sum": 1}}},
     ]
-    top_raw = await db.forum_comments.aggregate(pipeline).to_list(length=5)
-    top_contributors = []
-    for entry in top_raw:
-        u = await db.users.find_one({"id": entry["_id"]}, {"_id": 0, "name": 1, "email": 1})
-        top_contributors.append({
-            "user_id": entry["_id"],
-            "name": (u or {}).get("name") or (u or {}).get("email", "Unknown"),
-            "best_answers": entry["count"],
+    ba_raw = await db.forum_comments.aggregate(ba_pipeline).to_list(length=100)
+    ba_map = {e["_id"]: e["best_answers"] for e in ba_raw}
+
+    # 2. Upvotes received per user (votes on their comments)
+    vote_pipeline = [
+        {"$match": {"vote_type": "up"}},
+        {"$group": {"_id": "$comment_author_id", "upvotes": {"$sum": 1}}},
+    ]
+    vote_raw = await db.forum_votes.aggregate(vote_pipeline).to_list(length=100)
+    vote_map = {e["_id"]: e["upvotes"] for e in vote_raw}
+
+    # 3. Comments per user
+    comment_pipeline = [
+        {"$group": {"_id": "$author_id", "comments": {"$sum": 1}}},
+    ]
+    comment_raw = await db.forum_comments.aggregate(comment_pipeline).to_list(length=100)
+    comment_map = {e["_id"]: e["comments"] for e in comment_raw}
+
+    # Merge all user IDs
+    all_user_ids = set(ba_map.keys()) | set(vote_map.keys()) | set(comment_map.keys())
+    contributors = []
+    for uid in all_user_ids:
+        ba = ba_map.get(uid, 0)
+        up = vote_map.get(uid, 0)
+        cm = comment_map.get(uid, 0)
+        # Reputation: 10 pts per best answer + 1 pt per upvote + 0.5 per comment
+        reputation = (ba * 10) + up + int(cm * 0.5)
+        contributors.append({
+            "user_id": uid,
+            "best_answers": ba,
+            "upvotes_received": up,
+            "comments_count": cm,
+            "reputation": reputation,
         })
+
+    # Sort by reputation desc, take top 10
+    contributors.sort(key=lambda x: x["reputation"], reverse=True)
+    top_contributors = contributors[:10]
+
+    # Enrich with names
+    for c in top_contributors:
+        u = await db.users.find_one({"id": c["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+        c["name"] = (u or {}).get("name") or (u or {}).get("email", "Unknown")
 
     return {
         "total_posts": total_posts,
@@ -383,6 +451,97 @@ async def get_forum_stats(user: dict = Depends(deps.get_current_user)):
         "total_comments": total_comments,
         "top_contributors": top_contributors,
     }
+
+
+@router.get("/search-similar")
+async def search_similar_posts(
+    q: str = Query(..., min_length=3),
+    limit: int = Query(5, ge=1, le=10),
+    user: dict = Depends(deps.get_current_user),
+):
+    """AJAX search for similar posts based on title query."""
+    db = deps.db
+    # Split query into words for better matching
+    words = q.strip().split()
+    # Build regex that matches any word
+    regex_pattern = "|".join([w for w in words if len(w) >= 2])
+    if not regex_pattern:
+        return {"results": []}
+
+    cursor = db.forum_posts.find(
+        {"title": {"$regex": regex_pattern, "$options": "i"}},
+        {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1},
+    ).sort("created_at", -1).limit(limit)
+    results = await cursor.to_list(length=limit)
+    return {"results": results, "query": q}
+
+
+@router.post("/comments/{comment_id}/vote")
+async def vote_comment(
+    comment_id: str,
+    body: VoteRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Upvote or downvote a comment. Toggle: same vote removes it, different vote switches."""
+    db = deps.db
+    if body.vote_type not in ("up", "down"):
+        raise HTTPException(status_code=400, detail="vote_type must be 'up' or 'down'")
+
+    comment = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0, "id": 1, "author_id": 1})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Can't vote on your own comment
+    if comment["author_id"] == user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot vote on your own comment")
+
+    # Get voter name
+    voter_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "name": 1, "email": 1})
+    voter_name = (voter_user or {}).get("name") or (voter_user or {}).get("email", "Unknown")
+
+    existing = await db.forum_votes.find_one(
+        {"comment_id": comment_id, "user_id": user["id"]}, {"_id": 0}
+    )
+
+    if existing:
+        if existing["vote_type"] == body.vote_type:
+            # Same vote = remove (toggle off)
+            await db.forum_votes.delete_one({"comment_id": comment_id, "user_id": user["id"]})
+            return {"action": "removed", "vote_type": body.vote_type}
+        else:
+            # Different vote = switch
+            await db.forum_votes.update_one(
+                {"comment_id": comment_id, "user_id": user["id"]},
+                {"$set": {"vote_type": body.vote_type, "voter_name": voter_name, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            )
+            return {"action": "switched", "vote_type": body.vote_type}
+    else:
+        # New vote
+        vote_doc = {
+            "id": str(uuid.uuid4()),
+            "comment_id": comment_id,
+            "comment_author_id": comment["author_id"],
+            "user_id": user["id"],
+            "voter_name": voter_name,
+            "vote_type": body.vote_type,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        await db.forum_votes.insert_one(vote_doc)
+        return {"action": "created", "vote_type": body.vote_type}
+
+
+@router.get("/comments/{comment_id}/voters")
+async def get_comment_voters(
+    comment_id: str,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Get list of who voted on a comment."""
+    db = deps.db
+    votes = await db.forum_votes.find(
+        {"comment_id": comment_id}, {"_id": 0, "user_id": 1, "voter_name": 1, "vote_type": 1, "created_at": 1}
+    ).to_list(length=500)
+
+    return {"comment_id": comment_id, "votes": votes}
 
 
 @router.delete("/posts/{post_id}")

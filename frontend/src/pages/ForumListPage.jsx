@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { forumAPI } from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
-  MessageSquare, Plus, Search, Filter, Clock, CheckCircle2,
-  Eye, MessageCircle, Tag, Loader2, ChevronLeft, ChevronRight, Award
+  MessageSquare, Plus, Search, Clock, CheckCircle2,
+  Eye, MessageCircle, Loader2, ChevronLeft, ChevronRight,
+  Award, ThumbsUp, Trophy, Star
 } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -19,19 +19,19 @@ const STATUS_COLORS = {
   closed: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
 };
 
-function PostCard({ post, onClick }) {
-  const timeSince = (dateStr) => {
-    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (seconds < 60) return 'just now';
-    const mins = Math.floor(seconds / 60);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    if (days < 30) return `${days}d ago`;
-    return new Date(dateStr).toLocaleDateString();
-  };
+function timeSince(dateStr) {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+}
 
+function PostCard({ post, onClick }) {
   return (
     <button
       onClick={onClick}
@@ -72,6 +72,119 @@ function PostCard({ post, onClick }) {
         )}
       </div>
     </button>
+  );
+}
+
+function SimilarPostsSuggestion({ query, navigate, onSelect }) {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!query || query.trim().length < 3) {
+      setResults([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await forumAPI.searchSimilar(query.trim());
+        setResults(res.data.results || []);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
+  if (!query || query.trim().length < 3) return null;
+
+  return (
+    <div className="mt-2 rounded-lg border border-zinc-700 bg-zinc-800/80 overflow-hidden" data-testid="similar-posts-suggestions">
+      <div className="px-3 py-2 border-b border-zinc-700 flex items-center gap-1.5">
+        <Search className="w-3 h-3 text-blue-400" />
+        <span className="text-[11px] text-zinc-400 font-medium">Similar existing posts</span>
+        {loading && <Loader2 className="w-3 h-3 animate-spin text-zinc-500 ml-auto" />}
+      </div>
+      {results.length === 0 && !loading ? (
+        <div className="px-3 py-2 text-xs text-zinc-500">No similar posts found. Your question looks unique!</div>
+      ) : (
+        <div className="max-h-40 overflow-y-auto">
+          {results.map(r => (
+            <button
+              key={r.id}
+              onClick={() => { onSelect(); navigate(`/forum/${r.id}`); }}
+              className="w-full text-left px-3 py-2 hover:bg-zinc-700/50 transition-colors border-b border-zinc-700/50 last:border-0"
+              data-testid={`similar-post-${r.id}`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${STATUS_COLORS[r.status]}`}>
+                  {r.status === 'open' ? 'Open' : 'Solved'}
+                </span>
+                {r.best_answer_id && (
+                  <Award className="w-3 h-3 text-amber-400" />
+                )}
+                <span className="text-xs text-zinc-300 truncate flex-1">{r.title}</span>
+                <span className="text-[10px] text-zinc-500 flex items-center gap-0.5">
+                  <MessageCircle className="w-2.5 h-2.5" />{r.comment_count || 0}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopContributorsCard({ contributors }) {
+  if (!contributors || contributors.length === 0) return null;
+
+  const medals = ['text-amber-400', 'text-zinc-400', 'text-amber-700'];
+
+  return (
+    <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800" data-testid="top-contributors-section">
+      <p className="text-xs font-semibold text-zinc-300 mb-3 flex items-center gap-1.5">
+        <Trophy className="w-4 h-4 text-amber-400" /> Top Contributors
+      </p>
+      <div className="space-y-2">
+        {contributors.map((c, i) => (
+          <div
+            key={c.user_id}
+            className={`flex items-center gap-3 p-2 rounded-lg ${i < 3 ? 'bg-zinc-800/50' : ''}`}
+          >
+            <span className={`text-sm font-bold w-6 text-center ${medals[i] || 'text-zinc-500'}`}>
+              {i + 1}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-zinc-200 truncate">{c.name}</p>
+              <div className="flex items-center gap-3 mt-0.5">
+                {c.best_answers > 0 && (
+                  <span className="text-[10px] text-amber-400 flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5" /> {c.best_answers} best
+                  </span>
+                )}
+                {c.upvotes_received > 0 && (
+                  <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
+                    <ThumbsUp className="w-2.5 h-2.5" /> {c.upvotes_received} upvotes
+                  </span>
+                )}
+                <span className="text-[10px] text-zinc-500 flex items-center gap-0.5">
+                  <MessageCircle className="w-2.5 h-2.5" /> {c.comments_count}
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-blue-400">{c.reputation}</p>
+              <p className="text-[9px] text-zinc-500">rep</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -171,20 +284,7 @@ export default function ForumListPage() {
       )}
 
       {/* Top Contributors */}
-      {stats?.top_contributors?.length > 0 && (
-        <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
-          <p className="text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-amber-400" /> Top Contributors
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {stats.top_contributors.map((c, i) => (
-              <span key={c.user_id} className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-300">
-                {i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `${i+1}th`} {c.name} ({c.best_answers})
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      <TopContributorsCard contributors={stats?.top_contributors} />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2">
@@ -233,29 +333,17 @@ export default function ForumListPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage(p => p - 1)}
-            className="btn-secondary"
-          >
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="btn-secondary">
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <span className="text-xs text-zinc-400">Page {page} of {totalPages}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage(p => p + 1)}
-            className="btn-secondary"
-          >
+          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary">
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       )}
 
-      {/* New Post Dialog */}
+      {/* New Post Dialog with Similar Posts */}
       <Dialog open={newPostOpen} onOpenChange={setNewPostOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
           <DialogHeader>
@@ -270,6 +358,12 @@ export default function ForumListPage() {
                 placeholder="What's your question?"
                 className="input-dark mt-1"
                 data-testid="new-post-title"
+              />
+              {/* Live similar posts search */}
+              <SimilarPostsSuggestion
+                query={newPost.title}
+                navigate={navigate}
+                onSelect={() => setNewPostOpen(false)}
               />
             </div>
             <div>

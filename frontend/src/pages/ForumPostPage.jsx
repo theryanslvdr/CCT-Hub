@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, MessageSquare, CheckCircle2, Clock, Eye, MessageCircle,
-  Award, Star, Loader2, Send, Crown, Trash2, X, Users
+  ArrowLeft, CheckCircle2, Clock, Eye, MessageCircle,
+  Award, Star, Loader2, Send, Trash2, Users,
+  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 function timeSince(dateStr) {
@@ -28,6 +29,89 @@ function RoleBadge({ role }) {
   if (role === 'super_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 font-medium">Super</span>;
   if (role === 'basic_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-medium">Admin</span>;
   return null;
+}
+
+function VoterList({ voters, type }) {
+  if (!voters || voters.length === 0) return null;
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-1">
+      {voters.map(v => (
+        <span
+          key={v.user_id}
+          className={`text-[10px] px-1.5 py-0.5 rounded ${
+            type === 'up' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+          }`}
+        >
+          {v.name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function VoteButtons({ comment, userId, onVote }) {
+  const [expandVoters, setExpandVoters] = useState(false);
+  const isOwn = comment.author_id === userId;
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => !isOwn && onVote(comment.id, 'up')}
+        disabled={isOwn}
+        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all ${
+          comment.my_vote === 'up'
+            ? 'bg-emerald-500/20 text-emerald-400'
+            : isOwn
+            ? 'text-zinc-600 cursor-not-allowed'
+            : 'text-zinc-500 hover:bg-zinc-800 hover:text-emerald-400'
+        }`}
+        data-testid={`upvote-${comment.id}`}
+      >
+        <ThumbsUp className="w-3.5 h-3.5" />
+        <span>{comment.upvotes || 0}</span>
+      </button>
+      <button
+        onClick={() => !isOwn && onVote(comment.id, 'down')}
+        disabled={isOwn}
+        className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all ${
+          comment.my_vote === 'down'
+            ? 'bg-red-500/20 text-red-400'
+            : isOwn
+            ? 'text-zinc-600 cursor-not-allowed'
+            : 'text-zinc-500 hover:bg-zinc-800 hover:text-red-400'
+        }`}
+        data-testid={`downvote-${comment.id}`}
+      >
+        <ThumbsDown className="w-3.5 h-3.5" />
+        <span>{comment.downvotes || 0}</span>
+      </button>
+      {(comment.upvotes > 0 || comment.downvotes > 0) && (
+        <button
+          onClick={() => setExpandVoters(!expandVoters)}
+          className="text-zinc-600 hover:text-zinc-400 p-1 transition-colors"
+          data-testid={`toggle-voters-${comment.id}`}
+        >
+          {expandVoters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </button>
+      )}
+      {expandVoters && (
+        <div className="absolute z-10 mt-1 top-full left-0 bg-zinc-800 border border-zinc-700 rounded-lg p-2 min-w-[140px] shadow-xl">
+          {comment.up_voters?.length > 0 && (
+            <div className="mb-1">
+              <p className="text-[9px] text-emerald-400 font-medium mb-0.5">Upvoted</p>
+              <VoterList voters={comment.up_voters} type="up" />
+            </div>
+          )}
+          {comment.down_voters?.length > 0 && (
+            <div>
+              <p className="text-[9px] text-red-400 font-medium mb-0.5">Downvoted</p>
+              <VoterList voters={comment.down_voters} type="down" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ForumPostPage() {
@@ -74,6 +158,15 @@ export default function ForumPostPage() {
       toast.error(e.response?.data?.detail || 'Failed to post comment');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVote = async (commentId, voteType) => {
+    try {
+      await forumAPI.voteComment(commentId, voteType);
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to vote');
     }
   };
 
@@ -130,7 +223,6 @@ export default function ForumPostPage() {
     }
   };
 
-  // Get unique commenters (excluding OP) for collaborator selection
   const getCommenters = () => {
     if (!post?.comments) return [];
     const seen = new Set();
@@ -243,6 +335,8 @@ export default function ForumPostPage() {
                   </div>
                 )}
                 <p className="text-sm text-zinc-300 whitespace-pre-wrap">{c.content}</p>
+
+                {/* Vote + Meta row */}
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center gap-3 text-[11px] text-zinc-500">
                     <span className="flex items-center gap-1">
@@ -250,18 +344,30 @@ export default function ForumPostPage() {
                       <RoleBadge role={c.author_role} />
                     </span>
                     <span>{timeSince(c.created_at)}</span>
+                    {c.score !== 0 && (
+                      <span className={`font-medium ${c.score > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {c.score > 0 ? '+' : ''}{c.score} score
+                      </span>
+                    )}
                   </div>
-                  {canManage && post.status === 'open' && !c.is_best_answer && c.author_id !== post.author_id && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleMarkBestAnswer(c.id)}
-                      className="text-xs text-amber-400 hover:text-amber-300 h-7 px-2"
-                      data-testid={`mark-best-${c.id}`}
-                    >
-                      <Star className="w-3 h-3 mr-1" /> Mark Best
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {/* Voting */}
+                    <div className="relative">
+                      <VoteButtons comment={c} userId={user?.id} onVote={handleVote} />
+                    </div>
+                    {/* Mark best */}
+                    {canManage && post.status === 'open' && !c.is_best_answer && c.author_id !== post.author_id && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleMarkBestAnswer(c.id)}
+                        className="text-xs text-amber-400 hover:text-amber-300 h-7 px-2"
+                        data-testid={`mark-best-${c.id}`}
+                      >
+                        <Star className="w-3 h-3 mr-1" /> Mark Best
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -327,7 +433,9 @@ export default function ForumPostPage() {
                       }`}
                       data-testid={`select-best-${c.id}`}
                     >
-                      <span className="font-medium text-zinc-300">{c.author_name}</span>: {c.content.slice(0, 80)}{c.content.length > 80 ? '...' : ''}
+                      <span className="font-medium text-zinc-300">{c.author_name}</span>
+                      {c.score > 0 && <span className="text-emerald-400 ml-1.5">+{c.score}</span>}
+                      : {c.content.slice(0, 80)}{c.content.length > 80 ? '...' : ''}
                     </button>
                   ))}
                 </div>

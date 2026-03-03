@@ -177,6 +177,9 @@ export const forumAPI = {
   closePost: (postId, data) => api.put(`/forum/posts/${postId}/close`, data),
   deletePost: (postId) => api.delete(`/forum/posts/${postId}`),
   getStats: () => api.get('/forum/stats'),
+  searchSimilar: (q) => api.get('/forum/search-similar', { params: { q } }),
+  voteComment: (commentId, voteType) => api.post(`/forum/comments/${commentId}/vote`, { vote_type: voteType }),
+  getVoters: (commentId) => api.get(`/forum/comments/${commentId}/voters`),
 };
 
 // Trade Monitor APIs
