@@ -2000,19 +2000,19 @@ async def get_daily_balances(
     """
     Get daily balance calculations for a date range.
     
-    This is used by the frontend's Daily Projection table to show accurate
-    "Balance Before" values for each trading day.
+    CRITICAL: The "Balance Before" for any day represents the account balance
+    at the START of that trading day, BEFORE any trades happen.
     
-    If a balance_override exists, it will be applied to dates on or after the override's effective_date.
-    Past balances (before the override date) remain unchanged.
+    Timeline for a single day:
+    1. Balance Before = previous day's ending balance
+    2. User trades → earns profit + commission
+    3. User may deposit or withdraw
+    4. Day ends with: Balance Before + Profit + Commission + Deposits - Withdrawals
     
-    Args:
-        start_date: Start date (YYYY-MM-DD)
-        end_date: End date (YYYY-MM-DD)
-        user_id: Optional user ID (for admin simulation)
-    
-    Returns:
-        Array of daily balance entries with date, balance, lot_size
+    For calculating Balance Before:
+    - Deposits/Withdrawals on day D affect the ENDING balance of day D
+    - This means they affect the "Balance Before" of day D+1
+    - NOT the "Balance Before" of day D itself
     """
     # Determine target user
     target_user_id = user["id"]
@@ -2042,104 +2042,110 @@ async def get_daily_balances(
         override_date = balance_override.get("effective_date")
         override_adjustment = balance_override.get("adjustment_amount", 0)
     
-    # Get all deposits and trades for the user up to end_date
-    end_date_str = end.replace(hour=23, minute=59, second=59).strftime("%Y-%m-%dT%H:%M:%S")
+    # Get ALL deposits (including withdrawals stored as negative deposits)
+    all_deposits = await db.deposits.find(
+        {"user_id": target_user_id},
+        {"_id": 0}
+    ).to_list(10000)
     
-    deposits = await db.deposits.find(
+    # Get withdrawals from the separate withdrawals collection
+    all_withdrawals = await db.withdrawals.find(
         {
             "user_id": target_user_id,
-            "created_at": {"$lte": end_date_str}
+            "status": {"$ne": "rejected"}
         },
         {"_id": 0}
     ).to_list(10000)
     
-    # CRITICAL FIX: Also get withdrawals from the separate withdrawals collection
-    withdrawals = await db.withdrawals.find(
-        {
-            "user_id": target_user_id,
-            "created_at": {"$lte": end_date_str},
-            "status": {"$ne": "rejected"}  # Don't count rejected withdrawals
-        },
+    # Get all trades
+    all_trades = await db.trade_logs.find(
+        {"user_id": target_user_id},
         {"_id": 0}
     ).to_list(10000)
     
-    trades = await db.trade_logs.find(
-        {
-            "user_id": target_user_id,
-            "created_at": {"$lte": end_date_str}
-        },
-        {"_id": 0}
-    ).to_list(10000)
-    
-    # Build deposits and trades maps by date
-    deposits_by_date = {}
-    for d in deposits:
-        date_key = d.get("created_at", "")[:10]  # YYYY-MM-DD
-        if date_key:
-            if date_key not in deposits_by_date:
-                deposits_by_date[date_key] = 0
-            deposits_by_date[date_key] += d.get("amount", 0)
-    
-    # CRITICAL FIX: Add withdrawals as negative amounts
-    for w in withdrawals:
-        date_key = w.get("created_at", "")[:10]
-        if date_key:
-            if date_key not in deposits_by_date:
-                deposits_by_date[date_key] = 0
-            deposits_by_date[date_key] -= w.get("amount", 0)  # Subtract withdrawal
-    
+    # Group transactions by date
+    deposits_by_date = {}  # Positive amounts (actual deposits)
+    withdrawals_by_date = {}  # Positive amounts (money leaving)
     trades_by_date = {}
-    for t in trades:
+    
+    # Process deposits
+    for d in all_deposits:
+        amount = d.get("amount", 0)
+        date_key = d.get("created_at", "")[:10]
+        if not date_key:
+            continue
+        
+        if amount > 0 and not d.get("is_withdrawal"):
+            # Regular deposit
+            deposits_by_date[date_key] = deposits_by_date.get(date_key, 0) + amount
+        elif amount < 0 or d.get("is_withdrawal"):
+            # Legacy withdrawal stored as negative deposit
+            withdrawals_by_date[date_key] = withdrawals_by_date.get(date_key, 0) + abs(amount)
+    
+    # Process withdrawals from withdrawals collection
+    for w in all_withdrawals:
+        amount = w.get("amount", 0)
+        date_key = w.get("created_at", "")[:10]
+        if date_key and amount > 0:
+            withdrawals_by_date[date_key] = withdrawals_by_date.get(date_key, 0) + amount
+    
+    # Process trades
+    for t in all_trades:
         date_key = t.get("created_at", "")[:10]
-        if date_key:
-            if date_key not in trades_by_date:
-                trades_by_date[date_key] = {"profit": 0, "commission": 0, "lot_size": None, "projected": None}
-            trades_by_date[date_key]["profit"] += t.get("actual_profit", 0)
-            trades_by_date[date_key]["commission"] += t.get("commission", 0)
-            # Store the stored lot_size and projected_profit for reference
-            if t.get("lot_size"):
-                trades_by_date[date_key]["lot_size"] = t.get("lot_size")
-                trades_by_date[date_key]["projected"] = t.get("projected_profit")
+        if not date_key:
+            continue
+        if date_key not in trades_by_date:
+            trades_by_date[date_key] = {"profit": 0, "commission": 0, "lot_size": None, "projected": None}
+        trades_by_date[date_key]["profit"] += t.get("actual_profit", 0)
+        trades_by_date[date_key]["commission"] += t.get("commission", 0)
+        if t.get("lot_size"):
+            trades_by_date[date_key]["lot_size"] = t.get("lot_size")
+            trades_by_date[date_key]["projected"] = t.get("projected_profit")
     
-    # Calculate running balance day by day
-    daily_balances = []
+    # Get all unique dates
+    all_dates = sorted(set(
+        list(deposits_by_date.keys()) + 
+        list(withdrawals_by_date.keys()) + 
+        list(trades_by_date.keys())
+    ))
     
-    # Get all unique dates up to start_date to calculate the starting balance
-    all_dates = sorted(set(list(deposits_by_date.keys()) + list(trades_by_date.keys())))
-    
-    # Calculate balance at start of the date range (before any trades on start_date)
+    # Calculate running balance FORWARD from the first transaction
     running_balance = 0.0
     start_date_str = start.strftime("%Y-%m-%d")
-    
-    for date_key in all_dates:
-        if date_key < start_date_str:
-            running_balance += deposits_by_date.get(date_key, 0)
-            trade_data = trades_by_date.get(date_key, {})
-            running_balance += trade_data.get("profit", 0)
-            running_balance += trade_data.get("commission", 0)
-    
-    # Apply balance override if the start date is on or after the override date
     override_applied = False
-    if override_date and start_date_str >= override_date:
-        running_balance += override_adjustment
-        override_applied = True
     
-    # Now iterate through the requested date range
-    current_date = start
-    while current_date <= end:
-        date_key = current_date.strftime("%Y-%m-%d")
+    # First, calculate the balance at the START of start_date
+    for date_key in all_dates:
+        if date_key >= start_date_str:
+            break
         
-        # Check if we need to apply the override starting from this date
+        # Check if override should be applied
         if not override_applied and override_date and date_key >= override_date:
             running_balance += override_adjustment
             override_applied = True
         
-        # Apply deposits/withdrawals first (they affect balance BEFORE the trade)
-        day_deposit = deposits_by_date.get(date_key, 0)
-        if day_deposit != 0:
-            running_balance += day_deposit
+        # For dates BEFORE our range, apply all transactions to get running balance
+        # Order: deposits → trades → withdrawals
+        running_balance += deposits_by_date.get(date_key, 0)
+        trade_data = trades_by_date.get(date_key, {})
+        running_balance += trade_data.get("profit", 0)
+        running_balance += trade_data.get("commission", 0)
+        running_balance -= withdrawals_by_date.get(date_key, 0)
+    
+    # Now iterate through the requested date range
+    daily_balances = []
+    current_date = start
+    
+    while current_date <= end:
+        date_key = current_date.strftime("%Y-%m-%d")
         
-        # "Balance Before" is the balance at the start of the trading day
+        # Check if we need to apply the override
+        if not override_applied and override_date and date_key >= override_date:
+            running_balance += override_adjustment
+            override_applied = True
+        
+        # CRITICAL: "Balance Before" is balance at START of day
+        # BEFORE deposits, trades, or withdrawals
         balance_before = round(running_balance, 2)
         lot_size = truncate_lot_size(balance_before) if balance_before > 0 else 0
         target_profit = round(lot_size * 15, 2)
@@ -2150,6 +2156,9 @@ async def get_daily_balances(
         stored_lot_size = trade_data.get("lot_size")
         stored_projected = trade_data.get("projected")
         
+        day_deposits = deposits_by_date.get(date_key, 0)
+        day_withdrawals = withdrawals_by_date.get(date_key, 0)
+        
         daily_balances.append({
             "date": date_key,
             "balance_before": balance_before,
@@ -2159,14 +2168,19 @@ async def get_daily_balances(
             "commission": commission if commission else None,
             "has_trade": date_key in trades_by_date,
             "stored_lot_size": stored_lot_size,
-            "stored_projected": stored_projected
+            "stored_projected": stored_projected,
+            "day_deposits": day_deposits,
+            "day_withdrawals": day_withdrawals,
         })
         
-        # Apply trade profit + commission for next day's balance
+        # Apply this day's transactions to get ending balance
+        # which becomes tomorrow's "Balance Before"
+        running_balance += day_deposits
         if actual_profit is not None:
             running_balance += actual_profit
         if commission:
             running_balance += commission
+        running_balance -= day_withdrawals
         
         current_date += timedelta(days=1)
     
@@ -2174,7 +2188,15 @@ async def get_daily_balances(
         "daily_balances": daily_balances,
         "start_date": start_date,
         "end_date": end_date,
-        "user_id": target_user_id
+        "user_id": target_user_id,
+        "override_applied": override_applied,
+        "override_amount": override_adjustment if override_applied else None,
+        "debug": {
+            "total_deposits": sum(deposits_by_date.values()),
+            "total_withdrawals": sum(withdrawals_by_date.values()),
+            "deposit_dates": list(deposits_by_date.keys()),
+            "withdrawal_dates": list(withdrawals_by_date.keys()),
+        }
     }
 
 
