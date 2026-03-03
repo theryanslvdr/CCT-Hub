@@ -24,8 +24,21 @@ import math
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Build version - generated on server startup, changes on every restart/deploy
-BUILD_VERSION = str(uuid.uuid4())
+# Build version - only changes on actual code deployments (not hot-reload restarts)
+# Use a fixed version file if it exists, otherwise generate a new one
+import hashlib
+_version_file = "/app/.build_version"
+try:
+    with open(_version_file, 'r') as f:
+        BUILD_VERSION = f.read().strip()
+except FileNotFoundError:
+    # Generate once and persist
+    BUILD_VERSION = hashlib.md5(str(uuid.uuid4()).encode()).hexdigest()[:12]
+    try:
+        with open(_version_file, 'w') as f:
+            f.write(BUILD_VERSION)
+    except:
+        pass  # Can't write, use generated version
 
 # Import services
 from services import (
@@ -1762,8 +1775,25 @@ async def record_withdrawal(data: WithdrawalRequest, user: dict = Depends(get_cu
 
 @profit_router.get("/withdrawals")
 async def get_withdrawals(user: dict = Depends(get_current_user)):
-    """Get all withdrawals for the current user (includes is_withdrawal=True OR negative amounts)"""
-    withdrawals = await db.deposits.find(
+    """Get all withdrawals for the current user from the withdrawals collection and deposits with is_withdrawal=True"""
+    # CRITICAL FIX: Get withdrawals from BOTH places:
+    # 1. The dedicated withdrawals collection (actual withdrawal requests)
+    # 2. The deposits collection with is_withdrawal=True or negative amounts (legacy)
+    
+    # Get from withdrawals collection
+    actual_withdrawals = await db.withdrawals.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Convert to have negative amounts for frontend consumption
+    # (withdrawals collection stores positive amounts, but frontend expects negative)
+    for w in actual_withdrawals:
+        if w.get("amount", 0) > 0:
+            w["amount"] = -w["amount"]  # Make negative for frontend
+    
+    # Also get legacy withdrawals from deposits collection
+    legacy_withdrawals = await db.deposits.find(
         {
             "user_id": user["id"], 
             "$or": [
@@ -1773,7 +1803,21 @@ async def get_withdrawals(user: dict = Depends(get_current_user)):
         },
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
-    return withdrawals
+    
+    # Combine both sources (dedupe by id if needed)
+    seen_ids = set()
+    combined = []
+    for w in actual_withdrawals + legacy_withdrawals:
+        w_id = w.get("id")
+        if w_id and w_id not in seen_ids:
+            seen_ids.add(w_id)
+            combined.append(w)
+        elif not w_id:
+            combined.append(w)
+    
+    # Sort by created_at descending
+    combined.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return combined
 
 class ConfirmReceiptRequest(BaseModel):
     confirmed_at: str

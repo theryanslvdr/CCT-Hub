@@ -459,13 +459,17 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 **Fixed Files:**
 - `/app/backend/utils/calculations.py` — `get_user_financial_summary()` and `calculate_account_value()` now query and subtract from `db.withdrawals` collection
-- `/app/backend/server.py` — `/api/profit/daily-balances` endpoint now includes withdrawals in balance calculations
+- `/app/backend/server.py`:
+  - `/api/profit/daily-balances` endpoint now includes withdrawals in balance calculations
+  - `/api/profit/withdrawals` endpoint now returns from `db.withdrawals` collection (with negative amounts for frontend)
+  - `BUILD_VERSION` now persists to file to prevent false "new version deployed" banners on hot-reload
 
 **Impact:**
 - Account value calculations now correctly subtract withdrawals
 - Monthly Table "Balance Before" values now accurate
 - Trade Monitor LOT Size calculations now correct
 - Withdrawal preview now shows correct remaining balance
+- Frontend projection table uses correct withdrawal data
 
 ### P1 - Upcoming
 - Rewards Admin Dashboard UI (Backend complete, frontend pending)
