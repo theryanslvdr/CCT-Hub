@@ -110,6 +110,19 @@ Quarterly Fixed Daily Profit = round((Account Value at Quarter Start / 980) * 15
 - **Status:** All 21 tests PASSING
 - **One-click repair:** `POST /api/admin/licensee-health-check` — validates all licensees, auto-fixes missing start dates
 
+### Rewards Full List Dialog + Permission Changes (Feb 25, 2026) - COMPLETE
+**Rewards Full List Dialog:**
+- "See Full List" link on top-right of Badges & Achievements card
+- Opens dialog with 11 earning actions table (Action, Category, Points, USDT Value)
+- Achievement Badges section with 14 badges showing earned/locked status
+- "1 Point = $0.01 USDT" conversion note
+
+**Super Admin Permission Restriction:**
+- Super admin sees: Members, Trading Signals, Team Analytics, Transactions, Rewards Admin
+- Super admin does NOT see: System Check, Platform Settings, API Center, Licenses
+- Master admin retains full access to all features
+- **Test Status:** 100% passed (iteration_132)
+
 ### Rewards Platform User Sync (Feb 25, 2026) - COMPLETE
 **Admin Batch Sync:**
 - "Sync All Users" button in Platform Settings > Diagnostics
