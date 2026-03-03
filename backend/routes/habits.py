@@ -9,6 +9,7 @@ import logging
 import deps
 from deps import get_current_user, require_admin
 from helpers import send_push_to_admins
+from utils.trading_days import is_trading_day, get_holidays_for_range
 
 logger = logging.getLogger("server")
 
@@ -84,7 +85,11 @@ async def get_habit_streak(user: dict = Depends(get_current_user)):
 
 
 async def _calc_habit_streak(user_id: str) -> dict:
-    """Calculate consecutive days this user completed at least one habit."""
+    """Calculate consecutive trading-day streak for this user.
+    
+    Weekends and US market holidays are skipped - missing those days
+    does NOT break a streak.
+    """
     db = deps.db
     pipeline = [
         {"$match": {"user_id": user_id}},
@@ -97,30 +102,62 @@ async def _calc_habit_streak(user_id: str) -> dict:
         return {"current_streak": 0, "longest_streak": 0, "total_days": 0}
 
     dates = sorted([d["_id"] for d in dates_docs], reverse=True)
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-    current_streak = 0
-    check_date = datetime.strptime(today_str, "%Y-%m-%d").date()
-    if dates[0] != today_str:
-        yesterday = (check_date - timedelta(days=1)).isoformat()
-        if dates[0] != yesterday:
-            current_streak = 0
-        else:
-            check_date = check_date - timedelta(days=1)
-
     date_set = set(dates)
-    while check_date.isoformat() in date_set:
-        current_streak += 1
-        check_date -= timedelta(days=1)
+    today = datetime.now(timezone.utc).date()
 
+    # Pre-compute holidays for the range of dates we're checking
+    min_year = min(int(d[:4]) for d in dates)
+    holidays = get_holidays_for_range(min_year, today.year + 1)
+
+    def _prev_trading_day(d):
+        """Get the previous trading day (skip weekends and holidays)."""
+        d = d - timedelta(days=1)
+        while d.weekday() >= 5 or d.isoformat() in holidays:
+            d = d - timedelta(days=1)
+        return d
+
+    def _is_trading_day(d):
+        return d.weekday() < 5 and d.isoformat() not in holidays
+
+    # Current streak: count backwards from today, skipping non-trading days
+    current_streak = 0
+    check_date = today
+
+    # If today is not a trading day, move to the last trading day
+    if not _is_trading_day(check_date):
+        check_date = _prev_trading_day(check_date + timedelta(days=1))
+
+    # If user hasn't completed today, check if the last trading day was completed
+    if check_date.isoformat() not in date_set:
+        prev_td = _prev_trading_day(check_date)
+        if prev_td.isoformat() in date_set:
+            check_date = prev_td
+        else:
+            current_streak = 0
+            check_date = None
+
+    if check_date is not None:
+        while check_date.isoformat() in date_set:
+            current_streak += 1
+            check_date = _prev_trading_day(check_date)
+
+    # Longest streak: count consecutive trading days in sorted order
     longest = 0
     run = 0
     all_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in dates])
     for i, d in enumerate(all_dates):
-        if i == 0 or (d - all_dates[i - 1]).days == 1:
-            run += 1
-        else:
+        if i == 0:
             run = 1
+        else:
+            prev = all_dates[i - 1]
+            expected_next = prev + timedelta(days=1)
+            # Skip non-trading days between prev and d
+            while expected_next < d and (expected_next.weekday() >= 5 or expected_next.isoformat() in holidays):
+                expected_next += timedelta(days=1)
+            if expected_next == d:
+                run += 1
+            else:
+                run = 1
         longest = max(longest, run)
 
     return {
@@ -130,9 +167,14 @@ async def _calc_habit_streak(user_id: str) -> dict:
     }
 
 
+class HabitCompleteRequest(BaseModel):
+    screenshot_url: str = ""
+
 @router.post("/{habit_id}/complete")
-async def complete_habit(habit_id: str, screenshot_url: str = "", user: dict = Depends(get_current_user)):
+async def complete_habit(habit_id: str, data: HabitCompleteRequest = None, screenshot_url: str = "", user: dict = Depends(get_current_user)):
     """Mark a habit as completed for today."""
+    # Support both body and query param for backward compatibility
+    effective_screenshot_url = (data.screenshot_url if data and data.screenshot_url else screenshot_url) or ""
     db = deps.db
     habit = await db.habits.find_one({"id": habit_id, "active": True}, {"_id": 0})
     if not habit:
@@ -151,7 +193,7 @@ async def complete_habit(habit_id: str, screenshot_url: str = "", user: dict = D
         "habit_id": habit_id,
         "date": today,
         "completed_at": datetime.now(timezone.utc).isoformat(),
-        "screenshot_url": screenshot_url,
+        "screenshot_url": effective_screenshot_url,
     })
 
     try:

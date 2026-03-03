@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { MissedTradersWidget } from '@/components/admin/MissedTradersWidget';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 export const DashboardPage = () => {
@@ -39,6 +39,7 @@ export const DashboardPage = () => {
   const [projectionError, setProjectionError] = useState(false);
   const [rewardsSummary, setRewardsSummary] = useState(null);
   const [rewardsLeaderboard, setRewardsLeaderboard] = useState(null);
+  const [valuesHidden, setValuesHidden] = useState(() => localStorage.getItem('hideAccountValues') === 'true');
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
@@ -52,6 +53,14 @@ export const DashboardPage = () => {
   
   // Check if viewing as a licensee (either simulated or actual licensee user)
   const isLicenseeView = simulatedView?.license_type || user?.license_type || summary?.is_licensee;
+
+  const toggleValuesHidden = useCallback(() => {
+    setValuesHidden(prev => {
+      const newVal = !prev;
+      localStorage.setItem('hideAccountValues', newVal.toString());
+      return newVal;
+    });
+  }, []);
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -379,6 +388,9 @@ export const DashboardPage = () => {
             purple: 'from-purple-500 to-purple-600',
           };
 
+          const isCurrencyCard = card.format === 'currency';
+          const shouldHide = valuesHidden && isCurrencyCard;
+
           // Format exact value for tooltip
           const exactValue = card.format === 'currency' 
             ? formatCurrency(card.value, 'USD')
@@ -405,16 +417,33 @@ export const DashboardPage = () => {
               <CardContent className="p-3 md:p-6">
                 <div className="flex items-start justify-between gap-1 md:gap-2">
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="text-[10px] md:text-sm text-zinc-400 truncate">{card.title}</p>
-                    <ValueTooltip exactValue={exactValue}>
-                      {/* Mobile: compact format, Desktop: full format */}
-                      <p className="text-lg md:hidden font-bold font-mono text-white mt-1">
-                        {mobileValue}
-                      </p>
-                      <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2">
-                        {desktopValue}
-                      </p>
-                    </ValueTooltip>
+                    <div className="flex items-center gap-1">
+                      <p className="text-[10px] md:text-sm text-zinc-400 truncate">{card.title}</p>
+                      {isCurrencyCard && (
+                        <button 
+                          onClick={toggleValuesHidden} 
+                          className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
+                          data-testid={`toggle-hide-${card.title.toLowerCase().replace(/\s/g, '-')}`}
+                        >
+                          {valuesHidden ? <EyeOff className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <Eye className="w-3 h-3 md:w-3.5 md:h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                    {shouldHide ? (
+                      <>
+                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1">****</p>
+                        <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2">****</p>
+                      </>
+                    ) : (
+                      <ValueTooltip exactValue={exactValue}>
+                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1">
+                          {mobileValue}
+                        </p>
+                        <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2">
+                          {desktopValue}
+                        </p>
+                      </ValueTooltip>
+                    )}
                     {card.subtitle && (
                       <p className={`text-[9px] md:text-xs mt-1 truncate ${card.value > 100 ? 'text-emerald-400' : card.value === 100 ? 'text-blue-400' : 'text-amber-400'}`}>
                         {card.subtitle}
@@ -425,7 +454,7 @@ export const DashboardPage = () => {
                     <Icon className="w-4 h-4 md:w-6 md:h-6 text-white" />
                   </div>
                 </div>
-                {card.change !== undefined && card.changeFormat && (
+                {card.change !== undefined && card.changeFormat && !shouldHide && (
                   <div className="mt-2 md:mt-4 flex items-center gap-1 flex-wrap">
                     {card.change >= 100 ? (
                       <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-emerald-400" />

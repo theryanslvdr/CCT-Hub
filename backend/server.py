@@ -18,6 +18,7 @@ import requests
 import cloudinary
 import cloudinary.uploader
 import pytz
+import math
 
 # Set up logging early
 logging.basicConfig(level=logging.INFO)
@@ -780,6 +781,12 @@ async def verify_heartbeat_user_exists(email: str) -> bool:
 def calculate_exit_value(lot_size: float) -> float:
     """Calculate exit value: LOT Size × 15"""
     return lot_size * 15
+
+def truncate_lot_size(balance: float, divisor: float = 980) -> float:
+    """Calculate LOT size using truncation (floor to 2 decimals) to match frontend behavior."""
+    if balance <= 0:
+        return 0
+    return math.trunc(balance / divisor * 100) / 100
 
 def calculate_withdrawal_fees(amount: float) -> dict:
     """Calculate withdrawal fees: 3% Merin only (Binance fee moved to deposit)"""
@@ -1922,7 +1929,7 @@ async def get_balance_on_date(
     total_commission = sum(t.get("commission", 0) for t in trades)
     
     balance_on_date = round(total_net_deposits + total_profit + total_commission, 2)
-    lot_size = round(balance_on_date / 980, 2) if balance_on_date > 0 else 0
+    lot_size = truncate_lot_size(balance_on_date) if balance_on_date > 0 else 0
     
     return {
         "balance_on_date": balance_on_date,
@@ -2070,7 +2077,7 @@ async def get_daily_balances(
         
         # "Balance Before" is the balance at the start of the trading day
         balance_before = round(running_balance, 2)
-        lot_size = round(balance_before / 980, 2) if balance_before > 0 else 0
+        lot_size = truncate_lot_size(balance_before) if balance_before > 0 else 0
         target_profit = round(lot_size * 15, 2)
         
         trade_data = trades_by_date.get(date_key, {})
@@ -2614,7 +2621,7 @@ async def log_missed_trade(
                   (profits[0]["total"] if profits else 0) + \
                   (commissions[0]["total"] if commissions else 0)
         
-        lot_size = round(balance / 980, 2)
+        lot_size = truncate_lot_size(balance)
     
     # Calculate projected profit
     projected_profit = round(lot_size * 15, 2)
@@ -2704,7 +2711,7 @@ async def log_error_trade(data: ErrorTradeCreate, user: dict = Depends(get_curre
               (profits[0]["total"] if profits else 0) + \
               (commissions[0]["total"] if commissions else 0)
     
-    lot_size = round(balance / 980, 2)
+    lot_size = truncate_lot_size(balance)
     projected_profit = round(lot_size * 15, 2)
     profit_difference = round(data.actual_profit - projected_profit, 2)
     
@@ -4277,7 +4284,7 @@ async def simulate_member_view(user_id: str, user: dict = Depends(require_master
         total_profit = round(account_value - total_deposits, 2)
     
     # Calculate LOT size
-    lot_size = round(account_value / 980, 2) if account_value > 0 else 0
+    lot_size = truncate_lot_size(account_value) if account_value > 0 else 0
     
     # Get family members for honorary_fa licensees
     family_members = []
@@ -4865,7 +4872,7 @@ async def get_member_analytics(user_id: str, user: dict = Depends(require_admin)
         },
         "stats": {
             "account_value": round(account_value, 2),
-            "lot_size": round(account_value / 980, 2) if account_value > 0 else 0,
+            "lot_size": truncate_lot_size(account_value) if account_value > 0 else 0,
             "total_deposits": round(total_deposits, 2),
             "total_withdrawals": round(total_withdrawals, 2),
             "total_profit": round(total_profit, 2),
@@ -5179,8 +5186,8 @@ def calculate_extended_license_projections(starting_amount: float, start_date: d
     current_year = start_date.year
     
     # Calculate initial quarter's values
-    quarter_daily_profit = round((current_amount / 980) * 15, 2)
-    quarter_lot_size = round(current_amount / 980, 2)
+    quarter_daily_profit = round(truncate_lot_size(current_amount) * 15, 2)
+    quarter_lot_size = truncate_lot_size(current_amount)
     quarter_start_amount = current_amount
     
     trading_days_processed = 0
@@ -5196,8 +5203,8 @@ def calculate_extended_license_projections(starting_amount: float, start_date: d
         new_year = current_date.year
         
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_daily_profit = round((current_amount / 980) * 15, 2)
-            quarter_lot_size = round(current_amount / 980, 2)
+            quarter_daily_profit = round(truncate_lot_size(current_amount) * 15, 2)
+            quarter_lot_size = truncate_lot_size(current_amount)
             quarter_start_amount = current_amount
             current_quarter = new_quarter
             current_year = new_year
@@ -5460,8 +5467,8 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
     current_quarter = get_quarter(start_date)
     current_year = start_date.year
     
-    # Calculate initial daily profit (without intermediate lot_size rounding)
-    quarter_daily_profit = round((current_balance / 980) * 15, 2)
+    # Calculate initial daily profit (with truncated lot_size)
+    quarter_daily_profit = round(truncate_lot_size(current_balance) * 15, 2)
     
     # Generate projections day by day
     current_date = start_date
@@ -5482,11 +5489,11 @@ async def get_license_projections(license_id: str, user: dict = Depends(require_
         new_year = current_date.year
         
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_daily_profit = round((current_balance / 980) * 15, 2)
+            quarter_daily_profit = round(truncate_lot_size(current_balance) * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
         
-        lot_size = round(current_balance / 980, 2)
+        lot_size = truncate_lot_size(current_balance)
         daily_profit = quarter_daily_profit
         
         is_future = current_date > today
@@ -6938,7 +6945,7 @@ async def get_licensee_daily_projection(
     # Track quarter for quarterly compounding
     current_quarter = get_quarter(start_dt)
     current_year = start_dt.year
-    quarter_daily_profit = round((current_balance / 980) * 15, 2)
+    quarter_daily_profit = round(truncate_lot_size(current_balance) * 15, 2)
     
     current_dt = start_dt
     while current_dt <= end_dt:
@@ -6953,7 +6960,7 @@ async def get_licensee_daily_projection(
         new_quarter = get_quarter(current_dt)
         new_year = current_dt.year
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_daily_profit = round((current_balance / 980) * 15, 2)
+            quarter_daily_profit = round(truncate_lot_size(current_balance) * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
         
@@ -6981,7 +6988,7 @@ async def get_licensee_daily_projection(
             "date": date_str,
             "start_value": round(current_balance, 2),
             "account_value": round(current_balance + quarter_daily_profit, 2) if manager_traded else round(current_balance, 2),
-            "lot_size": round(current_balance / 980, 2),
+            "lot_size": truncate_lot_size(current_balance),
             "daily_profit": quarter_daily_profit,
             "manager_traded": manager_traded,
             "is_projected": is_future,
@@ -7648,7 +7655,7 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(get_cur
                 effective_balance = entry.balance if entry.balance else running_balance
                 
                 # Calculate lot size and projected profit from effective balance
-                lot_size = round(effective_balance / 980, 2)
+                lot_size = truncate_lot_size(effective_balance)
                 projected_profit = round(lot_size * 15, 2)
                 actual_profit = entry.actual_profit or 0
                 commission = entry.commission or 0  # Daily commission from referrals
@@ -7829,7 +7836,7 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
         holidays = get_holidays_for_range(start_year, start_year + 10)
         
         # Starting quarter daily profit (for display)
-        starting_daily_profit = round((current_value / 980) * 15, 2)
+        starting_daily_profit = round(truncate_lot_size(current_value) * 15, 2)
         
         # === TYPE 1: Forward projections from TODAY's current balance ===
         projections = []
@@ -7920,7 +7927,7 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
                 "current_value": round(float(fallback_value), 2),
                 "starting_amount": float(fallback_start),
                 "current_profit": round(float(fallback_value) - float(fallback_start), 2),
-                "starting_daily_profit": round((float(fallback_value) / 980) * 15, 2),
+                "starting_daily_profit": round(truncate_lot_size(float(fallback_value)) * 15, 2),
                 "trading_days_per_year": 250,
                 "effective_start_date": today.strftime("%Y-%m-%d"),
                 "projections": projections,

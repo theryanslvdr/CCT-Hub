@@ -1843,7 +1843,7 @@ export const TradeMonitorPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-zinc-900/50">
                   <p className="text-xs text-zinc-500 uppercase">Target</p>
-                  <p className="text-lg md:text-xl font-mono font-bold text-blue-400">{formatLargeNumber(dailySummary?.total_projected || exitValue)}</p>
+                  <p className="text-lg md:text-xl font-mono font-bold text-blue-400">{formatLargeNumber(exitValue)}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-zinc-900/50">
                   <p className="text-xs text-zinc-500 uppercase">Actual</p>

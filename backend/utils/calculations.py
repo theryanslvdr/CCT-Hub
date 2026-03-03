@@ -1,6 +1,7 @@
 """Calculation utility functions for trading, LOT size, etc."""
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
+import math
 import logging
 
 logger = logging.getLogger("server")
@@ -89,7 +90,7 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
     current_balance = starting_amount
     current_quarter = _get_quarter(start_date)
     current_year = start_date.year
-    quarter_daily_profit = round((current_balance / 980) * 15, 2)
+    quarter_daily_profit = round(math.trunc(current_balance / 980 * 100) / 100 * 15, 2)
 
     current_date = start_date
     today = datetime.now(timezone.utc)
@@ -105,7 +106,7 @@ async def calculate_honorary_licensee_value(db, license_doc: Dict) -> float:
         new_quarter = _get_quarter(current_date)
         new_year = current_date.year
         if new_year != current_year or new_quarter != current_quarter:
-            quarter_daily_profit = round((current_balance / 980) * 15, 2)
+            quarter_daily_profit = round(math.trunc(current_balance / 980 * 100) / 100 * 15, 2)
             current_quarter = new_quarter
             current_year = new_year
 
@@ -433,10 +434,11 @@ def calculate_lot_size(account_value: float, lot_divisor: float = 980) -> float:
     """Calculate LOT size from account value
     
     Formula: LOT = Account Value / 980
+    Uses truncation (floor) to 2 decimal places to match frontend behavior.
     """
     if account_value <= 0:
         return 0
-    return round(account_value / lot_divisor, 2)
+    return math.trunc(account_value / lot_divisor * 100) / 100
 
 
 def calculate_projected_profit(lot_size: float, profit_points: float = 15) -> float:

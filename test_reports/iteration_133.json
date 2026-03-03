@@ -1,0 +1,91 @@
+{
+  "summary": "Iteration 133: Verified all 5 bug fixes - Habit proof upload accepts body, Dashboard eye icon toggle works with localStorage persistence, Trade Monitor TARGET uses exitValue, LOT size uses truncation (math.trunc), and streak calculation skips weekends/holidays including Presidents Day 2026",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_bug_fixes_133.py",
+    "/app/test_reports/pytest/pytest_iteration_133.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend habits.py: HabitCompleteRequest body model correctly accepts screenshot_url (line 170-171)",
+    "Backend server.py: truncate_lot_size helper function uses math.trunc (line 785-789)",
+    "Backend calculations.py: calculate_lot_size uses math.trunc for 2-decimal truncation (line 436-441)",
+    "Backend trading_days.py: get_us_market_holidays includes Presidents Day (3rd Monday February) (lines 55-58)",
+    "Frontend DashboardPage.jsx: valuesHidden state toggles currency KPI cards, persists to localStorage 'hideAccountValues'",
+    "Frontend DashboardPage.jsx: Eye icon (EyeOff/Eye) on Account Value and Total Profit cards (line 426-429)",
+    "Frontend TradeMonitorPage.jsx: TARGET in Trade Control section uses exitValue (line 1846)",
+    "Frontend api.js: completeHabit sends body {screenshot_url} instead of query params (line 380)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_bug_fixes_133.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "master_admin_email": "iam@ryansalvador.com",
+    "master_admin_password": "admin123"
+  },
+  "seed_data_creation": "None - used existing test data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 133 verified all 5 bug fixes: (1) Habit proof upload - POST /api/habits/{id}/complete now accepts HabitCompleteRequest body with screenshot_url field, (2) Dashboard eye icon - toggleValuesHidden function toggles 'hideAccountValues' in localStorage, shows **** when hidden for currency KPI cards (Account Value, Total Profit), (3) Trade Monitor TARGET - line 1846 now uses exitValue instead of dailySummary.total_projected, ensuring TARGET and Projected Exit show same value, (4) LOT size truncation - math.trunc(balance/980*100)/100 gives 0.01 for $16.13 (not 0.02 from rounding), (5) Streak holidays - trading_days.py includes Presidents Day Feb 16 2026 in get_us_market_holidays set",
+  "verified_features": {
+    "habit_proof_upload": {
+      "endpoint": "POST /api/habits/{id}/complete",
+      "body_model": "HabitCompleteRequest with screenshot_url: str = ''",
+      "backward_compatible": true,
+      "status": "working"
+    },
+    "dashboard_eye_icon": {
+      "component": "DashboardPage.jsx",
+      "state_variable": "valuesHidden",
+      "localStorage_key": "hideAccountValues",
+      "affected_cards": ["Account Value", "Total Profit"],
+      "hidden_display": "****",
+      "status": "working"
+    },
+    "trade_monitor_target": {
+      "component": "TradeMonitorPage.jsx",
+      "line": 1846,
+      "value_source": "exitValue (same as Projected Exit)",
+      "formula": "lotSize * profitMultiplier (15)",
+      "status": "working"
+    },
+    "lot_size_truncation": {
+      "formula": "math.trunc(balance/980*100)/100",
+      "test_case": "$16.13 / 980 = 0.01 (not 0.02)",
+      "files": ["server.py:truncate_lot_size", "calculations.py:calculate_lot_size"],
+      "status": "working"
+    },
+    "streak_holiday_awareness": {
+      "file": "backend/utils/trading_days.py",
+      "function": "get_us_market_holidays",
+      "presidents_day_2026": "2026-02-16 (3rd Monday February)",
+      "holiday_count_2026": 10,
+      "status": "working"
+    }
+  },
+  "pytest_results": {
+    "total_tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "test_classes": [
+      "TestLotSizeTruncation",
+      "TestStreakHolidayAwareness",
+      "TestHabitProofUpload",
+      "TestUSMarketHolidays",
+      "TestAPIEndpoints"
+    ]
+  }
+}
