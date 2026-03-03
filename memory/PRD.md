@@ -379,6 +379,28 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 **Points:** forum_best_answer (50pts), forum_active_collaborator (15pts)
 **Test Status:** 100% passed (iteration_137, 15/15 backend + frontend)
 
+### Forum Enhancements (Mar 3, 2026) - COMPLETE
+**Upvote/Downvote System:**
+- `POST /api/forum/comments/{id}/vote` — Cast vote (up/down), toggle off, or switch
+- `GET /api/forum/comments/{id}/voters` — List voters with names (not anonymous)
+- Votes stored in `forum_votes` collection with voter_name, comment_author_id
+- Comments enriched with: upvotes, downvotes, score, up_voters, down_voters, my_vote
+- Cannot vote on own comment (400 error)
+- Frontend: ThumbsUp/ThumbsDown buttons, expandable voter list per comment
+
+**Live Similar Posts Search (AJAX):**
+- `GET /api/forum/search-similar?q=...` — Returns matching posts (3+ chars, word-based regex)
+- Frontend: SimilarPostsSuggestion in New Post dialog, 400ms debounce, clickable results with status badges
+- Helps users find existing answers before creating duplicates
+
+**Top Contributors with Reputation:**
+- Stats endpoint returns reputation scores: 10*best_answers + upvotes_received + 0.5*comments_count
+- Frontend: TopContributorsCard with rank, name, best answers, upvotes, comments, reputation score
+- Top 10 contributors displayed
+
+**Collections:** `forum_votes` (new)
+**Test Status:** 100% passed (iteration_138, 17/17 backend + frontend)
+
 ### P1 - Upcoming
 - Forum Enhancements: Top Contributors leaderboard page, real-time updates
 

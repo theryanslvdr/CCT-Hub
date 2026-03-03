@@ -10,6 +10,13 @@
 - Sidebar + MobileMenu: "Community Forum" link with MessageSquare icon
 - New collections: `forum_posts`, `forum_comments`
 
+### Forum Enhancements: Voting, Similar Search, Reputation
+- **Upvote/Downvote**: ThumbsUp/ThumbsDown on comments, toggle/switch, voter names visible (non-anonymous), self-vote blocked
+- **Similar Posts AJAX**: Live search in New Post dialog (3+ chars, 400ms debounce), shows existing posts with status badges
+- **Top Contributors**: Reputation scoring (10x best answers + upvotes + 0.5x comments), ranked leaderboard on forum page
+- New collection: `forum_votes`
+- New endpoints: `POST /api/forum/comments/{id}/vote`, `GET /api/forum/comments/{id}/voters`, `GET /api/forum/search-similar`
+
 ### Scan All Members Button
 - Verified "Scan All Members" retroactive rewards scan button on Admin Settings > Diagnostics tab
 - Backend endpoint `/api/rewards/retroactive-scan-all` working (scanned 15 users)
