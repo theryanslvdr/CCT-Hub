@@ -985,3 +985,162 @@ async def admin_get_sync_status(
     status = await get_sync_status(db)
     return status
 
+
+
+# ─── STREAK FREEZE ENDPOINTS ───
+
+STREAK_FREEZE_COSTS = {
+    "trade": 200,    # 200 points per trade streak freeze
+    "habit": 150,    # 150 points per habit streak freeze
+}
+
+class PurchaseStreakFreezeRequest(BaseModel):
+    freeze_type: str  # "trade" or "habit"
+    quantity: int = 1
+
+
+@router.get("/streak-freezes")
+async def get_streak_freezes(user: dict = Depends(deps.get_current_user)):
+    """Get user's available streak freezes and purchase history."""
+    db = deps.db
+    user_id = user["id"]
+
+    inventory = await db.streak_freezes.find_one(
+        {"user_id": user_id}, {"_id": 0}
+    )
+
+    if not inventory:
+        inventory = {
+            "user_id": user_id,
+            "trade_freezes": 0,
+            "habit_freezes": 0,
+            "trade_freezes_used": 0,
+            "habit_freezes_used": 0,
+        }
+
+    # Get recent usage history
+    usage = await db.streak_freeze_usage.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("used_at", -1).limit(20).to_list(20)
+
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+
+    return {
+        "trade_freezes": inventory.get("trade_freezes", 0),
+        "habit_freezes": inventory.get("habit_freezes", 0),
+        "trade_freezes_used": inventory.get("trade_freezes_used", 0),
+        "habit_freezes_used": inventory.get("habit_freezes_used", 0),
+        "costs": STREAK_FREEZE_COSTS,
+        "available_points": stats.get("lifetime_points", 0) if stats else 0,
+        "usage_history": usage,
+    }
+
+
+@router.post("/streak-freezes/purchase")
+async def purchase_streak_freeze(
+    req: PurchaseStreakFreezeRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Purchase streak freezes using reward points."""
+    db = deps.db
+    user_id = user["id"]
+
+    if req.freeze_type not in STREAK_FREEZE_COSTS:
+        raise HTTPException(status_code=400, detail="Invalid freeze type. Use 'trade' or 'habit'.")
+
+    if req.quantity < 1 or req.quantity > 10:
+        raise HTTPException(status_code=400, detail="Quantity must be between 1 and 10.")
+
+    cost_per = STREAK_FREEZE_COSTS[req.freeze_type]
+    total_cost = cost_per * req.quantity
+
+    # Check balance
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    current_points = stats.get("lifetime_points", 0) if stats else 0
+
+    if current_points < total_cost:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient points. Need {total_cost} but have {current_points}."
+        )
+
+    # Deduct points
+    await deduct_points(db, user_id, total_cost, "streak_freeze_purchase", {
+        "freeze_type": req.freeze_type,
+        "quantity": req.quantity,
+        "cost_per": cost_per,
+    })
+
+    # Add freezes to inventory
+    field = f"{req.freeze_type}_freezes"
+    await db.streak_freezes.update_one(
+        {"user_id": user_id},
+        {
+            "$inc": {field: req.quantity},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()},
+            "$setOnInsert": {"created_at": datetime.now(timezone.utc).isoformat()},
+        },
+        upsert=True,
+    )
+
+    updated = await db.streak_freezes.find_one({"user_id": user_id}, {"_id": 0})
+
+    return {
+        "success": True,
+        "purchased": req.quantity,
+        "freeze_type": req.freeze_type,
+        "points_spent": total_cost,
+        "trade_freezes": updated.get("trade_freezes", 0),
+        "habit_freezes": updated.get("habit_freezes", 0),
+    }
+
+
+async def use_streak_freeze(db, user_id: str, freeze_type: str, date_str: str) -> bool:
+    """Attempt to consume one streak freeze for a missed day. Returns True if successful."""
+    field = f"{freeze_type}_freezes"
+    used_field = f"{freeze_type}_freezes_used"
+
+    inventory = await db.streak_freezes.find_one({"user_id": user_id}, {"_id": 0})
+    if not inventory or inventory.get(field, 0) <= 0:
+        return False
+
+    # Check if already used a freeze for this date
+    existing = await db.streak_freeze_usage.find_one({
+        "user_id": user_id,
+        "freeze_type": freeze_type,
+        "date": date_str,
+    })
+    if existing:
+        return True  # Already frozen for this date
+
+    # Consume one freeze
+    await db.streak_freezes.update_one(
+        {"user_id": user_id, field: {"$gt": 0}},
+        {
+            "$inc": {field: -1, used_field: 1},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()},
+        },
+    )
+
+    # Log usage
+    await db.streak_freeze_usage.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "freeze_type": freeze_type,
+        "date": date_str,
+        "used_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return True
+
+
+async def check_freeze_for_date(db, user_id: str, freeze_type: str, date_str: str) -> bool:
+    """Check if a streak freeze was used for a specific date (without consuming)."""
+    existing = await db.streak_freeze_usage.find_one({
+        "user_id": user_id,
+        "freeze_type": freeze_type,
+        "date": date_str,
+    })
+    return existing is not None
+

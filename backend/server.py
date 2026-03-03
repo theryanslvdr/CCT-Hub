@@ -2394,44 +2394,61 @@ async def get_trade_streak(user_id: Optional[str] = None, user: dict = Depends(g
     # Calculate streak based on consecutive trading days
     # A streak counts consecutive TRADING days where the user traded
     # Holidays and weekends are skipped (don't break the streak)
+    # Streak freezes protect missed trading days
     streak = 0
     last_trade_date = None
     
+    # Build a set of dates the user traded
+    traded_dates_set = set()
     for trade in trades:
         trade_date_str = trade.get("created_at", "")
         if not trade_date_str:
             continue
-            
-        # Parse the trade date
         try:
             if isinstance(trade_date_str, str):
-                trade_date = datetime.fromisoformat(trade_date_str.replace('Z', '+00:00')).date()
+                td = datetime.fromisoformat(trade_date_str.replace('Z', '+00:00')).date()
             else:
-                trade_date = trade_date_str.date()
+                td = trade_date_str.date()
+            traded_dates_set.add(td)
         except:
             continue
+    
+    # Get all streak freeze usage for this user (trade type)
+    freeze_usage = await db.streak_freeze_usage.find(
+        {"user_id": target_user_id, "freeze_type": "trade"},
+        {"_id": 0, "date": 1}
+    ).to_list(500)
+    frozen_dates = {u["date"] for u in freeze_usage}
+    
+    # Count streak walking backwards from most recent trading day
+    today_date = datetime.now(timezone.utc).date()
+    check = today_date
+    
+    # Find starting point: today or last trading day
+    if not is_trading_day(check):
+        prev = get_previous_trading_day(check)
+        if prev:
+            check = prev
+    
+    # Walk backwards through trading days
+    while check is not None:
+        date_iso = check.isoformat()
         
-        if last_trade_date is None:
-            # First trade - start the streak
-            streak = 1
-            last_trade_date = trade_date
+        if check in traded_dates_set:
+            streak += 1
+        elif date_iso in frozen_dates:
+            # Freeze protects this day - streak continues but don't increment
+            streak += 1
         else:
-            # Check if this trade is on the previous trading day
-            expected_date = get_previous_trading_day(last_trade_date)
-            
-            if expected_date is None:
-                # Couldn't find a previous trading day
-                break
-            
-            if trade_date == expected_date:
-                streak += 1
-                last_trade_date = trade_date
-            elif trade_date == last_trade_date:
-                # Same day - don't break streak but don't increment
-                continue
-            else:
-                # Gap in trading days - streak broken
-                break
+            # Not traded and no freeze - streak breaks
+            break
+        
+        check = get_previous_trading_day(check)
+        if check is None:
+            break
+        # Safety: don't look back more than 400 days
+        if (today_date - check).days > 400:
+            break
     
     return {
         "streak": streak,

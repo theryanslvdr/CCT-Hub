@@ -88,7 +88,7 @@ async def _calc_habit_streak(user_id: str) -> dict:
     """Calculate consecutive trading-day streak for this user.
     
     Weekends and US market holidays are skipped - missing those days
-    does NOT break a streak.
+    does NOT break a streak. Streak freezes protect missed trading days.
     """
     db = deps.db
     pipeline = [
@@ -109,6 +109,13 @@ async def _calc_habit_streak(user_id: str) -> dict:
     min_year = min(int(d[:4]) for d in dates)
     holidays = get_holidays_for_range(min_year, today.year + 1)
 
+    # Get streak freeze usage for habit type
+    freeze_usage = await db.streak_freeze_usage.find(
+        {"user_id": user_id, "freeze_type": "habit"},
+        {"_id": 0, "date": 1}
+    ).to_list(500)
+    frozen_dates = {u["date"] for u in freeze_usage}
+
     def _prev_trading_day(d):
         """Get the previous trading day (skip weekends and holidays)."""
         d = d - timedelta(days=1)
@@ -119,6 +126,10 @@ async def _calc_habit_streak(user_id: str) -> dict:
     def _is_trading_day(d):
         return d.weekday() < 5 and d.isoformat() not in holidays
 
+    def _is_covered(d):
+        """Check if a date is covered by completion or freeze."""
+        return d.isoformat() in date_set or d.isoformat() in frozen_dates
+
     # Current streak: count backwards from today, skipping non-trading days
     current_streak = 0
     check_date = today
@@ -127,29 +138,33 @@ async def _calc_habit_streak(user_id: str) -> dict:
     if not _is_trading_day(check_date):
         check_date = _prev_trading_day(check_date + timedelta(days=1))
 
-    # If user hasn't completed today, check if the last trading day was completed
-    if check_date.isoformat() not in date_set:
+    # If user hasn't completed today and no freeze, check previous trading day
+    if not _is_covered(check_date):
         prev_td = _prev_trading_day(check_date)
-        if prev_td.isoformat() in date_set:
+        if _is_covered(prev_td):
             check_date = prev_td
         else:
             current_streak = 0
             check_date = None
 
     if check_date is not None:
-        while check_date.isoformat() in date_set:
+        while _is_covered(check_date):
             current_streak += 1
             check_date = _prev_trading_day(check_date)
 
     # Longest streak: count consecutive trading days in sorted order
+    # Include frozen dates in the calculation
+    all_covered = sorted(set(
+        [datetime.strptime(d, "%Y-%m-%d").date() for d in dates] +
+        [datetime.strptime(d, "%Y-%m-%d").date() for d in frozen_dates]
+    ))
     longest = 0
     run = 0
-    all_dates = sorted([datetime.strptime(d, "%Y-%m-%d").date() for d in dates])
-    for i, d in enumerate(all_dates):
+    for i, d in enumerate(all_covered):
         if i == 0:
             run = 1
         else:
-            prev = all_dates[i - 1]
+            prev = all_covered[i - 1]
             expected_next = prev + timedelta(days=1)
             # Skip non-trading days between prev and d
             while expected_next < d and (expected_next.weekday() >= 5 or expected_next.isoformat() in holidays):

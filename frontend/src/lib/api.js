@@ -156,6 +156,9 @@ export const rewardsAPI = {
   adminSyncUser: (userId) => api.post(`/rewards/admin/sync-user/${userId}`),
   adminGetSyncStatus: () => api.get('/rewards/admin/sync-status'),
   systemCheck: () => api.post('/rewards/system-check'),
+  // Streak Freezes
+  getStreakFreezes: () => api.get('/rewards/streak-freezes'),
+  purchaseStreakFreeze: (freezeType, quantity = 1) => api.post('/rewards/streak-freezes/purchase', { freeze_type: freezeType, quantity }),
 };
 
 // Trade Monitor APIs
