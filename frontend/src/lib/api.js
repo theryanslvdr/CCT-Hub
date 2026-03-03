@@ -162,6 +162,9 @@ export const rewardsAPI = {
   // Retroactive badge scan
   retroactiveScan: (userId = null) => api.post('/rewards/retroactive-scan', null, { params: userId ? { user_id: userId } : {} }),
   retroactiveScanAll: () => api.post('/rewards/retroactive-scan-all'),
+  // Earning actions
+  getEarningActions: () => api.get('/rewards/earning-actions'),
+  claimAction: (actionId) => api.post(`/rewards/claim/${actionId}`),
 };
 
 // Trade Monitor APIs

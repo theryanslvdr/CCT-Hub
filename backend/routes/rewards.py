@@ -12,6 +12,7 @@ from utils.rewards_engine import (
     award_points, deduct_points, compute_level, BASE_POINTS,
     process_trade_event, process_deposit_event, process_withdrawal_event,
     process_referral_qualified, check_and_award_badges, seed_default_badges,
+    calc_deposit_points,
 )
 
 router = APIRouter(prefix="/rewards", tags=["Rewards"])
@@ -376,6 +377,160 @@ async def event_community(req: EventCommunityRequest, _: bool = Depends(verify_i
         raise HTTPException(status_code=400, detail=f"Unknown community action: {action}")
 
     return {"success": True}
+
+
+# ─── EARNING ACTIONS STATUS & CLAIM ───
+
+@router.get("/earning-actions")
+async def get_earning_actions_status(user: dict = Depends(deps.get_current_user)):
+    """Get the status of all earning actions for the current user — which are claimed/awarded."""
+    db = deps.db
+    user_id = user["id"]
+
+    # Get all point log sources for this user
+    logs = await db.rewards_point_logs.find(
+        {"user_id": user_id},
+        {"_id": 0, "source": 1, "base_points": 1}
+    ).to_list(5000)
+    
+    source_set = set()
+    source_counts = {}
+    for log in logs:
+        src = log.get("source")
+        source_set.add(src)
+        source_counts[src] = source_counts.get(src, 0) + 1
+
+    # Get user stats
+    stats = await db.rewards_stats.find_one({"user_id": user_id}, {"_id": 0})
+    trade_count = stats.get("lifetime_trades", 0) if stats else 0
+    best_streak = stats.get("best_streak_days", 0) if stats else 0
+    deposit_total = stats.get("lifetime_deposit_usdt", 0) if stats else 0
+    referral_count = stats.get("qualified_referrals", 0) if stats else 0
+
+    actions = [
+        {
+            "id": "signup_verify",
+            "name": "Sign Up & Verify",
+            "description": "Create your account and enter your first trade",
+            "points": BASE_POINTS["signup_verify"],
+            "awarded": "signup_verify" in source_set,
+            "claimable": False,
+            "one_time": True,
+            "category": "onboarding",
+        },
+        {
+            "id": "join_community",
+            "name": "Join Community",
+            "description": "Join our trading community",
+            "points": BASE_POINTS["join_community"],
+            "awarded": "join_community" in source_set,
+            "claimable": "join_community" not in source_set,
+            "one_time": True,
+            "category": "onboarding",
+        },
+        {
+            "id": "first_trade",
+            "name": "First Trade",
+            "description": "Complete your very first trade",
+            "points": BASE_POINTS["first_trade"],
+            "awarded": "first_trade" in source_set,
+            "claimable": False,
+            "one_time": True,
+            "category": "trading",
+        },
+        {
+            "id": "first_daily_win",
+            "name": "First Daily Win",
+            "description": "Achieve your first profitable trade",
+            "points": BASE_POINTS["first_daily_win"],
+            "awarded": "first_daily_win" in source_set,
+            "claimable": False,
+            "one_time": True,
+            "category": "trading",
+        },
+        {
+            "id": "streak_5_day",
+            "name": "5-Day Trade Streak",
+            "description": "Maintain a 5-day consecutive trading streak",
+            "points": BASE_POINTS["streak_5_day"],
+            "awarded": "streak_5_day" in source_set,
+            "times_awarded": source_counts.get("streak_5_day", 0),
+            "claimable": False,
+            "one_time": False,
+            "category": "streaks",
+        },
+        {
+            "id": "milestone_10_trade",
+            "name": "10 Trades Milestone",
+            "description": "Complete your 10th trade",
+            "points": BASE_POINTS["milestone_10_trade"],
+            "awarded": "milestone_10_trade" in source_set,
+            "claimable": False,
+            "one_time": True,
+            "category": "trading",
+        },
+        {
+            "id": "qualified_referral",
+            "name": "Qualified Referral",
+            "description": "Refer a new member who completes their first trade",
+            "points": BASE_POINTS["qualified_referral"],
+            "awarded": "qualified_referral" in source_set,
+            "times_awarded": source_counts.get("qualified_referral", 0),
+            "claimable": False,
+            "one_time": False,
+            "category": "referrals",
+        },
+        {
+            "id": "deposit",
+            "name": "Deposit Bonus",
+            "description": "Earn 50 points for every $50 USDT deposited",
+            "points": BASE_POINTS["deposit_per_50_usdt"],
+            "points_label": "50 pts / $50",
+            "awarded": "deposit" in source_set,
+            "claimable": False,
+            "one_time": False,
+            "category": "deposits",
+        },
+    ]
+
+    return {
+        "actions": actions,
+        "stats": {
+            "lifetime_trades": trade_count,
+            "best_streak": best_streak,
+            "lifetime_deposit": deposit_total,
+            "referrals": referral_count,
+        },
+    }
+
+
+@router.post("/claim/{action_id}")
+async def claim_earning_action(
+    action_id: str,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Claim a one-time earning action (e.g., join_community)."""
+    db = deps.db
+    user_id = user["id"]
+
+    claimable_actions = {"join_community"}
+    if action_id not in claimable_actions:
+        raise HTTPException(status_code=400, detail="This action cannot be manually claimed.")
+
+    # Check if already claimed
+    existing = await db.rewards_point_logs.find_one({
+        "user_id": user_id,
+        "source": action_id,
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="You have already claimed this action.")
+
+    pts = BASE_POINTS.get(action_id, 0)
+    if pts <= 0:
+        raise HTTPException(status_code=400, detail="Invalid action.")
+
+    await award_points(db, user_id, pts, action_id)
+    return {"success": True, "points_awarded": pts, "action": action_id}
 
 
 # ─── POINTS HISTORY (auth via JWT) ───
@@ -787,6 +942,7 @@ async def retroactive_badge_scan(
         "user_id": target_uid,
         "stats": update_fields,
         "newly_awarded": newly_awarded,
+        "awarded_actions": stats_update.get("awarded_actions", []),
     }
 
 
@@ -794,7 +950,7 @@ async def retroactive_badge_scan(
 async def retroactive_scan_all_users(
     user: dict = Depends(deps.require_master_admin),
 ):
-    """Scan ALL users and retroactively award badges. Master admin only."""
+    """Scan ALL users and retroactively award badges and points. Master admin only."""
     db = deps.db
     users = await db.users.find({}, {"_id": 0, "id": 1}).to_list(1000)
 
@@ -830,8 +986,9 @@ async def retroactive_scan_all_users(
 
 
 async def _compute_real_stats(db, user_id: str) -> dict:
-    """Compute real user stats by scanning actual DB records."""
-    from utils.trading_days import get_holidays_for_range, is_trading_day
+    """Compute real user stats by scanning actual DB records,
+    and retroactively award any missed points."""
+    from utils.trading_days import get_holidays_for_range
 
     # 1. Count trades and distinct trade days
     trade_count = await db.trade_logs.count_documents({"user_id": user_id})
@@ -855,14 +1012,12 @@ async def _compute_real_stats(db, user_id: str) -> dict:
         holidays = get_holidays_for_range(min_year, max_year + 1)
         date_set = set(trade_dates)
 
-        # Walk through all trading days from first trade to today
         from datetime import date as date_type
         first = date_type.fromisoformat(trade_dates[0])
         today = date_type.today()
         check = first
         streak = 0
         while check <= today:
-            # Skip non-trading days
             if check.weekday() >= 5 or check.isoformat() in holidays:
                 check += timedelta(days=1)
                 continue
@@ -873,18 +1028,15 @@ async def _compute_real_stats(db, user_id: str) -> dict:
                 streak = 0
             check += timedelta(days=1)
 
-        # Calculate current streak walking backwards from today
+        # Current streak walking backwards from today
         current_streak = 0
         check = today
-        # Move to last trading day if today isn't one
         while check.weekday() >= 5 or check.isoformat() in holidays:
             check -= timedelta(days=1)
-        # If didn't trade today, check yesterday
         if check.isoformat() not in date_set:
             check -= timedelta(days=1)
             while check.weekday() >= 5 or check.isoformat() in holidays:
                 check -= timedelta(days=1)
-        # Count backwards
         while check.isoformat() in date_set:
             current_streak += 1
             check -= timedelta(days=1)
@@ -902,7 +1054,6 @@ async def _compute_real_stats(db, user_id: str) -> dict:
             total_deposits = dep_agg[0].get("total", 0)
     except Exception:
         pass
-    # Also try profit_adjustments for deposits
     try:
         adj_agg = await db.profit_adjustments.aggregate([
             {"$match": {"user_id": user_id, "type": "deposit"}},
@@ -920,6 +1071,86 @@ async def _compute_real_stats(db, user_id: str) -> dict:
     except Exception:
         pass
 
+    # 5. Check for any winning trade (actual_profit > 0) for first_daily_win
+    has_winning_trade = False
+    try:
+        winning = await db.trade_logs.find_one(
+            {"user_id": user_id, "actual_profit": {"$gt": 0}},
+            {"_id": 0, "id": 1}
+        )
+        has_winning_trade = winning is not None
+    except Exception:
+        pass
+
+    # ─── RETROACTIVE POINT AWARDS ───
+    # Check which one-time actions have already been awarded
+    existing_sources = set()
+    logs = await db.rewards_point_logs.find(
+        {"user_id": user_id},
+        {"_id": 0, "source": 1}
+    ).to_list(5000)
+    for log in logs:
+        existing_sources.add(log.get("source"))
+
+    awarded_actions = []
+
+    # signup_verify: award if user has at least 1 trade and never received it
+    if trade_count >= 1 and "signup_verify" not in existing_sources:
+        await award_points(db, user_id, BASE_POINTS["signup_verify"], "signup_verify")
+        awarded_actions.append("signup_verify")
+
+    # first_trade: award if user has trades and never received it
+    if trade_count >= 1 and "first_trade" not in existing_sources:
+        await award_points(db, user_id, BASE_POINTS["first_trade"], "first_trade")
+        awarded_actions.append("first_trade")
+
+    # first_daily_win: award if user has a winning trade and never received it
+    if has_winning_trade and "first_daily_win" not in existing_sources:
+        await award_points(db, user_id, BASE_POINTS["first_daily_win"], "first_daily_win")
+        awarded_actions.append("first_daily_win")
+
+    # streak_5_day: award for each 5-day streak milestone not yet awarded
+    if best_streak >= 5:
+        # Count how many logs with streak_5_day source exist
+        streak_logs = await db.rewards_point_logs.count_documents(
+            {"user_id": user_id, "source": "streak_5_day"}
+        )
+        deserved = best_streak // 5
+        if streak_logs < deserved:
+            for _ in range(deserved - streak_logs):
+                await award_points(db, user_id, BASE_POINTS["streak_5_day"], "streak_5_day",
+                                   {"retroactive": True, "best_streak": best_streak})
+            awarded_actions.append(f"streak_5_day (x{deserved - streak_logs})")
+
+    # milestone_10_trade: award if 10+ trades and never received
+    if trade_count >= 10 and "milestone_10_trade" not in existing_sources:
+        await award_points(db, user_id, BASE_POINTS["milestone_10_trade"], "milestone_10_trade")
+        awarded_actions.append("milestone_10_trade")
+
+    # deposit points: calculate total owed vs total awarded
+    if total_deposits > 0:
+        deserved_deposit_pts = calc_deposit_points(total_deposits)
+        dep_logs = await db.rewards_point_logs.find(
+            {"user_id": user_id, "source": "deposit"},
+            {"_id": 0, "base_points": 1}
+        ).to_list(5000)
+        awarded_deposit_pts = sum(log.get("base_points", 0) for log in dep_logs)
+        diff = deserved_deposit_pts - awarded_deposit_pts
+        if diff > 0:
+            await award_points(db, user_id, diff, "deposit", {"retroactive": True, "total_deposits": total_deposits})
+            awarded_actions.append(f"deposit ({diff} pts)")
+
+    # qualified_referral: award for each referral not yet awarded
+    if referral_count > 0:
+        ref_logs = await db.rewards_point_logs.count_documents(
+            {"user_id": user_id, "source": "qualified_referral"}
+        )
+        if ref_logs < referral_count:
+            for _ in range(referral_count - ref_logs):
+                await award_points(db, user_id, BASE_POINTS["qualified_referral"], "qualified_referral",
+                                   {"retroactive": True})
+            awarded_actions.append(f"qualified_referral (x{referral_count - ref_logs})")
+
     return {
         "lifetime_trades": trade_count,
         "distinct_trade_days": distinct_days,
@@ -927,6 +1158,7 @@ async def _compute_real_stats(db, user_id: str) -> dict:
         "current_streak_days": current_streak,
         "lifetime_deposit_usdt": total_deposits,
         "qualified_referrals": referral_count,
+        "awarded_actions": awarded_actions,
     }
 
 

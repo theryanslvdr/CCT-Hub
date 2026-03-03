@@ -236,6 +236,156 @@ function RewardsFullListDialog({ open, onOpenChange, badges }) {
   );
 }
 
+const EARNING_ACTION_ICONS = {
+  signup_verify: Shield,
+  join_community: Users,
+  first_trade: TrendingUp,
+  first_daily_win: Trophy,
+  streak_5_day: Flame,
+  milestone_10_trade: Target,
+  qualified_referral: Users,
+  deposit: Wallet,
+};
+
+const EARNING_ACTION_COLORS = {
+  onboarding: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', icon: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-400' },
+  trading: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'text-blue-400', badge: 'bg-blue-500/20 text-blue-400' },
+  streaks: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'text-orange-400', badge: 'bg-orange-500/20 text-orange-400' },
+  referrals: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', icon: 'text-purple-400', badge: 'bg-purple-500/20 text-purple-400' },
+  deposits: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', icon: 'text-cyan-400', badge: 'bg-cyan-500/20 text-cyan-400' },
+};
+
+function EarningActionsSection() {
+  const [actions, setActions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState(null);
+
+  const loadActions = useCallback(async () => {
+    try {
+      const res = await rewardsAPI.getEarningActions();
+      setActions(res.data?.actions || []);
+    } catch (e) {
+      console.error('Failed to load earning actions:', e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadActions(); }, [loadActions]);
+
+  const handleClaim = async (actionId) => {
+    setClaiming(actionId);
+    try {
+      const res = await rewardsAPI.claimAction(actionId);
+      toast.success(`+${res.data.points_awarded} points claimed!`);
+      loadActions();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to claim');
+    } finally {
+      setClaiming(null);
+    }
+  };
+
+  if (loading) return null;
+
+  const awarded = actions.filter(a => a.awarded);
+  const unclaimed = actions.filter(a => !a.awarded);
+
+  return (
+    <Card className="glass-card" data-testid="earning-actions-section">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Zap className="w-5 h-5 text-amber-400" /> Earning Actions
+        </CardTitle>
+        <p className="text-xs text-zinc-400 mt-1">
+          Complete actions to earn reward points. {awarded.length}/{actions.length} completed.
+        </p>
+        <div className="w-full bg-zinc-800 rounded-full h-2 mt-2">
+          <div
+            className="bg-gradient-to-r from-amber-500 to-amber-400 h-2 rounded-full transition-all"
+            style={{ width: `${actions.length > 0 ? (awarded.length / actions.length) * 100 : 0}%` }}
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Unclaimed / Available actions first */}
+        {unclaimed.map((action) => {
+          const Icon = EARNING_ACTION_ICONS[action.id] || Star;
+          const colors = EARNING_ACTION_COLORS[action.category] || EARNING_ACTION_COLORS.trading;
+          return (
+            <div
+              key={action.id}
+              className={`flex items-center gap-3 p-3 rounded-xl border ${colors.border} ${colors.bg} transition-all`}
+              data-testid={`earning-action-${action.id}`}
+            >
+              <div className={`p-2 rounded-lg bg-zinc-900/50`}>
+                <Icon className={`w-5 h-5 ${colors.icon}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white">{action.name}</p>
+                <p className="text-[11px] text-zinc-400 truncate">{action.description}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`text-xs font-mono font-bold px-2 py-1 rounded-full ${colors.badge}`}>
+                  +{action.points_label || `${action.points} pts`}
+                </span>
+                {action.claimable && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleClaim(action.id)}
+                    disabled={claiming === action.id}
+                    className="bg-amber-600 hover:bg-amber-500 text-white text-xs h-7 px-3"
+                    data-testid={`claim-${action.id}-btn`}
+                  >
+                    {claiming === action.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Claim'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Awarded actions */}
+        {awarded.length > 0 && (
+          <div className="pt-2">
+            <p className="text-xs text-zinc-500 font-medium mb-2 uppercase tracking-wider">Completed</p>
+            {awarded.map((action) => {
+              const Icon = EARNING_ACTION_ICONS[action.id] || Star;
+              const colors = EARNING_ACTION_COLORS[action.category] || EARNING_ACTION_COLORS.trading;
+              return (
+                <div
+                  key={action.id}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-zinc-800/50 bg-zinc-900/30 mb-2"
+                  data-testid={`earning-action-${action.id}`}
+                >
+                  <div className="p-2 rounded-lg bg-emerald-500/10">
+                    <Icon className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-zinc-300">{action.name}</p>
+                    <p className="text-[11px] text-zinc-500 truncate">{action.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-mono text-emerald-400 px-2 py-1 rounded-full bg-emerald-500/10">
+                      +{action.points_label || `${action.points} pts`}
+                    </span>
+                    <div className="flex items-center gap-1 text-emerald-400">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span className="text-[10px] font-medium">
+                        {action.times_awarded > 1 ? `x${action.times_awarded}` : 'Done'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function BadgesSection({ userId }) {
   const [badges, setBadges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -863,6 +1013,9 @@ export default function MyRewardsPage() {
           </p>
         </div>
       )}
+
+      {/* Earning Actions Section */}
+      <EarningActionsSection />
 
       {/* Badges Section */}
       <BadgesSection userId={user?.id} />
