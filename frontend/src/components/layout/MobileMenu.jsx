@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
   User, Settings, LogOut, X, Award, Wallet, Target, CreditCard,
-  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift
+  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -120,7 +120,15 @@ export const MobileMenu = ({ isOpen, onClose }) => {
 
   const superAdminItems = [
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
-    { path: '/admin/settings', icon: Settings, label: 'Platform Settings' },
+    { path: '/admin/rewards', icon: Gift, label: 'Rewards Admin' },
+  ];
+
+  // Master Admin only items
+  const masterAdminItems = [
+    { path: '/admin/system-check', icon: Shield, label: 'System Check' },
+    { path: '/admin/settings', icon: Cog, label: 'Platform Settings' },
+    { path: '/admin/api-center', icon: Plug, label: 'API Center' },
+    { path: '/admin/licenses', icon: Award, label: 'Licenses' },
   ];
 
   // External links
@@ -304,6 +312,27 @@ export const MobileMenu = ({ isOpen, onClose }) => {
             
             {/* Super Admin items */}
             {(isSuperAdmin() || isMasterAdmin()) && superAdminItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={onClose}
+                  className={({ isActive }) => cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                    isActive 
+                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
+                      : "text-zinc-300 active:bg-zinc-800"
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </NavLink>
+              );
+            })}
+
+            {/* Master Admin only items */}
+            {isMasterAdmin() && masterAdminItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
