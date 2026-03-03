@@ -1,5 +1,24 @@
 # CrossCurrent Hub - Changelog
 
+## Mar 3, 2026 (Session 3)
+
+### Forum Image Uploads with Publitio Integration
+- Added image upload capability to forum posts and comments
+- 2MB file size limit, supports JPG/PNG/GIF/WebP
+- New backend routes: `/api/publitio/upload`, `/api/publitio/test`, `/api/publitio/folders`
+- Frontend component: `ForumImageUpload.jsx` with preview, progress indicator
+- Admin Settings: Publitio card in API Keys tab with setup instructions
+- Images stored via Publitio CDN in organized folders (forum/posts/, forum/comments/)
+- Forum posts/comments now accept and display `images[]` array
+
+### Profit Tracker Hide/Show Amounts Toggle
+- Added eye icon toggle button near summary cards
+- Masks all financial amounts with "••••••" when hidden
+- Affects: Account Value, Deposits, Total Profit, LOT Size, Account Growth
+- Consistent with existing Dashboard privacy functionality
+
+**Test Status:** 100% passed (iteration_140)
+
 ## Mar 3, 2026 (Session 2)
 
 ### Community Forum Feature

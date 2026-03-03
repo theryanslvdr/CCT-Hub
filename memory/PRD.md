@@ -401,23 +401,70 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 **Collections:** `forum_votes` (new)
 **Test Status:** 100% passed (iteration_138, 17/17 backend + frontend)
 
+### Forum Image Uploads with Publitio (Mar 3, 2026) - COMPLETE
+**Image Upload Feature:**
+- Forum posts and comments can now include images (up to 4 per post/comment)
+- 2MB file size limit per image
+- Supported formats: JPG, PNG, GIF, WebP
+- Images stored via Publitio CDN with folder organization (`forum/posts/`, `forum/comments/`)
+- Frontend component: `ForumImageUpload.jsx` with preview, drag-drop, progress indicator
+
+**Backend Endpoints:**
+- `POST /api/publitio/upload` — Upload image with folder categorization
+- `GET /api/publitio/test` — Test Publitio connection status
+- `GET /api/publitio/folders` — List Publitio folders
+- `POST /api/publitio/folder/create` — Create new folder (admin only)
+- `DELETE /api/publitio/file/{id}` — Delete uploaded file (admin only)
+
+**Forum API Updates:**
+- `POST /api/forum/posts` — Now accepts `images: string[]` array
+- `POST /api/forum/posts/{id}/comments` — Now accepts `images: string[]` array
+- Posts and comments return images array in responses
+
+**Admin Settings Integration:**
+- Publitio card added to Platform Settings > API Keys tab
+- API Key and API Secret input fields with visibility toggle
+- "Test Connection" button to verify credentials
+- Setup instructions with links to publit.io
+- Credentials stored in platform settings DB
+
+**Files:**
+- `/app/backend/routes/publitio.py` — Publitio API routes
+- `/app/frontend/src/components/ForumImageUpload.jsx` — Upload component
+- `/app/frontend/src/pages/ForumListPage.jsx` — New Post dialog updated
+- `/app/frontend/src/pages/ForumPostPage.jsx` — Comment section + ImageGallery
+- `/app/frontend/src/pages/admin/AdminSettingsPage.jsx` — Publitio settings card
+
+**Test Status:** 100% passed (iteration_140, 11/11 backend + all frontend features verified)
+
+### Profit Tracker Hide/Show Amounts Toggle (Mar 3, 2026) - COMPLETE
+**Feature:**
+- Eye icon toggle button near summary cards on Profit Tracker page
+- Clicking "Hide" masks all financial amounts with "••••••"
+- Clicking "Show" reveals actual dollar amounts
+- Affects: Account Value, Deposits, Total Profit, LOT Size, Account Growth
+
+**Implementation:**
+- `hideAmounts` state in ProfitTrackerPage.jsx
+- `maskAmount()` helper function for conditional masking
+- Toggle button with `data-testid="toggle-amounts-visibility"`
+- Consistent with existing Dashboard hide/show functionality
+
+**Test Status:** Verified working via testing agent
+
 ### P1 - Upcoming
-- Real-time WebSocket updates for forum comments (**DONE** - Mar 3, 2026)
-- Forum Enhancements: Voting, Similar Search, Top Contributors (**DONE** - Mar 3, 2026)
+- Rewards Admin Dashboard UI (Backend complete, frontend pending)
 
 ### P2 - Improvements
 - Frontend refactoring: AdminSettingsPage.jsx split (**DONE** - Mar 3, 2026: 3368→1900 lines, extracted EmailsTab, TradingTab, DiagnosticsTab)
 - Frontend refactoring: ProfitTrackerPage.jsx split (5280 lines — deferred, tightly coupled dialogs)
 - Backend refactoring: Extract remaining routers from server.py (9840 lines — deferred, high risk)
-- Admin UI for PromotionRule management
-- Backend refactoring: Extract remaining routers from server.py
-- Frontend refactoring: AdminSettingsPage.jsx, ProfitTrackerPage.jsx
-- Email integration for password reset tokens
-- Admin UI for PromotionRule management
 
 ### P3 - Future
-- Cloudinary integration, Chatbase integration
+- Cloudinary integration (deprecated in favor of Publitio)
+- Chatbase integration
 - Rewards store UI (handled by rewards.crosscur.rent)
+- Admin UI for PromotionRule management
 
 ## Test Credentials
 - Master Admin: iam@ryansalvador.com / admin123
