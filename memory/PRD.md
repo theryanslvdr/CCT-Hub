@@ -151,6 +151,33 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 ### Streak Freeze Feature (Mar 3, 2026) - COMPLETE
 
 ### Retroactive Badge Awards & Bug Fixes (Mar 3, 2026) - COMPLETE
+
+### Earning Actions System (Mar 3, 2026) - COMPLETE
+**Earning Actions with Retroactive Point Awards:**
+- `GET /api/rewards/earning-actions` — returns status of all 8 earning actions per user (awarded, claimable, one-time, category)
+- `POST /api/rewards/claim/{action_id}` — manual claim endpoint (only for `join_community`)
+- Retroactive scan now also awards missed points: signup_verify (on first trade), first_trade, first_daily_win, streak_5_day (per 5 days), milestone_10_trade, deposits, referrals
+- Double-claim prevention: already-claimed actions return 400 error
+- Non-claimable actions (first_trade, etc.) return 400 if manually claimed
+
+**Actions:**
+| Action | Points | Auto/Manual | One-time |
+|--------|--------|------------|----------|
+| Sign Up & Verify | 25 | Auto (on first trade) | Yes |
+| Join Community | 5 | Manual (Claim button) | Yes |
+| First Trade | 25 | Auto | Yes |
+| First Daily Win | 10 | Auto (profitable trade) | Yes |
+| 5-Day Streak | 50 | Auto (repeatable) | No |
+| 10 Trades Milestone | 125 | Auto | Yes |
+| Qualified Referral | 150 | Auto (per referral) | No |
+| Deposit Bonus | 50/$50 | Auto | No |
+| Help Chat | ON HOLD | Future community forum | - |
+
+**Frontend:**
+- EarningActionsSection component on My Rewards page
+- Progress bar (X/8 completed), unclaimed at top with Claim button, completed below with Done badge
+- Repeatable actions show "xN" count
+- **Test Status:** 100% passed (iteration_136, 7/7 backend + frontend)
 **Retroactive Badge System:**
 - `POST /api/rewards/retroactive-scan` — scans user's actual hub records (trades, streaks, deposits, referrals) and awards earned badges
 - `POST /api/rewards/retroactive-scan-all` — master admin endpoint to scan ALL users
