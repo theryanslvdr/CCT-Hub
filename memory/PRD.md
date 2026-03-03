@@ -147,6 +147,27 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 ### Badge Toasts, Email Reset, Rewards Store API (Feb 25, 2026) - COMPLETE
 
 ### Bug Fixes & Enhancements (Mar 3, 2026) - COMPLETE
+
+### Streak Freeze Feature (Mar 3, 2026) - COMPLETE
+**Backend:**
+- `GET /api/rewards/streak-freezes` — returns user's freeze inventory, costs, available points, usage history
+- `POST /api/rewards/streak-freezes/purchase` — purchases streak freezes (trade=200pts, habit=150pts), validates balance, deducts points
+- `use_streak_freeze()` / `check_freeze_for_date()` utility functions for automatic freeze consumption
+- Trade streak calculation (`get_trade_streak`) updated to check for freezes on missed days
+- Habit streak calculation (`_calc_habit_streak`) updated to check for freezes on missed days
+- New MongoDB collections: `streak_freezes` (inventory), `streak_freeze_usage` (consumption log)
+
+**Frontend:**
+- StreakFreezeSection component on My Rewards page
+- Two cards: Trade Streak Freeze (blue, 200pts) and Habit Streak Freeze (orange, 150pts)
+- Quantity selector (1-10), Buy button with total cost, insufficient points warning
+- Recent usage history display
+
+**Rewards Platform Prompt:**
+- Complete integration prompt created at `/app/prompts_for_rewards_platform_streak_freeze.md`
+- Includes API specs, data models, UI guidelines, and testing instructions for the external Rewards Platform
+- **Test Status:** 100% passed (iteration_134, 8/8 backend + frontend)
+
 **Habit Proof Upload Fix:**
 - Changed `POST /api/habits/{id}/complete` to accept `screenshot_url` in request body (HabitCompleteRequest model) instead of query parameter
 - Fixes "Failed to complete task" error caused by base64 data URLs exceeding URL length limits

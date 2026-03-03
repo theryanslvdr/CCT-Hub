@@ -1,5 +1,14 @@
 # CrossCurrent Hub - Changelog
 
+## Mar 3, 2026
+
+### Streak Freeze Feature
+- Added streak freeze purchase system: Trade Streak Freeze (200 pts) and Habit Streak Freeze (150 pts)
+- Backend: `GET /api/rewards/streak-freezes`, `POST /api/rewards/streak-freezes/purchase`
+- Frontend: StreakFreezeSection on My Rewards page with quantity selector and buy buttons
+- Trade streak and habit streak calculations updated to check for active freezes
+- Created `/app/prompts_for_rewards_platform_streak_freeze.md` for Rewards Platform integration
+
 ## Feb 18, 2026 (Session 2)
 
 ### Simulation Dialog/Banner Stale Value Fix
