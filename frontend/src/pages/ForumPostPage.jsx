@@ -7,11 +7,68 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import ForumImageUpload from '@/components/ForumImageUpload';
 import {
   ArrowLeft, CheckCircle2, Clock, Eye, MessageCircle,
   Award, Star, Loader2, Send, Trash2, Users,
-  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp
+  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X
 } from 'lucide-react';
+
+// Image gallery lightbox component
+function ImageGallery({ images }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  if (!images || images.length === 0) return null;
+
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mt-3">
+        {images.map((url, idx) => (
+          <button
+            key={idx}
+            onClick={() => { setActiveIndex(idx); setLightboxOpen(true); }}
+            className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-700 hover:border-blue-500 transition-colors"
+          >
+            <img src={url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
+          </button>
+        ))}
+      </div>
+
+      {/* Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-4xl p-0 overflow-hidden">
+          <div className="relative">
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img 
+              src={images[activeIndex]} 
+              alt="Full size"
+              className="w-full max-h-[80vh] object-contain"
+            />
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveIndex(idx)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      idx === activeIndex ? 'bg-blue-500' : 'bg-zinc-600 hover:bg-zinc-500'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 function timeSince(dateStr) {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -124,6 +181,7 @@ export default function ForumPostPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [commentImages, setCommentImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [closing, setClosing] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
@@ -159,8 +217,10 @@ export default function ForumPostPage() {
     if (!comment.trim()) return;
     setSubmitting(true);
     try {
-      await forumAPI.createComment(postId, { content: comment });
+      const images = commentImages.map(img => img.url);
+      await forumAPI.createComment(postId, { content: comment, images });
       setComment('');
+      setCommentImages([]);
       toast.success('Comment posted');
       loadPost();
     } catch (e) {
@@ -299,6 +359,9 @@ export default function ForumPostPage() {
 
         <div className="mt-4 text-sm text-zinc-300 whitespace-pre-wrap">{post.content}</div>
 
+        {/* Post images */}
+        <ImageGallery images={post.images} />
+
         <div className="flex items-center gap-4 mt-4 text-[11px] text-zinc-500 border-t border-zinc-800 pt-3">
           <span className="flex items-center gap-1">
             <span className="font-medium text-zinc-300">{post.author_name}</span>
@@ -344,6 +407,9 @@ export default function ForumPostPage() {
                   </div>
                 )}
                 <p className="text-sm text-zinc-300 whitespace-pre-wrap">{c.content}</p>
+
+                {/* Comment images */}
+                <ImageGallery images={c.images} />
 
                 {/* Vote + Meta row */}
                 <div className="flex items-center justify-between mt-3">
@@ -395,6 +461,15 @@ export default function ForumPostPage() {
             className="input-dark resize-none mb-3"
             data-testid="comment-input"
           />
+          <div className="mb-3">
+            <ForumImageUpload
+              images={commentImages}
+              onChange={setCommentImages}
+              folder="forum/comments"
+              maxImages={4}
+              disabled={submitting}
+            />
+          </div>
           <div className="flex justify-end">
             <Button
               onClick={handleComment}

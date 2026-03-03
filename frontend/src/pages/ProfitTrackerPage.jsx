@@ -103,6 +103,10 @@ const formatCompact = (amount) => {
   return `${sign}$${absAmount.toFixed(2)}`;
 };
 
+// Mask financial amounts when hidden
+const MASKED_VALUE = '••••••';
+const maskAmount = (formattedValue, hide) => hide ? MASKED_VALUE : formattedValue;
+
 // Standard money formatting
 const formatMoney = (amount) => {
   if (amount === null || amount === undefined) return '$0.00';
@@ -756,6 +760,9 @@ export const ProfitTrackerPage = () => {
   const [showLicenseeWelcome, setShowLicenseeWelcome] = useState(false);
   const [licenseeWelcomeInfo, setLicenseeWelcomeInfo] = useState(null);
   const [licenseeProjections, setLicenseeProjections] = useState([]);
+  
+  // Hide/Show financial amounts toggle
+  const [hideAmounts, setHideAmounts] = useState(false);
   
   // Adjust Trade Dialog for past trades (renamed from Adjust Trade)
   const [enterAPDialogOpen, setEnterAPDialogOpen] = useState(false);
@@ -2355,6 +2362,18 @@ export const ProfitTrackerPage = () => {
       )}
 
       {/* Summary Cards - For licensees: 4 cards (Account Value, Deposits, Total Profit, Account Growth), For others: 4 cards */}
+      <div className="flex items-center justify-between mb-2">
+        <div></div>
+        <button
+          onClick={() => setHideAmounts(!hideAmounts)}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors"
+          title={hideAmounts ? "Show amounts" : "Hide amounts"}
+          data-testid="toggle-amounts-visibility"
+        >
+          {hideAmounts ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          <span className="hidden sm:inline">{hideAmounts ? 'Show' : 'Hide'}</span>
+        </button>
+      </div>
       <div className={`grid gap-3 ${isLicensee ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
         <Card className="glass-card" data-testid="account-value-card">
           <CardContent className="p-4">
@@ -2373,11 +2392,11 @@ export const ProfitTrackerPage = () => {
                     </button>
                   )}
                 </div>
-                <ValueTooltip exactValue={formatFullCurrency(displayAccountValue)}>
+                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : formatFullCurrency(displayAccountValue)}>
                   {/* Desktop: Full amount, Mobile: Compact */}
                   <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{formatLargeNumber(displayAccountValue)}</span>
-                    <span className="md:hidden">{formatCompact(displayAccountValue)}</span>
+                    <span className="hidden md:inline">{maskAmount(formatLargeNumber(displayAccountValue), hideAmounts)}</span>
+                    <span className="md:hidden">{maskAmount(formatCompact(displayAccountValue), hideAmounts)}</span>
                   </p>
                 </ValueTooltip>
               </div>
@@ -2406,13 +2425,13 @@ export const ProfitTrackerPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <ValueTooltip exactValue={`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
+                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : `${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
                   <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{getCurrencySymbol(selectedCurrency)}{formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}</span>
-                    <span className="md:hidden">{formatCompact(effectiveTotalDeposits)}</span>
+                    <span className="hidden md:inline">{maskAmount(`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}`, hideAmounts)}</span>
+                    <span className="md:hidden">{maskAmount(formatCompact(effectiveTotalDeposits), hideAmounts)}</span>
                   </p>
                 </ValueTooltip>
-                <p className="text-[10px] text-zinc-500 hidden md:block">≈ {formatFullCurrency(effectiveTotalDeposits)} USDT</p>
+                <p className="text-[10px] text-zinc-500 hidden md:block">{hideAmounts ? '' : `≈ ${formatFullCurrency(effectiveTotalDeposits)} USDT`}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
                 <ArrowDownToLine className="w-5 h-5 text-white" />
@@ -2426,10 +2445,10 @@ export const ProfitTrackerPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-xs text-zinc-400">Total Profit</p>
-                <ValueTooltip exactValue={formatFullCurrency(effectiveTotalProfit)}>
+                <ValueTooltip exactValue={hideAmounts ? MASKED_VALUE : formatFullCurrency(effectiveTotalProfit)}>
                   <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    <span className="hidden md:inline">{effectiveTotalProfit >= 0 ? '+' : ''}{formatLargeNumber(effectiveTotalProfit)}</span>
-                    <span className="md:hidden">{effectiveTotalProfit >= 0 ? '+' : ''}{formatCompact(effectiveTotalProfit)}</span>
+                    <span className="hidden md:inline">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatLargeNumber(effectiveTotalProfit)}`, hideAmounts)}</span>
+                    <span className="md:hidden">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatCompact(effectiveTotalProfit)}`, hideAmounts)}</span>
                   </p>
                 </ValueTooltip>
               </div>
@@ -2448,7 +2467,7 @@ export const ProfitTrackerPage = () => {
                 <div className="flex-1">
                   <p className="text-xs text-zinc-400">LOT Size</p>
                   <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                    {effectiveLotSize.toFixed(2)}
+                    {maskAmount(effectiveLotSize.toFixed(2), hideAmounts)}
                   </p>
                   <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
                 </div>
@@ -2473,12 +2492,12 @@ export const ProfitTrackerPage = () => {
                       : 'text-red-400'
                   }`}>
                     {licenseeAccountGrowth !== null 
-                      ? `${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`
+                      ? maskAmount(`${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`, hideAmounts)
                       : '--'
                     }
                   </p>
                   <p className="text-[10px] text-zinc-500">
-                    From initial {formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0)}
+                    From initial {maskAmount(formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0), hideAmounts)}
                   </p>
                 </div>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${

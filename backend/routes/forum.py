@@ -22,10 +22,12 @@ class CreatePostRequest(BaseModel):
     title: str
     content: str
     tags: List[str] = []
+    images: List[str] = []  # List of image URLs from Publitio
 
 
 class CreateCommentRequest(BaseModel):
     content: str
+    images: List[str] = []  # List of image URLs from Publitio
 
 
 class ClosePostRequest(BaseModel):
@@ -170,6 +172,7 @@ async def create_post(
         "content": body.content.strip(),
         "author_id": user["id"],
         "tags": body.tags,
+        "images": body.images or [],  # Store image URLs
         "status": "open",
         "best_answer_id": None,
         "active_collaborator_ids": [],
@@ -238,6 +241,7 @@ async def create_comment(
         "post_id": post_id,
         "author_id": user["id"],
         "content": body.content.strip(),
+        "images": body.images or [],  # Store image URLs
         "is_best_answer": False,
         "created_at": now,
         "updated_at": now,

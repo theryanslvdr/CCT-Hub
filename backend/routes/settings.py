@@ -37,6 +37,8 @@ class PlatformSettings(BaseModel):
     registration_enabled: bool = True
     require_heartbeat_verification: bool = True
     heartbeat_api_key: str = ""
+    publitio_api_key: str = ""
+    publitio_api_secret: str = ""
     emailit_api_key: str = ""
     emailit_from_email: str = ""
     cloudinary_cloud_name: str = ""

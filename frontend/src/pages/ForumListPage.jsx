@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import ForumImageUpload from '@/components/ForumImageUpload';
 import {
   MessageSquare, Plus, Search, Clock, CheckCircle2,
   Eye, MessageCircle, Loader2, ChevronLeft, ChevronRight,
-  Award, ThumbsUp, Trophy, Star
+  Award, ThumbsUp, Trophy, Star, ImageIcon
 } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -200,7 +201,7 @@ export default function ForumListPage() {
   const [stats, setStats] = useState(null);
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', tags: '' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', tags: '', images: [] });
 
   const pageSize = 20;
 
@@ -233,10 +234,11 @@ export default function ForumListPage() {
     setCreating(true);
     try {
       const tags = newPost.tags ? newPost.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-      const res = await forumAPI.createPost({ title: newPost.title, content: newPost.content, tags });
+      const images = newPost.images.map(img => img.url);
+      const res = await forumAPI.createPost({ title: newPost.title, content: newPost.content, tags, images });
       toast.success('Post created!');
       setNewPostOpen(false);
-      setNewPost({ title: '', content: '', tags: '' });
+      setNewPost({ title: '', content: '', tags: '', images: [] });
       navigate(`/forum/${res.data.id}`);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Failed to create post');
@@ -386,6 +388,20 @@ export default function ForumListPage() {
                 className="input-dark mt-1"
                 data-testid="new-post-tags"
               />
+            </div>
+            <div>
+              <Label className="text-zinc-300 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5" /> Attach Images (optional)
+              </Label>
+              <div className="mt-2">
+                <ForumImageUpload
+                  images={newPost.images}
+                  onChange={(imgs) => setNewPost(p => ({ ...p, images: imgs }))}
+                  folder="forum/posts"
+                  maxImages={4}
+                  disabled={creating}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>

@@ -1262,6 +1262,345 @@ async def admin_adjust_points(
     }
 
 
+# ─── ADMIN OVERVIEW / BIRD'S EYE VIEW ───
+
+@router.get("/admin/overview")
+async def admin_rewards_overview(user: dict = Depends(deps.require_admin)):
+    """Bird's eye view: summary cards for admin dashboard."""
+    db = deps.db
+    total_members = await db.rewards_stats.count_documents({})
+    
+    pipeline = [
+        {"$group": {
+            "_id": None,
+            "total_lifetime": {"$sum": "$lifetime_points"},
+            "total_spent": {"$sum": "$spent_points"},
+            "total_monthly": {"$sum": "$monthly_points"},
+        }}
+    ]
+    agg = await db.rewards_stats.aggregate(pipeline).to_list(1)
+    totals = agg[0] if agg else {}
+
+    total_lifetime = totals.get("total_lifetime", 0)
+    total_spent = totals.get("total_spent", 0)
+    avg_pts = int(total_lifetime / total_members) if total_members > 0 else 0
+    in_circulation = total_lifetime - total_spent
+
+    # Count admin adjustments
+    admin_actions = await db.rewards_point_logs.count_documents({
+        "source": {"$in": ["admin_adjustment_credit", "admin_adjustment_deduct"]}
+    })
+
+    # Count total badges awarded
+    total_badges = await db.rewards_user_badges.count_documents({})
+
+    # Count streak freezes
+    total_freezes = await db.streak_freezes.count_documents({})
+    used_freezes = await db.streak_freezes.count_documents({"status": "used"})
+
+    return {
+        "total_members": total_members,
+        "total_lifetime_points": total_lifetime,
+        "total_spent_points": total_spent,
+        "points_in_circulation": in_circulation,
+        "avg_points_per_member": avg_pts,
+        "total_monthly_points": totals.get("total_monthly", 0),
+        "admin_adjustments_count": admin_actions,
+        "total_badges_awarded": total_badges,
+        "total_streak_freezes": total_freezes,
+        "used_streak_freezes": used_freezes,
+    }
+
+
+@router.get("/admin/members")
+async def admin_list_members(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None),
+    sort_by: str = Query("lifetime_points"),
+    sort_dir: str = Query("desc"),
+    user: dict = Depends(deps.require_admin),
+):
+    """Paginated list of all members with their rewards data."""
+    db = deps.db
+
+    # Build user query
+    user_query = {"role": {"$nin": ["master_admin"]}}
+    if search:
+        user_query["$or"] = [
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+        ]
+
+    users = await db.users.find(user_query, {
+        "_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1, "created_at": 1,
+    }).to_list(5000)
+    user_map = {u["id"]: u for u in users}
+
+    # Get all rewards stats
+    stats_list = await db.rewards_stats.find({}, {"_id": 0}).to_list(5000)
+    stats_map = {s["user_id"]: s for s in stats_list}
+
+    # Get badge counts per user
+    badge_pipeline = [
+        {"$group": {"_id": "$user_id", "count": {"$sum": 1}}}
+    ]
+    badge_counts = await db.rewards_user_badges.aggregate(badge_pipeline).to_list(5000)
+    badge_map = {b["_id"]: b["count"] for b in badge_counts}
+
+    # Get streak freeze counts per user
+    freeze_pipeline = [
+        {"$group": {"_id": "$user_id", "total": {"$sum": 1}, "available": {"$sum": {"$cond": [{"$eq": ["$status", "available"]}, 1, 0]}}}}
+    ]
+    freeze_counts = await db.streak_freezes.aggregate(freeze_pipeline).to_list(5000)
+    freeze_map = {f["_id"]: f for f in freeze_counts}
+
+    # Merge
+    members = []
+    for uid, u in user_map.items():
+        s = stats_map.get(uid, {})
+        members.append({
+            "user_id": uid,
+            "name": u.get("full_name") or u.get("email", "Unknown"),
+            "email": u.get("email", ""),
+            "role": u.get("role", "member"),
+            "lifetime_points": s.get("lifetime_points", 0),
+            "spent_points": s.get("spent_points", 0),
+            "balance": s.get("lifetime_points", 0) - s.get("spent_points", 0),
+            "monthly_points": s.get("monthly_points", 0),
+            "level": s.get("level", "Newbie"),
+            "badges_count": badge_map.get(uid, 0),
+            "streak_freezes": freeze_map.get(uid, {}).get("available", 0),
+            "best_trade_streak": s.get("best_trade_streak", 0),
+            "best_habit_streak": s.get("best_habit_streak", 0),
+        })
+
+    # Sort
+    reverse = sort_dir == "desc"
+    members.sort(key=lambda x: x.get(sort_by, 0) or 0, reverse=reverse)
+
+    total = len(members)
+    start = (page - 1) * page_size
+    paginated = members[start:start + page_size]
+
+    return {"members": paginated, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/admin/audit-trail")
+async def admin_audit_trail(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    user: dict = Depends(deps.require_admin),
+):
+    """Audit trail of all admin point adjustments."""
+    db = deps.db
+    query = {"source": {"$in": ["admin_adjustment_credit", "admin_adjustment_deduct"]}}
+    total = await db.rewards_point_logs.count_documents(query)
+    logs = await db.rewards_point_logs.find(query, {"_id": 0}).sort(
+        "created_at", -1
+    ).skip((page - 1) * page_size).limit(page_size).to_list(page_size)
+
+    # Enrich with target user names
+    for log in logs:
+        target = await db.users.find_one({"id": log.get("user_id")}, {"_id": 0, "full_name": 1, "email": 1})
+        log["target_name"] = (target or {}).get("full_name") or (target or {}).get("email", "Unknown")
+
+    return {"logs": logs, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/admin/export-csv")
+async def admin_export_csv(user: dict = Depends(deps.require_admin)):
+    """Export all members rewards data as CSV."""
+    from fastapi.responses import StreamingResponse
+    import io, csv
+
+    db = deps.db
+    users = await db.users.find(
+        {"role": {"$nin": ["master_admin"]}},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1}
+    ).to_list(10000)
+    user_map = {u["id"]: u for u in users}
+
+    stats_list = await db.rewards_stats.find({}, {"_id": 0}).to_list(10000)
+    stats_map = {s["user_id"]: s for s in stats_list}
+
+    badge_pipeline = [{"$group": {"_id": "$user_id", "count": {"$sum": 1}}}]
+    badge_counts = await db.rewards_user_badges.aggregate(badge_pipeline).to_list(10000)
+    badge_map = {b["_id"]: b["count"] for b in badge_counts}
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Name", "Email", "Role", "Lifetime Points", "Spent Points", "Balance", "Level", "Badges", "Best Trade Streak", "Best Habit Streak"])
+
+    for uid, u in user_map.items():
+        s = stats_map.get(uid, {})
+        writer.writerow([
+            u.get("full_name", ""), u.get("email", ""), u.get("role", ""),
+            s.get("lifetime_points", 0), s.get("spent_points", 0),
+            s.get("lifetime_points", 0) - s.get("spent_points", 0),
+            s.get("level", "Newbie"), badge_map.get(uid, 0),
+            s.get("best_trade_streak", 0), s.get("best_habit_streak", 0),
+        ])
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=rewards_export.csv"},
+    )
+
+
+class ResetPointsRequest(BaseModel):
+    user_id: str
+    reason: str
+
+
+class AwardBadgeRequest(BaseModel):
+    user_id: str
+    badge_id: str
+
+
+class EditFreezeRequest(BaseModel):
+    user_id: str
+    freeze_type: str  # "trade" or "habit"
+    action: str  # "add" or "remove"
+    count: int = 1
+
+
+@router.post("/admin/reset-points")
+async def admin_reset_points(
+    req: ResetPointsRequest,
+    user: dict = Depends(deps.require_master_admin),
+):
+    """Reset a user's points to zero. Master Admin only."""
+    db = deps.db
+    target = await db.users.find_one({"id": req.user_id}, {"_id": 0, "id": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    stats = await db.rewards_stats.find_one({"user_id": req.user_id}, {"_id": 0})
+    old_points = (stats or {}).get("lifetime_points", 0)
+    old_spent = (stats or {}).get("spent_points", 0)
+
+    # Log the reset
+    log_entry = {
+        "id": str(uuid.uuid4()),
+        "user_id": req.user_id,
+        "points": -(old_points - old_spent),
+        "balance_after": 0,
+        "type": "admin_reset",
+        "source": "admin_adjustment_deduct",
+        "metadata": {
+            "admin_adjustment": True,
+            "adjusted_by": user["id"],
+            "adjusted_by_name": user.get("full_name", "Admin"),
+            "reason": req.reason,
+            "reset": True,
+            "old_lifetime": old_points,
+            "old_spent": old_spent,
+        },
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.rewards_point_logs.insert_one(log_entry)
+
+    # Reset stats
+    await db.rewards_stats.update_one(
+        {"user_id": req.user_id},
+        {"$set": {"lifetime_points": 0, "spent_points": 0, "monthly_points": 0, "level": "Newbie"}},
+    )
+
+    return {"success": True, "message": f"Reset {old_points} points for user"}
+
+
+@router.post("/admin/award-badge")
+async def admin_award_badge(
+    req: AwardBadgeRequest,
+    user: dict = Depends(deps.require_admin),
+):
+    """Manually award a badge to a user."""
+    db = deps.db
+    target = await db.users.find_one({"id": req.user_id}, {"_id": 0, "id": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    badge_def = await db.rewards_badge_definitions.find_one({"id": req.badge_id}, {"_id": 0})
+    if not badge_def:
+        raise HTTPException(status_code=404, detail="Badge not found")
+
+    existing = await db.rewards_user_badges.find_one(
+        {"user_id": req.user_id, "badge_id": req.badge_id}, {"_id": 0}
+    )
+    if existing:
+        raise HTTPException(status_code=400, detail="User already has this badge")
+
+    await db.rewards_user_badges.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": req.user_id,
+        "badge_id": req.badge_id,
+        "badge_name": badge_def.get("name", ""),
+        "awarded_by": user["id"],
+        "awarded_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return {"success": True, "message": f"Awarded badge '{badge_def.get('name')}' to user"}
+
+
+@router.post("/admin/revoke-badge")
+async def admin_revoke_badge(
+    req: AwardBadgeRequest,
+    user: dict = Depends(deps.require_admin),
+):
+    """Revoke a badge from a user."""
+    db = deps.db
+    result = await db.rewards_user_badges.delete_one(
+        {"user_id": req.user_id, "badge_id": req.badge_id}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Badge not found for user")
+
+    return {"success": True, "message": "Badge revoked"}
+
+
+@router.post("/admin/edit-streak-freezes")
+async def admin_edit_streak_freezes(
+    req: EditFreezeRequest,
+    user: dict = Depends(deps.require_admin),
+):
+    """Add or remove streak freezes for a user."""
+    db = deps.db
+    if req.freeze_type not in ("trade", "habit"):
+        raise HTTPException(status_code=400, detail="freeze_type must be 'trade' or 'habit'")
+    if req.action not in ("add", "remove"):
+        raise HTTPException(status_code=400, detail="action must be 'add' or 'remove'")
+
+    if req.action == "add":
+        docs = []
+        for _ in range(req.count):
+            docs.append({
+                "id": str(uuid.uuid4()),
+                "user_id": req.user_id,
+                "freeze_type": req.freeze_type,
+                "status": "available",
+                "source": "admin_grant",
+                "granted_by": user["id"],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            })
+        if docs:
+            await db.streak_freezes.insert_many(docs)
+        return {"success": True, "message": f"Added {req.count} {req.freeze_type} freeze(s)"}
+    else:
+        # Remove available freezes
+        for _ in range(req.count):
+            result = await db.streak_freezes.delete_one({
+                "user_id": req.user_id,
+                "freeze_type": req.freeze_type,
+                "status": "available",
+            })
+            if result.deleted_count == 0:
+                break
+        return {"success": True, "message": f"Removed {req.freeze_type} freeze(s)"}
+
+
 # ─── REWARDS STORE CROSS-SITE AUTH ───
 
 STORE_JWT_SECRET = os.environ.get("JWT_SECRET", os.environ.get("SECRET_KEY", ""))

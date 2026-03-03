@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { settingsAPI, adminAPI, rewardsAPI } from '@/lib/api';
+import { settingsAPI, adminAPI, rewardsAPI, publitioAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
   Plug, Eye, EyeOff, Mail, Cloud, Heart, Key, CheckCircle2,
   FileText, Zap, XCircle, Loader2, Code, Eye as EyePreview, ExternalLink, Link,
   LogIn, Plus, Trash2, GripVertical, Copyright, Wrench, Megaphone, AlertTriangle, Send,
-  TreePine, Calendar as CalendarIcon, TrendingUp, Shield, Database, Smartphone
+  TreePine, Calendar as CalendarIcon, TrendingUp, Shield, Database, Smartphone, ImageIcon
 } from 'lucide-react';
 import { CustomEmailTemplates } from '@/components/admin/CustomEmailTemplates';
 import { HabitManagerCard } from './settings/HabitManagerCard';
@@ -52,6 +52,8 @@ export const AdminSettingsPage = () => {
     cloudinary_api_key: '',
     cloudinary_api_secret: '',
     heartbeat_api_key: '',
+    publitio_api_key: '',
+    publitio_api_secret: '',
     // Custom Links
     custom_registration_link: '',
     // Footer
@@ -80,6 +82,7 @@ export const AdminSettingsPage = () => {
   const [testingEmailit, setTestingEmailit] = useState(false);
   const [testingCloudinary, setTestingCloudinary] = useState(false);
   const [testingHeartbeat, setTestingHeartbeat] = useState(false);
+  const [testingPublitio, setTestingPublitio] = useState(false);
   const [testResults, setTestResults] = useState({});
   
   // Visibility toggles for sensitive fields
@@ -87,7 +90,9 @@ export const AdminSettingsPage = () => {
     emailit: false,
     cloudinary_key: false,
     cloudinary_secret: false,
-    heartbeat: false
+    heartbeat: false,
+    publitio_key: false,
+    publitio_secret: false
   });
 
   useEffect(() => {
@@ -170,6 +175,24 @@ export const AdminSettingsPage = () => {
       toast.error('Failed to test connection');
     } finally {
       setTestingHeartbeat(false);
+    }
+  };
+
+  const handleTestPublitio = async () => {
+    setTestingPublitio(true);
+    try {
+      const res = await publitioAPI.testConnection();
+      setTestResults(prev => ({ ...prev, publitio: res.data }));
+      if (res.data.success) {
+        toast.success('Publitio connection successful!');
+      } else {
+        toast.error(res.data.message || 'Connection failed');
+      }
+    } catch (error) {
+      setTestResults(prev => ({ ...prev, publitio: { success: false, message: 'Connection failed' } }));
+      toast.error('Failed to test connection');
+    } finally {
+      setTestingPublitio(false);
     }
   };
 
@@ -1092,6 +1115,89 @@ export const AdminSettingsPage = () => {
                 <p className="text-xs text-zinc-500 mt-1">
                   Get your API key from <a href="https://heartbeat.chat" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">heartbeat.chat</a> dashboard
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Publitio */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-purple-400" /> Publitio
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleTestPublitio}
+                  disabled={testingPublitio}
+                  className={`btn-secondary ${testResults.publitio?.success ? 'border-emerald-500/30' : testResults.publitio?.success === false ? 'border-red-500/30' : ''}`}
+                >
+                  {testingPublitio ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testing...</>
+                  ) : testResults.publitio?.success ? (
+                    <><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-400" /> Connected</>
+                  ) : testResults.publitio?.success === false ? (
+                    <><XCircle className="w-4 h-4 mr-2 text-red-400" /> Failed</>
+                  ) : (
+                    <><Zap className="w-4 h-4 mr-2" /> Test Connection</>
+                  )}
+                </Button>
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Image hosting service for forum posts and comments (max 2MB)</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-zinc-300">API Key</Label>
+                  <div className="relative mt-1">
+                    <Input
+                      type={showKeys.publitio_key ? 'text' : 'password'}
+                      value={settings.publitio_api_key || ''}
+                      onChange={(e) => setSettings({ ...settings, publitio_api_key: e.target.value })}
+                      placeholder="xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="publitio-api-key"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('publitio_key')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.publitio_key ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-zinc-300">API Secret</Label>
+                  <div className="relative mt-1">
+                    <Input
+                      type={showKeys.publitio_secret ? 'text' : 'password'}
+                      value={settings.publitio_api_secret || ''}
+                      onChange={(e) => setSettings({ ...settings, publitio_api_secret: e.target.value })}
+                      placeholder="xxxxxxxxxxxx"
+                      className="input-dark pr-10"
+                      data-testid="publitio-api-secret"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyVisibility('publitio_secret')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    >
+                      {showKeys.publitio_secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                <p className="text-sm text-purple-300 font-medium mb-2">How to get Publitio API credentials:</p>
+                <ol className="text-xs text-zinc-400 space-y-1 list-decimal list-inside">
+                  <li>Go to <a href="https://publit.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">publit.io</a> and create a free account</li>
+                  <li>Navigate to Dashboard → Settings → API</li>
+                  <li>Copy your API Key and API Secret</li>
+                  <li>Paste them here and click "Save All Changes"</li>
+                </ol>
+                <p className="text-xs text-zinc-500 mt-2">Free tier includes 500MB storage and 2GB bandwidth/month</p>
               </div>
             </CardContent>
           </Card>

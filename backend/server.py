@@ -129,6 +129,7 @@ from routes.users import router as _users_router
 from routes.family import router as _family_router, admin_family_router as _admin_family_router
 from routes.rewards import router as _rewards_router
 from routes.forum import router as _forum_router
+from routes.publitio import router as _publitio_router
 from utils.calculations import _is_honorary
 
 # Role hierarchy (higher number = more permissions)
@@ -5994,7 +5995,7 @@ async def create_license_invite(data: LicenseInviteCreate, user: dict = Depends(
     await db.license_invites.insert_one(invite)
     
     # Generate registration URL
-    frontend_url = os.environ.get("FRONTEND_URL", "https://community-hub-549.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://admin-rewards-ctrl.preview.emergentagent.com")
     registration_url = f"{frontend_url}/register/license/{invite_code}"
     
     return {
@@ -6133,7 +6134,7 @@ Best regards,
 CrossCurrent Team"""
         }
     
-    frontend_url = os.environ.get("FRONTEND_URL", "https://community-hub-549.preview.emergentagent.com")
+    frontend_url = os.environ.get("FRONTEND_URL", "https://admin-rewards-ctrl.preview.emergentagent.com")
     registration_url = f"{frontend_url}/register/license/{invite['code']}"
     
     # Replace template variables
@@ -9702,6 +9703,7 @@ api_router.include_router(_family_router)
 api_router.include_router(_admin_family_router)
 api_router.include_router(_rewards_router)
 api_router.include_router(_forum_router)
+api_router.include_router(_publitio_router)
 
 app.include_router(api_router)
 

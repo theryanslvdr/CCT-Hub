@@ -155,6 +155,14 @@ export const rewardsAPI = {
   adminSyncAllUsers: () => api.post('/rewards/admin/sync-all-users'),
   adminSyncUser: (userId) => api.post(`/rewards/admin/sync-user/${userId}`),
   adminGetSyncStatus: () => api.get('/rewards/admin/sync-status'),
+  adminGetOverview: () => api.get('/rewards/admin/overview'),
+  adminListMembers: (params = {}) => api.get('/rewards/admin/members', { params }),
+  adminAuditTrail: (params = {}) => api.get('/rewards/admin/audit-trail', { params }),
+  adminExportCsv: () => api.get('/rewards/admin/export-csv', { responseType: 'blob' }),
+  adminResetPoints: (data) => api.post('/rewards/admin/reset-points', data),
+  adminAwardBadge: (data) => api.post('/rewards/admin/award-badge', data),
+  adminRevokeBadge: (data) => api.post('/rewards/admin/revoke-badge', data),
+  adminEditStreakFreezes: (data) => api.post('/rewards/admin/edit-streak-freezes', data),
   systemCheck: () => api.post('/rewards/system-check'),
   // Streak Freezes
   getStreakFreezes: () => api.get('/rewards/streak-freezes'),
@@ -180,6 +188,23 @@ export const forumAPI = {
   searchSimilar: (q) => api.get('/forum/search-similar', { params: { q } }),
   voteComment: (commentId, voteType) => api.post(`/forum/comments/${commentId}/vote`, { vote_type: voteType }),
   getVoters: (commentId) => api.get(`/forum/comments/${commentId}/voters`),
+};
+
+// Publitio Image Upload APIs
+export const publitioAPI = {
+  uploadImage: (file, folder = 'general', onProgress = null) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+    return api.post('/publitio/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress ? (e) => onProgress(Math.round((e.loaded * 100) / e.total)) : undefined,
+    });
+  },
+  testConnection: () => api.get('/publitio/test'),
+  listFolders: () => api.get('/publitio/folders'),
+  createFolder: (name, parentFolder = null) => api.post('/publitio/folder/create', null, { params: { name, parent_folder: parentFolder } }),
+  deleteFile: (fileId) => api.delete(`/publitio/file/${fileId}`),
 };
 
 // Trade Monitor APIs
