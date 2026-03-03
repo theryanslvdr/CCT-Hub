@@ -149,6 +149,24 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 ### Bug Fixes & Enhancements (Mar 3, 2026) - COMPLETE
 
 ### Streak Freeze Feature (Mar 3, 2026) - COMPLETE
+
+### Retroactive Badge Awards & Bug Fixes (Mar 3, 2026) - COMPLETE
+**Retroactive Badge System:**
+- `POST /api/rewards/retroactive-scan` — scans user's actual hub records (trades, streaks, deposits, referrals) and awards earned badges
+- `POST /api/rewards/retroactive-scan-all` — master admin endpoint to scan ALL users
+- `_compute_real_stats()` utility computes: lifetime_trades, distinct_trade_days, best_streak_days, current_streak_days, lifetime_deposit_usdt, qualified_referrals
+- Badge definitions expanded from 14 to 30: First Trade, Getting Started, Quarter Century, 50 Trades Club, Century Trader, Trading Veteran, Trading Legend, Streak Starter (3), Streak Master 7/14/30, Streak Champion (50), Streak Legend (100), Points Rookie (100), 500/1K/5K/10K milestones, First Referral, Referral Champion/Pro/Legend, First Deposit ($100), Deposit Hero ($500), High Roller ($1K), Whale ($5K), 10/30/50/100 Days Active
+- BadgesSection auto-runs retroactive scan on mount to award all earned badges
+- **Test Status:** 100% passed (iteration_135, 12/12 backend)
+
+**Daily Projection Fix (Dec trades not showing):**
+- Fixed `has_trade` in daily-balances: changed from `actual_profit is not None and actual_profit != 0` to `date_key in trades_by_date`
+- Zero-profit trades (break-even) now correctly show as having a trade
+
+**Trade History Streak Display:**
+- Streak indicator always visible in Trade History header (not gated by streak > 0)
+- Added "Day #" column to trade history table showing global trade day number for each trade
+- Backend `get_trade_history` returns `trade_day_number` per trade and `total_trade_days` count
 **Backend:**
 - `GET /api/rewards/streak-freezes` — returns user's freeze inventory, costs, available points, usage history
 - `POST /api/rewards/streak-freezes/purchase` — purchases streak freezes (trade=200pts, habit=150pts), validates balance, deducts points
