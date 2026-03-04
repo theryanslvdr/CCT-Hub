@@ -2200,6 +2200,100 @@ async def get_daily_balances(
     }
 
 
+@profit_router.get("/debug-transactions")
+async def debug_transactions(
+    user_id: Optional[str] = None,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Debug endpoint to see ALL raw transaction data for troubleshooting balance issues.
+    Admin only.
+    """
+    if user.get("role") not in ["admin", "basic_admin", "super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    target_user_id = user_id or user["id"]
+    
+    # Get ALL deposits
+    deposits = await db.deposits.find(
+        {"user_id": target_user_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(10000)
+    
+    # Get ALL withdrawals from withdrawals collection
+    withdrawals = await db.withdrawals.find(
+        {"user_id": target_user_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(10000)
+    
+    # Get ALL trades
+    trades = await db.trade_logs.find(
+        {"user_id": target_user_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(10000)
+    
+    # Get balance overrides
+    overrides = await db.balance_overrides.find(
+        {"user_id": target_user_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(100)
+    
+    # Calculate running totals
+    total_positive_deposits = sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0 and not d.get("is_withdrawal"))
+    total_negative_deposits = sum(abs(d.get("amount", 0)) for d in deposits if d.get("amount", 0) < 0 or d.get("is_withdrawal"))
+    total_withdrawals_collection = sum(w.get("amount", 0) for w in withdrawals if w.get("status") != "rejected")
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    total_commission = sum(t.get("commission", 0) for t in trades)
+    
+    # Get latest override
+    latest_override = overrides[-1] if overrides else None
+    override_amount = latest_override.get("adjustment_amount", 0) if latest_override else 0
+    
+    # Calculate expected account value
+    net_deposits = total_positive_deposits - total_negative_deposits - total_withdrawals_collection
+    expected_account_value = net_deposits + total_profit + total_commission + override_amount
+    
+    return {
+        "user_id": target_user_id,
+        "summary": {
+            "total_positive_deposits": round(total_positive_deposits, 2),
+            "total_negative_deposits_legacy": round(total_negative_deposits, 2),
+            "total_withdrawals_collection": round(total_withdrawals_collection, 2),
+            "total_profit": round(total_profit, 2),
+            "total_commission": round(total_commission, 2),
+            "override_amount": round(override_amount, 2),
+            "expected_account_value": round(expected_account_value, 2),
+        },
+        "deposits": [
+            {
+                "date": d.get("created_at", "")[:10],
+                "amount": d.get("amount"),
+                "is_withdrawal": d.get("is_withdrawal", False),
+                "type": d.get("type"),
+            }
+            for d in deposits
+        ],
+        "withdrawals_collection": [
+            {
+                "date": w.get("created_at", "")[:10],
+                "amount": w.get("amount"),
+                "status": w.get("status"),
+            }
+            for w in withdrawals
+        ],
+        "trades": [
+            {
+                "date": t.get("created_at", "")[:10],
+                "actual_profit": t.get("actual_profit"),
+                "commission": t.get("commission"),
+                "lot_size": t.get("lot_size"),
+            }
+            for t in trades
+        ],
+        "overrides": overrides,
+    }
+
+
 # ==================== TRADE MONITOR ROUTES ====================
 
 @trade_router.post("/log", response_model=TradeLogResponse)

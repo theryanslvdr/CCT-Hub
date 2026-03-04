@@ -580,7 +580,7 @@ export const AdminSettingsPage = () => {
               <div>
                 <Label className="text-zinc-300">Site Title (Browser Tab)</Label>
                 <Input
-                  value={settings.site_title}
+                  value={settings.site_title || ''}
                   onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
                   className="input-dark mt-1"
                   placeholder="CrossCurrent Finance Center"
@@ -591,7 +591,7 @@ export const AdminSettingsPage = () => {
               <div>
                 <Label className="text-zinc-300">Site Description</Label>
                 <Input
-                  value={settings.site_description}
+                  value={settings.site_description || ''}
                   onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
                   className="input-dark mt-1"
                   data-testid="site-description-input"
@@ -601,7 +601,7 @@ export const AdminSettingsPage = () => {
               <div>
                 <Label className="text-zinc-300">OG Image URL (Social Sharing)</Label>
                 <Input
-                  value={settings.og_image_url}
+                  value={settings.og_image_url || ''}
                   onChange={(e) => setSettings({ ...settings, og_image_url: e.target.value })}
                   placeholder="https://example.com/og-image.png"
                   className="input-dark mt-1"
@@ -870,12 +870,12 @@ export const AdminSettingsPage = () => {
                   <div className="flex items-center gap-3 mt-1">
                     <input
                       type="color"
-                      value={settings.primary_color}
+                      value={settings.primary_color || '#3B82F6'}
                       onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
                       className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
                     />
                     <Input
-                      value={settings.primary_color}
+                      value={settings.primary_color || ''}
                       onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
                       className="input-dark flex-1"
                       data-testid="primary-color-input"
@@ -887,12 +887,12 @@ export const AdminSettingsPage = () => {
                   <div className="flex items-center gap-3 mt-1">
                     <input
                       type="color"
-                      value={settings.accent_color}
+                      value={settings.accent_color || '#10B981'}
                       onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
                       className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
                     />
                     <Input
-                      value={settings.accent_color}
+                      value={settings.accent_color || ''}
                       onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
                       className="input-dark flex-1"
                       data-testid="accent-color-input"
@@ -1386,7 +1386,7 @@ export const AdminSettingsPage = () => {
               <div>
                 <Label className="text-zinc-300">Maintenance Message</Label>
                 <Textarea
-                  value={settings.maintenance_message}
+                  value={settings.maintenance_message || ''}
                   onChange={(e) => setSettings({ ...settings, maintenance_message: e.target.value })}
                   placeholder="Our services are undergoing maintenance, and will be back soon!"
                   className="input-dark mt-1 min-h-[100px]"
