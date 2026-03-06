@@ -437,6 +437,19 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 **Test Status:** 100% passed (iteration_140, 11/11 backend + all frontend features verified)
 
+### Balance Audit Trail + Forum Enhancements + Transaction Corrections + Notifications (Mar 6, 2026) - COMPLETE
+**New Features:**
+1. **Balance Audit Trail** — Visual timeline on Profit Tracker showing deposits, withdrawals, trades, commissions with running balance
+2. **Forum Edit/Delete** — Authors edit within 24hrs, admins anytime. Posts and comments. "(edited)" badge shown
+3. **Forum Pin Posts** — Admin can pin/unpin posts. Pinned posts appear first
+4. **Forum Categories** — Filter by General, Trading, Technical, Announcements
+5. **Forum @Mentions** — Type @name in comments to search/mention users with notification
+6. **Transaction Correction (Admin)** — Correct amount or delete any transaction with audit trail
+7. **Transaction Self-Edit (Member)** — Edit last 2 transactions within 48hrs
+8. **Enhanced Notifications** — Forum replies, best answers, mentions sent via WebSocket in real-time
+9. **Simulate Actions Restricted** — VSD, Simulate Error, Export Debug Data visible to Master Admin only
+**Testing:** 13/13 backend tests passed, all frontend features verified
+
 ### Critical Balance Calculation Bug Fix (Mar 6, 2026) - COMPLETE
 **Root Cause:** The `deposits` collection stores both real deposits AND `type=profit` entries (duplicates of trade_logs). The `/api/profit/daily-balances` endpoint was counting profit-type deposits as regular deposits AND also counting them from trade_logs → double-counting $8,000.85.
 **Fix Applied:**
