@@ -9,7 +9,7 @@ import asyncio
 import os
 from datetime import datetime, timezone, timedelta, date
 
-API_URL = os.environ.get("API_URL", "https://ledger-calc.preview.emergentagent.com")
+API_URL = os.environ.get("API_URL", "https://profit-tracker-v2.preview.emergentagent.com")
 ADMIN_EMAIL = "iam@ryansalvador.com"
 ADMIN_PASSWORD = "admin123"
 LICENSEE_EMAIL = "rizza.miles@gmail.com"

@@ -1,46 +1,48 @@
-"""Backend Routes Package
+"""Backend route modules."""
 
-This package contains modular route definitions for the FastAPI application.
-Each module handles a specific domain of the API.
+# Core routes (extracted from server.py)
+from routes.auth_routes import router as auth_router
+from routes.profit_routes import router as profit_router
+from routes.trade_routes import router as trade_router
+from routes.admin_routes import router as admin_router
+from routes.general_routes import router as general_router
 
-Structure:
-- auth.py: Authentication routes (register, login, password management)
-- admin.py: Admin management routes (members, licenses, analytics)
-- trade.py: Trading routes (signals, trade logs)
-- profit.py: Financial routes (deposits, withdrawals, debts, goals)
-- settings.py: Platform settings routes
-
-Migration Status:
-- Routes are currently defined in server.py
-- This package shows the target structure for modular routes
-- To complete migration:
-  1. Create a database module (db.py) with connection and collections
-  2. Move helper functions to utils/
-  3. Implement routes in each module
-  4. Update server.py to import and include routers
-
-Example usage in server.py:
-```python
-from routes import auth, admin, trade, profit, settings
-
-app.include_router(auth.router, prefix="/api")
-app.include_router(admin.router, prefix="/api")
-app.include_router(trade.router, prefix="/api")
-app.include_router(profit.router, prefix="/api")
-app.include_router(settings.router, prefix="/api")
-```
-"""
-
-from .auth import router as auth_router
-from .admin import router as admin_router
-from .trade import router as trade_router
-from .profit import router as profit_router
-from .settings import router as settings_router
+# Previously extracted routes
+from routes.currency import router as currency_router
+from routes.debt import router as debt_router
+from routes.goals import router as goals_router
+from routes.api_center import router as api_center_router
+from routes.bve import router as bve_router
+from routes.settings import router as settings_router
+from routes.habits import router as habits_router
+from routes.affiliate import router as affiliate_router, admin_affiliate_router
+from routes.activity_feed import admin_activity_router
+from routes.users import router as users_router
+from routes.family import router as family_router, admin_family_router
+from routes.rewards import router as rewards_router
+from routes.forum import router as forum_router
+from routes.publitio import router as publitio_router
 
 __all__ = [
     "auth_router",
-    "admin_router", 
+    "profit_router", 
     "trade_router",
-    "profit_router",
-    "settings_router"
+    "admin_router",
+    "general_router",
+    "currency_router",
+    "debt_router",
+    "goals_router",
+    "api_center_router",
+    "bve_router",
+    "settings_router",
+    "habits_router",
+    "affiliate_router",
+    "admin_affiliate_router",
+    "admin_activity_router",
+    "users_router",
+    "family_router",
+    "admin_family_router",
+    "rewards_router",
+    "forum_router",
+    "publitio_router",
 ]
