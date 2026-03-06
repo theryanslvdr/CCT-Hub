@@ -1067,7 +1067,7 @@ export const ProfitTrackerPage = () => {
           total_actual_profit: stats.total_actual_profit || 0,
           current_lot_size: memberRes.data.user?.lot_size || 0.01
         });
-        setDeposits(memberDepositsRes.data || memberRes.data.recent_deposits || []);
+        setDeposits((memberDepositsRes.data || memberRes.data.recent_deposits || []).filter(d => d.type !== 'profit'));
         setWithdrawals(memberWithdrawalsRes.data || []);
         
         // For licensees, use the projections from the dedicated endpoint
@@ -1130,8 +1130,10 @@ export const ProfitTrackerPage = () => {
       setSummary(summaryRes.data);
       
       // Separate deposits and withdrawals
+      // CRITICAL FIX: Exclude type=profit entries to prevent double-counting
+      // (profits are already tracked in trade_logs)
       const allDeposits = depositsRes.data || [];
-      const onlyDeposits = allDeposits.filter(d => d.amount >= 0);
+      const onlyDeposits = allDeposits.filter(d => d.amount >= 0 && d.type !== 'profit');
       setDeposits(onlyDeposits);
       
       // Get withdrawals from dedicated endpoint or filter

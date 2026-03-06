@@ -2072,14 +2072,20 @@ async def get_daily_balances(
     for d in all_deposits:
         amount = d.get("amount", 0)
         date_key = d.get("created_at", "")[:10]
+        dep_type = d.get("type", "")
         if not date_key:
             continue
         
+        # CRITICAL FIX: Skip type=profit entries - these are duplicates of trade_logs
+        # and would cause double-counting if included as deposits
+        if dep_type == "profit":
+            continue
+        
         if amount > 0 and not d.get("is_withdrawal"):
-            # Regular deposit
+            # Regular deposit (initial, deposit, etc.)
             deposits_by_date[date_key] = deposits_by_date.get(date_key, 0) + amount
         elif amount < 0 or d.get("is_withdrawal"):
-            # Legacy withdrawal stored as negative deposit
+            # Withdrawal stored as negative deposit
             withdrawals_by_date[date_key] = withdrawals_by_date.get(date_key, 0) + abs(amount)
     
     # Process withdrawals from withdrawals collection
@@ -2239,7 +2245,9 @@ async def debug_transactions(
     ).sort("created_at", 1).to_list(100)
     
     # Calculate running totals
-    total_positive_deposits = sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0 and not d.get("is_withdrawal"))
+    # CRITICAL: Exclude type=profit entries from deposit totals to avoid double-counting
+    total_positive_deposits = sum(d.get("amount", 0) for d in deposits if d.get("amount", 0) > 0 and not d.get("is_withdrawal") and d.get("type") != "profit")
+    total_profit_deposits = sum(d.get("amount", 0) for d in deposits if d.get("type") == "profit")
     total_negative_deposits = sum(abs(d.get("amount", 0)) for d in deposits if d.get("amount", 0) < 0 or d.get("is_withdrawal"))
     total_withdrawals_collection = sum(w.get("amount", 0) for w in withdrawals if w.get("status") != "rejected")
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
@@ -2257,6 +2265,7 @@ async def debug_transactions(
         "user_id": target_user_id,
         "summary": {
             "total_positive_deposits": round(total_positive_deposits, 2),
+            "total_profit_deposits_excluded": round(total_profit_deposits, 2),
             "total_negative_deposits_legacy": round(total_negative_deposits, 2),
             "total_withdrawals_collection": round(total_withdrawals_collection, 2),
             "total_profit": round(total_profit, 2),

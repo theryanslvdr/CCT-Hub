@@ -1,0 +1,65 @@
+{
+  "summary": "Iteration 141: Balance Calculation Double-Counting Bug Fix - VERIFIED. The critical bug where type='profit' entries in deposits collection caused ~$8,000 inflation has been fixed. Account value now correctly shows $33,664.09 instead of the buggy $41,664.94.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_141_balance_fix.py",
+    "/app/test_reports/pytest/pytest_iteration_141.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fix correctly excludes type='profit' entries from deposits in /api/profit/daily-balances (line 2079-2082)",
+    "Fix correctly shows total_profit_deposits_excluded in /api/profit/debug-transactions (line 2248-2250)",
+    "Frontend ProfitTrackerPage.jsx correctly filters type='profit' from onlyDeposits (line 1134-1136)",
+    "Frontend correctly filters type='profit' in simulated view deposits (line 1070)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_141_balance_fix.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "admin_email": "iam@ryansalvador.com",
+    "admin_password": "admin123"
+  },
+  "seed_data_creation": "No new seed data needed - tested with existing production data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Balance calculation bug fix verified. The deposits collection contains type='profit' entries that were previously double-counted. Backend now excludes them via d.get('type') != 'profit' checks. Expected values: Account Value = $33,664.09, Total Profit Deposits Excluded = $8,000.85. February 2026 has $3,000 withdrawal on Feb 18 correctly reflected in Feb 19 balance.",
+  "verified_values": {
+    "account_value_correct": "$33,664.09",
+    "account_value_buggy": "$41,664.94 (was before fix)",
+    "double_counted_amount": "$8,000.85",
+    "total_deposits": "$26,817.67",
+    "total_profit": "$23,114.26",
+    "february_withdrawal": "$3,000 on Feb 18 correctly affects Feb 19 balance"
+  },
+  "api_endpoints_tested": [
+    "POST /api/auth/login - 200 OK (access_token returned)",
+    "GET /api/profit/daily-balances - 200 OK (correct balance_before values)",
+    "GET /api/profit/summary - 200 OK (account_value = $33,664.09)",
+    "GET /api/profit/debug-transactions - 200 OK (shows total_profit_deposits_excluded)"
+  ],
+  "ui_elements_verified": [
+    "Account Value card: $33,664.09",
+    "Total Profit card: +$23,114.26",
+    "LOT Size card: 34.35",
+    "Monthly Table > History section shows correct trade data",
+    "Daily Projection modal shows Balance Before column with correct values"
+  ],
+  "rca_of_the_issue": {
+    "root_cause": "The deposits collection stores both real deposits AND type='profit' entries (duplicates of trade_logs). The backend /api/profit/daily-balances endpoint was counting profit-type deposits as regular deposits AND also counting them from trade_logs, causing double-counting.",
+    "impact": "Balance inflated by ~$8,000.85 (difference between $41,664.94 and $33,664.09)",
+    "fix_applied": "Added d.get('type') != 'profit' filter in backend server.py (lines 2079-2082, 2248-2250) and frontend ProfitTrackerPage.jsx (lines 1070, 1134-1136)",
+    "verification": "All 9 backend tests pass. Frontend displays correct Account Value of $33,664.09. Debug endpoint shows $8,000.85 in total_profit_deposits_excluded field."
+  }
+}
