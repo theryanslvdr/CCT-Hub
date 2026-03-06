@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form, WebSocket, WebSocketDisconnect, Body, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form, WebSocket, WebSocketDisconnect, Body, Request, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -548,6 +548,30 @@ async def create_member_notification(notification_type: str, title: str, message
         await websocket_manager.broadcast_to_all(notification)
     except Exception as e:
         logger.error(f"Failed to broadcast member notification: {e}")
+    
+    return notification
+
+
+async def create_user_notification(user_id: str, notification_type: str, title: str, message: str, metadata: dict = None):
+    """Create a notification for a specific user and send via WebSocket"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "type": notification_type,
+        "title": title,
+        "message": message,
+        "user_id": user_id,
+        "metadata": metadata or {},
+        "is_read": False,
+        "visibility": "user",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.user_notifications.insert_one(notification)
+    
+    # Send to specific user via WebSocket
+    try:
+        await websocket_manager.send_to_user(user_id, notification)
+    except Exception as e:
+        logger.error(f"Failed to send user notification to {user_id}: {e}")
     
     return notification
 
@@ -5324,6 +5348,221 @@ async def get_transaction_stats(user: dict = Depends(require_admin)):
         "today_withdrawals": round(today_withdrawals, 2)
     }
 
+
+# ==================== DEPOSIT/WITHDRAWAL CORRECTION ====================
+
+@admin_router.get("/members/{user_id}/recent-transactions")
+async def get_recent_transactions(
+    user_id: str,
+    limit: int = Query(5, ge=1, le=20),
+    admin: dict = Depends(require_admin),
+):
+    """Get a member's most recent deposits/withdrawals for correction purposes."""
+    if admin["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    txns = await db.deposits.find(
+        {"user_id": user_id, "type": {"$ne": "profit"}},
+        {"_id": 0},
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {"transactions": txns}
+
+
+@admin_router.put("/transactions/{tx_id}/correct")
+async def correct_transaction(
+    tx_id: str,
+    body: dict = Body(...),
+    admin: dict = Depends(require_admin),
+):
+    """Admin corrects a deposit/withdrawal amount. Preserves audit trail."""
+    if admin["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    new_amount = body.get("new_amount")
+    reason = body.get("reason", "Admin correction")
+    
+    if new_amount is None:
+        raise HTTPException(status_code=400, detail="new_amount is required")
+    
+    tx = await db.deposits.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    old_amount = tx.get("amount", 0)
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Record the correction in the transaction itself
+    correction_record = {
+        "old_amount": old_amount,
+        "new_amount": new_amount,
+        "reason": reason,
+        "corrected_by": admin["id"],
+        "corrected_by_name": admin.get("full_name", "Admin"),
+        "corrected_at": now,
+    }
+    
+    # Update the transaction amount and mark as corrected
+    await db.deposits.update_one(
+        {"id": tx_id},
+        {
+            "$set": {
+                "amount": new_amount,
+                "is_corrected": True,
+                "updated_at": now,
+            },
+            "$push": {"corrections": correction_record},
+        },
+    )
+    
+    # Log to admin audit
+    await db.admin_audit_log.insert_one({
+        "_id": str(uuid.uuid4()),
+        "action": "transaction_correction",
+        "tx_id": tx_id,
+        "user_id": tx.get("user_id"),
+        "old_amount": old_amount,
+        "new_amount": new_amount,
+        "reason": reason,
+        "admin_id": admin["id"],
+        "admin_name": admin.get("full_name", "Admin"),
+        "created_at": now,
+    })
+    
+    return {
+        "message": "Transaction corrected",
+        "tx_id": tx_id,
+        "old_amount": old_amount,
+        "new_amount": new_amount,
+        "reason": reason,
+    }
+
+
+@admin_router.delete("/transactions/{tx_id}")
+async def delete_transaction(
+    tx_id: str,
+    admin: dict = Depends(require_admin),
+):
+    """Admin deletes a transaction. Stores in audit log."""
+    if admin["role"] not in ["super_admin", "master_admin"]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    tx = await db.deposits.find_one({"id": tx_id}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Don't allow deleting type=profit entries
+    if tx.get("type") == "profit":
+        raise HTTPException(status_code=400, detail="Cannot delete system-generated profit entries")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Log to audit before deletion
+    await db.admin_audit_log.insert_one({
+        "_id": str(uuid.uuid4()),
+        "action": "transaction_deletion",
+        "tx_id": tx_id,
+        "user_id": tx.get("user_id"),
+        "deleted_transaction": tx,
+        "admin_id": admin["id"],
+        "admin_name": admin.get("full_name", "Admin"),
+        "created_at": now,
+    })
+    
+    await db.deposits.delete_one({"id": tx_id})
+    
+    return {"message": "Transaction deleted", "tx_id": tx_id}
+
+
+# ─── Member self-edit last 2 transactions ───
+
+@profit_router.get("/my-recent-transactions")
+async def get_my_recent_transactions(user: dict = Depends(get_current_user)):
+    """Get user's last 2 editable deposit/withdrawal simulations."""
+    txns = await db.deposits.find(
+        {
+            "user_id": user["id"],
+            "type": {"$nin": ["profit", "initial"]},
+        },
+        {"_id": 0},
+    ).sort("created_at", -1).limit(2).to_list(2)
+    
+    # Mark which ones are editable (within 48hrs and not corrected by admin)
+    now = datetime.now(timezone.utc)
+    for tx in txns:
+        created = datetime.fromisoformat(tx["created_at"].replace("Z", "+00:00"))
+        elapsed = (now - created).total_seconds()
+        tx["editable"] = elapsed < 172800 and not tx.get("is_corrected")  # 48 hours
+    
+    return {"transactions": txns}
+
+
+@profit_router.put("/my-transactions/{tx_id}")
+async def edit_my_transaction(
+    tx_id: str,
+    body: dict = Body(...),
+    user: dict = Depends(get_current_user),
+):
+    """Member edits their own recent transaction (last 2, within 48hrs)."""
+    new_amount = body.get("new_amount")
+    reason = body.get("reason", "Self correction")
+    
+    if new_amount is None:
+        raise HTTPException(status_code=400, detail="new_amount is required")
+    
+    tx = await db.deposits.find_one({"id": tx_id, "user_id": user["id"]}, {"_id": 0})
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    if tx.get("type") in ["profit", "initial"]:
+        raise HTTPException(status_code=400, detail="Cannot edit this type of transaction")
+    
+    if tx.get("is_corrected"):
+        raise HTTPException(status_code=400, detail="This transaction was already corrected by admin")
+    
+    # Check 48hr window
+    created = datetime.fromisoformat(tx["created_at"].replace("Z", "+00:00"))
+    elapsed = (datetime.now(timezone.utc) - created).total_seconds()
+    if elapsed > 172800:
+        raise HTTPException(status_code=403, detail="Edit window expired (48 hours)")
+    
+    # Verify it's one of the last 2 non-profit transactions
+    recent = await db.deposits.find(
+        {"user_id": user["id"], "type": {"$nin": ["profit", "initial"]}},
+        {"_id": 0, "id": 1},
+    ).sort("created_at", -1).limit(2).to_list(2)
+    recent_ids = {r["id"] for r in recent}
+    if tx_id not in recent_ids:
+        raise HTTPException(status_code=403, detail="Can only edit your last 2 transactions")
+    
+    old_amount = tx.get("amount", 0)
+    now = datetime.now(timezone.utc).isoformat()
+    
+    correction_record = {
+        "old_amount": old_amount,
+        "new_amount": new_amount,
+        "reason": reason,
+        "corrected_by": user["id"],
+        "corrected_by_name": user.get("full_name", "Member"),
+        "corrected_at": now,
+        "self_edit": True,
+    }
+    
+    await db.deposits.update_one(
+        {"id": tx_id},
+        {
+            "$set": {"amount": new_amount, "updated_at": now},
+            "$push": {"corrections": correction_record},
+        },
+    )
+    
+    return {
+        "message": "Transaction updated",
+        "tx_id": tx_id,
+        "old_amount": old_amount,
+        "new_amount": new_amount,
+    }
+
 # ==================== LICENSE MANAGEMENT ====================
 def get_us_trading_holidays(year: int) -> set:
     """Get US stock market holidays for a given year"""
@@ -8769,7 +9008,7 @@ async def get_notifications(
     """Get notifications for the current user (personal + community)"""
     is_admin = user.get("role") in ["basic_admin", "admin", "super_admin", "master_admin"]
     
-    # Get personal notifications (targeted to this user)
+    # Get personal notifications (targeted to this user from WebSocket service)
     personal_query = {"recipient_id": user["id"]}
     if unread_only:
         personal_query["read"] = False
@@ -8778,6 +9017,12 @@ async def get_notifications(
         personal_query,
         {"_id": 0}
     ).sort("timestamp", -1).limit(limit // 2).to_list(limit // 2)
+    
+    # Get user-specific notifications (from create_user_notification)
+    user_notifs = await db.user_notifications.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit // 2).to_list(limit // 2)
     
     # Get community/member notifications (visible to all)
     member_notifications = await db.member_notifications.find(
@@ -8801,6 +9046,10 @@ async def get_notifications(
         n["created_at"] = n.get("timestamp", n.get("created_at"))
         all_notifications.append(n)
     
+    for n in user_notifs:
+        n["source"] = "personal"
+        all_notifications.append(n)
+    
     for n in member_notifications:
         n["source"] = "community"
         all_notifications.append(n)
@@ -8819,13 +9068,18 @@ async def get_notifications(
         "read": False
     })
     
+    user_notif_unread = await db.user_notifications.count_documents({
+        "user_id": user["id"],
+        "is_read": False
+    })
+    
     admin_unread = 0
     if is_admin:
         admin_unread = await db.admin_notifications.count_documents({"is_read": False})
     
     return {
         "notifications": all_notifications,
-        "unread_count": personal_unread + admin_unread,
+        "unread_count": personal_unread + user_notif_unread + admin_unread,
         "is_admin": is_admin
     }
 

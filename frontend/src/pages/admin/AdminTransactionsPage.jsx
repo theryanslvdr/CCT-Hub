@@ -3,12 +3,16 @@ import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { formatNumber } from '@/lib/utils';
 import { 
   ArrowDownToLine, ArrowUpFromLine, DollarSign, Users, 
-  ChevronLeft, ChevronRight, TrendingUp, TrendingDown, RefreshCw
+  ChevronLeft, ChevronRight, TrendingUp, TrendingDown, RefreshCw,
+  Edit3, Trash2, AlertTriangle, CheckCircle2
 } from 'lucide-react';
 
 export const AdminTransactionsPage = () => {
@@ -17,6 +21,12 @@ export const AdminTransactionsPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('all');
+  
+  // Correction dialog state
+  const [correctDialogOpen, setCorrectDialogOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
+  const [correctionAmount, setCorrectionAmount] = useState('');
+  const [correctionReason, setCorrectionReason] = useState('');
   
   // Pagination
   const [page, setPage] = useState(1);
@@ -50,6 +60,44 @@ export const AdminTransactionsPage = () => {
   const handleRefresh = () => {
     loadData();
     toast.success('Transactions refreshed');
+  };
+
+  const openCorrection = (tx) => {
+    setSelectedTx(tx);
+    setCorrectionAmount(String(Math.abs(tx.amount)));
+    setCorrectionReason('');
+    setCorrectDialogOpen(true);
+  };
+
+  const handleCorrect = async () => {
+    if (!selectedTx || !correctionAmount) return;
+    try {
+      let newAmount = parseFloat(correctionAmount);
+      // If withdrawal, store as negative
+      if (selectedTx.type === 'withdrawal' || selectedTx.is_withdrawal) {
+        newAmount = -Math.abs(newAmount);
+      }
+      await adminAPI.correctTransaction(selectedTx.id, {
+        new_amount: newAmount,
+        reason: correctionReason || 'Admin correction',
+      });
+      toast.success('Transaction corrected successfully');
+      setCorrectDialogOpen(false);
+      loadData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to correct transaction');
+    }
+  };
+
+  const handleDeleteTx = async (tx) => {
+    if (!window.confirm(`Delete this ${tx.type} of $${formatNumber(Math.abs(tx.amount), 2)} by ${tx.user_name}? This action is logged.`)) return;
+    try {
+      await adminAPI.deleteTransaction(tx.id);
+      toast.success('Transaction deleted');
+      loadData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to delete transaction');
+    }
   };
 
   // Check access
@@ -237,6 +285,7 @@ export const AdminTransactionsPage = () => {
                       <th>Amount</th>
                       <th>Product/Notes</th>
                       <th>Date</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -282,6 +331,31 @@ export const AdminTransactionsPage = () => {
                           <span className="text-zinc-400 text-sm font-mono">
                             {formatDate(tx.created_at)}
                           </span>
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-1">
+                            {tx.is_corrected && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-1" title="This transaction was corrected">Corrected</span>
+                            )}
+                            <Button
+                              size="sm" variant="ghost"
+                              onClick={() => openCorrection(tx)}
+                              className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0"
+                              title="Correct amount"
+                              data-testid={`correct-tx-${tx.id}`}
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              size="sm" variant="ghost"
+                              onClick={() => handleDeleteTx(tx)}
+                              className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0"
+                              title="Delete transaction"
+                              data-testid={`delete-tx-${tx.id}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -330,6 +404,54 @@ export const AdminTransactionsPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Correction Dialog */}
+      <Dialog open={correctDialogOpen} onOpenChange={setCorrectDialogOpen}>
+        <DialogContent className="dialog-content max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" /> Correct Transaction
+            </DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Update the amount for this {selectedTx?.type || 'transaction'}. Original amount: ${formatNumber(Math.abs(selectedTx?.amount || 0), 2)}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <p className="text-xs text-zinc-500 mb-1">Member: <span className="text-zinc-300">{selectedTx?.user_name}</span></p>
+              <p className="text-xs text-zinc-500 mb-3">Date: <span className="text-zinc-300">{formatDate(selectedTx?.created_at)}</span></p>
+            </div>
+            <div>
+              <label className="text-sm text-zinc-300 block mb-1">New Amount ($)</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={correctionAmount}
+                onChange={e => setCorrectionAmount(e.target.value)}
+                className="input-dark font-mono"
+                data-testid="correction-amount-input"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-zinc-300 block mb-1">Reason for Correction</label>
+              <Textarea
+                value={correctionReason}
+                onChange={e => setCorrectionReason(e.target.value)}
+                placeholder="e.g., Member entered wrong amount, typo correction..."
+                rows={2}
+                className="input-dark resize-none"
+                data-testid="correction-reason-input"
+              />
+            </div>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="outline" onClick={() => setCorrectDialogOpen(false)} className="btn-secondary">Cancel</Button>
+              <Button onClick={handleCorrect} className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="confirm-correction-btn">
+                <CheckCircle2 className="w-4 h-4" /> Apply Correction
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

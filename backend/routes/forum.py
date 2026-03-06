@@ -8,10 +8,14 @@ from pydantic import BaseModel
 import deps
 
 try:
-    from services.websocket_service import broadcast_forum_event
+    from services.websocket_service import broadcast_forum_event, manager as ws_manager, create_notification, NotificationType
 except ImportError:
     async def broadcast_forum_event(*args, **kwargs):
         pass
+    ws_manager = None
+    NotificationType = None
+    def create_notification(*args, **kwargs):
+        return {}
 
 router = APIRouter(prefix="/forum", tags=["Forum"])
 
@@ -22,7 +26,8 @@ class CreatePostRequest(BaseModel):
     title: str
     content: str
     tags: List[str] = []
-    images: List[str] = []  # List of image URLs from Publitio
+    images: List[str] = []
+    category: str = "general"  # trading, technical, general, announcements
 
 
 class CreateCommentRequest(BaseModel):
@@ -37,6 +42,21 @@ class ClosePostRequest(BaseModel):
 
 class VoteRequest(BaseModel):
     vote_type: str  # "up" or "down"
+
+
+class EditPostRequest(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    tags: Optional[List[str]] = None
+    category: Optional[str] = None
+
+
+class EditCommentRequest(BaseModel):
+    content: str
+
+
+class PinPostRequest(BaseModel):
+    pinned: bool
 
 
 # ─── Helpers ───
@@ -122,6 +142,7 @@ async def _award_forum_points(user_id: str, points: int, source: str, metadata: 
 async def list_posts(
     status: Optional[str] = Query(None, description="Filter: open, closed"),
     tag: Optional[str] = Query(None),
+    category: Optional[str] = Query(None, description="Filter: trading, technical, general, announcements"),
     search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -134,6 +155,8 @@ async def list_posts(
         query["status"] = status
     if tag:
         query["tags"] = tag
+    if category:
+        query["category"] = category
     if search:
         query["$or"] = [
             {"title": {"$regex": search, "$options": "i"}},
@@ -141,9 +164,10 @@ async def list_posts(
         ]
 
     total = await db.forum_posts.count_documents(query)
+    # Sort: pinned posts first, then by created_at descending
     cursor = (
         db.forum_posts.find(query, {"_id": 0})
-        .sort("created_at", -1)
+        .sort([("pinned", -1), ("created_at", -1)])
         .skip((page - 1) * page_size)
         .limit(page_size)
     )
@@ -172,12 +196,15 @@ async def create_post(
         "content": body.content.strip(),
         "author_id": user["id"],
         "tags": body.tags,
-        "images": body.images or [],  # Store image URLs
+        "images": body.images or [],
+        "category": body.category or "general",
+        "pinned": False,
         "status": "open",
         "best_answer_id": None,
         "active_collaborator_ids": [],
         "comment_count": 0,
         "views": 0,
+        "edited": False,
         "created_at": now,
         "updated_at": now,
     }
@@ -241,8 +268,9 @@ async def create_comment(
         "post_id": post_id,
         "author_id": user["id"],
         "content": body.content.strip(),
-        "images": body.images or [],  # Store image URLs
+        "images": body.images or [],
         "is_best_answer": False,
+        "edited": False,
         "created_at": now,
         "updated_at": now,
     }
@@ -259,6 +287,44 @@ async def create_comment(
         "comment_id": comment["id"],
         "author_name": comment.get("author_name", "Someone"),
     })
+    
+    # Notify post author about the new comment (if not self-commenting)
+    full_post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0, "author_id": 1, "title": 1})
+    if full_post and full_post["author_id"] != user["id"] and ws_manager:
+        notif = create_notification(
+            notification_type="forum_reply",
+            title="New Reply on Your Post",
+            message=f'{user.get("full_name", "Someone")} replied to "{full_post.get("title", "your post")[:50]}"',
+            metadata={"post_id": post_id, "comment_id": comment_id},
+        )
+        try:
+            await ws_manager.send_to_user(full_post["author_id"], notif)
+        except Exception:
+            pass
+    
+    # Detect @mentions in comment content and notify mentioned users
+    import re
+    mentions = re.findall(r'@(\w+(?:\s\w+)?)', body.content)
+    if mentions and ws_manager:
+        for mention_name in mentions[:5]:  # Limit to 5 mentions
+            mentioned_user = await db.users.find_one(
+                {"$or": [
+                    {"full_name": {"$regex": f"^{re.escape(mention_name)}$", "$options": "i"}},
+                    {"name": {"$regex": f"^{re.escape(mention_name)}$", "$options": "i"}},
+                ]},
+                {"_id": 0, "id": 1},
+            )
+            if mentioned_user and mentioned_user["id"] != user["id"]:
+                notif = create_notification(
+                    notification_type="forum_mention",
+                    title="You Were Mentioned",
+                    message=f'{user.get("full_name", "Someone")} mentioned you in a forum comment',
+                    metadata={"post_id": post_id, "comment_id": comment_id},
+                )
+                try:
+                    await ws_manager.send_to_user(mentioned_user["id"], notif)
+                except Exception:
+                    pass
     
     return comment
 
@@ -302,6 +368,19 @@ async def mark_best_answer(
         {"$set": {"best_answer_id": comment_id, "updated_at": datetime.now(timezone.utc).isoformat()}},
     )
 
+    # Notify the comment author about being marked as best answer
+    if comment["author_id"] != user["id"] and ws_manager:
+        notif = create_notification(
+            notification_type="forum_best_answer",
+            title="Best Answer!",
+            message=f'Your answer on "{post.get("title", "a post")[:50]}" was marked as the best answer! +50 points',
+            metadata={"post_id": post_id, "comment_id": comment_id},
+        )
+        try:
+            await ws_manager.send_to_user(comment["author_id"], notif)
+        except Exception:
+            pass
+    
     return {"message": "Best answer marked", "comment_id": comment_id}
 
 
@@ -594,6 +673,190 @@ async def delete_post(
         raise HTTPException(status_code=403, detail="Only the OP or admins can delete this post")
 
     await db.forum_comments.delete_many({"post_id": post_id})
+    await db.forum_votes.delete_many({"post_id": post_id})
     await db.forum_posts.delete_one({"id": post_id})
 
     return {"message": "Post deleted", "post_id": post_id}
+
+
+# ─── Edit Post ───
+
+@router.put("/posts/{post_id}")
+async def edit_post(
+    post_id: str,
+    body: EditPostRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Edit a post. Author can edit within 24hrs. Admins can edit anytime."""
+    db = deps.db
+    post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    is_op = post["author_id"] == user["id"]
+    is_admin = user.get("role") in ("master_admin", "super_admin", "basic_admin")
+
+    if not is_op and not is_admin:
+        raise HTTPException(status_code=403, detail="Only the author or admins can edit")
+
+    # Check 24hr window for non-admins
+    if is_op and not is_admin:
+        created = datetime.fromisoformat(post["created_at"].replace("Z", "+00:00"))
+        elapsed = (datetime.now(timezone.utc) - created).total_seconds()
+        if elapsed > 86400:
+            raise HTTPException(status_code=403, detail="Edit window expired (24 hours)")
+
+    now = datetime.now(timezone.utc).isoformat()
+    update = {"$set": {"edited": True, "edited_at": now, "updated_at": now}}
+
+    if body.title is not None:
+        update["$set"]["title"] = body.title.strip()
+    if body.content is not None:
+        update["$set"]["content"] = body.content.strip()
+    if body.tags is not None:
+        update["$set"]["tags"] = body.tags
+    if body.category is not None:
+        update["$set"]["category"] = body.category
+
+    await db.forum_posts.update_one({"id": post_id}, update)
+    return {"message": "Post updated", "post_id": post_id}
+
+
+# ─── Edit Comment ───
+
+@router.put("/comments/{comment_id}")
+async def edit_comment(
+    comment_id: str,
+    body: EditCommentRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Edit a comment. Author can edit within 24hrs. Admins can edit anytime."""
+    db = deps.db
+    comment = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    is_author = comment["author_id"] == user["id"]
+    is_admin = user.get("role") in ("master_admin", "super_admin", "basic_admin")
+
+    if not is_author and not is_admin:
+        raise HTTPException(status_code=403, detail="Only the author or admins can edit")
+
+    if is_author and not is_admin:
+        created = datetime.fromisoformat(comment["created_at"].replace("Z", "+00:00"))
+        elapsed = (datetime.now(timezone.utc) - created).total_seconds()
+        if elapsed > 86400:
+            raise HTTPException(status_code=403, detail="Edit window expired (24 hours)")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await db.forum_comments.update_one(
+        {"id": comment_id},
+        {"$set": {"content": body.content.strip(), "edited": True, "edited_at": now, "updated_at": now}},
+    )
+    return {"message": "Comment updated", "comment_id": comment_id}
+
+
+# ─── Delete Comment ───
+
+@router.delete("/comments/{comment_id}")
+async def delete_comment(
+    comment_id: str,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Delete a comment. Author or admins can delete."""
+    db = deps.db
+    comment = await db.forum_comments.find_one({"id": comment_id}, {"_id": 0})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    is_author = comment["author_id"] == user["id"]
+    is_admin = user.get("role") in ("master_admin", "super_admin", "basic_admin")
+
+    if not is_author and not is_admin:
+        raise HTTPException(status_code=403, detail="Only the author or admins can delete")
+
+    post_id = comment["post_id"]
+
+    # If this was the best answer, clear it from the post
+    if comment.get("is_best_answer"):
+        await db.forum_posts.update_one(
+            {"id": post_id},
+            {"$set": {"best_answer_id": None}},
+        )
+
+    await db.forum_votes.delete_many({"comment_id": comment_id})
+    await db.forum_comments.delete_one({"id": comment_id})
+    await db.forum_posts.update_one({"id": post_id}, {"$inc": {"comment_count": -1}})
+
+    return {"message": "Comment deleted", "comment_id": comment_id}
+
+
+# ─── Pin/Unpin Post (Admin only) ───
+
+@router.put("/posts/{post_id}/pin")
+async def pin_post(
+    post_id: str,
+    body: PinPostRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Pin or unpin a post. Admin only."""
+    is_admin = user.get("role") in ("master_admin", "super_admin", "basic_admin")
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Only admins can pin posts")
+
+    db = deps.db
+    post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0, "id": 1})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    await db.forum_posts.update_one(
+        {"id": post_id},
+        {"$set": {"pinned": body.pinned, "updated_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    action = "pinned" if body.pinned else "unpinned"
+    return {"message": f"Post {action}", "post_id": post_id}
+
+
+# ─── Get Categories ───
+
+@router.get("/categories")
+async def get_categories(user: dict = Depends(deps.get_current_user)):
+    """Get available forum categories with counts."""
+    db = deps.db
+    pipeline = [
+        {"$group": {"_id": "$category", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+    ]
+    raw = await db.forum_posts.aggregate(pipeline).to_list(length=50)
+    
+    default_cats = ["general", "trading", "technical", "announcements"]
+    cat_map = {r["_id"]: r["count"] for r in raw if r["_id"]}
+    
+    categories = []
+    for cat in default_cats:
+        categories.append({"name": cat, "count": cat_map.pop(cat, 0)})
+    for name, count in cat_map.items():
+        categories.append({"name": name, "count": count})
+    
+    return {"categories": categories}
+
+
+# ─── Mention search ───
+
+@router.get("/users/search")
+async def search_users_for_mention(
+    q: str = Query(..., min_length=1),
+    limit: int = Query(5, ge=1, le=10),
+    user: dict = Depends(deps.get_current_user),
+):
+    """Search users for @mention autocomplete."""
+    db = deps.db
+    cursor = db.users.find(
+        {"$or": [
+            {"name": {"$regex": q, "$options": "i"}},
+            {"email": {"$regex": q, "$options": "i"}},
+        ]},
+        {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1},
+    ).limit(limit)
+    users = await cursor.to_list(length=limit)
+    return {"users": users}

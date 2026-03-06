@@ -90,7 +90,33 @@ export const WebSocketProvider = ({ children }) => {
         toast(title, {
           description: message,
           duration: 8000,
-          icon: '📊',
+        });
+        break;
+      case 'forum_reply':
+      case 'forum_mention':
+        toast.info(title, {
+          description: message,
+          duration: 5000,
+        });
+        break;
+      case 'forum_best_answer':
+        toast.success(title, {
+          description: message,
+          duration: 8000,
+        });
+        break;
+      case 'points_earned':
+      case 'level_up':
+      case 'badge_earned':
+        toast.success(title, {
+          description: message,
+          duration: 6000,
+        });
+        break;
+      case 'transaction_corrected':
+        toast.warning(title, {
+          description: message,
+          duration: 6000,
         });
         break;
       case 'system_announcement':

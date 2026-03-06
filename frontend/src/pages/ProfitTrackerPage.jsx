@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { profitAPI, currencyAPI, adminAPI, tradeAPI } from '@/lib/api';
+import BalanceAuditTrail from '@/components/BalanceAuditTrail';
 import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -2643,7 +2644,8 @@ export const ProfitTrackerPage = () => {
                 >
                   <Award className="w-4 h-4" /> Simulate Commission
                 </Button>
-                {/* Simulate Error Button */}
+                {/* Simulate Error Button - Master Admin Only */}
+                {isMasterAdmin() && (
                 <Button 
                   variant="outline"
                   className="w-full btn-secondary gap-2 justify-start border-red-500/50 hover:bg-red-500/10" 
@@ -2652,6 +2654,7 @@ export const ProfitTrackerPage = () => {
                 >
                   <AlertTriangle className="w-4 h-4 text-red-400" /> Simulate Error
                 </Button>
+                )}
                 {/* VSD Button - Master Admin Only */}
                 {isMasterAdmin() && (
                   <Button 
@@ -2793,7 +2796,8 @@ export const ProfitTrackerPage = () => {
                     </div>
                   </button>
 
-                  {/* Error Trade Card */}
+                  {/* Error Trade Card - Master Admin Only */}
+                  {isMasterAdmin() && (
                   <button
                     onClick={() => { setSimulateActionsOpen(false); setErrorDialogOpen(true); }}
                     className="relative w-full p-5 rounded-2xl border-2 border-red-500/30 bg-red-500/5 text-left transition-all duration-300 hover:border-red-500/50 hover:bg-red-500/10 group overflow-hidden"
@@ -2811,6 +2815,7 @@ export const ProfitTrackerPage = () => {
                       <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
                     </div>
                   </button>
+                  )}
 
                   {/* VSD Card - Master Admin Only */}
                   {isMasterAdmin() && (
@@ -4600,6 +4605,11 @@ export const ProfitTrackerPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Balance Audit Trail */}
+      {!isLicensee && (
+        <BalanceAuditTrail userId={simulatedView?.memberId} />
+      )}
 
       {/* Projection Vision Card */}
       <Card className="glass-highlight border-blue-500/30">

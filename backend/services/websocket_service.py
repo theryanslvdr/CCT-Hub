@@ -98,6 +98,10 @@ class ConnectionManager:
             for ws in disconnected:
                 self.active_connections[user_id].remove(ws)
     
+    async def send_to_user(self, user_id: str, message: dict):
+        """Send a message to a specific user and persist"""
+        await self.send_notification(message, user_id, persist=True)
+
     async def send_personal_message(self, message: dict, user_id: str):
         """Send a message to a specific user (all their connections) - legacy method"""
         await self.send_notification(message, user_id, persist=True)
@@ -150,8 +154,18 @@ class NotificationType:
     
     # Forum notifications
     FORUM_NEW_COMMENT = "forum_new_comment"
+    FORUM_BEST_ANSWER = "forum_best_answer"
+    FORUM_MENTION = "forum_mention"
     FORUM_VOTE = "forum_vote"
     FORUM_POST_CLOSED = "forum_post_closed"
+    
+    # Points & Rewards
+    POINTS_EARNED = "points_earned"
+    LEVEL_UP = "level_up"
+    BADGE_EARNED = "badge_earned"
+    
+    # Corrections
+    TRANSACTION_CORRECTED = "transaction_corrected"
 
 
 def create_notification(

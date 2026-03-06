@@ -11,7 +11,8 @@ import ForumImageUpload from '@/components/ForumImageUpload';
 import {
   ArrowLeft, CheckCircle2, Clock, Eye, MessageCircle,
   Award, Star, Loader2, Send, Trash2, Users,
-  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X
+  ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X,
+  Edit3, Pin, MoreHorizontal
 } from 'lucide-react';
 
 // Image gallery lightbox component
@@ -188,6 +189,14 @@ export default function ForumPostPage() {
   const [selectedBestAnswer, setSelectedBestAnswer] = useState(null);
   const [selectedCollaborators, setSelectedCollaborators] = useState([]);
   const [deleting, setDeleting] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [editPostData, setEditPostData] = useState({ title: '', content: '' });
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentContent, setEditCommentContent] = useState('');
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionResults, setMentionResults] = useState([]);
+  const [showMentions, setShowMentions] = useState(false);
+  const commentInputRef = React.useRef(null);
 
   const loadPost = useCallback(async () => {
     try {
@@ -292,6 +301,90 @@ export default function ForumPostPage() {
     }
   };
 
+  const handleEditPost = async () => {
+    try {
+      await forumAPI.editPost(postId, { title: editPostData.title, content: editPostData.content });
+      toast.success('Post updated');
+      setEditingPost(false);
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to edit post');
+    }
+  };
+
+  const handleEditComment = async (commentId) => {
+    if (!editCommentContent.trim()) return;
+    try {
+      await forumAPI.editComment(commentId, { content: editCommentContent });
+      toast.success('Comment updated');
+      setEditingCommentId(null);
+      setEditCommentContent('');
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to edit comment');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Delete this comment?')) return;
+    try {
+      await forumAPI.deleteComment(commentId);
+      toast.success('Comment deleted');
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to delete comment');
+    }
+  };
+
+  const handlePinPost = async () => {
+    try {
+      await forumAPI.pinPost(postId, !post.pinned);
+      toast.success(post.pinned ? 'Post unpinned' : 'Post pinned');
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to pin post');
+    }
+  };
+
+  const canEditPost = (isOP && ((Date.now() - new Date(post?.created_at).getTime()) < 86400000)) || isAdmin();
+  const canEditComment = (c) => {
+    const isAuthor = c.author_id === user?.id;
+    const within24h = (Date.now() - new Date(c.created_at).getTime()) < 86400000;
+    return (isAuthor && within24h) || isAdmin();
+  };
+
+  // @Mention search
+  const handleCommentChange = async (e) => {
+    const val = e.target.value;
+    setComment(val);
+    
+    const cursorPos = e.target.selectionStart;
+    const textBefore = val.substring(0, cursorPos);
+    const atMatch = textBefore.match(/@(\w{1,20})$/);
+    
+    if (atMatch) {
+      setMentionQuery(atMatch[1]);
+      try {
+        const res = await forumAPI.searchUsers(atMatch[1]);
+        setMentionResults(res.data.users || []);
+        setShowMentions(true);
+      } catch { setMentionResults([]); }
+    } else {
+      setShowMentions(false);
+    }
+  };
+
+  const insertMention = (userName) => {
+    const input = commentInputRef.current;
+    if (!input) return;
+    const cursorPos = input.selectionStart;
+    const textBefore = comment.substring(0, cursorPos);
+    const textAfter = comment.substring(cursorPos);
+    const newBefore = textBefore.replace(/@\w{1,20}$/, `@${userName} `);
+    setComment(newBefore + textAfter);
+    setShowMentions(false);
+  };
+
   const getCommenters = () => {
     if (!post?.comments) return [];
     const seen = new Set();
@@ -324,10 +417,15 @@ export default function ForumPostPage() {
       </button>
 
       {/* Post */}
-      <div className="p-5 rounded-lg bg-zinc-900/60 border border-zinc-800">
+      <div className={`p-5 rounded-lg border ${post.pinned ? 'bg-amber-500/5 border-amber-500/30' : 'bg-zinc-900/60 border-zinc-800'}`}>
+        {post.pinned && (
+          <div className="flex items-center gap-1.5 mb-2 text-amber-400 text-xs font-medium">
+            <Pin className="w-3.5 h-3.5" /> Pinned Post
+          </div>
+        )}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
                 post.status === 'open'
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -335,16 +433,56 @@ export default function ForumPostPage() {
               }`}>
                 {post.status === 'open' ? 'Open' : 'Solved'}
               </span>
+              {post.category && post.category !== 'general' && (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">
+                  {post.category}
+                </span>
+              )}
               {post.best_answer_id && (
                 <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                   Has Best Answer
                 </span>
               )}
+              {post.edited && (
+                <span className="text-[10px] text-zinc-600 italic">edited</span>
+              )}
             </div>
-            <h1 className="text-lg md:text-xl font-bold text-white">{post.title}</h1>
+            {editingPost ? (
+              <div className="space-y-2">
+                <input
+                  value={editPostData.title}
+                  onChange={e => setEditPostData(p => ({ ...p, title: e.target.value }))}
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 text-white px-3 py-2 text-sm"
+                  data-testid="edit-post-title"
+                />
+                <Textarea
+                  value={editPostData.content}
+                  onChange={e => setEditPostData(p => ({ ...p, content: e.target.value }))}
+                  rows={5}
+                  className="input-dark resize-none"
+                  data-testid="edit-post-content"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleEditPost} className="bg-blue-600 hover:bg-blue-700" data-testid="save-post-edit-btn">Save</Button>
+                  <Button size="sm" variant="outline" onClick={() => setEditingPost(false)} className="btn-secondary">Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <h1 className="text-lg md:text-xl font-bold text-white">{post.title}</h1>
+            )}
           </div>
-          {canManage && (
+          {canManage && !editingPost && (
             <div className="flex gap-2 flex-shrink-0">
+              {isAdmin() && (
+                <Button size="sm" variant="outline" onClick={handlePinPost} className={`btn-secondary ${post.pinned ? 'text-amber-400' : 'text-zinc-400'}`} data-testid="pin-post-btn" title={post.pinned ? 'Unpin' : 'Pin'}>
+                  <Pin className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {canEditPost && (
+                <Button size="sm" variant="outline" onClick={() => { setEditPostData({ title: post.title, content: post.content }); setEditingPost(true); }} className="btn-secondary text-blue-400" data-testid="edit-post-btn">
+                  <Edit3 className="w-3.5 h-3.5" />
+                </Button>
+              )}
               {post.status === 'open' && (
                 <Button size="sm" onClick={openCloseDialog} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700" data-testid="close-post-btn">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Close
@@ -357,7 +495,7 @@ export default function ForumPostPage() {
           )}
         </div>
 
-        <div className="mt-4 text-sm text-zinc-300 whitespace-pre-wrap">{post.content}</div>
+        {!editingPost && <div className="mt-4 text-sm text-zinc-300 whitespace-pre-wrap">{post.content}</div>}
 
         {/* Post images */}
         <ImageGallery images={post.images} />
@@ -406,7 +544,24 @@ export default function ForumPostPage() {
                     <Award className="w-3.5 h-3.5" /> Best Answer
                   </div>
                 )}
-                <p className="text-sm text-zinc-300 whitespace-pre-wrap">{c.content}</p>
+
+                {editingCommentId === c.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editCommentContent}
+                      onChange={e => setEditCommentContent(e.target.value)}
+                      rows={3}
+                      className="input-dark resize-none"
+                      data-testid={`edit-comment-input-${c.id}`}
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => handleEditComment(c.id)} className="bg-blue-600 hover:bg-blue-700" data-testid={`save-comment-edit-${c.id}`}>Save</Button>
+                      <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditCommentContent(''); }} className="btn-secondary">Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-300 whitespace-pre-wrap">{c.content}</p>
+                )}
 
                 {/* Comment images */}
                 <ImageGallery images={c.images} />
@@ -419,6 +574,7 @@ export default function ForumPostPage() {
                       <RoleBadge role={c.author_role} />
                     </span>
                     <span>{timeSince(c.created_at)}</span>
+                    {c.edited && <span className="italic text-zinc-600">edited</span>}
                     {c.score !== 0 && (
                       <span className={`font-medium ${c.score > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {c.score > 0 ? '+' : ''}{c.score} score
@@ -426,6 +582,27 @@ export default function ForumPostPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1">
+                    {/* Edit/Delete Comment */}
+                    {canEditComment(c) && editingCommentId !== c.id && (
+                      <>
+                        <Button
+                          size="sm" variant="ghost"
+                          onClick={() => { setEditingCommentId(c.id); setEditCommentContent(c.content); }}
+                          className="text-xs text-zinc-500 hover:text-blue-400 h-7 px-2"
+                          data-testid={`edit-comment-${c.id}`}
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm" variant="ghost"
+                          onClick={() => handleDeleteComment(c.id)}
+                          className="text-xs text-zinc-500 hover:text-red-400 h-7 px-2"
+                          data-testid={`delete-comment-${c.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </>
+                    )}
                     {/* Voting */}
                     <div className="relative">
                       <VoteButtons comment={c} userId={user?.id} onVote={handleVote} />
@@ -453,14 +630,32 @@ export default function ForumPostPage() {
       {/* New comment box */}
       {post.status === 'open' && (
         <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
-          <Textarea
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            placeholder="Write your answer..."
-            rows={3}
-            className="input-dark resize-none mb-3"
-            data-testid="comment-input"
-          />
+          <div className="relative">
+            <Textarea
+              ref={commentInputRef}
+              value={comment}
+              onChange={handleCommentChange}
+              placeholder="Write your answer... Use @name to mention someone"
+              rows={3}
+              className="input-dark resize-none mb-3"
+              data-testid="comment-input"
+            />
+            {/* @Mention dropdown */}
+            {showMentions && mentionResults.length > 0 && (
+              <div className="absolute bottom-full left-0 mb-1 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-20 max-h-40 overflow-y-auto" data-testid="mention-dropdown">
+                {mentionResults.map(u => (
+                  <button
+                    key={u.id}
+                    onClick={() => insertMention(u.name || u.email)}
+                    className="w-full text-left px-3 py-2 hover:bg-zinc-700 text-sm text-zinc-300 flex items-center gap-2"
+                  >
+                    <span className="font-medium">{u.name || u.email}</span>
+                    {u.role && u.role !== 'member' && <RoleBadge role={u.role} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="mb-3">
             <ForumImageUpload
               images={commentImages}

@@ -101,6 +101,9 @@ export const profitAPI = {
   // Onboarding
   completeOnboarding: (data) => api.post('/profit/complete-onboarding', data),
   getOnboardingStatus: () => api.get('/profit/onboarding-status'),
+  // Member self-edit transactions
+  getMyRecentTransactions: () => api.get('/profit/my-recent-transactions'),
+  editMyTransaction: (txId, data) => api.put(`/profit/my-transactions/${txId}`, data),
   // Licensee
   getLicenseeWelcomeInfo: () => api.get('/profit/licensee/welcome-info'),
   markLicenseeWelcomeSeen: () => api.post('/profit/licensee/mark-welcome-seen'),
@@ -180,10 +183,16 @@ export const forumAPI = {
   listPosts: (params = {}) => api.get('/forum/posts', { params }),
   createPost: (data) => api.post('/forum/posts', data),
   getPost: (postId) => api.get(`/forum/posts/${postId}`),
+  editPost: (postId, data) => api.put(`/forum/posts/${postId}`, data),
   createComment: (postId, data) => api.post(`/forum/posts/${postId}/comments`, data),
+  editComment: (commentId, data) => api.put(`/forum/comments/${commentId}`, data),
+  deleteComment: (commentId) => api.delete(`/forum/comments/${commentId}`),
   markBestAnswer: (postId, commentId) => api.put(`/forum/posts/${postId}/best-answer/${commentId}`),
   closePost: (postId, data) => api.put(`/forum/posts/${postId}/close`, data),
   deletePost: (postId) => api.delete(`/forum/posts/${postId}`),
+  pinPost: (postId, pinned) => api.put(`/forum/posts/${postId}/pin`, { pinned }),
+  getCategories: () => api.get('/forum/categories'),
+  searchUsers: (q) => api.get('/forum/users/search', { params: { q } }),
   getStats: () => api.get('/forum/stats'),
   searchSimilar: (q) => api.get('/forum/search-similar', { params: { q } }),
   voteComment: (commentId, voteType) => api.post(`/forum/comments/${commentId}/vote`, { vote_type: voteType }),
@@ -294,6 +303,10 @@ export const adminAPI = {
     params: { page, page_size: pageSize, transaction_type: type } 
   }),
   getTransactionStats: () => api.get('/admin/transactions/stats'),
+  // Transaction Corrections
+  getMemberRecentTransactions: (userId, limit = 5) => api.get(`/admin/members/${userId}/recent-transactions`, { params: { limit } }),
+  correctTransaction: (txId, data) => api.put(`/admin/transactions/${txId}/correct`, data),
+  deleteTransaction: (txId) => api.delete(`/admin/transactions/${txId}`),
   // Licenses
   getLicenses: () => api.get('/admin/licenses'),
   createLicense: (data) => api.post('/admin/licenses', data),
