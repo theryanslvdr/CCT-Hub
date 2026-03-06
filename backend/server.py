@@ -123,6 +123,7 @@ from routes.family import router as _family_router, admin_family_router as _admi
 from routes.rewards import router as _rewards_router
 from routes.forum import router as _forum_router
 from routes.publitio import router as _publitio_router
+from routes.system_health import router as _system_health_router
 
 # ─── Register Routers ───
 api_router.include_router(_auth_router)
@@ -146,8 +147,39 @@ api_router.include_router(_admin_family_router)
 api_router.include_router(_rewards_router)
 api_router.include_router(_forum_router)
 api_router.include_router(_publitio_router)
+api_router.include_router(_system_health_router)
 
 app.include_router(api_router)
+
+# ─── Latency Tracking Middleware ───
+from starlette.middleware.base import BaseHTTPMiddleware
+import time as _time
+
+class LatencyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        start = _time.time()
+        response = await call_next(request)
+        latency_ms = (_time.time() - start) * 1000
+        path = request.url.path
+        try:
+            from routes.system_health import record_latency
+            if '/api/auth/' in path:
+                record_latency('auth', latency_ms)
+            elif '/api/profit/' in path:
+                record_latency('profit', latency_ms)
+            elif '/api/trade/' in path:
+                record_latency('trade', latency_ms)
+            elif '/api/admin/' in path:
+                record_latency('admin', latency_ms)
+            elif '/api/forum/' in path:
+                record_latency('forum', latency_ms)
+            else:
+                record_latency('general', latency_ms)
+        except Exception:
+            pass
+        return response
+
+app.add_middleware(LatencyMiddleware)
 
 # ─── CORS Middleware ───
 app.add_middleware(

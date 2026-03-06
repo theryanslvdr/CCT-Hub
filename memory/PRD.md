@@ -94,5 +94,6 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 
 ## P2 Backlog
 - [ ] Further ProfitTrackerPage.jsx decomposition (ProjectionVision, StatsCards, TransactionDialogs)
-- [ ] E2E test suite with pytest
+- [x] E2E test suite with pytest — **135 tests, all passing**
 - [ ] Performance optimization (caching, pagination improvements)
+- [ ] User onboarding documentation for transaction correction features

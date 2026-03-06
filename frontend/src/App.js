@@ -35,6 +35,7 @@ import HabitTrackerPage from "./pages/HabitTrackerPage";
 import AffiliateCenterPage from "./pages/AffiliateCenterPage";
 import FamilyAccountsPage from "./pages/FamilyAccountsPage";
 import SystemCheckPage from "./pages/admin/SystemCheckPage";
+import SystemHealthPage from "./pages/admin/SystemHealthPage";
 import MyRewardsPage from "./pages/MyRewardsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
@@ -103,6 +104,7 @@ function App() {
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/daily-summary" element={<DailyTradeSummaryPage />} />
             <Route path="/admin/system-check" element={<SystemCheckPage />} />
+            <Route path="/admin/system-health" element={<SystemHealthPage />} />
             <Route path="/admin/rewards" element={<RewardsAdminPage />} />
           </Route>
 

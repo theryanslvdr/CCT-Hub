@@ -260,7 +260,7 @@ async def verify_user_password(data: VerifyPasswordRequest, user: dict = Depends
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    is_valid = bcrypt.checkpw(data.password.encode(), db_user["password"].encode())
+    is_valid = deps.verify_password(data.password, db_user["password"])
     return {"valid": is_valid}
 
 

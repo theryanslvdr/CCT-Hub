@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,6 +45,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const [licensees, setLicensees] = useState([]);
   const [loadingLicensees, setLoadingLicensees] = useState(false);
   const [selectedLicenseeId, setSelectedLicenseeId] = useState('');
+  const [adminExpanded, setAdminExpanded] = useState(false);
 
   // Load platform settings for logo
   useEffect(() => {
@@ -181,7 +182,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
   // Master Admin only items
   const masterAdminItems = [
+    { path: '/admin/licenses', icon: Award, label: 'Licenses' },
     { path: '/admin/system-check', icon: Shield, label: 'System Check' },
+    { path: '/admin/system-health', icon: Gauge, label: 'System Health' },
   ];
 
   // Check if user or simulated view is a licensee
@@ -498,8 +501,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
       {/* Navigation - Main Member Items */}
       <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
-        {/* Regular menu items */}
-        {getVisibleMemberItems().map((item) => (
+        {/* Core section */}
+        {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-2 pb-1">Core</p>}
+        {getVisibleMemberItems().filter(i => ['dashboard', 'profit_tracker', 'trade_monitor'].includes(i.id)).map((item) => (
           <NavLink 
             key={item.path} 
             to={item.path} 
@@ -513,11 +517,60 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           </NavLink>
         ))}
 
+        {/* Growth section */}
+        {(() => {
+          const growthItems = getVisibleMemberItems().filter(i => 
+            ['habits', 'affiliate', 'my_rewards', 'leaderboard', 'licensee_account', 'family_accounts'].includes(i.id)
+          );
+          if (growthItems.length === 0) return null;
+          return (
+            <>
+              {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Growth</p>}
+              {growthItems.map((item) => (
+                <NavLink 
+                  key={item.path} 
+                  to={item.path} 
+                  className={navLinkClass}
+                  onClick={handleNavClick}
+                  data-testid={`nav-${item.id}`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {!collapsed && <span className="text-sm">{item.label}</span>}
+                </NavLink>
+              ))}
+            </>
+          );
+        })()}
+
+        {/* Community section */}
+        {(() => {
+          const communityItems = getVisibleMemberItems().filter(i => ['forum'].includes(i.id));
+          if (communityItems.length === 0) return null;
+          return (
+            <>
+              {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Community</p>}
+              {communityItems.map((item) => (
+                <NavLink 
+                  key={item.path} 
+                  to={item.path} 
+                  className={navLinkClass}
+                  onClick={handleNavClick}
+                  data-testid={`nav-${item.id}`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {!collapsed && <span className="text-sm">{item.label}</span>}
+                </NavLink>
+              ))}
+            </>
+          );
+        })()}
+
         {/* Hidden Features (Master Admin only) - No section title, just crown icons */}
         {canAccessHiddenFeatures() && !simulatedView && (
           <>
-            {/* Divider */}
-            <div className="my-3 border-t border-zinc-800/50" />
+            {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Tools</p>}
             
             {hiddenFeatures.map((item) => (
               <NavLink 
@@ -541,14 +594,23 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         )}
       </nav>
 
-      {/* Admin Section - Anchored at bottom, above user profile */}
-      {/* Show when: real admin (no simulation) OR simulating an admin role */}
+      {/* Admin Section - Collapsible, anchored at bottom */}
       {((isAdmin() && !simulatedView) || (simulatedView && ['basic_admin', 'super_admin', 'master_admin'].includes(simulatedView.role))) && (
-        <div className="px-3 pb-2 border-t border-zinc-800/50 pt-3">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 px-3">
-            {!collapsed && 'Admin Section'}
-          </p>
-          <div className="space-y-1">
+        <div className="px-3 pb-2 border-t border-zinc-800/50 pt-2">
+          <button
+            onClick={() => setAdminExpanded(!adminExpanded)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+            data-testid="admin-section-toggle"
+          >
+            {!collapsed && <span className="text-xs uppercase tracking-wider font-medium">Admin</span>}
+            {collapsed ? (
+              <Shield className="w-4 h-4 mx-auto" />
+            ) : (
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${adminExpanded ? 'rotate-180' : ''}`} />
+            )}
+          </button>
+          
+          <div className={`space-y-1 overflow-hidden transition-all duration-200 ${adminExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
             {adminNavItems.map((item) => (
               <NavLink 
                 key={item.path} 
@@ -562,7 +624,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </NavLink>
             ))}
             
-            {/* Super/Master Admin only items - show for real super/master OR simulated super/master */}
+            {/* Super/Master Admin only items */}
             {((!simulatedView && (isSuperAdmin() || isMasterAdmin())) || (simulatedView && ['super_admin', 'master_admin'].includes(simulatedView.role))) && superAdminItems.map((item) => (
               <NavLink 
                 key={item.path} 
@@ -576,7 +638,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               </NavLink>
             ))}
 
-            {/* Master Admin only items - show for real master OR simulated master */}
+            {/* Master Admin only items */}
             {((!simulatedView && isMasterAdmin()) || (simulatedView && simulatedView.role === 'master_admin')) && masterAdminItems.map((item) => (
               <NavLink 
                 key={item.path} 
@@ -644,17 +706,6 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                     API Center
                   </DropdownMenuItem>
                 </>
-              )}
-              
-              {/* Master Admin only: Licenses - hide during non-master simulation */}
-              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
-                <DropdownMenuItem 
-                  onClick={handleLicensesClick}
-                  className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"
-                >
-                  <Award className="w-4 h-4 mr-2" />
-                  Licenses
-                </DropdownMenuItem>
               )}
               
               {!window.matchMedia('(display-mode: standalone)').matches && (
@@ -726,17 +777,6 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                     API Center
                   </DropdownMenuItem>
                 </>
-              )}
-              
-              {/* Master Admin only: Licenses - hide during non-master simulation */}
-              {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
-                <DropdownMenuItem 
-                  onClick={handleLicensesClick}
-                  className="cursor-pointer text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 focus:bg-purple-500/10"
-                >
-                  <Award className="w-4 h-4 mr-2" />
-                  Licenses
-                </DropdownMenuItem>
               )}
               
               {!window.matchMedia('(display-mode: standalone)').matches && (

@@ -1,0 +1,39 @@
+{
+  "iteration": 145,
+  "date": "2026-03-06",
+  "type": "pytest_suite_completion",
+  "total_tests": 135,
+  "passed": 135,
+  "failed": 0,
+  "test_files": [
+    "tests/test_auth_suite.py (10 tests - login, me, verify-password, forgot-password)",
+    "tests/test_profit_suite.py (19 tests - summary, deposits, withdrawals, commissions, daily-balances, vsd, sync-validation, onboarding, balance-override)",
+    "tests/test_trade_suite.py (12 tests - logs, history, streak, signal, daily-summary, missed-trade, holidays, products, signal-block)",
+    "tests/test_admin_suite.py (24 tests - members, member-detail, deposits, withdrawals, transactions, signals, holidays, products, analytics, notifications, licenses, trade-change-requests)",
+    "tests/test_general_suite.py (9 tests - health, root, version, notifications, ws-status, system-health, db-ping)",
+    "tests/test_forum_suite.py (6 tests - posts, CRUD create/read/delete, comments)",
+    "tests/test_rewards_suite.py (11 tests - summary, leaderboard, badges, earning-actions, history, admin overview/members/badges)",
+    "tests/test_misc_suite.py (17 tests - settings, currency, debt, goals, habits, users, family, activity-feed, affiliate)",
+    "tests/test_refactored_routes.py (27 tests - existing regression suite)"
+  ],
+  "bug_fixed": "Fixed missing bcrypt import in auth_routes.py verify-password endpoint (was returning 500, now uses deps.verify_password)",
+  "coverage": {
+    "auth_routes": "login, me, verify-password, forgot-password",
+    "profit_routes": "summary, deposits, withdrawals, commissions, balance-on-date, daily-balances, my-recent-transactions, calculate-exit, simulate-withdrawal, vsd, sync-validation, onboarding-status, license-projections, master-admin-trades, balance-override",
+    "trade_routes": "logs, history, streak, active-signal, daily-summary, missed-trade-status, global-holidays, trading-products, holidays, signal-block-status",
+    "admin_routes": "members (list, detail, search, pagination, deposits, withdrawals), transactions (list, stats), signals (list, history, archive), global-holidays, trading-products, analytics (team, today, missed, growth, recent, member), notifications, licenses, trade-change-requests",
+    "general_routes": "health, root, version, notifications, ws/status",
+    "system_health": "system-health (full), db-ping",
+    "forum": "posts (list, pagination, CRUD, comments)",
+    "rewards": "summary, leaderboard, badges, earning-actions, history, admin (overview, members, badges)",
+    "settings": "platform, notice-banner, promotion-popup, email-templates, manifest.json",
+    "currency": "rates, convert",
+    "debt": "list, plan",
+    "goals": "list",
+    "habits": "list, streak",
+    "users": "notification-preferences, vapid-public-key",
+    "family": "members (access control)",
+    "activity_feed": "list",
+    "affiliate": "resources"
+  }
+}

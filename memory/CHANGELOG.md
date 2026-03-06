@@ -1,5 +1,25 @@
 # CrossCurrent Hub - Changelog
 
+## 2026-03-06 - Comprehensive Pytest Suite Complete
+
+### Backend Pytest Suite (P0 - Launch Readiness)
+- **135 total tests**, all passing across 9 test files
+- Test files created:
+  - `test_auth_suite.py` (10 tests) — login, /me, verify-password, forgot-password, auth edge cases
+  - `test_profit_suite.py` (19 tests) — summary, deposits, withdrawals, commissions, daily-balances, VSD, sync-validation, onboarding, balance-override
+  - `test_trade_suite.py` (12 tests) — logs, history, streak, signals, daily-summary, missed-trade, holidays, products
+  - `test_admin_suite.py` (24 tests) — members CRUD, transactions, signals, analytics (6 endpoints), licenses, notifications
+  - `test_general_suite.py` (9 tests) — health, version, notifications, WS status, system-health, db-ping
+  - `test_forum_suite.py` (6 tests) — posts CRUD, comments, pagination
+  - `test_rewards_suite.py` (11 tests) — summary, leaderboard, badges, earning-actions, history, admin endpoints
+  - `test_misc_suite.py` (17 tests) — settings, currency, debt, goals, habits, users, family, activity-feed, affiliate
+  - `test_refactored_routes.py` (27 tests) — existing regression suite
+- Shared `conftest.py` with session-scoped fixtures for auth token and admin user
+- Test report: `/app/test_reports/iteration_145.json`
+
+### Bug Fix
+- Fixed `POST /api/auth/verify-password` returning 500 — missing `bcrypt` import in `auth_routes.py`, now uses `deps.verify_password()`
+
 ## 2026-03-06 - Major Refactoring Release
 
 ### Backend Refactoring
