@@ -2656,6 +2656,12 @@ async def get_trade_streak(user_id: Optional[str] = None, user: dict = Depends(g
         prev = get_previous_trading_day(check)
         if prev:
             check = prev
+    elif check not in traded_dates_set and check.isoformat() not in frozen_dates:
+        # Today is a trading day but user hasn't traded yet today
+        # The day isn't over, so don't break the streak — start from previous trading day
+        prev = get_previous_trading_day(check)
+        if prev:
+            check = prev
     
     # Walk backwards through trading days
     while check is not None:
@@ -5271,17 +5277,22 @@ async def get_team_transactions(
     all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}).to_list(1000)
     user_lookup = {u["id"]: {"name": u.get("full_name", "Unknown"), "email": u.get("email", "")} for u in all_users}
     
-    # CRITICAL: Always exclude type=profit entries — these are system-generated duplicates
-    query = {"type": {"$ne": "profit"}}
-    
-    if transaction_type == "withdrawal":
-        query["is_withdrawal"] = True
-    elif transaction_type == "deposit":
-        query["$and"] = query.get("$and", [])
-        query["$and"].append({"$or": [
-            {"is_withdrawal": {"$ne": True}},
-            {"is_withdrawal": {"$exists": False}}
-        ]})
+    # CRITICAL: Build query based on filter type
+    if transaction_type == "profit":
+        # Show ONLY profit-type entries
+        query = {"type": "profit", "user_id": {"$exists": True}}
+    else:
+        # Default: exclude type=profit entries
+        query = {"type": {"$ne": "profit"}}
+        
+        if transaction_type == "withdrawal":
+            query["is_withdrawal"] = True
+        elif transaction_type == "deposit":
+            query["$and"] = query.get("$and", [])
+            query["$and"].append({"$or": [
+                {"is_withdrawal": {"$ne": True}},
+                {"is_withdrawal": {"$exists": False}}
+            ]})
     
     # User search filter
     if user_search:
@@ -5305,7 +5316,12 @@ async def get_team_transactions(
         user_info = user_lookup.get(tx.get("user_id"), {"name": "Unknown", "email": ""})
         tx["user_name"] = user_info["name"]
         tx["user_email"] = user_info["email"]
-        tx["type"] = "withdrawal" if tx.get("is_withdrawal") else "deposit"
+        if tx.get("type") == "profit":
+            tx["type"] = "profit"
+        elif tx.get("is_withdrawal"):
+            tx["type"] = "withdrawal"
+        else:
+            tx["type"] = "deposit"
         enriched.append(tx)
     
     return {

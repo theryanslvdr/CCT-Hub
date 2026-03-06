@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { profitAPI, currencyAPI, adminAPI, tradeAPI } from '@/lib/api';
 import BalanceAuditTrail, { BalanceAuditModal } from '@/components/BalanceAuditTrail';
+import MyTransactionEdit from '@/components/MyTransactionEdit';
 import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -4859,6 +4860,11 @@ export const ProfitTrackerPage = () => {
       {/* Recent Activity */}
       {!isLicensee && (
         <BalanceAuditTrail userId={simulatedView?.memberId} />
+      )}
+
+      {/* My Recent Transactions (member self-edit) */}
+      {!isLicensee && !simulatedView?.memberId && (
+        <MyTransactionEdit />
       )}
 
       {/* Daily Projection Dialog */}

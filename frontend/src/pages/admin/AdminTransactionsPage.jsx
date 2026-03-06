@@ -132,7 +132,7 @@ export const AdminTransactionsPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Team Transactions</h1>
-          <p className="text-zinc-400">Deposits and withdrawals only — profit entries are excluded</p>
+          <p className="text-zinc-400">Manage deposits, withdrawals, and view profit entries</p>
         </div>
         <Button onClick={handleRefresh} variant="outline" className="btn-secondary gap-2" data-testid="refresh-transactions">
           <RefreshCw className="w-4 h-4" /> Refresh
@@ -238,6 +238,7 @@ export const AdminTransactionsPage = () => {
                 <TabsTrigger value="all" className="data-[state=active]:bg-blue-500/20">All</TabsTrigger>
                 <TabsTrigger value="deposit" className="data-[state=active]:bg-emerald-500/20">Deposits</TabsTrigger>
                 <TabsTrigger value="withdrawal" className="data-[state=active]:bg-orange-500/20">Withdrawals</TabsTrigger>
+                <TabsTrigger value="profit" className="data-[state=active]:bg-blue-500/20">Profits</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -299,6 +300,11 @@ export const AdminTransactionsPage = () => {
                                 <ArrowUpFromLine className="w-4 h-4 text-orange-400" />
                                 <span className="status-badge bg-orange-500/20 text-orange-400">Withdrawal</span>
                               </>
+                            ) : tx.type === 'profit' ? (
+                              <>
+                                <TrendingUp className="w-4 h-4 text-blue-400" />
+                                <span className="status-badge bg-blue-500/20 text-blue-400">Profit</span>
+                              </>
                             ) : (
                               <>
                                 <ArrowDownToLine className="w-4 h-4 text-emerald-400" />
@@ -314,8 +320,8 @@ export const AdminTransactionsPage = () => {
                           </div>
                         </td>
                         <td>
-                          <span className={`font-mono font-bold ${tx.type === 'withdrawal' ? 'text-orange-400' : 'text-emerald-400'}`}>
-                            {tx.type === 'withdrawal' ? '-' : '+'}${formatNumber(Math.abs(tx.amount), 2)}
+                          <span className={`font-mono font-bold ${tx.type === 'withdrawal' ? 'text-orange-400' : tx.type === 'profit' ? 'text-blue-400' : 'text-emerald-400'}`}>
+                            {tx.type === 'withdrawal' ? '-' : '+'} ${formatNumber(Math.abs(tx.amount), 2)}
                           </span>
                           {tx.type === 'withdrawal' && tx.net_amount && (
                             <p className="text-xs text-zinc-500">Net: ${formatNumber(tx.net_amount, 2)}</p>
@@ -332,12 +338,19 @@ export const AdminTransactionsPage = () => {
                             {tx.is_corrected && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-1">Corrected</span>
                             )}
-                            <Button size="sm" variant="ghost" onClick={() => openCorrection(tx)} className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0" title="Correct amount" data-testid={`correct-tx-${tx.id}`}>
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDeleteTx(tx)} className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0" title="Delete transaction" data-testid={`delete-tx-${tx.id}`}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            {tx.type !== 'profit' && (
+                              <>
+                                <Button size="sm" variant="ghost" onClick={() => openCorrection(tx)} className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0" title="Correct amount" data-testid={`correct-tx-${tx.id}`}>
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={() => handleDeleteTx(tx)} className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0" title="Delete transaction" data-testid={`delete-tx-${tx.id}`}>
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            )}
+                            {tx.type === 'profit' && (
+                              <span className="text-[10px] text-zinc-600">System</span>
+                            )}
                           </div>
                         </td>
                       </tr>
