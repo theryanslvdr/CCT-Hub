@@ -437,6 +437,16 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 **Test Status:** 100% passed (iteration_140, 11/11 backend + all frontend features verified)
 
+### Comprehensive Documentation (Mar 6, 2026) - COMPLETE
+**Files Created:**
+- `/app/docs/2026-03_Member_Instructionals.md` — 25 step-by-step guides for members
+- `/app/docs/2026-03_Admin_Instructionals.md` — 28 step-by-step guides for admins
+
+**Also Added:**
+- "Export Debug Data" button in Profit Tracker (Simulate Actions > Master Admin only)
+- Downloads user's raw financial data as JSON for developer debugging
+- Available on both desktop and mobile views
+
 ### Profit Tracker Hide/Show Amounts Toggle (Mar 3, 2026) - COMPLETE
 **Feature:**
 - Per-card eye icon toggle for each summary card (Account Value, Deposits, Total Profit, LOT Size, Account Growth)

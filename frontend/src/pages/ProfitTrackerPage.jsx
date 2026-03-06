@@ -2661,6 +2661,33 @@ export const ProfitTrackerPage = () => {
                     <Users className="w-4 h-4 text-purple-400" /> Licensee VSD
                   </Button>
                 )}
+                {/* Export Debug Data - Master Admin Only */}
+                {isMasterAdmin() && (
+                  <Button 
+                    variant="outline"
+                    className="w-full btn-secondary gap-2 justify-start border-yellow-500/50 hover:bg-yellow-500/10" 
+                    onClick={async () => {
+                      try {
+                        setSimulateActionsOpen(false);
+                        const targetId = simulatedView?.memberId || user?.id;
+                        const res = await api.get(`/admin/export-debug-data/${targetId}`);
+                        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `debug-data-${new Date().toISOString().slice(0,10)}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Debug data exported! Share this file with your developer.');
+                      } catch (e) {
+                        toast.error('Failed to export debug data');
+                      }
+                    }}
+                    data-testid="export-debug-data-button"
+                  >
+                    <FileText className="w-4 h-4 text-yellow-400" /> Export Debug Data
+                  </Button>
+                )}
               </div>
             </DialogContent>
           </Dialog>
@@ -2798,6 +2825,42 @@ export const ProfitTrackerPage = () => {
                         <div className="flex-1">
                           <h3 className="text-lg font-bold text-white mb-1">Licensee VSD</h3>
                           <p className="text-sm text-zinc-500">Virtual Share Distribution</p>
+                        </div>
+                        <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Export Debug Data - Mobile Master Admin */}
+                  {isMasterAdmin() && (
+                    <button
+                      className="group relative w-full text-left p-5 rounded-2xl bg-zinc-900/50 border border-yellow-500/20 hover:border-yellow-500/40 transition-all overflow-hidden"
+                      onClick={async () => {
+                        try {
+                          setSimulateActionsOpen(false);
+                          const targetId = simulatedView?.memberId || user?.id;
+                          const res = await api.get(`/admin/export-debug-data/${targetId}`);
+                          const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `debug-data-${new Date().toISOString().slice(0,10)}.json`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          toast.success('Debug data exported!');
+                        } catch (e) {
+                          toast.error('Failed to export debug data');
+                        }
+                      }}
+                      data-testid="export-debug-data-button-mobile"
+                    >
+                      <div className="relative z-10 flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center">
+                          <FileText className="w-7 h-7 text-yellow-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-white mb-1">Export Debug Data</h3>
+                          <p className="text-sm text-zinc-500">Download JSON for developer</p>
                         </div>
                         <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90" />
                       </div>
