@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { formatNumber } from '@/lib/utils';
 import { 
   ArrowDownToLine, ArrowUpFromLine, DollarSign, Users, 
   ChevronLeft, ChevronRight, TrendingUp, TrendingDown, RefreshCw,
-  Edit3, Trash2, AlertTriangle, CheckCircle2
+  Edit3, Trash2, AlertTriangle, CheckCircle2, Search, X
 } from 'lucide-react';
 
 export const AdminTransactionsPage = () => {
@@ -21,6 +21,8 @@ export const AdminTransactionsPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('all');
+  const [userSearch, setUserSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   
   // Correction dialog state
   const [correctDialogOpen, setCorrectDialogOpen] = useState(false);
@@ -33,15 +35,11 @@ export const AdminTransactionsPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    loadData();
-  }, [page, filterType]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [txRes, statsRes] = await Promise.all([
-        adminAPI.getTeamTransactions(page, 20, filterType === 'all' ? null : filterType),
+        adminAPI.getTeamTransactions(page, 20, filterType === 'all' ? null : filterType, userSearch || null),
         adminAPI.getTransactionStats()
       ]);
       
@@ -55,6 +53,19 @@ export const AdminTransactionsPage = () => {
     } finally {
       setLoading(false);
     }
+  }, [page, filterType, userSearch]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleSearch = () => {
+    setUserSearch(searchInput.trim());
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchInput('');
+    setUserSearch('');
+    setPage(1);
   };
 
   const handleRefresh = () => {
@@ -73,7 +84,6 @@ export const AdminTransactionsPage = () => {
     if (!selectedTx || !correctionAmount) return;
     try {
       let newAmount = parseFloat(correctionAmount);
-      // If withdrawal, store as negative
       if (selectedTx.type === 'withdrawal' || selectedTx.is_withdrawal) {
         newAmount = -Math.abs(newAmount);
       }
@@ -111,13 +121,8 @@ export const AdminTransactionsPage = () => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   };
 
@@ -127,14 +132,9 @@ export const AdminTransactionsPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Team Transactions</h1>
-          <p className="text-zinc-400">Track all deposits and withdrawals across the team</p>
+          <p className="text-zinc-400">Deposits and withdrawals only — profit entries are excluded</p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          variant="outline" 
-          className="btn-secondary gap-2"
-          data-testid="refresh-transactions"
-        >
+        <Button onClick={handleRefresh} variant="outline" className="btn-secondary gap-2" data-testid="refresh-transactions">
           <RefreshCw className="w-4 h-4" /> Refresh
         </Button>
       </div>
@@ -146,12 +146,8 @@ export const AdminTransactionsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Total Deposits</p>
-                <p className="text-3xl font-bold font-mono text-emerald-400 mt-2">
-                  ${formatNumber(stats?.total_deposits || 0, 2)}
-                </p>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {stats?.deposit_count || 0} transactions
-                </p>
+                <p className="text-3xl font-bold font-mono text-emerald-400 mt-2">${formatNumber(stats?.total_deposits || 0, 2)}</p>
+                <p className="text-xs text-zinc-500 mt-1">{stats?.deposit_count || 0} transactions</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
                 <ArrowDownToLine className="w-6 h-6 text-white" />
@@ -165,12 +161,8 @@ export const AdminTransactionsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Total Withdrawals</p>
-                <p className="text-3xl font-bold font-mono text-orange-400 mt-2">
-                  ${formatNumber(stats?.total_withdrawals || 0, 2)}
-                </p>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {stats?.withdrawal_count || 0} transactions
-                </p>
+                <p className="text-3xl font-bold font-mono text-orange-400 mt-2">${formatNumber(stats?.total_withdrawals || 0, 2)}</p>
+                <p className="text-xs text-zinc-500 mt-1">{stats?.withdrawal_count || 0} transactions</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                 <ArrowUpFromLine className="w-6 h-6 text-white" />
@@ -187,19 +179,10 @@ export const AdminTransactionsPage = () => {
                 <p className={`text-3xl font-bold font-mono mt-2 ${(stats?.net_flow || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {(stats?.net_flow || 0) >= 0 ? '+' : '-'}${formatNumber(Math.abs(stats?.net_flow || 0), 2)}
                 </p>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {(stats?.net_flow || 0) >= 0 ? 'Inflow' : 'Outflow'}
-                </p>
+                <p className="text-xs text-zinc-500 mt-1">{(stats?.net_flow || 0) >= 0 ? 'Inflow' : 'Outflow'}</p>
               </div>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                (stats?.net_flow || 0) >= 0 
-                  ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
-                  : 'bg-gradient-to-br from-red-500 to-red-600'
-              }`}>
-                {(stats?.net_flow || 0) >= 0 
-                  ? <TrendingUp className="w-6 h-6 text-white" />
-                  : <TrendingDown className="w-6 h-6 text-white" />
-                }
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${(stats?.net_flow || 0) >= 0 ? 'bg-gradient-to-br from-emerald-500 to-green-600' : 'bg-gradient-to-br from-red-500 to-red-600'}`}>
+                {(stats?.net_flow || 0) >= 0 ? <TrendingUp className="w-6 h-6 text-white" /> : <TrendingDown className="w-6 h-6 text-white" />}
               </div>
             </div>
           </CardContent>
@@ -210,12 +193,8 @@ export const AdminTransactionsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Unique Depositors</p>
-                <p className="text-3xl font-bold font-mono text-blue-400 mt-2">
-                  {stats?.unique_depositors || 0}
-                </p>
-                <p className="text-xs text-zinc-500 mt-1">
-                  Team members with deposits
-                </p>
+                <p className="text-3xl font-bold font-mono text-blue-400 mt-2">{stats?.unique_depositors || 0}</p>
+                <p className="text-xs text-zinc-500 mt-1">Team members with deposits</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
@@ -251,24 +230,46 @@ export const AdminTransactionsPage = () => {
 
       {/* Transactions Table */}
       <Card className="glass-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-white">Transaction History</CardTitle>
+        <CardHeader className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <CardTitle className="text-white">Transaction History</CardTitle>
+            <Tabs value={filterType} onValueChange={(v) => { setFilterType(v); setPage(1); }}>
+              <TabsList className="bg-zinc-900/50">
+                <TabsTrigger value="all" className="data-[state=active]:bg-blue-500/20">All</TabsTrigger>
+                <TabsTrigger value="deposit" className="data-[state=active]:bg-emerald-500/20">Deposits</TabsTrigger>
+                <TabsTrigger value="withdrawal" className="data-[state=active]:bg-orange-500/20">Withdrawals</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           
-          {/* Filter Tabs */}
-          <Tabs value={filterType} onValueChange={(v) => { setFilterType(v); setPage(1); }}>
-            <TabsList className="bg-zinc-900/50">
-              <TabsTrigger value="all" className="data-[state=active]:bg-blue-500/20">
-                All
-              </TabsTrigger>
-              <TabsTrigger value="deposit" className="data-[state=active]:bg-emerald-500/20">
-                Deposits
-              </TabsTrigger>
-              <TabsTrigger value="withdrawal" className="data-[state=active]:bg-orange-500/20">
-                Withdrawals
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* User Search */}
+          <div className="flex gap-2">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <Input
+                placeholder="Search by name or email..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                className="pl-9 input-dark"
+                data-testid="user-search-input"
+              />
+            </div>
+            <Button onClick={handleSearch} size="sm" className="bg-blue-600 hover:bg-blue-700" data-testid="user-search-btn">
+              Search
+            </Button>
+            {userSearch && (
+              <Button onClick={clearSearch} size="sm" variant="outline" className="btn-secondary gap-1" data-testid="clear-search-btn">
+                <X className="w-3 h-3" /> Clear
+              </Button>
+            )}
+          </div>
+          
+          {userSearch && (
+            <p className="text-xs text-blue-400">Filtered by: "{userSearch}" — {total} result{total !== 1 ? 's' : ''}</p>
+          )}
         </CardHeader>
+        
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -317,42 +318,24 @@ export const AdminTransactionsPage = () => {
                             {tx.type === 'withdrawal' ? '-' : '+'}${formatNumber(Math.abs(tx.amount), 2)}
                           </span>
                           {tx.type === 'withdrawal' && tx.net_amount && (
-                            <p className="text-xs text-zinc-500">
-                              Net: ${formatNumber(tx.net_amount, 2)}
-                            </p>
+                            <p className="text-xs text-zinc-500">Net: ${formatNumber(tx.net_amount, 2)}</p>
                           )}
                         </td>
                         <td>
-                          <span className="text-zinc-400 text-sm">
-                            {tx.product || tx.notes || '-'}
-                          </span>
+                          <span className="text-zinc-400 text-sm">{tx.product || tx.notes || '-'}</span>
                         </td>
                         <td>
-                          <span className="text-zinc-400 text-sm font-mono">
-                            {formatDate(tx.created_at)}
-                          </span>
+                          <span className="text-zinc-400 text-sm font-mono">{formatDate(tx.created_at)}</span>
                         </td>
                         <td>
                           <div className="flex items-center gap-1">
                             {tx.is_corrected && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-1" title="This transaction was corrected">Corrected</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-1">Corrected</span>
                             )}
-                            <Button
-                              size="sm" variant="ghost"
-                              onClick={() => openCorrection(tx)}
-                              className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0"
-                              title="Correct amount"
-                              data-testid={`correct-tx-${tx.id}`}
-                            >
+                            <Button size="sm" variant="ghost" onClick={() => openCorrection(tx)} className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0" title="Correct amount" data-testid={`correct-tx-${tx.id}`}>
                               <Edit3 className="w-3.5 h-3.5" />
                             </Button>
-                            <Button
-                              size="sm" variant="ghost"
-                              onClick={() => handleDeleteTx(tx)}
-                              className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0"
-                              title="Delete transaction"
-                              data-testid={`delete-tx-${tx.id}`}
-                            >
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteTx(tx)} className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0" title="Delete transaction" data-testid={`delete-tx-${tx.id}`}>
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
@@ -365,40 +348,24 @@ export const AdminTransactionsPage = () => {
 
               {/* Pagination */}
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
-                <p className="text-sm text-zinc-500">
-                  Showing {transactions.length} of {total} transactions
-                </p>
+                <p className="text-sm text-zinc-500">Showing {transactions.length} of {total} transactions</p>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="btn-secondary"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary">
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <span className="text-sm text-zinc-400 px-2">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="btn-secondary"
-                  >
+                  <span className="text-sm text-zinc-400">Page {page} of {totalPages}</span>
+                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-secondary">
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="text-center py-12">
-              <DollarSign className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-500">No transactions found</p>
-              <p className="text-zinc-600 text-sm mt-1">
-                {filterType !== 'all' ? 'Try changing the filter' : 'Transactions will appear here when members deposit or withdraw'}
+            <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
+              <DollarSign className="w-12 h-12 mb-4 opacity-30" />
+              <p className="text-lg font-medium">No transactions found</p>
+              <p className="text-sm mt-1">
+                {userSearch ? `No results for "${userSearch}"` : 'No deposits or withdrawals recorded yet'}
               </p>
             </div>
           )}
@@ -413,7 +380,7 @@ export const AdminTransactionsPage = () => {
               <AlertTriangle className="w-5 h-5 text-amber-400" /> Correct Transaction
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Update the amount for this {selectedTx?.type || 'transaction'}. Original amount: ${formatNumber(Math.abs(selectedTx?.amount || 0), 2)}
+              Update the amount for this {selectedTx?.type || 'transaction'}. Original: ${formatNumber(Math.abs(selectedTx?.amount || 0), 2)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-2">
@@ -423,25 +390,11 @@ export const AdminTransactionsPage = () => {
             </div>
             <div>
               <label className="text-sm text-zinc-300 block mb-1">New Amount ($)</label>
-              <Input
-                type="number"
-                step="0.01"
-                value={correctionAmount}
-                onChange={e => setCorrectionAmount(e.target.value)}
-                className="input-dark font-mono"
-                data-testid="correction-amount-input"
-              />
+              <Input type="number" step="0.01" value={correctionAmount} onChange={e => setCorrectionAmount(e.target.value)} className="input-dark font-mono" data-testid="correction-amount-input" />
             </div>
             <div>
               <label className="text-sm text-zinc-300 block mb-1">Reason for Correction</label>
-              <Textarea
-                value={correctionReason}
-                onChange={e => setCorrectionReason(e.target.value)}
-                placeholder="e.g., Member entered wrong amount, typo correction..."
-                rows={2}
-                className="input-dark resize-none"
-                data-testid="correction-reason-input"
-              />
+              <Textarea value={correctionReason} onChange={e => setCorrectionReason(e.target.value)} placeholder="e.g., Member entered wrong amount..." rows={2} className="input-dark resize-none" data-testid="correction-reason-input" />
             </div>
             <div className="flex gap-2 justify-end pt-2">
               <Button variant="outline" onClick={() => setCorrectDialogOpen(false)} className="btn-secondary">Cancel</Button>
@@ -455,3 +408,5 @@ export const AdminTransactionsPage = () => {
     </div>
   );
 };
+
+export default AdminTransactionsPage;

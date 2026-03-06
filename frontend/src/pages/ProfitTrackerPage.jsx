@@ -4625,16 +4625,13 @@ export const ProfitTrackerPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Balance Audit Trail */}
+      {/* Balance Audit Modal (triggered by Balance Trail button) */}
       {!isLicensee && (
-        <>
-          <BalanceAuditTrail userId={simulatedView?.memberId} />
-          <BalanceAuditModal
-            open={auditTrailModalOpen}
-            onClose={() => setAuditTrailModalOpen(false)}
-            userId={simulatedView?.memberId}
-          />
-        </>
+        <BalanceAuditModal
+          open={auditTrailModalOpen}
+          onClose={() => setAuditTrailModalOpen(false)}
+          userId={simulatedView?.memberId}
+        />
       )}
 
       {/* Projection Vision Card */}
@@ -4858,6 +4855,11 @@ export const ProfitTrackerPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Recent Activity */}
+      {!isLicensee && (
+        <BalanceAuditTrail userId={simulatedView?.memberId} />
+      )}
 
       {/* Daily Projection Dialog */}
       <Dialog open={dailyProjectionOpen} onOpenChange={setDailyProjectionOpen}>

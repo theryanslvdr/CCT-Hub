@@ -5259,6 +5259,7 @@ async def get_team_transactions(
     page: int = 1,
     page_size: int = 20,
     transaction_type: Optional[str] = None,  # deposit, withdrawal, or None for all
+    user_search: Optional[str] = None,
     user: dict = Depends(require_admin)
 ):
     """Get all team transactions (deposits and withdrawals) with pagination"""
@@ -5270,15 +5271,26 @@ async def get_team_transactions(
     all_users = await db.users.find({}, {"_id": 0, "id": 1, "full_name": 1, "email": 1}).to_list(1000)
     user_lookup = {u["id"]: {"name": u.get("full_name", "Unknown"), "email": u.get("email", "")} for u in all_users}
     
-    # Build query
-    query = {}
+    # CRITICAL: Always exclude type=profit entries — these are system-generated duplicates
+    query = {"type": {"$ne": "profit"}}
+    
     if transaction_type == "withdrawal":
         query["is_withdrawal"] = True
     elif transaction_type == "deposit":
-        query["$or"] = [
+        query["$and"] = query.get("$and", [])
+        query["$and"].append({"$or": [
             {"is_withdrawal": {"$ne": True}},
             {"is_withdrawal": {"$exists": False}}
+        ]})
+    
+    # User search filter
+    if user_search:
+        matching_user_ids = [
+            u["id"] for u in all_users
+            if user_search.lower() in u.get("full_name", "").lower()
+            or user_search.lower() in u.get("email", "").lower()
         ]
+        query["user_id"] = {"$in": matching_user_ids}
     
     skip = (page - 1) * page_size
     total = await db.deposits.count_documents(query)
@@ -5296,22 +5308,12 @@ async def get_team_transactions(
         tx["type"] = "withdrawal" if tx.get("is_withdrawal") else "deposit"
         enriched.append(tx)
     
-    # Get summary stats
-    all_deposits = await db.deposits.find({}, {"_id": 0}).to_list(10000)
-    total_deposits = sum(d.get("amount", 0) for d in all_deposits if not d.get("is_withdrawal") and d.get("amount", 0) > 0)
-    total_withdrawals = sum(abs(d.get("amount", 0)) for d in all_deposits if d.get("is_withdrawal"))
-    
     return {
         "transactions": enriched,
         "total": total,
         "page": page,
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size if total > 0 else 1,
-        "summary": {
-            "total_deposits": round(total_deposits, 2),
-            "total_withdrawals": round(total_withdrawals, 2),
-            "net_flow": round(total_deposits - total_withdrawals, 2)
-        }
     }
 
 @admin_router.get("/transactions/stats")
@@ -5320,7 +5322,8 @@ async def get_transaction_stats(user: dict = Depends(require_admin)):
     if user["role"] not in ["super_admin", "master_admin"]:
         raise HTTPException(status_code=403, detail="Only Super Admin and Master Admin can view transaction stats")
     
-    all_deposits = await db.deposits.find({}, {"_id": 0}).to_list(10000)
+    # CRITICAL: Exclude type=profit entries from all stats
+    all_deposits = await db.deposits.find({"type": {"$ne": "profit"}}, {"_id": 0}).to_list(10000)
     
     # Calculate stats
     deposits = [d for d in all_deposits if not d.get("is_withdrawal") and d.get("amount", 0) > 0]

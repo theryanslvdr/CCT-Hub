@@ -299,8 +299,8 @@ export const adminAPI = {
   markNotificationRead: (notificationId) => api.put(`/admin/notifications/${notificationId}/read`),
   markAllNotificationsRead: () => api.put('/admin/notifications/read-all'),
   // Team Transactions
-  getTeamTransactions: (page = 1, pageSize = 20, type = null) => api.get('/admin/transactions', { 
-    params: { page, page_size: pageSize, transaction_type: type } 
+  getTeamTransactions: (page = 1, pageSize = 20, type = null, userSearch = null) => api.get('/admin/transactions', { 
+    params: { page, page_size: pageSize, transaction_type: type, user_search: userSearch } 
   }),
   getTransactionStats: () => api.get('/admin/transactions/stats'),
   // Transaction Corrections
