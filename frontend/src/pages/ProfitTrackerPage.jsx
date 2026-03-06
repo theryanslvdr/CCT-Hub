@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api, { profitAPI, currencyAPI, adminAPI, tradeAPI } from '@/lib/api';
-import BalanceAuditTrail from '@/components/BalanceAuditTrail';
+import BalanceAuditTrail, { BalanceAuditModal } from '@/components/BalanceAuditTrail';
 import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -812,6 +812,7 @@ export const ProfitTrackerPage = () => {
   
   // Simulate Actions Dialog (combined simulate deposit, withdrawal, commission)
   const [simulateActionsOpen, setSimulateActionsOpen] = useState(false);
+  const [auditTrailModalOpen, setAuditTrailModalOpen] = useState(false);
   
   // Simulate Error Dialog
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -2608,9 +2609,10 @@ export const ProfitTrackerPage = () => {
         {/* Simulate Actions Popup */}
         {/* Desktop: Dialog, Mobile: Full-screen overlay */}
         {!isMobile && (
+          <div className="hidden md:flex gap-2">
           <Dialog open={simulateActionsOpen} onOpenChange={setSimulateActionsOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-primary gap-2 w-full md:w-auto hidden md:flex" data-testid="simulate-actions-button">
+              <Button className="btn-primary gap-2" data-testid="simulate-actions-button">
                 <Calculator className="w-4 h-4" /> Simulate Actions
               </Button>
             </DialogTrigger>
@@ -2696,16 +2698,33 @@ export const ProfitTrackerPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+          <Button
+            variant="outline"
+            className="btn-secondary gap-2"
+            onClick={() => setAuditTrailModalOpen(true)}
+            data-testid="balance-trail-button"
+          >
+            <TrendingUp className="w-4 h-4 text-blue-400" /> Balance Trail
+          </Button>
+          </div>
         )}
 
         {/* Mobile Simulate Actions Button */}
-        <div className="md:hidden w-full">
+        <div className="md:hidden w-full flex gap-2">
           <Button 
-            className="btn-primary gap-2 w-full" 
+            className="btn-primary gap-2 flex-1" 
             onClick={() => setSimulateActionsOpen(true)}
             data-testid="simulate-actions-button-mobile"
           >
             <Calculator className="w-4 h-4" /> Simulate Actions
+          </Button>
+          <Button
+            variant="outline"
+            className="btn-secondary gap-2"
+            onClick={() => setAuditTrailModalOpen(true)}
+            data-testid="balance-trail-button-mobile"
+          >
+            <TrendingUp className="w-4 h-4 text-blue-400" />
           </Button>
         </div>
 
@@ -4608,7 +4627,14 @@ export const ProfitTrackerPage = () => {
 
       {/* Balance Audit Trail */}
       {!isLicensee && (
-        <BalanceAuditTrail userId={simulatedView?.memberId} />
+        <>
+          <BalanceAuditTrail userId={simulatedView?.memberId} />
+          <BalanceAuditModal
+            open={auditTrailModalOpen}
+            onClose={() => setAuditTrailModalOpen(false)}
+            userId={simulatedView?.memberId}
+          />
+        </>
       )}
 
       {/* Projection Vision Card */}
