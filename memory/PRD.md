@@ -437,6 +437,14 @@ LOT Size = math.trunc(Account Value / 980 * 100) / 100  (truncation, NOT roundin
 
 **Test Status:** 100% passed (iteration_140, 11/11 backend + all frontend features verified)
 
+### Critical Balance Calculation Bug Fix (Mar 6, 2026) - COMPLETE
+**Root Cause:** The `deposits` collection stores both real deposits AND `type=profit` entries (duplicates of trade_logs). The `/api/profit/daily-balances` endpoint was counting profit-type deposits as regular deposits AND also counting them from trade_logs → double-counting $8,000.85.
+**Fix Applied:**
+- Backend `server.py`: Added `type != 'profit'` filter in daily-balances and debug-transactions endpoints
+- Frontend `ProfitTrackerPage.jsx`: Filtered `type=profit` from deposits state in both self-view and simulated view
+- Account value corrected from $41,664.94 (buggy) → $33,664.09 (correct)
+**Testing:** 9/9 backend tests passed, frontend verified via screenshots and testing agent
+
 ### Comprehensive Documentation (Mar 6, 2026) - COMPLETE
 **Files Created:**
 - `/app/docs/2026-03_Member_Instructionals.md` — 25 step-by-step guides for members
