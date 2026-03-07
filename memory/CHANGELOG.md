@@ -1,5 +1,27 @@
 # CrossCurrent Hub - Changelog
 
+## 2026-03-07 - Commission Display Fix + Cache Purge Button
+
+### Bug Fix: Commissions Missing from Daily Projection Table
+- **Root cause:** Three-part issue:
+  1. Standalone commissions on weekends/holidays were not being shifted to the nearest trading day during merge, causing them to be lost in the daily projection (which only shows trading days)
+  2. Total Commission summary card in daily projection only counted `completed` status days, excluding commissions on `missed` days
+  3. Commission column for `missed` status days showed "Add" instead of the actual commission value
+- **Fix:**
+  1. Added holiday-aware date shifting during commission merge in `loadData()` — weekends and global holidays shift to previous trading day
+  2. Loaded global holidays within `loadData()` Promise.all to make them available during merge
+  3. Removed `.filter(day => day.status === 'completed')` from Total Commission summary card
+  4. Updated commission column for missed-status days to show actual value with cyan styling when commission exists
+- **Result:** Daily projection Total Commission ($917.48 for Jan 2026) now matches monthly table exactly. Commission values like +$904.48 on Fri Jan 16 correctly aggregate shifted weekend/holiday commissions.
+- **Files modified:** `ProfitTrackerPage.jsx` (commission merge logic), `DailyProjectionDialog.jsx` (summary card + column rendering)
+- **Test report:** `/app/test_reports/iteration_147.json` (7/7 features passed)
+
+### Feature: Clear Cache & Reload Button
+- Added "Clear Cache & Reload" button (amber colored) to user profile dropdown in sidebar
+- Functionality: Unregisters service workers, clears browser caches, clears localStorage/sessionStorage (preserves auth token), then force reloads
+- Available in both expanded and collapsed sidebar views
+- **File modified:** `Sidebar.jsx`
+
 ## 2026-03-07 - Bug Fixes + Transaction Correction Guide + ProfitTrackerPage Refactoring
 
 ### Bug Fix: Signal Deactivation (500 Error)
