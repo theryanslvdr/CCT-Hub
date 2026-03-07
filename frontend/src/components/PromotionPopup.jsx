@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { settingsAPI } from '@/lib/api';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Megaphone, Sparkles, Rocket } from 'lucide-react';
 
@@ -73,6 +73,7 @@ export const PromotionPopup = () => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="glass-card border-zinc-700 sm:max-w-md p-0 overflow-hidden" data-testid="promotion-popup">
+        <DialogTitle className="sr-only">{popup.title || 'Announcement'}</DialogTitle>
         {/* Accent header bar */}
         <div className={`h-1.5 bg-gradient-to-r ${style.accent}`} />
 

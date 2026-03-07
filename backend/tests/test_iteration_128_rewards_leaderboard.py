@@ -8,7 +8,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://pytest-suite-1.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://transaction-guide.preview.emergentagent.com')
 
 class TestRewardsAPIEndpoints:
     """Test rewards API endpoints for Phase 2 features"""
