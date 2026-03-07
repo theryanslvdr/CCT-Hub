@@ -3,6 +3,8 @@ import api, { profitAPI, currencyAPI, adminAPI, tradeAPI } from '@/lib/api';
 import BalanceAuditTrail, { BalanceAuditModal } from '@/components/BalanceAuditTrail';
 import MyTransactionEdit from '@/components/MyTransactionEdit';
 import { DailyProjectionDialog } from '@/components/profit/DailyProjectionDialog';
+import { StatsCards } from '@/components/profit/StatsCards';
+import { AdminActionsPanel } from '@/components/profit/AdminActionsPanel';
 import { formatNumber, calculateWithdrawalFees, calculateDepositFees } from '@/lib/utils';
 import {
   truncateTo2Decimals, formatFullCurrency, formatLargeNumber, formatCompact,
@@ -221,6 +223,7 @@ export const ProfitTrackerPage = () => {
   const [newAccountValue, setNewAccountValue] = useState('');
   const [resetReason, setResetReason] = useState('');
   const [resetPassword, setResetPassword] = useState('');
+  const [resetNewBalance, setResetNewBalance] = useState('');
   
   // Manual deposit override
   const [manualDepositMode, setManualDepositMode] = useState(false);
@@ -1752,191 +1755,23 @@ export const ProfitTrackerPage = () => {
         </Card>
       )}
 
-      {/* Summary Cards - For licensees: 4 cards (Account Value, Deposits, Total Profit, Account Growth), For others: 4 cards */}
-      <div className={`grid gap-3 ${isLicensee ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
-        <Card className="glass-card" data-testid="account-value-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-zinc-400">Account Value</p>
-                  {!isLicensee && !simulatedView && (
-                    <button
-                      onClick={() => openBalanceVerification(displayAccountValue)}
-                      className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-                      title="Sync with Merin balance"
-                      data-testid="sync-balance-btn"
-                    >
-                      Sync
-                    </button>
-                  )}
-                  <button
-                    onClick={() => toggleCardVisibility('accountValue')}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                    title={hiddenCards.accountValue ? "Show value" : "Hide value"}
-                    data-testid="toggle-account-value"
-                  >
-                    {hiddenCards.accountValue ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                  </button>
-                </div>
-                <ValueTooltip exactValue={hiddenCards.accountValue ? MASKED_VALUE : formatFullCurrency(displayAccountValue)}>
-                  {/* Desktop: Full amount, Mobile: Compact */}
-                  <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{maskAmount(formatLargeNumber(displayAccountValue), hiddenCards.accountValue)}</span>
-                    <span className="md:hidden">{maskAmount(formatCompact(displayAccountValue), hiddenCards.accountValue)}</span>
-                  </p>
-                </ValueTooltip>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                <Wallet className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card" data-testid="total-deposits-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-zinc-400">Deposits</p>
-                  <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                    <SelectTrigger className="w-16 h-5 text-[10px] bg-zinc-900/50 border-zinc-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="PHP">PHP</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <button
-                    onClick={() => toggleCardVisibility('deposits')}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                    title={hiddenCards.deposits ? "Show value" : "Hide value"}
-                    data-testid="toggle-deposits"
-                  >
-                    {hiddenCards.deposits ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                  </button>
-                </div>
-                <ValueTooltip exactValue={hiddenCards.deposits ? MASKED_VALUE : `${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))} (${formatFullCurrency(effectiveTotalDeposits)} USDT)`}>
-                  <p className="text-2xl font-bold font-mono text-white mt-1">
-                    <span className="hidden md:inline">{maskAmount(`${getCurrencySymbol(selectedCurrency)}${formatNumber(convertAmount(effectiveTotalDeposits, selectedCurrency))}`, hiddenCards.deposits)}</span>
-                    <span className="md:hidden">{maskAmount(formatCompact(effectiveTotalDeposits), hiddenCards.deposits)}</span>
-                  </p>
-                </ValueTooltip>
-                <p className="text-[10px] text-zinc-500 hidden md:block">{hiddenCards.deposits ? '' : `≈ ${formatFullCurrency(effectiveTotalDeposits)} USDT`}</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
-                <ArrowDownToLine className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card" data-testid="total-profit-card">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-zinc-400">Total Profit</p>
-                  <button
-                    onClick={() => toggleCardVisibility('profit')}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                    title={hiddenCards.profit ? "Show value" : "Hide value"}
-                    data-testid="toggle-profit"
-                  >
-                    {hiddenCards.profit ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                  </button>
-                </div>
-                <ValueTooltip exactValue={hiddenCards.profit ? MASKED_VALUE : formatFullCurrency(effectiveTotalProfit)}>
-                  <p className={`text-2xl font-bold font-mono mt-1 ${effectiveTotalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    <span className="hidden md:inline">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatLargeNumber(effectiveTotalProfit)}`, hiddenCards.profit)}</span>
-                    <span className="md:hidden">{maskAmount(`${effectiveTotalProfit >= 0 ? '+' : ''}${formatCompact(effectiveTotalProfit)}`, hiddenCards.profit)}</span>
-                  </p>
-                </ValueTooltip>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* LOT Size card - Hidden for licensees (they don't trade) */}
-        {!isLicensee && (
-          <Card className="glass-card" data-testid="current-lot-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-zinc-400">LOT Size</p>
-                    <button
-                      onClick={() => toggleCardVisibility('lotSize')}
-                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                      title={hiddenCards.lotSize ? "Show value" : "Hide value"}
-                      data-testid="toggle-lot-size"
-                    >
-                      {hiddenCards.lotSize ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    </button>
-                  </div>
-                  <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                    {maskAmount(effectiveLotSize.toFixed(2), hiddenCards.lotSize)}
-                  </p>
-                  <p className="text-[10px] text-zinc-500">Balance ÷ 980</p>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                  <Calculator className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Account Growth card - Only for licensees */}
-        {isLicensee && (
-          <Card className="glass-card" data-testid="account-growth-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-zinc-400">Account Growth</p>
-                    <button
-                      onClick={() => toggleCardVisibility('growth')}
-                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
-                      title={hiddenCards.growth ? "Show value" : "Hide value"}
-                      data-testid="toggle-growth"
-                    >
-                      {hiddenCards.growth ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    </button>
-                  </div>
-                  <p className={`text-2xl font-bold font-mono mt-1 ${
-                    licenseeAccountGrowth !== null && licenseeAccountGrowth >= 0 
-                      ? 'text-emerald-400' 
-                      : 'text-red-400'
-                  }`}>
-                    {licenseeAccountGrowth !== null 
-                      ? maskAmount(`${licenseeAccountGrowth >= 0 ? '+' : ''}${licenseeAccountGrowth.toFixed(2)}%`, hiddenCards.growth)
-                      : '--'
-                    }
-                  </p>
-                  <p className="text-[10px] text-zinc-500">
-                    From initial {maskAmount(formatCompact(simulatedView?.starting_amount || simulatedView?.startingAmount || 0), hiddenCards.growth)}
-                  </p>
-                </div>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  licenseeAccountGrowth !== null && licenseeAccountGrowth >= 0
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-600'
-                    : 'bg-gradient-to-br from-red-500 to-red-600'
-                }`}>
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {/* Summary Cards */}
+      <StatsCards
+        isLicensee={isLicensee}
+        simulatedView={simulatedView}
+        displayAccountValue={displayAccountValue}
+        effectiveTotalDeposits={effectiveTotalDeposits}
+        effectiveTotalProfit={effectiveTotalProfit}
+        effectiveLotSize={effectiveLotSize}
+        licenseeAccountGrowth={licenseeAccountGrowth}
+        hiddenCards={hiddenCards}
+        toggleCardVisibility={toggleCardVisibility}
+        selectedCurrency={selectedCurrency}
+        setSelectedCurrency={setSelectedCurrency}
+        getCurrencySymbol={getCurrencySymbol}
+        convertAmount={convertAmount}
+        openBalanceVerification={openBalanceVerification}
+      />
 
       {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) - Hidden for licensees */}
       {activeSignal && !isLicensee && (
@@ -3636,126 +3471,26 @@ export const ProfitTrackerPage = () => {
         </Dialog>
         </div>
 
-        {/* Access Records and Reset Buttons - Side by side on mobile, full width together */}
-        <div className="flex gap-2 w-full md:w-auto md:ml-auto">
-          {/* Access Records Button - Combined Popup */}
-          <Dialog open={accessRecordsOpen} onOpenChange={setAccessRecordsOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="btn-secondary gap-2 flex-1 md:flex-none" data-testid="access-records-button">
-                <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline">Access </span>Records
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass-card border-zinc-800 max-w-sm">
-              <DialogHeader>
-                <DialogTitle className="text-white flex items-center gap-2">
-                  <FolderOpen className="w-5 h-5 text-blue-400" /> Access Records
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 mt-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full btn-secondary gap-2 justify-start" 
-                  onClick={() => { setAccessRecordsOpen(false); setDepositRecordsOpen(true); }}
-                  data-testid="view-deposits-button"
-                >
-                  <FileText className="w-4 h-4 text-emerald-400" /> Deposit Records
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full btn-secondary gap-2 justify-start" 
-                  onClick={() => { setAccessRecordsOpen(false); setWithdrawalRecordsOpen(true); }}
-                  data-testid="view-withdrawals-button"
-                >
-                  <Receipt className="w-4 h-4 text-amber-400" /> Withdrawal Records
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full btn-secondary gap-2 justify-start" 
-                  onClick={() => { setAccessRecordsOpen(false); setCommissionRecordsOpen(true); }}
-                  data-testid="view-commissions-button"
-                >
-                  <Award className="w-4 h-4 text-purple-400" /> Commission Records
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* Reset Button */}
-          <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!open) resetResetDialog(); else setResetDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="btn-secondary gap-2 text-amber-400 hover:text-amber-300 flex-1 md:flex-none" data-testid="reset-tracker-button">
-                <RotateCcw className="w-4 h-4" /> Reset<span className="hidden sm:inline"> Tracker</span>
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="glass-card border-zinc-800">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                {resetStep === 'confirm' && <><RotateCcw className="w-5 h-5 text-red-400" /> Reset Profit Tracker</>}
-                {resetStep === 'newBalance' && <><Wallet className="w-5 h-5 text-blue-400" /> Set New Account Value</>}
-                {resetStep === 'password' && <><Lock className="w-5 h-5 text-amber-400" /> Security Verification</>}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {resetStep === 'confirm' && (
-              <div className="space-y-4 mt-4">
-                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
-                  <p className="font-medium mb-2">Warning: This action cannot be undone!</p>
-                  <p className="text-sm">Resetting will delete all your:</p>
-                  <ul className="list-disc list-inside text-sm mt-2">
-                    <li>Deposit records</li>
-                    <li>Withdrawal records</li>
-                    <li>Trade logs</li>
-                    <li>Profit calculations</li>
-                  </ul>
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" onClick={() => setResetDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetConfirm}>
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {resetStep === 'password' && (
-              <div className="space-y-4 mt-4">
-                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                  <div className="flex items-start gap-3">
-                    <Lock className="w-5 h-5 text-amber-400 mt-0.5" />
-                    <div>
-                      <p className="text-amber-400 font-medium">Security Verification Required</p>
-                      <p className="text-sm text-zinc-400 mt-1">
-                        Please enter your password to confirm the reset. You&apos;ll be guided through setting up your new tracker.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-zinc-300">Password</Label>
-                  <Input
-                    type="password"
-                    value={resetPassword}
-                    onChange={(e) => setResetPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="input-dark mt-1"
-                    data-testid="reset-password-input"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" onClick={() => setResetStep('confirm')}>
-                    Back
-                  </Button>
-                  <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleResetWithPassword} data-testid="confirm-reset-button">
-                    <Lock className="w-4 h-4 mr-2" /> Confirm Reset
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-        </div>
+        {/* Access Records and Reset Buttons */}
+          <AdminActionsPanel
+            accessRecordsOpen={accessRecordsOpen}
+            setAccessRecordsOpen={setAccessRecordsOpen}
+            setDepositRecordsOpen={setDepositRecordsOpen}
+            setWithdrawalRecordsOpen={setWithdrawalRecordsOpen}
+            setCommissionRecordsOpen={setCommissionRecordsOpen}
+            resetDialogOpen={resetDialogOpen}
+            setResetDialogOpen={setResetDialogOpen}
+            resetStep={resetStep}
+            setResetStep={setResetStep}
+            resetPassword={resetPassword}
+            setResetPassword={setResetPassword}
+            resetNewBalance={resetNewBalance}
+            setResetNewBalance={setResetNewBalance}
+            handleResetConfirm={handleResetConfirm}
+            handleResetWithPassword={handleResetWithPassword}
+            resetResetDialog={resetResetDialog}
+            summary={summary}
+          />
       </div>
       )}
 
