@@ -1,5 +1,18 @@
 # CrossCurrent Hub - Changelog
 
+### Feature: Commission Backfill (skip_deposit)
+- Added `skip_deposit: bool = False` field to `CommissionCreate` model
+- When `true`, commission is recorded but NO deposit is created (account balance unaffected)
+- Frontend "Adjust Commission" dialog now has a "Display only (don't add to balance)" checkbox
+- **Use case:** Backfilling historical commissions that were lost due to the save bug, without double-counting in account value
+- **Files modified:** `backend/routes/profit_routes.py`, `frontend/src/pages/ProfitTrackerPage.jsx`
+
+### Bug Fix: Publitio Image Upload (P1)
+- **Root cause:** `get_publitio_creds()` in `publitio.py` was reading from `db.settings` (non-existent collection with `_id: "global"`) instead of `db.platform_settings` (the actual settings collection). Credentials could never be found.
+- **Fix:** Changed to read from `db.platform_settings.find_one({})`
+- **Note:** User's Publitio API keys are currently empty in the database. User needs to re-enter them in Platform Settings → API Keys.
+- **Files modified:** `backend/routes/publitio.py`
+
 ## 2026-03-07 - Commission Save Bug + Batch Sync Fix + Platform Settings Black Screen Fix
 
 ### Bug Fix: Commission Save Endpoint (P0 - CRITICAL)

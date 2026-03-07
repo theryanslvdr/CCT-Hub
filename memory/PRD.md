@@ -101,6 +101,8 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] Fix batch sync to rewards platform button
 - [x] Add auto batch sync every 4 hours
 - [x] Fix Platform Settings black screen (dead useEffect crash)
+- [x] Commission backfill with skip_deposit option
+- [x] Fix Publitio reading from wrong DB collection
 - [ ] Further ProfitTrackerPage.jsx decomposition (Transaction Dialogs, Projection Section)
 - [ ] Performance optimization (caching, pagination improvements)
 - [ ] User onboarding documentation for transaction correction features
