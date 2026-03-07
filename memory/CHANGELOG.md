@@ -1,5 +1,19 @@
 # CrossCurrent Hub - Changelog
 
+### Critical Fix: Commission as Display-Only (Balance Decoupled)
+- **Root cause:** Commissions were factored into the balance calculation at 3 points in `profitCalculations.js`:
+  1. Starting balance subtracted commissions → artificially lowered all "Balance Before" values
+  2. Today's effective balance subtracted commission
+  3. Running balance added commission to next day's calculation
+- **User's use case:** People enter a lump-sum total commission (not daily values). Including this in balance math distorted all projections.
+- **Fix:** Removed commission from all 3 balance calculation points. Commission is now purely display-only:
+  - Shows in the Commission column per day
+  - Shows in the Total Commission summary card
+  - Does NOT affect Balance Before, Lot Size, Target Profit, or P/L Diff
+- Also: Adjust Commission dialog now always sends `skip_deposit: true` (no deposit created), removed the skip_deposit checkbox since it's always on.
+- **Files modified:** `frontend/src/utils/profitCalculations.js`, `frontend/src/pages/ProfitTrackerPage.jsx`
+- **Test report:** `/app/test_reports/iteration_150.json` (7/7 backend, 7/7 frontend passed)
+
 ### Feature: Commission Backfill (skip_deposit)
 - Added `skip_deposit: bool = False` field to `CommissionCreate` model
 - When `true`, commission is recorded but NO deposit is created (account balance unaffected)
