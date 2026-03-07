@@ -47,6 +47,7 @@ class CommissionCreate(BaseModel):
     traders_count: int = 1
     notes: Optional[str] = None
     commission_date: Optional[str] = None
+    skip_deposit: bool = False  # True = record-only, don't add to account balance
 
 class OnboardingTransaction(BaseModel):
     type: str
@@ -487,26 +488,28 @@ async def record_commission(data: CommissionCreate, user: dict = Depends(deps.ge
     
     await deps.db.commissions.insert_one(commission)
     
-    # Also record as a deposit (commission adds to account balance)
-    deposit = {
-        "id": str(uuid.uuid4()),
-        "user_id": user["id"],
-        "amount": data.amount,
-        "product": "COMMISSION",
-        "currency": "USDT",
-        "notes": f"Referral commission ({data.traders_count} traders)",
-        "is_commission": True,
-        "commission_date": commission_date,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await deps.db.deposits.insert_one(deposit)
+    # Also record as a deposit (commission adds to account balance) — unless skip_deposit
+    if not data.skip_deposit:
+        deposit = {
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "amount": data.amount,
+            "product": "COMMISSION",
+            "currency": "USDT",
+            "notes": f"Referral commission ({data.traders_count} traders)",
+            "is_commission": True,
+            "commission_date": commission_date,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await deps.db.deposits.insert_one(deposit)
     
     return {
         "message": "Commission recorded successfully",
         "commission_id": commission["id"],
         "amount": data.amount,
         "traders_count": data.traders_count,
-        "commission_date": commission_date
+        "commission_date": commission_date,
+        "deposit_created": not data.skip_deposit
     }
 
 

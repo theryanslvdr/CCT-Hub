@@ -171,6 +171,7 @@ export const ProfitTrackerPage = () => {
   const [adjustCommissionDate, setAdjustCommissionDate] = useState(null);
   const [adjustCommissionAmount, setAdjustCommissionAmount] = useState('');
   const [adjustCommissionLoading, setAdjustCommissionLoading] = useState(false);
+  const [adjustCommissionSkipDeposit, setAdjustCommissionSkipDeposit] = useState(false);
   
   // Access Records Dialog (combined deposit, withdrawal, commission records)
   const [accessRecordsOpen, setAccessRecordsOpen] = useState(false);
@@ -1102,6 +1103,7 @@ export const ProfitTrackerPage = () => {
   const handleOpenAdjustCommission = (day) => {
     setAdjustCommissionDate(day);
     setAdjustCommissionAmount(day.commission?.toString() || '');
+    setAdjustCommissionSkipDeposit(false);
     setAdjustCommissionOpen(true);
   };
 
@@ -1123,7 +1125,8 @@ export const ProfitTrackerPage = () => {
         amount: parseFloat(adjustCommissionAmount),
         traders_count: 1,
         notes: `Commission adjustment for ${adjustCommissionDate.dateStr}`,
-        commission_date: adjustCommissionDate.dateKey
+        commission_date: adjustCommissionDate.dateKey,
+        skip_deposit: adjustCommissionSkipDeposit
       });
       
       toast.success('Commission adjusted successfully!');
@@ -3755,6 +3758,19 @@ export const ProfitTrackerPage = () => {
                 This will add commission earnings for the selected date
               </p>
             </div>
+            <label className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={adjustCommissionSkipDeposit}
+                onChange={(e) => setAdjustCommissionSkipDeposit(e.target.checked)}
+                className="mt-0.5 accent-amber-500"
+                data-testid="skip-deposit-checkbox"
+              />
+              <div>
+                <p className="text-sm text-amber-300 font-medium">Display only (don't add to balance)</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Use this for backfilling historical commissions that are already reflected in your account value</p>
+              </div>
+            </label>
             <Button 
               onClick={handleSubmitAdjustCommission} 
               className="w-full btn-primary"

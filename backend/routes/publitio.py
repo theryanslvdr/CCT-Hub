@@ -21,7 +21,7 @@ ALLOWED_MIME_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
 async def get_publitio_creds():
     """Get Publitio credentials from DB settings (fallback to env)."""
     db = deps.db
-    settings = await db.settings.find_one({"_id": "global"}, {"_id": 0})
+    settings = await db.platform_settings.find_one({}, {"_id": 0})
     if settings:
         api_key = settings.get("publitio_api_key", "")
         api_secret = settings.get("publitio_api_secret", "")
