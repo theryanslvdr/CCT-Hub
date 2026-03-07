@@ -93,7 +93,8 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] **Frontend refactoring** - ProfitTrackerPage utilities and DailyProjectionDialog extracted
 
 ## P2 Backlog
-- [ ] Further ProfitTrackerPage.jsx decomposition (ProjectionVision, StatsCards, TransactionDialogs)
 - [x] E2E test suite with pytest — **135 tests, all passing**
+- [x] ProfitTrackerPage.jsx partial decomposition — StatsCards + AdminActionsPanel extracted
+- [ ] Further ProfitTrackerPage.jsx decomposition (Transaction Dialogs, Projection Section)
 - [ ] Performance optimization (caching, pagination improvements)
 - [ ] User onboarding documentation for transaction correction features

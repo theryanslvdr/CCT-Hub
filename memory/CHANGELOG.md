@@ -1,6 +1,6 @@
 # CrossCurrent Hub - Changelog
 
-## 2026-03-07 - Bug Fixes + Transaction Correction Guide
+## 2026-03-07 - Bug Fixes + Transaction Correction Guide + ProfitTrackerPage Refactoring
 
 ### Bug Fix: Signal Deactivation (500 Error)
 - **Root cause:** `TradingSignalUpdate` model in `models/trade.py` was missing the `is_official` field, causing `AttributeError` when the backend tried to access it during signal updates
@@ -11,8 +11,19 @@
 - **Root cause:** `getTradeWindowInfo()` in `TradeMonitorPage.jsx` had a 30-minute post-trade window. If the user visited the page more than 30 minutes after trade time, the Exit Trade button wouldn't show
 - **Fix:** Extended the post-trade window from 30 minutes to 8 hours, ensuring the Exit Trade button is accessible for the full trading session
 
-### Documentation: Transaction Correction Guide
+### Bug Fix: Missing resetNewBalance State (Found by Testing Agent)
+- **Root cause:** During AdminActionsPanel extraction, the `resetNewBalance` state variable was referenced as a prop but never defined in ProfitTrackerPage
+- **Fix:** Added `const [resetNewBalance, setResetNewBalance] = useState('')` to ProfitTrackerPage
+
+### Documentation: Transaction Correction Guide with Screenshots
 - Created `/app/memory/transaction_correction_guide.md` with step-by-step instructions for both members and admins
+- 3 screenshots saved to `/app/frontend/public/guide-images/` (member transactions, admin transactions, admin correction dialog)
+
+### ProfitTrackerPage.jsx Refactoring (P1)
+- Extracted `StatsCards` component → `/app/frontend/src/components/profit/StatsCards.jsx` (~170 lines)
+- Extracted `AdminActionsPanel` component → `/app/frontend/src/components/profit/AdminActionsPanel.jsx` (~120 lines)
+- File reduced from 4,451 → 4,184 lines (~6% reduction, 267 lines extracted)
+- Test report: `/app/test_reports/iteration_146.json` (100% pass rate)
 
 ## 2026-03-06 - Comprehensive Pytest Suite Complete
 
