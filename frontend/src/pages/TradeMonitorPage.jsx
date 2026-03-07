@@ -255,14 +255,15 @@ export const TradeMonitorPage = () => {
     const tzOffset = getTimezoneOffset(signalTz);
     tradeTime.setUTCHours(hours - tzOffset, minutes, 0, 0);
     
-    // If trade time has passed for today, check if within 30 min post-trade window
+    // If trade time has passed for today
     if (tradeTime <= now) {
       const timeSinceTrade = now - tradeTime;
-      const thirtyMinutesMs = 30 * 60 * 1000;
-      if (timeSinceTrade <= thirtyMinutesMs) {
+      const eightHoursMs = 8 * 60 * 60 * 1000;
+      if (timeSinceTrade <= eightHoursMs) {
+        // Within 8 hours after trade time — keep showing as post-trade so Exit Trade button remains accessible
         return { canTrade: true, minutesUntilOpen: 0, isTradeTime: true, isPostTrade: true };
       }
-      // Trade window closed for today
+      // Trade window closed for today (more than 8 hours since trade time)
       tradeTime.setDate(tradeTime.getDate() + 1);
     }
     

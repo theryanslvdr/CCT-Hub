@@ -40,6 +40,7 @@ class TradingSignalUpdate(BaseModel):
     profit_points: Optional[float] = None
     notes: Optional[str] = None
     is_active: Optional[bool] = None
+    is_official: Optional[bool] = None
 
 
 class TradingSignalResponse(BaseModel):

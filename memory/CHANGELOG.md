@@ -1,5 +1,19 @@
 # CrossCurrent Hub - Changelog
 
+## 2026-03-07 - Bug Fixes + Transaction Correction Guide
+
+### Bug Fix: Signal Deactivation (500 Error)
+- **Root cause:** `TradingSignalUpdate` model in `models/trade.py` was missing the `is_official` field, causing `AttributeError` when the backend tried to access it during signal updates
+- **Fix:** Added `is_official: Optional[bool] = None` to the `TradingSignalUpdate` Pydantic model
+- Signal deactivation/reactivation now works correctly
+
+### Bug Fix: Exit Trade Button Not Appearing
+- **Root cause:** `getTradeWindowInfo()` in `TradeMonitorPage.jsx` had a 30-minute post-trade window. If the user visited the page more than 30 minutes after trade time, the Exit Trade button wouldn't show
+- **Fix:** Extended the post-trade window from 30 minutes to 8 hours, ensuring the Exit Trade button is accessible for the full trading session
+
+### Documentation: Transaction Correction Guide
+- Created `/app/memory/transaction_correction_guide.md` with step-by-step instructions for both members and admins
+
 ## 2026-03-06 - Comprehensive Pytest Suite Complete
 
 ### Backend Pytest Suite (P0 - Launch Readiness)
