@@ -1121,13 +1121,12 @@ export const ProfitTrackerPage = () => {
     setAdjustCommissionLoading(true);
     try {
       // Use the commission endpoint with the specific date
-      // Commissions are display-only — they don't affect account balance
       await api.post('/profit/commission', {
         amount: parseFloat(adjustCommissionAmount),
         traders_count: 1,
         notes: `Commission for ${adjustCommissionDate.dateStr}`,
         commission_date: adjustCommissionDate.dateKey,
-        skip_deposit: true
+        skip_deposit: adjustCommissionSkipDeposit
       });
       
       toast.success('Commission adjusted successfully!');
@@ -3755,10 +3754,20 @@ export const ProfitTrackerPage = () => {
                   data-testid="adjust-commission-amount"
                 />
               </div>
-              <p className="text-xs text-zinc-500 mt-1">
-                Enter your total referral commission. This is display-only and does not affect your account balance.
-              </p>
             </div>
+            <label className="flex items-start gap-2 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={adjustCommissionSkipDeposit}
+                onChange={(e) => setAdjustCommissionSkipDeposit(e.target.checked)}
+                className="mt-0.5 accent-amber-500"
+                data-testid="skip-deposit-checkbox"
+              />
+              <div>
+                <p className="text-sm text-zinc-300">Historical correction only</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Check this to record past commissions without adding to your account balance</p>
+              </div>
+            </label>
             <Button 
               onClick={handleSubmitAdjustCommission} 
               className="w-full btn-primary"
