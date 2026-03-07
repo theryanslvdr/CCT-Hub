@@ -97,6 +97,10 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] ProfitTrackerPage.jsx partial decomposition — StatsCards + AdminActionsPanel extracted
 - [x] Fix commissions missing from daily projection table
 - [x] Add Clear Cache & Reload button to sidebar profile menu
+- [x] Fix commission save endpoint (CommissionCreate model missing fields)
+- [x] Fix batch sync to rewards platform button
+- [x] Add auto batch sync every 4 hours
+- [x] Fix Platform Settings black screen (dead useEffect crash)
 - [ ] Further ProfitTrackerPage.jsx decomposition (Transaction Dialogs, Projection Section)
 - [ ] Performance optimization (caching, pagination improvements)
 - [ ] User onboarding documentation for transaction correction features

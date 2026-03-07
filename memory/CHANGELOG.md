@@ -1,5 +1,27 @@
 # CrossCurrent Hub - Changelog
 
+## 2026-03-07 - Commission Save Bug + Batch Sync Fix + Platform Settings Black Screen Fix
+
+### Bug Fix: Commission Save Endpoint (P0 - CRITICAL)
+- **Root cause:** `CommissionCreate` Pydantic model was missing `traders_count` and `commission_date` fields. When the frontend posted commission data with these fields, Pydantic rejected them causing a 500 Internal Server Error. No commissions could be saved.
+- **Fix:** Added `traders_count: int = 1` and `commission_date: Optional[str] = None` to the `CommissionCreate` model in `profit_routes.py`
+- **Files modified:** `backend/routes/profit_routes.py`
+
+### Bug Fix: Batch Sync to Rewards Platform (P1)
+- **Root cause:** `DiagnosticsTab.jsx` called `rewardsAPI.batchSync()` which did NOT exist in the API module. The correct method is `rewardsAPI.adminSyncAllUsers()`.
+- **Fix:** Changed the call to use the correct API method with proper response handling.
+- **Files modified:** `frontend/src/pages/admin/settings/DiagnosticsTab.jsx`
+
+### Feature: Auto Batch Sync Every 4 Hours
+- Added APScheduler `IntervalTrigger(hours=4)` job in `server.py` startup that calls `batch_sync_all_users()` automatically
+- **Files modified:** `backend/server.py`
+
+### Bug Fix: Platform Settings Black Screen (P0)
+- **Root cause:** `AdminSettingsPage.jsx` had a dead `useEffect` (lines 354-364) that called `setLastSyncDate()` and `setNextSyncRecommended()` — but these state setters were NEVER declared. When `localStorage.getItem('lastLicenseeSyncDate')` returned a value (after any batch sync), calling these undefined functions threw a ReferenceError, crashing the component → black screen. First load after cache purge worked because localStorage was cleared.
+- **Fix:** Removed the dead useEffect. The `DiagnosticsTab.jsx` already has its own properly declared state for sync dates.
+- **Files modified:** `frontend/src/pages/admin/AdminSettingsPage.jsx`
+- **Test report:** `/app/test_reports/iteration_148.json` (6/6 backend, 7/7 frontend passed)
+
 ## 2026-03-07 - Commission Display Fix + Cache Purge Button
 
 ### Bug Fix: Commissions Missing from Daily Projection Table
