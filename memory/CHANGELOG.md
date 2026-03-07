@@ -22,6 +22,21 @@
 - **Use case:** Backfilling historical commissions that were lost due to the save bug, without double-counting in account value
 - **Files modified:** `backend/routes/profit_routes.py`, `frontend/src/pages/ProfitTrackerPage.jsx`
 
+### Critical Fix: Commission Balance Formula
+- **Formula:** Next Trade Day Balance Before = Last Trade Day Balance Before + Actual Profit + Commission
+- **Implementation:** Two commission fields in tradeLogs:
+  - `commission`: All commissions (for display in Commission column)
+  - `balance_commission`: Only real commissions (skip_deposit=false, for balance calculations)
+- Balance calculations in `profitCalculations.js` use `balance_commission`:
+  - Starting balance subtracts balance_commission
+  - Today's effective balance subtracts balance_commission
+  - Running balance adds balance_commission for next day
+- Commission deposits (`is_commission: true`) filtered from `transactionsByDate` to prevent double-counting
+- Historical corrections (`skip_deposit: true`) only show in display, don't affect balance
+- `skip_deposit` flag saved on commission record in DB for correct historical tracking
+- **Files modified:** `frontend/src/utils/profitCalculations.js`, `frontend/src/pages/ProfitTrackerPage.jsx`, `backend/routes/profit_routes.py`
+- **Test report:** `/app/test_reports/iteration_151.json` (9/9 backend, 7/7 frontend passed)
+
 ### Bug Fix: Publitio Image Upload (P1)
 - **Root cause:** `get_publitio_creds()` in `publitio.py` was reading from `db.settings` (non-existent collection with `_id: "global"`) instead of `db.platform_settings` (the actual settings collection). Credentials could never be found.
 - **Fix:** Changed to read from `db.platform_settings.find_one({})`
