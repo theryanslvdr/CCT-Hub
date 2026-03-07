@@ -545,6 +545,26 @@ export const ProfitTrackerPage = () => {
           ...log
         };
       });
+      
+      // Merge standalone commissions into tradeLogs so they appear in the daily projection table
+      const commissionsData = commissionsRes.data || [];
+      commissionsData.forEach(c => {
+        const dateKey = c.commission_date || c.created_at?.split('T')[0];
+        if (dateKey) {
+          if (logsMap[dateKey]) {
+            // Add commission to existing trade log for that date
+            logsMap[dateKey].commission = (logsMap[dateKey].commission || 0) + (c.amount || 0);
+          } else {
+            // Create a trade log entry for the commission-only date
+            logsMap[dateKey] = {
+              actual_profit: 0,
+              has_traded: false,
+              commission: c.amount || 0,
+            };
+          }
+        }
+      });
+      
       setTradeLogs(logsMap);
       
       // Check if first time user - but skip onboarding wizard for licensees
@@ -3919,6 +3939,7 @@ export const ProfitTrackerPage = () => {
                               <th>Month</th>
                               <th>{months[0]?.isPastMonth ? 'Trades' : 'Trading Days'}</th>
                               <th>{months[0]?.isPastMonth ? 'Total Profit' : 'Final Balance'}</th>
+                              {months[0]?.isPastMonth && <th>Commission</th>}
                               <th>Actions</th>
                             </tr>
                           </thead>
@@ -3943,6 +3964,11 @@ export const ProfitTrackerPage = () => {
                                     : formatLargeNumber(m.endBalance)
                                   }
                                 </td>
+                                {m.isPastMonth && (
+                                  <td className="font-mono text-purple-400">
+                                    {(m.totalCommission || 0) > 0 ? `+${formatLargeNumber(m.totalCommission)}` : '-'}
+                                  </td>
+                                )}
                                 <td>
                                   <Button
                                     size="sm"

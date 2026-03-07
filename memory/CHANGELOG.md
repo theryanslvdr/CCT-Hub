@@ -15,6 +15,13 @@
 - **Root cause:** During AdminActionsPanel extraction, the `resetNewBalance` state variable was referenced as a prop but never defined in ProfitTrackerPage
 - **Fix:** Added `const [resetNewBalance, setResetNewBalance] = useState('')` to ProfitTrackerPage
 
+### Bug Fix: Commissions Missing from Monthly Profit Table
+- **Root cause:** Standalone commissions (from "Adjust Commission") were stored in a separate `commissions` collection but never merged into `tradeLogs`. The monthly table also had no Commission column.
+- **Fix:**
+  1. Added commission merge logic in `loadData()` — standalone commissions are now merged into `tradeLogs` by date
+  2. Added `totalCommission` calculation in `generateMonthlyProjection()`
+  3. Added Commission column to Monthly Table view, showing per-month commission totals
+
 ### Documentation: Transaction Correction Guide with Screenshots
 - Created `/app/memory/transaction_correction_guide.md` with step-by-step instructions for both members and admins
 - 3 screenshots saved to `/app/frontend/public/guide-images/` (member transactions, admin transactions, admin correction dialog)

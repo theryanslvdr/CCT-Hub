@@ -489,6 +489,7 @@ export const generateMonthlyProjection = (accountBalance, tradeLogs = {}, global
       
       // For past months, we show actual data from trade logs
       const totalProfit = monthTrades.reduce((sum, [_, log]) => sum + (log?.actual_profit || 0), 0);
+      const totalCommission = monthTrades.reduce((sum, [_, log]) => sum + (log?.commission || 0), 0);
       
       pastMonths.push({
         monthOffset: monthOffset,
@@ -500,6 +501,7 @@ export const generateMonthlyProjection = (accountBalance, tradeLogs = {}, global
         isCurrentMonth: false,
         isPastMonth: true,
         totalProfit: totalProfit,
+        totalCommission: totalCommission,
         tradesCount: monthTrades.length,
       });
     }
