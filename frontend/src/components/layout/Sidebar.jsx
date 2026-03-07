@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -263,6 +263,37 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const handleApiCenterClick = () => {
     navigate('/admin/api-center');
     handleNavClick();
+  };
+
+  const handlePurgeCache = async () => {
+    try {
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      // Clear browser caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+      // Clear storage except auth
+      const token = localStorage.getItem('access_token');
+      const userStr = localStorage.getItem('user');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (token) localStorage.setItem('access_token', token);
+      if (userStr) localStorage.setItem('user', userStr);
+      // Force reload
+      window.location.reload(true);
+    } catch (err) {
+      console.error('Cache purge failed:', err);
+      window.location.reload(true);
+    }
   };
 
   const handleLicensesClick = () => {
@@ -724,6 +755,16 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 
+                onClick={handlePurgeCache}
+                className="cursor-pointer text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 focus:bg-amber-500/10"
+                data-testid="purge-cache-menu-item"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear Cache &amp; Reload
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuItem 
                 onClick={handleLogout}
                 className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"
               >
@@ -791,6 +832,16 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   </DropdownMenuItem>
                 </>
               )}
+
+              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuItem 
+                onClick={handlePurgeCache}
+                className="cursor-pointer text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 focus:bg-amber-500/10"
+                data-testid="purge-cache-collapsed-menu-item"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear Cache &amp; Reload
+              </DropdownMenuItem>
 
               <DropdownMenuSeparator className="bg-zinc-800" />
               <DropdownMenuItem 

@@ -500,7 +500,7 @@ export const ProfitTrackerPage = () => {
         return;
       }
       
-      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes, commissionsRes] = await Promise.all([
+      const [summaryRes, depositsRes, ratesRes, withdrawalsRes, signalRes, tradeLogsRes, commissionsRes, holidaysRes] = await Promise.all([
         profitAPI.getSummary(),
         profitAPI.getDeposits(),
         currencyAPI.getRates('USDT'),
@@ -508,7 +508,13 @@ export const ProfitTrackerPage = () => {
         api.get('/trade/active-signal').catch(() => ({ data: null })),
         api.get('/trade/logs').catch(() => ({ data: [] })),
         api.get('/profit/commissions').catch(() => ({ data: [] })),
+        tradeAPI.getGlobalHolidays().catch(() => ({ data: { holidays: [] } })),
       ]);
+      // Update global holidays state from the same load cycle
+      const loadedHolidays = holidaysRes.data?.holidays || [];
+      setGlobalHolidays(loadedHolidays);
+      const holidayDateSet = new Set(loadedHolidays.map(h => h.date));
+      
       setSummary(summaryRes.data);
       
       // Separate deposits and withdrawals
@@ -549,8 +555,20 @@ export const ProfitTrackerPage = () => {
       // Merge standalone commissions into tradeLogs so they appear in the daily projection table
       const commissionsData = commissionsRes.data || [];
       commissionsData.forEach(c => {
-        const dateKey = c.commission_date || c.created_at?.split('T')[0];
+        let dateKey = c.commission_date || c.created_at?.split('T')[0];
         if (dateKey) {
+          // Shift non-trading day commissions to the nearest previous trading day
+          const d = new Date(dateKey + 'T12:00:00');
+          let maxShifts = 7; // Safety limit
+          while (maxShifts > 0) {
+            const dow = d.getDay();
+            const dk = d.toISOString().split('T')[0];
+            if (dow !== 0 && dow !== 6 && !holidayDateSet.has(dk)) break;
+            d.setDate(d.getDate() - 1);
+            maxShifts--;
+          }
+          dateKey = d.toISOString().split('T')[0];
+          
           if (logsMap[dateKey]) {
             // Add commission to existing trade log for that date
             logsMap[dateKey].commission = (logsMap[dateKey].commission || 0) + (c.amount || 0);

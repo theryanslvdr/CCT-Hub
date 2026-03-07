@@ -90,7 +90,6 @@ export const DailyProjectionDialog = ({
                 <p className="text-lg font-bold font-mono text-cyan-400 mt-1">
                   ${formatNumber(
                     dailyData
-                      .filter(day => day.status === 'completed')
                       .reduce((sum, day) => sum + (day.commission || 0), 0)
                   )}
                 </p>
@@ -355,10 +354,10 @@ export const DailyProjectionDialog = ({
                           ) : day.status === 'missed' ? (
                             <button
                               onClick={() => onOpenAdjustCommission(day)}
-                              className="text-zinc-500 text-xs hover:text-cyan-400 hover:underline cursor-pointer"
+                              className={`hover:underline cursor-pointer ${day.commission > 0 ? 'font-mono text-cyan-400 hover:text-cyan-300' : 'text-zinc-500 text-xs hover:text-cyan-400'}`}
                               data-testid={`adjust-commission-${day.dateKey}`}
                             >
-                              Add
+                              {day.commission > 0 ? `+${formatMoney(day.commission)}` : 'Add'}
                             </button>
                           ) : (
                             <span className="text-zinc-500 text-xs">-</span>

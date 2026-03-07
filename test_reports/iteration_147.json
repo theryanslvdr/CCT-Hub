@@ -1,0 +1,81 @@
+{
+  "iteration": 147,
+  "date": "2026-03-07",
+  "summary": "Frontend testing completed for commission display fixes and Clear Cache & Reload button. All 7 features verified PASSED. The Daily Projection Total Commission card now correctly shows $917.48 (matching monthly table), commission values display correctly for all rows including missed-status days, Fri Jan 16 correctly aggregates weekend/holiday shifted commissions ($904.48), and Clear Cache & Reload button is present and visible in the user profile dropdown.",
+  "bugs_fixed_by_testing_agent": [],
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Dialogs",
+        "issues": ["DialogContent console warning about missing Description for screen reader accessibility - non-blocking cosmetic issue"]
+      },
+      {
+        "screen": "Charts",
+        "issues": ["Console warning about chart width/height being -1 on initial render - non-blocking cosmetic issue"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_147.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A - Frontend only testing",
+    "frontend": "100% (7/7 features verified)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "None - used existing production data",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Commission display fixes verified working: Daily Projection dialog Total Commission card shows $917.48 matching monthly table; Commission column shows actual values for all status days (completed/missed); Weekend/holiday commissions correctly shifted to Fri Jan 16 ($904.48). Clear Cache & Reload button added with data-testid='purge-cache-menu-item' in both expanded and collapsed sidebar profile dropdowns.",
+  "features_verified": {
+    "commission_display_fixes": {
+      "total_commission_card_daily": "PASS - Shows $917.48 matching monthly table",
+      "total_commission_card_monthly": "PASS - Shows +$917.48 in January 2026 row",
+      "commission_column_values": "PASS - Shows actual values (+$10.00, +$904.48, +$3.00) instead of 'Add'",
+      "fri_jan_16_aggregation": "PASS - Shows +$904.48 aggregated from weekend/holiday shifts",
+      "missed_status_days_show_commission": "PASS - Commission values visible for all day statuses"
+    },
+    "clear_cache_button": {
+      "button_visible": "PASS - Found with data-testid='purge-cache-menu-item'",
+      "button_text": "PASS - Shows 'Clear Cache & Reload'",
+      "button_location": "PASS - In user profile dropdown (expanded sidebar)"
+    },
+    "page_functionality": {
+      "profit_tracker_loads": "PASS - No errors on page load",
+      "daily_projection_dialog": "PASS - Renders correctly with commission data",
+      "monthly_table_view": "PASS - History section shows correct commission values"
+    }
+  },
+  "detailed_test_results": {
+    "monthly_table_data": {
+      "january_2025": { "trades": "1 trades", "profit": "$0.00", "commission": "+$5.00" },
+      "december_2025": { "trades": "7 trades", "profit": "$1,426.19", "commission": "-" },
+      "january_2026": { "trades": "20 trades", "profit": "$7,086.99", "commission": "+$917.48" },
+      "february_2026": { "trades": "19 trades", "profit": "$9,897.57", "commission": "-" }
+    },
+    "daily_projection_summary_cards": {
+      "monthly_target": "$6,527.40",
+      "current_profit": "$7,086.99",
+      "total_commission": "$917.48"
+    },
+    "commission_rows_january_2026": [
+      { "date": "Mon, Jan 12", "commission": "+$10.00" },
+      { "date": "Fri, Jan 16", "commission": "+$904.48" },
+      { "date": "Tue, Jan 27", "commission": "+$3.00" }
+    ],
+    "calculated_total_from_table": "$917.48"
+  }
+}
