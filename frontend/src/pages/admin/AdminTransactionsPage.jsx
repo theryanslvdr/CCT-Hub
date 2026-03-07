@@ -12,8 +12,9 @@ import { formatNumber } from '@/lib/utils';
 import { 
   ArrowDownToLine, ArrowUpFromLine, DollarSign, Users, 
   ChevronLeft, ChevronRight, TrendingUp, TrendingDown, RefreshCw,
-  Edit3, Trash2, AlertTriangle, CheckCircle2, Search, X
+  Edit3, Trash2, AlertTriangle, CheckCircle2, Search, X, HelpCircle
 } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 export const AdminTransactionsPage = () => {
   const { isSuperAdmin, isMasterAdmin } = useAuth();
@@ -232,7 +233,44 @@ export const AdminTransactionsPage = () => {
       <Card className="glass-card">
         <CardHeader className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <CardTitle className="text-white">Transaction History</CardTitle>
+            <div className="flex items-center gap-1.5">
+              <CardTitle className="text-white">Transaction History</CardTitle>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="text-zinc-500 hover:text-blue-400 transition-colors" data-testid="admin-tx-help-button">
+                    <HelpCircle className="w-3.5 h-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0 bg-zinc-900 border-zinc-700" side="bottom" align="start">
+                  <div className="p-3 space-y-2.5">
+                    <p className="text-xs font-semibold text-white">How to Correct a Transaction</p>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-blue-400">1</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400">Find the transaction and click the <Edit3 className="w-3 h-3 inline text-blue-400" /> <span className="text-blue-400">pencil icon</span> in the Actions column.</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-blue-400">2</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400">Enter the correct amount and a reason for the correction.</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-blue-400">3</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400">Click <span className="text-white font-medium">Apply Correction</span>. The member&apos;s balance updates immediately.</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-zinc-800 space-y-1">
+                      <p className="text-[10px] text-zinc-500">Corrections are logged in the audit trail. The member will be notified and their edit access is locked.</p>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
             <Tabs value={filterType} onValueChange={(v) => { setFilterType(v); setPage(1); }}>
               <TabsList className="bg-zinc-900/50">
                 <TabsTrigger value="all" className="data-[state=active]:bg-blue-500/20">All</TabsTrigger>

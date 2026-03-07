@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { toast } from 'sonner';
-import { Edit3, Clock, Lock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Edit3, Clock, Lock, AlertTriangle, CheckCircle2, HelpCircle } from 'lucide-react';
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.abs(val));
@@ -83,7 +84,46 @@ export default function MyTransactionEdit() {
     <>
       <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 overflow-hidden" data-testid="my-transaction-edit">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
-          <h3 className="text-sm font-semibold text-white">My Recent Transactions</h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-sm font-semibold text-white">My Recent Transactions</h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="text-zinc-500 hover:text-blue-400 transition-colors" data-testid="transaction-help-button">
+                  <HelpCircle className="w-3.5 h-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-0 bg-zinc-900 border-zinc-700" side="bottom" align="start">
+                <div className="p-3 space-y-2.5">
+                  <p className="text-xs font-semibold text-white">How Transaction Editing Works</p>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-blue-400">1</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">Click <span className="text-blue-400 font-medium">Edit</span> on any recent deposit or withdrawal to correct its amount.</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-blue-400">2</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">Enter the correct amount and an optional reason, then click <span className="text-white font-medium">Update</span>.</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-blue-400">3</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">Your balance updates immediately. The admin is notified.</p>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-zinc-800 space-y-1">
+                    <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" /> You have <span className="text-amber-400 font-medium">48 hours</span> from creation to edit.</p>
+                    <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Lock className="w-3 h-3" /> Only your <span className="text-white font-medium">last 2</span> deposits/withdrawals are editable.</p>
+                    <p className="text-[10px] text-zinc-500 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Each transaction can be edited <span className="text-white font-medium">once</span>.</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
           <span className="text-[10px] text-zinc-500">Edit within 48 hours</span>
         </div>
         <div className="divide-y divide-zinc-800/50">

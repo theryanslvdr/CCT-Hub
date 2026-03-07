@@ -19,6 +19,10 @@
 - Created `/app/memory/transaction_correction_guide.md` with step-by-step instructions for both members and admins
 - 3 screenshots saved to `/app/frontend/public/guide-images/` (member transactions, admin transactions, admin correction dialog)
 
+### In-App Help Overlays
+- Added help icon (?) next to "My Recent Transactions" title — shows 3-step editing walkthrough + rules (48h window, last 2 editable, one edit per tx)
+- Added help icon (?) next to "Transaction History" title on Admin Transactions page — shows 3-step correction process + audit trail note
+
 ### ProfitTrackerPage.jsx Refactoring (P1)
 - Extracted `StatsCards` component → `/app/frontend/src/components/profit/StatsCards.jsx` (~170 lines)
 - Extracted `AdminActionsPanel` component → `/app/frontend/src/components/profit/AdminActionsPanel.jsx` (~120 lines)
