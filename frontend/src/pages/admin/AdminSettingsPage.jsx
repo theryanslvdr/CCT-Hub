@@ -349,20 +349,6 @@ export const AdminSettingsPage = () => {
     return value.slice(0, 4) + '••••••••' + value.slice(-4);
   };
 
-  // ===== DIAGNOSTIC FUNCTIONS =====
-  
-  // Load last sync date from localStorage
-  useEffect(() => {
-    const savedLastSync = localStorage.getItem('lastLicenseeSyncDate');
-    if (savedLastSync) {
-      setLastSyncDate(new Date(savedLastSync));
-      // Recommend sync every 7 days
-      const nextSync = new Date(savedLastSync);
-      nextSync.setDate(nextSync.getDate() + 7);
-      setNextSyncRecommended(nextSync);
-    }
-  }, []);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">

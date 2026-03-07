@@ -44,7 +44,9 @@ router = APIRouter(prefix="/profit", tags=["Profit Tracker"])
 class CommissionCreate(BaseModel):
     amount: float
     source: str = "referral"
+    traders_count: int = 1
     notes: Optional[str] = None
+    commission_date: Optional[str] = None
 
 class OnboardingTransaction(BaseModel):
     type: str

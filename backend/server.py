@@ -86,6 +86,7 @@ cloudinary.config(
 # ─── APScheduler ───
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 scheduler = AsyncIOScheduler()
 
 # ─── Initialize Shared Deps ───
@@ -372,8 +373,25 @@ async def startup_db():
             id="missed_trade_check",
             replace_existing=True
         )
+        
+        # Auto batch sync to rewards platform every 4 hours
+        async def auto_batch_sync():
+            try:
+                from services.rewards_sync_service import batch_sync_all_users
+                summary = await batch_sync_all_users(db)
+                logger.info(f"Auto batch sync completed: {summary.get('success', 0)} synced, {summary.get('failed', 0)} failed")
+            except Exception as e:
+                logger.warning(f"Auto batch sync failed: {e}")
+        
+        scheduler.add_job(
+            auto_batch_sync,
+            IntervalTrigger(hours=4),
+            id="rewards_auto_sync",
+            replace_existing=True
+        )
+        
         scheduler.start()
-        logger.info("Scheduler started for missed trade notifications")
+        logger.info("Scheduler started for missed trade notifications and rewards auto-sync (every 4h)")
     except Exception as e:
         logger.warning(f"Scheduler startup warning: {e}")
 

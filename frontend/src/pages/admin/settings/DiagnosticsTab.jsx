@@ -25,11 +25,12 @@ function RewardsPlatformSync() {
   const handleBatchSync = async () => {
     setSyncing(true);
     try {
-      const res = await rewardsAPI.batchSync();
-      toast.success(`Synced ${res.data.synced_count || 0} users to rewards platform`);
+      const res = await rewardsAPI.adminSyncAllUsers();
+      toast.success(`Synced ${res.data?.summary?.synced || res.data?.synced_count || 0} users to rewards platform`);
       loadSyncStatus();
     } catch (error) {
-      toast.error('Failed to batch sync');
+      console.error('Batch sync error:', error);
+      toast.error(error.response?.data?.detail || 'Failed to batch sync');
     } finally {
       setSyncing(false);
     }
