@@ -1,0 +1,111 @@
+{
+  "iteration": 150,
+  "date": "2026-03-07",
+  "summary": "Tested commission display-only feature: commissions now do NOT affect daily balance calculations. Verified: 1) POST /api/profit/commission with skip_deposit=true saves commission but NO deposit created (PASS), 2) Commission column shows values correctly in Daily View (PASS), 3) Total Commission card shows correct sum (PASS), 4) Balance Before progression is consistent - not affected by commissions (PASS), 5) P/L Diff excludes commission (PASS), 6) Adjust Commission dialog shows 'display-only' helper text (PASS), 7) skip_deposit checkbox removed from dialog (PASS).",
+  "bugs_fixed_by_testing_agent": [],
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Dialogs",
+        "issues": ["DialogContent console warning about missing Description for screen reader accessibility - non-blocking cosmetic issue"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_150_commission_display_only.py",
+    "/app/test_reports/pytest/pytest_iteration_150.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_iteration_150_commission_display_only.py"],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100% (7/7 features verified)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "Created test commission records with TEST_ prefix during backend testing (all with skip_deposit=true, so no deposits created)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Commission display-only feature verified: 1) profitCalculations.js lines 248-253, 349, 400-403 exclude commission from balance calculations. 2) ProfitTrackerPage.jsx line 1130 always sends skip_deposit=true when saving commission. 3) Backend CommissionCreate model has skip_deposit field (line 50 profit_routes.py) - when true, commission is saved but no deposit created. 4) Adjust Commission dialog text at line 3758-3760 shows 'display-only and does not affect your account balance'. 5) Real commissions exist in Jan 2026 totaling $1,289.48 - Balance Before values are not affected.",
+  "features_verified": {
+    "commission_skip_deposit_true": {
+      "endpoint": "POST /api/profit/commission",
+      "behavior": "PASS - Commission saved, NO deposit created when skip_deposit=true",
+      "response_includes": "deposit_created: false"
+    },
+    "commission_skip_deposit_false": {
+      "endpoint": "POST /api/profit/commission",
+      "behavior": "PASS - Commission saved, deposit created when skip_deposit=false (legacy)",
+      "response_includes": "deposit_created: true"
+    },
+    "balance_before_excludes_commission": {
+      "test_case": "Jan 16, 2026 - Commission $904.48",
+      "jan_15_balance": "$18,360.44",
+      "jan_15_profit": "$290.85",
+      "jan_16_balance_before": "$18,651.29",
+      "calculation": "$18,360.44 + $290.85 = $18,651.29 (commission NOT subtracted)",
+      "result": "PASS - Balance Before is not affected by commission"
+    },
+    "pl_diff_excludes_commission": {
+      "test_case": "Jan 16, 2026",
+      "target_profit": "$285.45",
+      "actual_profit": "$293.66",
+      "pl_diff": "+$8.21",
+      "calculation": "$293.66 - $285.45 = $8.21 (commission excluded)",
+      "result": "PASS - P/L Diff correctly excludes commission"
+    },
+    "commission_column_display": {
+      "location": "Daily View table",
+      "result": "PASS - Commission column shows individual day commissions"
+    },
+    "total_commission_card": {
+      "location": "Daily View summary cards",
+      "jan_2026_value": "$1,289.48",
+      "result": "PASS - Shows correct total of all commissions for the month"
+    },
+    "adjust_commission_dialog": {
+      "helper_text": "Enter your total referral commission. This is display-only and does not affect your account balance.",
+      "skip_deposit_checkbox": "REMOVED - Not present in dialog",
+      "always_sends": "skip_deposit: true",
+      "result": "PASS - Dialog correctly configured for display-only behavior"
+    },
+    "monthly_table_commission": {
+      "location": "Monthly Table History",
+      "jan_2026_display": "+$1,289.48 in Commission column",
+      "result": "PASS - Commissions display correctly in monthly summary"
+    }
+  },
+  "backend_test_results": {
+    "test_commission_with_skip_deposit_true_no_deposit_created": "PASSED",
+    "test_commission_skip_deposit_false_creates_deposit": "PASSED",
+    "test_commission_endpoint_returns_correct_fields": "PASSED",
+    "test_commissions_list_endpoint": "PASSED",
+    "test_profit_summary_not_affected_by_display_only_commission": "PASSED",
+    "test_daily_balances_not_affected_by_commission": "PASSED",
+    "test_commission_model_has_skip_deposit_field": "PASSED"
+  },
+  "code_verification": {
+    "profitCalculations.js": {
+      "line_248_253": "Starting balance calculation excludes commission (only sums actual_profit)",
+      "line_349": "Today's effective balance excludes commission (liveAccountValue - actualProfit only)",
+      "line_400_403": "Running balance for next day excludes commission (only adds actualProfit or targetProfit)"
+    },
+    "ProfitTrackerPage.jsx": {
+      "line_1130": "Commission save always sends skip_deposit: true",
+      "line_3758_3760": "Helper text: 'display-only and does not affect your account balance'"
+    },
+    "profit_routes.py": {
+      "line_50": "CommissionCreate model has skip_deposit: bool = False field"
+    }
+  }
+}

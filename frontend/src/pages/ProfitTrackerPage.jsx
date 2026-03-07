@@ -1121,12 +1121,13 @@ export const ProfitTrackerPage = () => {
     setAdjustCommissionLoading(true);
     try {
       // Use the commission endpoint with the specific date
+      // Commissions are display-only — they don't affect account balance
       await api.post('/profit/commission', {
         amount: parseFloat(adjustCommissionAmount),
         traders_count: 1,
-        notes: `Commission adjustment for ${adjustCommissionDate.dateStr}`,
+        notes: `Commission for ${adjustCommissionDate.dateStr}`,
         commission_date: adjustCommissionDate.dateKey,
-        skip_deposit: adjustCommissionSkipDeposit
+        skip_deposit: true
       });
       
       toast.success('Commission adjusted successfully!');
@@ -3738,7 +3739,7 @@ export const ProfitTrackerPage = () => {
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <p className="text-sm text-zinc-400">
-              Add or update commission for <span className="text-white font-medium">{adjustCommissionDate?.dateStr}</span>
+              Record commission earnings for <span className="text-white font-medium">{adjustCommissionDate?.dateStr}</span>
             </p>
             <div>
               <Label className="text-zinc-300">Commission Amount (USDT)</Label>
@@ -3755,22 +3756,9 @@ export const ProfitTrackerPage = () => {
                 />
               </div>
               <p className="text-xs text-zinc-500 mt-1">
-                This will add commission earnings for the selected date
+                Enter your total referral commission. This is display-only and does not affect your account balance.
               </p>
             </div>
-            <label className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={adjustCommissionSkipDeposit}
-                onChange={(e) => setAdjustCommissionSkipDeposit(e.target.checked)}
-                className="mt-0.5 accent-amber-500"
-                data-testid="skip-deposit-checkbox"
-              />
-              <div>
-                <p className="text-sm text-amber-300 font-medium">Display only (don't add to balance)</p>
-                <p className="text-xs text-zinc-500 mt-0.5">Use this for backfilling historical commissions that are already reflected in your account value</p>
-              </div>
-            </label>
             <Button 
               onClick={handleSubmitAdjustCommission} 
               className="w-full btn-primary"
