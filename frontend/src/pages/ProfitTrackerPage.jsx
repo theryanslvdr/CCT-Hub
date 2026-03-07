@@ -569,16 +569,19 @@ export const ProfitTrackerPage = () => {
             maxShifts--;
           }
           dateKey = d.toISOString().split('T')[0];
+          const isHistorical = c.skip_deposit === true;
           
           if (logsMap[dateKey]) {
-            // Add commission to existing trade log for that date
             logsMap[dateKey].commission = (logsMap[dateKey].commission || 0) + (c.amount || 0);
+            if (!isHistorical) {
+              logsMap[dateKey].balance_commission = (logsMap[dateKey].balance_commission || 0) + (c.amount || 0);
+            }
           } else {
-            // Create a trade log entry for the commission-only date
             logsMap[dateKey] = {
               actual_profit: 0,
               has_traded: false,
               commission: c.amount || 0,
+              balance_commission: isHistorical ? 0 : (c.amount || 0),
             };
           }
         }

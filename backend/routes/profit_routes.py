@@ -483,6 +483,7 @@ async def record_commission(data: CommissionCreate, user: dict = Depends(deps.ge
         "traders_count": data.traders_count,
         "notes": data.notes or f"Commission from {data.traders_count} referral trades",
         "commission_date": commission_date,
+        "skip_deposit": data.skip_deposit,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     

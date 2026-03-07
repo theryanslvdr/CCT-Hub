@@ -213,9 +213,11 @@ export const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLo
   
   // Create a map of deposits/withdrawals by date for quick lookup
   // Note: Withdrawals already have NEGATIVE amounts in the database
+  // Commission deposits are excluded — commissions affect balance through the commission pathway instead
   const transactionsByDate = {};
   if (allTransactions && allTransactions.length > 0) {
     allTransactions.forEach(tx => {
+      if (tx.is_commission) return; // Skip commission deposits (handled separately)
       const txDate = tx.created_at ? tx.created_at.split('T')[0] : null;
       if (txDate) {
         if (!transactionsByDate[txDate]) {
@@ -245,12 +247,12 @@ export const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLo
     // But we also need to subtract profits from FUTURE months (months after the one we're viewing)
     // to get the correct starting balance for this month
     
-    // Sum up ALL profits from the start of this month onwards
-    // Note: Commissions are display-only (lump sum totals) and do NOT affect balance calculations
+    // Sum up ALL profits + balance-affecting commissions from the start of this month onwards
+    // Historical corrections (skip_deposit=true) are excluded from balance calculations
     const profitsFromThisMonthOnwards = Object.entries(tradeLogs)
       .filter(([key, _]) => key >= monthStartStr)
       .reduce((sum, [_, log]) => {
-        return sum + (log?.actual_profit || 0);
+        return sum + (log?.actual_profit || 0) + (log?.balance_commission || 0);
       }, 0);
     
     // Sum up ALL deposits/withdrawals from the start of this month onwards
@@ -275,7 +277,8 @@ export const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLo
       const tradeLog = tradeLogs[dateKey];
       const hasTraded = tradeLog?.has_traded;
       const actualProfit = tradeLog?.actual_profit;
-      const commission = tradeLog?.commission || 0;  // Daily commission from referrals
+      const commission = tradeLog?.commission || 0;  // All commissions (for display)
+      const balanceCommission = tradeLog?.balance_commission || 0;  // Only real commissions (for balance calc)
       const isErrorTrade = tradeLog?.is_error_trade || false;
       const errorType = tradeLog?.error_type || null;
       const errorExplanation = tradeLog?.error_explanation || null;
@@ -343,12 +346,11 @@ export const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLo
       
       if (isToday && liveAccountValue !== null) {
         // CRITICAL FIX: "Balance Before" should show the balance BEFORE today's trade
-        // If we traded today, the live account value already INCLUDES today's profit
-        // So we need to subtract it to get the true "Balance Before"
-        // Note: Commission is display-only and does NOT affect balance
+        // If we traded today, the live account value already INCLUDES today's profit + commission
+        // So we need to subtract them to get the true "Balance Before"
         if (hasTraded && actualProfit !== undefined) {
           // Calculate what the balance was BEFORE we traded
-          effectiveBalance = truncateTo2Decimals(liveAccountValue - actualProfit);
+          effectiveBalance = truncateTo2Decimals(liveAccountValue - actualProfit - balanceCommission);
         } else {
           // No trade yet today, live value IS the balance before
           effectiveBalance = liveAccountValue;
@@ -399,10 +401,11 @@ export const generateDailyProjectionForMonth = (startBalance, monthDate, tradeLo
         errorExplanation: errorExplanation,
       });
       
-      // Add profit to running balance for next day's calculation
-      // Commission is display-only (lump sum totals) and does NOT affect balance
+      // Add profit + commission to running balance for next day's calculation
+      // Formula: Next Day Balance = This Day Balance + Actual Profit + Commission
+      // Only balance-affecting commissions (not historical corrections) are included
       if (hasTraded && actualProfit !== undefined) {
-        runningBalance += actualProfit;
+        runningBalance += actualProfit + balanceCommission;
       } else {
         runningBalance += targetProfit;
       }

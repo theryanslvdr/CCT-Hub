@@ -1,0 +1,132 @@
+{
+  "iteration": 151,
+  "date": "2026-03-07",
+  "summary": "Tested commission balance feature: Real commissions (skip_deposit=false) create deposits AND affect balance through balance_commission field. Historical corrections (skip_deposit=true) are display-only. All tests PASSED.",
+  "bugs_fixed_by_testing_agent": [],
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_151_commission_balance.py",
+    "/app/test_reports/pytest/pytest_iteration_151.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_iteration_151_commission_balance.py"],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (7/7 features verified)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "Created test commission records with TEST_ prefix during backend testing",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Commission balance feature verified. Two commission fields in tradeLogs: 'commission' (all, for display) and 'balance_commission' (only real, for balance calc). In profitCalculations.js lines 255, 281, 408, balance calculations use 'balance_commission' only. Backend POST /api/profit/commission accepts skip_deposit field - when true, commission is saved but no deposit created.",
+  "features_verified": {
+    "commission_skip_deposit_false_creates_deposit": {
+      "endpoint": "POST /api/profit/commission",
+      "test": "skip_deposit=false creates deposit with product=COMMISSION",
+      "result": "PASS",
+      "response_includes": "deposit_created: true"
+    },
+    "commission_skip_deposit_true_no_deposit": {
+      "endpoint": "POST /api/profit/commission",
+      "test": "skip_deposit=true saves commission but NO deposit created",
+      "result": "PASS",
+      "response_includes": "deposit_created: false"
+    },
+    "skip_deposit_field_saved_on_commission": {
+      "test": "Commission records correctly save skip_deposit field",
+      "result": "PASS"
+    },
+    "adjust_commission_dialog_checkbox": {
+      "location": "Adjust Commission dialog",
+      "checkbox_label": "Historical correction only",
+      "default_state": "UNCHECKED",
+      "helper_text": "Check this to record past commissions without adding to your account balance",
+      "result": "PASS - Checkbox unchecked by default"
+    },
+    "commission_column_display": {
+      "location": "Daily Projection dialog table",
+      "test": "Commission column shows all commissions (both real and historical)",
+      "example_values": "+$10.00 (Jan 12), +$904.48 (Jan 16)",
+      "result": "PASS"
+    },
+    "total_commission_summary_card": {
+      "location": "Daily Projection dialog header",
+      "test": "Total Commission card shows sum of all commissions",
+      "example_value": "$914.48",
+      "result": "PASS"
+    },
+    "balance_formula_with_commission": {
+      "formula": "Next Day Balance Before = Last Day Balance Before + Actual Profit + Commission",
+      "test_case": "Jan 15 → Jan 16",
+      "calculation": "$18,360.44 + $290.85 = $18,651.29 (commission from Jan 15 was $0, so not included)",
+      "result": "PASS - Balance Before matches expected value"
+    }
+  },
+  "backend_test_results": {
+    "test_commission_with_skip_deposit_false_creates_deposit": "PASSED",
+    "test_commission_with_skip_deposit_true_no_deposit": "PASSED",
+    "test_commission_saved_with_skip_deposit_field": "PASSED",
+    "test_commissions_list_endpoint": "PASSED",
+    "test_commission_api_model_validation": "PASSED",
+    "test_deposit_created_for_real_commission": "PASSED",
+    "test_summary_endpoint_works": "PASSED",
+    "test_daily_balances_endpoint": "PASSED",
+    "test_trade_logs_endpoint": "PASSED"
+  },
+  "ui_verification": {
+    "daily_projection_dialog": {
+      "verified_elements": [
+        "MONTHLY TARGET card",
+        "CURRENT PROFIT card",
+        "TOTAL COMMISSION card ($914.48)",
+        "DATE column",
+        "BALANCE BEFORE column",
+        "LOT SIZE column",
+        "TARGET PROFIT column",
+        "ACTUAL PROFIT column",
+        "COMMISSION column",
+        "P/L DIFF column"
+      ]
+    },
+    "adjust_commission_dialog": {
+      "verified_elements": [
+        "Dialog title: 'Adjust Commission'",
+        "Description: 'Record commission earnings for {date}'",
+        "Commission Amount (USDT) input field",
+        "Historical correction only checkbox (UNCHECKED by default)",
+        "Save Commission button"
+      ]
+    }
+  },
+  "code_verification": {
+    "profitCalculations.js": {
+      "line_255": "profitsFromThisMonthOnwards uses balance_commission for balance calculations",
+      "line_281": "balanceCommission extracted from tradeLog.balance_commission",
+      "line_353": "Today effectiveBalance uses balanceCommission",
+      "line_408": "runningBalance += actualProfit + balanceCommission"
+    },
+    "ProfitTrackerPage.jsx": {
+      "line_174": "adjustCommissionSkipDeposit defaults to false (unchecked)",
+      "line_574-585": "Commission merge separates commission vs balance_commission based on skip_deposit flag",
+      "line_1132": "skip_deposit: adjustCommissionSkipDeposit sent to API"
+    },
+    "profit_routes.py": {
+      "line_50": "CommissionCreate model has skip_deposit: bool = False field",
+      "line_486": "skip_deposit saved on commission record",
+      "line_493-505": "Deposit only created if not skip_deposit"
+    }
+  }
+}
