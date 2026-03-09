@@ -8,6 +8,7 @@ class TradeLogCreate(BaseModel):
     lot_size: float
     direction: str  # BUY or SELL
     actual_profit: float
+    commission: float = 0
     notes: Optional[str] = None
 
 
@@ -18,6 +19,7 @@ class TradeLogResponse(BaseModel):
     direction: str
     projected_profit: float
     actual_profit: float
+    commission: float = 0
     profit_difference: float
     performance: str
     signal_id: Optional[str]

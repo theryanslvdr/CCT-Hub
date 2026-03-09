@@ -22,6 +22,11 @@
 - **Use case:** Backfilling historical commissions that were lost due to the save bug, without double-counting in account value
 - **Files modified:** `backend/routes/profit_routes.py`, `frontend/src/pages/ProfitTrackerPage.jsx`
 
+### Bug Fix: Failed to Log Trade (P0)
+- **Root cause:** `TradeLogCreate` Pydantic model was missing the `commission` field. The `log_trade` route accessed `data.commission` at lines 60 and 88, causing `AttributeError` in Pydantic v2.
+- **Fix:** Added `commission: float = 0` to `TradeLogCreate` and `TradeLogResponse` models.
+- **Files modified:** `backend/models/trade.py`
+
 ### Bug Fix: Failed to Create Signal (P0)
 - **Root cause:** A duplicate `TradingSignalCreate` class at line 132 in `admin_routes.py` shadowed the proper model from `models/trade.py`. The duplicate was missing `profit_points`, `is_official`, `send_email`, and `profit_multiplier` fields, causing `AttributeError` on signal creation.
 - **Fix:** 
