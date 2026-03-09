@@ -1,11 +1,16 @@
 """Community Forum API routes — ticketing-style Q&A with point awards."""
 import uuid
+import os
+import httpx
+import logging
 from datetime import datetime, timezone
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 
 import deps
+
+logger = logging.getLogger(__name__)
 
 try:
     from services.websocket_service import broadcast_forum_event, manager as ws_manager, create_notification, NotificationType
@@ -1085,3 +1090,115 @@ async def get_post_details(
         "contributors": contributors,
         "awards": awards,
     }
+
+
+
+# ─── AI-Powered Semantic Similarity (OpenRouter) ───
+
+class AISimilarityRequest(BaseModel):
+    title: str
+    content: str = ""
+
+
+@router.post("/ai-check-duplicate")
+async def ai_check_duplicate(
+    body: AISimilarityRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Use AI (via OpenRouter) to find semantically similar forum posts.
+    Falls back to regex search if OpenRouter is unavailable."""
+    db = deps.db
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+
+    # First, gather recent posts as candidates (max 20)
+    candidates = await db.forum_posts.find(
+        {},
+        {"_id": 0, "id": 1, "title": 1, "content": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1, "category": 1},
+    ).sort("created_at", -1).limit(20).to_list(20)
+
+    if not candidates or not openrouter_key:
+        # Fallback: regex search
+        words = f"{body.title} {body.content}".split()
+        regex = "|".join([w for w in words if len(w) >= 3])
+        if not regex:
+            return {"results": [], "has_similar": False, "ai_powered": False}
+        results = await db.forum_posts.find(
+            {"$or": [
+                {"title": {"$regex": regex, "$options": "i"}},
+                {"content": {"$regex": regex, "$options": "i"}},
+            ]},
+            {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1, "category": 1},
+        ).sort("created_at", -1).limit(5).to_list(5)
+        return {"results": results, "has_similar": len(results) > 0, "ai_powered": False}
+
+    # Build candidate list for the LLM
+    candidate_list = "\n".join(
+        f"[{i}] {c['title']}" for i, c in enumerate(candidates)
+    )
+
+    prompt = (
+        f"You are a forum duplicate detector. A user wants to post:\n"
+        f"Title: {body.title}\n"
+        f"Content: {body.content[:500]}\n\n"
+        f"Here are existing forum posts:\n{candidate_list}\n\n"
+        f"Return ONLY a JSON array of indices (e.g. [0, 3, 7]) of posts that are semantically similar "
+        f"or cover the same topic/question. If none are similar, return []. "
+        f"Only include posts that are genuinely about the same topic."
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "openai/gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": "You are a precise duplicate detection assistant. Respond with only a JSON array of indices."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 100,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            ai_text = data["choices"][0]["message"]["content"].strip()
+
+            # Parse indices from AI response
+            import json as json_mod
+            # Handle markdown code blocks
+            if ai_text.startswith("```"):
+                ai_text = ai_text.split("```")[1]
+                if ai_text.startswith("json"):
+                    ai_text = ai_text[4:]
+                ai_text = ai_text.strip()
+            indices = json_mod.loads(ai_text)
+            if not isinstance(indices, list):
+                indices = []
+
+            similar = [candidates[i] for i in indices if 0 <= i < len(candidates)]
+            # Remove content field to keep response light
+            for s in similar:
+                s.pop("content", None)
+
+            return {"results": similar, "has_similar": len(similar) > 0, "ai_powered": True}
+
+    except Exception as e:
+        logger.warning(f"OpenRouter AI similarity check failed: {e}")
+        # Fallback to regex
+        words = f"{body.title} {body.content}".split()
+        regex = "|".join([w for w in words if len(w) >= 3])
+        if not regex:
+            return {"results": [], "has_similar": False, "ai_powered": False}
+        results = await db.forum_posts.find(
+            {"$or": [
+                {"title": {"$regex": regex, "$options": "i"}},
+                {"content": {"$regex": regex, "$options": "i"}},
+            ]},
+            {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1, "category": 1},
+        ).sort("created_at", -1).limit(5).to_list(5)
+        return {"results": results, "has_similar": len(results) > 0, "ai_powered": False}

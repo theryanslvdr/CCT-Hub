@@ -140,6 +140,7 @@ export function CommissionRecordsDialog({ open, onOpenChange, commissions }) {
                 <tr>
                   <th>Date</th>
                   <th>Amount (USDT)</th>
+                  <th>Type</th>
                   <th>Traders</th>
                   <th>Notes</th>
                 </tr>
@@ -149,6 +150,13 @@ export function CommissionRecordsDialog({ open, onOpenChange, commissions }) {
                   <tr key={c.id}>
                     <td className="font-mono">{new Date(c.created_at).toLocaleDateString()}</td>
                     <td className="font-mono text-purple-400">+{formatMoney(c.amount)}</td>
+                    <td>
+                      {c.skip_deposit ? (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Historical</span>
+                      ) : (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Balance</span>
+                      )}
+                    </td>
                     <td className="font-mono text-zinc-400">{c.traders_count}</td>
                     <td className="text-zinc-500 max-w-[200px] truncate">{c.notes || '-'}</td>
                   </tr>

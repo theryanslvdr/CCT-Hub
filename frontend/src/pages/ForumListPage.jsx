@@ -257,15 +257,23 @@ export default function ForumListPage() {
       return;
     }
 
-    // Pre-submission duplicate check: search by both title AND content
+    // Pre-submission AI-powered duplicate check
     if (!newPost._confirmedDuplicate) {
       try {
-        const res = await forumAPI.searchSimilarFull(newPost.title.trim(), newPost.content.trim());
+        const res = await forumAPI.aiCheckDuplicate(newPost.title.trim(), newPost.content.trim());
         if (res.data.has_similar && res.data.results?.length > 0) {
-          setSimilarWarning(res.data.results);
-          return; // Show warning — user must confirm or view similar
+          setSimilarWarning({ results: res.data.results, ai: res.data.ai_powered });
+          return;
         }
-      } catch { /* proceed if check fails */ }
+      } catch {
+        try {
+          const res = await forumAPI.searchSimilarFull(newPost.title.trim(), newPost.content.trim());
+          if (res.data.has_similar && res.data.results?.length > 0) {
+            setSimilarWarning({ results: res.data.results, ai: false });
+            return;
+          }
+        } catch { /* proceed */ }
+      }
     }
 
     setCreating(true);
@@ -479,9 +487,10 @@ export default function ForumListPage() {
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2" data-testid="duplicate-warning">
               <p className="text-xs font-medium text-amber-400 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5" /> Similar posts found — your question may already be answered!
+                {similarWarning.ai && <span className="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">AI-powered</span>}
               </p>
               <div className="max-h-32 overflow-y-auto space-y-1">
-                {similarWarning.map(r => (
+                {(similarWarning.results || similarWarning).map(r => (
                   <button
                     key={r.id}
                     onClick={() => { setNewPostOpen(false); setSimilarWarning(null); navigate(`/forum/${r.id}`); }}

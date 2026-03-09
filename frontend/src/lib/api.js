@@ -196,6 +196,7 @@ export const forumAPI = {
   getStats: () => api.get('/forum/stats'),
   searchSimilar: (q) => api.get('/forum/search-similar', { params: { q } }),
   searchSimilarFull: (title, content) => api.get('/forum/search-similar-full', { params: { title, content } }),
+  aiCheckDuplicate: (title, content) => api.post('/forum/ai-check-duplicate', { title, content }),
   voteComment: (commentId, voteType) => api.post(`/forum/comments/${commentId}/vote`, { vote_type: voteType }),
   getVoters: (commentId) => api.get(`/forum/comments/${commentId}/voters`),
   mergePosts: (sourcePostId, targetPostId) => api.post('/forum/posts/merge', { source_post_id: sourcePostId, target_post_id: targetPostId }),
