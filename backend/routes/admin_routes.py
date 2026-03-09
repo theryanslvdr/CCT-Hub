@@ -14,7 +14,7 @@ from typing import Optional, List, Dict, Any
 from enum import Enum
 
 import deps
-from models.trade import TradeLogResponse, TradingSignalResponse, TradingSignalUpdate
+from models.trade import TradeLogResponse, TradingSignalResponse, TradingSignalUpdate, TradingSignalCreate
 from models.license import LicenseCreate, LicenseInviteCreate, LicenseInviteUpdate
 from models.user import RoleUpgrade
 from models.settings import EmailTemplateUpdate
@@ -128,15 +128,6 @@ class LicenseeTradeOverride(BaseModel):
     date: str
     traded: bool
     notes: Optional[str] = None
-
-class TradingSignalCreate(BaseModel):
-    product: str
-    direction: str
-    trade_date: Optional[str] = None
-    trade_time: Optional[str] = None
-    trade_timezone: Optional[str] = "Asia/Manila"
-    notes: Optional[str] = None
-    send_email: Optional[bool] = False
 
 @router.post("/push-notify-all")
 async def admin_push_notify_all(request: Request, user: dict = Depends(deps.require_admin)):
@@ -474,7 +465,7 @@ async def create_signal(data: TradingSignalCreate, request: Request, user: dict 
         try:
             push_result = await send_push_to_all_members(
                 title=f"Trading Signal: {data.direction} {data.product}",
-                body=f"Trade at {data.trade_time} | Multiplier: ×{data.profit_multiplier}",
+                body=f"Trade at {data.trade_time} | Multiplier: ×{data.profit_multiplier or data.profit_points}",
                 url="/trade-monitor",
                 tag="trading-signal"
             )

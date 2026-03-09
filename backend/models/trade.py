@@ -31,6 +31,10 @@ class TradingSignalCreate(BaseModel):
     direction: str  # BUY or SELL
     profit_points: float = 15  # Default profit multiplier
     notes: Optional[str] = None
+    is_official: bool = False
+    send_email: bool = False
+    trade_date: Optional[str] = None
+    profit_multiplier: Optional[float] = None
 
 
 class TradingSignalUpdate(BaseModel):
@@ -52,6 +56,7 @@ class TradingSignalResponse(BaseModel):
     profit_points: float
     notes: Optional[str]
     is_active: bool
+    is_official: bool = False
     is_simulated: bool = False
     created_by: str
     created_at: datetime

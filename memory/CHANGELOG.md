@@ -22,6 +22,16 @@
 - **Use case:** Backfilling historical commissions that were lost due to the save bug, without double-counting in account value
 - **Files modified:** `backend/routes/profit_routes.py`, `frontend/src/pages/ProfitTrackerPage.jsx`
 
+### Bug Fix: Failed to Create Signal (P0)
+- **Root cause:** A duplicate `TradingSignalCreate` class at line 132 in `admin_routes.py` shadowed the proper model from `models/trade.py`. The duplicate was missing `profit_points`, `is_official`, `send_email`, and `profit_multiplier` fields, causing `AttributeError` on signal creation.
+- **Fix:** 
+  1. Removed the duplicate class from `admin_routes.py`
+  2. Added `TradingSignalCreate` to the import from `models/trade.py`
+  3. Added `is_official`, `send_email`, `trade_date`, `profit_multiplier` fields to `TradingSignalCreate` model
+  4. Added `is_official` to `TradingSignalResponse` model
+  5. Fixed push notification body to fall back to `profit_points` when `profit_multiplier` is None
+- **Files modified:** `backend/routes/admin_routes.py`, `backend/models/trade.py`
+
 ### Critical Fix: Commission Balance Formula
 - **Formula:** Next Trade Day Balance Before = Last Trade Day Balance Before + Actual Profit + Commission
 - **Implementation:** Two commission fields in tradeLogs:
