@@ -195,8 +195,12 @@ export const forumAPI = {
   searchUsers: (q) => api.get('/forum/users/search', { params: { q } }),
   getStats: () => api.get('/forum/stats'),
   searchSimilar: (q) => api.get('/forum/search-similar', { params: { q } }),
+  searchSimilarFull: (title, content) => api.get('/forum/search-similar-full', { params: { title, content } }),
   voteComment: (commentId, voteType) => api.post(`/forum/comments/${commentId}/vote`, { vote_type: voteType }),
   getVoters: (commentId) => api.get(`/forum/comments/${commentId}/voters`),
+  mergePosts: (sourcePostId, targetPostId) => api.post('/forum/posts/merge', { source_post_id: sourcePostId, target_post_id: targetPostId }),
+  validateSolution: (postId) => api.put(`/forum/posts/${postId}/validate-solution`),
+  getPostDetails: (postId) => api.get(`/forum/posts/${postId}/details`),
 };
 
 // Publitio Image Upload APIs

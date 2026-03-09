@@ -15,7 +15,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://transaction-guide.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bve-data-loss.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 MASTER_ADMIN_EMAIL = "iam@ryansalvador.com"

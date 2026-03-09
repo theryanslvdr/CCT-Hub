@@ -1,0 +1,144 @@
+{
+  "iteration": 152,
+  "date": "2026-03-09",
+  "summary": "Tested BVE data isolation fix (P0) and new forum merge/duplicate safeguard features. All 15 backend tests PASSED. UI verification confirmed BVE mode shows 'Entered Beta Virtual Environment' indicator, Trade History loads from BVE collections, Reset buttons visible. Forum features verified: sidebar with Post Info/Contributors/Awards, merge button for admins, duplicate post safeguard with similar posts warning.",
+  "bugs_fixed_by_testing_agent": [],
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_152_bve_forum_features.py",
+    "/app/test_reports/pytest/pytest_iteration_152.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_iteration_152_bve_forum_features.py"],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": {
+    "email": "iam@ryansalvador.com",
+    "password": "admin123",
+    "role": "Master Admin"
+  },
+  "seed_data_creation": "Used existing test posts from previous iterations",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "BVE data isolation verified - /api/bve/trade/history returns BVE data only, /api/bve/trade/{id} deletes from BVE only. Forum merge at /api/forum/posts/merge requires master_admin or super_admin. Duplicate safeguard uses /api/forum/search-similar-full with has_similar flag. Post details sidebar uses /api/forum/posts/{id}/details.",
+  "features_verified": {
+    "bve_trade_history_isolation": {
+      "endpoint": "GET /api/bve/trade/history",
+      "test": "Returns trade history from bve_trade_logs collection only",
+      "result": "PASS",
+      "ui_verification": "Trade Monitor shows 63 trades in BVE mode, distinct LOT size (59.26)"
+    },
+    "bve_trade_delete_isolation": {
+      "endpoint": "DELETE /api/bve/trade/{trade_id}",
+      "test": "Deletes from bve_trade_logs only, never production",
+      "result": "PASS"
+    },
+    "bve_rewind_isolation": {
+      "endpoint": "POST /api/bve/rewind",
+      "test": "Rewinds BVE state without touching production trade_logs",
+      "result": "PASS"
+    },
+    "forum_merge_posts": {
+      "endpoint": "POST /api/forum/posts/merge",
+      "test": "Merges source post into target, moves comments, awards 8pts to source OP",
+      "result": "PASS",
+      "role_check": "Only master_admin and super_admin can merge (403 for others)"
+    },
+    "forum_validate_solution": {
+      "endpoint": "PUT /api/forum/posts/{post_id}/validate-solution",
+      "test": "Updates solution_validated_at timestamp",
+      "result": "PASS"
+    },
+    "forum_search_similar_full": {
+      "endpoint": "GET /api/forum/search-similar-full",
+      "test": "Searches both title and content, returns has_similar flag",
+      "result": "PASS",
+      "ui_verification": "New Post dialog shows 'Similar posts found' warning"
+    },
+    "forum_post_details": {
+      "endpoint": "GET /api/forum/posts/{post_id}/details",
+      "test": "Returns contributors, awards, validation info for sidebar",
+      "result": "PASS",
+      "ui_verification": "Sidebar shows POST INFO section with views, comments, date"
+    },
+    "forum_enhanced_search": {
+      "endpoint": "GET /api/forum/search-similar",
+      "test": "Searches both title AND content (enhanced)",
+      "result": "PASS"
+    },
+    "forum_merge_button_visibility": {
+      "location": "ForumPostPage.jsx",
+      "test": "Merge button visible for master_admin/super_admin",
+      "result": "PASS - Merge icon visible in post header"
+    },
+    "forum_duplicate_safeguard_ui": {
+      "location": "ForumListPage.jsx - New Post dialog",
+      "test": "Shows similar posts warning before submission",
+      "result": "PASS",
+      "elements_verified": [
+        "Similar existing posts dropdown while typing",
+        "Yellow warning: 'Similar posts found — your question may already be answered!'",
+        "Continue posting button: 'My question is different — continue posting'"
+      ]
+    },
+    "forum_sidebar_ui": {
+      "location": "ForumPostPage.jsx",
+      "test": "Post details sidebar visible on post page",
+      "result": "PASS",
+      "elements_verified": [
+        "POST INFO section header",
+        "Posted date",
+        "Views count",
+        "Comments count"
+      ]
+    }
+  },
+  "backend_test_results": {
+    "test_bve_trade_history_endpoint_exists": "PASSED",
+    "test_bve_trade_history_returns_only_bve_data": "PASSED",
+    "test_bve_delete_trade_endpoint_exists": "PASSED",
+    "test_bve_rewind_endpoint_exists": "PASSED",
+    "test_merge_posts_endpoint_exists": "PASSED",
+    "test_merge_posts_requires_admin_role": "PASSED",
+    "test_validate_solution_endpoint_exists": "PASSED",
+    "test_search_similar_full_endpoint_exists": "PASSED",
+    "test_search_similar_full_returns_has_similar_flag": "PASSED",
+    "test_post_details_endpoint_exists": "PASSED",
+    "test_post_details_with_existing_post": "PASSED",
+    "test_search_similar_searches_both_title_and_content": "PASSED",
+    "test_merge_role_check_in_backend": "PASSED",
+    "test_duplicate_safeguard_returns_has_similar": "PASSED",
+    "test_bve_workflow_isolation": "PASSED"
+  },
+  "ui_verification_screenshots": {
+    "forum_list": "Shows Community Forum with posts, Top Contributors, category filters",
+    "forum_post_detail": "Shows post with sidebar containing POST INFO section",
+    "new_post_dialog": "Dialog with Title, Content, Category, Tags, Image upload",
+    "similar_posts_suggestions": "Dropdown showing similar existing posts while typing",
+    "duplicate_warning": "Yellow warning with 'Continue posting' option",
+    "trade_monitor_bve": "Shows 'Entered Beta Virtual Environment' notification, different LOT size"
+  },
+  "p0_bug_verification": {
+    "bve_reset_to_entry_point": {
+      "issue": "Deletes trades from main dashboard",
+      "fix_verified": "Trade history and delete operations in BVE mode only touch bve_* collections",
+      "code_locations": [
+        "/app/backend/routes/bve.py - GET /bve/trade/history (line ~308)",
+        "/app/backend/routes/bve.py - DELETE /bve/trade/{trade_id} (line ~342)",
+        "/app/frontend/src/pages/TradeMonitorPage.jsx - loadTradeHistory routes to BVE in BVE mode"
+      ],
+      "result": "FIXED - BVE operations isolated from production data"
+    }
+  }
+}

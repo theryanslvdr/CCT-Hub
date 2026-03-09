@@ -305,6 +305,69 @@ async def log_bve_trade(data: dict, user: dict = Depends(require_bve_admin)):
     
     return {k: v for k, v in trade_log.items() if k != "_id"}
 
+@router.get("/trade/history")
+async def get_bve_trade_history(
+    page: int = 1,
+    page_size: int = 10,
+    user: dict = Depends(require_bve_admin),
+):
+    """Get paginated trade history from BVE collections."""
+    db = deps.db
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+
+    skip = (page - 1) * page_size
+    query = {"bve_session_id": session["id"]}
+
+    total = await db.bve_trade_logs.count_documents(query)
+    trades = await db.bve_trade_logs.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(page_size).to_list(page_size)
+
+    enriched = []
+    for t in trades:
+        enriched.append({
+            **t,
+            "created_at": t.get("created_at", ""),
+            "signal_details": None,
+            "time_entered": t.get("time_entered"),
+            "trade_day_number": 0,
+        })
+
+    return {
+        "trades": enriched,
+        "total": total,
+        "total_trade_days": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": max(1, (total + page_size - 1) // page_size),
+    }
+
+
+@router.delete("/trade/{trade_id}")
+async def delete_bve_trade(trade_id: str, user: dict = Depends(require_bve_admin)):
+    """Delete a trade from BVE session only — never touches production data."""
+    db = deps.db
+    session = await db.bve_sessions.find_one(
+        {"user_id": user["id"], "ended_at": {"$exists": False}},
+        sort=[("created_at", -1)]
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active BVE session")
+
+    result = await db.bve_trade_logs.delete_one(
+        {"id": trade_id, "bve_session_id": session["id"]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="BVE trade not found")
+
+    return {"message": "BVE trade deleted", "trade_id": trade_id}
+
+
 @router.get("/summary")
 async def get_bve_summary(user: dict = Depends(require_bve_admin)):
     """Get profit summary in BVE mode"""

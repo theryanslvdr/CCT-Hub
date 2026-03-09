@@ -5,6 +5,7 @@ import { useWebSocket } from '@/contexts/WebSocketContext';
 import { forumAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import ForumImageUpload from '@/components/ForumImageUpload';
@@ -12,7 +13,7 @@ import {
   ArrowLeft, CheckCircle2, Clock, Eye, MessageCircle,
   Award, Star, Loader2, Send, Trash2, Users,
   ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X,
-  Edit3, Pin, MoreHorizontal
+  Edit3, Pin, MoreHorizontal, Merge, ShieldCheck, Calendar, Search
 } from 'lucide-react';
 
 // Image gallery lightbox component
@@ -198,10 +199,28 @@ export default function ForumPostPage() {
   const [showMentions, setShowMentions] = useState(false);
   const commentInputRef = React.useRef(null);
 
+  // Sidebar details
+  const [postDetails, setPostDetails] = useState(null);
+
+  // Merge dialog state
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [mergeSearchQuery, setMergeSearchQuery] = useState('');
+  const [mergeSearchResults, setMergeSearchResults] = useState([]);
+  const [mergeTargetId, setMergeTargetId] = useState(null);
+  const [merging, setMerging] = useState(false);
+  const [mergeSearching, setMergeSearching] = useState(false);
+
+  // Validating solution state
+  const [validating, setValidating] = useState(false);
+
+  const isMergeAdmin = user?.role === 'master_admin' || user?.role === 'super_admin';
+
   const loadPost = useCallback(async () => {
     try {
       const res = await forumAPI.getPost(postId);
       setPost(res.data);
+      // Load sidebar details
+      forumAPI.getPostDetails(postId).then(r => setPostDetails(r.data)).catch(() => {});
     } catch (e) {
       toast.error('Failed to load post');
       navigate('/forum');
@@ -346,6 +365,43 @@ export default function ForumPostPage() {
     }
   };
 
+  // Merge post handlers
+  const handleMergeSearch = async (q) => {
+    setMergeSearchQuery(q);
+    if (q.trim().length < 2) { setMergeSearchResults([]); return; }
+    setMergeSearching(true);
+    try {
+      const res = await forumAPI.searchSimilar(q.trim());
+      setMergeSearchResults((res.data.results || []).filter(r => r.id !== postId));
+    } catch { setMergeSearchResults([]); }
+    finally { setMergeSearching(false); }
+  };
+
+  const handleMergePosts = async () => {
+    if (!mergeTargetId) { toast.error('Select a target post'); return; }
+    if (!window.confirm('Merge this post into the selected target? All comments will be moved. This cannot be undone.')) return;
+    setMerging(true);
+    try {
+      const res = await forumAPI.mergePosts(postId, mergeTargetId);
+      toast.success(res.data.message);
+      setMergeDialogOpen(false);
+      navigate(`/forum/${mergeTargetId}`);
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to merge posts');
+    } finally { setMerging(false); }
+  };
+
+  const handleValidateSolution = async () => {
+    setValidating(true);
+    try {
+      await forumAPI.validateSolution(postId);
+      toast.success('Solution marked as still valid');
+      loadPost();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to validate solution');
+    } finally { setValidating(false); }
+  };
+
   const canEditPost = (isOP && ((Date.now() - new Date(post?.created_at).getTime()) < 86400000)) || isAdmin();
   const canEditComment = (c) => {
     const isAuthor = c.author_id === user?.id;
@@ -406,7 +462,9 @@ export default function ForumPostPage() {
   const commenters = getCommenters();
 
   return (
-    <div className="space-y-5 pb-20 md:pb-6 max-w-4xl" data-testid="forum-post-page">
+    <div className="flex gap-5 pb-20 md:pb-6" data-testid="forum-post-page">
+      {/* Main content */}
+      <div className="flex-1 min-w-0 space-y-5 max-w-4xl">
       {/* Back button */}
       <button
         onClick={() => navigate('/forum')}
@@ -473,6 +531,11 @@ export default function ForumPostPage() {
           </div>
           {canManage && !editingPost && (
             <div className="flex gap-2 flex-shrink-0">
+              {isMergeAdmin && (
+                <Button size="sm" variant="outline" onClick={() => { setMergeDialogOpen(true); setMergeSearchQuery(''); setMergeSearchResults([]); setMergeTargetId(null); }} className="btn-secondary text-orange-400" data-testid="merge-post-btn" title="Merge into another post">
+                  <Merge className="w-3.5 h-3.5" />
+                </Button>
+              )}
               {isAdmin() && (
                 <Button size="sm" variant="outline" onClick={handlePinPost} className={`btn-secondary ${post.pinned ? 'text-amber-400' : 'text-zinc-400'}`} data-testid="pin-post-btn" title={post.pinned ? 'Unpin' : 'Pin'}>
                   <Pin className="w-3.5 h-3.5" />
@@ -685,6 +748,96 @@ export default function ForumPostPage() {
         </div>
       )}
 
+      </div>{/* end main content */}
+
+      {/* Right Sidebar — Post Details */}
+      <aside className="hidden lg:block w-72 flex-shrink-0 space-y-4" data-testid="post-details-sidebar">
+        {/* Post Info */}
+        <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Post Info</h3>
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Posted {post.created_at ? new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Eye className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{post.views || 0} views</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{post.comments?.length || 0} comments</span>
+            </div>
+            {post.merged_from && (
+              <div className="flex items-center gap-2 text-orange-400">
+                <Merge className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>Has merged content</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Solution Validation */}
+        {post.status === 'closed' && post.best_answer_id && (
+          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Solution Status</h3>
+            {postDetails?.solution_validated_at ? (
+              <p className="text-[11px] text-emerald-400 mb-2 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Validated {timeSince(postDetails.solution_validated_at)}
+              </p>
+            ) : (
+              <p className="text-[11px] text-zinc-500 mb-2">Not yet validated</p>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleValidateSolution}
+              disabled={validating}
+              className="w-full gap-1.5 text-xs btn-secondary text-emerald-400 hover:text-emerald-300 border-emerald-500/20 hover:border-emerald-500/40"
+              data-testid="validate-solution-btn"
+            >
+              {validating ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
+              Solution still valid
+            </Button>
+          </div>
+        )}
+
+        {/* Contributors */}
+        {postDetails?.contributors?.length > 0 && (
+          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" /> Contributors ({postDetails.contributors.length})
+            </h3>
+            <div className="space-y-1.5">
+              {postDetails.contributors.map(c => (
+                <div key={c.user_id} className="flex items-center gap-2 text-xs">
+                  <span className="text-zinc-300">{c.name}</span>
+                  <RoleBadge role={c.role} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Awards */}
+        {postDetails?.awards?.length > 0 && (
+          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-amber-400" /> Awards
+            </h3>
+            <div className="space-y-1.5">
+              {postDetails.awards.map((a, i) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-300">{a.name}</span>
+                  <span className="text-amber-400 font-medium">+{a.points} pts</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+
       {/* Close Post Dialog */}
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
@@ -775,6 +928,69 @@ export default function ForumPostPage() {
             <Button variant="outline" onClick={() => setCloseDialogOpen(false)} className="btn-secondary">Cancel</Button>
             <Button onClick={handleClosePost} disabled={closing} className="gap-2 bg-emerald-600 hover:bg-emerald-700" data-testid="confirm-close-btn">
               {closing ? <><Loader2 className="w-4 h-4 animate-spin" /> Closing...</> : <><CheckCircle2 className="w-4 h-4" /> Close & Award Points</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Merge Post Dialog */}
+      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Merge className="w-5 h-5 text-orange-400" /> Merge Post
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-xs text-zinc-400">
+              Merge "<span className="text-zinc-200">{post.title}</span>" into another post.
+              All comments will be moved to the target. The original poster gets 8 pts.
+            </p>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <Input
+                value={mergeSearchQuery}
+                onChange={e => handleMergeSearch(e.target.value)}
+                placeholder="Search for target post..."
+                className="pl-9 input-dark"
+                data-testid="merge-search-input"
+              />
+            </div>
+            {mergeSearching && (
+              <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-zinc-500" /></div>
+            )}
+            {mergeSearchResults.length > 0 && (
+              <div className="max-h-48 overflow-y-auto space-y-1.5">
+                {mergeSearchResults.map(r => (
+                  <button
+                    key={r.id}
+                    onClick={() => setMergeTargetId(mergeTargetId === r.id ? null : r.id)}
+                    className={`w-full text-left p-3 rounded border text-xs transition-all ${
+                      mergeTargetId === r.id
+                        ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
+                        : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                    }`}
+                    data-testid={`merge-target-${r.id}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${r.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'}`}>
+                        {r.status === 'open' ? 'Open' : 'Solved'}
+                      </span>
+                      <span className="text-zinc-200 truncate flex-1">{r.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-zinc-500">
+                      <span className="flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" />{r.comment_count || 0}</span>
+                      <span>{timeSince(r.created_at)}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMergeDialogOpen(false)} className="btn-secondary">Cancel</Button>
+            <Button onClick={handleMergePosts} disabled={merging || !mergeTargetId} className="gap-2 bg-orange-600 hover:bg-orange-700" data-testid="confirm-merge-btn">
+              {merging ? <><Loader2 className="w-4 h-4 animate-spin" /> Merging...</> : <><Merge className="w-4 h-4" /> Merge</>}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -12,7 +12,7 @@ import ForumImageUpload from '@/components/ForumImageUpload';
 import {
   MessageSquare, Plus, Search, Clock, CheckCircle2,
   Eye, MessageCircle, Loader2, ChevronLeft, ChevronRight,
-  Award, ThumbsUp, Trophy, Star, ImageIcon, Pin, Tag
+  Award, ThumbsUp, Trophy, Star, ImageIcon, Pin, Tag, AlertTriangle
 } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -225,6 +225,7 @@ export default function ForumListPage() {
   const [creating, setCreating] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', tags: '', images: [], category: 'general' });
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [similarWarning, setSimilarWarning] = useState(null);
 
   const pageSize = 20;
 
@@ -255,6 +256,18 @@ export default function ForumListPage() {
       toast.error('Title and content are required');
       return;
     }
+
+    // Pre-submission duplicate check: search by both title AND content
+    if (!newPost._confirmedDuplicate) {
+      try {
+        const res = await forumAPI.searchSimilarFull(newPost.title.trim(), newPost.content.trim());
+        if (res.data.has_similar && res.data.results?.length > 0) {
+          setSimilarWarning(res.data.results);
+          return; // Show warning — user must confirm or view similar
+        }
+      } catch { /* proceed if check fails */ }
+    }
+
     setCreating(true);
     try {
       const tags = newPost.tags ? newPost.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
@@ -263,6 +276,7 @@ export default function ForumListPage() {
       toast.success('Post created!');
       setNewPostOpen(false);
       setNewPost({ title: '', content: '', tags: '', images: [], category: 'general' });
+      setSimilarWarning(null);
       navigate(`/forum/${res.data.id}`);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Failed to create post');
@@ -460,6 +474,41 @@ export default function ForumListPage() {
               </div>
             </div>
           </div>
+          {/* Duplicate post warning */}
+          {similarWarning && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2" data-testid="duplicate-warning">
+              <p className="text-xs font-medium text-amber-400 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" /> Similar posts found — your question may already be answered!
+              </p>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {similarWarning.map(r => (
+                  <button
+                    key={r.id}
+                    onClick={() => { setNewPostOpen(false); setSimilarWarning(null); navigate(`/forum/${r.id}`); }}
+                    className="w-full text-left px-3 py-2 rounded bg-zinc-800/50 border border-zinc-700 hover:border-amber-500/30 text-xs text-zinc-300 transition-all"
+                    data-testid={`warning-post-${r.id}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${STATUS_COLORS[r.status]}`}>
+                        {r.status === 'open' ? 'Open' : 'Solved'}
+                      </span>
+                      {r.best_answer_id && <Award className="w-3 h-3 text-amber-400" />}
+                      <span className="truncate">{r.title}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setSimilarWarning(null); setNewPost(p => ({ ...p, _confirmedDuplicate: true })); }}
+                className="w-full text-xs btn-secondary text-zinc-400"
+                data-testid="continue-posting-btn"
+              >
+                My question is different — continue posting
+              </Button>
+            </div>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewPostOpen(false)} className="btn-secondary">Cancel</Button>
             <Button onClick={handleCreatePost} disabled={creating} className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="submit-post-btn">

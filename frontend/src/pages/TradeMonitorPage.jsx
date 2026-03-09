@@ -394,16 +394,22 @@ export const TradeMonitorPage = () => {
 
   const loadTradeHistory = useCallback(async () => {
     try {
-      // When simulating a member, load their trade history instead of admin's
-      const userId = simulatedView?.memberId || null;
-      const res = await tradeAPI.getHistory(historyPage, 10, userId);
+      let res;
+      if (isInBVE) {
+        // In BVE mode, fetch trade history from BVE collections only
+        res = await api.get('/bve/trade/history', { params: { page: historyPage, page_size: 10 } });
+      } else {
+        // When simulating a member, load their trade history instead of admin's
+        const userId = simulatedView?.memberId || null;
+        res = await tradeAPI.getHistory(historyPage, 10, userId);
+      }
       setTradeHistory(res.data.trades);
       setHistoryTotalPages(res.data.total_pages);
       setHistoryTotal(res.data.total);
     } catch (error) {
       console.error('Failed to load trade history:', error);
     }
-  }, [historyPage, simulatedView?.memberId]);
+  }, [historyPage, simulatedView?.memberId, isInBVE]);
 
   // Pull-to-refresh for mobile
   const handleRefresh = useCallback(async () => {
@@ -1247,6 +1253,23 @@ export const TradeMonitorPage = () => {
   const [deleteTradeLoading, setDeleteTradeLoading] = useState(null);
 
   const handleResetTrade = async (tradeId) => {
+    if (isInBVE) {
+      // In BVE mode, delete from BVE collection only — never touch production
+      if (!window.confirm('Delete this trade from BVE? This does NOT affect your real trade data.')) return;
+      setResetTradeLoading(tradeId);
+      try {
+        await api.delete(`/bve/trade/${tradeId}`);
+        toast.success('BVE trade deleted');
+        loadTradeHistory();
+        loadData();
+      } catch (error) {
+        toast.error(error.response?.data?.detail || 'Failed to delete BVE trade');
+      } finally {
+        setResetTradeLoading(null);
+      }
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to reset this trade? This action cannot be undone.')) {
       return;
     }

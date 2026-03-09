@@ -561,7 +561,7 @@ async def search_similar_posts(
     limit: int = Query(5, ge=1, le=10),
     user: dict = Depends(deps.get_current_user),
 ):
-    """AJAX search for similar posts based on title query."""
+    """AJAX search for similar posts based on title and content query."""
     db = deps.db
     # Split query into words for better matching
     words = q.strip().split()
@@ -571,8 +571,11 @@ async def search_similar_posts(
         return {"results": []}
 
     cursor = db.forum_posts.find(
-        {"title": {"$regex": regex_pattern, "$options": "i"}},
-        {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1},
+        {"$or": [
+            {"title": {"$regex": regex_pattern, "$options": "i"}},
+            {"content": {"$regex": regex_pattern, "$options": "i"}},
+        ]},
+        {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1, "category": 1},
     ).sort("created_at", -1).limit(limit)
     results = await cursor.to_list(length=limit)
     return {"results": results, "query": q}
@@ -860,3 +863,225 @@ async def search_users_for_mention(
     ).limit(limit)
     users = await cursor.to_list(length=limit)
     return {"users": users}
+
+
+# ─── Merge Posts (Master Admin / Super Admin only) ───
+
+class MergePostsRequest(BaseModel):
+    source_post_id: str
+    target_post_id: str
+
+
+@router.post("/posts/merge")
+async def merge_posts(
+    body: MergePostsRequest,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Merge source post into target post.
+    - All comments from source are moved to target.
+    - Source OP gets half the standard collaborator points (8 pts).
+    - All contributors from source retain their full points.
+    - Source post is deleted; target post is updated.
+    Only master_admin or super_admin can merge.
+    """
+    if user.get("role") not in ("master_admin", "super_admin"):
+        raise HTTPException(status_code=403, detail="Only Master Admin or Super Admin can merge posts")
+
+    db = deps.db
+
+    source = await db.forum_posts.find_one({"id": body.source_post_id}, {"_id": 0})
+    target = await db.forum_posts.find_one({"id": body.target_post_id}, {"_id": 0})
+
+    if not source:
+        raise HTTPException(status_code=404, detail="Source post not found")
+    if not target:
+        raise HTTPException(status_code=404, detail="Target post not found")
+    if source["id"] == target["id"]:
+        raise HTTPException(status_code=400, detail="Cannot merge a post into itself")
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    # 1. Move all comments from source to target
+    source_comments = await db.forum_comments.find(
+        {"post_id": body.source_post_id}, {"_id": 0}
+    ).to_list(1000)
+
+    moved_count = 0
+    contributor_ids = set()
+    for comment in source_comments:
+        await db.forum_comments.update_one(
+            {"id": comment["id"]},
+            {"$set": {"post_id": body.target_post_id, "merged_from": body.source_post_id}},
+        )
+        moved_count += 1
+        if comment["author_id"] != source["author_id"]:
+            contributor_ids.add(comment["author_id"])
+
+    # 2. Update target post comment count
+    await db.forum_posts.update_one(
+        {"id": body.target_post_id},
+        {
+            "$inc": {"comment_count": moved_count},
+            "$set": {
+                "updated_at": now,
+                "merged_from": body.source_post_id,
+                "merged_at": now,
+                "merged_by": user["id"],
+            },
+        },
+    )
+
+    # 3. Move votes from source's comments (already moved, so their comment_id stays the same)
+    # No action needed since votes reference comment_id, not post_id
+
+    # 4. Award half points (8 pts) to source OP for contribution
+    source_op_id = source["author_id"]
+    if source_op_id != target["author_id"]:
+        await _award_forum_points(
+            source_op_id, 8, "forum_merge_op",
+            {"source_post_id": body.source_post_id, "target_post_id": body.target_post_id},
+        )
+
+    # 5. Delete source post (comments already moved)
+    await db.forum_posts.delete_one({"id": body.source_post_id})
+
+    # 6. Log the merge for audit
+    merge_log = {
+        "id": str(uuid.uuid4()),
+        "source_post_id": body.source_post_id,
+        "source_title": source.get("title", ""),
+        "target_post_id": body.target_post_id,
+        "target_title": target.get("title", ""),
+        "merged_by": user["id"],
+        "merged_by_name": user.get("name") or user.get("email"),
+        "comments_moved": moved_count,
+        "source_op_id": source_op_id,
+        "created_at": now,
+    }
+    await db.forum_merge_logs.insert_one(merge_log)
+
+    return {
+        "message": f"Post merged successfully. {moved_count} comments moved.",
+        "target_post_id": body.target_post_id,
+        "comments_moved": moved_count,
+        "source_op_points": 8 if source_op_id != target["author_id"] else 0,
+    }
+
+
+# ─── Solution Still Valid ───
+
+@router.put("/posts/{post_id}/validate-solution")
+async def validate_solution(
+    post_id: str,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Mark the solution as still valid. Updates a timestamp."""
+    db = deps.db
+    post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0, "id": 1, "status": 1})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    now = datetime.now(timezone.utc).isoformat()
+    await db.forum_posts.update_one(
+        {"id": post_id},
+        {"$set": {
+            "solution_validated_at": now,
+            "solution_validated_by": user["id"],
+        }},
+    )
+
+    return {"message": "Solution marked as still valid", "validated_at": now}
+
+
+# ─── Enhanced Similar Search (title + content) ───
+
+@router.get("/search-similar-full")
+async def search_similar_full(
+    title: str = Query("", min_length=0),
+    content: str = Query("", min_length=0),
+    exclude_id: Optional[str] = Query(None),
+    limit: int = Query(5, ge=1, le=10),
+    user: dict = Depends(deps.get_current_user),
+):
+    """Search for similar posts by both title and content (for pre-submission check)."""
+    db = deps.db
+    combined = f"{title} {content}".strip()
+    words = combined.split()
+    regex_pattern = "|".join([w for w in words if len(w) >= 3])
+    if not regex_pattern:
+        return {"results": [], "has_similar": False}
+
+    query = {
+        "$or": [
+            {"title": {"$regex": regex_pattern, "$options": "i"}},
+            {"content": {"$regex": regex_pattern, "$options": "i"}},
+        ]
+    }
+    if exclude_id:
+        query["id"] = {"$ne": exclude_id}
+
+    cursor = db.forum_posts.find(
+        query,
+        {"_id": 0, "id": 1, "title": 1, "status": 1, "comment_count": 1, "best_answer_id": 1, "created_at": 1, "category": 1},
+    ).sort("created_at", -1).limit(limit)
+    results = await cursor.to_list(length=limit)
+
+    return {"results": results, "has_similar": len(results) > 0}
+
+
+# ─── Post Details Metadata (for sidebar) ───
+
+@router.get("/posts/{post_id}/details")
+async def get_post_details(
+    post_id: str,
+    user: dict = Depends(deps.get_current_user),
+):
+    """Get enriched post metadata for the sidebar: contributors, awards, validated timestamp."""
+    db = deps.db
+    post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # Get unique contributors from comments
+    comments = await db.forum_comments.find(
+        {"post_id": post_id}, {"_id": 0, "author_id": 1}
+    ).to_list(500)
+    contributor_ids = list(set(c["author_id"] for c in comments if c["author_id"] != post["author_id"]))
+
+    contributors = []
+    for cid in contributor_ids[:20]:
+        u = await db.users.find_one({"id": cid}, {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1})
+        if u:
+            contributors.append({
+                "user_id": u["id"],
+                "name": u.get("name") or u.get("email", "Unknown"),
+                "role": u.get("role", "member"),
+            })
+
+    # Get awards given on this post
+    awards = []
+    point_logs = await db.rewards_point_logs.find(
+        {"metadata.post_id": post_id, "source": {"$regex": "^forum_"}},
+        {"_id": 0, "user_id": 1, "points": 1, "source": 1},
+    ).to_list(50)
+
+    for log in point_logs:
+        u = await db.users.find_one({"id": log["user_id"]}, {"_id": 0, "name": 1, "email": 1})
+        awards.append({
+            "user_id": log["user_id"],
+            "name": (u or {}).get("name") or (u or {}).get("email", "Unknown"),
+            "points": log["points"],
+            "source": log["source"],
+        })
+
+    return {
+        "post_id": post_id,
+        "created_at": post.get("created_at"),
+        "status": post.get("status"),
+        "solution_validated_at": post.get("solution_validated_at"),
+        "solution_validated_by": post.get("solution_validated_by"),
+        "merged_from": post.get("merged_from"),
+        "merged_at": post.get("merged_at"),
+        "contributors": contributors,
+        "awards": awards,
+    }
