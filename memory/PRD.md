@@ -83,6 +83,7 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - **Cloudinary** - Image uploads
 - **Publitio** - Forum image hosting
 - **Rewards Platform (rewards.crosscur.rent)** - External rewards API with auto-sync
+- **OpenRouter** - AI-powered semantic duplicate detection for forum (gpt-4o-mini)
 
 ## What's Been Implemented
 - [x] Profit tracking (deposits, withdrawals, commissions, projections)
@@ -106,6 +107,9 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] Forum: Post details sidebar (contributors, awards, post date, solution validation)
 - [x] Forum: Enhanced similar search (both title AND content)
 - [x] Forum: "Solution still valid" button with timestamp
+- [x] Commission Records: Type column distinguishing Balance vs Historical (skip_deposit)
+- [x] OpenRouter AI-powered semantic duplicate detection for forum posts
+- [x] Exit Trade function verified (all flows tested, performance calculation confirmed)
 
 ## Prioritized Backlog
 
@@ -113,8 +117,6 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - None currently
 
 ### P1 (High)
-- [ ] Commission display for Master Admin: Show commissions with/without skip_deposit differentiated
-- [ ] Exit Trade function regression test (user-requested triple-check)
 - [ ] Publitio: Needs user to re-enter API keys in Platform Settings
 
 ### P2 (Medium)

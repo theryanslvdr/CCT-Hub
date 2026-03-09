@@ -20,6 +20,16 @@
 - 100% frontend verification
 - BVE data isolation confirmed
 
+### Commission & AI Features (same day)
+- **Commission Records**: Added "Type" column - "Balance" (green) for normal commissions, "Historical" (amber) for `skip_deposit=true`
+- **OpenRouter Integration**: AI-powered semantic duplicate detection at `POST /api/forum/ai-check-duplicate`. Uses gpt-4o-mini via OpenRouter. Falls back to regex if unavailable.
+- **Exit Trade Verification**: Full regression test passed - trade logging, performance calculation, commission storage, trade history all working correctly.
+
+### Testing (AI & Commissions)
+- 18/18 backend tests passed (iteration 153)
+- 100% frontend verification
+- OpenRouter AI integration confirmed working (ai_powered=true)
+
 ## 2026-03-06 - Commission & Stability Fixes
 
 ### Bug Fixes
