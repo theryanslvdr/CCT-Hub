@@ -25,7 +25,7 @@ const ResourceCard = ({ resource, isAdmin, onDelete }) => {
   };
 
   return (
-    <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 transition-colors" data-testid={`resource-${resource.id}`}>
+    <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06] hover:border-white/[0.08] transition-colors" data-testid={`resource-${resource.id}`}>
       <div className="flex items-start justify-between gap-2">
         <h4 className="text-sm font-medium text-white">{resource.title}</h4>
         <div className="flex gap-1 shrink-0">
@@ -71,14 +71,14 @@ const InlineAddForm = ({ category, onSaved }) => {
 
   if (!show) {
     return (
-      <Button variant="ghost" size="sm" onClick={() => setShow(true)} className="w-full border border-dashed border-zinc-700 text-zinc-500 hover:text-white hover:border-zinc-500 gap-1.5" data-testid={`add-resource-inline-${category}`}>
+      <Button variant="ghost" size="sm" onClick={() => setShow(true)} className="w-full border border-dashed border-white/[0.08] text-zinc-500 hover:text-white hover:border-zinc-500 gap-1.5" data-testid={`add-resource-inline-${category}`}>
         <Plus className="w-4 h-4" /> Add Resource
       </Button>
     );
   }
 
   return (
-    <div className="p-3 rounded-lg border border-cyan-500/30 bg-zinc-900/60 space-y-2" data-testid={`inline-form-${category}`}>
+    <div className="p-3 rounded-lg border border-cyan-500/30 bg-[#0d0d0d]/60 space-y-2" data-testid={`inline-form-${category}`}>
       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="input-dark text-sm" data-testid={`inline-title-${category}`} />
       <Textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content (members can copy this)" className="input-dark text-sm" rows={3} data-testid={`inline-content-${category}`} />
       <div className="flex gap-2 justify-end">
@@ -139,7 +139,7 @@ const AffiliateCenterPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-zinc-900/60 border border-zinc-800 w-full flex flex-wrap h-auto gap-1 p-1">
+        <TabsList className="bg-[#0d0d0d]/60 border border-white/[0.06] w-full flex flex-wrap h-auto gap-1 p-1">
           {CATEGORIES.map(cat => {
             const Icon = cat.icon;
             const count = (resources[cat.key] || []).length;
@@ -147,7 +147,7 @@ const AffiliateCenterPage = () => {
               <TabsTrigger
                 key={cat.key}
                 value={cat.key}
-                className="flex-1 min-w-[120px] text-xs data-[state=active]:bg-zinc-800 gap-1.5"
+                className="flex-1 min-w-[120px] text-xs data-[state=active]:bg-[#1a1a1a] gap-1.5"
                 data-testid={`affiliate-tab-${cat.key}`}
               >
                 <Icon className={`w-3.5 h-3.5 ${cat.color}`} />
@@ -157,7 +157,7 @@ const AffiliateCenterPage = () => {
             );
           })}
           {chatbase.enabled && (
-            <TabsTrigger value="consim" className="flex-1 min-w-[120px] text-xs data-[state=active]:bg-zinc-800 gap-1.5" data-testid="affiliate-tab-consim">
+            <TabsTrigger value="consim" className="flex-1 min-w-[120px] text-xs data-[state=active]:bg-[#1a1a1a] gap-1.5" data-testid="affiliate-tab-consim">
               <Bot className="w-3.5 h-3.5 text-cyan-400" /> ConSim
             </TabsTrigger>
           )}
@@ -197,7 +197,7 @@ const AffiliateCenterPage = () => {
                 <p className="text-xs text-zinc-500">Practice your invitation conversations with an AI chatbot</p>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg overflow-hidden border border-zinc-800" style={{ height: '500px' }} data-testid="chatbase-embed">
+                <div className="rounded-lg overflow-hidden border border-white/[0.06]" style={{ height: '500px' }} data-testid="chatbase-embed">
                   <iframe src={`https://www.chatbase.co/chatbot-iframe/${chatbase.bot_id}`} title="ConSim Chatbot" width="100%" height="100%" style={{ border: 'none' }} />
                 </div>
               </CardContent>

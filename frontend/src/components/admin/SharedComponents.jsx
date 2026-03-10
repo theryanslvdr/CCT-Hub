@@ -68,12 +68,12 @@ export const SearchFilterBar = ({
         <div className="flex flex-wrap gap-2 items-center">
           {filters.map((filter, index) => (
             <Select key={index} value={filter.value} onValueChange={filter.onChange}>
-              <SelectTrigger className="w-[140px] bg-zinc-900/50 border-zinc-800 text-white" data-testid={filter.testId}>
+              <SelectTrigger className="w-[140px] bg-[#0d0d0d]/50 border-white/[0.06] text-white" data-testid={filter.testId}>
                 <SelectValue placeholder={filter.placeholder} />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800">
+              <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
                 {filter.options.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-zinc-800">
+                  <SelectItem key={option.value} value={option.value} className="text-white hover:bg-[#1a1a1a]">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -87,7 +87,7 @@ export const SearchFilterBar = ({
               size="icon"
               onClick={onRefresh}
               disabled={refreshing}
-              className="border-zinc-700 hover:bg-zinc-800"
+              className="border-white/[0.08] hover:bg-[#1a1a1a]"
               data-testid="refresh-button"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -126,7 +126,7 @@ export const Pagination = ({
           size="icon"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="border-zinc-700 hover:bg-zinc-800"
+          className="border-white/[0.08] hover:bg-[#1a1a1a]"
           data-testid="prev-page"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -139,7 +139,7 @@ export const Pagination = ({
           size="icon"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="border-zinc-700 hover:bg-zinc-800"
+          className="border-white/[0.08] hover:bg-[#1a1a1a]"
           data-testid="next-page"
         >
           <ChevronRight className="w-4 h-4" />
@@ -278,7 +278,7 @@ export const EmptyState = ({
   action
 }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
-    <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+    <div className="w-16 h-16 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-4">
       <Icon className="w-8 h-8 text-zinc-500" />
     </div>
     <h3 className="text-lg font-medium text-white mb-2">{title}</h3>
@@ -299,7 +299,7 @@ export const ActionButtons = ({ actions, size = 'sm' }) => (
         size={size}
         onClick={action.onClick}
         disabled={action.disabled}
-        className={action.className || 'text-zinc-400 hover:text-white hover:bg-zinc-800'}
+        className={action.className || 'text-zinc-400 hover:text-white hover:bg-[#1a1a1a]'}
         title={action.title}
         data-testid={action.testId}
       >

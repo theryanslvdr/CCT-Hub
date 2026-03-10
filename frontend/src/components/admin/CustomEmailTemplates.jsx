@@ -239,7 +239,7 @@ export const CustomEmailTemplates = () => {
                 className={`p-4 rounded-lg border transition-all cursor-pointer ${
                   selectedTemplate?.id === template.id
                     ? 'bg-purple-500/10 border-orange-500/20'
-                    : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                    : 'bg-[#0d0d0d]/50 border-white/[0.06] hover:border-white/[0.08]'
                 }`}
                 onClick={() => handleSelectTemplate(template)}
               >
@@ -254,7 +254,7 @@ export const CustomEmailTemplates = () => {
                       )}
                     </div>
                     <p className="text-xs text-zinc-500 mt-0.5 truncate">{template.subject}</p>
-                    <Badge variant="outline" className="bg-zinc-800/50 text-zinc-400 border-zinc-700 text-xs mt-1">
+                    <Badge variant="outline" className="bg-white/[0.04] text-zinc-400 border-white/[0.08] text-xs mt-1">
                       {template.category}
                     </Badge>
                   </div>
@@ -289,7 +289,7 @@ export const CustomEmailTemplates = () => {
         </div>
 
         {/* Edit/Create Panel */}
-        <div className="lg:border-l lg:border-zinc-800 lg:pl-6">
+        <div className="lg:border-l lg:border-white/[0.06] lg:pl-6">
           {(isEditing || isCreating) ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -324,7 +324,7 @@ export const CustomEmailTemplates = () => {
                   <SelectTrigger className="input-dark mt-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800">
+                  <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
                     {CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
                         {cat.label}
@@ -352,7 +352,7 @@ export const CustomEmailTemplates = () => {
                   {SHORTCODES.map((sc) => (
                     <code
                       key={sc.code}
-                      className="px-2 py-1 rounded bg-zinc-800 text-xs text-zinc-300 cursor-pointer hover:bg-zinc-700 hover:text-white transition-colors"
+                      className="px-2 py-1 rounded bg-[#1a1a1a] text-xs text-zinc-300 cursor-pointer hover:bg-white/[0.08] hover:text-white transition-colors"
                       onClick={() => insertShortcode(sc.code)}
                       title={sc.description}
                     >
@@ -366,7 +366,7 @@ export const CustomEmailTemplates = () => {
               <div className="flex items-center justify-between">
                 <Label className="text-zinc-300">Email Body</Label>
                 <Tabs value={editorMode} onValueChange={setEditorMode} className="w-auto">
-                  <TabsList className="bg-zinc-800 h-8">
+                  <TabsList className="bg-[#1a1a1a] h-8">
                     <TabsTrigger value="visual" className="text-xs h-7 px-3">
                       <Eye className="w-3 h-3 mr-1" /> Visual
                     </TabsTrigger>
@@ -379,7 +379,7 @@ export const CustomEmailTemplates = () => {
 
               {/* Editor */}
               {editorMode === 'visual' ? (
-                <div className="rounded-lg overflow-hidden border border-zinc-800 bg-white">
+                <div className="rounded-lg overflow-hidden border border-white/[0.06] bg-white">
                   <ReactQuill
                     theme="snow"
                     value={templateBody}
@@ -434,7 +434,7 @@ export const CustomEmailTemplates = () => {
                 <Button
                   variant="outline"
                   onClick={resetForm}
-                  className="border-zinc-700"
+                  className="border-white/[0.08]"
                 >
                   Cancel
                 </Button>
@@ -442,7 +442,7 @@ export const CustomEmailTemplates = () => {
 
               {/* Preview Dialog */}
               <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-                <DialogContent className="bg-zinc-900 border-zinc-800 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-white flex items-center gap-2">
                       <Eye className="w-5 h-5 text-orange-400" />
@@ -452,7 +452,7 @@ export const CustomEmailTemplates = () => {
                   
                   <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                     {/* Subject Preview */}
-                    <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                    <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]">
                       <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Subject</p>
                       <p className="text-white font-medium">{getPreviewContent(templateSubject)}</p>
                     </div>
@@ -480,10 +480,10 @@ export const CustomEmailTemplates = () => {
                     </div>
                   </div>
                   
-                  <div className="pt-4 border-t border-zinc-800">
+                  <div className="pt-4 border-t border-white/[0.06]">
                     <Button 
                       onClick={() => setPreviewOpen(false)}
-                      className="w-full bg-zinc-800 hover:bg-zinc-700"
+                      className="w-full bg-[#1a1a1a] hover:bg-white/[0.08]"
                     >
                       Close Preview
                     </Button>

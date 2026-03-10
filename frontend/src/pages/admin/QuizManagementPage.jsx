@@ -202,7 +202,7 @@ const QuizManagementPage = () => {
               <select
                 value={genTopic}
                 onChange={e => setGenTopic(e.target.value)}
-                className="h-9 px-3 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+                className="h-9 px-3 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm"
                 data-testid="gen-topic-select"
               >
                 <option value="">All Topics</option>
@@ -217,7 +217,7 @@ const QuizManagementPage = () => {
                 max={10}
                 value={genCount}
                 onChange={e => setGenCount(parseInt(e.target.value) || 5)}
-                className="w-20 h-9 bg-zinc-800 border-zinc-700 text-white"
+                className="w-20 h-9 bg-[#1a1a1a] border-white/[0.08] text-white"
                 data-testid="gen-count-input"
               />
             </div>
@@ -226,7 +226,7 @@ const QuizManagementPage = () => {
               <select
                 value={genDifficulty}
                 onChange={e => setGenDifficulty(parseInt(e.target.value))}
-                className="h-9 px-3 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+                className="h-9 px-3 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm"
                 data-testid="gen-difficulty-select"
               >
                 {[1,2,3,4,5,6,7].map(d => <option key={d} value={d}>Level {d}</option>)}
@@ -257,7 +257,7 @@ const QuizManagementPage = () => {
                 type="date"
                 value={publishDate}
                 onChange={e => setPublishDate(e.target.value)}
-                className="h-8 w-36 bg-zinc-800 border-zinc-700 text-white text-xs"
+                className="h-8 w-36 bg-[#1a1a1a] border-white/[0.08] text-white text-xs"
                 data-testid="publish-date-input"
               />
               <Button
@@ -279,7 +279,7 @@ const QuizManagementPage = () => {
             ) : (
               <div className="space-y-2">
                 {published.map((q, i) => (
-                  <div key={q.id} className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+                  <div key={q.id} className="p-3 rounded-lg bg-[#0d0d0d]/40 border border-white/[0.06]">
                     <p className="text-sm text-white font-medium">{i+1}. {q.question}</p>
                     <p className="text-xs text-emerald-400 mt-1">Answer: {q.correct_answer}</p>
                     <p className="text-xs text-zinc-500 mt-0.5">{q.explanation}</p>
@@ -301,13 +301,13 @@ const QuizManagementPage = () => {
             </CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
               {/* Filters */}
-              <div className="flex rounded-lg overflow-hidden border border-zinc-700">
+              <div className="flex rounded-lg overflow-hidden border border-white/[0.08]">
                 {['pending', 'approved', 'rejected', ''].map(s => (
                   <button
                     key={s || 'all'}
                     onClick={() => { setStatusFilter(s); setPage(1); }}
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      statusFilter === s ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                      statusFilter === s ? 'bg-orange-600 text-white' : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
                     }`}
                     data-testid={`filter-${s || 'all'}-btn`}
                   >
@@ -318,7 +318,7 @@ const QuizManagementPage = () => {
               <select
                 value={topicFilter}
                 onChange={e => { setTopicFilter(e.target.value); setPage(1); }}
-                className="h-8 px-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-xs"
+                className="h-8 px-2 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-xs"
               >
                 <option value="">All Topics</option>
                 {TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
@@ -373,7 +373,7 @@ const QuizManagementPage = () => {
                   <div
                     key={quiz.id}
                     className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                      selected.has(quiz.id) ? 'bg-orange-500/10 border-orange-500/20' : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                      selected.has(quiz.id) ? 'bg-orange-500/10 border-orange-500/20' : 'bg-[#0d0d0d]/40 border-white/[0.06] hover:border-white/[0.08]'
                     }`}
                     onClick={() => toggleSelect(quiz.id)}
                     data-testid={`quiz-pool-${quiz.id}`}
@@ -389,7 +389,7 @@ const QuizManagementPage = () => {
                           <p className="text-sm text-white font-medium">{quiz.question}</p>
                           <button
                             onClick={(e) => openEdit(quiz, e)}
-                            className="shrink-0 p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                            className="shrink-0 p-1.5 rounded-md hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
                             data-testid={`edit-quiz-${quiz.id}`}
                             title="Edit quiz"
                           >
@@ -438,7 +438,7 @@ const QuizManagementPage = () => {
       {editQuiz && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditQuiz(null)}>
           <div
-            className="w-full max-w-lg mx-4 p-5 rounded-xl bg-zinc-900 border border-zinc-700 space-y-4 max-h-[80vh] overflow-y-auto"
+            className="w-full max-w-lg mx-4 p-5 rounded-xl bg-[#0d0d0d] border border-white/[0.08] space-y-4 max-h-[80vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
             data-testid="edit-quiz-modal"
           >
@@ -456,7 +456,7 @@ const QuizManagementPage = () => {
               <textarea
                 value={editForm.question || ''}
                 onChange={e => setEditForm(p => ({ ...p, question: e.target.value }))}
-                className="w-full h-20 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm resize-none"
+                className="w-full h-20 px-3 py-2 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm resize-none"
                 data-testid="edit-question-input"
               />
             </div>
@@ -466,7 +466,7 @@ const QuizManagementPage = () => {
               <Input
                 value={editForm.correct_answer || ''}
                 onChange={e => setEditForm(p => ({ ...p, correct_answer: e.target.value }))}
-                className="bg-zinc-800 border-zinc-700 text-white"
+                className="bg-[#1a1a1a] border-white/[0.08] text-white"
                 data-testid="edit-correct-answer-input"
               />
             </div>
@@ -482,7 +482,7 @@ const QuizManagementPage = () => {
                     updated[i] = e.target.value;
                     setEditForm(p => ({ ...p, wrong_answers: updated }));
                   }}
-                  className="bg-zinc-800 border-zinc-700 text-white mb-1.5"
+                  className="bg-[#1a1a1a] border-white/[0.08] text-white mb-1.5"
                   placeholder={`Wrong answer ${i + 1}`}
                   data-testid={`edit-wrong-answer-${i}`}
                 />
@@ -494,7 +494,7 @@ const QuizManagementPage = () => {
               <textarea
                 value={editForm.explanation || ''}
                 onChange={e => setEditForm(p => ({ ...p, explanation: e.target.value }))}
-                className="w-full h-16 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm resize-none"
+                className="w-full h-16 px-3 py-2 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm resize-none"
                 data-testid="edit-explanation-input"
               />
             </div>
@@ -504,7 +504,7 @@ const QuizManagementPage = () => {
               <select
                 value={editForm.platform_topic || 'Hub'}
                 onChange={e => setEditForm(p => ({ ...p, platform_topic: e.target.value }))}
-                className="h-9 w-full px-3 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+                className="h-9 w-full px-3 rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm"
               >
                 {TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>

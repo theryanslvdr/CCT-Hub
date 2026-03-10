@@ -130,7 +130,7 @@ export const LicenseRegistrationPage = () => {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
           <p className="text-zinc-400">Validating invite code...</p>
@@ -141,7 +141,7 @@ export const LicenseRegistrationPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
         <Card className="glass-card max-w-md w-full">
           <CardContent className="p-8 text-center">
             <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
@@ -159,7 +159,7 @@ export const LicenseRegistrationPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -198,7 +198,7 @@ export const LicenseRegistrationPage = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="p-3 rounded-lg bg-zinc-900/50">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50">
                 <div className="flex items-center gap-2 text-zinc-500 mb-1">
                   <DollarSign className="w-4 h-4" />
                   <span>Starting Amount</span>
@@ -208,7 +208,7 @@ export const LicenseRegistrationPage = () => {
                 </p>
               </div>
               {inviteData?.valid_until && (
-                <div className="p-3 rounded-lg bg-zinc-900/50">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50">
                   <div className="flex items-center gap-2 text-zinc-500 mb-1">
                     <Calendar className="w-4 h-4" />
                     <span>Valid Until</span>

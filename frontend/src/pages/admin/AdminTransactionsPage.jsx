@@ -241,7 +241,7 @@ export const AdminTransactionsPage = () => {
                     <HelpCircle className="w-3.5 h-3.5" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-72 p-0 bg-zinc-900 border-zinc-700" side="bottom" align="start">
+                <PopoverContent className="w-72 p-0 bg-[#0d0d0d] border-white/[0.08]" side="bottom" align="start">
                   <div className="p-3 space-y-2.5">
                     <p className="text-xs font-semibold text-white">How to Correct a Transaction</p>
                     <div className="space-y-2">
@@ -264,7 +264,7 @@ export const AdminTransactionsPage = () => {
                         <p className="text-[11px] text-zinc-400">Click <span className="text-white font-medium">Apply Correction</span>. The member&apos;s balance updates immediately.</p>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-zinc-800 space-y-1">
+                    <div className="pt-2 border-t border-white/[0.06] space-y-1">
                       <p className="text-[10px] text-zinc-500">Corrections are logged in the audit trail. The member will be notified and their edit access is locked.</p>
                     </div>
                   </div>
@@ -272,7 +272,7 @@ export const AdminTransactionsPage = () => {
               </Popover>
             </div>
             <Tabs value={filterType} onValueChange={(v) => { setFilterType(v); setPage(1); }}>
-              <TabsList className="bg-zinc-900/50">
+              <TabsList className="bg-[#0d0d0d]/50">
                 <TabsTrigger value="all" className="data-[state=active]:bg-orange-500/10">All</TabsTrigger>
                 <TabsTrigger value="deposit" className="data-[state=active]:bg-emerald-500/20">Deposits</TabsTrigger>
                 <TabsTrigger value="withdrawal" className="data-[state=active]:bg-orange-500/20">Withdrawals</TabsTrigger>
@@ -398,7 +398,7 @@ export const AdminTransactionsPage = () => {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                 <p className="text-sm text-zinc-500">Showing {transactions.length} of {total} transactions</p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary">

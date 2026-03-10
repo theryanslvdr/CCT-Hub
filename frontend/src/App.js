@@ -44,6 +44,7 @@ import ReferralTreePage from "./pages/admin/ReferralTreePage";
 import QuizManagementPage from "./pages/admin/QuizManagementPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import AITrainingPage from "./pages/admin/AITrainingPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 
@@ -115,6 +116,7 @@ function App() {
             <Route path="/admin/referrals" element={<ReferralTreePage />} />
             <Route path="/admin/quizzes" element={<QuizManagementPage />} />
             <Route path="/admin/ai-training" element={<AITrainingPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           </Route>
 
           {/* Default redirect */}

@@ -188,7 +188,7 @@ export const ProfitPlannerPage = () => {
             <Plus className="w-4 h-4" /> Add Goal
           </Button>
         </DialogTrigger>
-        <DialogContent className="glass-card border-zinc-800 max-w-lg">
+        <DialogContent className="glass-card border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Create New Goal</DialogTitle>
           </DialogHeader>
@@ -294,7 +294,7 @@ export const ProfitPlannerPage = () => {
                   </div>
 
                   {!isCompleted && (
-                    <div className="mt-4 p-3 rounded-lg bg-zinc-900/50">
+                    <div className="mt-4 p-3 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Remaining</p>
                       <p className="text-xl font-mono font-bold text-white">${formatNumber(remaining)}</p>
                     </div>
@@ -343,12 +343,12 @@ export const ProfitPlannerPage = () => {
 
       {/* Contribute Dialog */}
       <Dialog open={contributeDialogOpen} onOpenChange={setContributeDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Contribute to {selectedGoal?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="p-4 rounded-lg bg-zinc-900/50">
+            <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
               <div className="flex justify-between mb-2">
                 <span className="text-zinc-400">Current Progress</span>
                 <span className="text-white font-mono">${formatNumber(selectedGoal?.current_amount || 0)}</span>
@@ -378,25 +378,25 @@ export const ProfitPlannerPage = () => {
 
       {/* Goal Plan Dialog */}
       <Dialog open={!!goalPlan} onOpenChange={() => setGoalPlan(null)}>
-        <DialogContent className="glass-card border-zinc-800 max-w-lg">
+        <DialogContent className="glass-card border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Plan for {goalPlan?.goal_name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-xs text-zinc-500">Target</p>
                 <p className="text-xl font-mono font-bold text-white">${formatNumber(goalPlan?.target || 0)}</p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-xs text-zinc-500">Current</p>
                 <p className="text-xl font-mono font-bold text-cyan-400">${formatNumber(goalPlan?.current || 0)}</p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-xs text-zinc-500">Remaining</p>
                 <p className="text-xl font-mono font-bold text-amber-400">${formatNumber(goalPlan?.remaining || 0)}</p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-xs text-zinc-500">Account Balance</p>
                 <p className="text-xl font-mono font-bold text-white">${formatNumber(goalPlan?.account_value || 0)}</p>
               </div>

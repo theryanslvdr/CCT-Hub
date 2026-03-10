@@ -165,7 +165,7 @@ export function EmailsTab() {
                     className={`p-4 rounded-lg border transition-all cursor-pointer ${
                       selectedTemplate?.type === template.type
                         ? 'bg-orange-500/10 border-orange-500/20'
-                        : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                        : 'bg-[#0d0d0d]/50 border-white/[0.06] hover:border-white/[0.08]'
                     }`}
                     onClick={() => {
                       setSelectedTemplate(template);
@@ -186,7 +186,7 @@ export function EmailsTab() {
               </div>
 
               {/* Edit Template Panel */}
-              <div className="lg:border-l lg:border-zinc-800 lg:pl-6">
+              <div className="lg:border-l lg:border-white/[0.06] lg:pl-6">
                 {editingTemplate ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -226,21 +226,21 @@ export function EmailsTab() {
                         <textarea
                           value={editingTemplate.body}
                           onChange={(e) => setEditingTemplate((prev) => ({ ...prev, body: e.target.value }))}
-                          className="w-full h-64 mt-1 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 p-3 font-mono text-xs resize-none focus:outline-none focus:border-orange-500"
+                          className="w-full h-64 mt-1 rounded-lg border border-white/[0.08] bg-[#0d0d0d] text-zinc-300 p-3 font-mono text-xs resize-none focus:outline-none focus:border-orange-500"
                         />
                       </div>
                     ) : (
                       <div>
                         <Label className="text-zinc-400">Preview</Label>
                         <div
-                          className="mt-1 p-4 rounded-lg border border-zinc-700 bg-white min-h-[256px] max-h-[400px] overflow-y-auto"
+                          className="mt-1 p-4 rounded-lg border border-white/[0.08] bg-white min-h-[256px] max-h-[400px] overflow-y-auto"
                           dangerouslySetInnerHTML={{ __html: editingTemplate.body }}
                         />
                       </div>
                     )}
 
                     {editingTemplate.variables?.length > 0 && (
-                      <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                      <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]">
                         <p className="text-xs text-zinc-400 mb-1">Available Variables:</p>
                         <div className="flex flex-wrap gap-1">
                           {editingTemplate.variables.map((v) => (
@@ -303,7 +303,7 @@ export function EmailsTab() {
             <>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {emailHistory.map((email, idx) => (
-                  <div key={idx} className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800 flex items-center justify-between">
+                  <div key={idx} className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] flex items-center justify-between">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-white truncate">{email.subject}</p>
                       <p className="text-xs text-zinc-500">
@@ -350,7 +350,7 @@ export function EmailsTab() {
 
       {/* Test Email Dialog */}
       <Dialog open={testEmailDialogOpen} onOpenChange={setTestEmailDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Send Test Email</DialogTitle>
           </DialogHeader>

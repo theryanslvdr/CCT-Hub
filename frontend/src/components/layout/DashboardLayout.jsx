@@ -114,6 +114,7 @@ const pagesTitles = {
   '/admin/referrals': 'Referral Network',
   '/admin/quizzes': 'Quiz Manager',
   '/admin/ai-training': 'AI Training Center',
+  '/admin/dashboard': 'Admin Dashboard',
   '/ai-assistant': 'AI Assistant',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',

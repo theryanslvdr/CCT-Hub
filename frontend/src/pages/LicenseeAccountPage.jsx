@@ -379,7 +379,7 @@ export const LicenseeAccountPage = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="bg-zinc-900/50 border border-zinc-800 mb-4">
+            <TabsList className="bg-[#0d0d0d]/50 border border-white/[0.06] mb-4">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="deposits">Deposits</TabsTrigger>
               <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
@@ -413,7 +413,7 @@ export const LicenseeAccountPage = () => {
                         className={`p-4 rounded-lg border transition-all ${
                           tx.status === 'awaiting_confirmation'
                             ? 'bg-purple-500/5 border-orange-500/20'
-                            : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                            : 'bg-[#0d0d0d]/50 border-white/[0.06] hover:border-white/[0.08]'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -483,7 +483,7 @@ export const LicenseeAccountPage = () => {
 
                         {/* Feedback preview */}
                         {tx.feedback && tx.feedback.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-zinc-800">
+                          <div className="mt-3 pt-3 border-t border-white/[0.06]">
                             <p className="text-xs text-zinc-500 mb-1">Latest Feedback:</p>
                             <p className="text-sm text-zinc-300">
                               {tx.feedback[tx.feedback.length - 1].message}
@@ -502,7 +502,7 @@ export const LicenseeAccountPage = () => {
 
       {/* Deposit Dialog */}
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <ArrowUpCircle className="w-5 h-5 text-emerald-400" /> Submit Deposit Request
@@ -557,12 +557,12 @@ export const LicenseeAccountPage = () => {
                     <img 
                       src={screenshotPreview} 
                       alt="Screenshot preview" 
-                      className="w-full h-40 object-cover rounded-lg border border-zinc-700"
+                      className="w-full h-40 object-cover rounded-lg border border-white/[0.08]"
                     />
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-2 right-2 bg-zinc-900/80 hover:bg-zinc-800"
+                      className="absolute top-2 right-2 bg-[#0d0d0d]/80 hover:bg-[#1a1a1a]"
                       onClick={() => {
                         setScreenshotPreview(null);
                         setDepositForm(prev => ({ ...prev, screenshot: null }));
@@ -572,7 +572,7 @@ export const LicenseeAccountPage = () => {
                     </Button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-zinc-600 transition-colors">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/[0.08] rounded-lg cursor-pointer hover:border-zinc-600 transition-colors">
                     <Upload className="w-8 h-8 text-zinc-500 mb-2" />
                     <span className="text-sm text-zinc-500">Click to upload screenshot</span>
                     <span className="text-xs text-zinc-600 mt-1">PNG, JPG up to 10MB</span>
@@ -611,7 +611,7 @@ export const LicenseeAccountPage = () => {
 
       {/* Withdrawal Dialog */}
       <Dialog open={withdrawalDialogOpen} onOpenChange={setWithdrawalDialogOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <ArrowDownCircle className="w-5 h-5 text-red-400" /> Request Withdrawal
@@ -689,7 +689,7 @@ export const LicenseeAccountPage = () => {
 
       {/* View Transaction Dialog */}
       <Dialog open={viewTransactionOpen} onOpenChange={setViewTransactionOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {selectedTransaction?.type === 'deposit' 
@@ -741,7 +741,7 @@ export const LicenseeAccountPage = () => {
               {selectedTransaction.notes && (
                 <div>
                   <span className="text-zinc-500 text-sm">Your Notes</span>
-                  <p className="text-white mt-1 p-2 bg-zinc-800 rounded">{selectedTransaction.notes}</p>
+                  <p className="text-white mt-1 p-2 bg-[#1a1a1a] rounded">{selectedTransaction.notes}</p>
                 </div>
               )}
 
@@ -757,7 +757,7 @@ export const LicenseeAccountPage = () => {
                     <img 
                       src={selectedTransaction.screenshot_url} 
                       alt="Deposit screenshot" 
-                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-orange-500 transition-colors"
+                      className="w-full max-h-48 object-cover rounded-lg border border-white/[0.08] hover:border-orange-500 transition-colors"
                     />
                   </a>
                 </div>
@@ -775,7 +775,7 @@ export const LicenseeAccountPage = () => {
                     <img 
                       src={selectedTransaction.proof_url} 
                       alt="Proof of transfer" 
-                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-orange-500 transition-colors"
+                      className="w-full max-h-48 object-cover rounded-lg border border-white/[0.08] hover:border-orange-500 transition-colors"
                     />
                   </a>
                 </div>
@@ -789,7 +789,7 @@ export const LicenseeAccountPage = () => {
                   </span>
                   <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
                     {selectedTransaction.feedback.map((fb, idx) => (
-                      <div key={idx} className="p-2 bg-zinc-800 rounded text-sm">
+                      <div key={idx} className="p-2 bg-[#1a1a1a] rounded text-sm">
                         <div className="flex items-center justify-between text-xs text-zinc-500 mb-1">
                           <span>{fb.from_admin ? 'Admin' : 'You'}</span>
                           <span>{formatDateTime(fb.created_at)}</span>
@@ -813,7 +813,7 @@ export const LicenseeAccountPage = () => {
 
               {/* Confirm Button */}
               {selectedTransaction.status === 'awaiting_confirmation' && (
-                <div className="pt-4 border-t border-zinc-800">
+                <div className="pt-4 border-t border-white/[0.06]">
                   <p className="text-sm text-purple-400 mb-3">
                     Please review the details and confirm this transaction.
                   </p>

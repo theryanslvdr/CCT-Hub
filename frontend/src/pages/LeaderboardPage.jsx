@@ -86,7 +86,7 @@ export default function LeaderboardPage() {
         </div>
         
         {/* Period Toggle */}
-        <div className="flex gap-2 bg-zinc-900 p-1 rounded-lg">
+        <div className="flex gap-2 bg-[#0d0d0d] p-1 rounded-lg">
           <button
             onClick={() => { setPeriod('monthly'); setCurrentPage(1); }}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -199,7 +199,7 @@ export default function LeaderboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-800">
+                    <tr className="border-b border-white/[0.06]">
                       <th className="text-left py-3 px-3 text-zinc-400 font-medium w-16">Rank</th>
                       <th className="text-left py-3 px-3 text-zinc-400 font-medium">User</th>
                       <th className="text-center py-3 px-3 text-zinc-400 font-medium">Level</th>
@@ -215,7 +215,7 @@ export default function LeaderboardPage() {
                       return (
                         <tr 
                           key={entry.user_id || i} 
-                          className={`border-b border-zinc-800/50 ${isCurrentUser ? 'bg-orange-500/10' : 'hover:bg-zinc-800/30'}`}
+                          className={`border-b border-white/[0.06]/50 ${isCurrentUser ? 'bg-orange-500/10' : 'hover:bg-white/[0.03]'}`}
                           data-testid={`leaderboard-row-${entry.rank}`}
                         >
                           <td className="py-3 px-3">
@@ -229,7 +229,7 @@ export default function LeaderboardPage() {
                           </td>
                           <td className="py-3 px-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center">
                                 <User className="w-4 h-4 text-zinc-500" />
                               </div>
                               <div>
@@ -278,7 +278,7 @@ export default function LeaderboardPage() {
               
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                   <p className="text-xs text-zinc-500">
                     Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, leaderboard.length)} of {leaderboard.length}
                   </p>

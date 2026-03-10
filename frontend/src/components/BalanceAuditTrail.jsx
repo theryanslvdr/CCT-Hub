@@ -96,8 +96,8 @@ export function BalanceAuditPreview({ userId, onViewAll }) {
   const last3 = events.slice(-3);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 overflow-hidden" data-testid="balance-audit-preview">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
+    <div className="rounded-xl border border-white/[0.06] bg-[#0d0d0d]/60 overflow-hidden" data-testid="balance-audit-preview">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
         <h3 className="text-sm font-semibold text-white">Recent Activity</h3>
         {events.length > 3 && (
           <Button
@@ -120,7 +120,7 @@ export function BalanceAuditPreview({ userId, onViewAll }) {
         <div className="text-center py-6 text-zinc-500 text-xs">No activity this month</div>
       ) : (
         <div className="relative px-4 py-2">
-          <div className="absolute left-6 top-0 bottom-0 w-px bg-zinc-800" />
+          <div className="absolute left-6 top-0 bottom-0 w-px bg-[#1a1a1a]" />
           {last3.map((event, idx) => <TimelineRow key={idx} event={event} />)}
         </div>
       )}
@@ -226,7 +226,7 @@ export function BalanceAuditModal({ open, onClose, userId }) {
             <div className="text-center py-12 text-zinc-500 text-sm">No transactions for {monthLabel}</div>
           ) : (
             <div className="relative px-2">
-              <div className="absolute left-4 top-0 bottom-0 w-px bg-zinc-800" />
+              <div className="absolute left-4 top-0 bottom-0 w-px bg-[#1a1a1a]" />
               {events.map((event, idx) => <TimelineRow key={idx} event={event} />)}
               <div className="pt-3 pb-1 text-center text-[10px] text-zinc-600">
                 {events.length} transactions in {monthLabel}

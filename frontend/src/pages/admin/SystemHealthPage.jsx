@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 const MetricCard = ({ icon: Icon, title, value, subtitle, status, className = '' }) => (
-  <Card className={`glass-card border-zinc-800/50 ${className}`} data-testid={`metric-${title.toLowerCase().replace(/\s/g, '-')}`}>
+  <Card className={`glass-card border-white/[0.06]/50 ${className}`} data-testid={`metric-${title.toLowerCase().replace(/\s/g, '-')}`}>
     <CardContent className="p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2 mb-2">
@@ -47,7 +47,7 @@ const LatencyBar = ({ group, data }) => {
   return (
     <div className="flex items-center gap-3 py-1.5" data-testid={`latency-${group}`}>
       <span className="text-xs text-zinc-400 w-16 font-mono">{group}</span>
-      <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
         <div className={`h-full ${barColor} rounded-full transition-all duration-500`} style={{ width: `${maxWidth}%` }} />
       </div>
       <span className="text-xs font-mono text-zinc-300 w-16 text-right">
@@ -61,14 +61,14 @@ const LatencyBar = ({ group, data }) => {
 };
 
 const ServiceBadge = ({ name, status }) => (
-  <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-zinc-900/50" data-testid={`service-${name}`}>
+  <div className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-[#0d0d0d]/50" data-testid={`service-${name}`}>
     <span className="text-sm text-zinc-300 capitalize">{name.replace(/_/g, ' ')}</span>
     {status === 'configured' ? (
       <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-xs">
         <CheckCircle2 className="w-3 h-3 mr-1" /> Active
       </Badge>
     ) : (
-      <Badge variant="outline" className="border-zinc-700 text-zinc-500 text-xs">
+      <Badge variant="outline" className="border-white/[0.08] text-zinc-500 text-xs">
         <XCircle className="w-3 h-3 mr-1" /> Off
       </Badge>
     )}
@@ -155,7 +155,7 @@ export default function SystemHealthPage() {
           <Button
             variant="outline"
             size="sm"
-            className={`border-zinc-700 text-xs ${autoRefresh ? 'text-emerald-400 border-emerald-500/30' : 'text-zinc-400'}`}
+            className={`border-white/[0.08] text-xs ${autoRefresh ? 'text-emerald-400 border-emerald-500/30' : 'text-zinc-400'}`}
             onClick={() => setAutoRefresh(!autoRefresh)}
             data-testid="auto-refresh-toggle"
           >
@@ -165,7 +165,7 @@ export default function SystemHealthPage() {
           <Button
             variant="outline"
             size="sm"
-            className="border-zinc-700 text-zinc-400 text-xs"
+            className="border-white/[0.08] text-zinc-400 text-xs"
             onClick={() => fetchHealth(true)}
             disabled={refreshing}
             data-testid="refresh-button"
@@ -210,7 +210,7 @@ export default function SystemHealthPage() {
 
       {/* System Resources */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <Card className="glass-card border-zinc-800/50" data-testid="cpu-card">
+        <Card className="glass-card border-white/[0.06]/50" data-testid="cpu-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
               <Cpu className="w-4 h-4 text-orange-400" /> CPU
@@ -223,7 +223,7 @@ export default function SystemHealthPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-zinc-800/50" data-testid="memory-card">
+        <Card className="glass-card border-white/[0.06]/50" data-testid="memory-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
               <MemoryStick className="w-4 h-4 text-purple-400" /> Memory
@@ -238,7 +238,7 @@ export default function SystemHealthPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-zinc-800/50" data-testid="disk-card">
+        <Card className="glass-card border-white/[0.06]/50" data-testid="disk-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-emerald-400" /> Disk
@@ -256,7 +256,7 @@ export default function SystemHealthPage() {
 
       {/* Route Latencies & DB Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <Card className="glass-card border-zinc-800/50" data-testid="latency-card">
+        <Card className="glass-card border-white/[0.06]/50" data-testid="latency-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-400" /> Route Latencies
@@ -269,7 +269,7 @@ export default function SystemHealthPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-zinc-800/50" data-testid="database-card">
+        <Card className="glass-card border-white/[0.06]/50" data-testid="database-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
@@ -284,15 +284,15 @@ export default function SystemHealthPage() {
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 rounded-lg bg-zinc-900/50">
+              <div className="p-2 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-lg font-mono font-bold text-white">{db.connections?.current || 0}</p>
                 <p className="text-[10px] text-zinc-500">Current</p>
               </div>
-              <div className="p-2 rounded-lg bg-zinc-900/50">
+              <div className="p-2 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-lg font-mono font-bold text-white">{db.connections?.available || 0}</p>
                 <p className="text-[10px] text-zinc-500">Available</p>
               </div>
-              <div className="p-2 rounded-lg bg-zinc-900/50">
+              <div className="p-2 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-lg font-mono font-bold text-emerald-400">{db.ping_ms || '--'}ms</p>
                 <p className="text-[10px] text-zinc-500">Ping</p>
               </div>
@@ -307,7 +307,7 @@ export default function SystemHealthPage() {
               {showCollections ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
             {showCollections && db.document_counts && (
-              <div className="border border-zinc-800 rounded-lg p-1 space-y-0.5">
+              <div className="border border-white/[0.06] rounded-lg p-1 space-y-0.5">
                 {Object.entries(db.document_counts)
                   .sort((a, b) => b[1] - a[1])
                   .map(([name, count]) => (
@@ -320,7 +320,7 @@ export default function SystemHealthPage() {
       </div>
 
       {/* External Services */}
-      <Card className="glass-card border-zinc-800/50" data-testid="services-card">
+      <Card className="glass-card border-white/[0.06]/50" data-testid="services-card">
         <CardHeader className="pb-2 px-4 pt-4">
           <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
             <Globe className="w-4 h-4 text-cyan-400" /> External Services

@@ -139,7 +139,7 @@ export const PullToRefreshIndicator = ({
       }}
     >
       <div className={`
-        w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 
+        w-10 h-10 rounded-full bg-[#1a1a1a] border border-white/[0.08] 
         flex items-center justify-center shadow-lg
         ${isRefreshing ? 'animate-spin' : ''}
       `}>

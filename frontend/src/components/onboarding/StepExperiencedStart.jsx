@@ -80,14 +80,14 @@ export const StepExperiencedStart = ({
                 {startDate ? format(startDate, 'PPP') : <span className="text-zinc-500">Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-700" align="start">
+            <PopoverContent className="w-auto p-0 bg-[#0d0d0d] border-white/[0.08]" align="start">
               <Calendar
                 mode="single"
                 selected={startDate}
                 onSelect={setStartDate}
                 disabled={(date) => date > today || (minDate && date < minDate)}
                 initialFocus
-                className="bg-zinc-900"
+                className="bg-[#0d0d0d]"
               />
             </PopoverContent>
           </Popover>

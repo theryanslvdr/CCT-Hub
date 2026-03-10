@@ -25,7 +25,7 @@ const ActivityItem = ({ activity, isNew }) => {
 
   return (
     <div
-      className={`flex items-start gap-3 p-3 rounded-lg transition-all duration-500 ${isNew ? 'bg-teal-500/5 border border-teal-500/20 animate-pulse' : 'hover:bg-zinc-800/40'}`}
+      className={`flex items-start gap-3 p-3 rounded-lg transition-all duration-500 ${isNew ? 'bg-teal-500/5 border border-teal-500/20 animate-pulse' : 'hover:bg-[#1a1a1a]/40'}`}
       data-testid={`activity-item-${activity.timestamp}`}
     >
       <div className={`w-8 h-8 rounded-full ${config.bg} flex items-center justify-center shrink-0 mt-0.5`}>
@@ -40,7 +40,7 @@ const ActivityItem = ({ activity, isNew }) => {
         {activity.screenshot_url && activity.screenshot_url.length > 50 && (
           <div className="mt-2 flex items-center gap-1.5">
             <Camera className="w-3 h-3 text-zinc-500" />
-            <img src={activity.screenshot_url} alt="Proof" className="max-h-16 rounded border border-zinc-700" onError={(e) => e.target.style.display='none'} />
+            <img src={activity.screenshot_url} alt="Proof" className="max-h-16 rounded border border-white/[0.08]" onError={(e) => e.target.style.display='none'} />
           </div>
         )}
       </div>

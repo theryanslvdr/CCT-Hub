@@ -80,11 +80,11 @@ const NotificationCard = ({ notification, isAdmin, navigate }) => {
 
   return (
     <div 
-      className={`flex items-start gap-3 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800 transition-colors ${isClickable ? 'hover:border-orange-500/20 cursor-pointer' : 'hover:border-zinc-700'}`}
+      className={`flex items-start gap-3 p-4 bg-[#0d0d0d]/50 rounded-lg border border-white/[0.06] transition-colors ${isClickable ? 'hover:border-orange-500/20 cursor-pointer' : 'hover:border-white/[0.08]'}`}
       onClick={handleClick}
       data-testid={`notification-card-${notification.id || ''}`}
     >
-      <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+      <div className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
         <NotificationIcon type={notification.type} />
       </div>
       <div className="flex-1 min-w-0">
@@ -166,13 +166,13 @@ export const NotificationsPage = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate('/admin/daily-summary')}
-              className="border-zinc-700 text-xs gap-1"
+              className="border-white/[0.08] text-xs gap-1"
               data-testid="go-to-daily-summary-btn"
             >
               <BarChart3 className="w-3.5 h-3.5" /> Daily Summary
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={fetchNotifications} disabled={loading} className="border-zinc-700">
+          <Button variant="outline" size="sm" onClick={fetchNotifications} disabled={loading} className="border-white/[0.08]">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           </Button>
         </div>
@@ -180,11 +180,11 @@ export const NotificationsPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 bg-zinc-900">
-          <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800">All</TabsTrigger>
-          <TabsTrigger value="community" className="data-[state=active]:bg-zinc-800">Community</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-[#0d0d0d]">
+          <TabsTrigger value="all" className="data-[state=active]:bg-[#1a1a1a]">All</TabsTrigger>
+          <TabsTrigger value="community" className="data-[state=active]:bg-[#1a1a1a]">Community</TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="admin" className="data-[state=active]:bg-zinc-800">Admin</TabsTrigger>
+            <TabsTrigger value="admin" className="data-[state=active]:bg-[#1a1a1a]">Admin</TabsTrigger>
           )}
         </TabsList>
 

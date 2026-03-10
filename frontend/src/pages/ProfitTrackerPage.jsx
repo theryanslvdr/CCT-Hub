@@ -1873,7 +1873,7 @@ export const ProfitTrackerPage = () => {
                 <Calculator className="w-4 h-4" /> Simulate Actions
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card border-zinc-800 max-w-sm">
+            <DialogContent className="glass-card border-white/[0.06] max-w-sm">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
                   <Calculator className="w-5 h-5 text-orange-400" /> Simulate Actions
@@ -2004,7 +2004,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={() => setSimulateActionsOpen(false)}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2117,7 +2117,7 @@ export const ProfitTrackerPage = () => {
                   {/* Export Debug Data - Mobile Master Admin */}
                   {isMasterAdmin() && (
                     <button
-                      className="group relative w-full text-left p-5 rounded-2xl bg-zinc-900/50 border border-yellow-500/20 hover:border-yellow-500/40 transition-all overflow-hidden"
+                      className="group relative w-full text-left p-5 rounded-2xl bg-[#0d0d0d]/50 border border-yellow-500/20 hover:border-yellow-500/40 transition-all overflow-hidden"
                       onClick={async () => {
                         try {
                           setSimulateActionsOpen(false);
@@ -2157,7 +2157,7 @@ export const ProfitTrackerPage = () => {
               <div className="flex-shrink-0 p-6 pt-0 pb-8 bg-gradient-to-t from-black to-transparent">
                 <button
                   onClick={() => setSimulateActionsOpen(false)}
-                  className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                  className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                 >
                   Close
                 </button>
@@ -2179,7 +2179,7 @@ export const ProfitTrackerPage = () => {
         
         {/* Simulate Error Dialog - Desktop */}
         <Dialog open={errorDialogOpen} onOpenChange={(open) => { if (!open) resetErrorDialog(); else setErrorDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md hidden md:block">
+          <DialogContent className="glass-card border-white/[0.06] max-w-md hidden md:block">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-400" /> Report Error Trade
@@ -2197,10 +2197,10 @@ export const ProfitTrackerPage = () => {
               <div>
                 <Label className="text-zinc-300">Error Type</Label>
                 <Select value={errorType} onValueChange={setErrorType}>
-                  <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                  <SelectTrigger className="mt-1 bg-[#0d0d0d] border-white/[0.08] text-white">
                     <SelectValue placeholder="Select error type..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-700">
+                  <SelectContent className="bg-[#0d0d0d] border-white/[0.08]">
                     <SelectItem value="wrong_product" className="text-white">Wrong Product Selection</SelectItem>
                     <SelectItem value="wrong_time" className="text-white">Wrong Trade Time</SelectItem>
                     <SelectItem value="wrong_direction" className="text-white">Wrong Direction (BUY/SELL)</SelectItem>
@@ -2214,10 +2214,10 @@ export const ProfitTrackerPage = () => {
                 <div>
                   <Label className="text-zinc-300">Product</Label>
                   <Select value={errorProduct} onValueChange={setErrorProduct}>
-                    <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                    <SelectTrigger className="mt-1 bg-[#0d0d0d] border-white/[0.08] text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-700">
+                    <SelectContent className="bg-[#0d0d0d] border-white/[0.08]">
                       <SelectItem value="MOIL10" className="text-white">MOIL10</SelectItem>
                       <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
                       <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
@@ -2229,10 +2229,10 @@ export const ProfitTrackerPage = () => {
                 <div>
                   <Label className="text-zinc-300">Direction</Label>
                   <Select value={errorDirection} onValueChange={setErrorDirection}>
-                    <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700 text-white">
+                    <SelectTrigger className="mt-1 bg-[#0d0d0d] border-white/[0.08] text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-700">
+                    <SelectContent className="bg-[#0d0d0d] border-white/[0.08]">
                       <SelectItem value="BUY" className="text-emerald-400">BUY</SelectItem>
                       <SelectItem value="SELL" className="text-red-400">SELL</SelectItem>
                     </SelectContent>
@@ -2337,7 +2337,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={resetErrorDialog}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2362,10 +2362,10 @@ export const ProfitTrackerPage = () => {
                       Error Type
                     </label>
                     <Select value={errorType} onValueChange={setErrorType}>
-                      <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg py-5 focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
+                      <SelectTrigger className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg py-5 focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                         <SelectValue placeholder="Select error type..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                      <SelectContent className="bg-[#0d0d0d] border-white/[0.08] z-[99999]">
                         <SelectItem value="wrong_product" className="text-white py-3">Wrong Product Selection</SelectItem>
                         <SelectItem value="wrong_time" className="text-white py-3">Wrong Trade Time</SelectItem>
                         <SelectItem value="wrong_direction" className="text-white py-3">Wrong Direction (BUY/SELL)</SelectItem>
@@ -2381,10 +2381,10 @@ export const ProfitTrackerPage = () => {
                         Product
                       </label>
                       <Select value={errorProduct} onValueChange={setErrorProduct}>
-                        <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-cyan-500">
+                        <SelectTrigger className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white py-4 focus:border-cyan-500">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                        <SelectContent className="bg-[#0d0d0d] border-white/[0.08] z-[99999]">
                           <SelectItem value="MOIL10" className="text-white">MOIL10</SelectItem>
                           <SelectItem value="XAUUSD" className="text-white">XAUUSD</SelectItem>
                           <SelectItem value="BTCUSD" className="text-white">BTCUSD</SelectItem>
@@ -2398,10 +2398,10 @@ export const ProfitTrackerPage = () => {
                         Direction
                       </label>
                       <Select value={errorDirection} onValueChange={setErrorDirection}>
-                        <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-cyan-500">
+                        <SelectTrigger className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white py-4 focus:border-cyan-500">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                        <SelectContent className="bg-[#0d0d0d] border-white/[0.08] z-[99999]">
                           <SelectItem value="BUY" className="text-emerald-400">BUY</SelectItem>
                           <SelectItem value="SELL" className="text-red-400">SELL</SelectItem>
                         </SelectContent>
@@ -2419,7 +2419,7 @@ export const ProfitTrackerPage = () => {
                       value={errorDate}
                       onChange={(e) => setErrorDate(e.target.value)}
                       max={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-base focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300 px-4 py-5"
+                      className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-base focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300 px-4 py-5"
                       data-testid="mobile-error-date-input"
                     />
                   </div>
@@ -2437,7 +2437,7 @@ export const ProfitTrackerPage = () => {
                         value={errorProfit}
                         onChange={(e) => setErrorProfit(e.target.value)}
                         placeholder="-50.00"
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-300 pl-10 pr-4 py-5"
+                        className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono placeholder:text-zinc-600 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-300 pl-10 pr-4 py-5"
                         data-testid="mobile-error-profit-input"
                       />
                     </div>
@@ -2453,7 +2453,7 @@ export const ProfitTrackerPage = () => {
                       value={errorExplanation}
                       onChange={(e) => setErrorExplanation(e.target.value)}
                       placeholder="Describe what happened..."
-                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-base placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 px-4 py-5"
+                      className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-base placeholder:text-zinc-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 px-4 py-5"
                       data-testid="mobile-error-explanation-input"
                     />
                   </div>
@@ -2502,7 +2502,7 @@ export const ProfitTrackerPage = () => {
                 </button>
                 <button
                   onClick={resetErrorDialog}
-                  className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                  className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                 >
                   Cancel
                 </button>
@@ -2534,7 +2534,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={resetDepositDialog}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2559,7 +2559,7 @@ export const ProfitTrackerPage = () => {
                                 value={depositAmount}
                                 onChange={(e) => setDepositAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                                className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                                 data-testid="mobile-deposit-amount-input"
                               />
                             </div>
@@ -2573,7 +2573,7 @@ export const ProfitTrackerPage = () => {
                               value={depositNotes}
                               onChange={(e) => setDepositNotes(e.target.value)}
                               placeholder="Add notes..."
-                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-emerald-500"
+                              className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white px-4 py-4 focus:outline-none focus:border-emerald-500"
                             />
                           </div>
                           <button 
@@ -2607,7 +2607,7 @@ export const ProfitTrackerPage = () => {
                                 value={manualDepositAmount}
                                 onChange={(e) => setManualDepositAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500"
+                                className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500"
                               />
                             </div>
                           </div>
@@ -2619,7 +2619,7 @@ export const ProfitTrackerPage = () => {
                               value={depositNotes}
                               onChange={(e) => setDepositNotes(e.target.value)}
                               placeholder="Add notes..."
-                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
+                              className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
                             />
                           </div>
                           <button 
@@ -2653,7 +2653,7 @@ export const ProfitTrackerPage = () => {
 
                   {depositStep === 'simulate' && depositSimulation && (
                     <>
-                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+                      <div className="p-4 rounded-2xl bg-[#0d0d0d]/50 border border-white/[0.06] space-y-4">
                         {!depositSimulation.isManualOverride ? (
                           <>
                             <div className="flex justify-between items-center">
@@ -2664,7 +2664,7 @@ export const ProfitTrackerPage = () => {
                               <span>Deposit Fee ({(depositSimulation.depositFee / depositSimulation.binanceAmount * 100).toFixed(1)}%)</span>
                               <span className="font-mono">-{formatMoney(depositSimulation.depositFee)}</span>
                             </div>
-                            <div className="border-t border-zinc-700 pt-4 flex justify-between items-center">
+                            <div className="border-t border-white/[0.08] pt-4 flex justify-between items-center">
                               <span className="text-emerald-400 font-medium">You'll Receive</span>
                               <span className="font-mono text-emerald-400 text-xl font-bold">{formatMoney(depositSimulation.receiveAmount)}</span>
                             </div>
@@ -2688,7 +2688,7 @@ export const ProfitTrackerPage = () => {
                         </button>
                         <button 
                           onClick={() => { setDepositStep('input'); setDepositSimulation(null); }}
-                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                          className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                         >
                           Back
                         </button>
@@ -2714,7 +2714,7 @@ export const ProfitTrackerPage = () => {
                         </button>
                         <button 
                           onClick={() => setDepositStep('simulate')}
-                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                          className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                         >
                           No, I'm just thinking
                         </button>
@@ -2749,7 +2749,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={resetWithdrawalDialog}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2761,7 +2761,7 @@ export const ProfitTrackerPage = () => {
                 <div className="space-y-6">
                   {withdrawalStep === 'input' && (
                     <>
-                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800">
+                      <div className="p-4 rounded-2xl bg-[#0d0d0d]/50 border border-white/[0.06]">
                         <p className="text-sm text-zinc-400">Current Merin Balance</p>
                         <p className="text-2xl font-bold font-mono text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
                       </div>
@@ -2776,7 +2776,7 @@ export const ProfitTrackerPage = () => {
                             value={withdrawalAmount}
                             onChange={(e) => setWithdrawalAmount(e.target.value)}
                             placeholder="0.00"
-                            className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                            className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                             data-testid="mobile-withdrawal-amount-input"
                           />
                         </div>
@@ -2789,7 +2789,7 @@ export const ProfitTrackerPage = () => {
                           value={withdrawalNotes}
                           onChange={(e) => setWithdrawalNotes(e.target.value)}
                           placeholder="Withdrawal reason..."
-                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
+                          className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
                         />
                       </div>
                       <button 
@@ -2804,7 +2804,7 @@ export const ProfitTrackerPage = () => {
 
                   {withdrawalStep === 'result' && withdrawalResult && (
                     <>
-                      <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+                      <div className="p-4 rounded-2xl bg-[#0d0d0d]/50 border border-white/[0.06] space-y-4">
                         <div className="flex justify-between items-center">
                           <span className="text-zinc-400">Gross Amount</span>
                           <span className="font-mono text-white">{formatMoney(withdrawalResult.grossAmount)}</span>
@@ -2813,7 +2813,7 @@ export const ProfitTrackerPage = () => {
                           <span>Withdrawal Fee ({(withdrawalResult.withdrawalFee / withdrawalResult.grossAmount * 100).toFixed(1)}%)</span>
                           <span className="font-mono">-{formatMoney(withdrawalResult.withdrawalFee)}</span>
                         </div>
-                        <div className="border-t border-zinc-700 pt-4 flex justify-between items-center">
+                        <div className="border-t border-white/[0.08] pt-4 flex justify-between items-center">
                           <span className="text-orange-400 font-medium">Net Withdrawal</span>
                           <span className="font-mono text-orange-400 text-xl font-bold">{formatMoney(withdrawalResult.netAmount)}</span>
                         </div>
@@ -2827,7 +2827,7 @@ export const ProfitTrackerPage = () => {
                         </button>
                         <button 
                           onClick={() => { setWithdrawalStep('input'); setWithdrawalResult(null); }}
-                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                          className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                         >
                           Back
                         </button>
@@ -2854,7 +2854,7 @@ export const ProfitTrackerPage = () => {
                         </button>
                         <button 
                           onClick={() => setWithdrawalStep('result')}
-                          className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                          className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                         >
                           Go back
                         </button>
@@ -2885,7 +2885,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={() => setCommissionDialogOpen(false)}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2912,7 +2912,7 @@ export const ProfitTrackerPage = () => {
                         value={commissionAmount}
                         onChange={(e) => setCommissionAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                         data-testid="mobile-commission-amount-input"
                       />
                     </div>
@@ -2925,7 +2925,7 @@ export const ProfitTrackerPage = () => {
                       value={commissionNotes}
                       onChange={(e) => setCommissionNotes(e.target.value)}
                       placeholder="Commission details..."
-                      className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white px-4 py-4 focus:outline-none focus:border-purple-500"
                     />
                   </div>
                   <button 
@@ -2959,7 +2959,7 @@ export const ProfitTrackerPage = () => {
                   </div>
                   <button 
                     onClick={() => setEnterAPDialogOpen(false)}
-                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                    className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2970,7 +2970,7 @@ export const ProfitTrackerPage = () => {
               <div className="flex-1 overflow-y-auto px-6 pb-8">
                 <div className="space-y-5">
                   {/* Current calculated values */}
-                  <div className="p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-3 text-sm">
+                  <div className="p-4 rounded-2xl bg-[#0d0d0d]/50 border border-white/[0.06] space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-zinc-400">Calculated Balance Before</span>
                       <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore || 0)}</span>
@@ -2991,10 +2991,10 @@ export const ProfitTrackerPage = () => {
                       Did you deposit or withdraw on this day?
                     </label>
                     <Select value={adjustmentType} onValueChange={setAdjustmentType}>
-                      <SelectTrigger className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white py-4 focus:border-amber-500">
+                      <SelectTrigger className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white py-4 focus:border-amber-500">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-700 z-[99999]">
+                      <SelectContent className="bg-[#0d0d0d] border-white/[0.08] z-[99999]">
                         <SelectItem value="profit_only" className="text-white py-3">No, just enter profit</SelectItem>
                         <SelectItem value="with_deposit" className="text-white py-3">Yes, I made a deposit</SelectItem>
                         <SelectItem value="with_withdrawal" className="text-white py-3">Yes, I made a withdrawal</SelectItem>
@@ -3016,7 +3016,7 @@ export const ProfitTrackerPage = () => {
                           value={adjustmentAmount}
                           onChange={(e) => setAdjustmentAmount(e.target.value)}
                           placeholder="0.00"
-                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
                           data-testid="mobile-adjustment-amount"
                         />
                       </div>
@@ -3036,7 +3036,7 @@ export const ProfitTrackerPage = () => {
                         value={adjustedBalance}
                         onChange={(e) => setAdjustedBalance(e.target.value)}
                         placeholder={enterAPDate.balanceBefore?.toString() || '0'}
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
+                        className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-amber-500"
                         data-testid="mobile-adjusted-balance"
                       />
                     </div>
@@ -3058,7 +3058,7 @@ export const ProfitTrackerPage = () => {
                         value={enterAPValue}
                         onChange={(e) => setEnterAPValue(e.target.value)}
                         placeholder="Enter your actual profit"
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                        className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                         data-testid="mobile-enter-ap-input"
                       />
                     </div>
@@ -3080,7 +3080,7 @@ export const ProfitTrackerPage = () => {
                         value={enterAPCommission}
                         onChange={(e) => setEnterAPCommission(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl text-white font-mono pl-10 pr-4 py-4 focus:outline-none focus:border-cyan-500"
                         data-testid="mobile-enter-ap-commission"
                       />
                     </div>
@@ -3135,7 +3135,7 @@ export const ProfitTrackerPage = () => {
                     </button>
                     <button 
                       onClick={() => setEnterAPDialogOpen(false)}
-                      className="w-full py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors"
+                      className="w-full py-4 rounded-xl bg-[#1a1a1a] text-zinc-300 font-medium hover:bg-white/[0.08] transition-colors"
                     >
                       Cancel
                     </button>
@@ -3148,7 +3148,7 @@ export const ProfitTrackerPage = () => {
         
         {/* Simulate Deposit Dialog - Desktop Only */}
         <Dialog open={depositDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogContent className="glass-card border-white/[0.06] max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {depositStep === 'input' && 'Simulate Deposit'}
@@ -3258,7 +3258,7 @@ export const ProfitTrackerPage = () => {
 
             {depositStep === 'simulate' && depositSimulation && (
               <div className="space-y-4 mt-4">
-                <div className="space-y-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="space-y-3 p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   {depositSimulation.isManualOverride ? (
                     <>
                       <div className="p-2 rounded bg-orange-500/10 border border-orange-500/20 mb-3">
@@ -3283,7 +3283,7 @@ export const ProfitTrackerPage = () => {
                         <span>Binance Fee</span>
                         <span className="font-mono">-$1.00</span>
                       </div>
-                      <div className="border-t border-zinc-700 pt-3 flex justify-between">
+                      <div className="border-t border-white/[0.08] pt-3 flex justify-between">
                         <span className="text-zinc-300 font-medium">Receive Amount</span>
                         <span className="font-mono font-bold text-emerald-400">{formatMoney(depositSimulation.receiveAmount)}</span>
                       </div>
@@ -3329,7 +3329,7 @@ export const ProfitTrackerPage = () => {
 
         {/* Withdrawal Dialog - Desktop Only */}
         <Dialog open={withdrawalDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetWithdrawalDialog(); else setWithdrawalDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogContent className="glass-card border-white/[0.06] max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {withdrawalStep === 'input' && 'Simulate Withdrawal'}
@@ -3340,7 +3340,7 @@ export const ProfitTrackerPage = () => {
 
             {withdrawalStep === 'input' && (
               <div className="space-y-4 mt-4">
-                <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <p className="text-sm text-zinc-400">Current Merin Balance</p>
                   <p className="text-2xl font-bold font-mono text-white">{formatLargeNumber(summary?.account_value || 0)}</p>
                 </div>
@@ -3375,7 +3375,7 @@ export const ProfitTrackerPage = () => {
 
             {withdrawalStep === 'result' && withdrawalResult && (
               <div className="space-y-4 mt-4">
-                <div className="space-y-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="space-y-3 p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <div className="flex justify-between">
                     <span className="text-zinc-400">Gross Amount</span>
                     <span className="font-mono text-white">{formatMoney(withdrawalResult.grossAmount)}</span>
@@ -3384,7 +3384,7 @@ export const ProfitTrackerPage = () => {
                     <span>Merin Fee (3%)</span>
                     <span className="font-mono">-{formatMoney(withdrawalResult.merinFee)}</span>
                   </div>
-                  <div className="border-t border-zinc-700 pt-3 flex justify-between">
+                  <div className="border-t border-white/[0.08] pt-3 flex justify-between">
                     <span className="text-zinc-300 font-medium">Net Amount (to Binance)</span>
                     <span className="font-mono font-bold text-emerald-400">{formatMoney(withdrawalResult.netAmount)}</span>
                   </div>
@@ -3451,7 +3451,7 @@ export const ProfitTrackerPage = () => {
 
         {/* Commission Dialog - Desktop Only */}
         <Dialog open={commissionDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
-          <DialogContent className="glass-card border-zinc-800 max-w-md">
+          <DialogContent className="glass-card border-white/[0.06] max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <Award className="w-5 h-5 text-purple-400" /> Simulate Commission
@@ -3601,7 +3601,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Balance Verification Dialog - shown after onboarding to sync with Merin */}
       <Dialog open={balanceVerificationOpen} onOpenChange={setBalanceVerificationOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Verify Your Balance
@@ -3615,7 +3615,7 @@ export const ProfitTrackerPage = () => {
               </p>
             </div>
             
-            <div className="border-t border-zinc-800 pt-4">
+            <div className="border-t border-white/[0.06] pt-4">
               <p className="text-sm text-zinc-400 mb-3">
                 <span className="text-amber-400">Merin showing a different balance?</span><br/>
                 Enter your actual Merin balance below to sync. This will not affect your past trading history.
@@ -3674,7 +3674,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Legacy Initial Balance Dialog - kept for backwards compatibility */}
       <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Rocket className="w-5 h-5 text-orange-400" /> Welcome to Profit Tracker!
@@ -3734,7 +3734,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Adjust Commission Dialog */}
       <Dialog open={adjustCommissionOpen} onOpenChange={setAdjustCommissionOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Award className="w-5 h-5 text-cyan-400" /> Adjust Commission
@@ -3759,7 +3759,7 @@ export const ProfitTrackerPage = () => {
                 />
               </div>
             </div>
-            <label className="flex items-start gap-2 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50 cursor-pointer">
+            <label className="flex items-start gap-2 p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]/50 cursor-pointer">
               <input
                 type="checkbox"
                 checked={adjustCommissionSkipDeposit}
@@ -3842,7 +3842,7 @@ export const ProfitTrackerPage = () => {
           {projectionView === 'summary' ? (
             <div className="space-y-4 sm:space-y-6">
               {/* Current Stats - Mobile optimized, hide LOT Size and Daily Profit for licensees */}
-              <div className={`grid ${isLicensee ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg bg-zinc-900/50`}>
+              <div className={`grid ${isLicensee ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg bg-[#0d0d0d]/50`}>
                 <div>
                   <p className="text-[10px] sm:text-xs text-zinc-500">Current Balance</p>
                   <p className="font-mono text-sm sm:text-lg text-white truncate">{formatLargeNumber(effectiveAccountValue)}</p>
@@ -3881,14 +3881,14 @@ export const ProfitTrackerPage = () => {
                   <LineChart data={projectionChartData}>
                     <defs>
                       <linearGradient id="colorProjection" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#F97316" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#F97316" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                    <XAxis dataKey="name" stroke="#71717A" fontSize={10} tickMargin={5} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" stroke="#404040" fontSize={10} tickMargin={5} />
                     <YAxis 
-                      stroke="#71717A" 
+                      stroke="#404040" 
                       fontSize={10} 
                       width={45}
                       tickFormatter={(v) => {
@@ -3903,7 +3903,7 @@ export const ProfitTrackerPage = () => {
                       contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px', fontSize: '12px' }}
                       formatter={(value) => [formatLargeNumber(value), 'Projected Balance']}
                     />
-                    <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6', r: 3 }} />
+                    <Line type="monotone" dataKey="balance" stroke="#F97316" strokeWidth={2} dot={{ fill: '#F97316', r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -3911,7 +3911,7 @@ export const ProfitTrackerPage = () => {
               {/* Projection Grid - Mobile optimized */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 {projectionData.slice(1, 4).map((p, i) => (
-                  <div key={p.period} className={`p-2 sm:p-4 rounded-lg border ${i === 0 ? 'bg-orange-500/10 border-orange-500/20' : 'bg-zinc-900/50 border-zinc-800'}`}>
+                  <div key={p.period} className={`p-2 sm:p-4 rounded-lg border ${i === 0 ? 'bg-orange-500/10 border-orange-500/20' : 'bg-[#0d0d0d]/50 border-white/[0.06]'}`}>
                     <p className={`text-[10px] sm:text-xs ${i === 0 ? 'text-orange-400' : 'text-zinc-500'}`}>{p.period}</p>
                     <p className={`font-mono text-sm sm:text-lg ${i === 0 ? 'text-orange-400' : 'text-white'} mt-0.5 sm:mt-1 truncate`}>
                       {formatLargeNumber(p.balance)}
@@ -3927,7 +3927,7 @@ export const ProfitTrackerPage = () => {
                   <div className="flex items-center justify-between mb-1 sm:mb-2">
                     <p className="text-[10px] sm:text-xs text-purple-400">Year</p>
                     <Select value={selectedYears.toString()} onValueChange={(v) => setSelectedYears(parseInt(v))}>
-                      <SelectTrigger className="w-14 sm:w-20 h-5 sm:h-6 text-[10px] sm:text-xs bg-zinc-900/50 border-zinc-700">
+                      <SelectTrigger className="w-14 sm:w-20 h-5 sm:h-6 text-[10px] sm:text-xs bg-[#0d0d0d]/50 border-white/[0.08]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -3959,9 +3959,9 @@ export const ProfitTrackerPage = () => {
                     <AccordionItem 
                       key={yearKey} 
                       value={`year-${yearKey}`}
-                      className="border border-zinc-800 rounded-lg overflow-hidden"
+                      className="border border-white/[0.06] rounded-lg overflow-hidden"
                     >
-                      <AccordionTrigger className="px-4 py-3 bg-zinc-900/50 hover:bg-zinc-900 text-white">
+                      <AccordionTrigger className="px-4 py-3 bg-[#0d0d0d]/50 hover:bg-[#0d0d0d] text-white">
                         <div className="flex items-center justify-between w-full pr-4">
                           <span className="font-medium">
                             {yearKey === 'History' ? (
@@ -3976,7 +3976,7 @@ export const ProfitTrackerPage = () => {
                           </span>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="bg-zinc-950/50">
+                      <AccordionContent className="bg-[#0a0a0a]/50">
                         <table className="w-full data-table text-sm">
                           <thead>
                             <tr>
@@ -4068,7 +4068,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Adjust Trade Dialog - Desktop Only */}
       <Dialog open={enterAPDialogOpen && !isMobile} onOpenChange={setEnterAPDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Edit3 className="w-5 h-5 text-amber-400" /> Adjust Trade
@@ -4081,7 +4081,7 @@ export const ProfitTrackerPage = () => {
               </p>
               
               {/* Current calculated values */}
-              <div className="p-3 rounded-lg bg-zinc-900/50 space-y-2 text-sm">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50 space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Calculated Balance Before</span>
                   <span className="font-mono text-white">{formatLargeNumber(enterAPDate.balanceBefore || 0)}</span>

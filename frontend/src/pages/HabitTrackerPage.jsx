@@ -102,7 +102,7 @@ function SocialGrowthEngine() {
   return (
     <div className="space-y-4" data-testid="social-growth-engine">
       {/* Level & Progress Header */}
-      <div className="p-4 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800">
+      <div className="p-4 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${levelConfig.accent} flex items-center justify-center`}>
@@ -116,7 +116,7 @@ function SocialGrowthEngine() {
           {nextLevelAt && (
             <div className="text-right">
               <p className="text-[10px] text-zinc-500">Next level at {nextLevelAt} day streak</p>
-              <div className="w-24 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
+              <div className="w-24 h-1.5 bg-[#1a1a1a] rounded-full mt-1 overflow-hidden">
                 <div className={`h-full rounded-full bg-gradient-to-r ${levelConfig.accent} transition-all duration-500`} style={{ width: `${levelProgress}%` }} />
               </div>
             </div>
@@ -124,7 +124,7 @@ function SocialGrowthEngine() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
           </div>
           <span className="text-xs text-zinc-500 whitespace-nowrap">
@@ -135,7 +135,7 @@ function SocialGrowthEngine() {
 
       {/* Quiz Cards */}
       {quizzes.length === 0 ? (
-        <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800 text-center">
+        <div className="p-6 rounded-lg bg-[#0d0d0d]/40 border border-white/[0.06] text-center">
           <HelpCircle className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
           <p className="text-sm text-zinc-400">No quizzes published for today yet.</p>
           <p className="text-xs text-zinc-600 mt-1">Check back later — your admin is preparing today's knowledge challenges.</p>
@@ -157,7 +157,7 @@ function SocialGrowthEngine() {
       )}
 
       {/* Level roadmap */}
-      <div className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+      <div className="p-3 rounded-lg bg-[#0d0d0d]/40 border border-white/[0.06]">
         <p className="text-[11px] text-zinc-500 font-medium mb-2 uppercase tracking-wider">Growth Roadmap</p>
         <div className="flex items-center gap-1 flex-wrap">
           {[1, 2, 3, 4, 5, 6, 7].map((l) => {
@@ -190,7 +190,7 @@ function QuizCard({ quiz, index, selectedAnswer, onSelectAnswer, onSubmit, submi
       className={`p-4 rounded-lg border transition-all ${
         quiz.answered
           ? quiz.is_correct ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'
-          : 'bg-zinc-900/40 border-zinc-800'
+          : 'bg-[#0d0d0d]/40 border-white/[0.06]'
       }`}
       data-testid={`quiz-card-${quiz.id}`}
     >
@@ -217,11 +217,11 @@ function QuizCard({ quiz, index, selectedAnswer, onSelectAnswer, onSubmit, submi
           const isCorrectAnswer = isAnswered && option === quiz.correct_answer;
           const isWrongPick = isAnswered && option === quiz.user_answer && !quiz.is_correct;
 
-          let optClasses = 'bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:border-zinc-500 cursor-pointer';
+          let optClasses = 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:border-zinc-500 cursor-pointer';
           if (isAnswered) {
             if (isCorrectAnswer) optClasses = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300';
             else if (isWrongPick) optClasses = 'bg-red-500/10 border-red-500/40 text-red-300';
-            else optClasses = 'bg-zinc-800/30 border-zinc-800 text-zinc-500';
+            else optClasses = 'bg-white/[0.03] border-white/[0.06] text-zinc-500';
           } else if (isSelected) {
             optClasses = 'bg-orange-500/10 border-orange-500/40 text-orange-300 ring-1 ring-orange-500/30';
           }
@@ -363,21 +363,21 @@ const HabitTrackerPage = () => {
 
       {/* Streak badges */}
       <div className="grid grid-cols-3 gap-3" data-testid="streak-badges">
-        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <Flame className={`w-5 h-5 ${streak.current_streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
           </div>
           <p className="text-2xl font-bold text-white">{streak.current_streak}</p>
           <p className="text-[11px] text-zinc-500">Current Streak</p>
         </div>
-        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <Trophy className={`w-5 h-5 ${streak.longest_streak > 0 ? 'text-amber-400' : 'text-zinc-600'}`} />
           </div>
           <p className="text-2xl font-bold text-white">{streak.longest_streak}</p>
           <p className="text-[11px] text-zinc-500">Best Streak</p>
         </div>
-        <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
+        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <Calendar className="w-5 h-5 text-orange-400" />
           </div>
@@ -392,10 +392,10 @@ const HabitTrackerPage = () => {
       {/* Admin-set Habits (if any) */}
       {habits.length > 0 && (
         <>
-          <div className="border-t border-zinc-800 pt-4">
+          <div className="border-t border-white/[0.06] pt-4">
             <h2 className="text-base font-semibold text-white mb-1">Platform Tasks</h2>
             <p className="text-xs text-zinc-500 mb-3">{completedCount} of {habits.length} completed</p>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
+            <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden mb-4">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-emerald-500 transition-all duration-500"
                 style={{ width: `${habits.length ? (completedCount / habits.length) * 100 : 0}%` }}
@@ -409,7 +409,7 @@ const HabitTrackerPage = () => {
               return (
                 <Card
                   key={habit.id}
-                  className={`glass-card transition-all duration-300 ${done ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-zinc-800'}`}
+                  className={`glass-card transition-all duration-300 ${done ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/[0.06]'}`}
                   data-testid={`habit-card-${habit.id}`}
                 >
                   <CardContent className="p-4">
@@ -437,7 +437,7 @@ const HabitTrackerPage = () => {
                         )}
 
                         {habit.action_type === 'send_invite' && habit.action_data && (
-                          <div className="mt-3 p-3 bg-zinc-900/60 rounded-lg border border-zinc-800">
+                          <div className="mt-3 p-3 bg-[#0d0d0d]/60 rounded-lg border border-white/[0.06]">
                             <p className="text-xs text-zinc-500 mb-1.5">Pre-written message:</p>
                             <p className="text-sm text-zinc-300 whitespace-pre-wrap">{habit.action_data}</p>
                             <Button

@@ -79,20 +79,20 @@ function UserSearchInput({ onUserSelect, selectedUser }) {
           value={query}
           onChange={handleInputChange}
           onFocus={() => results.length > 0 && setShowDropdown(true)}
-          className="bg-zinc-900 border-zinc-700 text-white pl-9"
+          className="bg-[#0d0d0d] border-white/[0.08] text-white pl-9"
           data-testid="user-search-input"
         />
         {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-500" />}
       </div>
       {showDropdown && results.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-[#0d0d0d] border border-white/[0.08] rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {results.map((user) => (
             <button
               key={user.id}
               onClick={() => { setQuery(user.full_name || user.email); setShowDropdown(false); onUserSelect(user); }}
-              className="w-full px-3 py-2.5 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 border-b border-zinc-800/50 last:border-0"
+              className="w-full px-3 py-2.5 text-left hover:bg-[#1a1a1a] transition-colors flex items-center gap-3 border-b border-white/[0.06]/50 last:border-0"
             >
-              <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
                 <User className="w-4 h-4 text-zinc-500" />
               </div>
               <div className="min-w-0">
@@ -183,7 +183,7 @@ function OverviewTab() {
             { label: 'Avg / Member', value: maskValue(overview.avg_points_per_member?.toLocaleString()), icon: BarChart3, color: 'text-cyan-400' },
             { label: 'Badges Awarded', value: overview.total_badges_awarded, icon: Award, color: 'text-purple-400' },
           ].map(c => (
-            <div key={c.label} className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800">
+            <div key={c.label} className="p-3 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
               <div className="flex items-center gap-1.5 mb-1">
                 <c.icon className={`w-3.5 h-3.5 ${c.color}`} />
                 <span className="text-[10px] text-zinc-500 uppercase">{c.label}</span>
@@ -218,10 +218,10 @@ function OverviewTab() {
       </div>
 
       {/* Members Table */}
-      <div className="overflow-x-auto rounded-lg border border-zinc-800">
+      <div className="overflow-x-auto rounded-lg border border-white/[0.06]">
         <table className="w-full text-sm" data-testid="members-table">
-          <thead className="bg-zinc-900/80">
-            <tr className="border-b border-zinc-800">
+          <thead className="bg-[#0d0d0d]/80">
+            <tr className="border-b border-white/[0.06]">
               {[
                 { key: 'name', label: 'Member' },
                 { key: 'lifetime_points', label: 'Lifetime' },
@@ -250,7 +250,7 @@ function OverviewTab() {
             ) : members.length === 0 ? (
               <tr><td colSpan={7} className="py-8 text-center text-zinc-500 text-sm">No members found</td></tr>
             ) : members.map(m => (
-              <tr key={m.user_id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30" data-testid={`member-row-${m.user_id}`}>
+              <tr key={m.user_id} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]" data-testid={`member-row-${m.user_id}`}>
                 <td className="py-2 px-3">
                   <p className="text-white text-xs font-medium truncate max-w-[150px]">{m.name}</p>
                   <p className="text-[10px] text-zinc-500 truncate max-w-[150px]">{m.email}</p>
@@ -323,8 +323,8 @@ function AuditTrailTab() {
           <>
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-zinc-900">
-                  <tr className="border-b border-zinc-800">
+                <thead className="sticky top-0 bg-[#0d0d0d]">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Date</th>
                     <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Admin</th>
                     <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Member</th>
@@ -338,7 +338,7 @@ function AuditTrailTab() {
                     const pts = log.points || 0;
                     const isCredit = pts > 0;
                     return (
-                      <tr key={i} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                      <tr key={i} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]">
                         <td className="py-2 px-3 text-zinc-300 font-mono text-xs whitespace-nowrap">
                           {log.created_at ? new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '--'}
                         </td>
@@ -363,7 +363,7 @@ function AuditTrailTab() {
               </table>
             </div>
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/[0.06]">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="btn-secondary h-8 w-8 p-0">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -571,7 +571,7 @@ export default function RewardsAdminPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-zinc-900 p-1 rounded-lg overflow-x-auto">
+      <div className="flex gap-1 bg-[#0d0d0d] p-1 rounded-lg overflow-x-auto">
         {tabs.map(t => (
           <button
             key={t.key}
@@ -604,7 +604,7 @@ export default function RewardsAdminPage() {
               {lookupLoading && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-orange-500" /></div>}
               {lookupResult && !lookupLoading && (
                 <div className="mt-4 space-y-3" data-testid="lookup-result">
-                  <div className="p-4 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
+                  <div className="p-4 rounded-lg bg-white/[0.04] border border-white/[0.08]/50">
                     <div className="flex items-center gap-2 mb-3">
                       <User className="w-4 h-4 text-zinc-400" />
                       <span className="text-white font-medium">{lookupResult.full_name}</span>
@@ -617,7 +617,7 @@ export default function RewardsAdminPage() {
                         { label: 'Level', value: lookupResult.level, icon: Award, color: 'text-purple-400' },
                         { label: 'Monthly Rank', value: `#${lookupResult.current_rank || '--'}`, icon: Trophy, color: 'text-cyan-400' },
                       ].map(c => (
-                        <div key={c.label} className="p-2 rounded bg-zinc-900/50">
+                        <div key={c.label} className="p-2 rounded bg-[#0d0d0d]/50">
                           <div className="flex items-center gap-1.5 mb-1">
                             <c.icon className={`w-3.5 h-3.5 ${c.color}`} /><span className="text-zinc-400">{c.label}</span>
                           </div>
@@ -656,15 +656,15 @@ export default function RewardsAdminPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-xs text-zinc-400 block mb-1">Action Type</label>
-                    <select value={simAction} onChange={(e) => setSimAction(e.target.value)} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm">
+                    <select value={simAction} onChange={(e) => setSimAction(e.target.value)} className="w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-white text-sm">
                       {ACTIONS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
                     </select>
                   </div>
                   {simAction === 'manual_bonus' && (
-                    <div><label className="text-xs text-zinc-400 block mb-1">Points</label><Input type="number" value={simPoints} onChange={(e) => setSimPoints(Number(e.target.value))} className="bg-zinc-900 border-zinc-700 text-white" /></div>
+                    <div><label className="text-xs text-zinc-400 block mb-1">Points</label><Input type="number" value={simPoints} onChange={(e) => setSimPoints(Number(e.target.value))} className="bg-[#0d0d0d] border-white/[0.08] text-white" /></div>
                   )}
                   {simAction === 'test_deposit' && (
-                    <div><label className="text-xs text-zinc-400 block mb-1">Amount (USDT)</label><Input type="number" value={simAmount} onChange={(e) => setSimAmount(Number(e.target.value))} className="bg-zinc-900 border-zinc-700 text-white" /></div>
+                    <div><label className="text-xs text-zinc-400 block mb-1">Amount (USDT)</label><Input type="number" value={simAmount} onChange={(e) => setSimAmount(Number(e.target.value))} className="bg-[#0d0d0d] border-white/[0.08] text-white" /></div>
                   )}
                   <Button onClick={handleSimulate} disabled={simLoading} className="w-full bg-amber-600 hover:bg-amber-500"><Zap className="w-4 h-4 mr-2" />{simLoading ? 'Processing...' : 'Run Simulation'}</Button>
                   {simResult && (
@@ -684,15 +684,15 @@ export default function RewardsAdminPage() {
                 <CardHeader><CardTitle className="text-white flex items-center gap-2 text-base"><Star className="w-5 h-5 text-orange-400" /> Manual Adjustment</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
-                    <button onClick={() => setAdjIsDeduction(false)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${!adjIsDeduction ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`} data-testid="adj-credit-btn">
+                    <button onClick={() => setAdjIsDeduction(false)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${!adjIsDeduction ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-[#0d0d0d] text-zinc-400 border border-white/[0.06]'}`} data-testid="adj-credit-btn">
                       <Plus className="w-4 h-4" /> Credit
                     </button>
-                    <button onClick={() => setAdjIsDeduction(true)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${adjIsDeduction ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`} data-testid="adj-deduct-btn">
+                    <button onClick={() => setAdjIsDeduction(true)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${adjIsDeduction ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-[#0d0d0d] text-zinc-400 border border-white/[0.06]'}`} data-testid="adj-deduct-btn">
                       <Minus className="w-4 h-4" /> Deduct
                     </button>
                   </div>
-                  <div><label className="text-xs text-zinc-400 block mb-1">Points</label><Input type="number" value={adjPoints} onChange={(e) => setAdjPoints(Number(e.target.value))} className="bg-zinc-900 border-zinc-700 text-white" min={1} data-testid="adj-points-input" /></div>
-                  <div><label className="text-xs text-zinc-400 block mb-1">Reason (required for audit trail)</label><Input value={adjReason} onChange={(e) => setAdjReason(e.target.value)} placeholder="e.g., Compensation for system error" className="bg-zinc-900 border-zinc-700 text-white" data-testid="adj-reason-input" /></div>
+                  <div><label className="text-xs text-zinc-400 block mb-1">Points</label><Input type="number" value={adjPoints} onChange={(e) => setAdjPoints(Number(e.target.value))} className="bg-[#0d0d0d] border-white/[0.08] text-white" min={1} data-testid="adj-points-input" /></div>
+                  <div><label className="text-xs text-zinc-400 block mb-1">Reason (required for audit trail)</label><Input value={adjReason} onChange={(e) => setAdjReason(e.target.value)} placeholder="e.g., Compensation for system error" className="bg-[#0d0d0d] border-white/[0.08] text-white" data-testid="adj-reason-input" /></div>
                   <Button onClick={handleAdjustPoints} disabled={adjLoading || !adjReason.trim() || !adjPoints} className={`w-full ${adjIsDeduction ? 'bg-red-600 hover:bg-red-500' : 'bg-emerald-600 hover:bg-emerald-500'}`} data-testid="adj-submit-btn">
                     {adjLoading ? 'Processing...' : `${adjIsDeduction ? 'Deduct' : 'Credit'} ${adjPoints} Points`}
                   </Button>
@@ -709,7 +709,7 @@ export default function RewardsAdminPage() {
                   <CardTitle className="text-white flex items-center gap-2"><Clock className="w-5 h-5 text-zinc-400" /> Transaction History</CardTitle>
                   <div className="flex gap-1.5 flex-wrap">
                     {[{ value: 'all', label: 'All' }, { value: 'earn', label: 'Earned' }, { value: 'spend', label: 'Spent' }, { value: 'admin', label: 'Admin' }].map(f => (
-                      <button key={f.value} onClick={() => { setHistoryFilter(f.value); setHistoryPage(1); }} className={`px-3 py-1 rounded-full text-xs font-medium ${historyFilter === f.value ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}>
+                      <button key={f.value} onClick={() => { setHistoryFilter(f.value); setHistoryPage(1); }} className={`px-3 py-1 rounded-full text-xs font-medium ${historyFilter === f.value ? 'bg-orange-500 text-white' : 'bg-[#1a1a1a] text-zinc-400 hover:bg-white/[0.08]'}`}>
                         {f.label}
                       </button>
                     ))}
@@ -719,7 +719,7 @@ export default function RewardsAdminPage() {
               <CardContent>
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-zinc-900"><tr className="border-b border-zinc-800">
+                    <thead className="sticky top-0 bg-[#0d0d0d]"><tr className="border-b border-white/[0.06]">
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Date</th>
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Type</th>
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium text-xs">Source</th>
@@ -732,7 +732,7 @@ export default function RewardsAdminPage() {
                         const pts = row.points || 0;
                         const isEarn = pts > 0;
                         return (
-                          <tr key={i} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                          <tr key={i} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]">
                             <td className="py-2 px-3 text-zinc-300 font-mono text-xs whitespace-nowrap">{row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '--'}</td>
                             <td className="py-2 px-3"><span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${isEarn ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>{isEarn ? 'Earn' : 'Spend'}</span></td>
                             <td className="py-2 px-3 text-zinc-300 text-xs">{SOURCE_LABELS[row.source] || row.source}{row.source?.includes('admin') && <span className="ml-1 text-amber-400 text-[10px]">(Admin)</span>}</td>
@@ -746,7 +746,7 @@ export default function RewardsAdminPage() {
                   </table>
                 </div>
                 {historyTotalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                     <p className="text-xs text-zinc-500">{filteredHistory.length} transactions</p>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage === 1} className="h-8 w-8 p-0"><ChevronLeft className="w-4 h-4" /></Button>
@@ -771,23 +771,23 @@ export default function RewardsAdminPage() {
             {badgesLoading ? <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-zinc-500" /></div> : (
               <div className="space-y-2">
                 {badges.map(badge => (
-                  <div key={badge.id} className={`p-3 rounded-lg border ${badge.is_active ? 'bg-zinc-800/50 border-zinc-700' : 'bg-zinc-900/30 border-zinc-800 opacity-60'} flex items-center gap-4`}>
+                  <div key={badge.id} className={`p-3 rounded-lg border ${badge.is_active ? 'bg-white/[0.04] border-white/[0.08]' : 'bg-[#0d0d0d]/30 border-white/[0.06] opacity-60'} flex items-center gap-4`}>
                     {editingBadge === badge.id ? (
                       <div className="flex-1 flex items-center gap-3">
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="bg-zinc-900 border-zinc-700 text-white h-8 text-sm flex-1" placeholder="Badge name" />
-                        <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="bg-zinc-900 border-zinc-700 text-white h-8 text-sm flex-[2]" placeholder="Description" />
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="bg-[#0d0d0d] border-white/[0.08] text-white h-8 text-sm flex-1" placeholder="Badge name" />
+                        <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="bg-[#0d0d0d] border-white/[0.08] text-white h-8 text-sm flex-[2]" placeholder="Description" />
                         <Button size="sm" className="h-8 bg-emerald-600" onClick={() => handleBadgeSave(badge.id)}><Save className="w-3.5 h-3.5" /></Button>
                         <Button size="sm" variant="outline" className="h-8" onClick={() => setEditingBadge(null)}><X className="w-3.5 h-3.5" /></Button>
                       </div>
                     ) : (
                       <>
-                        <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center flex-shrink-0"><Award className="w-5 h-5 text-amber-400" /></div>
+                        <div className="w-10 h-10 rounded-lg bg-[#0d0d0d] flex items-center justify-center flex-shrink-0"><Award className="w-5 h-5 text-amber-400" /></div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-white font-medium">{badge.name}</p>
                           <p className="text-xs text-zinc-500">{badge.description}</p>
                           <div className="flex gap-2 mt-1">
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400">{badge.category}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400">{badge.condition_type}: {badge.condition_value}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#0d0d0d] text-zinc-400">{badge.category}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#0d0d0d] text-zinc-400">{badge.condition_type}: {badge.condition_value}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
@@ -808,7 +808,7 @@ export default function RewardsAdminPage() {
 
       {/* Reset Points Dialog */}
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-md">
           <DialogHeader><DialogTitle className="text-white flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-red-400" /> Reset Points to Zero</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-zinc-400">This will reset <span className="text-white font-medium">{selectedUser?.full_name}</span>'s points to zero. This action is logged in the audit trail.</p>
@@ -825,13 +825,13 @@ export default function RewardsAdminPage() {
 
       {/* Award/Revoke Badge Dialog */}
       <Dialog open={badgeDialogOpen} onOpenChange={setBadgeDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-lg">
           <DialogHeader><DialogTitle className="text-white flex items-center gap-2"><Award className="w-5 h-5 text-purple-400" /> Award / Revoke Badge</DialogTitle></DialogHeader>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {badges.filter(b => b.is_active).map(badge => {
               const hasBadge = userBadgeIds.includes(badge.id);
               return (
-                <div key={badge.id} className={`flex items-center justify-between p-3 rounded-lg border ${hasBadge ? 'bg-amber-500/5 border-amber-500/20' : 'bg-zinc-800/50 border-zinc-700'}`}>
+                <div key={badge.id} className={`flex items-center justify-between p-3 rounded-lg border ${hasBadge ? 'bg-amber-500/5 border-amber-500/20' : 'bg-white/[0.04] border-white/[0.08]'}`}>
                   <div className="flex items-center gap-3 min-w-0">
                     <Award className={`w-5 h-5 ${hasBadge ? 'text-amber-400' : 'text-zinc-600'}`} />
                     <div className="min-w-0">
@@ -857,19 +857,19 @@ export default function RewardsAdminPage() {
 
       {/* Edit Streak Freezes Dialog */}
       <Dialog open={freezeDialogOpen} onOpenChange={setFreezeDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-md">
           <DialogHeader><DialogTitle className="text-white flex items-center gap-2"><Snowflake className="w-5 h-5 text-orange-400" /> Edit Streak Freezes</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-2">
               {['trade', 'habit'].map(t => (
-                <button key={t} onClick={() => setFreezeType(t)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeType === t ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`}>
+                <button key={t} onClick={() => setFreezeType(t)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeType === t ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-[#0d0d0d] text-zinc-400 border border-white/[0.06]'}`}>
                   {t === 'trade' ? <TrendingUp className="w-4 h-4" /> : <Flame className="w-4 h-4" />} {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}
             </div>
             <div className="flex gap-2">
               {['add', 'remove'].map(a => (
-                <button key={a} onClick={() => setFreezeAction(a)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeAction === a ? (a === 'add' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30') : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`}>
+                <button key={a} onClick={() => setFreezeAction(a)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeAction === a ? (a === 'add' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30') : 'bg-[#0d0d0d] text-zinc-400 border border-white/[0.06]'}`}>
                   {a === 'add' ? <Plus className="w-4 h-4" /> : <Minus className="w-4 h-4" />} {a.charAt(0).toUpperCase() + a.slice(1)}
                 </button>
               ))}

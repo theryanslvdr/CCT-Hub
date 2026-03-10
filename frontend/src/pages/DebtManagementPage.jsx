@@ -19,7 +19,7 @@ const InfoTooltip = ({ content }) => (
         <HelpCircle className="w-4 h-4" />
       </button>
     </TooltipTrigger>
-    <TooltipContent className="max-w-xs bg-zinc-800 text-zinc-200 border-zinc-700">
+    <TooltipContent className="max-w-xs bg-[#1a1a1a] text-zinc-200 border-white/[0.08]">
       <p>{content}</p>
     </TooltipContent>
   </Tooltip>
@@ -198,7 +198,7 @@ export const DebtManagementPage = () => {
             <Plus className="w-4 h-4" /> Add Debt
           </Button>
         </DialogTrigger>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Add New Debt</DialogTitle>
           </DialogHeader>
@@ -293,7 +293,7 @@ export const DebtManagementPage = () => {
           <CardContent>
             <div className="space-y-4">
               {plan.upcoming_payments.map((payment, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <div>
                     <p className="font-medium text-white">{payment.debt_name}</p>
                     <p className="text-sm text-zinc-400">
@@ -324,7 +324,7 @@ export const DebtManagementPage = () => {
               {debts.map((debt) => {
                 const progress = ((debt.total_amount - debt.remaining_amount) / debt.total_amount) * 100;
                 return (
-                  <div key={debt.id} className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                  <div key={debt.id} className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] hover:border-white/[0.08] transition-colors">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <p className="font-medium text-white">{debt.name}</p>
@@ -362,12 +362,12 @@ export const DebtManagementPage = () => {
 
       {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Record Payment for {selectedDebt?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="p-4 rounded-lg bg-zinc-900/50">
+            <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
               <p className="text-sm text-zinc-400">Remaining Balance</p>
               <p className="text-2xl font-mono font-bold text-white">${formatNumber(selectedDebt?.remaining_amount || 0)}</p>
             </div>

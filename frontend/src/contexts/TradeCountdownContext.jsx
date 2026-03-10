@@ -129,7 +129,7 @@ export const TradeCountdownProvider = ({ children }) => {
       {/* Floating countdown popup - only show when NOT on trade monitor/merin/admin and countdown is active */}
       {activeCountdown && countdown && !shouldHideFloatingPopup && (
         <div 
-          className={`fixed bottom-6 right-6 z-50 bg-zinc-900/95 border ${countdown.total <= 30000 ? 'border-red-500 animate-pulse' : 'border-orange-500/30'} rounded-xl shadow-2xl p-4 max-w-sm backdrop-blur-lg`}
+          className={`fixed bottom-6 right-6 z-50 bg-[#0d0d0d]/95 border ${countdown.total <= 30000 ? 'border-red-500 animate-pulse' : 'border-orange-500/30'} rounded-xl shadow-2xl p-4 max-w-sm backdrop-blur-lg`}
           data-testid="floating-countdown"
         >
           <div className="flex items-center gap-3 mb-3">

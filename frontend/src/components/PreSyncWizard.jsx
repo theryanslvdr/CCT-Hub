@@ -26,7 +26,7 @@ function StepIndicator({ currentStep, totalSteps = 4 }) {
                 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
                 ${isDone ? 'bg-emerald-500 text-white' : ''}
                 ${isActive ? 'bg-orange-500 text-white ring-2 ring-orange-400/50' : ''}
-                ${!isActive && !isDone ? 'bg-zinc-800 text-zinc-500' : ''}
+                ${!isActive && !isDone ? 'bg-[#1a1a1a] text-zinc-500' : ''}
               `}>
                 {isDone ? <CheckCircle2 className="w-4 h-4" /> : stepNum}
               </div>
@@ -37,7 +37,7 @@ function StepIndicator({ currentStep, totalSteps = 4 }) {
           );
         })}
       </div>
-      <Progress value={(currentStep / totalSteps) * 100} className="h-1 bg-zinc-800" />
+      <Progress value={(currentStep / totalSteps) * 100} className="h-1 bg-[#1a1a1a]" />
     </div>
   );
 }
@@ -121,7 +121,7 @@ function StepMissingDays({ validation, onMarkDidNotTrade, onMarkAllDidNotTrade, 
         {missing.map((day) => (
           <div 
             key={day.date} 
-            className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/50"
+            className="flex items-center justify-between p-2.5 rounded-lg bg-[#1a1a1a]/80 border border-white/[0.08]/50"
             data-testid={`missing-day-${day.date}`}
           >
             <div className="flex items-center gap-2">
@@ -199,7 +199,7 @@ function StepPreStartWarning({ validation, acknowledged, onToggleAcknowledge, on
         {preStartTrades.map((trade, i) => (
           <div 
             key={`${trade.date}-${i}`}
-            className="flex items-center justify-between p-2 rounded bg-zinc-800/60 text-sm"
+            className="flex items-center justify-between p-2 rounded bg-white/[0.04] text-sm"
           >
             <span className="font-mono text-zinc-300">{trade.date}</span>
             <div className="flex gap-3 text-xs">
@@ -214,7 +214,7 @@ function StepPreStartWarning({ validation, acknowledged, onToggleAcknowledge, on
         ))}
       </div>
 
-      <label className="flex items-start gap-3 p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50 cursor-pointer hover:border-zinc-600 transition-colors">
+      <label className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]/50 cursor-pointer hover:border-zinc-600 transition-colors">
         <input
           type="checkbox"
           checked={acknowledged}
@@ -259,7 +259,7 @@ function StepSync({
         </div>
       </div>
 
-      <div className="p-4 rounded-lg bg-zinc-800/80 border border-zinc-700/50">
+      <div className="p-4 rounded-lg bg-[#1a1a1a]/80 border border-white/[0.08]/50">
         <p className="text-xs text-zinc-500 mb-1">Calculated balance:</p>
         <p className="text-2xl font-bold text-white font-mono">
           ${calculatedBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -386,7 +386,7 @@ export function PreSyncWizard({
     }
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
             <p className="text-sm text-zinc-400">Validating your account...</p>
@@ -422,7 +422,7 @@ export function PreSyncWizard({
               </div>
               <button 
                 onClick={() => onOpenChange(false)}
-                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
                 data-testid="close-sync-wizard-mobile"
               >
                 <X className="w-5 h-5" />
@@ -442,7 +442,7 @@ export function PreSyncWizard({
   // Desktop: Dialog
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="pre-sync-wizard-dialog" aria-describedby="sync-wizard-desc">
+      <DialogContent className="glass-card border-white/[0.06] max-w-md" data-testid="pre-sync-wizard-dialog" aria-describedby="sync-wizard-desc">
         <DialogHeader>
           <DialogTitle className="text-white text-base">Balance Sync Wizard</DialogTitle>
           <p id="sync-wizard-desc" className="sr-only">Multi-step wizard to validate and sync your balance</p>

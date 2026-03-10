@@ -19,7 +19,7 @@ function MemberCard({ member, onView, onEdit, onRemove }) {
     : '0.0';
 
   return (
-    <Card data-testid={`family-member-card-${member.id}`} className="bg-zinc-900/60 border-zinc-800 hover:border-orange-500/40 transition-all cursor-pointer group">
+    <Card data-testid={`family-member-card-${member.id}`} className="bg-[#0d0d0d]/60 border-white/[0.06] hover:border-orange-500/40 transition-all cursor-pointer group">
       <CardContent className="p-5" onClick={() => onView(member)}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ function MemberCard({ member, onView, onEdit, onRemove }) {
         {member.email && (
           <p className="text-zinc-600 text-xs mt-3 truncate">{member.email}</p>
         )}
-        <div className="flex gap-2 mt-4 pt-3 border-t border-zinc-800">
+        <div className="flex gap-2 mt-4 pt-3 border-t border-white/[0.06]">
           <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white text-xs h-7 px-2"
             onClick={(e) => { e.stopPropagation(); onEdit(member); }} data-testid={`edit-member-${member.id}`}>
             Edit
@@ -120,7 +120,7 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md" data-testid="family-member-form-dialog">
+      <DialogContent className="bg-[#0d0d0d] border-white/[0.06] text-white max-w-md" data-testid="family-member-form-dialog">
         <DialogHeader>
           <DialogTitle className="text-white">{editMember ? 'Edit Family Member' : 'Add Family Member'}</DialogTitle>
         </DialogHeader>
@@ -128,15 +128,15 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
           <div>
             <Label className="text-zinc-400 text-xs">Name *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name"
-              className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-name-input" />
+              className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="member-name-input" />
           </div>
           <div>
             <Label className="text-zinc-400 text-xs">Relationship *</Label>
             <Select value={relationship} onValueChange={setRelationship}>
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-relationship-select">
+              <SelectTrigger className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="member-relationship-select">
                 <SelectValue placeholder="Select relationship" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
+              <SelectContent className="bg-[#1a1a1a] border-white/[0.08]">
                 {['spouse', 'child', 'sibling', 'parent', 'other'].map(r => (
                   <SelectItem key={r} value={r} className="text-white capitalize">{r}</SelectItem>
                 ))}
@@ -146,19 +146,19 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
           <div>
             <Label className="text-zinc-400 text-xs">Email (optional)</Label>
             <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com"
-              className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-email-input" />
+              className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="member-email-input" />
           </div>
           {!editMember && (
             <>
               <div>
                 <Label className="text-zinc-400 text-xs">Starting Amount ($) *</Label>
                 <Input type="number" value={startingAmount} onChange={(e) => setStartingAmount(e.target.value)} placeholder="1000"
-                  className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-starting-amount-input" />
+                  className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="member-starting-amount-input" />
               </div>
               <div>
                 <Label className="text-zinc-400 text-xs">Deposit Date *</Label>
                 <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="member-deposit-date-input" />
+                  className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="member-deposit-date-input" />
                 <p className="text-zinc-500 text-[11px] mt-1">Trading starts on the next trading day after this date</p>
               </div>
             </>
@@ -200,7 +200,7 @@ function WithdrawalDialog({ open, onClose, member, onSubmit }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-sm" data-testid="withdrawal-dialog">
+      <DialogContent className="bg-[#0d0d0d] border-white/[0.06] text-white max-w-sm" data-testid="withdrawal-dialog">
         <DialogHeader>
           <DialogTitle className="text-white">Request Withdrawal for {member?.name}</DialogTitle>
         </DialogHeader>
@@ -209,12 +209,12 @@ function WithdrawalDialog({ open, onClose, member, onSubmit }) {
           <div>
             <Label className="text-zinc-400 text-xs">Amount ($)</Label>
             <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500"
-              className="bg-zinc-800 border-zinc-700 text-white mt-1" data-testid="withdrawal-amount-input" />
+              className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" data-testid="withdrawal-amount-input" />
           </div>
           <div>
             <Label className="text-zinc-400 text-xs">Notes (optional)</Label>
             <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Reason for withdrawal"
-              className="bg-zinc-800 border-zinc-700 text-white mt-1" />
+              className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1" />
           </div>
         </div>
         <DialogFooter>
@@ -281,7 +281,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-orange-400" />
@@ -290,7 +290,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
             <p className="text-white font-bold text-lg">{formatCurrency(currentBalance)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -299,7 +299,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
             <p className="text-emerald-400 font-bold text-lg">{formatCurrency(currentBalance - member.starting_amount)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="w-4 h-4 text-amber-400" />
@@ -308,7 +308,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
             <p className="text-white font-bold text-lg">{formatCurrency(member.starting_amount)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <BarChart3 className="w-4 h-4 text-purple-400" />
@@ -323,10 +323,10 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
       <div className="flex items-center gap-3 mb-4">
         <Label className="text-zinc-400 text-sm">Month:</Label>
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[180px] bg-zinc-800 border-zinc-700 text-white" data-testid="month-selector">
+          <SelectTrigger className="w-[180px] bg-[#1a1a1a] border-white/[0.08] text-white" data-testid="month-selector">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
+          <SelectContent className="bg-[#1a1a1a] border-white/[0.08]">
             {availableMonths.map(m => (
               <SelectItem key={m} value={m} className="text-white">{m}</SelectItem>
             ))}
@@ -336,7 +336,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
       </div>
 
       {/* Projections Table */}
-      <Card className="bg-zinc-900/60 border-zinc-800">
+      <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -346,7 +346,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="projections-table">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
+                  <tr className="border-b border-white/[0.06] text-zinc-500 text-xs">
                     <th className="text-left p-3">Date</th>
                     <th className="text-right p-3">Balance Before</th>
                     <th className="text-center p-3">Manager Traded</th>
@@ -359,7 +359,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
                   {filteredProjections.map((p, i) => {
                     const isPast = new Date(p.date) <= new Date();
                     return (
-                      <tr key={i} className={`border-b border-zinc-800/50 ${isPast ? '' : 'opacity-50'}`}>
+                      <tr key={i} className={`border-b border-white/[0.06]/50 ${isPast ? '' : 'opacity-50'}`}>
                         <td className="p-3 text-white font-mono text-xs">{p.date}</td>
                         <td className="p-3 text-right text-zinc-300 font-mono text-xs">{formatCurrency(p.start_value)}</td>
                         <td className="p-3 text-center">
@@ -444,7 +444,7 @@ function WithdrawalsSection({ withdrawals, onApprove, onReject }) {
         <div className="space-y-2">
           <h4 className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">History</h4>
           {others.map(w => (
-            <Card key={w.id} className="bg-zinc-900/40 border-zinc-800">
+            <Card key={w.id} className="bg-[#0d0d0d]/40 border-white/[0.06]">
               <CardContent className="p-3 flex items-center justify-between">
                 <div>
                   <p className="text-zinc-300 text-sm">{w.family_member_name} - {formatCurrency(w.amount)}</p>
@@ -583,7 +583,7 @@ export default function FamilyAccountsPage() {
           isAdminSimulation={isAdminSimulation} parentUserId={simulatedUserId || effectiveUserId} />
         {!isAdminSimulation && (
           <div className="mt-4">
-            <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:text-white"
+            <Button variant="outline" className="border-white/[0.08] text-zinc-300 hover:text-white"
               onClick={() => setShowWithdrawal(viewingMember)} data-testid="request-withdrawal-btn">
               <DollarSign className="w-4 h-4 mr-2" /> Request Withdrawal
             </Button>
@@ -622,25 +622,25 @@ export default function FamilyAccountsPage() {
 
       {/* Portfolio Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <p className="text-zinc-500 text-xs">Total Members</p>
             <p className="text-white font-bold text-2xl">{members.length}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <p className="text-zinc-500 text-xs">Family Portfolio</p>
             <p className="text-white font-bold text-lg">{formatCurrency(totalFamilyValue)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <p className="text-zinc-500 text-xs">Total Profit</p>
             <p className="text-emerald-400 font-bold text-lg">{formatCurrency(totalFamilyProfit)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/60 border-zinc-800">
+        <Card className="bg-[#0d0d0d]/60 border-white/[0.06]">
           <CardContent className="p-4">
             <p className="text-zinc-500 text-xs">Pending Approvals</p>
             <p className={`font-bold text-2xl ${pendingWithdrawals > 0 ? 'text-amber-400' : 'text-zinc-600'}`}>
@@ -651,11 +651,11 @@ export default function FamilyAccountsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-zinc-800 pb-1">
+      <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-1">
         {['members', 'withdrawals'].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === tab ? 'text-white bg-zinc-800' : 'text-zinc-500 hover:text-zinc-300'
+              activeTab === tab ? 'text-white bg-[#1a1a1a]' : 'text-zinc-500 hover:text-zinc-300'
             }`} data-testid={`tab-${tab}`}>
             {tab === 'members' ? `Family Members (${members.length})` : `Withdrawals${pendingWithdrawals > 0 ? ` (${pendingWithdrawals})` : ''}`}
           </button>
@@ -669,7 +669,7 @@ export default function FamilyAccountsPage() {
       ) : activeTab === 'members' ? (
         <div>
           {members.length === 0 ? (
-            <Card className="bg-zinc-900/40 border-zinc-800 border-dashed">
+            <Card className="bg-[#0d0d0d]/40 border-white/[0.06] border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Users className="w-12 h-12 text-zinc-600 mb-4" />
                 <p className="text-zinc-400 text-base mb-2">No family members yet</p>

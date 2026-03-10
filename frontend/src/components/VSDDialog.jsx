@@ -33,7 +33,7 @@ export const VSDDialog = ({ open, onOpenChange, vsdData, loading }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="glass-card border-white/[0.06] max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <PieChartIcon className="w-5 h-5 text-purple-400" /> Virtual Share Distribution
@@ -107,7 +107,7 @@ export const VSDDialog = ({ open, onOpenChange, vsdData, loading }) => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-zinc-800">
+                      <tr className="border-b border-white/[0.06]">
                         <th className="text-left py-2 px-2 text-zinc-400 font-medium">Name</th>
                         <th className="text-right py-2 px-2 text-zinc-400 font-medium">Current Balance</th>
                         <th className="text-right py-2 px-2 text-zinc-400 font-medium">Total Deposit</th>
@@ -117,7 +117,7 @@ export const VSDDialog = ({ open, onOpenChange, vsdData, loading }) => {
                     </thead>
                     <tbody>
                       {vsdData.licensee_breakdown.map((licensee, idx) => (
-                        <tr key={licensee.license_id || idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                        <tr key={licensee.license_id || idx} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]">
                           <td className="py-2 px-2">
                             <div className="font-medium text-white">{licensee.user_name}</div>
                             <div className="text-xs text-zinc-500 capitalize">{licensee.license_type}</div>
@@ -143,7 +143,7 @@ export const VSDDialog = ({ open, onOpenChange, vsdData, loading }) => {
             </div>
             
             {/* Info Note */}
-            <div className="p-3 rounded-lg bg-zinc-900/50 text-xs text-zinc-400">
+            <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-xs text-zinc-400">
               <p>• <span className="text-emerald-400">Your Portion</span> = Funds available for your personal trading/withdrawals</p>
               <p>• <span className="text-purple-400">Licensee Portions</span> = Virtual shares allocated to licensees (they deposited into your Merin account)</p>
               <p>• <span className="text-white">Total Profit</span> = Accumulated projected profits when you (manager) traded</p>

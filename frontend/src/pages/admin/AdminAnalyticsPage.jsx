@@ -224,8 +224,8 @@ export const AdminAnalyticsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-6 animate-pulse">
-              <div className="h-4 w-24 bg-zinc-800 rounded mb-4" />
-              <div className="h-8 w-32 bg-zinc-800 rounded" />
+              <div className="h-4 w-24 bg-[#1a1a1a] rounded mb-4" />
+              <div className="h-8 w-32 bg-[#1a1a1a] rounded" />
             </div>
           ))}
         </div>
@@ -316,7 +316,7 @@ export const AdminAnalyticsPage = () => {
 
       {/* Team Report Dialog */}
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+        <DialogContent className="glass-card border-white/[0.06] max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Image className="w-5 h-5 text-cyan-400" /> Team Performance Report
@@ -330,7 +330,7 @@ export const AdminAnalyticsPage = () => {
                 <SelectTrigger className="input-dark mt-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800">
+                <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
                   <SelectItem value="daily">Daily</SelectItem>
                   <SelectItem value="weekly">Weekly (Last 7 days)</SelectItem>
                   <SelectItem value="monthly">Monthly (Last 30 days)</SelectItem>
@@ -339,7 +339,7 @@ export const AdminAnalyticsPage = () => {
             </div>
             
             {reportPreview && (
-              <div className="rounded-lg border border-zinc-800 overflow-hidden">
+              <div className="rounded-lg border border-white/[0.06] overflow-hidden">
                 <img 
                   src={`data:image/png;base64,${reportPreview.image_base64}`} 
                   alt="Team Performance Report Preview" 
@@ -468,7 +468,7 @@ export const AdminAnalyticsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="account_value" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50">
+              <TabsList className="grid w-full grid-cols-4 bg-[#0d0d0d]/50">
                 <TabsTrigger value="account_value" className="data-[state=active]:bg-orange-500/10">
                   Account Value
                 </TabsTrigger>
@@ -490,18 +490,18 @@ export const AdminAnalyticsPage = () => {
                     <AreaChart data={growthData}>
                       <defs>
                         <linearGradient id="colorAccountValue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#F97316" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#F97316" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                      <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis stroke="#71717A" fontSize={10} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="date" stroke="#404040" fontSize={10} tickFormatter={(d) => d.slice(5)} />
+                      <YAxis stroke="#404040" fontSize={10} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                        contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
                         formatter={(v) => [`$${formatNumber(v, 2)}`, 'Account Value']}
                       />
-                      <Area type="monotone" dataKey="account_value" stroke="#3B82F6" fillOpacity={1} fill="url(#colorAccountValue)" />
+                      <Area type="monotone" dataKey="account_value" stroke="#F97316" fillOpacity={1} fill="url(#colorAccountValue)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
@@ -522,11 +522,11 @@ export const AdminAnalyticsPage = () => {
                           <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                      <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis stroke="#71717A" fontSize={10} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="date" stroke="#404040" fontSize={10} tickFormatter={(d) => d.slice(5)} />
+                      <YAxis stroke="#404040" fontSize={10} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                        contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
                         formatter={(v) => [`$${formatNumber(v, 2)}`, 'Total Profit']}
                       />
                       <Area type="monotone" dataKey="total_profit" stroke="#10B981" fillOpacity={1} fill="url(#colorProfit)" />
@@ -544,11 +544,11 @@ export const AdminAnalyticsPage = () => {
                 {growthData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={growthData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                      <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis stroke="#71717A" fontSize={10} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="date" stroke="#404040" fontSize={10} tickFormatter={(d) => d.slice(5)} />
+                      <YAxis stroke="#404040" fontSize={10} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                        contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
                         formatter={(v) => [v, 'Total Trades']}
                       />
                       <Bar dataKey="total_trades" fill="#06B6D4" radius={[4, 4, 0, 0]} />
@@ -566,11 +566,11 @@ export const AdminAnalyticsPage = () => {
                 {growthData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={growthData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                      <XAxis dataKey="date" stroke="#71717A" fontSize={10} tickFormatter={(d) => d.slice(5)} />
-                      <YAxis stroke="#71717A" fontSize={10} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="date" stroke="#404040" fontSize={10} tickFormatter={(d) => d.slice(5)} />
+                      <YAxis stroke="#404040" fontSize={10} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                        contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
                         formatter={(v) => [`${formatNumber(v, 1)}%`, 'Performance Rate']}
                       />
                       <Line type="monotone" dataKey="performance_rate" stroke="#A855F7" strokeWidth={2} dot={{ fill: '#A855F7' }} />
@@ -597,7 +597,7 @@ export const AdminAnalyticsPage = () => {
             {missedTrades?.missed_members?.length > 0 ? (
               <div className="space-y-3">
                 {/* Today's Stats */}
-                <div className="p-3 rounded-lg bg-zinc-900/50 mb-4">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50 mb-4">
                   <p className="text-xs text-zinc-500 mb-1">Team Profit Today</p>
                   <p className="text-2xl font-bold text-emerald-400">${formatNumber(missedTrades.team_profit_today, 2)}</p>
                   {missedTrades.highest_earner && (
@@ -611,7 +611,7 @@ export const AdminAnalyticsPage = () => {
                 {/* Members who missed */}
                 <div className="space-y-2 max-h-[280px] overflow-y-auto">
                   {missedTrades.missed_members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors">
+                    <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 hover:bg-white/[0.04] transition-colors">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-sm font-medium">
                           {member.name?.charAt(0) || '?'}
@@ -671,7 +671,7 @@ export const AdminAnalyticsPage = () => {
                         .then(res => setTopPerformers(res.data.performers || []))
                         .catch(() => {});
                     }}
-                    className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-orange-500 focus:ring-orange-500"
+                    className="w-4 h-4 rounded bg-[#1a1a1a] border-white/[0.08] text-orange-500 focus:ring-orange-500"
                   />
                   Active traders only
                 </label>
@@ -684,7 +684,7 @@ export const AdminAnalyticsPage = () => {
                 {topPerformers.map((performer, index) => (
                   <div 
                     key={performer.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30 hover:bg-zinc-800/50 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.04] transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
@@ -777,7 +777,7 @@ export const AdminAnalyticsPage = () => {
               </div>
               
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                 <p className="text-sm text-zinc-500">Page {tradesPage} of {tradesTotalPages}</p>
                 <div className="flex items-center gap-2">
                   <Button
@@ -822,7 +822,7 @@ export const AdminAnalyticsPage = () => {
               {teamStats.member_stats.slice(0, 6).map((member, index) => (
                 <div 
                   key={member.id} 
-                  className={`p-4 rounded-lg bg-zinc-900/50 flex items-center gap-4 cursor-pointer hover:bg-zinc-800/50 transition-colors ${index === 0 ? 'border border-amber-500/30' : ''}`}
+                  className={`p-4 rounded-lg bg-[#0d0d0d]/50 flex items-center gap-4 cursor-pointer hover:bg-white/[0.04] transition-colors ${index === 0 ? 'border border-amber-500/30' : ''}`}
                   onClick={() => loadMemberAnalytics(member.id)}
                   data-testid={`performer-${member.id}`}
                 >
@@ -858,7 +858,7 @@ export const AdminAnalyticsPage = () => {
 
       {/* Member Analytics Dialog */}
       <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+        <DialogContent className="glass-card border-white/[0.06] max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <User className="w-5 h-5" /> {memberAnalytics?.member?.name || 'Member'} Analytics
@@ -867,7 +867,7 @@ export const AdminAnalyticsPage = () => {
           {memberAnalytics ? (
             <div className="space-y-6 mt-4">
               {/* Member Info */}
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-900/50">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-[#0d0d0d]/50">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xl font-bold">
                   {memberAnalytics.member.name?.charAt(0)}
                 </div>
@@ -885,19 +885,19 @@ export const AdminAnalyticsPage = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Account Value</p>
                   <p className="text-xl font-bold text-orange-400 font-mono">${formatNumber(memberAnalytics.stats.account_value, 2)}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">LOT Size</p>
                   <p className="text-xl font-bold text-purple-400 font-mono">{memberAnalytics.stats.lot_size.toFixed(2)}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Total Profit</p>
                   <p className="text-xl font-bold text-emerald-400 font-mono">${formatNumber(memberAnalytics.stats.total_profit, 2)}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Performance</p>
                   <p className="text-xl font-bold text-amber-400 font-mono">{memberAnalytics.stats.performance_rate}%</p>
                 </div>
@@ -905,15 +905,15 @@ export const AdminAnalyticsPage = () => {
 
               {/* Trade Summary */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Total Trades</p>
                   <p className="text-lg font-bold text-white">{memberAnalytics.stats.total_trades}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Winning Trades</p>
                   <p className="text-lg font-bold text-emerald-400">{memberAnalytics.stats.winning_trades}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-zinc-900/50 text-center">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-center">
                   <p className="text-xs text-zinc-500">Total Deposits</p>
                   <p className="text-lg font-bold text-cyan-400">${formatNumber(memberAnalytics.stats.total_deposits, 2)}</p>
                 </div>
@@ -925,7 +925,7 @@ export const AdminAnalyticsPage = () => {
                   <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trades</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {memberAnalytics.recent_trades.map((trade, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/50">
+                      <div key={idx} className="flex justify-between items-center p-3 rounded-lg bg-[#0d0d0d]/50">
                         <div className="flex items-center gap-3">
                           <span className={`px-2 py-1 rounded text-xs font-medium ${trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                             {trade.direction}

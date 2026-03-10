@@ -170,9 +170,10 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
   // Admin navigation items - kept in sidebar (removed Settings & API Center - moved to profile popover)
   const adminNavItems = [
+    { path: '/admin/dashboard', icon: BarChart3, label: 'Admin Dashboard' },
     { path: '/admin/members', icon: Users, label: 'Members' },
     { path: '/admin/signals', icon: Radio, label: 'Trading Signals' },
-    { path: '/admin/analytics', icon: BarChart3, label: 'Team Analytics' },
+    { path: '/admin/analytics', icon: TrendingUp, label: 'Team Analytics' },
   ];
 
   // Super/Master Admin only items
@@ -367,7 +368,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full h-8 text-xs text-zinc-400 border-zinc-700 hover:bg-zinc-800 justify-between"
+                  className="w-full h-8 text-xs text-zinc-400 border-white/[0.08] hover:bg-[#1a1a1a] justify-between"
                 >
                   <span className="flex items-center gap-1.5">
                     <Eye className="w-3.5 h-3.5" /> Simulate View
@@ -375,25 +376,25 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   <ChevronDown className="w-3.5 h-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-zinc-900 border-zinc-700">
+              <DropdownMenuContent align="start" className="w-56 bg-[#0d0d0d] border-white/[0.08]">
                 <DropdownMenuLabel className="text-zinc-500 text-xs">Role Simulation</DropdownMenuLabel>
                 <DropdownMenuItem 
                   onClick={() => simulateMemberView({ role: 'member', displayName: 'Member' })}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <User className="w-4 h-4 mr-2 text-orange-400" />
                   Member View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => simulateMemberView({ role: 'basic_admin', displayName: 'Basic Admin' })}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <UserCheck className="w-4 h-4 mr-2 text-green-400" />
                   Basic Admin View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => simulateMemberView({ role: 'super_admin', displayName: 'Super Admin' })}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4 mr-2 text-purple-400" />
                   Super Admin View
@@ -402,21 +403,21 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <DropdownMenuLabel className="text-zinc-500 text-xs">Licensee Simulation</DropdownMenuLabel>
                 <DropdownMenuItem 
                   onClick={() => handleLicenseeSimulationClick('honorary')}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <Star className="w-4 h-4 mr-2 text-amber-400" />
                   Honorary Licensee View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => handleLicenseeSimulationClick('honorary_fa')}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <Users className="w-4 h-4 mr-2 text-orange-400" />
                   Honorary FA (Family) View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => handleLicenseeSimulationClick('extended')}
-                  className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  className="text-zinc-300 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 mr-2 text-purple-400" />
                   Extended Licensee View
@@ -426,7 +427,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             
             {/* Licensee Simulation Dialog */}
             <Dialog open={licenseeDialogOpen} onOpenChange={setLicenseeDialogOpen}>
-              <DialogContent className="bg-zinc-900 border-zinc-700 max-w-md">
+              <DialogContent className="bg-[#0d0d0d] border-white/[0.08] max-w-md">
                 <DialogHeader>
                   <DialogTitle className="text-white flex items-center gap-2">
                     {selectedLicenseType === 'honorary' ? (
@@ -447,11 +448,11 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-zinc-300">Simulation Mode</label>
                     <Select value={selectedLicenseeId} onValueChange={setSelectedLicenseeId}>
-                      <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-zinc-300">
+                      <SelectTrigger className="w-full bg-[#1a1a1a] border-white/[0.08] text-zinc-300">
                         <SelectValue placeholder="Select simulation mode..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-800 border-zinc-700">
-                        <SelectItem value="dummy" className="text-zinc-300 hover:bg-zinc-700">
+                      <SelectContent className="bg-[#1a1a1a] border-white/[0.08]">
+                        <SelectItem value="dummy" className="text-zinc-300 hover:bg-white/[0.08]">
                           <div className="flex flex-col">
                             <span className="font-medium">Demo Mode (Dummy Values)</span>
                             <span className="text-xs text-zinc-500">Use placeholder data ($5,000 balance)</span>
@@ -470,7 +471,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                             <SelectItem 
                               key={licensee.user_id} 
                               value={licensee.user_id}
-                              className="text-zinc-300 hover:bg-zinc-700"
+                              className="text-zinc-300 hover:bg-white/[0.08]"
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium">{licensee.full_name}</span>
@@ -486,7 +487,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   </div>
                   
                   {selectedLicenseeId && selectedLicenseeId !== 'dummy' && (
-                    <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+                    <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]">
                       {(() => {
                         const selected = licensees.find(l => l.user_id === selectedLicenseeId);
                         return selected ? (
@@ -513,7 +514,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
-                    className="flex-1 border-zinc-700"
+                    className="flex-1 border-white/[0.08]"
                     onClick={() => setLicenseeDialogOpen(false)}
                   >
                     Cancel
@@ -631,10 +632,10 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
       {/* Admin Section - Collapsible, anchored at bottom */}
       {((isAdmin() && !simulatedView) || (simulatedView && ['basic_admin', 'super_admin', 'master_admin'].includes(simulatedView.role))) && (
-        <div className="px-3 pb-2 border-t border-zinc-800/50 pt-2">
+        <div className="px-3 pb-2 border-t border-white/[0.06]/50 pt-2">
           <button
             onClick={() => setAdminExpanded(!adminExpanded)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors"
             data-testid="admin-section-toggle"
           >
             {!collapsed && <span className="text-xs uppercase tracking-wider font-medium">Admin</span>}
@@ -691,11 +692,11 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       )}
 
       {/* User Profile Section - Fixed at Bottom */}
-      <div className="p-3 border-t border-zinc-800">
+      <div className="p-3 border-t border-white/[0.06]">
         {!collapsed ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center gap-2.5 p-2.5 rounded-lg bg-[#0d0d0d]/50 hover:bg-white/[0.04] transition-colors cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
@@ -712,11 +713,11 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             <DropdownMenuContent 
               align="end" 
               side="top" 
-              className="w-56 bg-zinc-900 border-zinc-800"
+              className="w-56 bg-[#0d0d0d] border-white/[0.06]"
             >
               <DropdownMenuItem 
                 onClick={handleProfileClick}
-                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
@@ -725,17 +726,17 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
               {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <>
-                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuSeparator className="bg-[#1a1a1a]" />
                   <DropdownMenuItem 
                     onClick={handleSettingsClick}
-                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
                   >
                     <Cog className="w-4 h-4 mr-2" />
                     Platform Settings
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleApiCenterClick}
-                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
                   >
                     <Plug className="w-4 h-4 mr-2" />
                     API Center
@@ -745,7 +746,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               
               {!window.matchMedia('(display-mode: standalone)').matches && (
                 <>
-                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuSeparator className="bg-[#1a1a1a]" />
                   <DropdownMenuItem 
                     onClick={() => setPwaInstructionsOpen(true)}
                     className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
@@ -757,7 +758,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </>
               )}
 
-              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuSeparator className="bg-[#1a1a1a]" />
               <DropdownMenuItem 
                 onClick={handlePurgeCache}
                 className="cursor-pointer text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 focus:bg-amber-500/10"
@@ -767,7 +768,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Clear Cache &amp; Reload
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuSeparator className="bg-[#1a1a1a]" />
               <DropdownMenuItem 
                 onClick={handleLogout}
                 className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"
@@ -780,7 +781,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center justify-center p-2 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center justify-center p-2 rounded-lg bg-[#0d0d0d]/50 hover:bg-white/[0.04] transition-colors cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
@@ -789,15 +790,15 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             <DropdownMenuContent 
               align="center" 
               side="right" 
-              className="w-56 bg-zinc-900 border-zinc-800"
+              className="w-56 bg-[#0d0d0d] border-white/[0.06]"
             >
               <div className="px-2 py-1.5 text-sm text-zinc-400">
                 {user?.full_name}
               </div>
-              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuSeparator className="bg-[#1a1a1a]" />
               <DropdownMenuItem 
                 onClick={handleProfileClick}
-                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
@@ -806,17 +807,17 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
               {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
                 <>
-                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuSeparator className="bg-[#1a1a1a]" />
                   <DropdownMenuItem 
                     onClick={handleSettingsClick}
-                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
                   >
                     <Cog className="w-4 h-4 mr-2" />
                     Platform Settings
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleApiCenterClick}
-                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-zinc-800 focus:bg-zinc-800"
+                    className="cursor-pointer text-zinc-300 hover:text-white hover:bg-[#1a1a1a] focus:bg-[#1a1a1a]"
                   >
                     <Plug className="w-4 h-4 mr-2" />
                     API Center
@@ -826,7 +827,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               
               {!window.matchMedia('(display-mode: standalone)').matches && (
                 <>
-                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuSeparator className="bg-[#1a1a1a]" />
                   <DropdownMenuItem 
                     onClick={() => setPwaInstructionsOpen(true)}
                     className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
@@ -837,7 +838,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 </>
               )}
 
-              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuSeparator className="bg-[#1a1a1a]" />
               <DropdownMenuItem 
                 onClick={handlePurgeCache}
                 className="cursor-pointer text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 focus:bg-amber-500/10"
@@ -847,7 +848,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 Clear Cache &amp; Reload
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="bg-zinc-800" />
+              <DropdownMenuSeparator className="bg-[#1a1a1a]" />
               <DropdownMenuItem 
                 onClick={handleLogout}
                 className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"

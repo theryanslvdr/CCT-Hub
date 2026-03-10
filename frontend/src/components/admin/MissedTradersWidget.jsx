@@ -150,7 +150,7 @@ export const MissedTradersWidget = () => {
 
 <div style="text-align: center; margin: 32px 0;">
   <a href="${appUrl}/profit-tracker" 
-     style="display: inline-block; background: #3B82F6; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+     style="display: inline-block; background: #F97316; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
     📊 Oh, you traded? Report Your Profit Now
   </a>
 </div>
@@ -398,7 +398,7 @@ export const MissedTradersWidget = () => {
 
   return (
     <>
-      <Card className="glass-card border-zinc-800" data-testid="no-trade-members-widget">
+      <Card className="glass-card border-white/[0.06]" data-testid="no-trade-members-widget">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
@@ -497,11 +497,11 @@ export const MissedTradersWidget = () => {
                 {missedTraders.map((trader) => (
                   <div 
                     key={trader.id}
-                    className="flex items-center justify-between p-3 bg-zinc-900/50 rounded-lg border border-zinc-800"
+                    className="flex items-center justify-between p-3 bg-[#0d0d0d]/50 rounded-lg border border-white/[0.06]"
                     data-testid={`missed-trader-${trader.id}`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center flex-shrink-0">
                         <span className="text-sm font-medium text-zinc-400">
                           {trader.full_name?.charAt(0) || '?'}
                         </span>
@@ -571,7 +571,7 @@ export const MissedTradersWidget = () => {
 
       {/* WYSIWYG Email Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Mail className="w-5 h-5 text-orange-400" />
@@ -599,7 +599,7 @@ export const MissedTradersWidget = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleUseTemplate(template)}
-                      className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                      className="border-white/[0.08] text-zinc-300 hover:bg-[#1a1a1a]"
                     >
                       <FileText className="w-3 h-3 mr-1" />
                       {template.name}
@@ -629,14 +629,14 @@ export const MissedTradersWidget = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowShortcodes(!showShortcodes)}
-                  className="border-zinc-700 text-zinc-400 hover:text-white"
+                  className="border-white/[0.08] text-zinc-400 hover:text-white"
                 >
                   <Code className="w-4 h-4 mr-2" />
                   Shortcodes
                 </Button>
               </div>
               <Tabs value={editorMode} onValueChange={setEditorMode} className="w-auto">
-                <TabsList className="bg-zinc-800">
+                <TabsList className="bg-[#1a1a1a]">
                   <TabsTrigger value="visual" className="text-xs">Visual</TabsTrigger>
                   <TabsTrigger value="code" className="text-xs">HTML Code</TabsTrigger>
                 </TabsList>
@@ -645,7 +645,7 @@ export const MissedTradersWidget = () => {
             
             {/* Shortcodes Panel */}
             {showShortcodes && (
-              <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-2">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] space-y-2">
                 <p className="text-xs text-zinc-400 font-medium mb-2">Click to insert:</p>
                 <div className="grid grid-cols-2 gap-2">
                   {SHORTCODES.map((sc) => (
@@ -653,7 +653,7 @@ export const MissedTradersWidget = () => {
                       key={sc.code}
                       type="button"
                       onClick={() => insertShortcode(sc.code)}
-                      className="text-left p-2 rounded bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
+                      className="text-left p-2 rounded bg-white/[0.04] hover:bg-white/[0.08]/50 transition-colors"
                     >
                       <code className="text-orange-400 text-sm">{sc.code}</code>
                       <p className="text-xs text-zinc-500 mt-0.5">{sc.description}</p>
@@ -667,7 +667,7 @@ export const MissedTradersWidget = () => {
             <div className="space-y-2">
               <Label className="text-zinc-400">Email Body</Label>
               {editorMode === 'visual' ? (
-                <div className="rounded-lg overflow-hidden border border-zinc-800 bg-white">
+                <div className="rounded-lg overflow-hidden border border-white/[0.06] bg-white">
                   <ReactQuill
                     theme="snow"
                     value={emailBody}
@@ -696,7 +696,7 @@ export const MissedTradersWidget = () => {
             <Button
               variant="outline"
               onClick={() => setEmailDialogOpen(false)}
-              className="border-zinc-700"
+              className="border-white/[0.08]"
             >
               Cancel
             </Button>
@@ -723,7 +723,7 @@ export const MissedTradersWidget = () => {
 
       {/* Template Management Dialog (Master Admin Only) */}
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-orange-400" />
@@ -769,7 +769,7 @@ export const MissedTradersWidget = () => {
                   {templates.map((template) => (
                     <div 
                       key={template.id}
-                      className="flex items-center justify-between p-4 bg-zinc-900/50 rounded-lg border border-zinc-800"
+                      className="flex items-center justify-between p-4 bg-[#0d0d0d]/50 rounded-lg border border-white/[0.06]"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -835,7 +835,7 @@ export const MissedTradersWidget = () => {
                     <SelectTrigger className="input-dark">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800">
+                    <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
                       <SelectItem value="general">General</SelectItem>
                       <SelectItem value="reminder">Reminder</SelectItem>
                       <SelectItem value="announcement">Announcement</SelectItem>
@@ -856,13 +856,13 @@ export const MissedTradersWidget = () => {
               </div>
               
               {/* Shortcodes Reference */}
-              <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <p className="text-xs text-zinc-400 font-medium mb-2">Available Shortcodes:</p>
                 <div className="flex flex-wrap gap-2">
                   {SHORTCODES.map((sc) => (
                     <code 
                       key={sc.code}
-                      className="text-xs bg-zinc-800 text-orange-400 px-2 py-1 rounded cursor-pointer hover:bg-zinc-700"
+                      className="text-xs bg-[#1a1a1a] text-orange-400 px-2 py-1 rounded cursor-pointer hover:bg-white/[0.08]"
                       onClick={() => {
                         if (templateEditorMode === 'code') {
                           setEmailBody(prev => prev + sc.code);
@@ -882,7 +882,7 @@ export const MissedTradersWidget = () => {
               <div className="flex items-center justify-between">
                 <Label className="text-zinc-400">Email Body</Label>
                 <Tabs value={templateEditorMode} onValueChange={setTemplateEditorMode} className="w-auto">
-                  <TabsList className="bg-zinc-800">
+                  <TabsList className="bg-[#1a1a1a]">
                     <TabsTrigger value="visual" className="text-xs">Visual</TabsTrigger>
                     <TabsTrigger value="code" className="text-xs">HTML Code</TabsTrigger>
                   </TabsList>
@@ -890,7 +890,7 @@ export const MissedTradersWidget = () => {
               </div>
               
               {templateEditorMode === 'visual' ? (
-                <div className="rounded-lg overflow-hidden border border-zinc-800 bg-white">
+                <div className="rounded-lg overflow-hidden border border-white/[0.06] bg-white">
                   <ReactQuill
                     theme="snow"
                     value={emailBody}
@@ -918,7 +918,7 @@ export const MissedTradersWidget = () => {
                 <Button
                   variant="outline"
                   onClick={closeTemplateEdit}
-                  className="border-zinc-700"
+                  className="border-white/[0.08]"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Back
@@ -940,7 +940,7 @@ export const MissedTradersWidget = () => {
               <Button
                 variant="outline"
                 onClick={() => setTemplateDialogOpen(false)}
-                className="border-zinc-700"
+                className="border-white/[0.08]"
               >
                 Close
               </Button>

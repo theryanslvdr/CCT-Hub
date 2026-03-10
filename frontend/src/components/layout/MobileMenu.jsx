@@ -115,6 +115,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   ];
 
   const adminNavItems = [
+    { path: '/admin/dashboard', icon: BarChart3, label: 'Admin Dashboard' },
     { path: '/admin/members', icon: Users, label: 'Members' },
     { path: '/admin/signals', icon: Radio, label: 'Trading Signals' },
     { path: '/admin/analytics', icon: BarChart3, label: 'Team Analytics' },
@@ -221,7 +222,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700"
+          className="w-10 h-10 rounded-full bg-[#1a1a1a] hover:bg-white/[0.08]"
           data-testid="mobile-menu-close"
         >
           <X className="w-5 h-5 text-white" />
@@ -253,7 +254,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
         {/* User info */}
         <div 
           onClick={() => handleNavClick('/profile')}
-          className="flex items-center gap-3 p-4 mb-4 rounded-xl bg-zinc-900/50 border border-zinc-800 active:bg-zinc-800"
+          className="flex items-center gap-3 p-4 mb-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06] active:bg-[#1a1a1a]"
         >
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
             <User className="w-6 h-6 text-white" />
@@ -279,7 +280,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                   isActive 
                     ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
-                    : "text-zinc-300 active:bg-zinc-800"
+                    : "text-zinc-300 active:bg-[#1a1a1a]"
                 )}
               >
                 <Icon className="w-5 h-5" />
@@ -304,7 +305,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
                       ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
-                    : "text-zinc-300 active:bg-zinc-800"
+                    : "text-zinc-300 active:bg-[#1a1a1a]"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -325,7 +326,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
                       ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
-                    : "text-zinc-300 active:bg-zinc-800"
+                    : "text-zinc-300 active:bg-[#1a1a1a]"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -346,7 +347,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
                       ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
-                    : "text-zinc-300 active:bg-zinc-800"
+                    : "text-zinc-300 active:bg-[#1a1a1a]"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -366,7 +367,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
               <button
                 key={index}
                 onClick={() => handleExternalLink(link)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-300 active:bg-zinc-800 transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-300 active:bg-[#1a1a1a] transition-all"
               >
                 <Icon className={cn("w-5 h-5", link.iconColor)} />
                 <span className="font-medium flex-1 text-left">{link.label}</span>

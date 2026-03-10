@@ -47,19 +47,19 @@ function RewardsPlatformSync() {
       </h3>
       {syncStatus && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+          <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-center">
             <p className="text-lg font-bold text-white">{syncStatus.total_users || 0}</p>
             <p className="text-[10px] text-zinc-500 uppercase">Total Users</p>
           </div>
-          <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+          <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-center">
             <p className="text-lg font-bold text-emerald-400">{syncStatus.synced_users || 0}</p>
             <p className="text-[10px] text-zinc-500 uppercase">Synced</p>
           </div>
-          <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+          <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-center">
             <p className="text-lg font-bold text-amber-400">{syncStatus.pending_users || 0}</p>
             <p className="text-[10px] text-zinc-500 uppercase">Pending</p>
           </div>
-          <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+          <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-center">
             <p className="text-lg font-bold text-red-400">{syncStatus.failed_users || 0}</p>
             <p className="text-[10px] text-zinc-500 uppercase">Failed</p>
           </div>
@@ -112,7 +112,7 @@ function ScanAllMembersButton() {
         {scanning ? <><Loader2 className="w-4 h-4 animate-spin" /> Scanning...</> : <><Zap className="w-4 h-4" /> Scan All Members</>}
       </Button>
       {result && (
-        <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 text-xs text-zinc-400">
+        <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-400">
           <p>Scanned: {result.scanned} members</p>
           {result.results?.filter((r) => r.badges_awarded > 0).length > 0 && (
             <div className="mt-1">
@@ -302,7 +302,7 @@ export function DiagnosticsTab() {
         </div>
 
         {batchSyncResults && (
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-sm">
+          <div className="p-4 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm">
             <p className="text-emerald-400 font-medium mb-2">Batch Sync Results:</p>
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center">
@@ -371,7 +371,7 @@ export function DiagnosticsTab() {
         </div>
 
         {diagnosticResult && !diagnosticResult.error && (
-          <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-sm space-y-3">
+          <div className="p-4 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-white font-medium">{diagnosticResult.email}</p>
               {diagnosticResult.user_id && (
@@ -414,7 +414,7 @@ export function DiagnosticsTab() {
             {diagnosticResult.details && (
               <details className="text-xs">
                 <summary className="text-zinc-400 cursor-pointer hover:text-zinc-300">Raw diagnostic data</summary>
-                <pre className="mt-2 p-2 bg-zinc-900 rounded text-zinc-500 overflow-auto max-h-48">
+                <pre className="mt-2 p-2 bg-[#0d0d0d] rounded text-zinc-500 overflow-auto max-h-48">
                   {JSON.stringify(diagnosticResult.details, null, 2)}
                 </pre>
               </details>
@@ -422,12 +422,12 @@ export function DiagnosticsTab() {
           </div>
         )}
 
-        <div className="border-t border-zinc-800 my-4" />
+        <div className="border-t border-white/[0.06] my-4" />
 
         {/* Rewards Platform Sync Section */}
         <RewardsPlatformSync />
 
-        <div className="border-t border-zinc-800 my-4" />
+        <div className="border-t border-white/[0.06] my-4" />
 
         {/* Scan All Members */}
         <ScanAllMembersButton />

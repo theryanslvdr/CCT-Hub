@@ -109,7 +109,7 @@ export const HabitManagerCard = () => {
       </CardHeader>
       <CardContent className="space-y-3">
         {showForm && (
-          <div className="p-4 rounded-lg bg-zinc-900/60 border border-teal-500/30 space-y-3" data-testid="habit-form">
+          <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-teal-500/30 space-y-3" data-testid="habit-form">
             <Input value={form.title} onChange={(e) => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Habit title (e.g., Send 1 invite today)" className="input-dark" data-testid="habit-title-input" />
             <Textarea value={form.description} onChange={(e) => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="input-dark" rows={2} />
             <div className="grid grid-cols-3 gap-3">
@@ -157,7 +157,7 @@ export const HabitManagerCard = () => {
           <p className="text-sm text-zinc-500 text-center py-4">No habits created yet. Click "Add Habit" to create one.</p>
         ) : (
           habits.map(h => (
-            <div key={h.id} className={`p-3 rounded-lg border flex items-center justify-between ${h.active ? 'bg-zinc-900/40 border-zinc-800' : 'bg-zinc-900/20 border-zinc-800/50 opacity-60'}`} data-testid={`admin-habit-${h.id}`}>
+            <div key={h.id} className={`p-3 rounded-lg border flex items-center justify-between ${h.active ? 'bg-[#0d0d0d]/40 border-white/[0.06]' : 'bg-[#0d0d0d]/20 border-white/[0.06]/50 opacity-60'}`} data-testid={`admin-habit-${h.id}`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-white">{h.title}</p>

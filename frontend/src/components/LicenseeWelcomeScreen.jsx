@@ -78,7 +78,7 @@ export const LicenseeWelcomeScreen = ({
 
           {/* Info Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                   <Wallet className="w-5 h-5 text-emerald-400" />
@@ -90,7 +90,7 @@ export const LicenseeWelcomeScreen = ({
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-purple-400" />

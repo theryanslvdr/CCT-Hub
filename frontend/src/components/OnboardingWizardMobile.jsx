@@ -42,7 +42,7 @@ const StepIndicator = ({ current, total }) => {
               ? 'bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]' 
               : i === current 
                 ? 'bg-cyan-500/50' 
-                : 'bg-zinc-800'
+                : 'bg-[#1a1a1a]'
           }`}
         />
       ))}
@@ -69,7 +69,7 @@ const SelectionCard = ({
         transition-all duration-300 overflow-hidden group
         ${selected 
           ? `border-${accentColor}-500 bg-${accentColor}-500/10 shadow-[0_0_30px_rgba(6,182,212,0.2)]` 
-          : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-800/50'
+          : 'border-white/[0.06] bg-[#0d0d0d]/50 hover:border-white/[0.08] hover:bg-white/[0.04]'
         }
       `}
     >
@@ -87,7 +87,7 @@ const SelectionCard = ({
           transition-all duration-300
           ${selected 
             ? `bg-${accentColor}-500/20 text-${accentColor}-400` 
-            : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700'
+            : 'bg-[#1a1a1a] text-zinc-400 group-hover:bg-white/[0.08]'
           }
         `}>
           <Icon className="w-7 h-7" />
@@ -137,7 +137,7 @@ const GlassInput = ({ label, icon: Icon, value, onChange, placeholder, type = 't
           placeholder={placeholder}
           data-testid={testId}
           className={`
-            w-full bg-zinc-950/80 border border-zinc-800 rounded-xl
+            w-full bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl
             text-white text-lg font-mono placeholder:text-zinc-600
             focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20
             transition-all duration-300
@@ -155,7 +155,7 @@ const GlassInput = ({ label, icon: Icon, value, onChange, placeholder, type = 't
 // Stats Card Component
 const StatsCard = ({ label, value, color = 'cyan' }) => {
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+    <div className="bg-[#0d0d0d]/50 border border-white/[0.06] rounded-xl p-4">
       <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-mono font-bold ${
         color === 'cyan' ? 'text-cyan-400' : color === 'teal' ? 'text-teal-400' : 'text-white'
@@ -563,7 +563,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                       <PopoverTrigger asChild>
                         <button
                           data-testid="start-date-picker"
-                          className="w-full flex items-center justify-between bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-5 text-left hover:border-zinc-700 transition-colors"
+                          className="w-full flex items-center justify-between bg-[#0a0a0a]/80 border border-white/[0.06] rounded-xl px-4 py-5 text-left hover:border-white/[0.08] transition-colors"
                         >
                           <span className={startDate ? 'text-white font-mono' : 'text-zinc-500'}>
                             {startDate ? format(startDate, 'MMMM d, yyyy') : 'Select a date'}
@@ -572,7 +572,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                         </button>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 bg-zinc-900 border-zinc-800 z-[99999]" 
+                        className="w-auto p-0 bg-[#0d0d0d] border-white/[0.06] z-[99999]" 
                         align="center"
                         side="bottom"
                         sideOffset={5}
@@ -585,7 +585,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                           onSelect={setStartDate}
                           disabled={(date) => date > new Date() || date < MIN_START_DATE}
                           initialFocus
-                          className="bg-zinc-900 rounded-xl"
+                          className="bg-[#0d0d0d] rounded-xl"
                         />
                       </PopoverContent>
                     </Popover>
@@ -651,15 +651,15 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
 
               <div className="space-y-4">
                 {/* Add transaction form */}
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 space-y-4">
+                <div className="bg-[#0d0d0d]/50 border border-white/[0.06] rounded-xl p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-zinc-500 uppercase tracking-wider">Type</label>
                       <Select value={newTransactionType} onValueChange={setNewTransactionType}>
-                        <SelectTrigger className="mt-1 bg-zinc-950 border-zinc-800 text-white">
+                        <SelectTrigger className="mt-1 bg-[#0a0a0a] border-white/[0.06] text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                        <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
                           <SelectItem value="deposit" className="text-emerald-400">Deposit</SelectItem>
                           <SelectItem value="withdrawal" className="text-red-400">Withdrawal</SelectItem>
                         </SelectContent>
@@ -672,7 +672,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                         value={newTransactionAmount}
                         onChange={(e) => setNewTransactionAmount(e.target.value)}
                         placeholder="0.00"
-                        className="mt-1 bg-zinc-950 border-zinc-800 text-white font-mono"
+                        className="mt-1 bg-[#0a0a0a] border-white/[0.06] text-white font-mono"
                       />
                     </div>
                   </div>
@@ -681,7 +681,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                     <label className="text-xs text-zinc-500 uppercase tracking-wider">Date</label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="w-full mt-1 flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-left hover:border-zinc-700 transition-colors">
+                        <button className="w-full mt-1 flex items-center justify-between bg-[#0a0a0a] border border-white/[0.06] rounded-lg px-3 py-2 text-left hover:border-white/[0.08] transition-colors">
                           <span className={newTransactionDate ? 'text-white text-sm font-mono' : 'text-zinc-500 text-sm'}>
                             {newTransactionDate ? format(newTransactionDate, 'MMM d, yyyy') : 'Select date'}
                           </span>
@@ -689,7 +689,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                         </button>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 bg-zinc-900 border-zinc-800 z-[99999]" 
+                        className="w-auto p-0 bg-[#0d0d0d] border-white/[0.06] z-[99999]" 
                         align="center"
                         side="bottom"
                         sideOffset={5}
@@ -702,7 +702,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                           onSelect={setNewTransactionDate}
                           disabled={(date) => date > new Date() || date < MIN_DEPOSIT_DATE}
                           initialFocus
-                          className="bg-zinc-900"
+                          className="bg-[#0d0d0d]"
                         />
                       </PopoverContent>
                     </Popover>
@@ -710,7 +710,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                   
                   <Button
                     onClick={handleAddTransaction}
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white"
+                    className="w-full bg-[#1a1a1a] hover:bg-white/[0.08] text-white"
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Transaction
                   </Button>
@@ -722,7 +722,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                     {transactions.map((tx) => (
                       <div 
                         key={tx.id} 
-                        className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3"
+                        className="flex items-center justify-between bg-[#0d0d0d]/50 border border-white/[0.06] rounded-xl px-4 py-3"
                       >
                         <div className="flex items-center gap-3">
                           {tx.type === 'deposit' ? (
@@ -773,7 +773,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
               {tradingDays.length > 0 && currentTradingDay && (
                 <div className="space-y-4">
                   {/* Day navigation */}
-                  <div className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3">
+                  <div className="flex items-center justify-between bg-[#0d0d0d]/50 border border-white/[0.06] rounded-xl px-4 py-3">
                     <button
                       onClick={() => setCurrentTradeIndex(Math.max(0, currentTradeIndex - 1))}
                       disabled={currentTradeIndex === 0}
@@ -795,9 +795,9 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                   </div>
 
                   {/* Trade entry card */}
-                  <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden">
+                  <div className="bg-[#0d0d0d]/80 border border-white/[0.06] rounded-2xl overflow-hidden">
                     {/* Header stats */}
-                    <div className="grid grid-cols-2 divide-x divide-zinc-800 border-b border-zinc-800">
+                    <div className="grid grid-cols-2 divide-x divide-zinc-800 border-b border-white/[0.06]">
                       <div className="p-4 text-center">
                         <p className="text-xs text-zinc-500 uppercase">Balance</p>
                         <p className="text-lg font-mono text-white mt-1">{formatMoney(currentBalance)}</p>
@@ -818,10 +818,10 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                               value={currentEntry?.product || 'MOIL10'}
                               onValueChange={(v) => handleTradeEntry('product', v)}
                             >
-                              <SelectTrigger className="mt-1 bg-zinc-950 border-zinc-800 text-white text-sm">
+                              <SelectTrigger className="mt-1 bg-[#0a0a0a] border-white/[0.06] text-white text-sm">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-zinc-800 z-[99999]">
+                              <SelectContent className="bg-[#0d0d0d] border-white/[0.06] z-[99999]">
                                 {PRODUCTS.map(p => (
                                   <SelectItem key={p} value={p} className="text-white text-sm">{p}</SelectItem>
                                 ))}
@@ -834,10 +834,10 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                               value={currentEntry?.direction || 'BUY'}
                               onValueChange={(v) => handleTradeEntry('direction', v)}
                             >
-                              <SelectTrigger className="mt-1 bg-zinc-950 border-zinc-800 text-white text-sm">
+                              <SelectTrigger className="mt-1 bg-[#0a0a0a] border-white/[0.06] text-white text-sm">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-zinc-800 z-[99999]">
+                              <SelectContent className="bg-[#0d0d0d] border-white/[0.06] z-[99999]">
                                 {DIRECTIONS.map(d => (
                                   <SelectItem key={d} value={d} className={`text-sm ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
                                     {d}
@@ -858,13 +858,13 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                               value={currentEntry?.actualProfit ?? ''}
                               onChange={(e) => handleTradeEntry('actualProfit', e.target.value)}
                               placeholder="0.00"
-                              className="pl-8 bg-zinc-950 border-zinc-800 text-white font-mono text-lg"
+                              className="pl-8 bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-lg"
                             />
                           </div>
                         </div>
 
                         {currentEntry?.actualProfit !== undefined && (
-                          <div className="flex justify-between items-center bg-zinc-950/50 rounded-lg px-4 py-3">
+                          <div className="flex justify-between items-center bg-[#0a0a0a]/50 rounded-lg px-4 py-3">
                             <span className="text-sm text-zinc-400">P/L Difference</span>
                             <span className={`font-mono font-bold ${
                               (parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 
@@ -892,7 +892,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
 
                     {/* Footer actions */}
                     {!currentEntry?.missed && (
-                      <div className="border-t border-zinc-800 px-4 py-3 flex justify-between items-center">
+                      <div className="border-t border-white/[0.06] px-4 py-3 flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <button
                             onClick={handleMissedTrade}
@@ -919,7 +919,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
 
                   {/* Commission input */}
                   {currentTradeIndex === tradingDays.length - 1 && (
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4">
+                    <div className="bg-[#0d0d0d]/50 border border-white/[0.06] rounded-xl p-4">
                       <label className="text-xs text-zinc-500 uppercase">Total Commission Earned</label>
                       <div className="relative mt-2">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono">$</span>
@@ -928,7 +928,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
                           value={totalCommission}
                           onChange={(e) => setTotalCommission(e.target.value)}
                           placeholder="0.00"
-                          className="pl-8 bg-zinc-950 border-zinc-800 text-white font-mono"
+                          className="pl-8 bg-[#0a0a0a] border-white/[0.06] text-white font-mono"
                         />
                       </div>
                     </div>
@@ -947,7 +947,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 p-6 pt-4 border-t border-zinc-800/50 bg-zinc-950/80 backdrop-blur-sm space-y-3">
+        <div className="flex-shrink-0 p-6 pt-4 border-t border-white/[0.06]/50 bg-[#0a0a0a]/80 backdrop-blur-sm space-y-3">
           {/* Save & Continue Later button */}
           <button
             onClick={handleSaveForLater}
@@ -964,7 +964,7 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
               <Button
                 variant="outline"
                 onClick={handleBack}
-                className="flex-1 bg-zinc-900 border-zinc-700 text-white hover:bg-zinc-800 py-6 rounded-xl"
+                className="flex-1 bg-[#0d0d0d] border-white/[0.08] text-white hover:bg-[#1a1a1a] py-6 rounded-xl"
               >
                 <ChevronLeft className="w-5 h-5 mr-2" /> Back
               </Button>

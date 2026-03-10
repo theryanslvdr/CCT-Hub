@@ -37,7 +37,7 @@ export const AdminSettingsPage = () => {
     logo_url: '',
     pwa_icon_url: '',
     og_image_url: '',
-    primary_color: '#3B82F6',
+    primary_color: '#F97316',
     accent_color: '#06B6D4',
     hide_emergent_badge: false,
     // Login Customization
@@ -405,7 +405,7 @@ export const AdminSettingsPage = () => {
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                   activeTab === tab.key 
                     ? 'bg-orange-500 text-white' 
-                    : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -420,12 +420,12 @@ export const AdminSettingsPage = () => {
       <div className="flex gap-6">
         {/* Desktop Sidebar Navigation */}
         <div className="hidden md:block w-56 flex-shrink-0">
-          <div className="sticky top-4 space-y-1 bg-zinc-900/50 rounded-lg border border-zinc-800 p-2">
+          <div className="sticky top-4 space-y-1 bg-[#0d0d0d]/50 rounded-lg border border-white/[0.06] p-2">
             {/* Regular Settings */}
             <button
               onClick={() => setActiveTab('seo')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'seo' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'seo' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-seo"
             >
@@ -434,7 +434,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('branding')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'branding' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'branding' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-branding"
             >
@@ -443,7 +443,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('ui')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'ui' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'ui' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-ui"
             >
@@ -452,7 +452,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('integrations')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'integrations' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'integrations' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-integrations"
             >
@@ -461,7 +461,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('links')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'links' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'links' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-links"
             >
@@ -470,7 +470,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('emails')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'emails' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'emails' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-emails"
             >
@@ -479,7 +479,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('maintenance')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'maintenance' ? 'bg-amber-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'maintenance' ? 'bg-amber-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-maintenance"
             >
@@ -488,7 +488,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('security')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'security' ? 'bg-red-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'security' ? 'bg-red-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
               }`}
               data-testid="tab-security"
             >
@@ -498,14 +498,14 @@ export const AdminSettingsPage = () => {
             {/* Master Admin Only Section */}
             {isMasterAdmin && (
               <>
-                <div className="my-3 border-t border-zinc-700" />
+                <div className="my-3 border-t border-white/[0.08]" />
                 <p className="px-3 py-1 text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-1">
                   <Crown className="w-3 h-3" /> Master Admin
                 </p>
                 <button
                   onClick={() => setActiveTab('trading')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    activeTab === 'trading' ? 'bg-emerald-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    activeTab === 'trading' ? 'bg-emerald-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
                   }`}
                   data-testid="tab-trading"
                 >
@@ -514,7 +514,7 @@ export const AdminSettingsPage = () => {
                 <button
                   onClick={() => setActiveTab('banners')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    activeTab === 'banners' ? 'bg-purple-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    activeTab === 'banners' ? 'bg-purple-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
                   }`}
                   data-testid="tab-banners"
                 >
@@ -523,7 +523,7 @@ export const AdminSettingsPage = () => {
                 <button
                   onClick={() => setActiveTab('habits')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    activeTab === 'habits' ? 'bg-teal-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    activeTab === 'habits' ? 'bg-teal-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
                   }`}
                   data-testid="tab-habits"
                 >
@@ -532,7 +532,7 @@ export const AdminSettingsPage = () => {
                 <button
                   onClick={() => setActiveTab('affiliate')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    activeTab === 'affiliate' ? 'bg-cyan-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    activeTab === 'affiliate' ? 'bg-cyan-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
                   }`}
                   data-testid="tab-affiliate"
                 >
@@ -541,7 +541,7 @@ export const AdminSettingsPage = () => {
                 <button
                   onClick={() => setActiveTab('diagnostics')}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    activeTab === 'diagnostics' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    activeTab === 'diagnostics' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-[#1a1a1a] hover:text-white'
                   }`}
                   data-testid="tab-diagnostics"
                 >
@@ -637,11 +637,11 @@ export const AdminSettingsPage = () => {
                 <Label className="text-zinc-300">Logo (replaces CrossCurrent text in sidebar)</Label>
                 <div className="mt-2 flex items-center gap-4">
                   {settings.logo_url ? (
-                    <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                    <div className="w-32 h-16 rounded-lg bg-[#0d0d0d] flex items-center justify-center overflow-hidden border border-white/[0.08]">
                       <img src={settings.logo_url} alt="Logo" className="max-w-full max-h-full object-contain" />
                     </div>
                   ) : (
-                    <div className="w-32 h-16 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                    <div className="w-32 h-16 rounded-lg bg-[#0d0d0d] flex items-center justify-center border-2 border-dashed border-white/[0.08]">
                       <span className="text-zinc-500 text-sm">No logo</span>
                     </div>
                   )}
@@ -669,11 +669,11 @@ export const AdminSettingsPage = () => {
                 <Label className="text-zinc-300">Favicon (browser tab icon)</Label>
                 <div className="mt-2 flex items-center gap-4">
                   {settings.favicon_url ? (
-                    <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                    <div className="w-12 h-12 rounded-lg bg-[#0d0d0d] flex items-center justify-center overflow-hidden border border-white/[0.08]">
                       <img src={settings.favicon_url} alt="Favicon" className="w-8 h-8 object-contain" />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                    <div className="w-12 h-12 rounded-lg bg-[#0d0d0d] flex items-center justify-center border-2 border-dashed border-white/[0.08]">
                       <span className="text-zinc-500 text-xs">None</span>
                     </div>
                   )}
@@ -704,11 +704,11 @@ export const AdminSettingsPage = () => {
                 </p>
                 <div className="mt-2 flex items-center gap-4">
                   {settings.pwa_icon_url ? (
-                    <div className="w-16 h-16 rounded-xl bg-zinc-900 flex items-center justify-center overflow-hidden border border-zinc-700">
+                    <div className="w-16 h-16 rounded-xl bg-[#0d0d0d] flex items-center justify-center overflow-hidden border border-white/[0.08]">
                       <img src={settings.pwa_icon_url} alt="PWA Icon" className="w-14 h-14 object-contain rounded-lg" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-700">
+                    <div className="w-16 h-16 rounded-xl bg-[#0d0d0d] flex items-center justify-center border-2 border-dashed border-white/[0.08]">
                       <Smartphone className="w-6 h-6 text-zinc-500" />
                     </div>
                   )}
@@ -763,7 +763,7 @@ export const AdminSettingsPage = () => {
 
               {/* Hide Emergent Badge Toggle - Master Admin Only */}
               {isMasterAdmin() && (
-                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-purple-500/20">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-purple-500/20">
                   <div className="flex items-center gap-3">
                     <Crown className="w-5 h-5 text-purple-400" />
                     <div>
@@ -827,7 +827,7 @@ export const AdminSettingsPage = () => {
               </div>
               
               {/* Preview */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <p className="text-xs text-zinc-500 mb-3">Preview:</p>
                 <div className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-2">
@@ -856,9 +856,9 @@ export const AdminSettingsPage = () => {
                   <div className="flex items-center gap-3 mt-1">
                     <input
                       type="color"
-                      value={settings.primary_color || '#3B82F6'}
+                      value={settings.primary_color || '#F97316'}
                       onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
+                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-white/[0.08]"
                     />
                     <Input
                       value={settings.primary_color || ''}
@@ -875,7 +875,7 @@ export const AdminSettingsPage = () => {
                       type="color"
                       value={settings.accent_color || '#10B981'}
                       onChange={(e) => setSettings({ ...settings, accent_color: e.target.value })}
-                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-zinc-700"
+                      className="w-12 h-10 rounded cursor-pointer bg-transparent border border-white/[0.08]"
                     />
                     <Input
                       value={settings.accent_color || ''}
@@ -888,7 +888,7 @@ export const AdminSettingsPage = () => {
               </div>
 
               {/* Preview */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <p className="text-xs text-zinc-500 mb-3">Preview:</p>
                 <div className="flex gap-4">
                   <Button style={{ backgroundColor: settings.primary_color }} className="text-white">
@@ -1272,7 +1272,7 @@ export const AdminSettingsPage = () => {
                   {(settings.footer_links || []).length > 0 && (
                     <div className="space-y-2 mb-4">
                       {(settings.footer_links || []).map((link, index) => (
-                        <div key={index} className="flex items-center gap-2 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                        <div key={index} className="flex items-center gap-2 p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                           <GripVertical className="w-4 h-4 text-zinc-600" />
                           <span className="text-zinc-300 flex-1">{link.label}</span>
                           <span className="text-zinc-500 text-sm truncate max-w-[200px]">{link.url}</span>
@@ -1310,7 +1310,7 @@ export const AdminSettingsPage = () => {
                 </div>
 
                 {/* Footer Preview */}
-                <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <p className="text-xs text-zinc-500 mb-3">Preview:</p>
                   <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
                     <span className="text-zinc-500">{settings.footer_copyright}</span>
@@ -1343,7 +1343,7 @@ export const AdminSettingsPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <div>
                   <p className="text-white font-medium">Enable Maintenance Mode</p>
                   <p className="text-sm text-zinc-400 mt-1">
@@ -1396,7 +1396,7 @@ export const AdminSettingsPage = () => {
               </p>
 
               {/* Add New Announcement Form */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-4">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] space-y-4">
                 <h4 className="text-white font-medium">New Announcement</h4>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1415,17 +1415,17 @@ export const AdminSettingsPage = () => {
                       value={newAnnouncement.type} 
                       onValueChange={(value) => setNewAnnouncement({ ...newAnnouncement, type: value })}
                     >
-                      <SelectTrigger className="bg-zinc-900/50 border-zinc-800 text-white mt-1">
+                      <SelectTrigger className="bg-[#0d0d0d]/50 border-white/[0.06] text-white mt-1">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800">
-                        <SelectItem value="info" className="text-white hover:bg-zinc-800">
+                      <SelectContent className="bg-[#0d0d0d] border-white/[0.06]">
+                        <SelectItem value="info" className="text-white hover:bg-[#1a1a1a]">
                           <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-orange-500" /> Info</span>
                         </SelectItem>
-                        <SelectItem value="warning" className="text-white hover:bg-zinc-800">
+                        <SelectItem value="warning" className="text-white hover:bg-[#1a1a1a]">
                           <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500" /> Warning</span>
                         </SelectItem>
-                        <SelectItem value="success" className="text-white hover:bg-zinc-800">
+                        <SelectItem value="success" className="text-white hover:bg-[#1a1a1a]">
                           <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Success</span>
                         </SelectItem>
                       </SelectContent>
@@ -1513,10 +1513,10 @@ export const AdminSettingsPage = () => {
                           )}
                           <div className="flex items-center gap-2 mt-2">
                             {announcement.sticky && (
-                              <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-xs rounded">Sticky</span>
+                              <span className="px-2 py-0.5 bg-[#1a1a1a] text-zinc-400 text-xs rounded">Sticky</span>
                             )}
                             <span className={`px-2 py-0.5 text-xs rounded ${
-                              announcement.active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-500'
+                              announcement.active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#1a1a1a] text-zinc-500'
                             }`}>
                               {announcement.active ? 'Active' : 'Inactive'}
                             </span>
@@ -1569,7 +1569,7 @@ export const AdminSettingsPage = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Master Toggle */}
-                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <div>
                     <p className="text-white font-medium">Enable Content Protection</p>
                     <p className="text-sm text-zinc-500 mt-1">
@@ -1586,7 +1586,7 @@ export const AdminSettingsPage = () => {
                 {settings.content_protection_enabled && (
                   <div className="space-y-4">
                     {/* Watermark Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                       <div>
                         <p className="text-white font-medium">Show User Watermark</p>
                         <p className="text-sm text-zinc-500 mt-1">
@@ -1602,7 +1602,7 @@ export const AdminSettingsPage = () => {
 
                     {/* Custom Watermark Text (Master Admin Only) */}
                     {settings.content_protection_watermark && (
-                      <div className="p-4 rounded-lg bg-zinc-900/50 border border-orange-500/20">
+                      <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-orange-500/20">
                         <div className="flex items-center gap-2 mb-3">
                           <Crown className="w-4 h-4 text-purple-400" />
                           <p className="text-purple-400 font-medium text-sm">Master Admin Only</p>
@@ -1623,7 +1623,7 @@ export const AdminSettingsPage = () => {
                     )}
 
                     {/* Copy Protection Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                       <div>
                         <p className="text-white font-medium">Disable Text Selection & Copy</p>
                         <p className="text-sm text-zinc-500 mt-1">
@@ -1638,7 +1638,7 @@ export const AdminSettingsPage = () => {
                     </div>
 
                     {/* Right-Click Protection Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                       <div>
                         <p className="text-white font-medium">Disable Right-Click Menu</p>
                         <p className="text-sm text-zinc-500 mt-1">
@@ -1653,7 +1653,7 @@ export const AdminSettingsPage = () => {
                     </div>
 
                     {/* Keyboard Shortcuts Protection Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                       <div>
                         <p className="text-white font-medium">Block Keyboard Shortcuts</p>
                         <p className="text-sm text-zinc-500 mt-1">
@@ -1733,12 +1733,12 @@ export const AdminSettingsPage = () => {
                           <div className="flex gap-2 mt-1">
                             <input
                               type="color"
-                              value={settings.notice_banner_bg_color || '#3B82F6'}
+                              value={settings.notice_banner_bg_color || '#F97316'}
                               onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_bg_color: e.target.value }))}
-                              className="w-10 h-10 rounded border border-zinc-700 cursor-pointer bg-transparent"
+                              className="w-10 h-10 rounded border border-white/[0.08] cursor-pointer bg-transparent"
                             />
                             <Input
-                              value={settings.notice_banner_bg_color || '#3B82F6'}
+                              value={settings.notice_banner_bg_color || '#F97316'}
                               onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_bg_color: e.target.value }))}
                               className="input-dark flex-1"
                             />
@@ -1751,7 +1751,7 @@ export const AdminSettingsPage = () => {
                               type="color"
                               value={settings.notice_banner_text_color || '#FFFFFF'}
                               onChange={(e) => setSettings(prev => ({ ...prev, notice_banner_text_color: e.target.value }))}
-                              className="w-10 h-10 rounded border border-zinc-700 cursor-pointer bg-transparent"
+                              className="w-10 h-10 rounded border border-white/[0.08] cursor-pointer bg-transparent"
                             />
                             <Input
                               value={settings.notice_banner_text_color || '#FFFFFF'}
@@ -1800,7 +1800,7 @@ export const AdminSettingsPage = () => {
                           ].map(page => {
                             const checked = (settings.notice_banner_pages || []).includes(page.key);
                             return (
-                              <label key={page.key} className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/50 border border-zinc-800 cursor-pointer hover:border-zinc-600 transition-colors">
+                              <label key={page.key} className="flex items-center gap-2 p-2 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] cursor-pointer hover:border-zinc-600 transition-colors">
                                 <input
                                   type="checkbox"
                                   checked={checked}
@@ -1813,7 +1813,7 @@ export const AdminSettingsPage = () => {
                                         : pages.filter(p => p !== page.key)
                                     }));
                                   }}
-                                  className="rounded border-zinc-600 bg-zinc-800 text-orange-500"
+                                  className="rounded border-zinc-600 bg-[#1a1a1a] text-orange-500"
                                   data-testid={`notice-page-${page.key}`}
                                 />
                                 <span className="text-sm text-zinc-300">{page.label}</span>
@@ -1879,7 +1879,7 @@ export const AdminSettingsPage = () => {
                               key={preset.key}
                               onClick={() => setSettings(prev => ({ ...prev, promo_popup_preset: preset.key }))}
                               className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                                settings.promo_popup_preset === preset.key ? preset.color : 'border-zinc-700 bg-zinc-900/50 text-zinc-400'
+                                settings.promo_popup_preset === preset.key ? preset.color : 'border-white/[0.08] bg-[#0d0d0d]/50 text-zinc-400'
                               }`}
                               data-testid={`promo-preset-${preset.key}`}
                             >

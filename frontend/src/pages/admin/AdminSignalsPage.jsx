@@ -316,7 +316,7 @@ export const AdminSignalsPage = () => {
                   <FlaskConical className="w-4 h-4" /> Simulate
                 </Button>
               </DialogTrigger>
-              <DialogContent className="glass-card border-zinc-800">
+              <DialogContent className="glass-card border-white/[0.06]">
                 <DialogHeader>
                   <DialogTitle className="text-white flex items-center gap-2">
                     <FlaskConical className="w-5 h-5 text-amber-400" /> Simulate Test Signal
@@ -412,7 +412,7 @@ export const AdminSignalsPage = () => {
                 <Plus className="w-4 h-4" /> New Signal
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card border-zinc-800">
+            <DialogContent className="glass-card border-white/[0.06]">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
                   <Radio className="w-5 h-5 text-orange-400" /> Create Trading Signal
@@ -492,7 +492,7 @@ export const AdminSignalsPage = () => {
                 </div>
                 
                 {/* Official Signal Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                   <div>
                     <Label className="text-zinc-300 cursor-pointer">Official Trading Signal</Label>
                     <p className="text-xs text-zinc-500 mt-0.5">Mark this as an official signal from the trading team</p>
@@ -597,7 +597,7 @@ export const AdminSignalsPage = () => {
               </div>
             </div>
             {activeSignal.notes && (
-              <p className="mt-4 text-zinc-400 p-3 bg-zinc-900/50 rounded-lg">{activeSignal.notes}</p>
+              <p className="mt-4 text-zinc-400 p-3 bg-[#0d0d0d]/50 rounded-lg">{activeSignal.notes}</p>
             )}
           </CardContent>
         </Card>
@@ -681,7 +681,7 @@ export const AdminSignalsPage = () => {
               </div>
               
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                 <p className="text-sm text-zinc-500">
                   Page {currentPage} of {totalPages}
                 </p>
@@ -723,7 +723,7 @@ export const AdminSignalsPage = () => {
 
       {/* Monthly Archive Dialog */}
       <Dialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Archive className="w-5 h-5 text-orange-400" /> Monthly Signal Archive
@@ -740,13 +740,13 @@ export const AdminSignalsPage = () => {
                   <AccordionItem 
                     key={month.month_key} 
                     value={month.month_key}
-                    className="glass-card border border-zinc-800 rounded-lg overflow-hidden"
+                    className="glass-card border border-white/[0.06] rounded-lg overflow-hidden"
                   >
-                    <AccordionTrigger className="px-4 py-3 hover:bg-zinc-800/50">
+                    <AccordionTrigger className="px-4 py-3 hover:bg-white/[0.04]">
                       <div className="flex items-center gap-3">
                         <Calendar className="w-5 h-5 text-orange-400" />
                         <span className="text-white font-medium">{month.month_label}</span>
-                        <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-zinc-500 bg-[#1a1a1a] px-2 py-0.5 rounded-full">
                           {month.signals.length} signals
                         </span>
                       </div>
@@ -756,7 +756,7 @@ export const AdminSignalsPage = () => {
                         {month.signals.map((signal, index) => (
                           <div 
                             key={signal.id || index} 
-                            className="p-3 rounded-lg bg-zinc-900/50 flex items-center justify-between"
+                            className="p-3 rounded-lg bg-[#0d0d0d]/50 flex items-center justify-between"
                           >
                             <div className="flex items-center gap-4">
                               <span className="text-xs text-zinc-500 font-mono">
@@ -792,7 +792,7 @@ export const AdminSignalsPage = () => {
             
             {/* Archive Action */}
             {isSuperAdmin() && (
-              <div className="mt-6 pt-4 border-t border-zinc-800">
+              <div className="mt-6 pt-4 border-t border-white/[0.06]">
                 <Button 
                   onClick={handleArchiveMonth} 
                   variant="outline" 
@@ -811,7 +811,7 @@ export const AdminSignalsPage = () => {
 
       {/* Edit Signal Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Edit Signal</DialogTitle>
           </DialogHeader>
@@ -871,14 +871,14 @@ export const AdminSignalsPage = () => {
                 className="input-dark mt-1"
               />
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50">
               <Label className="text-zinc-300">Active Signal</Label>
               <Switch
                 checked={editForm.is_active}
                 onCheckedChange={(v) => setEditForm({ ...editForm, is_active: v })}
               />
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
               <div>
                 <Label className="text-zinc-300">Official Trading Signal</Label>
                 <p className="text-xs text-zinc-500 mt-0.5">Mark this as an official signal</p>

@@ -19,8 +19,8 @@ const TreeNode = ({ node, depth = 0 }) => {
   return (
     <div className="select-none" data-testid={`tree-node-${node.id}`}>
       <div
-        className={`flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-all hover:bg-zinc-800/60 ${
-          depth === 0 ? 'bg-zinc-800/40' : ''
+        className={`flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-all hover:bg-white/[0.04] ${
+          depth === 0 ? 'bg-[#1a1a1a]/40' : ''
         }`}
         style={{ marginLeft: depth * 24 }}
         onClick={() => hasChildren && setExpanded(!expanded)}
@@ -60,7 +60,7 @@ const TreeNode = ({ node, depth = 0 }) => {
       </div>
 
       {expanded && hasChildren && (
-        <div className="border-l border-zinc-700/50 ml-6">
+        <div className="border-l border-white/[0.08]/50 ml-6">
           {node.children.map((child) => (
             <TreeNode key={child.id} node={child} depth={depth + 1} />
           ))}
@@ -121,7 +121,7 @@ const D3TreeView = ({ treeData }) => {
 
   const renderCustomNode = ({ nodeDatum, toggleNode }) => (
     <g onClick={toggleNode}>
-      <circle r={20} fill={nodeDatum.children?.length > 0 ? '#3b82f6' : '#52525b'} stroke="#71717a" strokeWidth={1} />
+      <circle r={20} fill={nodeDatum.children?.length > 0 ? '#F97316' : '#52525b'} stroke="#71717a" strokeWidth={1} />
       <text fill="white" x={0} y={5} textAnchor="middle" fontSize={10} fontWeight="bold">
         {nodeDatum.name?.charAt(0)?.toUpperCase() || '?'}
       </text>
@@ -137,7 +137,7 @@ const D3TreeView = ({ treeData }) => {
   );
 
   return (
-    <div ref={containerRef} className="w-full h-[500px] bg-zinc-900/50 rounded-lg border border-zinc-700/50 overflow-hidden" data-testid="d3-tree-container">
+    <div ref={containerRef} className="w-full h-[500px] bg-[#0d0d0d]/50 rounded-lg border border-white/[0.08]/50 overflow-hidden" data-testid="d3-tree-container">
       <TreeComponent
         data={d3Data}
         translate={translate}
@@ -186,7 +186,7 @@ const FlatListView = ({ search }) => {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-zinc-400 border-b border-zinc-700/50">
+            <tr className="text-left text-zinc-400 border-b border-white/[0.08]/50">
               <th className="py-2 px-3">Member</th>
               <th className="py-2 px-3">Referral Code</th>
               <th className="py-2 px-3">Referred By</th>
@@ -196,7 +196,7 @@ const FlatListView = ({ search }) => {
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+              <tr key={u.id} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03] transition-colors">
                 <td className="py-2.5 px-3">
                   <div className="text-white font-medium">{u.full_name}</div>
                   <div className="text-xs text-zinc-500">{u.email}</div>
@@ -345,12 +345,12 @@ const ReferralTreePage = () => {
               <GitBranch className="w-5 h-5 text-orange-400" /> Referral Network
             </CardTitle>
             <div className="flex items-center gap-2">
-              <div className="flex rounded-lg overflow-hidden border border-zinc-700">
+              <div className="flex rounded-lg overflow-hidden border border-white/[0.08]">
                 <button
                   data-testid="view-tree-btn"
                   onClick={() => setView('tree')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'tree' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'tree' ? 'bg-orange-600 text-white' : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
                   }`}
                 >
                   <Network className="w-3.5 h-3.5 inline mr-1" />Tree
@@ -359,7 +359,7 @@ const ReferralTreePage = () => {
                   data-testid="view-d3-btn"
                   onClick={() => setView('d3')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'd3' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'd3' ? 'bg-orange-600 text-white' : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
                   }`}
                 >
                   <GitBranch className="w-3.5 h-3.5 inline mr-1" />Visual
@@ -368,7 +368,7 @@ const ReferralTreePage = () => {
                   data-testid="view-list-btn"
                   onClick={() => setView('list')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'list' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'list' ? 'bg-orange-600 text-white' : 'bg-[#1a1a1a] text-zinc-400 hover:text-white'
                   }`}
                 >
                   <List className="w-3.5 h-3.5 inline mr-1" />Table
@@ -384,7 +384,7 @@ const ReferralTreePage = () => {
                 placeholder="Search by name, email, or code..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-zinc-800/50 border-zinc-600 text-white"
+                className="pl-9 bg-white/[0.04] border-zinc-600 text-white"
               />
             </div>
           )}

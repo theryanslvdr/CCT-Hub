@@ -72,14 +72,14 @@ export const PromotionPopup = () => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="glass-card border-zinc-700 sm:max-w-md p-0 overflow-hidden" data-testid="promotion-popup">
+      <DialogContent className="glass-card border-white/[0.08] sm:max-w-md p-0 overflow-hidden" data-testid="promotion-popup">
         <DialogTitle className="sr-only">{popup.title || 'Announcement'}</DialogTitle>
         {/* Accent header bar */}
         <div className={`h-1.5 bg-gradient-to-r ${style.accent}`} />
 
         <button
           onClick={handleClose}
-          className="absolute right-3 top-3 p-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors z-10"
+          className="absolute right-3 top-3 p-1.5 rounded-full bg-[#1a1a1a] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors z-10"
           data-testid="promo-popup-close"
         >
           <X className="w-4 h-4" />

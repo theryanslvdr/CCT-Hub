@@ -78,10 +78,10 @@ export const NotificationSheet = () => {
         </Button>
       </SheetTrigger>
       <SheetContent 
-        className="w-[400px] sm:w-[540px] bg-zinc-900 border-zinc-800 p-0"
+        className="w-[400px] sm:w-[540px] bg-[#0d0d0d] border-white/[0.06] p-0"
         data-testid="notification-sheet"
       >
-        <SheetHeader className="p-4 border-b border-zinc-800">
+        <SheetHeader className="p-4 border-b border-white/[0.06]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <SheetTitle className="text-white flex items-center gap-2">
@@ -152,7 +152,7 @@ export const NotificationSheet = () => {
               {notifications.map((notification, index) => (
                 <div 
                   key={notification.id || index}
-                  className="p-4 hover:bg-zinc-800/30 transition-colors cursor-pointer group"
+                  className="p-4 hover:bg-white/[0.03] transition-colors cursor-pointer group"
                 >
                   <div className="flex items-start gap-3">
                     <div className={cn(
@@ -161,7 +161,7 @@ export const NotificationSheet = () => {
                       notification.type === 'deposit_request' ? 'bg-emerald-500/10' :
                       notification.type === 'withdrawal_request' ? 'bg-amber-500/10' :
                       notification.type === 'new_user' ? 'bg-emerald-500/10' :
-                      'bg-zinc-800'
+                      'bg-[#1a1a1a]'
                     )}>
                       <NotificationIcon type={notification.type} />
                     </div>
@@ -191,7 +191,7 @@ export const NotificationSheet = () => {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-800 bg-zinc-900">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.06] bg-[#0d0d0d]">
           <div className="flex items-center justify-center gap-2 text-sm">
             {connected ? (
               <>

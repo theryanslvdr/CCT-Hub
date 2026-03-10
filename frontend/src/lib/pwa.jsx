@@ -172,7 +172,7 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-lg max-h-[85vh] overflow-y-auto" data-testid="pwa-instructions-dialog">
+      <DialogContent className="glass-card border-white/[0.06] max-w-lg max-h-[85vh] overflow-y-auto" data-testid="pwa-instructions-dialog">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Download className="w-5 h-5 text-orange-400" /> Install The CrossCurrent Hub
@@ -237,7 +237,7 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
                     <button
                       key={key}
                       onClick={() => setPlatform(key)}
-                      className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/50 text-left hover:border-zinc-600 transition-colors"
+                      className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]/50 text-left hover:border-zinc-600 transition-colors"
                       data-testid={`pwa-platform-${key}`}
                     >
                       <PlatformIcon className="w-4 h-4 text-zinc-400 mb-1" />

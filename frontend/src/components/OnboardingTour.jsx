@@ -207,7 +207,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center z-[10001] p-4 pointer-events-none">
         <div 
-          className="bg-zinc-900/95 backdrop-blur-xl border border-zinc-700 rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
+          className="bg-[#0d0d0d]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95 duration-300 pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -232,7 +232,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
             </div>
             <button 
               onClick={handleSkip}
-              className="text-zinc-500 hover:text-white p-1 rounded hover:bg-zinc-800 transition-colors"
+              className="text-zinc-500 hover:text-white p-1 rounded hover:bg-[#1a1a1a] transition-colors"
               data-testid="tour-close-btn"
             >
               <X className="w-5 h-5" />
@@ -274,7 +274,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+          <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
             <Button
               variant="ghost"
               onClick={handleSkip}
@@ -288,7 +288,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
                 <Button
                   variant="outline"
                   onClick={handlePrev}
-                  className="border-zinc-700 text-zinc-300 hover:text-white"
+                  className="border-white/[0.08] text-zinc-300 hover:text-white"
                   disabled={isNavigating}
                   data-testid="tour-prev-btn"
                 >

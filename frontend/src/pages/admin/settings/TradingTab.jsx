@@ -155,8 +155,8 @@ export function TradingTab() {
                   key={product.id}
                   className={`flex items-center justify-between p-3 rounded-lg border ${
                     product.is_active
-                      ? 'bg-zinc-900/50 border-zinc-700'
-                      : 'bg-zinc-900/30 border-zinc-800 opacity-60'
+                      ? 'bg-[#0d0d0d]/50 border-white/[0.08]'
+                      : 'bg-[#0d0d0d]/30 border-white/[0.06] opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -232,7 +232,7 @@ export function TradingTab() {
                       borderRadius: '6px',
                     },
                   }}
-                  className="rounded-lg border border-zinc-700 bg-zinc-900/50 p-3"
+                  className="rounded-lg border border-white/[0.08] bg-[#0d0d0d]/50 p-3"
                   disabled={savingHoliday}
                 />
               </div>
@@ -249,7 +249,7 @@ export function TradingTab() {
                       .map((h) => (
                         <div
                           key={h.date}
-                          className="flex items-center justify-between p-2 rounded bg-zinc-800/50 text-sm"
+                          className="flex items-center justify-between p-2 rounded bg-white/[0.04] text-sm"
                         >
                           <span className="text-zinc-300">{h.date}</span>
                           <span className="text-zinc-500 text-xs">{h.name}</span>

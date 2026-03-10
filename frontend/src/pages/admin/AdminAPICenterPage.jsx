@@ -103,7 +103,7 @@ export const AdminAPICenterPage = () => {
             <div>
               <h3 className="text-lg font-bold text-white">Webhook Receiver</h3>
               <p className="text-zinc-400 text-sm mt-1">External apps can send data to this endpoint:</p>
-              <code className="block mt-2 p-3 rounded-lg bg-zinc-900 text-orange-400 font-mono text-sm">
+              <code className="block mt-2 p-3 rounded-lg bg-[#0d0d0d] text-orange-400 font-mono text-sm">
                 POST {BACKEND_URL}/api/api-center/receive
               </code>
               <p className="text-xs text-zinc-500 mt-2">
@@ -121,7 +121,7 @@ export const AdminAPICenterPage = () => {
             <Plus className="w-4 h-4" /> Add Connection
           </Button>
         </DialogTrigger>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Add API Connection</DialogTitle>
           </DialogHeader>
@@ -179,7 +179,7 @@ export const AdminAPICenterPage = () => {
           {connections.length > 0 ? (
             <div className="space-y-4">
               {connections.map((conn) => (
-                <div key={conn.id} className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                <div key={conn.id} className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] hover:border-white/[0.08] transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${conn.is_active ? 'bg-orange-500/10' : 'bg-zinc-700/50'}`}>
@@ -234,7 +234,7 @@ export const AdminAPICenterPage = () => {
 
       {/* Send Dialog */}
       <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-lg">
+        <DialogContent className="glass-card border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Send to {selectedConnection?.name}</DialogTitle>
           </DialogHeader>
@@ -258,7 +258,7 @@ export const AdminAPICenterPage = () => {
             </Button>
 
             {sendResult && (
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <p className="text-xs text-zinc-500 mb-2">Response:</p>
                 <pre className="text-sm text-zinc-300 font-mono overflow-auto max-h-40">
                   {JSON.stringify(sendResult, null, 2)}

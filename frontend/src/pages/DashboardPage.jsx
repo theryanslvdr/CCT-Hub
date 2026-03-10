@@ -288,8 +288,8 @@ export const DashboardPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-6 animate-pulse">
-              <div className="h-4 w-24 bg-zinc-800 rounded mb-4" />
-              <div className="h-8 w-32 bg-zinc-800 rounded" />
+              <div className="h-4 w-24 bg-[#1a1a1a] rounded mb-4" />
+              <div className="h-8 w-32 bg-[#1a1a1a] rounded" />
             </div>
           ))}
         </div>
@@ -384,28 +384,31 @@ export const DashboardPage = () => {
           const colorClasses = {
             blue: 'from-orange-500 to-amber-600',
             emerald: 'from-emerald-500 to-emerald-600',
-            cyan: 'from-cyan-500 to-cyan-600',
+            cyan: 'from-teal-500 to-teal-600',
             purple: 'from-purple-500 to-purple-600',
+          };
+          const glowClasses = {
+            blue: 'from-orange-500/[0.06]',
+            emerald: 'from-emerald-500/[0.06]',
+            cyan: 'from-teal-500/[0.06]',
+            purple: 'from-purple-500/[0.06]',
           };
 
           const isCurrencyCard = card.format === 'currency';
           const shouldHide = valuesHidden && isCurrencyCard;
 
-          // Format exact value for tooltip
           const exactValue = card.format === 'currency' 
             ? formatCurrency(card.value, 'USD')
             : card.format === 'percent' 
             ? `${card.value.toFixed(2)}%`
             : card.value.toString();
 
-          // Mobile compact format (K, M, B, T) - 3 digits, no rounding
           const mobileValue = card.format === 'currency' 
             ? formatCurrencyCompact(card.value)
             : card.format === 'number' 
             ? formatNumberCompact(card.value)
             : `${formatNumberCompact(card.value)}%`;
 
-          // Desktop full format
           const desktopValue = card.format === 'currency' 
             ? formatCurrency(card.value, 'USD')
             : card.format === 'number' 
@@ -413,35 +416,29 @@ export const DashboardPage = () => {
             : `${formatNumber(card.value, 1)}%`;
 
           return (
-            <Card key={index} className="glass-card hover:border-orange-500/20 transition-all" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
-              <CardContent className="p-3 md:p-6">
+            <Card key={index} className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] hover:border-white/[0.1] transition-all rounded-xl" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
+              <div className={`absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br ${glowClasses[card.color]} to-transparent rounded-full blur-2xl pointer-events-none`} />
+              <CardContent className="p-3 md:p-5 relative">
                 <div className="flex items-start justify-between gap-1 md:gap-2">
                   <div className="flex-1 min-w-0 overflow-hidden">
                     <div className="flex items-center gap-1">
-                      <p className="text-[10px] md:text-sm text-zinc-400 truncate">{card.title}</p>
+                      <p className="text-[10px] md:text-[11px] text-zinc-500 uppercase tracking-wider font-medium truncate">{card.title}</p>
                       {isCurrencyCard && (
                         <button 
                           onClick={toggleValuesHidden} 
-                          className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
+                          className="text-zinc-600 hover:text-zinc-400 transition-colors p-0.5"
                           data-testid={`toggle-hide-${card.title.toLowerCase().replace(/\s/g, '-')}`}
                         >
-                          {valuesHidden ? <EyeOff className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <Eye className="w-3 h-3 md:w-3.5 md:h-3.5" />}
+                          {valuesHidden ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         </button>
                       )}
                     </div>
                     {shouldHide ? (
-                      <>
-                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1">****</p>
-                        <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2">****</p>
-                      </>
+                      <p className="text-lg md:text-2xl font-bold font-mono text-white mt-1.5">****</p>
                     ) : (
                       <ValueTooltip exactValue={exactValue}>
-                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1">
-                          {mobileValue}
-                        </p>
-                        <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2">
-                          {desktopValue}
-                        </p>
+                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1.5">{mobileValue}</p>
+                        <p className="hidden md:block text-2xl font-bold font-mono text-white mt-1.5">{desktopValue}</p>
                       </ValueTooltip>
                     )}
                     {card.subtitle && (
@@ -450,24 +447,24 @@ export const DashboardPage = () => {
                       </p>
                     )}
                   </div>
-                  <div className={`w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br ${colorClasses[card.color]} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-4 h-4 md:w-6 md:h-6 text-white" />
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br ${colorClasses[card.color]} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                    <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                   </div>
                 </div>
                 {card.change !== undefined && card.changeFormat && !shouldHide && (
-                  <div className="mt-2 md:mt-4 flex items-center gap-1 flex-wrap">
+                  <div className="mt-2 md:mt-3 flex items-center gap-1 flex-wrap">
                     {card.change >= 100 ? (
                       <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-emerald-400" />
                     ) : (
                       <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4 text-red-400" />
                     )}
-                    <span className={`text-[10px] md:text-sm ${card.change >= 100 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`text-[10px] md:text-xs font-medium ${card.change >= 100 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {card.changeFormat === 'percent' 
                         ? `${formatNumber(card.change, 1)}%` 
                         : <><span className="md:hidden">{formatCurrencyCompact(Math.abs(card.change))}</span><span className="hidden md:inline">{formatCurrency(Math.abs(card.change))}</span></>
                       }
                     </span>
-                    <span className="text-zinc-500 text-[9px] md:text-sm">vs projected</span>
+                    <span className="text-zinc-600 text-[9px] md:text-xs">vs projected</span>
                   </div>
                 )}
               </CardContent>
@@ -542,7 +539,7 @@ export const DashboardPage = () => {
       {/* Tabbed Interface for Members */}
       {isMember && !isLicenseeView && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1" data-testid="dashboard-tabs">
+          <TabsList className="grid w-full grid-cols-4 bg-[#111111] border border-white/[0.06] rounded-xl p-1" data-testid="dashboard-tabs">
             <TabsTrigger 
               value="overview" 
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
@@ -591,15 +588,15 @@ export const DashboardPage = () => {
                             <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                           </linearGradient>
                           <linearGradient id="colorProjectedOverview" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#F97316" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#F97316" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
-                        <YAxis stroke="#71717A" fontSize={12} />
-                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
-                        <Area type="monotone" dataKey="projected" stroke="#3B82F6" fillOpacity={1} fill="url(#colorProjectedOverview)" name="Projected" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="name" stroke="#404040" fontSize={12} />
+                        <YAxis stroke="#404040" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }} />
+                        <Area type="monotone" dataKey="projected" stroke="#F97316" fillOpacity={1} fill="url(#colorProjectedOverview)" name="Projected" />
                         <Area type="monotone" dataKey="actual" stroke="#10B981" fillOpacity={1} fill="url(#colorActualOverview)" name="Actual" />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -655,15 +652,15 @@ export const DashboardPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Total Deposits</span>
                       <span className="text-xl font-mono text-white">{formatCurrency(summary?.total_deposits || 0, 'USD')}</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Total Profit</span>
                       <span className="text-xl font-mono text-emerald-400">{formatCurrency(summary?.total_actual_profit || 0, 'USD')}</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Projected Profit</span>
                       <span className="text-xl font-mono text-orange-400">{formatCurrency(summary?.total_projected_profit || 0, 'USD')}</span>
                     </div>
@@ -683,21 +680,21 @@ export const DashboardPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Performance Rate</span>
                       <span className="text-xl font-mono text-purple-400">{formatNumber(summary?.performance_rate || 0, 1)}%</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Profit Difference</span>
                       <span className={`text-xl font-mono ${(summary?.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {(summary?.profit_difference || 0) >= 0 ? '+' : ''}{formatCurrency(summary?.profit_difference || 0, 'USD')}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Total Trades</span>
                       <span className="text-xl font-mono text-cyan-400">{summary?.total_trades || 0}</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
+                    <div className="flex justify-between items-center p-4 rounded-lg bg-[#0d0d0d]/50">
                       <span className="text-zinc-400">Current LOT Size</span>
                       <span className="text-xl font-mono text-orange-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
                     </div>
@@ -775,10 +772,10 @@ export const DashboardPage = () => {
                   {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
-                        <YAxis stroke="#71717A" fontSize={12} />
-                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="name" stroke="#404040" fontSize={12} />
+                        <YAxis stroke="#404040" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }} />
                         <Line type="monotone" dataKey="actual" stroke="#10B981" strokeWidth={2} dot={{ fill: '#10B981' }} name="Actual Profit" />
                       </LineChart>
                     </ResponsiveContainer>
@@ -798,11 +795,11 @@ export const DashboardPage = () => {
                   {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
-                        <YAxis stroke="#71717A" fontSize={12} />
-                        <Tooltip contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }} />
-                        <Bar dataKey="projected" fill="#3B82F6" name="Projected" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="name" stroke="#404040" fontSize={12} />
+                        <YAxis stroke="#404040" fontSize={12} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }} />
+                        <Bar dataKey="projected" fill="#F97316" name="Projected" />
                         <Bar dataKey="actual" fill="#10B981" name="Actual" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -920,11 +917,11 @@ export const DashboardPage = () => {
                         value: p.projected_value,
                         profit: p.total_profit
                       })) || []}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                        <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
-                        <YAxis stroke="#71717A" fontSize={12} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                        <XAxis dataKey="name" stroke="#404040" fontSize={12} />
+                        <YAxis stroke="#404040" fontSize={12} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
                         <Tooltip
-                          contentStyle={{ backgroundColor: '#18181B', border: '1px solid #27272A', borderRadius: '8px' }}
+                          contentStyle={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
                           formatter={(value) => formatCurrency(value, 'USD')}
                         />
                         <Bar dataKey="value" fill="#06B6D4" name="License Year End" radius={[4, 4, 0, 0]} />
@@ -1124,13 +1121,13 @@ export const DashboardPage = () => {
                       <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorProjected" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#F97316" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#F97316" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
-                  <XAxis dataKey="name" stroke="#71717A" fontSize={12} />
-                  <YAxis stroke="#71717A" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="name" stroke="#404040" fontSize={12} />
+                  <YAxis stroke="#404040" fontSize={12} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#18181B',
@@ -1138,7 +1135,7 @@ export const DashboardPage = () => {
                       borderRadius: '8px',
                     }}
                   />
-                  <Area type="monotone" dataKey="projected" stroke="#3B82F6" fillOpacity={1} fill="url(#colorProjected)" name="Projected" />
+                  <Area type="monotone" dataKey="projected" stroke="#F97316" fillOpacity={1} fill="url(#colorProjected)" name="Projected" />
                   <Area type="monotone" dataKey="actual" stroke="#10B981" fillOpacity={1} fill="url(#colorActual)" name="Actual" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -1188,7 +1185,7 @@ export const DashboardPage = () => {
                 </p>
                 <p className="text-xs text-zinc-500 mt-1">LOT x 15 multiplier</p>
               </div>
-              <div className="p-4 rounded-lg bg-zinc-900/50">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                 <p className="text-xs text-zinc-400 uppercase tracking-wider">Performance Rate</p>
                 <p className="text-2xl font-bold font-mono text-white mt-1">
                   {formatNumber(summary?.performance_rate || 0, 1)}%

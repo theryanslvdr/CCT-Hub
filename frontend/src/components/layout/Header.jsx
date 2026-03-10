@@ -244,7 +244,7 @@ export const Header = ({ onMenuClick, title }) => {
               <span className="text-zinc-500">UTC</span>
               <span className="text-white font-medium">{formatTime(currentTime, 'UTC')}</span>
             </div>
-            <div className="w-px h-8 bg-zinc-800" />
+            <div className="w-px h-8 bg-[#1a1a1a]" />
             <div className="flex flex-col items-center">
               <span className="text-zinc-500">{user?.timezone || 'Local'}</span>
               <span className="text-orange-400 font-medium">{formatTime(currentTime, user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)}</span>
@@ -346,7 +346,7 @@ export const Header = ({ onMenuClick, title }) => {
 
       {/* Secret Upgrade Dialog */}
       <Dialog open={showSecretDialog} onOpenChange={setShowSecretDialog}>
-        <DialogContent className="glass-card border-zinc-800 max-w-sm">
+        <DialogContent className="glass-card border-white/[0.06] max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               🔐 Secret Access

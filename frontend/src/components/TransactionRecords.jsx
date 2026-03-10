@@ -25,7 +25,7 @@ function addBusinessDays(date, days) {
 export function DepositRecordsDialog({ open, onOpenChange, deposits }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+      <DialogContent className="glass-card border-white/[0.06] max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-cyan-400" /> Deposit Records
@@ -34,7 +34,7 @@ export function DepositRecordsDialog({ open, onOpenChange, deposits }) {
         <div className="mt-4 max-h-[400px] overflow-y-auto">
           {deposits.length > 0 ? (
             <table className="w-full data-table text-sm">
-              <thead className="sticky top-0 bg-zinc-900">
+              <thead className="sticky top-0 bg-[#0d0d0d]">
                 <tr>
                   <th>Date</th>
                   <th>Amount</th>
@@ -65,7 +65,7 @@ export function DepositRecordsDialog({ open, onOpenChange, deposits }) {
 export function WithdrawalRecordsDialog({ open, onOpenChange, withdrawals, onConfirmReceipt }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-3xl">
+      <DialogContent className="glass-card border-white/[0.06] max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Receipt className="w-5 h-5 text-amber-400" /> Withdrawal Records
@@ -74,7 +74,7 @@ export function WithdrawalRecordsDialog({ open, onOpenChange, withdrawals, onCon
         <div className="mt-4 max-h-[400px] overflow-y-auto">
           {withdrawals.length > 0 ? (
             <table className="w-full data-table text-sm">
-              <thead className="sticky top-0 bg-zinc-900">
+              <thead className="sticky top-0 bg-[#0d0d0d]">
                 <tr>
                   <th>Date Initiated</th>
                   <th>Amount (USDT)</th>
@@ -127,7 +127,7 @@ export function WithdrawalRecordsDialog({ open, onOpenChange, withdrawals, onCon
 export function CommissionRecordsDialog({ open, onOpenChange, commissions }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-2xl">
+      <DialogContent className="glass-card border-white/[0.06] max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Award className="w-5 h-5 text-purple-400" /> Commission Records
@@ -136,7 +136,7 @@ export function CommissionRecordsDialog({ open, onOpenChange, commissions }) {
         <div className="mt-4 max-h-[400px] overflow-y-auto">
           {commissions.length > 0 ? (
             <table className="w-full data-table text-sm">
-              <thead className="sticky top-0 bg-zinc-900">
+              <thead className="sticky top-0 bg-[#0d0d0d]">
                 <tr>
                   <th>Date</th>
                   <th>Amount (USDT)</th>

@@ -775,7 +775,7 @@ export const AdminMembersPage = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                   <p className="text-sm text-zinc-500">
                     Showing {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalMembers)} of {totalMembers}
                   </p>
@@ -811,7 +811,7 @@ export const AdminMembersPage = () => {
 
       {/* View Member Dialog - Enhanced with Edit, License, Simulate, Upgrade */}
       <Dialog open={viewDialogOpen} onOpenChange={(open) => { setViewDialogOpen(open); if (!open) setIsEditingProfile(false); }}>
-        <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Eye className="w-5 h-5" /> Member Details - {selectedMember?.full_name}
@@ -821,7 +821,7 @@ export const AdminMembersPage = () => {
           </DialogHeader>
           {memberDetails ? (
             <Tabs defaultValue="profile" className="mt-4">
-              <TabsList className="grid w-full grid-cols-4 bg-zinc-900">
+              <TabsList className="grid w-full grid-cols-4 bg-[#0d0d0d]">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="stats">Statistics</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
@@ -901,11 +901,11 @@ export const AdminMembersPage = () => {
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                         <p className="text-xs text-zinc-500">Role</p>
                         <p className="text-white font-medium capitalize">{memberDetails.user.role?.replace('_', ' ')}</p>
                       </div>
-                      <div className="p-4 rounded-lg bg-zinc-900/50">
+                      <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                         <p className="text-xs text-zinc-500">LOT Size</p>
                         <p className="text-white font-medium">
                           {((memberDetails.stats?.account_value || 0) / 980).toFixed(2)}
@@ -917,37 +917,37 @@ export const AdminMembersPage = () => {
                 ) : (
                   <>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Full Name</p>
                       <p className="text-white font-medium">{memberDetails.user.full_name}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Email</p>
                       <p className="text-white font-medium">{memberDetails.user.email}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Role</p>
                       <p className="text-white font-medium capitalize">{memberDetails.user.role?.replace('_', ' ')}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Timezone</p>
                       <p className="text-white font-medium">{memberDetails.user.timezone || 'UTC'}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">LOT Size</p>
                       <p className="text-white font-medium">
                         {((memberDetails.stats?.account_value || 0) / 980).toFixed(2)}
                       </p>
                       <p className="text-xs text-zinc-500 mt-1">Based on ${(memberDetails.stats?.account_value || 0).toLocaleString()}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <p className="text-xs text-zinc-500">Joined</p>
                       <p className="text-white font-medium">{new Date(memberDetails.user.created_at).toLocaleDateString()}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-zinc-900/50 col-span-2">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50 col-span-2">
                       <p className="text-xs text-zinc-500">User ID</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <code className="text-white font-mono text-sm bg-zinc-800 px-2 py-1 rounded flex-1 truncate">
+                        <code className="text-white font-mono text-sm bg-[#1a1a1a] px-2 py-1 rounded flex-1 truncate">
                           {memberDetails.user.id}
                         </code>
                         <Button
@@ -976,7 +976,7 @@ export const AdminMembersPage = () => {
                       <Button
                         onClick={() => handleExportDebugData(memberDetails.user.id, memberDetails.user.full_name)}
                         variant="outline"
-                        className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                        className="w-full border-white/[0.08] text-zinc-300 hover:bg-[#1a1a1a]"
                         data-testid="export-debug-data-button"
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -1031,7 +1031,7 @@ export const AdminMembersPage = () => {
               {/* Stats Tab */}
               <TabsContent value="stats" className="mt-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
+                  <div className="p-4 rounded-lg bg-[#0d0d0d]/50 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
                       <Activity className="w-5 h-5 text-orange-400" />
                     </div>
@@ -1040,7 +1040,7 @@ export const AdminMembersPage = () => {
                       <p className="text-xl font-bold text-white">{memberDetails.stats.total_trades}</p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
+                  <div className="p-4 rounded-lg bg-[#0d0d0d]/50 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <TrendingUp className="w-5 h-5 text-emerald-400" />
                     </div>
@@ -1049,7 +1049,7 @@ export const AdminMembersPage = () => {
                       <p className="text-xl font-bold text-emerald-400">${memberDetails.stats.total_profit.toFixed(2)}</p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
+                  <div className="p-4 rounded-lg bg-[#0d0d0d]/50 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
                       <DollarSign className="w-5 h-5 text-cyan-400" />
                     </div>
@@ -1058,7 +1058,7 @@ export const AdminMembersPage = () => {
                       <p className="text-xl font-bold text-white">${memberDetails.stats.total_deposits.toFixed(2)}</p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
+                  <div className="p-4 rounded-lg bg-[#0d0d0d]/50 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <DollarSign className="w-5 h-5 text-purple-400" />
                     </div>
@@ -1075,7 +1075,7 @@ export const AdminMembersPage = () => {
                   {memberDetails.recent_trades.length > 0 ? (
                     <div className="space-y-2">
                       {memberDetails.recent_trades.slice(0, 5).map((trade) => (
-                        <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 flex justify-between items-center">
+                        <div key={trade.id} className="p-3 rounded-lg bg-[#0d0d0d]/50 flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                               {trade.direction}
@@ -1101,7 +1101,7 @@ export const AdminMembersPage = () => {
                   
                   {/* Simulate Member View - for regular members */}
                   {selectedMember?.role === 'member' && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -1127,10 +1127,10 @@ export const AdminMembersPage = () => {
 
                   {/* Manage License - Master Admin only, for regular members */}
                   {isMasterAdmin() && selectedMember?.role === 'member' && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${memberLicense ? 'bg-purple-500/20' : 'bg-zinc-800'}`}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${memberLicense ? 'bg-purple-500/20' : 'bg-[#1a1a1a]'}`}>
                             <Award className={`w-5 h-5 ${memberLicense ? 'text-purple-400' : 'text-zinc-500'}`} />
                           </div>
                           <div>
@@ -1170,7 +1170,7 @@ export const AdminMembersPage = () => {
 
                   {/* Upgrade Role - for regular members */}
                   {selectedMember?.role === 'member' && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
@@ -1196,7 +1196,7 @@ export const AdminMembersPage = () => {
 
                   {/* Downgrade Role - For admins */}
                   {selectedMember?.role !== 'member' && isSuperAdmin && selectedMember?.id !== user?.id && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
@@ -1223,7 +1223,7 @@ export const AdminMembersPage = () => {
 
                   {/* Unblock Trading Signal - Admin only */}
                   {selectedMember?.id !== user?.id && selectedMember?.role === 'member' && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-orange-500/20">
@@ -1255,7 +1255,7 @@ export const AdminMembersPage = () => {
 
                   {/* Deactivate/Reactivate User - Admin only */}
                   {selectedMember?.id !== user?.id && (
-                    <div className="p-4 rounded-lg bg-zinc-900/50">
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${memberDetails?.user?.is_deactivated ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
@@ -1310,7 +1310,7 @@ export const AdminMembersPage = () => {
 
       {/* Edit Member Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Edit {selectedMember?.full_name}</DialogTitle>
           </DialogHeader>
@@ -1347,7 +1347,7 @@ export const AdminMembersPage = () => {
 
       {/* Upgrade Role Dialog */}
       <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white">Promote {selectedMember?.full_name}</DialogTitle>
           </DialogHeader>
@@ -1392,7 +1392,7 @@ export const AdminMembersPage = () => {
 
       {/* Temp Password Dialog */}
       <Dialog open={tempPasswordDialogOpen} onOpenChange={setTempPasswordDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Key className="w-5 h-5" /> Set Temporary Password
@@ -1423,7 +1423,7 @@ export const AdminMembersPage = () => {
 
       {/* License Management Dialog */}
       <Dialog open={licenseDialogOpen} onOpenChange={setLicenseDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Award className="w-5 h-5 text-purple-400" /> 
@@ -1620,7 +1620,7 @@ export const AdminMembersPage = () => {
 
       {/* Simulate Member Dialog */}
       <Dialog open={simulateDialogOpen} onOpenChange={setSimulateDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-4xl">
+        <DialogContent className="glass-card border-white/[0.06] max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Play className="w-5 h-5" /> Simulate Member View - {selectedMember?.full_name}
@@ -1630,7 +1630,7 @@ export const AdminMembersPage = () => {
             <div className="space-y-6 mt-4">
               {/* Account Overview */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg bg-zinc-900/50">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <DollarSign className="w-5 h-5 text-emerald-400" />
@@ -1643,7 +1643,7 @@ export const AdminMembersPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <Activity className="w-5 h-5 text-purple-400" />
@@ -1656,7 +1656,7 @@ export const AdminMembersPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
                       <TrendingUp className="w-5 h-5 text-orange-400" />
@@ -1669,7 +1669,7 @@ export const AdminMembersPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-zinc-900/50">
+                <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
                       <Activity className="w-5 h-5 text-cyan-400" />
@@ -1690,7 +1690,7 @@ export const AdminMembersPage = () => {
                 {simulationData.trades?.length > 0 ? (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {simulationData.trades.slice(0, 10).map((trade, index) => (
-                      <div key={trade.id || index} className="p-3 rounded-lg bg-zinc-900/50 flex justify-between items-center">
+                      <div key={trade.id || index} className="p-3 rounded-lg bg-[#0d0d0d]/50 flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             trade.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
@@ -1713,7 +1713,7 @@ export const AdminMembersPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-zinc-800">
+              <div className="flex gap-3 pt-4 border-t border-white/[0.06]">
                 <Button
                   onClick={() => {
                     simulateMemberView({
@@ -1756,7 +1756,7 @@ export const AdminMembersPage = () => {
 
       {/* Change License Type Dialog */}
       <Dialog open={changeLicenseDialogOpen} onOpenChange={setChangeLicenseDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <RefreshCw className="w-5 h-5 text-purple-400" /> Change License Type
@@ -1777,7 +1777,7 @@ export const AdminMembersPage = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <p className="text-zinc-500">Current Type</p>
@@ -1853,7 +1853,7 @@ export const AdminMembersPage = () => {
 
       {/* Diagnostic Dialog */}
       <Dialog open={diagnosticDialogOpen} onOpenChange={setDiagnosticDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Activity className="w-5 h-5 text-orange-400" />
@@ -1869,7 +1869,7 @@ export const AdminMembersPage = () => {
           ) : diagnosticData && diagnosticData.summary ? (
             <div className="space-y-6 mt-4">
               {/* User Info */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <h4 className="text-sm font-medium text-zinc-400 mb-3">User Information</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                   <div>
@@ -1970,7 +1970,7 @@ export const AdminMembersPage = () => {
               </div>
 
               {/* Summary Stats */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <h4 className="text-sm font-medium text-zinc-400 mb-3">Account Summary</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
@@ -2023,13 +2023,13 @@ export const AdminMembersPage = () => {
               </div>
 
               {/* Recent Trades */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Trades (Last 20)</h4>
                 {diagnosticData.trades.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-zinc-500 border-b border-zinc-800">
+                        <tr className="text-zinc-500 border-b border-white/[0.06]">
                           <th className="text-left py-2 px-2">Date</th>
                           <th className="text-right py-2 px-2">Profit</th>
                           <th className="text-right py-2 px-2">Commission</th>
@@ -2039,7 +2039,7 @@ export const AdminMembersPage = () => {
                       </thead>
                       <tbody>
                         {diagnosticData.trades.map((trade, idx) => (
-                          <tr key={idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                          <tr key={idx} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]">
                             <td className="py-2 px-2 text-white">{trade.date}</td>
                             <td className={`py-2 px-2 text-right font-mono ${trade.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               ${trade.profit.toFixed(2)}
@@ -2066,13 +2066,13 @@ export const AdminMembersPage = () => {
               </div>
 
               {/* Deposits */}
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <h4 className="text-sm font-medium text-zinc-400 mb-3">Recent Deposits/Withdrawals (Last 20)</h4>
                 {diagnosticData.deposits.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-zinc-500 border-b border-zinc-800">
+                        <tr className="text-zinc-500 border-b border-white/[0.06]">
                           <th className="text-left py-2 px-2">Date</th>
                           <th className="text-right py-2 px-2">Amount</th>
                           <th className="text-center py-2 px-2">Type</th>
@@ -2081,7 +2081,7 @@ export const AdminMembersPage = () => {
                       </thead>
                       <tbody>
                         {diagnosticData.deposits.map((dep, idx) => (
-                          <tr key={idx} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
+                          <tr key={idx} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]">
                             <td className="py-2 px-2 text-white">{dep.date}</td>
                             <td className={`py-2 px-2 text-right font-mono ${dep.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {dep.amount >= 0 ? '+' : ''}${dep.amount.toFixed(2)}

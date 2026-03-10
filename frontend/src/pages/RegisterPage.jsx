@@ -196,7 +196,7 @@ export const RegisterPage = () => {
         </div>
 
         {/* Heartbeat notice */}
-        <div className="mt-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+        <div className="mt-6 p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
           <p className="text-xs text-zinc-500 text-center">
             You must be a Heartbeat community member to register.
             Your membership will be verified automatically.

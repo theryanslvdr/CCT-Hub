@@ -129,7 +129,7 @@ const ReferralOnboardingModal = () => {
                 placeholder="e.g. JOHN_MERIN"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
-                className="bg-zinc-800/50 border-zinc-600 text-white"
+                className="bg-white/[0.04] border-zinc-600 text-white"
                 onKeyDown={(e) => e.key === 'Enter' && handleSetCode()}
               />
               <p className="text-xs text-zinc-500 mt-1">This will be your unique identifier in the referral network.</p>
@@ -156,7 +156,7 @@ const ReferralOnboardingModal = () => {
                 placeholder="e.g. RYAN_MERIN"
                 value={referredByCode}
                 onChange={(e) => setReferredByCode(e.target.value.toUpperCase())}
-                className="bg-zinc-800/50 border-zinc-600 text-white"
+                className="bg-white/[0.04] border-zinc-600 text-white"
                 onKeyDown={(e) => e.key === 'Enter' && handleSetReferredBy()}
               />
               <p className="text-xs text-zinc-500 mt-1">Enter the code of the person who invited you.</p>

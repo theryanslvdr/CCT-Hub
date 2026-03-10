@@ -34,7 +34,7 @@ export const DailyProjectionDialog = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-zinc-800 max-w-5xl max-h-[80vh]">
+      <DialogContent className="glass-card border-white/[0.06] max-w-5xl max-h-[80vh]">
         <DialogHeader className="text-left">
           <DialogTitle className="text-white flex flex-col md:flex-row md:items-center gap-2">
             <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export const DailyProjectionDialog = ({
         <div className="mt-4 max-h-[50vh] overflow-y-auto">
           {dailyData.length > 0 ? (
             <table className="w-full data-table text-sm">
-              <thead className="sticky top-0 bg-zinc-900">
+              <thead className="sticky top-0 bg-[#0d0d0d]">
                 <tr>
                   <th>Date</th>
                   <th>Balance Before</th>
@@ -137,7 +137,7 @@ export const DailyProjectionDialog = ({
                   } else if (day.status === 'completed') {
                     rowClass = 'bg-emerald-500/5';
                   } else if (day.status === 'missed') {
-                    rowClass = 'bg-zinc-800/30 opacity-75';
+                    rowClass = 'bg-white/[0.03] opacity-75';
                   }
                   
                   if (isGlobalHoliday) {
@@ -232,7 +232,7 @@ export const DailyProjectionDialog = ({
                                       {day.actualProfit >= 0 ? '+' : ''}{formatMoney(day.actualProfit)}
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-[250px] bg-zinc-900 border border-orange-500/30 text-orange-200">
+                                  <TooltipContent side="top" className="max-w-[250px] bg-[#0d0d0d] border border-orange-500/30 text-orange-200">
                                     <p className="font-semibold text-orange-400 mb-1">Error Trade Correction</p>
                                     {day.errorType && <p className="text-xs text-zinc-400">Type: {day.errorType}</p>}
                                     {day.errorExplanation && <p className="text-xs">{day.errorExplanation}</p>}
@@ -269,7 +269,7 @@ export const DailyProjectionDialog = ({
                                       <span className="hidden md:inline">Adjust Trade</span>
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                  <TooltipContent side="top" className="md:hidden bg-[#1a1a1a] text-white">
                                     Adjust Trade
                                   </TooltipContent>
                                 </ShadcnTooltip>
@@ -288,7 +288,7 @@ export const DailyProjectionDialog = ({
                                       <span className="hidden md:inline">Did Not Trade</span>
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                  <TooltipContent side="top" className="md:hidden bg-[#1a1a1a] text-white">
                                     Did Not Trade
                                   </TooltipContent>
                                 </ShadcnTooltip>
@@ -311,7 +311,7 @@ export const DailyProjectionDialog = ({
                                     <span className="hidden md:inline">Adjust Trade</span>
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                <TooltipContent side="top" className="md:hidden bg-[#1a1a1a] text-white">
                                   Adjust Trade
                                 </TooltipContent>
                               </ShadcnTooltip>
@@ -331,7 +331,7 @@ export const DailyProjectionDialog = ({
                                     <span className="hidden md:inline">Adjust Trade</span>
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top" className="md:hidden bg-zinc-800 text-white">
+                                <TooltipContent side="top" className="md:hidden bg-[#1a1a1a] text-white">
                                   Adjust Trade
                                 </TooltipContent>
                               </ShadcnTooltip>
@@ -388,7 +388,7 @@ export const DailyProjectionDialog = ({
             </div>
           )}
         </div>
-        <div className="mt-4 p-3 md:p-4 rounded-lg bg-zinc-900/50 text-xs text-zinc-400 max-w-full overflow-hidden">
+        <div className="mt-4 p-3 md:p-4 rounded-lg bg-[#0d0d0d]/50 text-xs text-zinc-400 max-w-full overflow-hidden">
           <p className="break-words">&#8226; Weekends and holidays are excluded from projections</p>
           {isLicensee ? (
             <>

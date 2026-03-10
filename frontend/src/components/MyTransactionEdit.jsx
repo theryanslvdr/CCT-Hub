@@ -82,8 +82,8 @@ export default function MyTransactionEdit() {
 
   return (
     <>
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 overflow-hidden" data-testid="my-transaction-edit">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
+      <div className="rounded-xl border border-white/[0.06] bg-[#0d0d0d]/60 overflow-hidden" data-testid="my-transaction-edit">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
           <div className="flex items-center gap-1.5">
             <h3 className="text-sm font-semibold text-white">My Recent Transactions</h3>
             <Popover>
@@ -92,7 +92,7 @@ export default function MyTransactionEdit() {
                   <HelpCircle className="w-3.5 h-3.5" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-72 p-0 bg-zinc-900 border-zinc-700" side="bottom" align="start">
+              <PopoverContent className="w-72 p-0 bg-[#0d0d0d] border-white/[0.08]" side="bottom" align="start">
                 <div className="p-3 space-y-2.5">
                   <p className="text-xs font-semibold text-white">How Transaction Editing Works</p>
                   <div className="space-y-2">
@@ -115,7 +115,7 @@ export default function MyTransactionEdit() {
                       <p className="text-[11px] text-zinc-400">Your balance updates immediately. The admin is notified.</p>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-zinc-800 space-y-1">
+                  <div className="pt-2 border-t border-white/[0.06] space-y-1">
                     <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Clock className="w-3 h-3" /> You have <span className="text-amber-400 font-medium">48 hours</span> from creation to edit.</p>
                     <p className="text-[10px] text-zinc-500 flex items-center gap-1"><Lock className="w-3 h-3" /> Only your <span className="text-white font-medium">last 2</span> deposits/withdrawals are editable.</p>
                     <p className="text-[10px] text-zinc-500 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Each transaction can be edited <span className="text-white font-medium">once</span>.</p>

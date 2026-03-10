@@ -774,7 +774,7 @@ export const AdminLicensesPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-zinc-900/50 border border-zinc-800">
+        <TabsList className="bg-[#0d0d0d]/50 border border-white/[0.06]">
           <TabsTrigger value="invites" className="data-[state=active]:bg-orange-500">
             License Invites ({invites.length})
           </TabsTrigger>
@@ -825,7 +825,7 @@ export const AdminLicensesPage = () => {
                       {invites.map((invite) => (
                         <tr key={invite.id}>
                           <td>
-                            <code className="text-xs bg-zinc-800 px-2 py-1 rounded">{invite.code}</code>
+                            <code className="text-xs bg-[#1a1a1a] px-2 py-1 rounded">{invite.code}</code>
                           </td>
                           <td>
                             <span className={`px-2 py-1 rounded text-xs ${
@@ -1178,7 +1178,7 @@ export const AdminLicensesPage = () => {
 
       {/* Create Invite Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Plus className="w-5 h-5 text-orange-400" /> Generate License Invite
@@ -1326,7 +1326,7 @@ export const AdminLicensesPage = () => {
 
       {/* Email Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Mail className="w-5 h-5 text-emerald-400" /> Send License Invite Email
@@ -1346,7 +1346,7 @@ export const AdminLicensesPage = () => {
             </div>
 
             {selectedInvite && (
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <p className="text-xs text-zinc-500 mb-2">Invite Details</p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
@@ -1384,7 +1384,7 @@ export const AdminLicensesPage = () => {
 
       {/* View Invite Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Eye className="w-5 h-5" /> Invite Details
@@ -1393,7 +1393,7 @@ export const AdminLicensesPage = () => {
           
           {selectedInvite && (
             <div className="space-y-4 mt-4">
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <div className="flex items-center justify-between mb-3">
                   <code className="text-base font-mono text-orange-400">{selectedInvite.code}</code>
                   {getInviteStatusBadge(selectedInvite)}
@@ -1421,7 +1421,7 @@ export const AdminLicensesPage = () => {
                 </div>
                 
                 {selectedInvite.invitee_name && (
-                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                  <div className="mt-3 pt-3 border-t border-white/[0.08]">
                     <p className="text-zinc-500 text-xs">Invitee</p>
                     <p className="text-white text-sm">{selectedInvite.invitee_name}</p>
                   </div>
@@ -1432,7 +1432,7 @@ export const AdminLicensesPage = () => {
               <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
                 <p className="text-xs text-zinc-400 mb-2">Registration Link</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-orange-400 bg-zinc-900/50 px-2 py-1 rounded truncate max-w-[200px]">
+                  <code className="text-xs text-orange-400 bg-[#0d0d0d]/50 px-2 py-1 rounded truncate max-w-[200px]">
                     .../register/license/{selectedInvite.code?.slice(0, 8)}...
                   </code>
                   <Button
@@ -1471,7 +1471,7 @@ export const AdminLicensesPage = () => {
 
       {/* View Transaction Dialog */}
       <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.06] max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {selectedTransaction?.type === 'deposit' ? (
@@ -1485,7 +1485,7 @@ export const AdminLicensesPage = () => {
           
           {selectedTransaction && (
             <div className="space-y-4 mt-4">
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-zinc-500">User</p>
@@ -1521,7 +1521,7 @@ export const AdminLicensesPage = () => {
                 </div>
                 
                 {selectedTransaction.notes && (
-                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                  <div className="mt-4 pt-4 border-t border-white/[0.06]">
                     <p className="text-zinc-500 text-sm">Notes</p>
                     <p className="text-zinc-300">{selectedTransaction.notes}</p>
                   </div>
@@ -1536,7 +1536,7 @@ export const AdminLicensesPage = () => {
                     <img 
                       src={selectedTransaction.screenshot_url} 
                       alt="Transaction screenshot" 
-                      className="rounded-lg border border-zinc-800 max-h-60 object-contain"
+                      className="rounded-lg border border-white/[0.06] max-h-60 object-contain"
                     />
                   </a>
                 </div>
@@ -1548,7 +1548,7 @@ export const AdminLicensesPage = () => {
                   <p className="text-sm text-zinc-400 mb-2">Communication History</p>
                   <div className="space-y-3">
                     {selectedTransaction.feedback.map((fb, idx) => (
-                      <div key={fb.id || idx} className={`p-3 rounded-lg ${fb.from_admin ? 'bg-orange-500/10 border border-orange-500/15' : 'bg-zinc-900/50 border border-zinc-800'}`}>
+                      <div key={fb.id || idx} className={`p-3 rounded-lg ${fb.from_admin ? 'bg-orange-500/10 border border-orange-500/15' : 'bg-[#0d0d0d]/50 border border-white/[0.06]'}`}>
                         <div className="flex items-center justify-between mb-2">
                           <span className={`text-xs ${fb.from_admin ? 'text-orange-400' : 'text-zinc-400'}`}>
                             {fb.from_admin ? fb.created_by_name || 'Admin' : 'Licensee'}
@@ -1563,7 +1563,7 @@ export const AdminLicensesPage = () => {
                         )}
                         {fb.screenshot_url && (
                           <a href={fb.screenshot_url} target="_blank" rel="noopener noreferrer" className="block mt-2">
-                            <img src={fb.screenshot_url} alt="Feedback screenshot" className="rounded-lg border border-zinc-800 max-h-40 object-contain" />
+                            <img src={fb.screenshot_url} alt="Feedback screenshot" className="rounded-lg border border-white/[0.06] max-h-40 object-contain" />
                           </a>
                         )}
                       </div>
@@ -1573,7 +1573,7 @@ export const AdminLicensesPage = () => {
               )}
 
               {/* Actions */}
-              <div className="flex gap-2 pt-4 border-t border-zinc-800">
+              <div className="flex gap-2 pt-4 border-t border-white/[0.06]">
                 <Button
                   onClick={() => {
                     setTransactionDialogOpen(false);
@@ -1613,7 +1613,7 @@ export const AdminLicensesPage = () => {
 
       {/* Feedback Dialog */}
       <Dialog open={feedbackDialogOpen} onOpenChange={setFeedbackDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-orange-400" /> Send Feedback
@@ -1676,7 +1676,7 @@ export const AdminLicensesPage = () => {
                   id="feedback-screenshot"
                 />
                 <label htmlFor="feedback-screenshot">
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-zinc-700 cursor-pointer hover:border-zinc-500 transition-colors">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/[0.08] cursor-pointer hover:border-zinc-500 transition-colors">
                     <Upload className="w-4 h-4 text-zinc-500" />
                     <span className="text-sm text-zinc-400">
                       {feedbackForm.screenshot ? feedbackForm.screenshot.name : 'Click to upload'}
@@ -1703,7 +1703,7 @@ export const AdminLicensesPage = () => {
 
       {/* Change License Type Dialog */}
       <Dialog open={changeLicenseDialogOpen} onOpenChange={setChangeLicenseDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <RefreshCw className="w-5 h-5 text-purple-400" /> Change License Type
@@ -1724,7 +1724,7 @@ export const AdminLicensesPage = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+              <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <p className="text-zinc-500">Current User</p>
@@ -1808,7 +1808,7 @@ export const AdminLicensesPage = () => {
 
       {/* Reset Balance Dialog */}
       <Dialog open={resetBalanceDialogOpen} onOpenChange={setResetBalanceDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-700 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.08] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <RotateCcw className="w-5 h-5 text-emerald-400" />
@@ -1817,7 +1817,7 @@ export const AdminLicensesPage = () => {
           </DialogHeader>
           {selectedLicense && (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
+              <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]">
                 <p className="text-zinc-500 text-xs">Current Balance</p>
                 <p className="text-emerald-400 font-mono text-lg">
                   ${selectedLicense.current_amount?.toLocaleString() || selectedLicense.starting_amount?.toLocaleString()}
@@ -1857,7 +1857,7 @@ export const AdminLicensesPage = () => {
                   id="record_as_deposit"
                   checked={resetBalanceForm.record_as_deposit}
                   onChange={(e) => setResetBalanceForm({ ...resetBalanceForm, record_as_deposit: e.target.checked })}
-                  className="rounded border-zinc-700 bg-zinc-800"
+                  className="rounded border-white/[0.08] bg-[#1a1a1a]"
                 />
                 <Label htmlFor="record_as_deposit" className="text-zinc-400 text-sm cursor-pointer">
                   Record adjustment as deposit/withdrawal transaction
@@ -1882,7 +1882,7 @@ export const AdminLicensesPage = () => {
 
       {/* Edit Profile Dialog */}
       <Dialog open={editProfileDialogOpen} onOpenChange={setEditProfileDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <UserCog className="w-5 h-5 text-orange-400" /> Edit Licensee Profile
@@ -1890,7 +1890,7 @@ export const AdminLicensesPage = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             {selectedLicense && (
-              <div className="p-3 rounded-lg bg-zinc-900/50 text-sm mb-4">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-sm mb-4">
                 <p className="text-zinc-400">Email: <span className="text-white">{selectedLicense.user_email}</span></p>
                 <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : selectedLicense.license_type === 'honorary_fa' ? 'text-orange-400' : 'text-amber-400'}>{selectedLicense.license_type === 'honorary_fa' ? 'Honorary FA' : selectedLicense.license_type}</span></p>
               </div>
@@ -1955,7 +1955,7 @@ export const AdminLicensesPage = () => {
 
       {/* Delete License Confirmation Dialog */}
       <Dialog open={deleteLicenseDialogOpen} onOpenChange={setDeleteLicenseDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-red-400" /> Delete License
@@ -1976,7 +1976,7 @@ export const AdminLicensesPage = () => {
                   </ul>
                 </div>
                 
-                <div className="p-3 rounded-lg bg-zinc-900/50 text-sm">
+                <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-sm">
                   <div className="flex justify-between mb-1">
                     <span className="text-zinc-400">Licensee:</span>
                     <span className="text-white">{selectedLicense.user_name}</span>
@@ -2027,7 +2027,7 @@ export const AdminLicensesPage = () => {
 
       {/* Edit Transaction Dialog */}
       <Dialog open={editTxDialogOpen} onOpenChange={setEditTxDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-orange-400" /> Edit Transaction
@@ -2035,7 +2035,7 @@ export const AdminLicensesPage = () => {
           </DialogHeader>
           {selectedTx && (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-zinc-900/50">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="text-zinc-500">Type:</span>
@@ -2111,7 +2111,7 @@ export const AdminLicensesPage = () => {
 
       {/* Delete Transaction Dialog */}
       <Dialog open={deleteTxDialogOpen} onOpenChange={setDeleteTxDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-red-400" /> Delete Transaction
@@ -2126,7 +2126,7 @@ export const AdminLicensesPage = () => {
                 </p>
               </div>
               
-              <div className="p-3 rounded-lg bg-zinc-900/50 text-sm">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-zinc-400">Type:</span>
                   <span className={selectedTx.type === 'deposit' ? 'text-emerald-400' : 'text-red-400'}>
@@ -2174,7 +2174,7 @@ export const AdminLicensesPage = () => {
 
       {/* Edit Effective Start Date Dialog */}
       <Dialog open={editEffectiveDateDialogOpen} onOpenChange={setEditEffectiveDateDialogOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="glass-card border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-orange-400" /> Edit Effective Start Date
@@ -2182,7 +2182,7 @@ export const AdminLicensesPage = () => {
           </DialogHeader>
           {selectedLicense && (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-zinc-900/50">
+              <div className="p-3 rounded-lg bg-[#0d0d0d]/50">
                 <div className="text-sm">
                   <span className="text-zinc-500">Licensee:</span>
                   <span className="ml-2 text-white">{selectedLicense.user_name}</span>
@@ -2229,7 +2229,7 @@ export const AdminLicensesPage = () => {
 
       {/* Add Family Member Dialog (Admin on behalf of licensee) */}
       <Dialog open={addFamilyDialogOpen} onOpenChange={setAddFamilyDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Users className="w-5 h-5 text-orange-400" /> Add Family Member
@@ -2246,7 +2246,7 @@ export const AdminLicensesPage = () => {
                   value={familyForm.name}
                   onChange={(e) => setFamilyForm({ ...familyForm, name: e.target.value })}
                   placeholder="Full name"
-                  className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                  className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1"
                   data-testid="admin-family-name-input"
                 />
               </div>
@@ -2256,7 +2256,7 @@ export const AdminLicensesPage = () => {
                   value={familyForm.relationship}
                   onChange={(e) => setFamilyForm({ ...familyForm, relationship: e.target.value })}
                   placeholder="e.g., Spouse, Child, Parent"
-                  className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                  className="bg-[#1a1a1a] border-white/[0.08] text-white mt-1"
                   data-testid="admin-family-relationship-input"
                 />
               </div>
@@ -2269,7 +2269,7 @@ export const AdminLicensesPage = () => {
                     value={familyForm.starting_amount}
                     onChange={(e) => setFamilyForm({ ...familyForm, starting_amount: e.target.value })}
                     placeholder="1000"
-                    className="bg-zinc-800 border-zinc-700 text-white pl-8"
+                    className="bg-[#1a1a1a] border-white/[0.08] text-white pl-8"
                     data-testid="admin-family-amount-input"
                   />
                 </div>
@@ -2298,7 +2298,7 @@ export const AdminLicensesPage = () => {
 
       {/* Diagnostic Tool Dialog */}
       <Dialog open={diagnosticDialogOpen} onOpenChange={setDiagnosticDialogOpen}>
-        <DialogContent className="glass-card border-zinc-700 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="glass-card border-white/[0.08] max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <UserCog className="w-5 h-5 text-cyan-400" /> Licensee Diagnostic Tool
@@ -2315,7 +2315,7 @@ export const AdminLicensesPage = () => {
                 placeholder="Enter licensee email (e.g., user@example.com)"
                 value={diagnosticEmail}
                 onChange={(e) => setDiagnosticEmail(e.target.value)}
-                className="flex-1 bg-zinc-800/50 border-zinc-700"
+                className="flex-1 bg-white/[0.04] border-white/[0.08]"
               />
               <Button 
                 onClick={() => runDiagnostic(diagnosticEmail)}
@@ -2341,7 +2341,7 @@ export const AdminLicensesPage = () => {
                         setDiagnosticEmail(lic.user_email || '');
                         runDiagnostic(lic.user_email);
                       }}
-                      className="text-xs border-zinc-700 hover:bg-zinc-800"
+                      className="text-xs border-white/[0.08] hover:bg-[#1a1a1a]"
                     >
                       {lic.user_name || lic.user_email || 'Unknown'}
                     </Button>
@@ -2370,7 +2370,7 @@ export const AdminLicensesPage = () => {
                 
                 {/* Steps */}
                 {diagnosticResult.steps && diagnosticResult.steps.length > 0 && (
-                  <div className="bg-zinc-900/50 rounded-lg p-3 space-y-1">
+                  <div className="bg-[#0d0d0d]/50 rounded-lg p-3 space-y-1">
                     {diagnosticResult.steps.map((step, i) => (
                       <p key={i} className={`text-sm font-mono ${step.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
                         {step}
@@ -2430,7 +2430,7 @@ export const AdminLicensesPage = () => {
                 {/* Raw JSON (collapsible) */}
                 <details className="text-xs">
                   <summary className="text-zinc-500 cursor-pointer hover:text-zinc-300">Show Raw Response</summary>
-                  <pre className="mt-2 bg-zinc-900 p-2 rounded overflow-x-auto text-zinc-400">
+                  <pre className="mt-2 bg-[#0d0d0d] p-2 rounded overflow-x-auto text-zinc-400">
                     {JSON.stringify(diagnosticResult, null, 2)}
                   </pre>
                 </details>

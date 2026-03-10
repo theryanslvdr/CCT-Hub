@@ -109,7 +109,7 @@ export default function ForumImageUpload({
           {images.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative group w-20 h-20 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-800"
+              className="relative group w-20 h-20 rounded-lg overflow-hidden border border-white/[0.08] bg-[#1a1a1a]"
             >
               <img 
                 src={img.thumbnail || img.url} 

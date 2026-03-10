@@ -143,7 +143,7 @@ const USDT_PER_POINT = 0.01; // 1 point = $0.01 USDT
 function RewardsFullListDialog({ open, onOpenChange, badges }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-zinc-950 border-zinc-800" data-testid="rewards-full-list-dialog">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#0a0a0a] border-white/[0.06]" data-testid="rewards-full-list-dialog">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <Coins className="w-5 h-5 text-amber-400" /> Rewards & Credit Equivalents
@@ -155,10 +155,10 @@ function RewardsFullListDialog({ open, onOpenChange, badges }) {
           <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
             <Star className="w-4 h-4 text-amber-400" /> Earning Actions
           </h3>
-          <div className="rounded-lg border border-zinc-800 overflow-hidden">
+          <div className="rounded-lg border border-white/[0.06] overflow-hidden">
             <table className="w-full text-sm" data-testid="rewards-credit-table">
               <thead>
-                <tr className="bg-zinc-900">
+                <tr className="bg-[#0d0d0d]">
                   <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Action</th>
                   <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Category</th>
                   <th className="text-right py-2.5 px-4 text-zinc-400 font-medium">Points</th>
@@ -169,13 +169,13 @@ function RewardsFullListDialog({ open, onOpenChange, badges }) {
                 {REWARDS_CREDIT_TABLE.map((row, i) => {
                   const Icon = row.icon;
                   return (
-                    <tr key={i} className="border-t border-zinc-800/50 hover:bg-zinc-900/40">
+                    <tr key={i} className="border-t border-white/[0.06]/50 hover:bg-[#0d0d0d]/40">
                       <td className="py-2.5 px-4 text-zinc-200 flex items-center gap-2">
                         <Icon className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
                         {row.action}
                       </td>
                       <td className="py-2.5 px-4">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">{row.category}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1a1a1a] text-zinc-400">{row.category}</span>
                       </td>
                       <td className="py-2.5 px-4 text-right font-mono text-amber-400 font-semibold">+{row.points}</td>
                       <td className="py-2.5 px-4 text-right font-mono text-emerald-400 text-xs">${(row.points * USDT_PER_POINT).toFixed(2)}</td>
@@ -193,10 +193,10 @@ function RewardsFullListDialog({ open, onOpenChange, badges }) {
             <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
               <Shield className="w-4 h-4 text-purple-400" /> Achievement Badges
             </h3>
-            <div className="rounded-lg border border-zinc-800 overflow-hidden">
+            <div className="rounded-lg border border-white/[0.06] overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-zinc-900">
+                  <tr className="bg-[#0d0d0d]">
                     <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Badge</th>
                     <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Requirement</th>
                     <th className="text-left py-2.5 px-4 text-zinc-400 font-medium">Category</th>
@@ -208,14 +208,14 @@ function RewardsFullListDialog({ open, onOpenChange, badges }) {
                     const Icon = BADGE_ICONS[badge.icon] || Award;
                     const colors = BADGE_CATEGORY_COLORS[badge.category] || BADGE_CATEGORY_COLORS.points;
                     return (
-                      <tr key={badge.id} className="border-t border-zinc-800/50 hover:bg-zinc-900/40">
+                      <tr key={badge.id} className="border-t border-white/[0.06]/50 hover:bg-[#0d0d0d]/40">
                         <td className="py-2.5 px-4 text-zinc-200 flex items-center gap-2">
                           <Icon className={`w-4 h-4 flex-shrink-0 ${badge.earned ? colors.text : 'text-zinc-600'}`} />
                           <span className={badge.earned ? '' : 'text-zinc-500'}>{badge.name}</span>
                         </td>
                         <td className="py-2.5 px-4 text-zinc-400 text-xs">{badge.description}</td>
                         <td className="py-2.5 px-4">
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">{badge.category}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#1a1a1a] text-zinc-400">{badge.category}</span>
                         </td>
                         <td className="py-2.5 px-4 text-center">
                           {badge.earned ? (
@@ -305,7 +305,7 @@ function EarningActionsSection() {
         <p className="text-xs text-zinc-400 mt-1">
           Complete actions to earn reward points. {awarded.length}/{actions.length} completed.
         </p>
-        <div className="w-full bg-zinc-800 rounded-full h-2 mt-2">
+        <div className="w-full bg-[#1a1a1a] rounded-full h-2 mt-2">
           <div
             className="bg-gradient-to-r from-amber-500 to-amber-400 h-2 rounded-full transition-all"
             style={{ width: `${actions.length > 0 ? (awarded.length / actions.length) * 100 : 0}%` }}
@@ -323,7 +323,7 @@ function EarningActionsSection() {
               className={`flex items-center gap-3 p-3 rounded-xl border ${colors.border} ${colors.bg} transition-all`}
               data-testid={`earning-action-${action.id}`}
             >
-              <div className={`p-2 rounded-lg bg-zinc-900/50`}>
+              <div className={`p-2 rounded-lg bg-[#0d0d0d]/50`}>
                 <Icon className={`w-5 h-5 ${colors.icon}`} />
               </div>
               <div className="flex-1 min-w-0">
@@ -360,7 +360,7 @@ function EarningActionsSection() {
               return (
                 <div
                   key={action.id}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-zinc-800/50 bg-zinc-900/30 mb-2"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.06]/50 bg-[#0d0d0d]/30 mb-2"
                   data-testid={`earning-action-${action.id}`}
                 >
                   <div className="p-2 rounded-lg bg-emerald-500/10">
@@ -503,7 +503,7 @@ function BadgesSection({ userId }) {
               {locked.map(badge => (
                 <div
                   key={badge.id}
-                  className="p-3 rounded-xl bg-zinc-900/40 border border-zinc-800 text-center opacity-50"
+                  className="p-3 rounded-xl bg-[#0d0d0d]/40 border border-white/[0.06] text-center opacity-50"
                   data-testid={`badge-locked-${badge.id}`}
                   title={badge.description}
                 >
@@ -634,7 +634,7 @@ function StreakFreezeSection() {
             const totalCost = ft.cost * qty;
             const canAfford = (freezeData?.available_points || 0) >= totalCost;
             return (
-              <div key={ft.key} className={`p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-${ft.color}-500/30 transition-all`} data-testid={`streak-freeze-${ft.key}`}>
+              <div key={ft.key} className={`p-4 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] hover:border-${ft.color}-500/30 transition-all`} data-testid={`streak-freeze-${ft.key}`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`p-2 rounded-lg bg-${ft.color}-500/10`}>
                     <Icon className={`w-5 h-5 text-${ft.color}-400`} />
@@ -663,10 +663,10 @@ function StreakFreezeSection() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-zinc-800 rounded-lg px-1 py-1">
+                  <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-lg px-1 py-1">
                     <button
                       onClick={() => setQuantities(prev => ({ ...prev, [ft.key]: Math.max(1, qty - 1) }))}
-                      className="p-1 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                      className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
                       data-testid={`${ft.key}-freeze-minus`}
                     >
                       <Minus className="w-3.5 h-3.5" />
@@ -674,7 +674,7 @@ function StreakFreezeSection() {
                     <span className="text-sm font-mono text-white w-6 text-center">{qty}</span>
                     <button
                       onClick={() => setQuantities(prev => ({ ...prev, [ft.key]: Math.min(10, qty + 1) }))}
-                      className="p-1 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                      className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
                       data-testid={`${ft.key}-freeze-plus`}
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -704,11 +704,11 @@ function StreakFreezeSection() {
 
         {/* Recent Usage */}
         {freezeData?.usage_history?.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-zinc-800">
+          <div className="mt-4 pt-4 border-t border-white/[0.06]">
             <p className="text-xs text-zinc-400 font-medium mb-2">Recent Freeze Usage</p>
             <div className="space-y-1.5">
               {freezeData.usage_history.slice(0, 5).map((u, i) => (
-                <div key={i} className="flex items-center justify-between text-xs py-1.5 px-2 rounded bg-zinc-900/40">
+                <div key={i} className="flex items-center justify-between text-xs py-1.5 px-2 rounded bg-[#0d0d0d]/40">
                   <div className="flex items-center gap-2">
                     <Snowflake className="w-3 h-3 text-cyan-400" />
                     <span className="text-zinc-300 capitalize">{u.freeze_type} freeze</span>
@@ -926,7 +926,7 @@ export default function MyRewardsPage() {
                   <span>{levelProgress.current.name}</span>
                   <span>{levelProgress.next.name}</span>
                 </div>
-                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${levelStyle.progress} transition-all duration-500`}
                     style={{ width: `${levelProgress.progress}%` }}
@@ -971,7 +971,7 @@ export default function MyRewardsPage() {
 
       {/* Streak & Activity Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
           <div className="flex items-center gap-2 text-orange-400 mb-1">
             <Flame className="w-4 h-4" />
             <span className="text-xs font-medium">Current Streak</span>
@@ -980,7 +980,7 @@ export default function MyRewardsPage() {
             {summary?.current_streak || 0} days
           </p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
           <div className="flex items-center gap-2 text-emerald-400 mb-1">
             <Target className="w-4 h-4" />
             <span className="text-xs font-medium">Best Streak</span>
@@ -989,7 +989,7 @@ export default function MyRewardsPage() {
             {summary?.best_streak || 0} days
           </p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
           <div className="flex items-center gap-2 text-orange-400 mb-1">
             <TrendingUp className="w-4 h-4" />
             <span className="text-xs font-medium">This Month</span>
@@ -998,7 +998,7 @@ export default function MyRewardsPage() {
             +{(summary?.monthly_points || 0).toLocaleString()}
           </p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
           <div className="flex items-center gap-2 text-purple-400 mb-1">
             <Users className="w-4 h-4" />
             <span className="text-xs font-medium">Referrals</span>
@@ -1063,7 +1063,7 @@ export default function MyRewardsPage() {
           
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-4 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 space-y-4" data-testid="filters-panel">
+            <div className="mt-4 p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] space-y-4" data-testid="filters-panel">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Date Filter */}
                 <div>
@@ -1082,7 +1082,7 @@ export default function MyRewardsPage() {
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           dateFilter === opt.value 
                             ? 'bg-orange-500 text-white' 
-                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                            : 'bg-[#1a1a1a] text-zinc-400 hover:bg-white/[0.08]'
                         }`}
                       >
                         {opt.label}
@@ -1095,14 +1095,14 @@ export default function MyRewardsPage() {
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="text-xs h-8 bg-zinc-800 border-zinc-700"
+                        className="text-xs h-8 bg-[#1a1a1a] border-white/[0.08]"
                         placeholder="Start"
                       />
                       <Input
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="text-xs h-8 bg-zinc-800 border-zinc-700"
+                        className="text-xs h-8 bg-[#1a1a1a] border-white/[0.08]"
                         placeholder="End"
                       />
                     </div>
@@ -1120,7 +1120,7 @@ export default function MyRewardsPage() {
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           sourceFilter === value 
                             ? 'bg-emerald-500 text-white' 
-                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                            : 'bg-[#1a1a1a] text-zinc-400 hover:bg-white/[0.08]'
                         }`}
                       >
                         {label}
@@ -1131,7 +1131,7 @@ export default function MyRewardsPage() {
               </div>
               
               {/* Period Stats */}
-              <div className="flex items-center gap-4 pt-3 border-t border-zinc-800">
+              <div className="flex items-center gap-4 pt-3 border-t border-white/[0.06]">
                 <span className="text-xs text-zinc-500">Period Summary:</span>
                 <span className="text-xs text-emerald-400 font-mono">+{periodStats.earned.toLocaleString()} earned</span>
                 <span className="text-xs text-red-400 font-mono">-{periodStats.spent.toLocaleString()} spent</span>
@@ -1158,7 +1158,7 @@ export default function MyRewardsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" data-testid="rewards-history-table">
                   <thead>
-                    <tr className="border-b border-zinc-800">
+                    <tr className="border-b border-white/[0.06]">
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium">Date</th>
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium">Type</th>
                       <th className="text-left py-2 px-3 text-zinc-400 font-medium">Source</th>
@@ -1172,7 +1172,7 @@ export default function MyRewardsPage() {
                       const isEarn = pts > 0;
                       const isAdmin = row.metadata?.admin_test;
                       return (
-                        <tr key={i} className="border-b border-zinc-800/50 hover:bg-zinc-800/30" data-testid={`history-row-${i}`}>
+                        <tr key={i} className="border-b border-white/[0.06]/50 hover:bg-white/[0.03]" data-testid={`history-row-${i}`}>
                           <td className="py-2 px-3 text-zinc-300 font-mono text-xs whitespace-nowrap">
                             {row.created_at ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '--'}
                           </td>
@@ -1200,7 +1200,7 @@ export default function MyRewardsPage() {
               
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
                   <p className="text-xs text-zinc-500">
                     Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredHistory.length)} of {filteredHistory.length}
                   </p>

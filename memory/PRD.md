@@ -69,6 +69,7 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - Separate Admin Dashboard home page
 - Public member profile view
 - Step-progress indicators for deposits/withdrawals
+- Smart prompt suggestions on AI Assistant (learn from popular user questions via active learning data)
 
 ### P2 — Future Features
 - AI for Debt Management

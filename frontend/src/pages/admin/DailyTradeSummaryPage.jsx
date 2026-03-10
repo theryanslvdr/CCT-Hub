@@ -77,7 +77,7 @@ export const DailyTradeSummaryPage = () => {
             className="input-dark w-44"
             data-testid="summary-date-input"
           />
-          <Button variant="outline" size="sm" onClick={() => fetchSummary(date)} disabled={loading} className="border-zinc-700" data-testid="refresh-summary-btn">
+          <Button variant="outline" size="sm" onClick={() => fetchSummary(date)} disabled={loading} className="border-white/[0.08]" data-testid="refresh-summary-btn">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           </Button>
         </div>
@@ -151,7 +151,7 @@ export const DailyTradeSummaryPage = () => {
               {summary.traded.length > 0 ? (
                 <div className="space-y-2">
                   {summary.traded.map((t, i) => (
-                    <div key={`${t.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800" data-testid={`traded-member-${i}`}>
+                    <div key={`${t.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]" data-testid={`traded-member-${i}`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-400">
                           {(t.name || '?')[0]}
@@ -193,7 +193,7 @@ export const DailyTradeSummaryPage = () => {
               {summary.missed.length > 0 ? (
                 <div className="space-y-2">
                   {summary.missed.map((m, i) => (
-                    <div key={`${m.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-red-500/10" data-testid={`missed-member-${i}`}>
+                    <div key={`${m.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-red-500/10" data-testid={`missed-member-${i}`}>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-xs font-bold text-red-400">
                           {(m.name || '?')[0]}
@@ -225,7 +225,7 @@ export const DailyTradeSummaryPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   {summary.did_not_trade.map((m, i) => (
-                    <div key={`${m.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-amber-500/10">
+                    <div key={`${m.user_id}-${i}`} className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-amber-500/10">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-xs font-bold text-amber-400">
                           {(m.name || '?')[0]}

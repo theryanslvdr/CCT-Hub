@@ -621,15 +621,15 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
             
             <div className="max-w-lg mx-auto">
               {/* Add transaction form */}
-              <div className="p-3 sm:p-4 rounded-lg bg-zinc-900/50 mb-4">
+              <div className="p-3 sm:p-4 rounded-lg bg-[#0d0d0d]/50 mb-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                   <div>
                     <Label className="text-xs text-zinc-400">Type</Label>
                     <Select value={newTransactionType} onValueChange={setNewTransactionType}>
-                      <SelectTrigger className="mt-1 bg-zinc-800 border-zinc-700">
+                      <SelectTrigger className="mt-1 bg-[#1a1a1a] border-white/[0.08]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-800 border-zinc-700">
+                      <SelectContent className="bg-[#1a1a1a] border-white/[0.08]">
                         <SelectItem value="deposit">Deposit</SelectItem>
                         <SelectItem value="withdrawal">Withdrawal</SelectItem>
                       </SelectContent>
@@ -657,7 +657,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                           {newTransactionDate ? format(newTransactionDate, 'MMM d') : 'Select'}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-700" align="start">
+                      <PopoverContent className="w-auto p-0 bg-[#0d0d0d] border-white/[0.08]" align="start">
                         <Calendar
                           mode="single"
                           selected={newTransactionDate}
@@ -667,7 +667,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                             isAfter(date, new Date())
                           }
                           initialFocus
-                          className="bg-zinc-900"
+                          className="bg-[#0d0d0d]"
                         />
                       </PopoverContent>
                     </Popover>
@@ -686,7 +686,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
               {transactions.length > 0 ? (
                 <div className="space-y-2">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/50">
+                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.04]">
                       <div className="flex items-center gap-3">
                         {tx.type === 'deposit' ? (
                           <ArrowDownCircle className="w-5 h-5 text-emerald-400" />
@@ -756,7 +756,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
             {currentDay && (
               <Card className="max-w-md mx-auto glass-card">
                 {/* Compact Header */}
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
+                <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between">
                   <span className="text-white font-medium text-sm">{format(currentDay, 'EEE, MMM d, yyyy')}</span>
                   <span className="text-xs text-zinc-500">Day {currentTradeIndex + 1}/{totalDays}</span>
                   {currentEntry?.missed && (
@@ -767,7 +767,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                 <CardContent className="p-3 space-y-3">
                   {/* Row 1: Balance (primary), LOT (derived), Projected */}
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-zinc-900/50 rounded p-2">
+                    <div className="bg-[#0d0d0d]/50 rounded p-2">
                       <p className="text-[10px] text-zinc-500 uppercase">Balance</p>
                       <div className="relative mt-0.5">
                         <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs">$</span>
@@ -781,11 +781,11 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                         />
                       </div>
                     </div>
-                    <div className="bg-zinc-900/50 rounded p-2">
+                    <div className="bg-[#0d0d0d]/50 rounded p-2">
                       <p className="text-[10px] text-zinc-500 uppercase">LOT Size</p>
                       <p className="font-mono text-purple-400 text-sm mt-1">{currentLotSize.toFixed(2)}</p>
                     </div>
-                    <div className="bg-zinc-900/50 rounded p-2">
+                    <div className="bg-[#0d0d0d]/50 rounded p-2">
                       <p className="text-[10px] text-zinc-500 uppercase">Projected</p>
                       <p className="font-mono text-orange-400 text-sm mt-1">{formatMoney(currentProjected)}</p>
                     </div>
@@ -804,7 +804,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                             <SelectTrigger className="h-8 input-dark text-xs">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                            <SelectContent className="bg-[#0d0d0d] border-white/[0.08]">
                               {PRODUCTS.map(p => (
                                 <SelectItem key={p} value={p} className="text-white text-xs">{p}</SelectItem>
                               ))}
@@ -820,7 +820,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                             <SelectTrigger className="h-8 input-dark text-xs">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                            <SelectContent className="bg-[#0d0d0d] border-white/[0.08]">
                               {DIRECTIONS.map(d => (
                                 <SelectItem key={d} value={d} className={`text-xs ${d === 'BUY' ? 'text-emerald-400' : 'text-red-400'}`}>
                                   {d}
@@ -847,7 +847,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                       
                       {/* Row 3: P/L Difference */}
                       {currentEntry?.actualProfit !== undefined && (
-                        <div className="bg-zinc-900/50 rounded p-2 text-xs">
+                        <div className="bg-[#0d0d0d]/50 rounded p-2 text-xs">
                           <div className="flex justify-between">
                             <span className="text-zinc-500">P/L Difference:</span>
                             <span className={`font-mono ${(parseFloat(currentEntry.actualProfit) - currentProjected) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -862,7 +862,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                 </CardContent>
                 
                 {/* Compact Footer */}
-                <div className="px-3 py-2 border-t border-zinc-800 flex items-center justify-between">
+                <div className="px-3 py-2 border-t border-white/[0.06] flex items-center justify-between">
                   {currentEntry?.missed ? (
                     <Button
                       variant="ghost"
@@ -920,7 +920,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
             {/* Commission Entry Card - shown when all days are complete or on last day */}
             {currentTradeIndex === tradingDays.length - 1 && (
               <Card className="max-w-md mx-auto glass-card mt-4 border-emerald-500/30">
-                <div className="px-4 py-2 border-b border-zinc-800 bg-emerald-500/10">
+                <div className="px-4 py-2 border-b border-white/[0.06] bg-emerald-500/10">
                   <span className="text-emerald-400 font-medium text-sm flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
                     Total Commission (Optional)
@@ -958,7 +958,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
   
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-2xl bg-zinc-900 border-zinc-700 max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="sm:max-w-2xl bg-[#0d0d0d] border-white/[0.08] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center justify-between">
             <span className="text-base sm:text-lg">
@@ -976,7 +976,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
         </div>
         
         {/* Mobile-friendly footer buttons */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-white/[0.06]">
           {/* Secondary actions - stacked on mobile */}
           <div className="flex flex-wrap gap-2 order-2 sm:order-1">
             {currentStep > 1 && (

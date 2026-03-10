@@ -74,7 +74,7 @@ export default function SystemCheckPage() {
                   key={i}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
                     r.status === 'pass'
-                      ? 'bg-zinc-800/50 text-zinc-200'
+                      ? 'bg-white/[0.04] text-zinc-200'
                       : 'bg-red-900/20 text-red-300'
                   }`}
                   data-testid={`check-step-${i}`}
@@ -104,7 +104,7 @@ export default function SystemCheckPage() {
       )}
 
       {!result && !loading && (
-        <Card className="border border-zinc-700/50">
+        <Card className="border border-white/[0.08]/50">
           <CardContent className="py-12 text-center text-zinc-500">
             <Shield className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>Click "Run System Check" to validate the rewards engine.</p>

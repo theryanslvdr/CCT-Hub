@@ -31,7 +31,7 @@ function ImageGallery({ images }) {
           <button
             key={idx}
             onClick={() => { setActiveIndex(idx); setLightboxOpen(true); }}
-            className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-700 hover:border-orange-500 transition-colors"
+            className="w-24 h-24 rounded-lg overflow-hidden border border-white/[0.08] hover:border-orange-500 transition-colors"
           >
             <img src={url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
           </button>
@@ -40,7 +40,7 @@ function ImageGallery({ images }) {
 
       {/* Lightbox */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-4xl p-0 overflow-hidden">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-4xl p-0 overflow-hidden">
           <div className="relative">
             <button
               onClick={() => setLightboxOpen(false)}
@@ -124,7 +124,7 @@ function VoteButtons({ comment, userId, onVote }) {
             ? 'bg-emerald-500/20 text-emerald-400'
             : isOwn
             ? 'text-zinc-600 cursor-not-allowed'
-            : 'text-zinc-500 hover:bg-zinc-800 hover:text-emerald-400'
+            : 'text-zinc-500 hover:bg-[#1a1a1a] hover:text-emerald-400'
         }`}
         data-testid={`upvote-${comment.id}`}
       >
@@ -139,7 +139,7 @@ function VoteButtons({ comment, userId, onVote }) {
             ? 'bg-red-500/20 text-red-400'
             : isOwn
             ? 'text-zinc-600 cursor-not-allowed'
-            : 'text-zinc-500 hover:bg-zinc-800 hover:text-red-400'
+            : 'text-zinc-500 hover:bg-[#1a1a1a] hover:text-red-400'
         }`}
         data-testid={`downvote-${comment.id}`}
       >
@@ -156,7 +156,7 @@ function VoteButtons({ comment, userId, onVote }) {
         </button>
       )}
       {expandVoters && (
-        <div className="absolute z-10 mt-1 top-full left-0 bg-zinc-800 border border-zinc-700 rounded-lg p-2 min-w-[140px] shadow-xl">
+        <div className="absolute z-10 mt-1 top-full left-0 bg-[#1a1a1a] border border-white/[0.08] rounded-lg p-2 min-w-[140px] shadow-xl">
           {comment.up_voters?.length > 0 && (
             <div className="mb-1">
               <p className="text-[9px] text-emerald-400 font-medium mb-0.5">Upvoted</p>
@@ -476,7 +476,7 @@ export default function ForumPostPage() {
       </button>
 
       {/* Post */}
-      <div className={`p-5 rounded-lg border ${post.pinned ? 'bg-amber-500/5 border-amber-500/30' : 'bg-zinc-900/60 border-zinc-800'}`}>
+      <div className={`p-5 rounded-lg border ${post.pinned ? 'bg-amber-500/5 border-amber-500/30' : 'bg-[#0d0d0d]/60 border-white/[0.06]'}`}>
         {post.pinned && (
           <div className="flex items-center gap-1.5 mb-2 text-amber-400 text-xs font-medium">
             <Pin className="w-3.5 h-3.5" /> Pinned Post
@@ -511,7 +511,7 @@ export default function ForumPostPage() {
                 <input
                   value={editPostData.title}
                   onChange={e => setEditPostData(p => ({ ...p, title: e.target.value }))}
-                  className="w-full rounded-md border border-zinc-700 bg-zinc-800 text-white px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-white/[0.08] bg-[#1a1a1a] text-white px-3 py-2 text-sm"
                   data-testid="edit-post-title"
                 />
                 <Textarea
@@ -564,7 +564,7 @@ export default function ForumPostPage() {
         {/* Post images */}
         <ImageGallery images={post.images} />
 
-        <div className="flex items-center gap-4 mt-4 text-[11px] text-zinc-500 border-t border-zinc-800 pt-3">
+        <div className="flex items-center gap-4 mt-4 text-[11px] text-zinc-500 border-t border-white/[0.06] pt-3">
           <span className="flex items-center gap-1">
             <span className="font-medium text-zinc-300">{post.author_name}</span>
             <RoleBadge role={post.author_role} />
@@ -577,7 +577,7 @@ export default function ForumPostPage() {
         {post.tags?.length > 0 && (
           <div className="flex gap-1.5 mt-2">
             {post.tags.map(t => (
-              <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">{t}</span>
+              <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-[#1a1a1a] text-zinc-400">{t}</span>
             ))}
           </div>
         )}
@@ -602,7 +602,7 @@ export default function ForumPostPage() {
                 className={`p-4 rounded-lg border transition-all ${
                   c.is_best_answer
                     ? 'bg-amber-500/5 border-amber-500/30'
-                    : 'bg-zinc-900/40 border-zinc-800'
+                    : 'bg-[#0d0d0d]/40 border-white/[0.06]'
                 }`}
                 data-testid={`comment-${c.id}`}
               >
@@ -696,7 +696,7 @@ export default function ForumPostPage() {
 
       {/* New comment box */}
       {post.status === 'open' && (
-        <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+        <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
           <div className="relative">
             <Textarea
               ref={commentInputRef}
@@ -709,12 +709,12 @@ export default function ForumPostPage() {
             />
             {/* @Mention dropdown */}
             {showMentions && mentionResults.length > 0 && (
-              <div className="absolute bottom-full left-0 mb-1 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-20 max-h-40 overflow-y-auto" data-testid="mention-dropdown">
+              <div className="absolute bottom-full left-0 mb-1 w-64 bg-[#1a1a1a] border border-white/[0.08] rounded-lg shadow-xl z-20 max-h-40 overflow-y-auto" data-testid="mention-dropdown">
                 {mentionResults.map(u => (
                   <button
                     key={u.id}
                     onClick={() => insertMention(u.name || u.email)}
-                    className="w-full text-left px-3 py-2 hover:bg-zinc-700 text-sm text-zinc-300 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 hover:bg-white/[0.08] text-sm text-zinc-300 flex items-center gap-2"
                   >
                     <span className="font-medium">{u.name || u.email}</span>
                     {u.role && u.role !== 'member' && <RoleBadge role={u.role} />}
@@ -748,7 +748,7 @@ export default function ForumPostPage() {
       )}
 
       {post.status === 'closed' && (
-        <div className="text-center py-4 text-sm text-zinc-500 border border-zinc-800 rounded-lg">
+        <div className="text-center py-4 text-sm text-zinc-500 border border-white/[0.06] rounded-lg">
           This post has been closed. No new comments can be added.
         </div>
       )}
@@ -758,7 +758,7 @@ export default function ForumPostPage() {
       {/* Right Sidebar — Post Details */}
       <aside className="hidden lg:block w-72 flex-shrink-0 space-y-4" data-testid="post-details-sidebar">
         {/* Post Info */}
-        <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+        <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
           <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Post Info</h3>
           <div className="space-y-2.5 text-xs">
             <div className="flex items-center gap-2 text-zinc-400">
@@ -784,7 +784,7 @@ export default function ForumPostPage() {
 
         {/* Solution Validation */}
         {post.status === 'closed' && post.best_answer_id && (
-          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
             <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Solution Status</h3>
             {postDetails?.solution_validated_at ? (
               <p className="text-[11px] text-emerald-400 mb-2 flex items-center gap-1.5">
@@ -810,7 +810,7 @@ export default function ForumPostPage() {
 
         {/* Contributors */}
         {postDetails?.contributors?.length > 0 && (
-          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
             <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" /> Contributors ({postDetails.contributors.length})
             </h3>
@@ -827,7 +827,7 @@ export default function ForumPostPage() {
 
         {/* Awards */}
         {postDetails?.awards?.length > 0 && (
-          <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800">
+          <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]">
             <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-amber-400" /> Awards
             </h3>
@@ -845,7 +845,7 @@ export default function ForumPostPage() {
 
       {/* Close Post Dialog */}
       <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Close Post & Award Points</DialogTitle>
           </DialogHeader>
@@ -866,7 +866,7 @@ export default function ForumPostPage() {
                       className={`w-full text-left p-2.5 rounded border text-xs transition-all ${
                         selectedBestAnswer === c.id
                           ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                          : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                          : 'bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:border-zinc-600'
                       }`}
                       data-testid={`select-best-${c.id}`}
                     >
@@ -909,7 +909,7 @@ export default function ForumPostPage() {
                             ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-not-allowed'
                             : selectedCollaborators.includes(c.user_id)
                             ? 'bg-orange-500/10 border-orange-500/20 text-orange-400'
-                            : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                            : 'bg-[#1a1a1a] border-white/[0.08] text-zinc-400 hover:border-zinc-600'
                         }`}
                         data-testid={`select-collab-${c.user_id}`}
                       >
@@ -922,7 +922,7 @@ export default function ForumPostPage() {
             </div>
 
             {/* Summary */}
-            <div className="text-xs text-zinc-500 bg-zinc-800/50 p-3 rounded">
+            <div className="text-xs text-zinc-500 bg-white/[0.04] p-3 rounded">
               <p className="font-medium text-zinc-300 mb-1">Points Summary:</p>
               {selectedBestAnswer && <p>Best Answer: +50 pts</p>}
               {selectedCollaborators.length > 0 && <p>Collaborators: +{selectedCollaborators.length * 15} pts ({selectedCollaborators.length} people)</p>}
@@ -940,7 +940,7 @@ export default function ForumPostPage() {
 
       {/* Merge Post Dialog */}
       <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Merge className="w-5 h-5 text-orange-400" /> Merge Post
@@ -973,7 +973,7 @@ export default function ForumPostPage() {
                     className={`w-full text-left p-3 rounded border text-xs transition-all ${
                       mergeTargetId === r.id
                         ? 'bg-orange-500/10 border-orange-500/30 text-orange-300'
-                        : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                        : 'bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:border-zinc-600'
                     }`}
                     data-testid={`merge-target-${r.id}`}
                   >

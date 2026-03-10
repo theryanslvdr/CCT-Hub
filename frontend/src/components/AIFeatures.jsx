@@ -76,7 +76,7 @@ export function AIFinancialSummary() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-orange-500/15 transition-colors" data-testid="ai-financial-summary">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-orange-500/15 transition-colors" data-testid="ai-financial-summary">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-orange-400" /> AI Financial Summary
@@ -138,7 +138,7 @@ export function AIBalanceForecast() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-emerald-500/20 transition-colors" data-testid="ai-balance-forecast">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-emerald-500/20 transition-colors" data-testid="ai-balance-forecast">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
           <TrendingUp className="w-4 h-4 text-emerald-400" /> AI Balance Forecast
         </h3>
@@ -288,7 +288,7 @@ export function AITradeJournal() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-amber-500/20 transition-colors" data-testid="ai-trade-journal">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-amber-500/20 transition-colors" data-testid="ai-trade-journal">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
           <BookOpen className="w-4 h-4 text-amber-400" /> AI Trade Journal
         </h3>
@@ -402,7 +402,7 @@ export function AIAnomalyAlert() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-red-500/20 transition-colors" data-testid="ai-anomaly-alert">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-red-500/20 transition-colors" data-testid="ai-anomaly-alert">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
           <AlertTriangle className="w-4 h-4 text-red-400" /> AI Anomaly Detection
         </h3>
@@ -554,7 +554,7 @@ export function AIDailyReport() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-indigo-500/20 transition-colors" data-testid="ai-daily-report">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-indigo-500/20 transition-colors" data-testid="ai-daily-report">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
           <FileText className="w-4 h-4 text-indigo-400" /> AI Daily Trade Report
         </h3>
@@ -612,7 +612,7 @@ export function AICommissionInsights() {
 
   if (!loaded) {
     return (
-      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-purple-500/20 transition-colors" data-testid="ai-commission-insights">
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-white/[0.06] hover:border-purple-500/20 transition-colors" data-testid="ai-commission-insights">
         <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
           <DollarSign className="w-4 h-4 text-purple-400" /> AI Commission Optimizer
         </h3>

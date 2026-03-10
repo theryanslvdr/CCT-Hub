@@ -43,8 +43,8 @@ function PostCard({ post, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-lg bg-zinc-900/60 border transition-all group ${
-        post.pinned ? 'border-amber-500/30 bg-amber-500/5' : 'border-zinc-800 hover:border-zinc-600'
+      className={`w-full text-left p-4 rounded-lg bg-[#0d0d0d]/60 border transition-all group ${
+        post.pinned ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/[0.06] hover:border-zinc-600'
       }`}
       data-testid={`forum-post-${post.id}`}
     >
@@ -87,7 +87,7 @@ function PostCard({ post, onClick }) {
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 max-w-[120px]">
             {post.tags.slice(0, 3).map(t => (
-              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-[#1a1a1a] text-zinc-400">
                 {t}
               </span>
             ))}
@@ -126,8 +126,8 @@ function SimilarPostsSuggestion({ query, navigate, onSelect }) {
   if (!query || query.trim().length < 3) return null;
 
   return (
-    <div className="mt-2 rounded-lg border border-zinc-700 bg-zinc-800/80 overflow-hidden" data-testid="similar-posts-suggestions">
-      <div className="px-3 py-2 border-b border-zinc-700 flex items-center gap-1.5">
+    <div className="mt-2 rounded-lg border border-white/[0.08] bg-[#1a1a1a]/80 overflow-hidden" data-testid="similar-posts-suggestions">
+      <div className="px-3 py-2 border-b border-white/[0.08] flex items-center gap-1.5">
         <Search className="w-3 h-3 text-orange-400" />
         <span className="text-[11px] text-zinc-400 font-medium">Similar existing posts</span>
         {loading && <Loader2 className="w-3 h-3 animate-spin text-zinc-500 ml-auto" />}
@@ -140,7 +140,7 @@ function SimilarPostsSuggestion({ query, navigate, onSelect }) {
             <button
               key={r.id}
               onClick={() => { onSelect(); navigate(`/forum/${r.id}`); }}
-              className="w-full text-left px-3 py-2 hover:bg-zinc-700/50 transition-colors border-b border-zinc-700/50 last:border-0"
+              className="w-full text-left px-3 py-2 hover:bg-white/[0.08]/50 transition-colors border-b border-white/[0.08]/50 last:border-0"
               data-testid={`similar-post-${r.id}`}
             >
               <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ function TopContributorsCard({ contributors }) {
   const medals = ['text-amber-400', 'text-zinc-400', 'text-amber-700'];
 
   return (
-    <div className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800" data-testid="top-contributors-section">
+    <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]" data-testid="top-contributors-section">
       <p className="text-xs font-semibold text-zinc-300 mb-3 flex items-center gap-1.5">
         <Trophy className="w-4 h-4 text-amber-400" /> Top Contributors
       </p>
@@ -177,7 +177,7 @@ function TopContributorsCard({ contributors }) {
         {contributors.map((c, i) => (
           <div
             key={c.user_id}
-            className={`flex items-center gap-3 p-2 rounded-lg ${i < 3 ? 'bg-zinc-800/50' : ''}`}
+            className={`flex items-center gap-3 p-2 rounded-lg ${i < 3 ? 'bg-white/[0.04]' : ''}`}
           >
             <span className={`text-sm font-bold w-6 text-center ${medals[i] || 'text-zinc-500'}`}>
               {i + 1}
@@ -323,7 +323,7 @@ export default function ForumListPage() {
             { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
             { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
           ].map(s => (
-            <div key={s.label} className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-center">
+            <div key={s.label} className="p-3 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
               <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
               <p className="text-[10px] text-zinc-500 uppercase">{s.label}</p>
             </div>
@@ -411,7 +411,7 @@ export default function ForumListPage() {
 
       {/* New Post Dialog with Similar Posts */}
       <Dialog open={newPostOpen} onOpenChange={setNewPostOpen}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-lg">
+        <DialogContent className="bg-[#0d0d0d] border-white/[0.06] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">New Post</DialogTitle>
           </DialogHeader>
@@ -448,7 +448,7 @@ export default function ForumListPage() {
               <select
                 value={newPost.category}
                 onChange={e => setNewPost(p => ({ ...p, category: e.target.value }))}
-                className="w-full mt-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-200 px-3 py-2 text-sm"
+                className="w-full mt-1 rounded-md border border-white/[0.08] bg-[#1a1a1a] text-zinc-200 px-3 py-2 text-sm"
                 data-testid="new-post-category"
               >
                 <option value="general">General</option>
@@ -494,7 +494,7 @@ export default function ForumListPage() {
                   <button
                     key={r.id}
                     onClick={() => { setNewPostOpen(false); setSimilarWarning(null); navigate(`/forum/${r.id}`); }}
-                    className="w-full text-left px-3 py-2 rounded bg-zinc-800/50 border border-zinc-700 hover:border-amber-500/30 text-xs text-zinc-300 transition-all"
+                    className="w-full text-left px-3 py-2 rounded bg-white/[0.04] border border-white/[0.08] hover:border-amber-500/30 text-xs text-zinc-300 transition-all"
                     data-testid={`warning-post-${r.id}`}
                   >
                     <div className="flex items-center gap-2">

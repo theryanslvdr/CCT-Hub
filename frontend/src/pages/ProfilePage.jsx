@@ -46,9 +46,9 @@ const ADMIN_NOTIFICATION_ITEMS = [
 const NotifToggle = ({ item, value, onChange }) => {
   const Icon = item.icon;
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors" data-testid={`notif-toggle-${item.key}`}>
+    <div className="flex items-center justify-between p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06] hover:border-white/[0.08] transition-colors" data-testid={`notif-toggle-${item.key}`}>
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className={`w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0 ${item.color}`}>
+        <div className={`w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center flex-shrink-0 ${item.color}`}>
           <Icon className="w-4 h-4" />
         </div>
         <div className="min-w-0">
@@ -66,9 +66,9 @@ const PushNotificationToggle = () => {
 
   if (!isSupported) {
     return (
-      <div className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500">
+          <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center text-zinc-500">
             <BellOff className="w-4 h-4" />
           </div>
           <div>
@@ -81,10 +81,10 @@ const PushNotificationToggle = () => {
   }
 
   return (
-    <div className="p-3 rounded-lg bg-zinc-900/50 border border-orange-500/20 hover:border-orange-500/30 transition-colors" data-testid="push-notification-toggle">
+    <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-orange-500/20 hover:border-orange-500/30 transition-colors" data-testid="push-notification-toggle">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSubscribed ? 'bg-orange-500/10 text-orange-400' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSubscribed ? 'bg-orange-500/10 text-orange-400' : 'bg-[#1a1a1a] text-zinc-400'}`}>
             {isSubscribed ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
           </div>
           <div>
@@ -267,7 +267,7 @@ export const ProfilePage = () => {
             </Select>
             <p className="text-xs text-zinc-500 mt-1">This timezone will be used in the Trade Monitor</p>
           </div>
-          <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+          <div className="p-4 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.06]">
             <p className="text-xs text-zinc-500 mb-2">Current time in your timezone:</p>
             <p className="text-3xl font-mono font-bold text-white">{currentTime}</p>
           </div>

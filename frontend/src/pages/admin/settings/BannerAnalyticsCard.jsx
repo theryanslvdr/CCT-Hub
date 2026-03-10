@@ -39,7 +39,7 @@ export const BannerAnalyticsCard = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(analytics.summary).map(([key, data]) => (
-              <div key={key} className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800 space-y-2" data-testid={`analytics-${key}`}>
+              <div key={key} className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06] space-y-2" data-testid={`analytics-${key}`}>
                 <p className="text-sm font-medium text-zinc-300">{formatLabel(key)}</p>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>

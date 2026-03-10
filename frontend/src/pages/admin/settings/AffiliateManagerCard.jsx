@@ -102,7 +102,7 @@ export const AffiliateManagerCard = () => {
         </CardHeader>
         <CardContent className="space-y-3">
           {showForm && (
-            <div className="p-4 rounded-lg bg-zinc-900/60 border border-cyan-500/30 space-y-3" data-testid="resource-form">
+            <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-cyan-500/30 space-y-3" data-testid="resource-form">
               <Input value={form.title} onChange={(e) => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Resource title" className="input-dark" data-testid="resource-title-input" />
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -141,11 +141,11 @@ export const AffiliateManagerCard = () => {
             <p className="text-sm text-zinc-500 text-center py-4">No resources yet. Click "Add Resource" to create one.</p>
           ) : (
             filtered.map(r => (
-              <div key={r.id} className="p-3 rounded-lg border bg-zinc-900/40 border-zinc-800 flex items-start justify-between gap-2" data-testid={`admin-resource-${r.id}`}>
+              <div key={r.id} className="p-3 rounded-lg border bg-[#0d0d0d]/40 border-white/[0.06] flex items-start justify-between gap-2" data-testid={`admin-resource-${r.id}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-white">{r.title}</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{RESOURCE_CATEGORIES.find(c => c.value === r.category)?.label}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1a1a1a] text-zinc-400">{RESOURCE_CATEGORIES.find(c => c.value === r.category)?.label}</span>
                   </div>
                   <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{r.content}</p>
                 </div>

@@ -36,7 +36,7 @@ export function AdminActionsPanel({
             <FolderOpen className="w-4 h-4" /> <span className="hidden sm:inline">Access </span>Records
           </Button>
         </DialogTrigger>
-        <DialogContent className="glass-card border-zinc-800 max-w-sm">
+        <DialogContent className="glass-card border-white/[0.06] max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FolderOpen className="w-5 h-5 text-orange-400" /> Access Records
@@ -78,7 +78,7 @@ export function AdminActionsPanel({
             <RotateCcw className="w-4 h-4" /> Reset<span className="hidden sm:inline"> Tracker</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="glass-card border-zinc-800">
+        <DialogContent className="glass-card border-white/[0.06]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {resetStep === 'confirm' && <><RotateCcw className="w-5 h-5 text-red-400" /> Reset Profit Tracker</>}
