@@ -127,7 +127,11 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - Smoother onboarding (pre-fill referral from website) — Partially done via onboarding gate system
 - External onboarding wizard site (prompt provided to user for separate Emergent deployment)
 
-### Invite Someone Feature (2026-03-10, Session 5)
+### Black Screen Bug Fix (2026-03-10, Session 5)
+- **Root Cause (FIXED):** `InviterModal.jsx` was missing `useEffect` import. When the modal tried to render for non-admin members, React crashed and unmounted the entire tree, leaving only the dark background (black screen).
+- **Error Boundary (ADDED):** Global `ErrorBoundary` component wraps the entire App. If any React component crashes, users see a "Something went wrong" recovery screen with a "Reload App" button instead of a black/blank page.
+- **Inviter Modal Updated (DONE):** Now shows once per session (via sessionStorage) for ALL non-admin members, regardless of whether they already have an inviter set. Members with an existing inviter see their current inviter with "Confirm" button + option to change. The `set-inviter` endpoint now allows re-setting.
+- Tested: iteration 179 — 100% pass.
 - **Onboarding Invite Link (DONE):** Backend returns `onboarding_invite_link` (`https://crosscur.rent/onboarding?merin_code={CODE}`) in `/api/referrals/tracking`. Default Merin code is `BDVMAF` when no code is provided on the onboarding site.
 - **Affiliate Center Invite Card (DONE):** Prominent "Invite Someone" card at top of Affiliate Center page with copy-to-clipboard, view referral stats link, and direct Merin signup link.
 - **Sidebar Profile Link (DONE):** "Affiliate Center" link added to profile dropdown in sidebar (both expanded and collapsed modes) for quick access.
