@@ -107,7 +107,13 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - **Merin Referral Code (DONE):** Members store their Merin code in profile. Invite link auto-generates: `https://www.meringlobaltrading.com/#/pages/login/regist?code={CODE}&lang=en_US`
 - **Cross-Platform API (DONE):** Public endpoints for external onboarding site: `GET /api/onboarding/status/{user_id}`, `POST /api/onboarding/complete-step-external`
 - **Admin Gate Toggle (DONE):** `onboarding_gate_enabled` setting in Admin Settings > Security tab.
-- Tested: iteration 172.
+
+### Referral Tracking & Milestone Rewards (2026-03-10, Session 4)
+- **Referral Tracking Page (DONE):** New `/referral-tracking` page ("Invite & Earn") with invite link, stats, milestones, leaderboard, and referral list.
+- **Referral Milestone Rewards (DONE):** Points awarded at 3 (100pts), 5 (200pts), 10 (500pts), 25 (1000pts), 50 (2500pts) referrals. New badges: `referral_25` (Network Builder), `referral_50` (Community Architect).
+- **Referral Leaderboard (DONE):** Ranked by referral count with badge display.
+- **Admin Stats (DONE):** `/api/referrals/admin/stats` returns total_members, code_adoption_rate, referral_rate, top_referrers.
+- Tested: iteration 174 — 100% pass.
 
 ### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
 - Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
