@@ -451,6 +451,9 @@ export const habitAPI = {
     formData.append('file', file);
     return api.post('/habits/upload-screenshot', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
+  getSocialTasks: () => api.get('/habits/social-tasks'),
+  completeSocialTask: (taskId) => api.post(`/habits/social-task/${taskId}/complete`),
+  uncompleteSocialTask: (taskId) => api.post(`/habits/social-task/${taskId}/uncomplete`),
 };
 
 // Admin Habit APIs

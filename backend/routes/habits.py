@@ -247,3 +247,174 @@ async def uncomplete_habit(habit_id: str, user: dict = Depends(get_current_user)
         {"user_id": user["id"], "habit_id": habit_id, "date": today}
     )
     return {"message": "Habit unmarked"}
+
+
+# ─── Social Media Growth Engine ───
+
+@router.get("/social-tasks")
+async def get_social_tasks(user: dict = Depends(get_current_user)):
+    """Get AI-generated daily social media growth tasks based on streak level."""
+    from services.ai_service import call_llm
+    db = deps.db
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    streak_data = await _calc_habit_streak(user["id"])
+    streak = streak_data.get("current_streak", 0)
+
+    # Determine level based on streak
+    if streak >= 46:
+        level = 4
+        level_name = "Thought Leader"
+    elif streak >= 22:
+        level = 3
+        level_name = "Content Creator"
+    elif streak >= 8:
+        level = 2
+        level_name = "Active Engager"
+    else:
+        level = 1
+        level_name = "Getting Started"
+
+    # Check for existing tasks today
+    existing = await db.social_tasks.find(
+        {"user_id": user["id"], "date": today}, {"_id": 0}
+    ).to_list(10)
+
+    if existing:
+        return {
+            "tasks": existing,
+            "level": level,
+            "level_name": level_name,
+            "streak": streak,
+            "date": today,
+            "next_level_at": _next_level_streak(level),
+        }
+
+    # Generate tasks via AI
+    level_descriptions = {
+        1: "Easy social media tasks for a beginner: liking trading posts, following key accounts, browsing trading forums. Max 5 minutes each.",
+        2: "Medium tasks: commenting on trading discussions, sharing useful content, engaging with trading communities. Max 10 minutes each.",
+        3: "Content creation tasks: sharing trading insights, posting about personal trading journey, creating short educational content. Max 15 minutes each.",
+        4: "Thought leadership: creating original trading tips, hosting discussions, creating educational threads that attract followers. Max 20 minutes each.",
+    }
+
+    system = (
+        "You are a social media growth coach for a trading community member. "
+        "Generate exactly 3 daily tasks as a JSON array. Each task has: "
+        '{"title": "short title", "description": "1-2 sentence instruction", "platform": "Instagram|Twitter|YouTube|TikTok|LinkedIn|Facebook|Any", "time_estimate": "5 min"}\n'
+        "Tasks should build the member's credibility and attract people to ask them about trading. "
+        "Make tasks specific and actionable. Vary platforms. Return ONLY the JSON array."
+    )
+
+    prompt = (
+        f"Level: {level} ({level_name})\n"
+        f"Streak: {streak} days\n"
+        f"Task difficulty: {level_descriptions[level]}\n"
+        f"Day of week: {datetime.now(timezone.utc).strftime('%A')}\n\n"
+        f"Generate 3 social media growth tasks for today."
+    )
+
+    result = await call_llm(system, prompt, "habit_tasks", user["id"], today, temperature=0.7)
+
+    tasks = []
+    if result:
+        import json as json_mod
+        try:
+            # Handle markdown code blocks
+            clean = result.strip()
+            if clean.startswith("```"):
+                clean = clean.split("```")[1]
+                if clean.startswith("json"):
+                    clean = clean[4:]
+                clean = clean.strip()
+            parsed = json_mod.loads(clean)
+            if isinstance(parsed, list):
+                for i, t in enumerate(parsed[:3]):
+                    task = {
+                        "id": str(uuid.uuid4()),
+                        "user_id": user["id"],
+                        "date": today,
+                        "title": t.get("title", f"Task {i+1}"),
+                        "description": t.get("description", ""),
+                        "platform": t.get("platform", "Any"),
+                        "time_estimate": t.get("time_estimate", "5 min"),
+                        "level": level,
+                        "completed": False,
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    tasks.append(task)
+        except (ValueError, TypeError, KeyError):
+            pass
+
+    # Fallback if AI failed
+    if not tasks:
+        fallback_tasks = [
+            {"title": "Like 3 trading posts", "description": "Find and like 3 interesting posts about trading on your feed.", "platform": "Any", "time_estimate": "3 min"},
+            {"title": "Follow a trader", "description": "Follow one new trading account or influencer.", "platform": "Instagram", "time_estimate": "2 min"},
+            {"title": "Save a trading tip", "description": "Save or bookmark one useful trading tip you find today.", "platform": "Any", "time_estimate": "2 min"},
+        ]
+        for i, ft in enumerate(fallback_tasks):
+            tasks.append({
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "date": today,
+                "level": level,
+                "completed": False,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                **ft,
+            })
+
+    # Store tasks in DB
+    if tasks:
+        await db.social_tasks.insert_many([{**t} for t in tasks])
+        # Remove _id from response
+        for t in tasks:
+            t.pop("_id", None)
+
+    return {
+        "tasks": tasks,
+        "level": level,
+        "level_name": level_name,
+        "streak": streak,
+        "date": today,
+        "next_level_at": _next_level_streak(level),
+    }
+
+
+def _next_level_streak(current_level):
+    """Return the streak needed to reach the next level."""
+    thresholds = {1: 8, 2: 22, 3: 46, 4: None}
+    return thresholds.get(current_level)
+
+
+@router.post("/social-task/{task_id}/complete")
+async def complete_social_task(task_id: str, user: dict = Depends(get_current_user)):
+    """Mark a social media growth task as completed."""
+    db = deps.db
+    result = await db.social_tasks.update_one(
+        {"id": task_id, "user_id": user["id"]},
+        {"$set": {"completed": True, "completed_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Check if all 3 tasks completed today — count as a habit completion day
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today_tasks = await db.social_tasks.find(
+        {"user_id": user["id"], "date": today}, {"_id": 0, "completed": 1}
+    ).to_list(10)
+
+    all_done = all(t.get("completed") for t in today_tasks) and len(today_tasks) >= 3
+
+    return {"message": "Task completed!", "task_id": task_id, "all_done": all_done}
+
+
+@router.post("/social-task/{task_id}/uncomplete")
+async def uncomplete_social_task(task_id: str, user: dict = Depends(get_current_user)):
+    """Unmark a social media growth task."""
+    db = deps.db
+    await db.social_tasks.update_one(
+        {"id": task_id, "user_id": user["id"]},
+        {"$set": {"completed": False}, "$unset": {"completed_at": ""}},
+    )
+    return {"message": "Task unmarked"}
