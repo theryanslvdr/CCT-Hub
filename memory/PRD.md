@@ -88,6 +88,7 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - **Onboarding Tour Persistence (DONE):** Tour completion saved to backend DB via /api/users/complete-tour, checked on load via /api/users/tour-status
 - **Adaptive AI Assistant (DONE):** Merged RyAI/zxAI into single unified chat. Backend auto-detects intent and routes to correct persona (technical → RyAI, encouragement → zxAI). Persona indicated per message.
 - **Admin Sidebar Simplified (DONE):** Replaced accordion with single "Admin Dashboard" button. AdminDashboardPage reorganized into 4 categories: Management, Analytics & Tools, AI & Platform, System.
+- **Admin Toggle for Adaptive AI (DONE — 2026-03-10, Session 3):** Added `adaptive_ai_enabled` setting to platform_settings. Toggle in Admin Settings > Security tab. When disabled, all chat requests fall back to RyAI (no adaptive persona routing). Tested: iteration_169 — 100% pass.
 
 ### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
 - Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
