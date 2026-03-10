@@ -30,6 +30,18 @@
 - 100% frontend verification
 - OpenRouter AI integration confirmed working (ai_powered=true)
 
+### Phase 1 AI Features (same day)
+- **AI Trade Coach**: Personalized coaching under each trade in Trade History (brain icon button)
+- **AI Financial Summary**: Weekly/Monthly analysis card on Profit Tracker with toggle
+- **AI Balance Forecast**: 7/30/90 day projection card on Profit Tracker
+- **AI Post Summarizer**: TL;DR button on forum posts with 3+ comments
+- **AI Service Layer**: Shared `/app/backend/services/ai_service.py` with MongoDB caching, per-feature token limits, and TTLs
+
+### Testing (Phase 1 AI)
+- 15/15 backend tests passed (iteration 154)
+- 100% frontend verification
+- All 4 AI endpoints confirmed working with OpenRouter + caching
+
 ## 2026-03-06 - Commission & Stability Fixes
 
 ### Bug Fixes

@@ -110,6 +110,11 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] Commission Records: Type column distinguishing Balance vs Historical (skip_deposit)
 - [x] OpenRouter AI-powered semantic duplicate detection for forum posts
 - [x] Exit Trade function verified (all flows tested, performance calculation confirmed)
+- [x] AI Trade Coach — Post-trade personalized coaching feedback per trade
+- [x] AI Financial Summary — Weekly/monthly AI-powered profit analysis
+- [x] AI Balance Forecast — 7/30/90 day balance projection
+- [x] AI Post Summarizer — TL;DR for forum threads with 3+ comments
+- [x] AI Service Layer — Shared backend module with DB caching, token limits, credit-efficient batching
 
 ## Prioritized Backlog
 
@@ -127,4 +132,31 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 
 ### Future
 - [ ] UI Refresh (major overhaul — awaiting user direction)
-- [ ] OpenRouter Integration (for AI-powered features like smart duplicate detection)
+
+## AI Integration Roadmap
+
+### Phase 1 — DONE
+- [x] AI Trade Coach
+- [x] AI Financial Summary (weekly/monthly)
+- [x] AI Balance Forecast (7/30/90 day)
+- [x] AI Post Summarizer
+- [x] AI Duplicate Detection
+
+### Phase 2 — Trading Intelligence (Next)
+- [ ] AI Signal Insights — Market context when signals drop
+- [ ] AI Trade Journal — Auto-generated daily/weekly trade summary
+- [ ] AI Goal Advisor — Evaluates goal realism
+- [ ] AI Anomaly Alert — Detects concerning performance patterns
+
+### Phase 3 — Community, Admin & Notifications
+- [ ] AI Answer Suggestions — Suggests answers from solved posts
+- [ ] AI Member Risk Scoring — Admin risk flags
+- [ ] AI Daily Trade Report — Auto admin summary
+- [ ] AI Smart Notifications — Personalized alerts
+- [ ] AI Commission Optimizer — Referral commission insights
+- [ ] AI Milestone Motivation — Goal encouragement
+
+### Phase 4 — Habit Tracker: Social Media Growth Engine
+- [ ] AI-generated daily social media task sets
+- [ ] Gradual difficulty progression
+- [ ] Progressive unlocks as streaks build
