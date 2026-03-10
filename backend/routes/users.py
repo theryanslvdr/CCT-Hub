@@ -195,3 +195,57 @@ async def upload_profile_picture(file: UploadFile = File(...), user: dict = Depe
         return {"url": url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+
+@router.get("/member/{member_id}/public")
+async def get_public_member_profile(member_id: str, user=Depends(get_current_user)):
+    """Get a member's public profile visible to other community members."""
+    db = deps.db
+    member = await db.users.find_one(
+        {"id": member_id},
+        {"_id": 0, "password_hash": 0, "push_subscriptions": 0}
+    )
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    # Get rewards stats
+    reward_stats = await db.rewards_stats.find_one(
+        {"user_id": member_id}, {"_id": 0}
+    )
+
+    # Get forum activity
+    forum_posts = await db.forum_posts.count_documents({"author_id": member_id})
+    forum_comments = await db.forum_comments.count_documents({"author_id": member_id})
+
+    # Get habit streak
+    habit_stats = await db.habit_streaks.find_one(
+        {"user_id": member_id}, {"_id": 0}
+    )
+
+    # Get badges
+    badges = []
+    async for b in db.user_badges.find({"user_id": member_id}, {"_id": 0}).limit(20):
+        badges.append(b)
+
+    return {
+        "profile": {
+            "id": member.get("id"),
+            "full_name": member.get("full_name", "Member"),
+            "role": member.get("role", "member"),
+            "timezone": member.get("timezone"),
+            "profile_picture": member.get("profile_picture"),
+            "created_at": member.get("created_at"),
+            "referral_code": member.get("referral_code"),
+        },
+        "stats": {
+            "level": reward_stats.get("level", "Newbie") if reward_stats else "Newbie",
+            "lifetime_points": reward_stats.get("lifetime_points", 0) if reward_stats else 0,
+            "current_streak": habit_stats.get("current_streak", 0) if habit_stats else 0,
+            "longest_streak": habit_stats.get("longest_streak", 0) if habit_stats else 0,
+            "forum_posts": forum_posts,
+            "forum_comments": forum_comments,
+            "quiz_correct_count": reward_stats.get("quiz_correct_count", 0) if reward_stats else 0,
+        },
+        "badges": badges,
+    }

@@ -104,12 +104,33 @@ const AIAssistantPage = () => {
     } catch { toast.error('Delete failed'); }
   };
 
+  const [popularPrompts, setPopularPrompts] = useState([]);
+
   const color = activeAssistant ? COLORS[activeAssistant.assistant_id] || '#F97316' : '#F97316';
   const Icon = activeAssistant ? ICONS[activeAssistant.icon] || MessageSquare : MessageSquare;
 
-  const quickPrompts = activeAssistant?.assistant_id === 'ryai'
-    ? ['How do I track my trades?', 'What are the trading rules?', 'How do commissions work?', 'Explain the profit tracker']
-    : ['Why is consistency important?', 'How do I build good habits?', 'What benefits does CrossCurrent offer?', 'Tell me about rewards'];
+  // Load popular prompts from active learning
+  useEffect(() => {
+    if (!activeAssistant) return;
+    aiAssistantAPI.getPopularPrompts(activeAssistant.assistant_id)
+      .then(r => {
+        const learned = (r.data.prompts || []).map(p => p.question);
+        if (learned.length >= 4) {
+          setPopularPrompts(learned.slice(0, 6));
+        } else {
+          // Fallback defaults
+          const defaults = activeAssistant.assistant_id === 'ryai'
+            ? ['How do I track my trades?', 'What are the trading rules?', 'How do commissions work?', 'Explain the profit tracker']
+            : ['Why is consistency important?', 'How do I build good habits?', 'What benefits does CrossCurrent offer?', 'Tell me about rewards'];
+          setPopularPrompts([...learned, ...defaults].slice(0, 6));
+        }
+      })
+      .catch(() => {
+        setPopularPrompts(activeAssistant.assistant_id === 'ryai'
+          ? ['How do I track my trades?', 'What are the trading rules?', 'How do commissions work?', 'Explain the profit tracker']
+          : ['Why is consistency important?', 'How do I build good habits?', 'What benefits does CrossCurrent offer?', 'Tell me about rewards']);
+      });
+  }, [activeAssistant]);
 
   return (
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-0 -m-3 sm:-m-4 md:-m-6" data-testid="ai-assistant-page">
@@ -194,9 +215,9 @@ const AIAssistantPage = () => {
               <h2 className="text-xl font-bold text-white mb-1">{activeAssistant?.display_name || 'AI Assistant'}</h2>
               <p className="text-sm text-zinc-500 mb-6">{activeAssistant?.greeting || 'How can I help you today?'}</p>
 
-              {/* Quick prompts grid */}
+              {/* Quick prompts grid - powered by active learning */}
               <div className="grid grid-cols-2 gap-2 w-full">
-                {quickPrompts.map((p, i) => (
+                {popularPrompts.map((p, i) => (
                   <button
                     key={i}
                     onClick={() => { setInput(p); inputRef.current?.focus(); }}
@@ -207,6 +228,9 @@ const AIAssistantPage = () => {
                   </button>
                 ))}
               </div>
+              {popularPrompts.some((_, i) => i > 3) && (
+                <p className="text-[10px] text-zinc-600 mt-2">Trending questions from the community</p>
+              )}
             </div>
           )}
 

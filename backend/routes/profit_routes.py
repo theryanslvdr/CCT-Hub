@@ -2246,3 +2246,39 @@ async def get_licensee_year_projections(user_id: Optional[str] = None, user: dic
         except Exception as e2:
             logger.error(f"Even fallback projections failed: {e2}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Projection calculation error: {str(e)}")
+
+
+
+@router.get("/daily-summary")
+async def get_daily_profit_summary(user=Depends(deps.get_current_user)):
+    """Get a consolidated daily profit summary for notification display."""
+    db = deps.db
+    user_id = user["id"]
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Get today's trade logs
+    today_logs = []
+    async for log in db.trade_logs.find({"user_id": user_id, "date": today}, {"_id": 0}):
+        today_logs.append(log)
+
+    total_profit = sum(l.get("profit_usdt", 0) or 0 for l in today_logs)
+    total_commission = sum(l.get("commission", 0) or 0 for l in today_logs)
+    trade_count = len(today_logs)
+
+    # Get account value
+    summary = await get_user_financial_summary(db, user_id)
+    account_value = summary.get("account_value", 0) if summary else 0
+
+    # Get streak info
+    streak = await db.habit_streaks.find_one({"user_id": user_id}, {"_id": 0})
+
+    return {
+        "date": today,
+        "trade_count": trade_count,
+        "total_profit": round(total_profit, 2),
+        "total_commission": round(total_commission, 2),
+        "net_profit": round(total_profit - total_commission, 2),
+        "account_value": round(account_value, 2),
+        "current_streak": streak.get("current_streak", 0) if streak else 0,
+        "has_traded_today": trade_count > 0,
+    }

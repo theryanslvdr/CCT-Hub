@@ -5,12 +5,15 @@ import { profitAPI, tradeAPI, currencyAPI, adminAPI, familyAPI, rewardsAPI } fro
 import api from '@/lib/api';
 import { formatCurrency, formatCurrencyCompact, formatNumber, formatNumberCompact } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { MissedTradersWidget } from '@/components/admin/MissedTradersWidget';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap, Share2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
+import ShareTradeCard from '@/components/ShareTradeCard';
+import DailyProfitSummary from '@/components/DailyProfitSummary';
 
 export const DashboardPage = () => {
   const { 
@@ -40,6 +43,8 @@ export const DashboardPage = () => {
   const [rewardsSummary, setRewardsSummary] = useState(null);
   const [rewardsLeaderboard, setRewardsLeaderboard] = useState(null);
   const [valuesHidden, setValuesHidden] = useState(() => localStorage.getItem('hideAccountValues') === 'true');
+  const [shareOpen, setShareOpen] = useState(false);
+  const [showDailySummary, setShowDailySummary] = useState(true);
 
   // Simulation values
   const simulatedMemberId = getSimulatedMemberId();
@@ -344,6 +349,14 @@ export const DashboardPage = () => {
               Here&apos;s your trading overview for today.
             </p>
           </div>
+          {/* Share Performance Button */}
+          <Button
+            onClick={() => setShareOpen(true)}
+            className="gap-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-300 h-9 px-3"
+            data-testid="share-performance-btn"
+          >
+            <Share2 className="w-4 h-4 text-orange-400" /> Share
+          </Button>
           {/* Row 2 on Mobile / Right side on Desktop: Signal Card - Clickable to Trade Monitor - Hidden for licensees */}
           {signal && !isLicenseeView && (
             <div 
@@ -376,6 +389,11 @@ export const DashboardPage = () => {
           )}
         </div>
       </div>
+
+      {/* Daily Profit Summary */}
+      {showDailySummary && (
+        <DailyProfitSummary onClose={() => setShowDailySummary(false)} />
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -1251,6 +1269,21 @@ export const DashboardPage = () => {
       </Card>
         </>
       )}
+
+      {/* Share Trade Card Dialog */}
+      <ShareTradeCard
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        data={{
+          accountValue: summary?.account_value || 0,
+          totalProfit: summary?.total_actual_profit || 0,
+          totalDeposits: summary?.total_deposits || 0,
+          tradingDays: summary?.total_trades || 0,
+          currentStreak: 0,
+          dateRange: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          userName: displayName || 'Trader',
+        }}
+      />
     </div>
   );
 };

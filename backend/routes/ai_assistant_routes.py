@@ -339,6 +339,33 @@ async def delete_session(session_id: str, user=Depends(get_current_user)):
     return {"status": "deleted"}
 
 
+@router.get("/popular-prompts")
+async def get_popular_prompts(assistant_id: str = "ryai", user=Depends(get_current_user)):
+    """Get popular/trending prompts from active learning data."""
+    db = deps.db
+    pipeline = [
+        {"$match": {"assistant_id": assistant_id, "escalated": False}},
+        {"$group": {"_id": "$question", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10},
+    ]
+    prompts = []
+    async for doc in db.ai_interactions.aggregate(pipeline):
+        prompts.append({"question": doc["_id"], "count": doc["count"]})
+    
+    # Also include knowledge base questions as suggestions
+    if len(prompts) < 6:
+        kb_cursor = db.ai_knowledge.find(
+            {"assistant_id": assistant_id},
+            {"_id": 0, "question": 1, "category": 1}
+        ).limit(10 - len(prompts))
+        async for entry in kb_cursor:
+            prompts.append({"question": entry["question"], "count": 0, "source": "knowledge"})
+    
+    return {"prompts": prompts}
+
+
+
 # ── Admin Endpoints ─────────────────────────────────────────────
 
 @router.get("/admin/config")

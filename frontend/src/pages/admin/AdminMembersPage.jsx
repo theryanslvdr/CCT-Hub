@@ -15,9 +15,10 @@ import {
   Trash2, Key, Mail, ChevronLeft, ChevronRight, MoreVertical,
   Activity, DollarSign, TrendingUp, Calendar, Crown, Play,
   Award, FileCheck, AlertTriangle, RefreshCw, Loader2, AlertCircle,
-  UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download, Radio
+  UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download, Radio, User
 } from 'lucide-react';
 import api, { adminAPI } from '@/lib/api';
+import { Link } from 'react-router-dom';
 import { AIMemberRisk } from '@/components/AIFeatures';
 
 export const AdminMembersPage = () => {
@@ -724,6 +725,17 @@ export const AdminMembersPage = () => {
                         <td>
                           {member.id !== user?.id && (
                             <div className="flex gap-1">
+                              <Link to={`/member/${member.id}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-zinc-400 hover:text-orange-400"
+                                  data-testid={`profile-${member.id}`}
+                                  title="View Public Profile"
+                                >
+                                  <User className="w-4 h-4" />
+                                </Button>
+                              </Link>
                               <Button
                                 variant="ghost"
                                 size="icon"

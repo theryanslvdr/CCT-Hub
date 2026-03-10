@@ -17,7 +17,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://admin-quiz-lab.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://finance-flow-staging.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "admin@crosscurrent.com"

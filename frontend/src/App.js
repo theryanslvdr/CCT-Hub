@@ -45,6 +45,7 @@ import QuizManagementPage from "./pages/admin/QuizManagementPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import AITrainingPage from "./pages/admin/AITrainingPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import MemberProfilePage from "./pages/MemberProfilePage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 
@@ -99,6 +100,7 @@ function App() {
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/forum" element={<ForumListPage />} />
             <Route path="/forum/:postId" element={<ForumPostPage />} />
+            <Route path="/member/:memberId" element={<MemberProfilePage />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             
             {/* Admin routes */}

@@ -116,6 +116,7 @@ const pagesTitles = {
   '/admin/ai-training': 'AI Training Center',
   '/admin/dashboard': 'Admin Dashboard',
   '/ai-assistant': 'AI Assistant',
+  '/member': 'Member Profile',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',
 };

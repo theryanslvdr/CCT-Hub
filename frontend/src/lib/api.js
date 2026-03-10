@@ -569,6 +569,7 @@ export const aiAssistantAPI = {
   getSessions: (assistantId) => api.get('/ai-assistant/sessions', { params: { assistant_id: assistantId } }),
   getSessionMessages: (sessionId) => api.get(`/ai-assistant/sessions/${sessionId}/messages`),
   deleteSession: (sessionId) => api.delete(`/ai-assistant/sessions/${sessionId}`),
+  getPopularPrompts: (assistantId) => api.get('/ai-assistant/popular-prompts', { params: { assistant_id: assistantId } }),
   // Admin endpoints
   getAdminConfig: () => api.get('/ai-assistant/admin/config'),
   updateConfig: (assistantId, data) => api.put(`/ai-assistant/admin/config/${assistantId}`, data),
@@ -579,4 +580,15 @@ export const aiAssistantAPI = {
   answerUnanswered: (itemId, answer) => api.post(`/ai-assistant/admin/unanswered/${itemId}/answer`, { answer }),
   getStats: () => api.get('/ai-assistant/admin/stats'),
 };
+
+// Public Member Profile
+export const memberAPI = {
+  getPublicProfile: (memberId) => api.get(`/users/member/${memberId}/public`),
+};
+
+// Daily Profit Summary
+export const profitSummaryAPI = {
+  getDailySummary: () => api.get('/profit/daily-summary'),
+};
+
 

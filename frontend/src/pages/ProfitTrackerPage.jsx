@@ -40,6 +40,7 @@ import { VSDDialog } from '@/components/VSDDialog';
 import { PreSyncWizard } from '@/components/PreSyncWizard';
 import { DataHealthBadge } from '@/components/DataHealthBadge';
 import { DepositRecordsDialog, WithdrawalRecordsDialog, CommissionRecordsDialog } from '@/components/TransactionRecords';
+import { TransactionStepper } from '@/components/TransactionStepper';
 
 // Hook to detect mobile viewport
 const useIsMobile = () => {
@@ -2544,6 +2545,14 @@ export const ProfitTrackerPage = () => {
               {/* Content Area - Scrollable */}
               <div className="flex-1 overflow-y-auto px-6 pb-8">
                 <div className="space-y-6">
+                  <TransactionStepper
+                    steps={[
+                      { id: 'amount', label: 'Amount' },
+                      { id: 'calculate', label: 'Calculate' },
+                      { id: 'confirm', label: 'Confirm' },
+                    ]}
+                    activeStep={depositStep === 'input' ? 1 : depositStep === 'simulate' ? 2 : 3}
+                  />
                   {depositStep === 'input' && (
                     <>
                       {!manualDepositMode ? (
@@ -2759,6 +2768,14 @@ export const ProfitTrackerPage = () => {
               {/* Content Area - Scrollable */}
               <div className="flex-1 overflow-y-auto px-6 pb-8">
                 <div className="space-y-6">
+                  <TransactionStepper
+                    steps={[
+                      { id: 'amount', label: 'Amount' },
+                      { id: 'fees', label: 'Fees' },
+                      { id: 'confirm', label: 'Confirm' },
+                    ]}
+                    activeStep={withdrawalStep === 'input' ? 1 : withdrawalStep === 'result' ? 2 : 3}
+                  />
                   {withdrawalStep === 'input' && (
                     <>
                       <div className="p-4 rounded-2xl bg-[#0d0d0d]/50 border border-white/[0.06]">
@@ -3157,6 +3174,16 @@ export const ProfitTrackerPage = () => {
               </DialogTitle>
             </DialogHeader>
             
+            <TransactionStepper
+              steps={[
+                { id: 'amount', label: 'Amount' },
+                { id: 'calculate', label: 'Calculate' },
+                { id: 'confirm', label: 'Confirm' },
+              ]}
+              activeStep={depositStep === 'input' ? 1 : depositStep === 'simulate' ? 2 : 3}
+              className="mt-2"
+            />
+
             {depositStep === 'input' && (
               <div className="space-y-4 mt-4">
                 {!manualDepositMode ? (
@@ -3337,6 +3364,16 @@ export const ProfitTrackerPage = () => {
                 {withdrawalStep === 'confirm' && 'Confirm Withdrawal'}
               </DialogTitle>
             </DialogHeader>
+
+            <TransactionStepper
+              steps={[
+                { id: 'amount', label: 'Amount' },
+                { id: 'fees', label: 'Fees' },
+                { id: 'confirm', label: 'Confirm' },
+              ]}
+              activeStep={withdrawalStep === 'input' ? 1 : withdrawalStep === 'result' ? 2 : 3}
+              className="mt-2"
+            />
 
             {withdrawalStep === 'input' && (
               <div className="space-y-4 mt-4">
