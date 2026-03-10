@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class TradeLogCreate(BaseModel):
-    lot_size: float
+    lot_size: Optional[float] = None
     direction: str  # BUY or SELL
     actual_profit: float
     commission: float = 0
