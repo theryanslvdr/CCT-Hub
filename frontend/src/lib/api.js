@@ -524,6 +524,10 @@ export const referralAPI = {
   getTree: () => api.get('/referrals/admin/tree'),
   getFlatList: (params) => api.get('/referrals/admin/flat-list', { params }),
   adminSetCode: (userId, referralCode) => api.post('/referrals/admin/set-code', { user_id: userId, referral_code: referralCode }),
+  // Tracking & Leaderboard
+  getTracking: () => api.get('/referrals/tracking'),
+  getLeaderboard: () => api.get('/referrals/leaderboard'),
+  getAdminStats: () => api.get('/referrals/admin/stats'),
 };
 
 // Quiz System API

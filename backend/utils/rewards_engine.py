@@ -41,6 +41,12 @@ BASE_POINTS = {
     "streak_5_day": 50,
     "milestone_10_trade": 125,
     "milestone_20_trade_streak": 20,
+    # Referral milestones (like streak milestones)
+    "referral_milestone_3": 100,
+    "referral_milestone_5": 200,
+    "referral_milestone_10": 500,
+    "referral_milestone_25": 1000,
+    "referral_milestone_50": 2500,
 }
 
 
@@ -395,8 +401,29 @@ async def process_referral_qualified(db, inviter_id: str, invitee_id: str):
     await award_points(db, inviter_id, BASE_POINTS["qualified_referral"], "qualified_referral",
                        {"invitee_id": invitee_id})
 
-    # Recompute level
+    # Check referral milestone rewards
     stats = await db.rewards_stats.find_one({"user_id": inviter_id}, {"_id": 0})
+    referral_count = stats.get("qualified_referrals", 0) if stats else 0
+    existing_sources = set()
+    logs = await db.rewards_point_logs.find(
+        {"user_id": inviter_id}, {"_id": 0, "source": 1}
+    ).to_list(1000)
+    for log in logs:
+        existing_sources.add(log.get("source"))
+
+    REFERRAL_MILESTONES = [
+        (3, "referral_milestone_3"),
+        (5, "referral_milestone_5"),
+        (10, "referral_milestone_10"),
+        (25, "referral_milestone_25"),
+        (50, "referral_milestone_50"),
+    ]
+    for threshold, source_key in REFERRAL_MILESTONES:
+        if referral_count >= threshold and source_key not in existing_sources:
+            await award_points(db, inviter_id, BASE_POINTS[source_key], source_key,
+                               {"referral_count": referral_count, "milestone": threshold})
+
+    # Recompute level
     if stats:
         new_level = compute_level(stats)
         await db.rewards_stats.update_one({"user_id": inviter_id}, {"$set": {"level": new_level}})
@@ -436,6 +463,8 @@ DEFAULT_BADGES = [
     {"id": "referral_3", "name": "Referral Champion", "description": "Refer 3 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 3, "sort_order": 31},
     {"id": "referral_5", "name": "Referral Pro", "description": "Refer 5 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 5, "sort_order": 32},
     {"id": "referral_10", "name": "Referral Legend", "description": "Refer 10 qualified members", "icon": "users", "category": "referrals", "condition_type": "referral_count", "condition_value": 10, "sort_order": 33},
+    {"id": "referral_25", "name": "Network Builder", "description": "Refer 25 qualified members", "icon": "crown", "category": "referrals", "condition_type": "referral_count", "condition_value": 25, "sort_order": 34},
+    {"id": "referral_50", "name": "Community Architect", "description": "Refer 50 qualified members", "icon": "crown", "category": "referrals", "condition_type": "referral_count", "condition_value": 50, "sort_order": 35},
 
     # Deposit achievements
     {"id": "deposit_100", "name": "First Deposit", "description": "Deposit $100 or more total", "icon": "wallet", "category": "deposits", "condition_type": "lifetime_deposit", "condition_value": 100, "sort_order": 40},

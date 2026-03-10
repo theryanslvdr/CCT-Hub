@@ -48,6 +48,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import MemberProfilePage from "./pages/MemberProfilePage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
+import ReferralTrackingPage from "./pages/ReferralTrackingPage";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -102,6 +103,7 @@ function App() {
             <Route path="/forum/:postId" element={<ForumPostPage />} />
             <Route path="/member/:memberId" element={<MemberProfilePage />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
+            <Route path="/referral-tracking" element={<ReferralTrackingPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />

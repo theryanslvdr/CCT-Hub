@@ -459,3 +459,181 @@ async def _validate_code_external(code: str) -> dict:
         logger.warning(f"External referral validation failed: {e}")
 
     return result
+
+
+
+# ─── Referral Tracking & Leaderboard ───
+
+REFERRAL_MILESTONES = [
+    {"threshold": 1, "title": "First Referral", "points": 150, "icon": "user-plus"},
+    {"threshold": 3, "title": "Referral Champion", "points": 100, "icon": "users"},
+    {"threshold": 5, "title": "Referral Pro", "points": 200, "icon": "users"},
+    {"threshold": 10, "title": "Referral Legend", "points": 500, "icon": "trophy"},
+    {"threshold": 25, "title": "Network Builder", "points": 1000, "icon": "crown"},
+    {"threshold": 50, "title": "Community Architect", "points": 2500, "icon": "crown"},
+]
+
+
+@router.get("/tracking")
+async def get_referral_tracking(user: dict = Depends(get_current_user)):
+    """Get referral tracking data for the current user."""
+    db = deps.db
+
+    user_doc = await db.users.find_one(
+        {"id": user["id"]},
+        {"_id": 0, "referral_code": 1, "merin_referral_code": 1, "full_name": 1}
+    )
+    referral_code = user_doc.get("referral_code") if user_doc else None
+    merin_code = user_doc.get("merin_referral_code") or referral_code
+
+    # Count referrals
+    direct_count = 0
+    referrals = []
+    if referral_code:
+        cursor = db.users.find(
+            {"referred_by": referral_code},
+            {"_id": 0, "id": 1, "full_name": 1, "created_at": 1, "onboarding_completed": 1}
+        ).sort("created_at", -1)
+        referrals = await cursor.to_list(500)
+        direct_count = len(referrals)
+
+    # Milestone progress
+    milestones = []
+    for m in REFERRAL_MILESTONES:
+        milestones.append({
+            **m,
+            "achieved": direct_count >= m["threshold"],
+            "progress": min(direct_count / m["threshold"], 1.0),
+        })
+
+    # Next milestone
+    next_milestone = None
+    for m in milestones:
+        if not m["achieved"]:
+            next_milestone = m
+            break
+
+    # Invite link
+    invite_link = None
+    if merin_code:
+        invite_link = f"https://www.meringlobaltrading.com/#/pages/login/regist?code={merin_code}&lang=en_US"
+
+    return {
+        "referral_code": referral_code,
+        "merin_code": merin_code,
+        "direct_count": direct_count,
+        "referrals": [
+            {
+                "name": r.get("full_name", "Unknown"),
+                "joined": r.get("created_at", ""),
+                "onboarded": r.get("onboarding_completed", False),
+            }
+            for r in referrals[:20]
+        ],
+        "milestones": milestones,
+        "next_milestone": next_milestone,
+        "invite_link": invite_link,
+    }
+
+
+@router.get("/leaderboard")
+async def get_referral_leaderboard(
+    limit: int = Query(20, ge=1, le=100),
+    user: dict = Depends(get_current_user),
+):
+    """Get the referral leaderboard — top referrers."""
+    db = deps.db
+
+    # Aggregate referral counts
+    pipeline = [
+        {"$match": {"referred_by": {"$exists": True, "$ne": None}}},
+        {"$group": {"_id": "$referred_by", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": limit},
+    ]
+    results = await db.users.aggregate(pipeline).to_list(limit)
+
+    leaderboard = []
+    for i, r in enumerate(results):
+        code = r["_id"]
+        referrer = await db.users.find_one(
+            {"referral_code": code},
+            {"_id": 0, "id": 1, "full_name": 1, "avatar_url": 1}
+        )
+        if referrer:
+            # Determine milestone badge
+            badge = None
+            for m in reversed(REFERRAL_MILESTONES):
+                if r["count"] >= m["threshold"]:
+                    badge = m["title"]
+                    break
+
+            leaderboard.append({
+                "rank": i + 1,
+                "user_id": referrer["id"],
+                "name": referrer.get("full_name", "Unknown"),
+                "avatar_url": referrer.get("avatar_url"),
+                "referral_count": r["count"],
+                "referral_code": code,
+                "badge": badge,
+                "is_current_user": referrer["id"] == user["id"],
+            })
+
+    # Find current user's rank if not in top list
+    current_rank = None
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1})
+    if user_doc and user_doc.get("referral_code"):
+        code = user_doc["referral_code"]
+        my_count = await db.users.count_documents({"referred_by": code})
+        if not any(l["is_current_user"] for l in leaderboard):
+            # Count how many have more
+            above = await db.users.aggregate([
+                {"$match": {"referred_by": {"$exists": True, "$ne": None}}},
+                {"$group": {"_id": "$referred_by", "count": {"$sum": 1}}},
+                {"$match": {"count": {"$gt": my_count}}},
+                {"$count": "total"},
+            ]).to_list(1)
+            current_rank = (above[0]["total"] + 1) if above else 1
+
+    return {
+        "leaderboard": leaderboard,
+        "current_user_rank": current_rank,
+        "total_referrers": await db.users.count_documents({"referral_code": {"$exists": True, "$ne": None}}),
+    }
+
+
+@router.get("/admin/stats")
+async def get_admin_referral_stats(user: dict = Depends(require_admin)):
+    """Admin: Get referral program statistics."""
+    db = deps.db
+
+    total_members = await db.users.count_documents({"role": "member"})
+    members_with_code = await db.users.count_documents({"referral_code": {"$exists": True, "$ne": None}, "role": "member"})
+    members_referred = await db.users.count_documents({"referred_by": {"$exists": True, "$ne": None}})
+
+    # Top referrers
+    pipeline = [
+        {"$match": {"referred_by": {"$exists": True, "$ne": None}}},
+        {"$group": {"_id": "$referred_by", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 10},
+    ]
+    top = await db.users.aggregate(pipeline).to_list(10)
+
+    top_referrers = []
+    for r in top:
+        referrer = await db.users.find_one({"referral_code": r["_id"]}, {"_id": 0, "full_name": 1})
+        top_referrers.append({
+            "name": referrer.get("full_name", "Unknown") if referrer else "Unknown",
+            "code": r["_id"],
+            "count": r["count"],
+        })
+
+    return {
+        "total_members": total_members,
+        "members_with_code": members_with_code,
+        "members_referred": members_referred,
+        "referral_rate": round(members_referred / max(total_members, 1) * 100, 1),
+        "code_adoption_rate": round(members_with_code / max(total_members, 1) * 100, 1),
+        "top_referrers": top_referrers,
+    }

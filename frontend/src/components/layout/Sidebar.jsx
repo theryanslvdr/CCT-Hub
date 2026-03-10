@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch, HelpCircle
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch, HelpCircle, UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -154,6 +154,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', id: 'trade_monitor', hideForLicensee: true },
     { path: '/habits', icon: CheckSquare, label: 'Daily Habits', id: 'habits', hideForLicensee: true },
     { path: '/affiliate', icon: Share2, label: 'Affiliate Center', id: 'affiliate', hideForLicensee: true },
+    { path: '/referral-tracking', icon: UserPlus, label: 'Invite & Earn', id: 'referral_tracking', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
     { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards', hideForLicensee: true },
@@ -205,7 +206,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     // For licensees, only include dashboard and profile (no habits/affiliate)
     const alwaysInclude = isLicenseeView
       ? ['dashboard', 'profile', 'my_rewards']
-      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_rewards', 'leaderboard', 'forum'];
+      : ['dashboard', 'profile', 'habits', 'affiliate', 'referral_tracking', 'my_rewards', 'leaderboard', 'forum'];
     const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
     
     return memberNavItems.filter(item => {
@@ -556,7 +557,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         {/* Growth section */}
         {(() => {
           const growthItems = getVisibleMemberItems().filter(i => 
-            ['habits', 'affiliate', 'my_rewards', 'leaderboard', 'licensee_account', 'family_accounts'].includes(i.id)
+            ['habits', 'affiliate', 'referral_tracking', 'my_rewards', 'leaderboard', 'licensee_account', 'family_accounts'].includes(i.id)
           );
           if (growthItems.length === 0) return null;
           return (
