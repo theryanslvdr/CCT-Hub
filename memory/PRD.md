@@ -127,6 +127,13 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - Smoother onboarding (pre-fill referral from website) — Partially done via onboarding gate system
 - External onboarding wizard site (prompt provided to user for separate Emergent deployment)
 
+### Invite Someone Feature (2026-03-10, Session 5)
+- **Onboarding Invite Link (DONE):** Backend returns `onboarding_invite_link` (`https://crosscur.rent/onboarding?merin_code={CODE}`) in `/api/referrals/tracking`. Default Merin code is `BDVMAF` when no code is provided on the onboarding site.
+- **Affiliate Center Invite Card (DONE):** Prominent "Invite Someone" card at top of Affiliate Center page with copy-to-clipboard, view referral stats link, and direct Merin signup link.
+- **Sidebar Profile Link (DONE):** "Affiliate Center" link added to profile dropdown in sidebar (both expanded and collapsed modes) for quick access.
+- **Referral Tracking Update (DONE):** Updated Invite & Earn page to display the onboarding invite link instead of the direct Merin registration link, with direct Merin link shown below as secondary.
+- Tested: iteration 176 — 100% frontend pass, 92% backend (1 skipped — no merged posts in DB).
+
 ### P3 — Future Features
 - AI for Debt Management
 - Gamified Leaderboards
