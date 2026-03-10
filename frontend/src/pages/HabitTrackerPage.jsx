@@ -59,12 +59,13 @@ function SocialGrowthEngine() {
     try {
       const res = await quizAPI.answer(quizId, answer);
       if (res.data.is_correct) {
-        toast.success('Correct!');
+        const bonusMsg = res.data.correct_bonus ? ` (+${res.data.correct_bonus} bonus pts)` : '';
+        toast.success(`Correct!${bonusMsg}`);
       } else {
         toast.error('Incorrect — see the explanation below');
       }
       if (res.data.reward) {
-        toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
+        toast.success(`+${res.data.reward.points} streak reward points! (Day ${res.data.reward.streak} streak)`);
       }
       await loadData();
     } catch (err) {

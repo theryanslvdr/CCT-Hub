@@ -42,6 +42,20 @@ class AnswerQuizRequest(BaseModel):
     answer: str
 
 
+class EditQuizRequest(BaseModel):
+    question: Optional[str] = None
+    correct_answer: Optional[str] = None
+    wrong_answers: Optional[List[str]] = None
+    explanation: Optional[str] = None
+    platform_topic: Optional[str] = None
+    task_type: Optional[str] = None
+    difficulty: Optional[int] = None
+
+
+# Points for correct quiz answers (minimal but meaningful)
+QUIZ_CORRECT_POINTS = 2
+
+
 # ─── Admin: Generate Quizzes ───
 
 @router.post("/admin/generate")
@@ -181,6 +195,90 @@ async def admin_reject_quizzes(data: RejectQuizRequest, user: dict = Depends(req
         }}
     )
     return {"rejected": result.modified_count}
+
+
+@router.put("/admin/edit/{quiz_id}")
+async def admin_edit_quiz(quiz_id: str, data: EditQuizRequest, user: dict = Depends(require_admin)):
+    """Admin edits a quiz question. After saving, AI verifies the edit is coherent."""
+    from services.ai_service import call_llm
+    db = deps.db
+
+    quiz = await db.quiz_pool.find_one({"id": quiz_id}, {"_id": 0})
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    # Build update fields from non-None values
+    updates = {}
+    if data.question is not None:
+        updates["question"] = data.question
+    if data.correct_answer is not None:
+        updates["correct_answer"] = data.correct_answer
+    if data.wrong_answers is not None:
+        updates["wrong_answers"] = data.wrong_answers
+    if data.explanation is not None:
+        updates["explanation"] = data.explanation
+    if data.platform_topic is not None:
+        updates["platform_topic"] = data.platform_topic
+    if data.task_type is not None:
+        updates["task_type"] = data.task_type
+    if data.difficulty is not None:
+        updates["difficulty"] = data.difficulty
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    # Merge edits with existing quiz for verification
+    merged = {**quiz, **updates}
+
+    # AI Verification: quick check that the edited quiz is coherent
+    verification = {"verified": True, "note": ""}
+    try:
+        system = (
+            "You are a quiz quality checker. Verify that the quiz question is coherent, "
+            "the correct answer actually answers the question correctly, the wrong answers "
+            "are plausible but incorrect, and the explanation matches the correct answer. "
+            "Respond with JSON: {\"valid\": true/false, \"issues\": \"brief description if invalid, empty if valid\"}"
+        )
+        prompt = (
+            f"Question: {merged['question']}\n"
+            f"Correct Answer: {merged['correct_answer']}\n"
+            f"Wrong Answers: {merged.get('wrong_answers', [])}\n"
+            f"Explanation: {merged.get('explanation', '')}"
+        )
+        ai_resp = await call_llm(system, prompt, feature="quiz_generation", skip_cache=True)
+        clean = ai_resp.strip()
+        if clean.startswith("```"):
+            clean = clean.split("\n", 1)[1] if "\n" in clean else clean[3:]
+            clean = clean.rsplit("```", 1)[0]
+        import json as json_mod
+        result = json_mod.loads(clean)
+        verification["verified"] = result.get("valid", True)
+        verification["note"] = result.get("issues", "")
+    except Exception as e:
+        verification["note"] = f"AI verification skipped: {str(e)[:80]}"
+
+    updates["edited_by"] = user["id"]
+    updates["edited_at"] = datetime.now(timezone.utc).isoformat()
+    updates["ai_verification"] = verification
+
+    # If quiz was already approved, reset to pending so master admin re-reviews
+    if quiz.get("status") == "approved" and not verification["verified"]:
+        updates["status"] = "pending"
+
+    await db.quiz_pool.update_one({"id": quiz_id}, {"$set": updates})
+
+    # Also update in daily_quizzes if already published
+    publish_updates = {k: v for k, v in updates.items()
+                       if k in ("question", "correct_answer", "wrong_answers", "explanation", "platform_topic", "task_type", "difficulty")}
+    if publish_updates:
+        await db.daily_quizzes.update_many({"quiz_id": quiz_id}, {"$set": publish_updates})
+
+    return {
+        "success": True,
+        "quiz_id": quiz_id,
+        "verification": verification,
+        "updated_fields": list(updates.keys()),
+    }
 
 
 @router.post("/admin/publish")
@@ -331,19 +429,43 @@ async def answer_quiz(quiz_id: str, data: AnswerQuizRequest, user: dict = Depend
     }
     await db.quiz_responses.insert_one({**response})
 
+    # Award bonus points for correct answer
+    correct_bonus = None
+    if is_correct:
+        try:
+            from utils.rewards_engine import award_points, check_and_award_badges
+            await award_points(db, user["id"], QUIZ_CORRECT_POINTS, "quiz_correct", {
+                "quiz_id": quiz_id,
+                "date": today,
+                "question": quiz["question"][:80],
+            })
+            correct_bonus = QUIZ_CORRECT_POINTS
+            # Increment quiz stats for badge tracking
+            await db.rewards_stats.update_one(
+                {"user_id": user["id"]},
+                {"$inc": {"quiz_correct_count": 1}},
+                upsert=True,
+            )
+            # Check for newly earned badges
+            new_badges = await check_and_award_badges(db, user["id"])
+            if new_badges:
+                logger.info(f"User {user['id']} earned badges: {new_badges}")
+        except Exception as e:
+            logger.warning(f"Failed to award quiz correct bonus: {e}")
+
     # Check if all quizzes for today are now answered
     total_quizzes = await db.daily_quizzes.count_documents({"date": today})
     total_answered = await db.quiz_responses.count_documents({"user_id": user["id"], "date": today})
     all_done = total_answered >= total_quizzes and total_quizzes > 0
 
-    # Award habit points if all done
+    # Award habit streak points if all quizzes done
     reward_info = None
     if all_done:
         try:
             from routes.referral_routes import _award_habit_points
             reward_info = await _award_habit_points(user["id"])
         except Exception as e:
-            logger.warning(f"Failed to award quiz points: {e}")
+            logger.warning(f"Failed to award quiz completion points: {e}")
 
     return {
         "is_correct": is_correct,
@@ -351,4 +473,5 @@ async def answer_quiz(quiz_id: str, data: AnswerQuizRequest, user: dict = Depend
         "explanation": quiz["explanation"],
         "all_done": all_done,
         "reward": reward_info,
+        "correct_bonus": correct_bonus,
     }

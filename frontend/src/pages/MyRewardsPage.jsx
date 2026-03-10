@@ -60,6 +60,8 @@ const SOURCE_LABELS = {
   system_check_restore: 'System Test',
   redeem: 'Redemption',
   streak_freeze_purchase: 'Streak Freeze',
+  habit_completion: 'Habit Streak Reward',
+  quiz_correct: 'Quiz Correct Answer',
 };
 
 const SOURCE_CATEGORIES = {
@@ -68,6 +70,7 @@ const SOURCE_CATEGORIES = {
   deposits: 'Deposits & Withdrawals',
   referrals: 'Referrals',
   streaks: 'Streaks & Milestones',
+  habits: 'Habits & Quizzes',
   bonus: 'Bonuses & Promotions',
 };
 
@@ -90,6 +93,8 @@ const SOURCE_CATEGORY_MAP = {
   join_community: 'bonus',
   first_daily_win: 'bonus',
   help_chat: 'bonus',
+  habit_completion: 'habits',
+  quiz_correct: 'habits',
 };
 
 const ITEMS_PER_PAGE = 15;

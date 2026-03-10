@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 import {
   Loader2, Sparkles, Check, X, Send, HelpCircle, RefreshCw,
-  BookOpen, Filter, CheckCircle2, XCircle, Eye
+  BookOpen, Filter, CheckCircle2, XCircle, Eye, Pencil, Save, AlertTriangle
 } from 'lucide-react';
 
 const TOPICS = ['Rewards', 'Hub', 'Website', 'Merin', 'MOIL10'];
@@ -36,6 +36,12 @@ const QuizManagementPage = () => {
   // Published quizzes for today
   const [published, setPublished] = useState([]);
   const [viewingPublished, setViewingPublished] = useState(false);
+
+  // Edit modal
+  const [editQuiz, setEditQuiz] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [verification, setVerification] = useState(null);
 
   const loadPool = useCallback(async () => {
     setLoading(true);
@@ -134,6 +140,42 @@ const QuizManagementPage = () => {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  };
+
+  const openEdit = (quiz, e) => {
+    e.stopPropagation();
+    setEditQuiz(quiz);
+    setEditForm({
+      question: quiz.question,
+      correct_answer: quiz.correct_answer,
+      wrong_answers: [...(quiz.wrong_answers || [])],
+      explanation: quiz.explanation || '',
+      platform_topic: quiz.platform_topic || 'Hub',
+    });
+    setVerification(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editQuiz) return;
+    setSaving(true);
+    setVerification(null);
+    try {
+      const res = await quizAPI.edit(editQuiz.id, editForm);
+      setVerification(res.data.verification);
+      if (res.data.verification?.verified) {
+        toast.success('Quiz saved & AI verified');
+        setEditQuiz(null);
+        loadPool();
+        loadPublished();
+      } else {
+        toast.warning('Saved but AI flagged issues — review the note below');
+        loadPool();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const selectAll = () => {
@@ -343,9 +385,24 @@ const QuizManagementPage = () => {
                         {selected.has(quiz.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium">{quiz.question}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm text-white font-medium">{quiz.question}</p>
+                          <button
+                            onClick={(e) => openEdit(quiz, e)}
+                            className="shrink-0 p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                            data-testid={`edit-quiz-${quiz.id}`}
+                            title="Edit quiz"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                         <p className="text-xs text-emerald-400 mt-1">Correct: {quiz.correct_answer}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">{quiz.explanation}</p>
+                        {quiz.ai_verification && !quiz.ai_verification.verified && (
+                          <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-400">
+                            <AlertTriangle className="w-3 h-3" /> AI flagged: {quiz.ai_verification.note}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS[quiz.status]}`}>
                             {quiz.status}
@@ -376,6 +433,121 @@ const QuizManagementPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Quiz Modal */}
+      {editQuiz && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditQuiz(null)}>
+          <div
+            className="w-full max-w-lg mx-4 p-5 rounded-xl bg-zinc-900 border border-zinc-700 space-y-4 max-h-[80vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+            data-testid="edit-quiz-modal"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-blue-400" /> Edit Quiz Question
+              </h3>
+              <button onClick={() => setEditQuiz(null)} className="text-zinc-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 mb-1 block">Question</label>
+              <textarea
+                value={editForm.question || ''}
+                onChange={e => setEditForm(p => ({ ...p, question: e.target.value }))}
+                className="w-full h-20 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm resize-none"
+                data-testid="edit-question-input"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 mb-1 block">Correct Answer</label>
+              <Input
+                value={editForm.correct_answer || ''}
+                onChange={e => setEditForm(p => ({ ...p, correct_answer: e.target.value }))}
+                className="bg-zinc-800 border-zinc-700 text-white"
+                data-testid="edit-correct-answer-input"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 mb-1 block">Wrong Answers</label>
+              {(editForm.wrong_answers || []).map((wa, i) => (
+                <Input
+                  key={i}
+                  value={wa}
+                  onChange={e => {
+                    const updated = [...(editForm.wrong_answers || [])];
+                    updated[i] = e.target.value;
+                    setEditForm(p => ({ ...p, wrong_answers: updated }));
+                  }}
+                  className="bg-zinc-800 border-zinc-700 text-white mb-1.5"
+                  placeholder={`Wrong answer ${i + 1}`}
+                  data-testid={`edit-wrong-answer-${i}`}
+                />
+              ))}
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 mb-1 block">Explanation</label>
+              <textarea
+                value={editForm.explanation || ''}
+                onChange={e => setEditForm(p => ({ ...p, explanation: e.target.value }))}
+                className="w-full h-16 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm resize-none"
+                data-testid="edit-explanation-input"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-zinc-400 mb-1 block">Platform Topic</label>
+              <select
+                value={editForm.platform_topic || 'Hub'}
+                onChange={e => setEditForm(p => ({ ...p, platform_topic: e.target.value }))}
+                className="h-9 w-full px-3 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+              >
+                {TOPICS.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+
+            {/* AI Verification Result */}
+            {verification && (
+              <div className={`p-3 rounded-lg text-xs ${
+                verification.verified
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                  : 'bg-amber-500/10 border border-amber-500/20 text-amber-300'
+              }`}>
+                <div className="flex items-center gap-1.5 font-medium mb-1">
+                  {verification.verified
+                    ? <><CheckCircle2 className="w-3.5 h-3.5" /> AI Verified</>
+                    : <><AlertTriangle className="w-3.5 h-3.5" /> AI Flagged Issues</>
+                  }
+                </div>
+                {verification.note && <p>{verification.note}</p>}
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => setEditQuiz(null)}
+                className="flex-1 h-9"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="flex-1 h-9 btn-primary gap-2"
+                data-testid="save-edit-btn"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save & Verify
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

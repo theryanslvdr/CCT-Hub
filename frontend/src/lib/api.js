@@ -533,6 +533,7 @@ export const quizAPI = {
   getPool: (params) => api.get('/habits/quiz/admin/pool', { params }),
   approve: (quizIds) => api.post('/habits/quiz/admin/approve', { quiz_ids: quizIds }),
   reject: (quizIds, reason) => api.post('/habits/quiz/admin/reject', { quiz_ids: quizIds, reason }),
+  edit: (quizId, data) => api.put(`/habits/quiz/admin/edit/${quizId}`, data),
   publish: (quizIds, date) => api.post('/habits/quiz/admin/publish', { quiz_ids: quizIds, date }),
   getPublished: (date) => api.get('/habits/quiz/admin/published', { params: { date } }),
   // Member

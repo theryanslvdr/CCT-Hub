@@ -448,6 +448,12 @@ DEFAULT_BADGES = [
     {"id": "days_30", "name": "Monthly Warrior", "description": "Trade on 30 distinct days", "icon": "calendar", "category": "activity", "condition_type": "distinct_days", "condition_value": 30, "sort_order": 51},
     {"id": "days_50", "name": "50 Days Strong", "description": "Trade on 50 distinct days", "icon": "calendar", "category": "activity", "condition_type": "distinct_days", "condition_value": 50, "sort_order": 52},
     {"id": "days_100", "name": "Centurion", "description": "Trade on 100 distinct days", "icon": "shield", "category": "activity", "condition_type": "distinct_days", "condition_value": 100, "sort_order": 53},
+
+    # Quiz achievements
+    {"id": "quiz_10", "name": "Quiz Rookie", "description": "Answer 10 quiz questions correctly", "icon": "book-open", "category": "quizzes", "condition_type": "quiz_correct_count", "condition_value": 10, "sort_order": 60},
+    {"id": "quiz_25", "name": "Knowledge Seeker", "description": "Answer 25 quiz questions correctly", "icon": "book-open", "category": "quizzes", "condition_type": "quiz_correct_count", "condition_value": 25, "sort_order": 61},
+    {"id": "quiz_50", "name": "Quiz Master", "description": "Answer 50 quiz questions correctly", "icon": "graduation-cap", "category": "quizzes", "condition_type": "quiz_correct_count", "condition_value": 50, "sort_order": 62},
+    {"id": "quiz_100", "name": "Quiz Legend", "description": "Answer 100 quiz questions correctly", "icon": "crown", "category": "quizzes", "condition_type": "quiz_correct_count", "condition_value": 100, "sort_order": 63},
 ]
 
 
@@ -481,6 +487,8 @@ def _check_badge_condition(condition_type: str, condition_value, stats: dict) ->
         return stats.get("lifetime_deposit_usdt", 0) >= val
     elif condition_type == "distinct_days":
         return stats.get("distinct_trade_days", 0) >= val
+    elif condition_type == "quiz_correct_count":
+        return stats.get("quiz_correct_count", 0) >= val
     return False
 
 
