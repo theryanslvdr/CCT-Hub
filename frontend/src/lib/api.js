@@ -526,6 +526,20 @@ export const referralAPI = {
   adminSetCode: (userId, referralCode) => api.post('/referrals/admin/set-code', { user_id: userId, referral_code: referralCode }),
 };
 
+// Quiz System API
+export const quizAPI = {
+  // Admin
+  generate: (data) => api.post('/habits/quiz/admin/generate', data),
+  getPool: (params) => api.get('/habits/quiz/admin/pool', { params }),
+  approve: (quizIds) => api.post('/habits/quiz/admin/approve', { quiz_ids: quizIds }),
+  reject: (quizIds, reason) => api.post('/habits/quiz/admin/reject', { quiz_ids: quizIds, reason }),
+  publish: (quizIds, date) => api.post('/habits/quiz/admin/publish', { quiz_ids: quizIds, date }),
+  getPublished: (date) => api.get('/habits/quiz/admin/published', { params: { date } }),
+  // Member
+  getToday: () => api.get('/habits/quiz/today'),
+  answer: (quizId, answer) => api.post(`/habits/quiz/${quizId}/answer`, { answer }),
+};
+
 // AI Features API
 export const aiAPI = {
   // Phase 1

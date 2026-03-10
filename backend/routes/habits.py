@@ -468,3 +468,99 @@ async def uncomplete_social_task(task_id: str, user: dict = Depends(get_current_
         {"$set": {"completed": False}, "$unset": {"completed_at": ""}},
     )
     return {"message": "Task unmarked"}
+
+
+
+# ─── Admin Spot-Check / Proof Verification ───
+
+class SpotCheckAction(BaseModel):
+    action: str  # "approve" or "reject"
+    reason: str = ""
+
+
+@router.get("/admin/pending-proofs")
+async def get_pending_proofs(
+    page: int = 1,
+    page_size: int = 20,
+    user: dict = Depends(require_admin),
+):
+    """Get habit completions with proof screenshots that need admin verification."""
+    db = deps.db
+    query = {
+        "screenshot_url": {"$exists": True, "$ne": ""},
+        "verification_status": {"$nin": ["approved"]},
+    }
+    total = await db.habit_completions.count_documents(query)
+    completions = await db.habit_completions.find(
+        query, {"_id": 0}
+    ).sort("completed_at", -1).skip((page - 1) * page_size).limit(page_size).to_list(page_size)
+
+    # Enrich with user and habit info
+    for c in completions:
+        u = await db.users.find_one({"id": c.get("user_id")}, {"_id": 0, "full_name": 1, "email": 1})
+        c["user_name"] = u.get("full_name", "Unknown") if u else "Unknown"
+        c["user_email"] = u.get("email", "") if u else ""
+        h = await db.habits.find_one({"id": c.get("habit_id")}, {"_id": 0, "title": 1})
+        c["habit_title"] = h.get("title", "Unknown") if h else "Unknown"
+
+    return {"completions": completions, "total": total, "page": page}
+
+
+@router.post("/admin/spot-check/{completion_id}")
+async def admin_spot_check(
+    completion_id: str,
+    data: SpotCheckAction,
+    user: dict = Depends(require_admin),
+):
+    """Admin approves or rejects a habit completion proof.
+    Approved proofs get deleted from storage after marking."""
+    db = deps.db
+    completion = await db.habit_completions.find_one({"id": completion_id}, {"_id": 0})
+    if not completion:
+        raise HTTPException(status_code=404, detail="Completion not found")
+
+    if data.action == "approve":
+        # Mark as approved and clear the proof (save storage)
+        await db.habit_completions.update_one(
+            {"id": completion_id},
+            {"$set": {
+                "verification_status": "approved",
+                "verified_by": user["id"],
+                "verified_at": datetime.now(timezone.utc).isoformat(),
+            }, "$unset": {
+                "screenshot_url": "",
+            }}
+        )
+        return {"message": "Proof approved and deleted", "action": "approved"}
+
+    elif data.action == "reject":
+        # Reject and remove the completion + proof
+        await db.habit_completions.update_one(
+            {"id": completion_id},
+            {"$set": {
+                "verification_status": "rejected",
+                "rejection_reason": data.reason,
+                "verified_by": user["id"],
+                "verified_at": datetime.now(timezone.utc).isoformat(),
+            }, "$unset": {
+                "screenshot_url": "",
+            }}
+        )
+        # Optionally: reset streak or deduct points for rejected proof
+        return {"message": "Proof rejected and deleted", "action": "rejected"}
+
+    raise HTTPException(status_code=400, detail="Action must be 'approve' or 'reject'")
+
+
+@router.get("/admin/spot-check-stats")
+async def spot_check_stats(user: dict = Depends(require_admin)):
+    """Get stats on pending, approved, and rejected proofs."""
+    db = deps.db
+    pending = await db.habit_completions.count_documents({
+        "screenshot_url": {"$exists": True, "$ne": ""},
+        "verification_status": {"$nin": ["approved", "rejected"]},
+    })
+    approved = await db.habit_completions.count_documents({"verification_status": "approved"})
+    rejected = await db.habit_completions.count_documents({"verification_status": "rejected"})
+
+    return {"pending": pending, "approved": approved, "rejected": rejected}

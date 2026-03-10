@@ -1,30 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { habitAPI } from '@/lib/api';
+import { habitAPI, quizAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy, Flame, Trophy, Calendar, Sparkles, Loader2, ArrowRight, Instagram, Twitter, Youtube, Linkedin, Facebook, Globe, Zap } from 'lucide-react';
+import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy, Flame, Trophy, Calendar, Sparkles, Loader2, ArrowRight, Zap, HelpCircle, Check, X, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
-
-const PLATFORM_ICONS = {
-  Instagram: Instagram,
-  Twitter: Twitter,
-  YouTube: Youtube,
-  LinkedIn: Linkedin,
-  Facebook: Facebook,
-  TikTok: Globe,
-  Any: Globe,
-};
-
-const PLATFORM_COLORS = {
-  Instagram: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
-  Twitter: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-  YouTube: 'text-red-400 bg-red-500/10 border-red-500/20',
-  LinkedIn: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  Facebook: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  TikTok: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-  Any: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20',
-};
 
 const LEVEL_CONFIGS = {
   1: { name: 'Getting Started', color: 'text-zinc-400', accent: 'from-zinc-500 to-zinc-400', emoji: 'Seed' },
@@ -36,76 +16,84 @@ const LEVEL_CONFIGS = {
   7: { name: 'Community Leader', color: 'text-yellow-400', accent: 'from-yellow-500 to-amber-300', emoji: 'Diamond' },
 };
 
-const TASK_TYPE_LABELS = {
-  engage: { label: 'Engage', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
-  create: { label: 'Create', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-  invite: { label: 'Invite', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  collaborate: { label: 'Collab', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  lead: { label: 'Lead', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+const TOPIC_COLORS = {
+  Rewards: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  Hub: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+  Website: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  Merin: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  MOIL10: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
 };
 
 function SocialGrowthEngine() {
-  const [data, setData] = useState(null);
+  const { isAdmin } = useAuth();
+  const [quizData, setQuizData] = useState(null);
+  const [streakData, setStreakData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [completing, setCompleting] = useState(null);
+  const [answering, setAnswering] = useState(null);
+  const [selectedAnswer, setSelectedAnswer] = useState({});
 
-  const loadTasks = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
-      const res = await habitAPI.getSocialTasks();
-      setData(res.data);
+      const [quizRes, streakRes] = await Promise.all([
+        quizAPI.getToday(),
+        habitAPI.getSocialTasks(),
+      ]);
+      setQuizData(quizRes.data);
+      setStreakData(streakRes.data);
     } catch {
-      toast.error('Failed to load social tasks');
+      toast.error('Failed to load growth tasks');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { loadTasks(); }, [loadTasks]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  const handleToggle = async (taskId, isCompleted) => {
-    setCompleting(taskId);
+  const handleAnswer = async (quizId) => {
+    const answer = selectedAnswer[quizId];
+    if (!answer) {
+      toast.error('Please select an answer');
+      return;
+    }
+    setAnswering(quizId);
     try {
-      if (isCompleted) {
-        await habitAPI.uncompleteSocialTask(taskId);
+      const res = await quizAPI.answer(quizId, answer);
+      if (res.data.is_correct) {
+        toast.success('Correct!');
       } else {
-        const res = await habitAPI.completeSocialTask(taskId);
-        if (res.data.reward) {
-          toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
-        } else if (res.data.all_done) {
-          toast.success('All social tasks done for today!');
-        } else {
-          toast.success('Task completed!');
-        }
+        toast.error('Incorrect — see the explanation below');
       }
-      await loadTasks();
-    } catch {
-      toast.error('Failed to update task');
+      if (res.data.reward) {
+        toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
+      }
+      await loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to submit answer');
     } finally {
-      setCompleting(null);
+      setAnswering(null);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-      </div>
-    );
+    return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-blue-400" /></div>;
   }
 
-  if (!data) return null;
-
-  const { tasks, level, level_name, streak, next_level_at } = data;
+  const level = streakData?.level || 1;
+  const levelName = streakData?.level_name || 'Getting Started';
+  const streak = streakData?.streak || 0;
+  const nextLevelAt = streakData?.next_level_at;
   const levelConfig = LEVEL_CONFIGS[level] || LEVEL_CONFIGS[1];
-  const completedCount = tasks.filter(t => t.completed).length;
-  const progress = tasks.length ? (completedCount / tasks.length) * 100 : 0;
 
-  // Progress to next level
+  const quizzes = quizData?.quizzes || [];
+  const answeredCount = quizzes.filter(q => q.answered).length;
+  const correctCount = quizzes.filter(q => q.is_correct).length;
+  const progress = quizzes.length ? (answeredCount / quizzes.length) * 100 : 0;
+
   let levelProgress = 0;
-  if (next_level_at) {
+  if (nextLevelAt) {
     const prevThresholds = { 1: 0, 2: 8, 3: 22, 4: 46, 5: 60, 6: 80, 7: 100 };
-    const prevThreshold = prevThresholds[level] || 0;
-    levelProgress = Math.min(100, ((streak - prevThreshold) / (next_level_at - prevThreshold)) * 100);
+    const prev = prevThresholds[level] || 0;
+    levelProgress = Math.min(100, ((streak - prev) / (nextLevelAt - prev)) * 100);
   } else {
     levelProgress = 100;
   }
@@ -117,94 +105,55 @@ function SocialGrowthEngine() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${levelConfig.accent} flex items-center justify-center`}>
-              <Sparkles className="w-5 h-5 text-white" />
+              <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Social Media Growth</h3>
-              <p className={`text-xs ${levelConfig.color}`}>Level {level}: {level_name}</p>
+              <h3 className="text-sm font-semibold text-white">Community Knowledge</h3>
+              <p className={`text-xs ${levelConfig.color}`}>Level {level}: {levelName}</p>
             </div>
           </div>
-          {next_level_at && (
+          {nextLevelAt && (
             <div className="text-right">
-              <p className="text-[10px] text-zinc-500">Next level at {next_level_at} day streak</p>
+              <p className="text-[10px] text-zinc-500">Next level at {nextLevelAt} day streak</p>
               <div className="w-24 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
-                <div
-                  className={`h-full rounded-full bg-gradient-to-r ${levelConfig.accent} transition-all duration-500`}
-                  style={{ width: `${levelProgress}%` }}
-                />
+                <div className={`h-full rounded-full bg-gradient-to-r ${levelConfig.accent} transition-all duration-500`} style={{ width: `${levelProgress}%` }} />
               </div>
             </div>
           )}
         </div>
 
-        {/* Today's progress */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs text-zinc-500 whitespace-nowrap">{completedCount}/{tasks.length} today</span>
+          <span className="text-xs text-zinc-500 whitespace-nowrap">
+            {answeredCount}/{quizzes.length} answered {correctCount > 0 && `(${correctCount} correct)`}
+          </span>
         </div>
       </div>
 
-      {/* Task Cards */}
-      <div className="space-y-2.5">
-        {tasks.map((task) => {
-          const PlatformIcon = PLATFORM_ICONS[task.platform] || Globe;
-          const platformColor = PLATFORM_COLORS[task.platform] || PLATFORM_COLORS.Any;
-          const done = task.completed;
-
-          return (
-            <div
-              key={task.id}
-              className={`p-3.5 rounded-lg border transition-all duration-300 ${
-                done
-                  ? 'bg-emerald-500/5 border-emerald-500/20'
-                  : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
-              }`}
-              data-testid={`social-task-${task.id}`}
-            >
-              <div className="flex items-start gap-3">
-                <button
-                  onClick={() => handleToggle(task.id, done)}
-                  disabled={completing === task.id}
-                  className="mt-0.5 shrink-0"
-                  data-testid={`social-toggle-${task.id}`}
-                >
-                  {completing === task.id ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-                  ) : done ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  ) : (
-                    <Circle className="w-5 h-5 text-zinc-600 hover:text-zinc-400 transition-colors" />
-                  )}
-                </button>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className={`text-sm font-medium ${done ? 'text-emerald-300 line-through' : 'text-white'}`}>
-                      {task.title}
-                    </p>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{task.description}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 ${platformColor}`}>
-                      <PlatformIcon className="w-2.5 h-2.5" /> {task.platform}
-                    </span>
-                    {task.task_type && TASK_TYPE_LABELS[task.task_type] && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border ${TASK_TYPE_LABELS[task.task_type].color}`}>
-                        {TASK_TYPE_LABELS[task.task_type].label}
-                      </span>
-                    )}
-                    <span className="text-[10px] text-zinc-600">{task.time_estimate}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Quiz Cards */}
+      {quizzes.length === 0 ? (
+        <div className="p-6 rounded-lg bg-zinc-900/40 border border-zinc-800 text-center">
+          <HelpCircle className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+          <p className="text-sm text-zinc-400">No quizzes published for today yet.</p>
+          <p className="text-xs text-zinc-600 mt-1">Check back later — your admin is preparing today's knowledge challenges.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {quizzes.map((quiz, idx) => (
+            <QuizCard
+              key={quiz.id}
+              quiz={quiz}
+              index={idx}
+              selectedAnswer={selectedAnswer[quiz.id]}
+              onSelectAnswer={(ans) => setSelectedAnswer(prev => ({ ...prev, [quiz.id]: ans }))}
+              onSubmit={() => handleAnswer(quiz.id)}
+              submitting={answering === quiz.id}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Level roadmap */}
       <div className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
@@ -227,6 +176,93 @@ function SocialGrowthEngine() {
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function QuizCard({ quiz, index, selectedAnswer, onSelectAnswer, onSubmit, submitting }) {
+  const topicColor = TOPIC_COLORS[quiz.platform_topic] || TOPIC_COLORS.Hub;
+
+  return (
+    <div
+      className={`p-4 rounded-lg border transition-all ${
+        quiz.answered
+          ? quiz.is_correct ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'
+          : 'bg-zinc-900/40 border-zinc-800'
+      }`}
+      data-testid={`quiz-card-${quiz.id}`}
+    >
+      {/* Question header */}
+      <div className="flex items-start gap-3 mb-3">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+          quiz.answered ? (quiz.is_correct ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400') : 'bg-blue-500/20 text-blue-400'
+        }`}>
+          {quiz.answered ? (quiz.is_correct ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />) : index + 1}
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-white leading-snug">{quiz.question}</p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${topicColor}`}>{quiz.platform_topic}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Answer options */}
+      <div className="space-y-1.5 ml-10">
+        {quiz.options.map((option, oi) => {
+          const isSelected = selectedAnswer === option;
+          const isAnswered = quiz.answered;
+          const isCorrectAnswer = isAnswered && option === quiz.correct_answer;
+          const isWrongPick = isAnswered && option === quiz.user_answer && !quiz.is_correct;
+
+          let optClasses = 'bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:border-zinc-500 cursor-pointer';
+          if (isAnswered) {
+            if (isCorrectAnswer) optClasses = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300';
+            else if (isWrongPick) optClasses = 'bg-red-500/10 border-red-500/40 text-red-300';
+            else optClasses = 'bg-zinc-800/30 border-zinc-800 text-zinc-500';
+          } else if (isSelected) {
+            optClasses = 'bg-blue-500/10 border-blue-500/40 text-blue-300 ring-1 ring-blue-500/30';
+          }
+
+          return (
+            <button
+              key={oi}
+              onClick={() => !isAnswered && onSelectAnswer(option)}
+              disabled={isAnswered}
+              className={`w-full text-left px-3 py-2 rounded-md border text-xs transition-all ${optClasses}`}
+              data-testid={`quiz-option-${quiz.id}-${oi}`}
+            >
+              <span className="font-mono mr-2 opacity-50">{String.fromCharCode(65 + oi)}.</span>
+              {option}
+              {isCorrectAnswer && <Check className="w-3.5 h-3.5 inline ml-2 text-emerald-400" />}
+              {isWrongPick && <X className="w-3.5 h-3.5 inline ml-2 text-red-400" />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Submit or Explanation */}
+      <div className="ml-10 mt-3">
+        {quiz.answered ? (
+          <div className={`p-2.5 rounded-md text-xs leading-relaxed ${
+            quiz.is_correct ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300'
+          }`}>
+            <span className="font-semibold">{quiz.is_correct ? 'Correct!' : 'Explanation:'}</span>{' '}
+            {quiz.explanation}
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            onClick={onSubmit}
+            disabled={!selectedAnswer || submitting}
+            className="h-7 text-xs btn-primary gap-1"
+            data-testid={`quiz-submit-${quiz.id}`}
+          >
+            {submitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+            Submit Answer
+          </Button>
+        )}
       </div>
     </div>
   );

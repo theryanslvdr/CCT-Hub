@@ -31,6 +31,7 @@ TOKEN_LIMITS = {
     "milestone_motivation": 150,
     "duplicate_check": 100,
     "habit_tasks": 300,
+    "quiz_generation": 2000,
 }
 
 # Cache durations per feature (seconds)

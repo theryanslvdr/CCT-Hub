@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { aiAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, TrendingUp, Brain, BookOpen, Target, AlertTriangle, Zap, MessageSquare, Shield, FileText, DollarSign, Trophy } from 'lucide-react';
+
+const Md = ({ children, className = '' }) => (
+  <div className={`prose prose-invert prose-sm max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mt-3 prose-headings:mb-1 ${className}`}>
+    <ReactMarkdown>{children || ''}</ReactMarkdown>
+  </div>
+);
 
 export function AITradeCoach({ tradeId }) {
   const [coaching, setCoaching] = useState(null);
@@ -25,7 +32,7 @@ export function AITradeCoach({ tradeId }) {
         <div className="flex items-center gap-1.5 text-blue-400 font-medium text-[11px] uppercase tracking-wider">
           <Brain className="w-3.5 h-3.5" /> AI Coach
         </div>
-        <div className="whitespace-pre-wrap leading-relaxed">{coaching}</div>
+        <Md className="text-zinc-300">{coaching}</Md>
       </div>
     );
   }
@@ -103,7 +110,7 @@ export function AIFinancialSummary() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-blue-400" /></div>
       ) : (
-        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{summary}</div>
+        <Md className="text-xs text-zinc-300">{summary}</Md>
       )}
     </div>
   );
@@ -155,7 +162,7 @@ export function AIBalanceForecast() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-emerald-400" /></div>
       ) : (
-        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{forecast}</div>
+        <Md className="text-xs text-zinc-300">{forecast}</Md>
       )}
       <Button size="sm" variant="ghost" onClick={loadForecast} disabled={loading} className="text-[10px] text-zinc-500 mt-2 h-6 px-2" data-testid="ai-forecast-refresh">
         Refresh
@@ -207,7 +214,7 @@ export function AIForumSummary({ postId, commentCount }) {
       <div className="flex items-center gap-1.5 text-blue-400 font-medium text-[11px] uppercase tracking-wider mb-2">
         <Sparkles className="w-3.5 h-3.5" /> AI Summary
       </div>
-      <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{summary}</div>
+      <Md className="text-zinc-300">{summary}</Md>
     </div>
   );
 }
@@ -237,7 +244,7 @@ export function AISignalInsights({ signalId }) {
         <div className="flex items-center gap-1.5 text-purple-400 font-medium text-[11px] uppercase tracking-wider">
           <Zap className="w-3.5 h-3.5" /> AI Signal Insights
         </div>
-        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{insights}</div>
+        <Md className="text-zinc-300">{insights}</Md>
       </div>
     );
   }
@@ -320,7 +327,7 @@ export function AITradeJournal() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-amber-400" /></div>
       ) : (
-        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{journal}</div>
+        <Md className="text-xs text-zinc-300">{journal}</Md>
       )}
     </div>
   );
@@ -355,7 +362,7 @@ export function AIGoalAdvisor({ goalId, goalName }) {
             <span className="text-[10px] text-zinc-500">~{data.days_to_goal} days at current pace</span>
           )}
         </div>
-        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{advice}</div>
+        <Md className="text-zinc-300">{advice}</Md>
       </div>
     );
   }
@@ -431,7 +438,7 @@ export function AIAnomalyAlert() {
               ))}
             </div>
           )}
-          <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{data.anomalies}</div>
+          <Md className="text-xs text-zinc-300">{data.anomalies}</Md>
         </>
       )}
       <Button size="sm" variant="ghost" onClick={load} disabled={loading} className="text-[10px] text-zinc-500 mt-2 h-6 px-2" data-testid="ai-anomaly-refresh">
@@ -466,7 +473,7 @@ export function AIAnswerSuggestion({ postId }) {
         <div className="flex items-center gap-1.5 text-blue-400 font-medium text-[11px] uppercase tracking-wider">
           <MessageSquare className="w-3.5 h-3.5" /> AI Suggested Answer
         </div>
-        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{suggestion}</div>
+        <Md className="text-zinc-300">{suggestion}</Md>
         <p className="text-[10px] text-zinc-600 italic">Based on previously solved questions</p>
       </div>
     );
@@ -504,7 +511,7 @@ export function AIMemberRisk({ userId, memberName }) {
         <div className="flex items-center gap-1.5 text-red-400 font-medium text-[11px] uppercase tracking-wider">
           <Shield className="w-3.5 h-3.5" /> AI Risk Assessment
         </div>
-        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{data.risk_assessment}</div>
+        <Md className="text-zinc-300">{data.risk_assessment}</Md>
         {data.stats && (
           <div className="flex gap-3 text-[10px] text-zinc-500 pt-1">
             <span>Streak: {data.stats.streak}d</span>
@@ -577,7 +584,7 @@ export function AIDailyReport() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-indigo-400" /></div>
       ) : (
-        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{data?.report}</div>
+        <Md className="text-xs text-zinc-300">{data?.report}</Md>
       )}
       <Button size="sm" variant="ghost" onClick={load} disabled={loading} className="text-[10px] text-zinc-500 mt-2 h-6 px-2">Refresh</Button>
     </div>
@@ -632,7 +639,7 @@ export function AICommissionInsights() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-purple-400" /></div>
       ) : (
-        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{data?.insights}</div>
+        <Md className="text-xs text-zinc-300">{data?.insights}</Md>
       )}
     </div>
   );

@@ -16,14 +16,20 @@ class TradeLogResponse(BaseModel):
     id: str
     user_id: str
     lot_size: float
-    direction: str
+    direction: Optional[str] = "NONE"
     projected_profit: float
     actual_profit: float
     commission: float = 0
     profit_difference: float
     performance: str
-    signal_id: Optional[str]
+    signal_id: Optional[str] = None
     created_at: datetime
+    did_not_trade: Optional[bool] = None
+    is_manual_adjustment: Optional[bool] = None
+    is_error_trade: Optional[bool] = None
+    error_type: Optional[str] = None
+    error_explanation: Optional[str] = None
+    balance_commission: Optional[float] = None
 
 
 class TradingSignalCreate(BaseModel):

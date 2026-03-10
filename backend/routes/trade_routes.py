@@ -138,7 +138,13 @@ async def get_trade_logs(limit: int = 50, user_id: Optional[str] = None, user: d
         {"user_id": target_user_id}, 
         {"_id": 0}
     ).sort("created_at", -1).to_list(limit)
-    return [TradeLogResponse(**{**t, "created_at": datetime.fromisoformat(t["created_at"]) if isinstance(t["created_at"], str) else t["created_at"]}) for t in trades]
+    result = []
+    for t in trades:
+        # Ensure required fields have sensible defaults for edge cases
+        if t.get("direction") is None:
+            t["direction"] = "NONE"
+        result.append(TradeLogResponse(**{**t, "created_at": datetime.fromisoformat(t["created_at"]) if isinstance(t["created_at"], str) else t["created_at"]}))
+    return result
 
 
 @router.get("/history")
@@ -803,7 +809,7 @@ async def mark_did_not_trade(
         "id": trade_id,
         "user_id": user["id"],
         "lot_size": 0,
-        "direction": None,
+        "direction": "NONE",
         "projected_profit": 0,
         "actual_profit": 0,
         "commission": 0,
@@ -811,7 +817,7 @@ async def mark_did_not_trade(
         "performance": "missed",
         "signal_id": None,
         "notes": "Did not trade",
-        "did_not_trade": True,  # Special flag for this type of entry
+        "did_not_trade": True,
         "is_retroactive": True,
         "created_at": created_at_str
     }

@@ -41,6 +41,7 @@ import MyRewardsPage from "./pages/MyRewardsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
 import ReferralTreePage from "./pages/admin/ReferralTreePage";
+import QuizManagementPage from "./pages/admin/QuizManagementPage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 
@@ -109,6 +110,7 @@ function App() {
             <Route path="/admin/system-health" element={<SystemHealthPage />} />
             <Route path="/admin/rewards" element={<RewardsAdminPage />} />
             <Route path="/admin/referrals" element={<ReferralTreePage />} />
+            <Route path="/admin/quizzes" element={<QuizManagementPage />} />
           </Route>
 
           {/* Default redirect */}

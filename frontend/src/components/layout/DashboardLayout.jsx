@@ -112,6 +112,7 @@ const pagesTitles = {
   '/admin/analytics': 'Team Analytics',
   '/admin/transactions': 'Team Transactions',
   '/admin/referrals': 'Referral Network',
+  '/admin/quizzes': 'Quiz Manager',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',
 };

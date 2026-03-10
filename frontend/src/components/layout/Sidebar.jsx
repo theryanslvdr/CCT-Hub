@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch, HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -179,6 +179,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/admin/transactions', icon: Wallet, label: 'Transactions' },
     { path: '/admin/rewards', icon: Star, label: 'Rewards Admin' },
     { path: '/admin/referrals', icon: GitBranch, label: 'Referral Tree' },
+    { path: '/admin/quizzes', icon: HelpCircle, label: 'Quiz Manager' },
   ];
 
   // Master Admin only items
