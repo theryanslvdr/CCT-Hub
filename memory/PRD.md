@@ -148,13 +148,13 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] AI Goal Advisor — Evaluates goal realism
 - [x] AI Anomaly Alert — Detects concerning performance patterns
 
-### Phase 3 — Community, Admin & Notifications
-- [ ] AI Answer Suggestions — Suggests answers from solved posts
-- [ ] AI Member Risk Scoring — Admin risk flags
-- [ ] AI Daily Trade Report — Auto admin summary
-- [ ] AI Smart Notifications — Personalized alerts
-- [ ] AI Commission Optimizer — Referral commission insights
-- [ ] AI Milestone Motivation — Goal encouragement
+### Phase 3 — Community, Admin & Notifications — DONE
+- [x] AI Answer Suggestions — Suggests answers from solved posts
+- [x] AI Member Risk Scoring — Admin risk flags
+- [x] AI Daily Trade Report — Auto admin summary
+- [x] AI Smart Notifications — Personalized alerts
+- [x] AI Commission Optimizer — Referral commission insights
+- [x] AI Milestone Motivation — Goal encouragement
 
 ### Phase 4 — Habit Tracker: Social Media Growth Engine
 - [ ] AI-generated daily social media task sets
