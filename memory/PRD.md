@@ -132,7 +132,8 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - **Affiliate Center Invite Card (DONE):** Prominent "Invite Someone" card at top of Affiliate Center page with copy-to-clipboard, view referral stats link, and direct Merin signup link.
 - **Sidebar Profile Link (DONE):** "Affiliate Center" link added to profile dropdown in sidebar (both expanded and collapsed modes) for quick access.
 - **Referral Tracking Update (DONE):** Updated Invite & Earn page to display the onboarding invite link instead of the direct Merin registration link, with direct Merin link shown below as secondary.
-- Tested: iteration 176 — 100% frontend pass, 92% backend (1 skipped — no merged posts in DB).
+- **Member Lookup (DONE):** "Find a Member" card in Affiliate Center — search by name/email, results show name + masked email + Merin code with copy button. Backend: `GET /api/referrals/lookup-members?q={query}`. Only returns members who have a Merin code set.
+- Tested: iterations 176-177 — 100% pass.
 
 ### P3 — Future Features
 - AI for Debt Management
