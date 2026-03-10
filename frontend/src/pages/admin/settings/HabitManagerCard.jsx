@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Loader2, FileText, XCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, Loader2, FileText, XCircle, CheckCircle2, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ACTION_TYPES = [
   { value: 'send_invite', label: 'Send Invite (copy message)' },
@@ -16,12 +16,15 @@ const ACTION_TYPES = [
   { value: 'generic', label: 'Generic Task' },
 ];
 
+const HABITS_PER_PAGE = 10;
+
 export const HabitManagerCard = () => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [form, setForm] = useState({
     title: '', description: '', action_type: 'generic',
     action_data: '', is_gate: true, validity_days: 1
@@ -156,29 +159,73 @@ export const HabitManagerCard = () => {
         ) : habits.length === 0 ? (
           <p className="text-sm text-zinc-500 text-center py-4">No habits created yet. Click "Add Habit" to create one.</p>
         ) : (
-          habits.map(h => (
-            <div key={h.id} className={`p-3 rounded-lg border flex items-center justify-between ${h.active ? 'bg-[#0d0d0d]/40 border-white/[0.06]' : 'bg-[#0d0d0d]/20 border-white/[0.06]/50 opacity-60'}`} data-testid={`admin-habit-${h.id}`}>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-white">{h.title}</p>
-                  {h.is_gate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Gate</span>}
-                  {(h.validity_days || 1) > 1 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 flex items-center gap-0.5">
-                      <Clock className="w-2.5 h-2.5" /> {h.validity_days}d
-                    </span>
-                  )}
-                  {!h.active && <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">Inactive</span>}
+          <>
+            {habits.slice((currentPage - 1) * HABITS_PER_PAGE, currentPage * HABITS_PER_PAGE).map(h => (
+              <div key={h.id} className={`p-3 rounded-lg border flex items-center justify-between ${h.active ? 'bg-[#0d0d0d]/40 border-white/[0.06]' : 'bg-[#0d0d0d]/20 border-white/[0.06]/50 opacity-60'}`} data-testid={`admin-habit-${h.id}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-white">{h.title}</p>
+                    {h.is_gate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Gate</span>}
+                    {(h.validity_days || 1) > 1 && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5" /> {h.validity_days}d
+                      </span>
+                    )}
+                    {!h.active && <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">Inactive</span>}
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-0.5">{ACTION_TYPES.find(t => t.value === h.action_type)?.label || h.action_type}</p>
                 </div>
-                <p className="text-xs text-zinc-500 mt-0.5">{ACTION_TYPES.find(t => t.value === h.action_type)?.label || h.action_type}</p>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(h)} className="text-zinc-400 hover:text-white"><FileText className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleToggleActive(h)} className={h.active ? 'text-red-400 hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'}>
+                    {h.active ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(h)} className="text-zinc-400 hover:text-white"><FileText className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="sm" onClick={() => handleToggleActive(h)} className={h.active ? 'text-red-400 hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'}>
-                  {h.active ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
-                </Button>
+            ))}
+            {/* Pagination */}
+            {habits.length > HABITS_PER_PAGE && (
+              <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]" data-testid="habits-pagination">
+                <p className="text-xs text-zinc-500">
+                  Showing {(currentPage - 1) * HABITS_PER_PAGE + 1}-{Math.min(currentPage * HABITS_PER_PAGE, habits.length)} of {habits.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="h-8 w-8 p-0 text-zinc-400 hover:text-white disabled:opacity-30"
+                    data-testid="habits-prev-page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  {Array.from({ length: Math.ceil(habits.length / HABITS_PER_PAGE) }, (_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`h-8 w-8 p-0 text-xs ${currentPage === i + 1 ? 'bg-orange-500/20 text-orange-400' : 'text-zinc-500 hover:text-white'}`}
+                      data-testid={`habits-page-${i + 1}`}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(habits.length / HABITS_PER_PAGE), p + 1))}
+                    disabled={currentPage >= Math.ceil(habits.length / HABITS_PER_PAGE)}
+                    className="h-8 w-8 p-0 text-zinc-400 hover:text-white disabled:opacity-30"
+                    data-testid="habits-next-page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))
+            )}
+          </>
         )}
       </CardContent>
     </Card>

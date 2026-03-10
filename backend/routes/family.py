@@ -66,7 +66,7 @@ async def calculate_family_member_value(db, member_doc: dict) -> float:
 
 async def get_family_member_projections(db, member_doc: dict) -> list:
     """Generate daily projections for a family member (same as honorary licensee)."""
-    from server import get_quarter
+    from utils.trading_days import get_quarter
 
     starting_amount = member_doc.get("starting_amount", 0)
     effective_start = member_doc.get("effective_start_date")

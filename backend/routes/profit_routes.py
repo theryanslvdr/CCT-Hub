@@ -14,7 +14,7 @@ from helpers import (
     create_admin_notification, create_member_notification, create_user_notification,
     truncate_lot_size, calculate_exit_value, calculate_withdrawal_fees,
     add_business_days, send_push_to_admins,
-    calculate_extended_license_projections, get_quarterly_summary
+    calculate_extended_license_projections, get_quarterly_summary, get_quarter
 )
 from services import websocket_manager
 

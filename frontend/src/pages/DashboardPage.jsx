@@ -261,12 +261,14 @@ export const DashboardPage = () => {
       showForLicensee: true,
     },
     {
-      title: 'Actual vs Projected',
+      title: isLicenseeView ? 'Account Growth' : 'Actual vs Projected',
       value: summary?.performance_rate || 0,
       format: 'percent',
       icon: Target,
       color: 'purple',
-      subtitle: summary?.performance_rate > 100 ? 'Above target!' : summary?.performance_rate === 100 ? 'On target' : 'Below target',
+      subtitle: isLicenseeView
+        ? (summary?.performance_rate > 0 ? `+${(summary?.performance_rate || 0).toFixed(1)}% since inception` : 'No growth yet')
+        : (summary?.performance_rate > 100 ? 'Above target!' : summary?.performance_rate === 100 ? 'On target' : 'Below target'),
       showForLicensee: true,
     },
   ];

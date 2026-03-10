@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Shield, Sparkles, MessageSquare, Brain, BookOpen, HelpCircle, Plus, Trash2, Save, Send, BarChart3, RefreshCw } from 'lucide-react';
+import { Shield, Sparkles, MessageSquare, Brain, BookOpen, HelpCircle, Plus, Trash2, Save, Send, BarChart3, RefreshCw, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { aiAssistantAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -177,7 +178,23 @@ const AITrainingPage = () => {
             </div>
             <div>
               <Label className="text-zinc-400 text-xs uppercase tracking-wider">AI Model</Label>
-              <Input value={config.model || ''} onChange={e => setConfig(p => ({...p, model: e.target.value}))} className="mt-1.5 bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs" placeholder="openai/gpt-4o-mini" data-testid="config-model" />
+              <Select value={config.model || ''} onValueChange={(v) => setConfig(p => ({...p, model: v}))}>
+                <SelectTrigger className="mt-1.5 bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs" data-testid="config-model">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai/gpt-4o-mini">openai/gpt-4o-mini</SelectItem>
+                  <SelectItem value="openai/gpt-4o">openai/gpt-4o</SelectItem>
+                  <SelectItem value="openai/gpt-4-turbo">openai/gpt-4-turbo</SelectItem>
+                  <SelectItem value="openai/gpt-3.5-turbo">openai/gpt-3.5-turbo</SelectItem>
+                  <SelectItem value="anthropic/claude-3.5-sonnet">anthropic/claude-3.5-sonnet</SelectItem>
+                  <SelectItem value="anthropic/claude-3-haiku">anthropic/claude-3-haiku</SelectItem>
+                  <SelectItem value="google/gemini-pro-1.5">google/gemini-pro-1.5</SelectItem>
+                  <SelectItem value="google/gemini-flash-1.5">google/gemini-flash-1.5</SelectItem>
+                  <SelectItem value="meta-llama/llama-3.1-70b-instruct">meta-llama/llama-3.1-70b-instruct</SelectItem>
+                  <SelectItem value="mistralai/mixtral-8x7b-instruct">mistralai/mixtral-8x7b-instruct</SelectItem>
+                </SelectContent>
+              </Select>
               <p className="text-[10px] text-zinc-600 mt-1">OpenRouter model identifier</p>
             </div>
             <div>
