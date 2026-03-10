@@ -149,6 +149,26 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] 7-level roadmap visualization (Seed → Sprout → Bloom → Crown → Star → Rocket → Diamond)
 - [x] Reward point scaling: 5/10/20/35/50/70/100 per streak tier
 
+### Social Growth → Admin-Controlled Quiz System — DONE (March 2026)
+- [x] Replaced auto-generated social tasks with admin-controlled quiz system
+- [x] Admin generates quiz questions about Hub ecosystem (Rewards, Hub, Website, Merin, MOIL10)
+- [x] Master admin reviews and approves questions before publishing
+- [x] Admin publishes approved quizzes for specific dates
+- [x] Members answer multiple-choice quizzes; wrong answers show explanations
+- [x] Quiz completion awards habit reward points (streak-scaled)
+- [x] Admin Quiz Manager page at /admin/quizzes
+
+### Habit Validation Safeguards — DONE (March 2026)
+- [x] Proof-of-completion upload (screenshot_url on habit completion)
+- [x] Admin pending proofs list with user/habit details
+- [x] Admin spot-check approve/reject with auto-deletion of proof files
+- [x] Spot-check stats endpoint (pending/approved/rejected counts)
+
+### Bug Fixes — March 2026
+- [x] "Did Not Trade" bug: direction:None caused Pydantic validation failure, wiping all trade data display
+- [x] daily-balances: actual_profit=0 converted to None due to 0-is-falsy comparison
+- [x] AI Cards: Raw markdown (**bold**) now renders properly via ReactMarkdown
+
 ### profitCalculations.js Refactoring — DONE (March 2026)
 - [x] Split 620-line monolith into 3 focused modules:
   - formatters.js: Currency & number formatting
