@@ -92,11 +92,22 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 
 ### Bug Fixes (2026-03-10, Session 3)
 - **Family Member Projections Fix (DONE):** Fixed broken import `from server import get_quarter` → `from utils.trading_days import get_quarter` in family.py. FA Licensee family projections now load correctly.
-- **Daily Projection Table Fix (DONE):** Added missing `get_quarter` import to profit_routes.py helpers import. Licensee daily projection endpoint no longer crashes.
+- **Daily Projection Table Fix (DONE):** Added missing `get_quarter` import to profit_routes.py and admin_routes.py. Licensee daily projection endpoint no longer crashes with NameError. Also fixed undefined `get_first_trading_day_of_quarter` function.
 - **Dashboard Licensee Label Fix (DONE):** Changed "Actual vs Projected / Below target" to "Account Growth / +X% since inception" for licensees in DashboardPage.jsx. No more misleading "Below target" label.
-- **AI Training Model Dropdown (DONE):** Replaced text input with Select dropdown for AI model selection in AITrainingPage.jsx. 10 model options (OpenAI, Anthropic, Google, Meta, Mistral).
+- **AI Training Model Dropdown (DONE):** Dynamic model selector pulling 346+ models from OpenRouter API with searchable dropdown. Backend endpoint: `/api/ai-assistant/models` (1h cache).
 - **Habits Pagination (DONE):** Added pagination (10 items/page) with prev/next and page number buttons to HabitManagerCard.jsx.
-- Tested: iteration_170 — 100% pass (all 5 fixes verified).
+- **Anomaly Detection Streak Fix (DONE):** Created shared `utils/streak.py` utility. Anomaly check, trade journal, and trade coach now compute streak from trade_logs instead of non-existent `users.streak` field.
+- **AI Trade Journal Truncation Fix (DONE):** Increased `max_tokens` from 350 to 800 in ai_service.py. Journals now complete fully.
+- **Timezone DST Fix (DONE):** Replaced hardcoded timezone offsets with dynamic `Intl.DateTimeFormat` API in TradeMonitorPage.jsx. Now correctly handles DST transitions.
+- **Notification Consolidation (DONE):** Rewrote NotificationPanel with Unread/Read/All tabs, type-based consolidation (e.g., "Member1, Member2 and 32 more submitted trades"), and action buttons per notification type.
+- Tested: iterations 170-173.
+
+### Onboarding & Invite System (2026-03-10, Session 4)
+- **7-Step Onboarding Gate (DONE):** New `/api/onboarding/*` routes. Blocks platform access until all steps complete (Heartbeat, Merin, Hub, Exchange, Tutorials, Live Trade, Rewards). Admin always bypasses.
+- **Merin Referral Code (DONE):** Members store their Merin code in profile. Invite link auto-generates: `https://www.meringlobaltrading.com/#/pages/login/regist?code={CODE}&lang=en_US`
+- **Cross-Platform API (DONE):** Public endpoints for external onboarding site: `GET /api/onboarding/status/{user_id}`, `POST /api/onboarding/complete-step-external`
+- **Admin Gate Toggle (DONE):** `onboarding_gate_enabled` setting in Admin Settings > Security tab.
+- Tested: iteration 172.
 
 ### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
 - Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
@@ -107,7 +118,8 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - AI Smart Prompts: Popular questions shown in AI Assistant from active learning data (DONE)
 
 ### P2 — Upcoming
-- Smoother onboarding (pre-fill referral from website)
+- Smoother onboarding (pre-fill referral from website) — Partially done via onboarding gate system
+- External onboarding wizard site (prompt provided to user for separate Emergent deployment)
 
 ### P3 — Future Features
 - AI for Debt Management
@@ -123,6 +135,8 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - `ai_knowledge` — Admin-curated training data
 - `ai_unanswered` — Escalated questions pending admin answer
 - `ai_interactions` — Active learning interaction log
+- `onboarding_checklists` — Per-user 7-step onboarding progress
+- `platform_settings` — Admin toggles (adaptive_ai_enabled, onboarding_gate_enabled, etc.)
 
 ## Credentials
 - Master Admin: `iam@ryansalvador.com` / `admin123`

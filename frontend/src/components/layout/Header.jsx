@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { authAPI } from '@/lib/api';
 import { useWebSocket } from '@/contexts/WebSocketContext';
-import { NotificationSheet } from '@/components/NotificationSheet';
+import { NotificationPanel } from '@/components/NotificationPanel';
 
 const SECRET_CODE = 'SUPER_ADMIN_BYPASS';
 const CLICKS_REQUIRED = 10;
@@ -268,7 +268,7 @@ export const Header = ({ onMenuClick, title }) => {
           {/* Notification Sheet - Off-Canvas Panel - Only for Super/Master Admin (Desktop) */}
           {canSeeNotifications && (
             <div className="hidden md:block">
-              <NotificationSheet />
+              <NotificationPanel />
             </div>
           )}
 
