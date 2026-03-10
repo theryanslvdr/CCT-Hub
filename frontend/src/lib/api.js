@@ -513,6 +513,19 @@ export const versionAPI = {
 
 export default api;
 
+// Referral System API
+export const referralAPI = {
+  checkOnboarding: () => api.get('/referrals/check-onboarding'),
+  getMyCode: () => api.get('/referrals/my-code'),
+  setCode: (referralCode) => api.post('/referrals/set-code', { referral_code: referralCode }),
+  setReferredBy: (referralCode) => api.post('/referrals/set-referred-by', { referral_code: referralCode }),
+  awardHabitReward: () => api.post('/referrals/habit-reward'),
+  // Admin
+  getTree: () => api.get('/referrals/admin/tree'),
+  getFlatList: (params) => api.get('/referrals/admin/flat-list', { params }),
+  adminSetCode: (userId, referralCode) => api.post('/referrals/admin/set-code', { user_id: userId, referral_code: referralCode }),
+};
+
 // AI Features API
 export const aiAPI = {
   // Phase 1

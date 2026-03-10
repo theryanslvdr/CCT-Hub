@@ -223,7 +223,15 @@ async def complete_habit(habit_id: str, data: HabitCompleteRequest = None, scree
     except Exception as e:
         logger.warning(f"Failed to send admin push for habit completion: {e}")
 
-    return {"message": "Habit completed!", "already": False}
+    # Award habit reward points (auto-scales with streak)
+    reward_info = None
+    try:
+        from routes.referral_routes import _award_habit_points
+        reward_info = await _award_habit_points(user["id"])
+    except Exception as e:
+        logger.warning(f"Failed to award habit points: {e}")
+
+    return {"message": "Habit completed!", "already": False, "reward": reward_info}
 
 
 @router.post("/upload-screenshot")
@@ -406,7 +414,16 @@ async def complete_social_task(task_id: str, user: dict = Depends(get_current_us
 
     all_done = all(t.get("completed") for t in today_tasks) and len(today_tasks) >= 3
 
-    return {"message": "Task completed!", "task_id": task_id, "all_done": all_done}
+    # Award habit reward points when all social tasks are done
+    reward_info = None
+    if all_done:
+        try:
+            from routes.referral_routes import _award_habit_points
+            reward_info = await _award_habit_points(user["id"])
+        except Exception as e:
+            logger.warning(f"Failed to award social task points: {e}")
+
+    return {"message": "Task completed!", "task_id": task_id, "all_done": all_done, "reward": reward_info}
 
 
 @router.post("/social-task/{task_id}/uncomplete")

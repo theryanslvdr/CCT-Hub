@@ -111,6 +111,7 @@ const pagesTitles = {
   '/admin/settings': 'Platform Settings',
   '/admin/analytics': 'Team Analytics',
   '/admin/transactions': 'Team Transactions',
+  '/admin/referrals': 'Referral Network',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',
 };

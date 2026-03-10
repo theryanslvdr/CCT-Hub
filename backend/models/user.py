@@ -30,6 +30,8 @@ class UserResponse(BaseModel):
     license_type: Optional[str] = None
     trading_start_date: Optional[str] = None
     trading_type: Optional[str] = None
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
 
 
 class TokenResponse(BaseModel):

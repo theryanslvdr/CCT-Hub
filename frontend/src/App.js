@@ -8,6 +8,7 @@ import { BVEProvider } from "./contexts/BVEContext";
 import { Toaster } from "./components/ui/sonner";
 import { PWAInstallBanner } from "./lib/pwa";
 import { VersionBanner } from "./components/VersionBanner";
+import ReferralOnboardingModal from "./components/ReferralOnboardingModal";
 
 // Pages
 import { LoginPage } from "./pages/LoginPage";
@@ -39,6 +40,7 @@ import SystemHealthPage from "./pages/admin/SystemHealthPage";
 import MyRewardsPage from "./pages/MyRewardsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import RewardsAdminPage from "./pages/admin/RewardsAdminPage";
+import ReferralTreePage from "./pages/admin/ReferralTreePage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 
@@ -106,6 +108,7 @@ function App() {
             <Route path="/admin/system-check" element={<SystemCheckPage />} />
             <Route path="/admin/system-health" element={<SystemHealthPage />} />
             <Route path="/admin/rewards" element={<RewardsAdminPage />} />
+            <Route path="/admin/referrals" element={<ReferralTreePage />} />
           </Route>
 
           {/* Default redirect */}
@@ -116,6 +119,7 @@ function App() {
         </BVEProvider>
         </BrowserRouter>
         <Toaster position="top-right" richColors theme="dark" />
+        <ReferralOnboardingModal />
         <PWAInstallBanner />
         <VersionBanner />
       </WebSocketProvider>

@@ -126,6 +126,7 @@ from routes.forum import router as _forum_router
 from routes.publitio import router as _publitio_router
 from routes.system_health import router as _system_health_router
 from routes.ai_routes import router as _ai_router
+from routes.referral_routes import router as _referral_router
 
 # ─── Register Routers ───
 api_router.include_router(_auth_router)
@@ -151,6 +152,7 @@ api_router.include_router(_forum_router)
 api_router.include_router(_publitio_router)
 api_router.include_router(_system_health_router)
 api_router.include_router(_ai_router)
+api_router.include_router(_referral_router)
 
 app.include_router(api_router)
 
@@ -308,6 +310,8 @@ async def startup_db():
         await db.rewards_leaderboard.create_index([("user_id", 1), ("month", 1)], unique=True)
         await db.rewards_point_logs.create_index([("user_id", 1), ("created_at", -1)])
         await db.rewards_promotions.create_index("is_active")
+        await db.users.create_index("referral_code", sparse=True)
+        await db.referral_events.create_index([("user_id", 1), ("created_at", -1)])
         logger.info("Database indexes created")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
