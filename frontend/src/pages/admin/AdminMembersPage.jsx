@@ -49,7 +49,8 @@ export const AdminMembersPage = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [viewEditForm, setViewEditForm] = useState({
     full_name: '',
-    timezone: ''
+    timezone: '',
+    merin_referral_code: ''
   });
   
   // License state
@@ -82,7 +83,7 @@ export const AdminMembersPage = () => {
   // Form states
   const [newRole, setNewRole] = useState('basic_admin');
   const [secretCode, setSecretCode] = useState('');
-  const [editForm, setEditForm] = useState({ full_name: '', timezone: '' });
+  const [editForm, setEditForm] = useState({ full_name: '', timezone: '', merin_referral_code: '' });
   const [tempPassword, setTempPassword] = useState('');
 
   // Check if can see account value (super_admin or master_admin only)
@@ -158,7 +159,8 @@ export const AdminMembersPage = () => {
     setIsEditingProfile(false);
     setViewEditForm({
       full_name: member.full_name || '',
-      timezone: member.timezone || 'UTC'
+      timezone: member.timezone || 'UTC',
+      merin_referral_code: member.merin_referral_code || ''
     });
     try {
       const res = await api.get(`/admin/members/${member.id}`);
@@ -176,6 +178,7 @@ export const AdminMembersPage = () => {
     setEditForm({
       full_name: member.full_name || '',
       timezone: member.timezone || 'UTC',
+      merin_referral_code: member.merin_referral_code || '',
     });
     setEditDialogOpen(true);
   };
@@ -185,6 +188,7 @@ export const AdminMembersPage = () => {
       await api.put(`/admin/members/${selectedMember.id}`, {
         full_name: editForm.full_name,
         timezone: editForm.timezone,
+        merin_referral_code: editForm.merin_referral_code || undefined,
       });
       toast.success('Member updated successfully');
       setEditDialogOpen(false);
@@ -199,6 +203,7 @@ export const AdminMembersPage = () => {
       await api.put(`/admin/members/${selectedMember.id}`, {
         full_name: viewEditForm.full_name,
         timezone: viewEditForm.timezone,
+        merin_referral_code: viewEditForm.merin_referral_code || undefined,
       });
       toast.success('Profile updated successfully');
       setIsEditingProfile(false);
@@ -208,7 +213,8 @@ export const AdminMembersPage = () => {
         user: {
           ...prev.user,
           full_name: viewEditForm.full_name,
-          timezone: viewEditForm.timezone
+          timezone: viewEditForm.timezone,
+          merin_referral_code: viewEditForm.merin_referral_code,
         }
       }));
       loadMembers();
@@ -851,7 +857,8 @@ export const AdminMembersPage = () => {
                       onClick={() => {
                         setViewEditForm({
                           full_name: memberDetails.user.full_name || '',
-                          timezone: memberDetails.user.timezone || 'UTC'
+                          timezone: memberDetails.user.timezone || 'UTC',
+                          merin_referral_code: memberDetails.user.merin_referral_code || ''
                         });
                         setIsEditingProfile(true);
                       }}
@@ -911,6 +918,16 @@ export const AdminMembersPage = () => {
                           <SelectItem value="UTC">UTC</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div>
+                      <Label className="text-zinc-300">Merin Referral Code</Label>
+                      <Input
+                        value={viewEditForm.merin_referral_code}
+                        onChange={(e) => setViewEditForm({ ...viewEditForm, merin_referral_code: e.target.value.toUpperCase() })}
+                        className="input-dark mt-1 font-mono uppercase"
+                        placeholder="e.g. BDVMAF"
+                        data-testid="view-edit-merin-code"
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
@@ -1349,6 +1366,17 @@ export const AdminMembersPage = () => {
                   <SelectItem value="UTC">UTC</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="text-zinc-300">Merin Referral Code</Label>
+              <Input
+                value={editForm.merin_referral_code}
+                onChange={(e) => setEditForm({ ...editForm, merin_referral_code: e.target.value.toUpperCase() })}
+                className="input-dark mt-1 font-mono uppercase"
+                placeholder="e.g. BDVMAF"
+                data-testid="edit-merin-code-input"
+              />
+              <p className="text-[10px] text-zinc-500 mt-1">Member's personal Merin Global Trading referral code</p>
             </div>
             <Button onClick={handleSaveEdit} className="w-full btn-primary" data-testid="save-edit-button">
               Save Changes

@@ -505,6 +505,11 @@ export default function ForumPostPage() {
               {post.edited && (
                 <span className="text-[10px] text-zinc-600 italic">edited</span>
               )}
+              {post.merged_from && (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center gap-1" data-testid="merged-tag">
+                  <Merge className="w-3 h-3" /> Merged
+                </span>
+              )}
             </div>
             {editingPost ? (
               <div className="space-y-2">
@@ -781,6 +786,31 @@ export default function ForumPostPage() {
             )}
           </div>
         </div>
+
+        {/* Merge Info */}
+        {post.merge_info && (
+          <div className="p-4 rounded-lg bg-purple-500/[0.03] border border-purple-500/20" data-testid="merge-info-sidebar">
+            <h3 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Merge className="w-3.5 h-3.5" /> Merged Post
+            </h3>
+            <div className="space-y-2 text-xs">
+              <div>
+                <p className="text-zinc-500">Merged from:</p>
+                <p className="text-purple-300 font-medium mt-0.5">{post.merge_info.source_title}</p>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-500">
+                <span>{post.merge_info.comments_moved} comment{post.merge_info.comments_moved !== 1 ? 's' : ''} moved</span>
+              </div>
+              {post.merge_info.merged_at && (
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span>Merged {new Date(post.merge_info.merged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              )}
+              <p className="text-zinc-600 text-[10px]">by {post.merge_info.merged_by_name}</p>
+            </div>
+          </div>
+        )}
 
         {/* Solution Validation */}
         {post.status === 'closed' && post.best_answer_id && (

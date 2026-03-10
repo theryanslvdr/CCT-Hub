@@ -248,6 +248,21 @@ async def get_post(
         await _enrich_comment_votes(c, user["id"])
 
     post["comments"] = comments
+
+    # Enrich merge info if this post has merged content
+    if post.get("merged_from"):
+        merge_log = await db.forum_merge_logs.find_one(
+            {"target_post_id": post_id}, {"_id": 0}
+        )
+        if merge_log:
+            post["merge_info"] = {
+                "source_title": merge_log.get("source_title", "Deleted post"),
+                "source_post_id": merge_log.get("source_post_id"),
+                "merged_by_name": merge_log.get("merged_by_name", "Admin"),
+                "merged_at": merge_log.get("created_at"),
+                "comments_moved": merge_log.get("comments_moved", 0),
+            }
+
     return post
 
 

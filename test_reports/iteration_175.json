@@ -1,0 +1,58 @@
+{
+  "summary": "Iteration 175: Tested Merged Forum Post indicators and Admin Merin Referral Code management. Backend: 11/12 tests passed (1 skipped - no merged posts in DB to test merge_info). Frontend: All UI elements verified. Login works, Forum page loads with proper data-testids, Admin Members page shows Merin Referral Code input in view dialog edit mode.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "critical": [],
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_175_merged_posts_merin.py",
+    "/app/test_reports/pytest/pytest_iteration_175.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "92% (11/12, 1 skipped)", "frontend": "100%"},
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 175 added: 1) Merged post indicator - 'Merged' tag (data-testid='merged-tag') appears near post title + merge-info-sidebar (data-testid='merge-info-sidebar') in aside when post.merged_from exists. merge_info object includes source_title, merged_at, comments_moved, merged_by_name from forum_merge_logs collection. No merged posts exist in test DB to verify live data. 2) Admin Merin code management - PUT /api/admin/members/{user_id} with merin_referral_code field updates user's code. View dialog edit mode has Merin Referral Code input (data-testid='view-edit-merin-code'). Edit dialog has edit-merin-code-input. Backend verified: code stored as uppercase, empty string clears field. Test member id=a9566813-3880-47c5-8703-7fa22fdb601d has TESTCODE set.",
+  "tests_executed": {
+    "backend_health": {"status": "PASS", "notes": "Server healthy"},
+    "login_endpoint": {"status": "PASS", "notes": "Returns access_token"},
+    "forum_posts_list": {"status": "PASS", "notes": "Returns posts array with total count"},
+    "get_single_post": {"status": "PASS", "notes": "Returns full post with comments"},
+    "post_with_merged_from_has_merge_info": {"status": "SKIPPED", "notes": "No merged posts in DB to verify merge_info object"},
+    "post_without_merged_from_no_merge_info": {"status": "PASS", "notes": "Non-merged posts correctly have no merge_info"},
+    "get_admin_members_list": {"status": "PASS", "notes": "Returns members array with pagination"},
+    "member_object_has_merin_referral_code_field": {"status": "PASS", "notes": "Field present on member objects"},
+    "update_member_merin_referral_code": {"status": "PASS", "notes": "PUT updates code, stored uppercase"},
+    "update_merin_code_empty_string_clears": {"status": "PASS", "notes": "Empty string accepted"},
+    "get_member_details_returns_merin_code": {"status": "PASS", "notes": "User object includes merin_referral_code"},
+    "frontend_login": {"status": "PASS", "notes": "Login redirects to dashboard"},
+    "frontend_forum_page_loads": {"status": "PASS", "notes": "Community Forum page loads correctly"},
+    "frontend_forum_post_page_elements": {"status": "PASS", "notes": "data-testid='forum-post-page', 'back-to-forum', 'post-details-sidebar' all present"},
+    "frontend_merged_tag_not_present_on_non_merged": {"status": "PASS", "notes": "No merged-tag on non-merged posts (expected)"},
+    "frontend_admin_members_page_loads": {"status": "PASS", "notes": "Member Management page loads"},
+    "frontend_view_dialog_edit_merin_code": {"status": "PASS", "notes": "data-testid='view-edit-merin-code' found in view dialog edit mode"}
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Rewards Platform external API"]
+  },
+  "code_review_notes": {
+    "forum.py_lines_253-265": "merge_info enrichment correctly queries forum_merge_logs when post.merged_from exists, returns source_title, source_post_id, merged_by_name, merged_at, comments_moved",
+    "admin_routes.py_line_77": "merin_referral_code added to AdminUserUpdate model",
+    "admin_routes.py_line_1091-1092": "merin_referral_code update handler correctly strips and uppercases the value",
+    "ForumPostPage.jsx_line_509": "merged-tag badge with data-testid rendered when post.merged_from exists",
+    "ForumPostPage.jsx_lines_791-813": "merge-info-sidebar section with data-testid rendered when post.merge_info exists",
+    "AdminMembersPage.jsx_lines_926-931": "view-edit-merin-code input in view dialog edit mode",
+    "AdminMembersPage.jsx_lines_1371-1379": "edit-merin-code-input in standalone edit dialog"
+  }
+}

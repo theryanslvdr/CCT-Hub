@@ -74,6 +74,8 @@ class AdminUserUpdate(BaseModel):
     allowed_dashboards: Optional[List[str]] = None
     timezone: Optional[str] = None
     referral_code: Optional[str] = None
+    merin_referral_code: Optional[str] = None
+    trading_start_date: Optional[str] = None
 
 class TempPasswordSet(BaseModel):
     temp_password: str
@@ -1086,6 +1088,8 @@ async def update_member(user_id: str, data: AdminUserUpdate, user: dict = Depend
         update_data["timezone"] = data.timezone
     if data.lot_size is not None:
         update_data["lot_size"] = data.lot_size
+    if data.merin_referral_code is not None:
+        update_data["merin_referral_code"] = data.merin_referral_code.strip().upper() if data.merin_referral_code else ""
     
     # Only super_admin or master_admin can update allowed_dashboards
     if data.allowed_dashboards is not None and user.get("role") in ["super_admin", "master_admin"]:
