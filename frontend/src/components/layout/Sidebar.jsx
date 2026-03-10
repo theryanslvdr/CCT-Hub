@@ -232,9 +232,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const navLinkClass = ({ isActive }) => 
     `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
       isActive 
-        ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' 
-        : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+        ? 'text-orange-400 bg-orange-500/[0.07] shadow-[0_0_20px_rgba(249,115,22,0.04)] border border-orange-500/[0.12]' 
+        : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent'
     }`;
+  const navLinkStyle = (isActive) => isActive ? {
+    background: 'rgba(249,115,22,0.08)',
+    border: '1px solid rgba(249,115,22,0.12)',
+    boxShadow: '0 0 20px rgba(249,115,22,0.04)',
+  } : { border: '1px solid transparent' };
 
   // Special class for hidden features - purple text on hover
   const hiddenNavLinkClass = ({ isActive }) => 
@@ -311,7 +316,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const hasFavicon = platformSettings?.favicon_url;
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''} flex flex-col`}>
+    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''} flex flex-col`} style={{ background: 'linear-gradient(180deg, #0c0c0c 0%, #080808 100%)', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
       {/* Logo Section */}
       <div className="p-5 pb-4">
         <div className="flex items-center gap-3">
@@ -538,7 +543,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       {/* Navigation - Main Member Items */}
       <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
         {/* Core section */}
-        {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-2 pb-1">Core</p>}
+        {!collapsed && <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] px-3 pt-3 pb-1.5 font-semibold">Core</p>}
         {getVisibleMemberItems().filter(i => ['dashboard', 'profit_tracker', 'trade_monitor'].includes(i.id)).map((item) => (
           <NavLink 
             key={item.path} 
@@ -561,7 +566,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           if (growthItems.length === 0) return null;
           return (
             <>
-              {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Growth</p>}
+              {!collapsed && <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] px-3 pt-4 pb-1.5 font-semibold">Growth</p>}
               {growthItems.map((item) => (
                 <NavLink 
                   key={item.path} 
@@ -585,7 +590,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           if (communityItems.length === 0) return null;
           return (
             <>
-              {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Community</p>}
+              {!collapsed && <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] px-3 pt-4 pb-1.5 font-semibold">Community</p>}
               {communityItems.map((item) => (
                 <NavLink 
                   key={item.path} 
@@ -606,7 +611,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         {/* Hidden Features (Master Admin only) - No section title, just crown icons */}
         {canAccessHiddenFeatures() && !simulatedView && (
           <>
-            {!collapsed && <p className="text-[10px] text-zinc-600 uppercase tracking-widest px-3 pt-4 pb-1">Tools</p>}
+            {!collapsed && <p className="text-[9px] text-zinc-600 uppercase tracking-[0.2em] px-3 pt-4 pb-1.5 font-semibold">Tools</p>}
             
             {hiddenFeatures.map((item) => (
               <NavLink 
@@ -632,7 +637,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
       {/* Admin Section - Collapsible, anchored at bottom */}
       {((isAdmin() && !simulatedView) || (simulatedView && ['basic_admin', 'super_admin', 'master_admin'].includes(simulatedView.role))) && (
-        <div className="px-3 pb-2 border-t border-white/[0.06]/50 pt-2">
+        <div className="px-3 pb-2 border-t border-white/[0.03] pt-2">
           <button
             onClick={() => setAdminExpanded(!adminExpanded)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors"
@@ -692,7 +697,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       )}
 
       {/* User Profile Section - Fixed at Bottom */}
-      <div className="p-3 border-t border-white/[0.06]">
+      <div className="p-3 border-t border-white/[0.03]">
         {!collapsed ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -43,9 +43,13 @@ function PostCard({ post, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-lg bg-[#0d0d0d]/60 border transition-all group ${
-        post.pinned ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/[0.06] hover:border-zinc-600'
+      className={`w-full text-left p-5 rounded-xl transition-all duration-200 group ${
+        post.pinned ? 'border border-amber-500/20 bg-amber-500/[0.03]' : 'hover:bg-white/[0.02]'
       }`}
+      style={post.pinned ? {} : {
+        background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))',
+        border: '1px solid rgba(255,255,255,0.04)',
+      }}
       data-testid={`forum-post-${post.id}`}
     >
       <div className="flex items-start gap-3">
@@ -169,7 +173,7 @@ function TopContributorsCard({ contributors }) {
   const medals = ['text-amber-400', 'text-zinc-400', 'text-amber-700'];
 
   return (
-    <div className="p-4 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06]" data-testid="top-contributors-section">
+    <div className="p-4 rounded-xl" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))', border: '1px solid rgba(255,255,255,0.04)' }} data-testid="top-contributors-section">
       <p className="text-xs font-semibold text-zinc-300 mb-3 flex items-center gap-1.5">
         <Trophy className="w-4 h-4 text-amber-400" /> Top Contributors
       </p>
@@ -327,9 +331,9 @@ export default function ForumListPage() {
                 { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
                 { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
               ].map(s => (
-                <div key={s.label} className="p-2.5 rounded-lg bg-[#111111]/80 border border-white/[0.06] text-center">
-                  <p className={`text-lg font-bold font-mono ${s.color}`}>{s.value}</p>
-                  <p className="text-[9px] text-zinc-600 uppercase tracking-wider">{s.label}</p>
+                <div key={s.label} className="p-3 rounded-xl text-center" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.7), rgba(10,10,10,0.9))', border: '1px solid rgba(255,255,255,0.04)' }}>
+                  <p className={`text-xl font-bold font-mono ${s.color}`}>{s.value}</p>
+                  <p className="text-[9px] text-zinc-600 uppercase tracking-widest mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -369,10 +373,10 @@ export default function ForumListPage() {
                 <button
                   key={c}
                   onClick={() => { setCategoryFilter(c); setPage(1); }}
-                  className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${
                     categoryFilter === c 
-                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' 
-                      : 'bg-transparent text-zinc-500 border-white/[0.06] hover:text-zinc-300 hover:border-white/[0.1]'
+                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/15 shadow-[0_0_12px_rgba(249,115,22,0.08)]' 
+                      : 'bg-transparent text-zinc-500 border-white/[0.04] hover:text-zinc-300 hover:border-white/[0.08]'
                   }`}
                   data-testid={`category-${c || 'all'}`}
                 >

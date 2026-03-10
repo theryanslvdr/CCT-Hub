@@ -338,14 +338,14 @@ export const DashboardPage = () => {
       )}
 
       {/* Welcome Section - Mobile: 2 rows when signal active */}
-      <div className="glass-card p-4 md:p-6">
+      <div className="glass-card-elevated p-5 md:p-7">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           {/* Row 1: Greeting */}
           <div>
-            <h2 className="text-xl md:text-2xl font-bold text-white">
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
               Welcome back, {displayName}!
             </h2>
-            <p className="text-zinc-400 text-sm md:text-base mt-1">
+            <p className="text-zinc-500 text-sm mt-1.5">
               Here&apos;s your trading overview for today.
             </p>
           </div>
@@ -396,20 +396,26 @@ export const DashboardPage = () => {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
         {kpiCards.map((card, index) => {
           const Icon = card.icon;
-          const colorClasses = {
+          const accentClass = {
+            blue: 'accent-orange',
+            emerald: 'accent-green',
+            cyan: 'accent-blue',
+            purple: 'accent-purple',
+          };
+          const iconBg = {
             blue: 'from-orange-500 to-amber-600',
             emerald: 'from-emerald-500 to-emerald-600',
             cyan: 'from-teal-500 to-teal-600',
             purple: 'from-purple-500 to-purple-600',
           };
-          const glowClasses = {
-            blue: 'from-orange-500/[0.06]',
-            emerald: 'from-emerald-500/[0.06]',
-            cyan: 'from-teal-500/[0.06]',
-            purple: 'from-purple-500/[0.06]',
+          const iconGlow = {
+            blue: '0 0 20px rgba(249,115,22,0.25)',
+            emerald: '0 0 20px rgba(16,185,129,0.25)',
+            cyan: '0 0 20px rgba(20,184,166,0.25)',
+            purple: '0 0 20px rgba(139,92,246,0.25)',
           };
 
           const isCurrencyCard = card.format === 'currency';
@@ -434,59 +440,63 @@ export const DashboardPage = () => {
             : `${formatNumber(card.value, 1)}%`;
 
           return (
-            <Card key={index} className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] hover:border-white/[0.1] transition-all rounded-xl" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
-              <div className={`absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br ${glowClasses[card.color]} to-transparent rounded-full blur-2xl pointer-events-none`} />
-              <CardContent className="p-3 md:p-5 relative">
-                <div className="flex items-start justify-between gap-1 md:gap-2">
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-center gap-1">
-                      <p className="text-[10px] md:text-[11px] text-zinc-500 uppercase tracking-wider font-medium truncate">{card.title}</p>
-                      {isCurrencyCard && (
-                        <button 
-                          onClick={toggleValuesHidden} 
-                          className="text-zinc-600 hover:text-zinc-400 transition-colors p-0.5"
-                          data-testid={`toggle-hide-${card.title.toLowerCase().replace(/\s/g, '-')}`}
-                        >
-                          {valuesHidden ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        </button>
-                      )}
-                    </div>
-                    {shouldHide ? (
-                      <p className="text-lg md:text-2xl font-bold font-mono text-white mt-1.5">****</p>
-                    ) : (
-                      <ValueTooltip exactValue={exactValue}>
-                        <p className="text-lg md:hidden font-bold font-mono text-white mt-1.5">{mobileValue}</p>
-                        <p className="hidden md:block text-2xl font-bold font-mono text-white mt-1.5">{desktopValue}</p>
-                      </ValueTooltip>
-                    )}
-                    {card.subtitle && (
-                      <p className={`text-[9px] md:text-xs mt-1 truncate ${card.value > 100 ? 'text-emerald-400' : card.value === 100 ? 'text-orange-400' : 'text-amber-400'}`}>
-                        {card.subtitle}
-                      </p>
+            <div 
+              key={index} 
+              className={`kpi-card ${accentClass[card.color] || ''} p-4 md:p-6`}
+              data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-[10px] md:text-[11px] text-zinc-500 uppercase tracking-widest font-medium truncate">{card.title}</p>
+                    {isCurrencyCard && (
+                      <button 
+                        onClick={toggleValuesHidden} 
+                        className="text-zinc-600 hover:text-zinc-400 transition-colors p-0.5"
+                        data-testid={`toggle-hide-${card.title.toLowerCase().replace(/\s/g, '-')}`}
+                      >
+                        {valuesHidden ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      </button>
                     )}
                   </div>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br ${colorClasses[card.color]} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                    <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                  </div>
+                  {shouldHide ? (
+                    <p className="text-xl md:text-3xl font-bold font-mono text-white mt-2">****</p>
+                  ) : (
+                    <ValueTooltip exactValue={exactValue}>
+                      <p className="text-xl md:hidden font-bold font-mono text-white mt-2">{mobileValue}</p>
+                      <p className="hidden md:block text-3xl font-bold font-mono text-white mt-2 tracking-tight">{desktopValue}</p>
+                    </ValueTooltip>
+                  )}
+                  {card.subtitle && (
+                    <p className={`text-[9px] md:text-xs mt-1.5 truncate font-medium ${card.value > 100 ? 'text-emerald-400' : card.value === 100 ? 'text-orange-400' : 'text-amber-400'}`}>
+                      {card.subtitle}
+                    </p>
+                  )}
                 </div>
-                {card.change !== undefined && card.changeFormat && !shouldHide && (
-                  <div className="mt-2 md:mt-3 flex items-center gap-1 flex-wrap">
-                    {card.change >= 100 ? (
-                      <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 text-emerald-400" />
-                    ) : (
-                      <ArrowDownRight className="w-3 h-3 md:w-4 md:h-4 text-red-400" />
-                    )}
-                    <span className={`text-[10px] md:text-xs font-medium ${card.change >= 100 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {card.changeFormat === 'percent' 
-                        ? `${formatNumber(card.change, 1)}%` 
-                        : <><span className="md:hidden">{formatCurrencyCompact(Math.abs(card.change))}</span><span className="hidden md:inline">{formatCurrency(Math.abs(card.change))}</span></>
-                      }
-                    </span>
-                    <span className="text-zinc-600 text-[9px] md:text-xs">vs projected</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                <div 
+                  className={`w-9 h-9 md:w-11 md:h-11 rounded-xl bg-gradient-to-br ${iconBg[card.color]} flex items-center justify-center flex-shrink-0`}
+                  style={{ boxShadow: iconGlow[card.color] }}
+                >
+                  <Icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                </div>
+              </div>
+              {card.change !== undefined && card.changeFormat && !shouldHide && (
+                <div className="mt-3 md:mt-4 flex items-center gap-1.5 flex-wrap">
+                  {card.change >= 100 ? (
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <ArrowDownRight className="w-3.5 h-3.5 text-red-400" />
+                  )}
+                  <span className={`text-[10px] md:text-xs font-semibold ${card.change >= 100 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {card.changeFormat === 'percent' 
+                      ? `${formatNumber(card.change, 1)}%` 
+                      : <><span className="md:hidden">{formatCurrencyCompact(Math.abs(card.change))}</span><span className="hidden md:inline">{formatCurrency(Math.abs(card.change))}</span></>
+                    }
+                  </span>
+                  <span className="text-zinc-600 text-[9px] md:text-[11px]">vs projected</span>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
@@ -557,31 +567,31 @@ export const DashboardPage = () => {
       {/* Tabbed Interface for Members */}
       {isMember && !isLicenseeView && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-[#111111] border border-white/[0.06] rounded-xl p-1" data-testid="dashboard-tabs">
+          <TabsList className="grid w-full grid-cols-4 rounded-xl p-1" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.95), rgba(10,10,10,0.98))', border: '1px solid rgba(255,255,255,0.05)' }} data-testid="dashboard-tabs">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
               data-testid="tab-overview"
             >
               <Wallet className="w-4 h-4" /> Overview
             </TabsTrigger>
             <TabsTrigger 
               value="profit" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
               data-testid="tab-profit"
             >
               <TrendingUp className="w-4 h-4" /> Profit
             </TabsTrigger>
             <TabsTrigger 
               value="trades" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
               data-testid="tab-trades"
             >
               <History className="w-4 h-4" /> Trades
             </TabsTrigger>
             <TabsTrigger 
               value="charts" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
               data-testid="tab-charts"
             >
               <BarChart3 className="w-4 h-4" /> Charts
@@ -592,9 +602,9 @@ export const DashboardPage = () => {
           <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Performance Chart */}
-              <Card className="glass-card lg:col-span-2">
+              <Card className="glass-card-elevated lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-white">Performance Overview</CardTitle>
+                  <CardTitle className="text-white text-lg">Performance Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {chartData.length > 0 ? (

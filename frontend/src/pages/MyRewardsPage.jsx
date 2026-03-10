@@ -634,7 +634,7 @@ function StreakFreezeSection() {
             const totalCost = ft.cost * qty;
             const canAfford = (freezeData?.available_points || 0) >= totalCost;
             return (
-              <div key={ft.key} className={`p-4 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] hover:border-${ft.color}-500/30 transition-all`} data-testid={`streak-freeze-${ft.key}`}>
+              <div key={ft.key} className={`p-4 rounded-xl rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-${ft.color}-500/30 transition-all`} data-testid={`streak-freeze-${ft.key}`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`p-2 rounded-lg bg-${ft.color}-500/10`}>
                     <Icon className={`w-5 h-5 text-${ft.color}-400`} />
@@ -884,7 +884,7 @@ export default function MyRewardsPage() {
       {/* Top stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Points balance */}
-        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-points-card">
+        <Card className="relative overflow-hidden glass-card rounded-xl" data-testid="rewards-points-card">
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-amber-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
           <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between">
@@ -905,7 +905,7 @@ export default function MyRewardsPage() {
         </Card>
 
         {/* Level with Progress */}
-        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-level-card">
+        <Card className="relative overflow-hidden glass-card rounded-xl" data-testid="rewards-level-card">
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-purple-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
           <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between mb-3">
@@ -947,7 +947,7 @@ export default function MyRewardsPage() {
         </Card>
 
         {/* Rank */}
-        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-rank-card">
+        <Card className="relative overflow-hidden glass-card rounded-xl" data-testid="rewards-rank-card">
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-teal-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
           <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between">

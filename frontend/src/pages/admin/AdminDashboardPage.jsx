@@ -12,16 +12,22 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const StatCard = ({ label, value, subtext, icon: Icon, color, link }) => {
   const Wrapper = link ? Link : 'div';
+  const iconGlow = {
+    'from-orange-500 to-amber-600': 'rgba(249,115,22,0.25)',
+    'from-emerald-500 to-emerald-600': 'rgba(16,185,129,0.25)',
+    'from-teal-500 to-teal-600': 'rgba(20,184,166,0.25)',
+    'from-purple-500 to-purple-600': 'rgba(139,92,246,0.25)',
+    'from-blue-500 to-blue-600': 'rgba(59,130,246,0.25)',
+  };
   return (
-    <Wrapper to={link} className={`relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] hover:border-white/[0.1] rounded-xl p-4 transition-all ${link ? 'cursor-pointer group' : ''}`} data-testid={`admin-stat-${label.toLowerCase().replace(/\s/g, '-')}`}>
-      <div className={`absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br ${color} rounded-full blur-2xl opacity-[0.06] pointer-events-none`} />
+    <Wrapper to={link} className={`kpi-card p-5 transition-all ${link ? 'cursor-pointer group' : ''}`} data-testid={`admin-stat-${label.toLowerCase().replace(/\s/g, '-')}`}>
       <div className="flex items-start justify-between relative">
         <div>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium">{label}</p>
-          <p className="text-2xl font-bold font-mono text-white mt-1">{value}</p>
-          {subtext && <p className="text-[10px] text-zinc-600 mt-0.5">{subtext}</p>}
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">{label}</p>
+          <p className="text-3xl font-bold font-mono text-white mt-2 tracking-tight">{value}</p>
+          {subtext && <p className="text-[10px] text-zinc-600 mt-1">{subtext}</p>}
         </div>
-        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
+        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center`} style={{ boxShadow: `0 0 20px ${iconGlow[color] || 'rgba(249,115,22,0.2)'}` }}>
           <Icon className="w-5 h-5 text-white" />
         </div>
       </div>
@@ -31,7 +37,7 @@ const StatCard = ({ label, value, subtext, icon: Icon, color, link }) => {
 };
 
 const QuickAction = ({ label, desc, icon: Icon, color, link }) => (
-  <Link to={link} className="flex items-center gap-4 p-4 rounded-xl bg-[#111111]/60 border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.03] transition-all group" data-testid={`quick-action-${label.toLowerCase().replace(/\s/g, '-')}`}>
+  <Link to={link} className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/[0.02] transition-all group" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))', border: '1px solid rgba(255,255,255,0.04)' }} data-testid={`quick-action-${label.toLowerCase().replace(/\s/g, '-')}`}>
     <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
       <Icon className="w-5 h-5 text-white" />
     </div>

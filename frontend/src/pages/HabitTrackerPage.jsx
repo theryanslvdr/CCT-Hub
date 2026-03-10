@@ -135,7 +135,7 @@ function SocialGrowthEngine() {
 
       {/* Quiz Cards */}
       {quizzes.length === 0 ? (
-        <div className="p-6 rounded-lg bg-[#0d0d0d]/40 border border-white/[0.06] text-center">
+        <div className="p-6 rounded-lg rounded-xl border border-white/[0.04] bg-white/[0.02] text-center">
           <HelpCircle className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
           <p className="text-sm text-zinc-400">No quizzes published for today yet.</p>
           <p className="text-xs text-zinc-600 mt-1">Check back later — your admin is preparing today's knowledge challenges.</p>
@@ -157,7 +157,7 @@ function SocialGrowthEngine() {
       )}
 
       {/* Level roadmap */}
-      <div className="p-3 rounded-lg bg-[#0d0d0d]/40 border border-white/[0.06]">
+      <div className="p-3 rounded-lg rounded-xl border border-white/[0.04] bg-white/[0.02]">
         <p className="text-[11px] text-zinc-500 font-medium mb-2 uppercase tracking-wider">Growth Roadmap</p>
         <div className="flex items-center gap-1 flex-wrap">
           {[1, 2, 3, 4, 5, 6, 7].map((l) => {
@@ -363,19 +363,19 @@ const HabitTrackerPage = () => {
 
       {/* Streak badges */}
       <div className="grid grid-cols-3 gap-3" data-testid="streak-badges">
-        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+        <div className="relative overflow-hidden p-4 rounded-xl glass-card text-center">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-orange-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
           <Flame className={`w-6 h-6 mx-auto mb-1.5 ${streak.current_streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
           <p className="text-3xl font-bold font-mono text-white">{streak.current_streak}</p>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Current Streak</p>
         </div>
-        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+        <div className="relative overflow-hidden p-4 rounded-xl glass-card text-center">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-amber-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
           <Trophy className={`w-6 h-6 mx-auto mb-1.5 ${streak.longest_streak > 0 ? 'text-amber-400' : 'text-zinc-600'}`} />
           <p className="text-3xl font-bold font-mono text-white">{streak.longest_streak}</p>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Best Streak</p>
         </div>
-        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+        <div className="relative overflow-hidden p-4 rounded-xl glass-card text-center">
           <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-emerald-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
           <Calendar className="w-6 h-6 mx-auto mb-1.5 text-emerald-400" />
           <p className="text-3xl font-bold font-mono text-white">{streak.total_days}</p>
@@ -434,7 +434,7 @@ const HabitTrackerPage = () => {
                         )}
 
                         {habit.action_type === 'send_invite' && habit.action_data && (
-                          <div className="mt-3 p-3 bg-[#0d0d0d]/60 rounded-lg border border-white/[0.06]">
+                          <div className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
                             <p className="text-xs text-zinc-500 mb-1.5">Pre-written message:</p>
                             <p className="text-sm text-zinc-300 whitespace-pre-wrap">{habit.action_data}</p>
                             <Button

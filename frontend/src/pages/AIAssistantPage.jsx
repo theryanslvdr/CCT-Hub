@@ -135,7 +135,7 @@ const AIAssistantPage = () => {
   return (
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-0 -m-3 sm:-m-4 md:-m-6" data-testid="ai-assistant-page">
       {/* Sidebar - sessions */}
-      <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden border-r border-white/[0.06] bg-[#0a0a0a] flex flex-col`}>
+      <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden flex flex-col`} style={{ background: 'rgba(8,8,8,0.95)', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
         {/* Assistant selector tabs */}
         <div className="p-3 border-b border-white/[0.06] flex gap-1">
           {assistants.map(a => {
@@ -192,7 +192,7 @@ const AIAssistantPage = () => {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] bg-[#0d0d0d]/50">
+        <div className="flex items-center gap-3 px-4 py-3" style={{ background: 'rgba(10,10,10,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
           <button onClick={() => setShowSidebar(!showSidebar)} className="text-zinc-500 hover:text-white transition-colors md:block hidden">
             <ChevronLeft className={`w-5 h-5 transition-transform ${!showSidebar ? 'rotate-180' : ''}`} />
           </button>
@@ -269,7 +269,7 @@ const AIAssistantPage = () => {
         </div>
 
         {/* Input area */}
-        <div className="p-4 border-t border-white/[0.06] bg-[#0d0d0d]/50">
+        <div className="p-4" style={{ background: 'rgba(10,10,10,0.6)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           <div className="flex gap-2 max-w-3xl mx-auto">
             <input
               ref={inputRef}
@@ -278,7 +278,8 @@ const AIAssistantPage = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               placeholder={`Ask ${activeAssistant?.display_name || 'AI'}...`}
-              className="flex-1 bg-[#111111] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/30 focus:ring-1 focus:ring-orange-500/20 focus:outline-none transition-all"
+              className="flex-1 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/30 focus:ring-1 focus:ring-orange-500/20 focus:outline-none transition-all"
+              style={{ background: 'rgba(14,14,14,0.95)', border: '1px solid rgba(255,255,255,0.06)' }}
               disabled={sending}
               data-testid="chat-input"
             />

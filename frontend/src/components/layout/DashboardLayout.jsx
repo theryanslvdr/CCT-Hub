@@ -216,7 +216,7 @@ export const DashboardLayout = () => {
 
   return (
     <ApiKeyStatusContext.Provider value={{ missingKeys, hasMissingKeys: missingKeys.length > 0 }}>
-      <div className="min-h-screen bg-background grid-bg flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ background: '#070707' }}>
         {/* Desktop Sidebar */}
         <div className="hidden md:block">
           <Sidebar

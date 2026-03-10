@@ -66,7 +66,7 @@ const MemberProfilePage = () => {
       </Link>
 
       {/* Profile Header Card */}
-      <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-2xl">
+      <Card className="relative overflow-hidden glass-card rounded-2xl">
         {/* Banner */}
         <div className="h-24 bg-gradient-to-br from-orange-500/20 via-amber-600/10 to-transparent relative">
           <div className="absolute -top-8 -right-8 w-32 h-32 bg-orange-500/[0.1] rounded-full blur-3xl" />
@@ -106,7 +106,7 @@ const MemberProfilePage = () => {
         ].map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06]" data-testid={`profile-stat-${s.label.toLowerCase().replace(/\s/g, '-')}`}>
+            <div key={i} className="relative overflow-hidden p-4 rounded-xl glass-card" data-testid={`profile-stat-${s.label.toLowerCase().replace(/\s/g, '-')}`}>
               <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br ${s.bg} to-transparent rounded-full blur-xl pointer-events-none`} />
               <Icon className={`w-5 h-5 ${s.color} mb-2`} />
               <p className="text-xl font-bold font-mono text-white">{s.value}</p>
@@ -118,7 +118,7 @@ const MemberProfilePage = () => {
 
       {/* Badges */}
       {badges && badges.length > 0 && (
-        <Card className="bg-[#111111]/80 border border-white/[0.06] rounded-xl">
+        <Card className="glass-card rounded-xl">
           <CardContent className="p-5">
             <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-400" /> Badges Earned
@@ -139,7 +139,7 @@ const MemberProfilePage = () => {
       )}
 
       {/* Activity Summary */}
-      <Card className="bg-[#111111]/80 border border-white/[0.06] rounded-xl">
+      <Card className="glass-card rounded-xl">
         <CardContent className="p-5">
           <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
             <Target className="w-4 h-4 text-emerald-400" /> Activity

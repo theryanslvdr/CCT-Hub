@@ -335,57 +335,75 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#0a0a0a' }}>
-      {/* Subtle dot pattern background */}
-      <div className="absolute inset-0 grid-bg opacity-50" />
-      {/* Top-left warm glow */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-orange-500/[0.07] rounded-full blur-[120px]" />
-      {/* Bottom-right subtle glow */}
-      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/[0.04] rounded-full blur-[100px]" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#050505' }}>
+      {/* Particle star background */}
+      <div className="absolute inset-0 star-bg" />
+      {/* Ambient glow - top center */}
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-500/[0.04] rounded-full blur-[150px]" />
+      {/* Ambient glow - bottom right */}
+      <div className="absolute -bottom-40 -right-20 w-[400px] h-[400px] bg-amber-500/[0.03] rounded-full blur-[130px]" />
       
-      <div className="relative z-10 w-full max-w-md">
-        {/* Glass card with orange border glow */}
-        <div className="bg-[#111111]/90 border border-white/[0.08] backdrop-blur-xl rounded-2xl p-8 shadow-[0_0_60px_-15px_rgba(249,115,22,0.15)]">
+      <div className="relative z-10 w-full max-w-[420px]">
+        {/* Premium glass card */}
+        <div 
+          className="backdrop-blur-2xl rounded-2xl p-9"
+          style={{
+            background: 'linear-gradient(145deg, rgba(18,18,18,0.92), rgba(10,10,10,0.96))',
+            border: '1px solid rgba(255,255,255,0.07)',
+            boxShadow: '0 8px 60px rgba(0,0,0,0.6), 0 0 80px rgba(249,115,22,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
+        >
           {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-10">
             {platformSettings?.logo_url ? (
               <img 
                 src={platformSettings.logo_url} 
                 alt={platformSettings?.platform_name || 'Platform'} 
-                className="max-w-[200px] max-h-[80px] object-contain mb-3"
+                className="max-w-[200px] max-h-[80px] object-contain mb-4"
               />
             ) : (
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(249,115,22,0.4)]">
-                <TrendingUp className="w-7 h-7 text-white" />
+              <div 
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                style={{
+                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                  boxShadow: '0 0 40px rgba(249,115,22,0.35), 0 4px 16px rgba(0,0,0,0.4)',
+                }}
+              >
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
             )}
             {platformSettings?.login_title && (
               <h1 className="text-2xl font-bold text-white tracking-tight">{platformSettings.login_title}</h1>
             )}
-            <p className="text-zinc-500 text-sm mt-1">{platformSettings?.login_tagline || platformSettings?.tagline || 'Finance Center'}</p>
+            <p className="text-zinc-500 text-sm mt-1.5">{platformSettings?.login_tagline || platformSettings?.tagline || 'Your Trading Finance Hub'}</p>
           </div>
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-3" data-testid="login-error">
+            <div className="mb-6 p-3.5 rounded-xl bg-red-500/8 border border-red-500/15 flex items-start gap-3" data-testid="login-error">
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-400 text-xs uppercase tracking-wider">Email</Label>
+              <Label htmlFor="email" className="text-zinc-500 text-[11px] uppercase tracking-widest font-medium">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="pl-10 bg-[#0a0a0a] border-white/[0.06] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 h-11"
+                  className="pl-11 h-12 rounded-xl text-zinc-100 placeholder:text-zinc-600"
+                  style={{
+                    background: 'rgba(6,6,6,0.8)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    transition: 'all 0.2s ease',
+                  }}
                   required
                   data-testid="login-email"
                 />
@@ -393,16 +411,21 @@ export const LoginPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-400 text-xs uppercase tracking-wider">Password</Label>
+              <Label htmlFor="password" className="text-zinc-500 text-[11px] uppercase tracking-widest font-medium">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 bg-[#0a0a0a] border-white/[0.06] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 h-11"
+                  className="pl-11 h-12 rounded-xl text-zinc-100 placeholder:text-zinc-600"
+                  style={{
+                    background: 'rgba(6,6,6,0.8)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    transition: 'all 0.2s ease',
+                  }}
                   required
                   data-testid="login-password"
                 />
@@ -411,7 +434,12 @@ export const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full h-11 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-lg shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all active:scale-[0.98]"
+              className="w-full h-12 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                border: '1px solid rgba(249,115,22,0.3)',
+                boxShadow: '0 0 30px rgba(249,115,22,0.3), 0 4px 12px rgba(0,0,0,0.4)',
+              }}
               disabled={isLoading}
               data-testid="login-submit"
             >
@@ -422,7 +450,7 @@ export const LoginPage = () => {
           </form>
 
           {/* Forgot Password Link */}
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <button
               onClick={() => {
                 setForgotPasswordOpen(true);
@@ -432,7 +460,7 @@ export const LoginPage = () => {
                 setResetNewPassword('');
                 setResetConfirmPassword('');
               }}
-              className="text-zinc-500 hover:text-zinc-300 transition-colors text-sm"
+              className="text-zinc-600 hover:text-zinc-400 transition-colors text-sm"
               data-testid="forgot-password-link"
             >
               Forgot Password?
@@ -440,10 +468,10 @@ export const LoginPage = () => {
           </div>
 
           {/* No Account Link */}
-          <div className="mt-5 text-center">
+          <div className="mt-4 text-center">
             <button
               onClick={handleOpenNoAccount}
-              className="text-orange-400/80 hover:text-orange-400 transition-colors text-sm flex items-center gap-1.5 mx-auto"
+              className="text-orange-500/70 hover:text-orange-400 transition-colors text-sm flex items-center gap-1.5 mx-auto"
             >
               <HelpCircle className="w-4 h-4" />
               Don't have an account/password?
@@ -451,8 +479,8 @@ export const LoginPage = () => {
           </div>
 
           {/* Community notice */}
-          <div className="mt-6 pt-5 border-t border-white/[0.06]">
-            <p className="text-[11px] text-zinc-600 text-center leading-relaxed">
+          <div className="mt-8 pt-6 border-t border-white/[0.04]">
+            <p className="text-[11px] text-zinc-700 text-center leading-relaxed">
               {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
             </p>
           </div>

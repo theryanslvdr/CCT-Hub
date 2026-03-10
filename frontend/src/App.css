@@ -6,7 +6,9 @@
 
 /* Sidebar */
 .sidebar {
-    @apply fixed left-0 top-0 h-full w-64 bg-[#0a0a0a] border-r border-white/[0.06] z-40;
+    @apply fixed left-0 top-0 h-full w-64 z-40;
+    background: linear-gradient(180deg, #0c0c0c 0%, #080808 100%);
+    border-right: 1px solid rgba(255,255,255,0.04);
 }
 
 .sidebar-collapsed {
@@ -18,7 +20,10 @@
 }
 
 .sidebar-item.active {
-    @apply bg-orange-500/10 text-orange-400 border border-orange-500/20;
+    @apply text-orange-400;
+    background: rgba(249,115,22,0.08);
+    border: 1px solid rgba(249,115,22,0.12);
+    box-shadow: 0 0 20px rgba(249,115,22,0.04);
 }
 
 /* Main content area */
@@ -32,7 +37,10 @@
 
 /* Header */
 .app-header {
-    @apply sticky top-0 z-30 h-16 border-b border-white/[0.06] bg-[#0a0a0a]/80 backdrop-blur-xl flex items-center justify-between px-6;
+    @apply sticky top-0 z-30 h-16 flex items-center justify-between px-6;
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
 /* Dashboard grid */
@@ -126,11 +134,15 @@
 
 /* Auth pages */
 .auth-container {
-    @apply min-h-screen flex items-center justify-center p-4 grid-bg;
+    @apply min-h-screen flex items-center justify-center p-4;
+    background: #050505;
 }
 
 .auth-card {
-    @apply glass-card w-full max-w-md p-8;
+    @apply w-full max-w-md p-9 backdrop-blur-2xl rounded-2xl;
+    background: linear-gradient(145deg, rgba(18,18,18,0.92), rgba(10,10,10,0.96));
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 8px 60px rgba(0,0,0,0.6), 0 0 80px rgba(249,115,22,0.06), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 /* Admin pages */
@@ -193,15 +205,18 @@
 
 /* Toast customization */
 [data-sonner-toast] {
-    @apply bg-zinc-900 border border-zinc-800 text-zinc-100 !important;
+    background: linear-gradient(145deg, rgba(20,20,20,0.98), rgba(12,12,12,0.99)) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    color: #e4e4e7 !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
 }
 
 [data-sonner-toast][data-type="success"] {
-    @apply border-emerald-500/30 !important;
+    border-color: rgba(16,185,129,0.2) !important;
 }
 
 [data-sonner-toast][data-type="error"] {
-    @apply border-red-500/30 !important;
+    border-color: rgba(239,68,68,0.2) !important;
 }
 
 
