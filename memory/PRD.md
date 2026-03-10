@@ -133,7 +133,9 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - **Sidebar Profile Link (DONE):** "Affiliate Center" link added to profile dropdown in sidebar (both expanded and collapsed modes) for quick access.
 - **Referral Tracking Update (DONE):** Updated Invite & Earn page to display the onboarding invite link instead of the direct Merin registration link, with direct Merin link shown below as secondary.
 - **Member Lookup (DONE):** "Find a Member" card in Affiliate Center — search by name/email, results show name + masked email + Merin code with copy button. Backend: `GET /api/referrals/lookup-members?q={query}`. Only returns members who have a Merin code set.
-- Tested: iterations 176-177 — 100% pass.
+- **"Who Invited You?" Modal (DONE):** One-time modal pushed to all non-admin members who haven't set their inviter. Non-dismissable — they MUST search and select their inviter via member lookup. Backend: `POST /api/referrals/set-inviter` (accepts inviter_id). Stores `referred_by` (code) and `referred_by_user_id`. Login response now includes `referred_by` field. Admins are excluded.
+- **Admin Inviter Management (DONE):** Admin Members page shows "Inviter" field in read-only view. Edit mode provides inviter lookup (search by name/email) with results dropdown. Admin can also clear a member's inviter. Backend: `PUT /api/admin/members/{id}` with `referred_by_user_id` field.
+- Tested: iterations 176-178 — 100% pass.
 
 ### P3 — Future Features
 - AI for Debt Management
