@@ -19,7 +19,7 @@ import os
 import time
 import jwt
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://platform-refresh-6.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dark-theme-overhaul-4.preview.emergentagent.com').rstrip('/')
 INTERNAL_API_KEY = "_CXCB2Y-ObBIZqqaCzmjEJU1zwe7DMHr8C-tzoef9h0"
 
 # Test credentials

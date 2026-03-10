@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { affiliateAPI, adminAffiliateAPI } from '@/lib/api';
+import { affiliateAPI, adminAffiliateAPI, referralAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageSquare, BookOpen, Image, HelpCircle, Bot, ClipboardCopy, ChevronDown, ChevronUp, Plus, X, Loader2, Trash2 } from 'lucide-react';
+import { MessageSquare, BookOpen, Image, HelpCircle, Bot, ClipboardCopy, ChevronDown, ChevronUp, Plus, X, Loader2, Trash2, UserPlus, Link2, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const CATEGORIES = [
   { key: 'conversation_starters', label: 'Conversation Starters', icon: MessageSquare, color: 'text-orange-400', desc: 'Ready-to-use messages to start inviting conversations' },
@@ -93,20 +94,25 @@ const InlineAddForm = ({ category, onSaved }) => {
 
 const AffiliateCenterPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isAdmin = ['admin', 'basic_admin', 'super_admin', 'master_admin'].includes(user?.role);
   const [resources, setResources] = useState({});
   const [chatbase, setChatbase] = useState({ enabled: false, bot_id: '' });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('conversation_starters');
+  const [inviteData, setInviteData] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
-      const [resRes, cbRes] = await Promise.all([
+      const [resRes, cbRes, trackRes] = await Promise.all([
         affiliateAPI.getResources(),
         affiliateAPI.getChatbase(),
+        referralAPI.getTracking().catch(() => ({ data: null })),
       ]);
       setResources(resRes.data.resources || {});
       setChatbase(cbRes.data);
+      setInviteData(trackRes.data);
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
@@ -119,6 +125,16 @@ const AffiliateCenterPage = () => {
       toast.success('Resource deleted');
       loadData();
     } catch { toast.error('Failed to delete'); }
+  };
+
+  const handleCopyInviteLink = () => {
+    const link = inviteData?.onboarding_invite_link;
+    if (link) {
+      navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success('Invite link copied!');
+      setTimeout(() => setCopied(false), 2500);
+    }
   };
 
   if (loading) {
@@ -137,6 +153,73 @@ const AffiliateCenterPage = () => {
         <h1 className="text-2xl font-bold text-white">Affiliate Center</h1>
         <p className="text-sm text-zinc-400 mt-1">Resources to help you invite and onboard new members</p>
       </div>
+
+      {/* Invite Someone Card */}
+      <Card className="border-orange-500/20 bg-gradient-to-r from-orange-500/[0.06] to-amber-500/[0.02] overflow-hidden" data-testid="invite-someone-card">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+              <UserPlus className="w-6 h-6 text-orange-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-white">Invite Someone</h3>
+              <p className="text-xs text-zinc-400 mt-1 mb-3">
+                Share this link with prospects. It takes them to the onboarding wizard with your Merin code 
+                <span className="text-orange-400 font-mono ml-1">{inviteData?.merin_code || '—'}</span> pre-filled.
+              </p>
+              {inviteData?.onboarding_invite_link ? (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={inviteData.onboarding_invite_link}
+                      readOnly
+                      className="bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs"
+                      data-testid="onboarding-invite-link-input"
+                    />
+                    <Button
+                      onClick={handleCopyInviteLink}
+                      className={`shrink-0 transition-all ${copied ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-orange-500 hover:bg-orange-600'} text-white`}
+                      data-testid="copy-onboarding-invite-link"
+                    >
+                      {copied ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-1.5" /> Copied</>
+                      ) : (
+                        <><ClipboardCopy className="w-4 h-4 mr-1.5" /> Copy</>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-4 text-[11px] text-zinc-500">
+                    <button
+                      onClick={() => navigate('/referral-tracking')}
+                      className="flex items-center gap-1 text-orange-400/70 hover:text-orange-400 transition-colors"
+                      data-testid="view-referral-tracking-link"
+                    >
+                      <Link2 className="w-3 h-3" /> View referral stats
+                    </button>
+                    {inviteData?.invite_link && (
+                      <a
+                        href={inviteData.invite_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        data-testid="direct-merin-link"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Direct Merin signup link
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-amber-400">
+                  Set your Merin referral code in{' '}
+                  <button onClick={() => navigate('/profile')} className="underline hover:text-amber-300">Profile</button>
+                  {' '}to generate your invite link.
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-[#0d0d0d]/60 border border-white/[0.06] w-full flex flex-wrap h-auto gap-1 p-1">

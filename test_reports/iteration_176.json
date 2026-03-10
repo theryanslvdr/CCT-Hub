@@ -1,0 +1,58 @@
+{
+  "summary": "Iteration 176: Tested new features including Admin member update with merin_referral_code and trading_start_date, Referral tracking API returning onboarding_invite_link, Affiliate Center 'Invite Someone' card, and Sidebar Affiliate Center link. Backend: 11/12 passed (1 skipped - no merged posts in DB). Frontend: All features verified.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_176_features.py",
+    "/app/test_reports/pytest/pytest_iteration_176.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_iteration_176_features.py"],
+  "success_rate": {"backend": "92% (11/12, 1 skipped)", "frontend": "100%"},
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123, Test member ID: a9566813-3880-47c5-8703-7fa22fdb601d",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All new features verified: 1) PUT /api/admin/members/{user_id} accepts merin_referral_code (stored uppercase) and trading_start_date fields. 2) GET /api/referrals/tracking returns onboarding_invite_link field with format https://crosscur.rent/onboarding?merin_code={CODE}. 3) Affiliate Center page (/affiliate) shows 'Invite Someone' card with data-testid='invite-someone-card', onboarding link input with data-testid='onboarding-invite-link-input', copy button with data-testid='copy-onboarding-invite-link'. 4) Sidebar has nav-affiliate (data-testid='nav-affiliate') and profile dropdown has sidebar-affiliate-center-link (data-testid='sidebar-affiliate-center-link'). 5) Referral Tracking page (/referral-tracking) shows new onboarding invite link with data-testid='invite-link-display'. 6) Forum merge_info tested - no merged posts in DB to verify but code path verified.",
+  "tests_executed": {
+    "backend_health": {"status": "PASS", "notes": "Server healthy"},
+    "login_endpoint": {"status": "PASS", "notes": "Returns access_token"},
+    "update_merin_referral_code": {"status": "PASS", "notes": "PUT updates code, stored uppercase"},
+    "update_trading_start_date": {"status": "PASS", "notes": "PUT updates trading_start_date for master_admin"},
+    "update_merin_code_empty_clears": {"status": "PASS", "notes": "Empty string clears merin_referral_code"},
+    "referral_tracking_endpoint": {"status": "PASS", "notes": "Returns onboarding_invite_link with correct format https://crosscur.rent/onboarding?merin_code=RYAN_MERIN"},
+    "referral_tracking_returns_referrals_list": {"status": "PASS", "notes": "Returns referrals list and next_milestone"},
+    "forum_posts_list": {"status": "PASS", "notes": "Returns posts array"},
+    "non_merged_post_no_merge_info": {"status": "PASS", "notes": "Non-merged posts correctly have no merge_info"},
+    "merged_post_has_merge_info": {"status": "SKIPPED", "notes": "No merged posts in DB to test"},
+    "admin_user_update_model_accepts_merin_code": {"status": "PASS", "notes": "AdminUserUpdate accepts merin_referral_code"},
+    "admin_user_update_model_accepts_trading_start_date": {"status": "PASS", "notes": "AdminUserUpdate accepts trading_start_date"},
+    "frontend_affiliate_center_page": {"status": "PASS", "notes": "data-testid='affiliate-center-page' present, 'Invite Someone' card found"},
+    "frontend_onboarding_invite_link": {"status": "PASS", "notes": "Link shows https://crosscur.rent/onboarding?merin_code=RYAN_MERIN"},
+    "frontend_referral_tracking_page": {"status": "PASS", "notes": "data-testid='referral-tracking-page' present with invite link"},
+    "frontend_sidebar_affiliate_nav": {"status": "PASS", "notes": "data-testid='nav-affiliate' found in sidebar"},
+    "frontend_sidebar_affiliate_dropdown": {"status": "PASS", "notes": "data-testid='sidebar-affiliate-center-link' found in profile dropdown"},
+    "frontend_admin_members_page": {"status": "PASS", "notes": "Member Management page loads correctly"}
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["_validate_merin_code in referral_routes.py (external Rewards Platform API)"]
+  },
+  "verified_features": {
+    "admin_update_member_merin_referral_code": "WORKING - PUT /api/admin/members/{user_id} with merin_referral_code field updates user's Merin code (stored uppercase)",
+    "admin_update_member_trading_start_date": "WORKING - PUT /api/admin/members/{user_id} with trading_start_date field (master_admin only)",
+    "referral_tracking_invite_link": "WORKING - GET /api/referrals/tracking returns invite_link (direct Merin) and onboarding_invite_link (crosscur.rent)",
+    "onboarding_invite_link_format": "WORKING - Format: https://crosscur.rent/onboarding?merin_code={CODE}",
+    "affiliate_center_invite_someone_card": "WORKING - Card shows onboarding link with copy button",
+    "sidebar_affiliate_center_link": "WORKING - Nav item and profile dropdown both contain Affiliate Center links",
+    "forum_merged_post_info": "PARTIAL - Code verified but no merged posts in DB to test live"
+  }
+}

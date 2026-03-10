@@ -63,22 +63,33 @@ const ReferralTrackingPage = () => {
               <p className="text-xs text-zinc-500 mt-1 mb-3">
                 Share this link with people you want to invite. Your Merin code <span className="text-orange-400 font-mono">{tracking?.merin_code || tracking?.referral_code || '—'}</span> is embedded.
               </p>
-              {tracking?.invite_link ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={tracking.invite_link}
-                    readOnly
-                    className="bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs"
-                    data-testid="invite-link-display"
-                  />
-                  <Button
-                    onClick={() => copyLink(tracking.invite_link)}
-                    className="bg-orange-500 hover:bg-orange-600 text-white shrink-0"
-                    data-testid="copy-invite-link"
-                  >
-                    <Copy className="w-4 h-4 mr-1.5" />
-                    Copy
-                  </Button>
+              {tracking?.onboarding_invite_link ? (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={tracking.onboarding_invite_link}
+                      readOnly
+                      className="bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs"
+                      data-testid="invite-link-display"
+                    />
+                    <Button
+                      onClick={() => copyLink(tracking.onboarding_invite_link)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white shrink-0"
+                      data-testid="copy-invite-link"
+                    >
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Copy
+                    </Button>
+                  </div>
+                  {tracking?.invite_link && (
+                    <div className="flex items-center gap-1 text-[11px] text-zinc-500">
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Direct Merin signup:</span>
+                      <a href={tracking.invite_link} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-300 underline truncate max-w-[300px]" data-testid="direct-merin-link-referral">
+                        {tracking.invite_link}
+                      </a>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm text-amber-400">Set your Merin referral code in Profile to generate an invite link.</p>

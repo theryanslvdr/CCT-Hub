@@ -513,10 +513,15 @@ async def get_referral_tracking(user: dict = Depends(get_current_user)):
             next_milestone = m
             break
 
-    # Invite link
+    # Invite link (Merin registration)
     invite_link = None
     if merin_code:
         invite_link = f"https://www.meringlobaltrading.com/#/pages/login/regist?code={merin_code}&lang=en_US"
+
+    # Onboarding invite link (for sharing with new members)
+    onboarding_invite_link = None
+    if merin_code:
+        onboarding_invite_link = f"https://crosscur.rent/onboarding?merin_code={merin_code}"
 
     return {
         "referral_code": referral_code,
@@ -533,6 +538,7 @@ async def get_referral_tracking(user: dict = Depends(get_current_user)):
         "milestones": milestones,
         "next_milestone": next_milestone,
         "invite_link": invite_link,
+        "onboarding_invite_link": onboarding_invite_link,
     }
 
 

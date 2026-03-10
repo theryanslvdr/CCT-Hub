@@ -1,6 +1,6 @@
 """
 Test iteration 171: Daily projection fix and AI models endpoint
-- Tests license projections for license_id=3365cca7-9ed8-40d4-9d73-0b9c43f34e8e
+- Tests license projections for license_id=dark-theme-overhaul-4
 - Tests March 2026 projections with correct start_value (~$7142 for Mar 2)
 - Tests /api/ai-assistant/models endpoint (300+ models from OpenRouter)
 - Tests server starts without import errors (get_quarter properly imported)

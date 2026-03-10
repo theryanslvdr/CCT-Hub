@@ -677,6 +677,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => { navigate('/affiliate'); handleNavClick(); }}
+                className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
+                data-testid="sidebar-affiliate-center-link"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Affiliate Center
+              </DropdownMenuItem>
               
               {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
               {isMasterAdmin() && (!simulatedView || simulatedView.role === 'master_admin') && (
@@ -757,6 +765,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => { navigate('/affiliate'); handleNavClick(); }}
+                className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
+                data-testid="sidebar-affiliate-center-link-collapsed"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Affiliate Center
               </DropdownMenuItem>
               
               {/* Master Admin only: Platform Settings & API Center - hide during non-master simulation */}
