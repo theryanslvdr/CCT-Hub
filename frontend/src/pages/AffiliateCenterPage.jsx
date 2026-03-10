@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageSquare, BookOpen, Image, HelpCircle, Bot, ClipboardCopy, ChevronDown, ChevronUp, Plus, X, Loader2, Trash2, UserPlus, Link2, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, BookOpen, Image, HelpCircle, Bot, ClipboardCopy, ChevronDown, ChevronUp, Plus, X, Loader2, Trash2, UserPlus, Link2, ExternalLink, CheckCircle2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -102,6 +102,10 @@ const AffiliateCenterPage = () => {
   const [activeTab, setActiveTab] = useState('conversation_starters');
   const [inviteData, setInviteData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupResults, setLookupResults] = useState([]);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const lookupTimeout = React.useRef(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -135,6 +139,30 @@ const AffiliateCenterPage = () => {
       toast.success('Invite link copied!');
       setTimeout(() => setCopied(false), 2500);
     }
+  };
+
+  const handleLookupChange = (value) => {
+    setLookupQuery(value);
+    if (lookupTimeout.current) clearTimeout(lookupTimeout.current);
+    if (value.trim().length < 1) {
+      setLookupResults([]);
+      return;
+    }
+    setLookupLoading(true);
+    lookupTimeout.current = setTimeout(async () => {
+      try {
+        const res = await referralAPI.lookupMembers(value.trim());
+        setLookupResults(res.data.results || []);
+      } catch {
+        setLookupResults([]);
+      }
+      setLookupLoading(false);
+    }, 300);
+  };
+
+  const handleCopyMerinCode = (code) => {
+    navigator.clipboard.writeText(code);
+    toast.success(`Merin code ${code} copied!`);
   };
 
   if (loading) {
@@ -215,6 +243,62 @@ const AffiliateCenterPage = () => {
                   <button onClick={() => navigate('/profile')} className="underline hover:text-amber-300">Profile</button>
                   {' '}to generate your invite link.
                 </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Member Lookup Card */}
+      <Card className="glass-card" data-testid="member-lookup-card">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0">
+              <Search className="w-6 h-6 text-cyan-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-white">Find a Member</h3>
+              <p className="text-xs text-zinc-400 mt-1 mb-3">
+                Look up a member by name or email to find their Merin referral code.
+              </p>
+              <div className="relative">
+                <Input
+                  value={lookupQuery}
+                  onChange={(e) => handleLookupChange(e.target.value)}
+                  placeholder="Type a name or email..."
+                  className="bg-[#0a0a0a] border-white/[0.06] text-white text-sm pl-9"
+                  data-testid="member-lookup-input"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                {lookupLoading && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 animate-spin" />
+                )}
+              </div>
+              {lookupResults.length > 0 && (
+                <div className="mt-2 rounded-lg border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]" data-testid="member-lookup-results">
+                  {lookupResults.map((r) => (
+                    <div key={r.id} className="flex items-center gap-3 px-3 py-2.5 bg-[#0a0a0a]/60 hover:bg-white/[0.03] transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                        <span className="text-xs font-medium text-zinc-400">{r.name?.charAt(0)?.toUpperCase() || '?'}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{r.name}</p>
+                        <p className="text-[11px] text-zinc-500 truncate">{r.masked_email}</p>
+                      </div>
+                      <button
+                        onClick={() => handleCopyMerinCode(r.merin_code)}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 text-xs font-mono hover:bg-orange-500/20 transition-colors shrink-0"
+                        data-testid={`copy-merin-code-${r.id}`}
+                      >
+                        <ClipboardCopy className="w-3 h-3" />
+                        {r.merin_code}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {lookupQuery.trim().length > 0 && !lookupLoading && lookupResults.length === 0 && (
+                <p className="text-xs text-zinc-500 mt-2" data-testid="member-lookup-no-results">No members found matching "{lookupQuery}"</p>
               )}
             </div>
           </div>

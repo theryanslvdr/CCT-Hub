@@ -542,6 +542,48 @@ async def get_referral_tracking(user: dict = Depends(get_current_user)):
     }
 
 
+@router.get("/lookup-members")
+async def lookup_members(
+    q: str = Query(..., min_length=1, max_length=100),
+    user: dict = Depends(get_current_user),
+):
+    """Search members by name or email to find their Merin referral code."""
+    db = deps.db
+    query_regex = {"$regex": q.strip(), "$options": "i"}
+    cursor = db.users.find(
+        {
+            "$and": [
+                {"merin_referral_code": {"$exists": True, "$nin": [None, ""]}},
+                {"$or": [{"full_name": query_regex}, {"email": query_regex}]},
+            ]
+        },
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "merin_referral_code": 1},
+    ).limit(10)
+    results = await cursor.to_list(10)
+
+    def mask_email(email: str) -> str:
+        if not email or "@" not in email:
+            return "***"
+        local, domain = email.split("@", 1)
+        if len(local) <= 2:
+            masked_local = local[0] + "***"
+        else:
+            masked_local = local[0] + "***" + local[-1]
+        return f"{masked_local}@{domain}"
+
+    return {
+        "results": [
+            {
+                "id": r["id"],
+                "name": r.get("full_name", "Unknown"),
+                "masked_email": mask_email(r.get("email", "")),
+                "merin_code": r.get("merin_referral_code", ""),
+            }
+            for r in results
+        ]
+    }
+
+
 @router.get("/leaderboard")
 async def get_referral_leaderboard(
     limit: int = Query(20, ge=1, le=100),

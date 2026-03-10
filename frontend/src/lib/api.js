@@ -528,6 +528,7 @@ export const referralAPI = {
   getTracking: () => api.get('/referrals/tracking'),
   getLeaderboard: () => api.get('/referrals/leaderboard'),
   getAdminStats: () => api.get('/referrals/admin/stats'),
+  lookupMembers: (q) => api.get('/referrals/lookup-members', { params: { q } }),
 };
 
 // Quiz System API
