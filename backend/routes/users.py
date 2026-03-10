@@ -22,6 +22,7 @@ class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None
     timezone: Optional[str] = None
     lot_size: Optional[float] = None
+    merin_referral_code: Optional[str] = None
 
 
 class NotificationPreferences(BaseModel):
@@ -152,6 +153,8 @@ async def update_profile(data: ProfileUpdate, user: dict = Depends(get_current_u
         update_data["timezone"] = data.timezone
     if data.lot_size is not None:
         update_data["lot_size"] = data.lot_size
+    if data.merin_referral_code is not None:
+        update_data["merin_referral_code"] = data.merin_referral_code.strip().upper()
 
     await db.users.update_one({"id": user["id"]}, {"$set": update_data})
     updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})

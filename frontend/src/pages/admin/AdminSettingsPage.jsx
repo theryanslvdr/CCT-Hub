@@ -73,6 +73,7 @@ export const AdminSettingsPage = () => {
     content_protection_disable_shortcuts: true,
     // Onboarding
     onboarding_enabled: true,
+    onboarding_gate_enabled: true,
     // Adaptive AI
     adaptive_ai_enabled: true,
   });
@@ -1741,6 +1742,34 @@ export const AdminSettingsPage = () => {
                     checked={settings.onboarding_enabled}
                     onCheckedChange={(checked) => setSettings({ ...settings, onboarding_enabled: checked })}
                     data-testid="onboarding-toggle"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Onboarding Gate Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-orange-400" />
+                  Onboarding Gate
+                </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Block platform access until members complete all 7 onboarding steps.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a]">
+                  <div>
+                    <p className="text-white font-medium">Enable Onboarding Gate</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      When enabled, members must complete all onboarding steps (Heartbeat, Merin, OKX, Tutorials, etc.) before accessing the platform.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={settings.onboarding_gate_enabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, onboarding_gate_enabled: checked })}
+                    data-testid="onboarding-gate-toggle"
                   />
                 </div>
               </CardContent>

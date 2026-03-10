@@ -121,6 +121,7 @@ export const ProfilePage = () => {
   const isAdmin = isSuperAdmin() || isMasterAdmin();
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [timezone, setTimezone] = useState(user?.timezone || 'Asia/Manila');
+  const [merinCode, setMerinCode] = useState(user?.merin_referral_code || user?.referral_code || '');
   const [saving, setSaving] = useState(false);
   
   // Password reset fields
@@ -140,6 +141,7 @@ export const ProfilePage = () => {
     if (user) {
       setFullName(user.full_name || '');
       setTimezone(user.timezone || 'Asia/Manila');
+      setMerinCode(user.merin_referral_code || user.referral_code || '');
     }
   }, [user]);
 
@@ -167,7 +169,7 @@ export const ProfilePage = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await userAPI.updateProfile({ full_name: fullName, timezone });
+      const response = await userAPI.updateProfile({ full_name: fullName, timezone, merin_referral_code: merinCode || undefined });
       updateUser(response.data);
       toast.success('Profile updated successfully!');
     } catch {
@@ -241,6 +243,17 @@ export const ProfilePage = () => {
             <Label className="text-zinc-300">Email</Label>
             <Input value={user?.email || ''} disabled className="input-dark mt-1 opacity-50 cursor-not-allowed" />
             <p className="text-xs text-zinc-500 mt-1">Email cannot be changed</p>
+          </div>
+          <div>
+            <Label className="text-zinc-300">Merin Referral Code</Label>
+            <Input
+              value={merinCode}
+              onChange={(e) => setMerinCode(e.target.value.toUpperCase())}
+              className="input-dark mt-1 font-mono uppercase"
+              placeholder="e.g. BDVMAF"
+              data-testid="profile-merin-code-input"
+            />
+            <p className="text-xs text-zinc-500 mt-1">Your personal Merin Global Trading referral code for inviting others</p>
           </div>
         </CardContent>
       </Card>

@@ -76,6 +76,8 @@ class PlatformSettings(BaseModel):
     promo_popup_frequency: str = "once_per_session"
     # Adaptive AI
     adaptive_ai_enabled: bool = True
+    # Onboarding Gate
+    onboarding_gate_enabled: bool = True
 
     # Coerce None to "" for all str fields
     @field_validator('*', mode='before')

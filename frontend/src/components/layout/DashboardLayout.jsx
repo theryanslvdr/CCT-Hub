@@ -13,6 +13,7 @@ import { OnboardingTour, useOnboarding } from '@/components/OnboardingTour';
 import { ContentProtection } from '@/components/ContentProtection';
 import { NoticeBanner } from '@/components/NoticeBanner';
 import { PromotionPopup } from '@/components/PromotionPopup';
+import OnboardingGate from '@/components/OnboardingGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Settings, ExternalLink, X, Info, CheckCircle, Bell } from 'lucide-react';
@@ -214,8 +215,11 @@ export const DashboardLayout = () => {
   const currentTitle = pagesTitles[location.pathname] || 'CrossCurrent Finance';
   const hideEmergentBadge = platformSettings?.hide_emergent_badge === true;
 
+  const isAdmin = user?.role === 'master_admin' || user?.role === 'super_admin';
+
   return (
     <ApiKeyStatusContext.Provider value={{ missingKeys, hasMissingKeys: missingKeys.length > 0 }}>
+      <OnboardingGate user={user}>
       <div className="min-h-screen flex flex-col relative" style={{ background: '#080808' }}>
         {/* Ambient glow blobs */}
         <div className="fixed top-0 right-0 w-64 h-64 rounded-full bg-orange-500/10 blur-[120px] pointer-events-none z-0" />
@@ -345,6 +349,7 @@ export const DashboardLayout = () => {
           </a>
         )}
       </div>
+      </OnboardingGate>
     </ApiKeyStatusContext.Provider>
   );
 };

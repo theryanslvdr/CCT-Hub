@@ -592,4 +592,12 @@ export const profitSummaryAPI = {
   getDailySummary: () => api.get('/profit/daily-summary'),
 };
 
+// Onboarding Checklist & Invite
+export const onboardingAPI = {
+  getChecklist: () => api.get('/onboarding/checklist'),
+  updateStep: (data) => api.put('/onboarding/checklist/step', data),
+  updateMerinCode: (code) => api.put('/onboarding/merin-code', { merin_referral_code: code }),
+  getInviteLink: () => api.get('/onboarding/invite-link'),
+};
+
 
