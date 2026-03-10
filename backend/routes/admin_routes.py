@@ -24,7 +24,7 @@ from helpers import (
     send_push_to_admins, send_push_notification, send_push_to_all_members,
     verify_heartbeat_user, send_signal_email_to_members,
     schedule_pre_trade_notifications,
-    calculate_extended_license_projections, get_quarterly_summary
+    calculate_extended_license_projections, get_quarterly_summary, get_quarter
 )
 from services import websocket_manager
 
@@ -2309,7 +2309,12 @@ async def create_license(data: LicenseCreate, user: dict = Depends(deps.require_
     else:
         # Default to first trading day of current quarter
         today = datetime.now(timezone.utc)
-        start_date = get_first_trading_day_of_quarter(today.year, get_quarter(today))
+        q = get_quarter(today)
+        quarter_start_month = (q - 1) * 3 + 1
+        start_date = datetime(today.year, quarter_start_month, 1, tzinfo=timezone.utc)
+        # Advance to first weekday if it falls on a weekend
+        while start_date.weekday() >= 5:
+            start_date += timedelta(days=1)
     
     license_id = str(uuid.uuid4())
     license_doc = {

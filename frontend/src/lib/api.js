@@ -579,6 +579,7 @@ export const aiAssistantAPI = {
   getUnanswered: (assistantId) => api.get('/ai-assistant/admin/unanswered', { params: { assistant_id: assistantId } }),
   answerUnanswered: (itemId, answer) => api.post(`/ai-assistant/admin/unanswered/${itemId}/answer`, { answer }),
   getStats: () => api.get('/ai-assistant/admin/stats'),
+  getModels: () => api.get('/ai-assistant/models'),
 };
 
 // Public Member Profile

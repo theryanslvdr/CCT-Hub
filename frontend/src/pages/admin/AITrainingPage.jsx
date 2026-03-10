@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Shield, Sparkles, MessageSquare, Brain, BookOpen, HelpCircle, Plus, Trash2, Save, Send, BarChart3, RefreshCw, ChevronDown } from 'lucide-react';
+import { Shield, Sparkles, MessageSquare, Brain, BookOpen, HelpCircle, Plus, Trash2, Save, Send, BarChart3, RefreshCw, ChevronDown, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { aiAssistantAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -32,6 +31,9 @@ const AITrainingPage = () => {
   const [kbForm, setKbForm] = useState({ category: '', question: '', answer: '' });
   const [answerModal, setAnswerModal] = useState(null);
   const [adminAnswer, setAdminAnswer] = useState('');
+  const [availableModels, setAvailableModels] = useState([]);
+  const [modelSearch, setModelSearch] = useState('');
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -51,6 +53,19 @@ const AITrainingPage = () => {
   }, [activeBot]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Load available models from OpenRouter
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const res = await aiAssistantAPI.getModels();
+        setAvailableModels(res.data.models || []);
+      } catch {
+        console.error('Failed to load models');
+      }
+    };
+    loadModels();
+  }, []);
 
   const handleSaveConfig = async () => {
     setSaving(true);
@@ -102,7 +117,13 @@ const AITrainingPage = () => {
   const Icon = ICONS[assistants.find(a => a.assistant_id === activeBot)?.icon] || MessageSquare;
 
   return (
-    <div className="space-y-6" data-testid="ai-training-page">
+    <div className="space-y-6" data-testid="ai-training-page" onClick={(e) => {
+      // Close model dropdown when clicking outside
+      if (modelDropdownOpen && !e.target.closest('[data-testid="model-dropdown"]') && !e.target.closest('[data-testid="config-model"]')) {
+        setModelDropdownOpen(false);
+        setModelSearch('');
+      }
+    }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -176,26 +197,82 @@ const AITrainingPage = () => {
               <Label className="text-zinc-400 text-xs uppercase tracking-wider">Tagline</Label>
               <Input value={config.tagline || ''} onChange={e => setConfig(p => ({...p, tagline: e.target.value}))} className="mt-1.5 bg-[#0a0a0a] border-white/[0.06] text-white" data-testid="config-tagline" />
             </div>
-            <div>
+            <div className="relative">
               <Label className="text-zinc-400 text-xs uppercase tracking-wider">AI Model</Label>
-              <Select value={config.model || ''} onValueChange={(v) => setConfig(p => ({...p, model: v}))}>
-                <SelectTrigger className="mt-1.5 bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs" data-testid="config-model">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openai/gpt-4o-mini">openai/gpt-4o-mini</SelectItem>
-                  <SelectItem value="openai/gpt-4o">openai/gpt-4o</SelectItem>
-                  <SelectItem value="openai/gpt-4-turbo">openai/gpt-4-turbo</SelectItem>
-                  <SelectItem value="openai/gpt-3.5-turbo">openai/gpt-3.5-turbo</SelectItem>
-                  <SelectItem value="anthropic/claude-3.5-sonnet">anthropic/claude-3.5-sonnet</SelectItem>
-                  <SelectItem value="anthropic/claude-3-haiku">anthropic/claude-3-haiku</SelectItem>
-                  <SelectItem value="google/gemini-pro-1.5">google/gemini-pro-1.5</SelectItem>
-                  <SelectItem value="google/gemini-flash-1.5">google/gemini-flash-1.5</SelectItem>
-                  <SelectItem value="meta-llama/llama-3.1-70b-instruct">meta-llama/llama-3.1-70b-instruct</SelectItem>
-                  <SelectItem value="mistralai/mixtral-8x7b-instruct">mistralai/mixtral-8x7b-instruct</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-[10px] text-zinc-600 mt-1">OpenRouter model identifier</p>
+              <div className="relative mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-[#0a0a0a] border border-white/[0.06] text-white font-mono text-xs hover:border-white/[0.12] transition-colors"
+                  data-testid="config-model"
+                >
+                  <span className={config.model ? 'text-white' : 'text-zinc-500'}>
+                    {config.model || 'Select a model'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${modelDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {modelDropdownOpen && (
+                  <div className="absolute z-50 w-full mt-1 rounded-lg bg-[#111111] border border-white/[0.08] shadow-xl max-h-72 overflow-hidden" data-testid="model-dropdown">
+                    <div className="p-2 border-b border-white/[0.06]">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                        <input
+                          type="text"
+                          value={modelSearch}
+                          onChange={e => setModelSearch(e.target.value)}
+                          placeholder="Search models..."
+                          className="w-full pl-8 pr-3 py-1.5 rounded bg-[#0a0a0a] border border-white/[0.06] text-white text-xs focus:outline-none focus:border-orange-500/50"
+                          autoFocus
+                          data-testid="model-search-input"
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-56 overflow-y-auto">
+                      {(availableModels.length > 0
+                        ? availableModels.filter(m =>
+                            m.id.toLowerCase().includes(modelSearch.toLowerCase()) ||
+                            m.name.toLowerCase().includes(modelSearch.toLowerCase())
+                          )
+                        : [
+                            { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
+                            { id: 'openai/gpt-4o', name: 'GPT-4o' },
+                            { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
+                            { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5' },
+                          ].filter(m => m.id.toLowerCase().includes(modelSearch.toLowerCase()))
+                      ).slice(0, 50).map(m => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setConfig(p => ({ ...p, model: m.id }));
+                            setModelDropdownOpen(false);
+                            setModelSearch('');
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-white/[0.04] transition-colors flex items-center justify-between ${
+                            config.model === m.id ? 'bg-orange-500/10 text-orange-400' : 'text-zinc-300'
+                          }`}
+                          data-testid={`model-option-${m.id}`}
+                        >
+                          <span className="font-mono truncate">{m.id}</span>
+                          {m.context_length > 0 && (
+                            <span className="text-zinc-600 ml-2 shrink-0">{(m.context_length / 1000).toFixed(0)}k</span>
+                          )}
+                        </button>
+                      ))}
+                      {availableModels.length > 0 && availableModels.filter(m =>
+                        m.id.toLowerCase().includes(modelSearch.toLowerCase())
+                      ).length === 0 && (
+                        <p className="text-center text-zinc-500 text-xs py-4">No models found</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <p className="text-[10px] text-zinc-600 mt-1">
+                {availableModels.length > 0
+                  ? `${availableModels.length} models available from OpenRouter`
+                  : 'OpenRouter model identifier'}
+              </p>
             </div>
             <div>
               <Label className="text-zinc-400 text-xs uppercase tracking-wider">Personality Traits</Label>

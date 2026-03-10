@@ -604,3 +604,55 @@ async def get_ai_stats(user=Depends(require_admin)):
         "escalated_count": escalated_count,
         "escalation_rate": round(escalated_count / max(total_interactions, 1) * 100, 1),
     }
+
+
+
+# ── OpenRouter Models Endpoint ────────────────────────────────
+_models_cache = {"data": None, "timestamp": None}
+
+@router.get("/models")
+async def get_available_models(user: dict = Depends(require_admin)):
+    """Fetch available AI models from OpenRouter with caching (1 hour)."""
+    import time
+
+    now = time.time()
+    if _models_cache["data"] and _models_cache["timestamp"] and (now - _models_cache["timestamp"] < 3600):
+        return _models_cache["data"]
+
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(
+                "https://openrouter.ai/api/v1/models",
+                headers={"Authorization": f"Bearer {api_key}"}
+            )
+            resp.raise_for_status()
+            all_models = resp.json().get("data", [])
+
+        # Filter to chat-capable models and format
+        models = []
+        for m in all_models:
+            model_id = m.get("id", "")
+            pricing = m.get("pricing", {})
+            prompt_price = float(pricing.get("prompt", "0") or "0")
+            models.append({
+                "id": model_id,
+                "name": m.get("name", model_id),
+                "context_length": m.get("context_length", 0),
+                "prompt_price": prompt_price,
+            })
+
+        # Sort by provider then name
+        models.sort(key=lambda x: x["id"])
+
+        result = {"models": models, "count": len(models)}
+        _models_cache["data"] = result
+        _models_cache["timestamp"] = now
+        return result
+
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to fetch OpenRouter models: {e}")
+        raise HTTPException(status_code=502, detail="Failed to fetch models from OpenRouter")
