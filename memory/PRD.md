@@ -90,6 +90,14 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - **Admin Sidebar Simplified (DONE):** Replaced accordion with single "Admin Dashboard" button. AdminDashboardPage reorganized into 4 categories: Management, Analytics & Tools, AI & Platform, System.
 - **Admin Toggle for Adaptive AI (DONE — 2026-03-10, Session 3):** Added `adaptive_ai_enabled` setting to platform_settings. Toggle in Admin Settings > Security tab. When disabled, all chat requests fall back to RyAI (no adaptive persona routing). Tested: iteration_169 — 100% pass.
 
+### Bug Fixes (2026-03-10, Session 3)
+- **Family Member Projections Fix (DONE):** Fixed broken import `from server import get_quarter` → `from utils.trading_days import get_quarter` in family.py. FA Licensee family projections now load correctly.
+- **Daily Projection Table Fix (DONE):** Added missing `get_quarter` import to profit_routes.py helpers import. Licensee daily projection endpoint no longer crashes.
+- **Dashboard Licensee Label Fix (DONE):** Changed "Actual vs Projected / Below target" to "Account Growth / +X% since inception" for licensees in DashboardPage.jsx. No more misleading "Below target" label.
+- **AI Training Model Dropdown (DONE):** Replaced text input with Select dropdown for AI model selection in AITrainingPage.jsx. 10 model options (OpenAI, Anthropic, Google, Meta, Mistral).
+- **Habits Pagination (DONE):** Added pagination (10 items/page) with prev/next and page number buttons to HabitManagerCard.jsx.
+- Tested: iteration_170 — 100% pass (all 5 fixes verified).
+
 ### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
 - Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
 - Daily Profit Summary: AI-consolidated notification on dashboard for today's trades (DONE)
