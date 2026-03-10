@@ -335,136 +335,171 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#050505' }}>
-      {/* Particle star background */}
-      <div className="absolute inset-0 star-bg" />
-      {/* Ambient glow - top center */}
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-500/[0.04] rounded-full blur-[150px]" />
-      {/* Ambient glow - bottom right */}
-      <div className="absolute -bottom-40 -right-20 w-[400px] h-[400px] bg-amber-500/[0.03] rounded-full blur-[130px]" />
-      
-      <div className="relative z-10 w-full max-w-[420px]">
-        {/* Premium opaque dark card */}
-        <div 
-          className="rounded-3xl p-9 bg-[#111111] border border-[#222222] shadow-[0_8px_60px_rgba(0,0,0,0.6)]"
-        >
-          {/* Logo */}
-          <div className="flex flex-col items-center mb-10">
-            {platformSettings?.logo_url ? (
-              <img 
-                src={platformSettings.logo_url} 
-                alt={platformSettings?.platform_name || 'Platform'} 
-                className="max-w-[200px] max-h-[80px] object-contain mb-4"
-              />
-            ) : (
+    <div className="min-h-screen flex" style={{ background: '#050505' }}>
+      {/* Left Panel — Login Form */}
+      <div className="w-full lg:w-1/2 flex flex-col min-h-screen relative">
+        {/* Logo — top left */}
+        <div className="p-8 lg:p-10">
+          {platformSettings?.logo_url ? (
+            <img 
+              src={platformSettings.logo_url} 
+              alt={platformSettings?.platform_name || 'Platform'} 
+              className="max-w-[160px] max-h-[48px] object-contain"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5">
               <div 
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-                style={{
-                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow: '0 0 40px rgba(249,115,22,0.35), 0 4px 16px rgba(0,0,0,0.4)',
-                }}
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
               >
-                <TrendingUp className="w-8 h-8 text-white" />
+                <TrendingUp className="w-5 h-5 text-white" />
               </div>
-            )}
-            {platformSettings?.login_title && (
-              <h1 className="text-2xl font-bold text-white tracking-tight">{platformSettings.login_title}</h1>
-            )}
-            <p className="text-zinc-500 text-sm mt-1.5">{platformSettings?.login_tagline || platformSettings?.tagline || 'Your Trading Finance Hub'}</p>
-          </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-500/8 border border-red-500/15 flex items-start gap-3" data-testid="login-error">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-400">{error}</p>
+              <span className="text-white font-semibold text-lg tracking-tight">
+                {platformSettings?.platform_name || 'CrossCurrent'}
+              </span>
             </div>
           )}
+        </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-500 text-[11px] uppercase tracking-widest font-medium">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+        {/* Form — centered vertically */}
+        <div className="flex-1 flex items-center px-8 lg:px-10">
+          <div className="w-full max-w-[380px]">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+              {platformSettings?.login_title || 'Welcome back'}
+            </h1>
+            <p className="text-zinc-500 text-sm mt-2 mb-8">
+              {platformSettings?.login_tagline || platformSettings?.tagline || 'Welcome back! Please enter your details.'}
+            </p>
+
+            {/* Error Alert */}
+            {error && (
+              <div className="mb-6 p-3.5 rounded-xl bg-red-500/8 border border-red-500/15 flex items-start gap-3" data-testid="login-error">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-zinc-400 text-sm font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="pl-11 h-12 rounded-xl text-white placeholder:text-gray-600 bg-[#1a1a1a] border-[#2a2a2a] focus-visible:border-orange-500/50"
+                  placeholder="Enter your email"
+                  className="h-11 rounded-lg text-white placeholder:text-zinc-600 bg-[#0a0a0a] border-white/[0.08] focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
                   required
                   data-testid="login-email"
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-500 text-[11px] uppercase tracking-widest font-medium">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-zinc-400 text-sm font-medium">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-11 h-12 rounded-xl text-white placeholder:text-gray-600 bg-[#1a1a1a] border-[#2a2a2a] focus-visible:border-orange-500/50"
+                  className="h-11 rounded-lg text-white placeholder:text-zinc-600 bg-[#0a0a0a] border-white/[0.08] focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
                   required
                   data-testid="login-password"
                 />
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
-              disabled={isLoading}
-              data-testid="login-submit"
-            >
-              {isLoading ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...</>
-              ) : 'Sign In'}
-            </Button>
-          </form>
+              {/* Forgot password — inline right-aligned */}
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotPasswordOpen(true);
+                    setForgotStep('email');
+                    setForgotEmail('');
+                    setResetToken('');
+                    setResetNewPassword('');
+                    setResetConfirmPassword('');
+                  }}
+                  className="text-orange-400/70 hover:text-orange-400 transition-colors text-sm"
+                  data-testid="forgot-password-link"
+                >
+                  Forgot password?
+                </button>
+              </div>
 
-          {/* Forgot Password Link */}
-          <div className="mt-5 text-center">
-            <button
-              onClick={() => {
-                setForgotPasswordOpen(true);
-                setForgotStep('email');
-                setForgotEmail('');
-                setResetToken('');
-                setResetNewPassword('');
-                setResetConfirmPassword('');
-              }}
-              className="text-zinc-600 hover:text-zinc-400 transition-colors text-sm"
-              data-testid="forgot-password-link"
-            >
-              Forgot Password?
-            </button>
-          </div>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-lg transition-all active:scale-[0.98]"
+                disabled={isLoading}
+                data-testid="login-submit"
+              >
+                {isLoading ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...</>
+                ) : 'Sign in'}
+              </Button>
+            </form>
 
-          {/* No Account Link */}
-          <div className="mt-4 text-center">
-            <button
-              onClick={handleOpenNoAccount}
-              className="text-orange-500/70 hover:text-orange-400 transition-colors text-sm flex items-center gap-1.5 mx-auto"
-            >
-              <HelpCircle className="w-4 h-4" />
-              Don't have an account/password?
-            </button>
-          </div>
-
-          {/* Community notice */}
-          <div className="mt-8 pt-6 border-t border-white/[0.04]">
-            <p className="text-[11px] text-zinc-700 text-center leading-relaxed">
-              {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
+            {/* No account link */}
+            <p className="mt-6 text-center text-sm text-zinc-500">
+              Don't have an account?{' '}
+              <button
+                onClick={handleOpenNoAccount}
+                className="text-orange-400 hover:text-orange-300 font-medium transition-colors"
+              >
+                Set up
+              </button>
             </p>
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="p-8 lg:p-10">
+          <p className="text-[11px] text-zinc-700 leading-relaxed">
+            {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Right Panel — Decorative (hidden on mobile) */}
+      <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-[#0a0a0a] items-center justify-center">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0d0d0d] via-[#0a0a0a] to-[#080808]" />
+        
+        {/* Abstract orange orb */}
+        <div className="relative">
+          <div 
+            className="w-[320px] h-[320px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle at 50% 40%, rgba(249,115,22,0.35), rgba(249,115,22,0.08) 50%, transparent 70%)',
+              filter: 'blur(1px)',
+            }}
+          />
+          {/* Inner glow */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[55%] w-[200px] h-[200px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, rgba(249,115,22,0.5), rgba(234,88,12,0.2) 60%, transparent 80%)',
+            }}
+          />
+          {/* Reflection/blur effect at bottom */}
+          <div 
+            className="absolute bottom-[-30px] left-1/2 -translate-x-1/2 w-[280px] h-[60px]"
+            style={{
+              background: 'radial-gradient(ellipse, rgba(249,115,22,0.15), transparent 70%)',
+              filter: 'blur(20px)',
+            }}
+          />
+        </div>
+
+        {/* Subtle grid pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
       </div>
 
       {/* No Account Dialog */}
