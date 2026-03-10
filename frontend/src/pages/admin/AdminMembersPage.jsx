@@ -17,7 +17,7 @@ import {
   Award, FileCheck, AlertTriangle, RefreshCw, Loader2, AlertCircle,
   UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download, Radio, User
 } from 'lucide-react';
-import api, { adminAPI } from '@/lib/api';
+import api, { adminAPI, referralAPI } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { AIMemberRisk } from '@/components/AIFeatures';
 
@@ -50,7 +50,8 @@ export const AdminMembersPage = () => {
   const [viewEditForm, setViewEditForm] = useState({
     full_name: '',
     timezone: '',
-    merin_referral_code: ''
+    merin_referral_code: '',
+    referred_by_user_id: '',
   });
   
   // License state
@@ -85,6 +86,34 @@ export const AdminMembersPage = () => {
   const [secretCode, setSecretCode] = useState('');
   const [editForm, setEditForm] = useState({ full_name: '', timezone: '', merin_referral_code: '' });
   const [tempPassword, setTempPassword] = useState('');
+
+  // Inviter lookup state (for admin edit)
+  const [inviterQuery, setInviterQuery] = useState('');
+  const [inviterResults, setInviterResults] = useState([]);
+  const [inviterSearching, setInviterSearching] = useState(false);
+  const [inviterName, setInviterName] = useState('');
+  const inviterDebounce = React.useRef(null);
+
+  const handleInviterSearch = (value) => {
+    setInviterQuery(value);
+    if (inviterDebounce.current) clearTimeout(inviterDebounce.current);
+    if (value.trim().length < 1) { setInviterResults([]); return; }
+    setInviterSearching(true);
+    inviterDebounce.current = setTimeout(async () => {
+      try {
+        const res = await referralAPI.lookupMembers(value.trim());
+        setInviterResults(res.data.results || []);
+      } catch { setInviterResults([]); }
+      setInviterSearching(false);
+    }, 300);
+  };
+
+  const handleSelectInviter = (member) => {
+    setViewEditForm(prev => ({ ...prev, referred_by_user_id: member.id }));
+    setInviterName(member.name);
+    setInviterQuery('');
+    setInviterResults([]);
+  };
 
   // Check if can see account value (super_admin or master_admin only)
   const canSeeAccountValue = isSuperAdmin() || isMasterAdmin();
@@ -157,11 +186,23 @@ export const AdminMembersPage = () => {
     setSelectedMember(member);
     setViewDialogOpen(true);
     setIsEditingProfile(false);
+    setInviterQuery('');
+    setInviterResults([]);
     setViewEditForm({
       full_name: member.full_name || '',
       timezone: member.timezone || 'UTC',
-      merin_referral_code: member.merin_referral_code || ''
+      merin_referral_code: member.merin_referral_code || '',
+      referred_by_user_id: member.referred_by_user_id || '',
     });
+    // Resolve inviter name if they have one
+    if (member.referred_by_user_id) {
+      try {
+        const invRes = await api.get(`/admin/members/${member.referred_by_user_id}`);
+        setInviterName(invRes.data?.user?.full_name || member.referred_by || 'Unknown');
+      } catch { setInviterName(member.referred_by || 'Unknown'); }
+    } else {
+      setInviterName('');
+    }
     try {
       const res = await api.get(`/admin/members/${member.id}`);
       setMemberDetails(res.data);
@@ -204,6 +245,7 @@ export const AdminMembersPage = () => {
         full_name: viewEditForm.full_name,
         timezone: viewEditForm.timezone,
         merin_referral_code: viewEditForm.merin_referral_code || undefined,
+        referred_by_user_id: viewEditForm.referred_by_user_id,
       });
       toast.success('Profile updated successfully');
       setIsEditingProfile(false);
@@ -215,6 +257,7 @@ export const AdminMembersPage = () => {
           full_name: viewEditForm.full_name,
           timezone: viewEditForm.timezone,
           merin_referral_code: viewEditForm.merin_referral_code,
+          referred_by_user_id: viewEditForm.referred_by_user_id,
         }
       }));
       loadMembers();
@@ -858,7 +901,8 @@ export const AdminMembersPage = () => {
                         setViewEditForm({
                           full_name: memberDetails.user.full_name || '',
                           timezone: memberDetails.user.timezone || 'UTC',
-                          merin_referral_code: memberDetails.user.merin_referral_code || ''
+                          merin_referral_code: memberDetails.user.merin_referral_code || '',
+                          referred_by_user_id: memberDetails.user.referred_by_user_id || '',
                         });
                         setIsEditingProfile(true);
                       }}
@@ -929,6 +973,52 @@ export const AdminMembersPage = () => {
                         data-testid="view-edit-merin-code"
                       />
                     </div>
+                    <div>
+                      <Label className="text-zinc-300">Inviter (Who Referred Them)</Label>
+                      {viewEditForm.referred_by_user_id && inviterName ? (
+                        <div className="flex items-center gap-2 mt-1 p-2 rounded-md bg-[#0d0d0d]/50 border border-white/[0.06]">
+                          <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
+                            <span className="text-[10px] font-medium text-orange-400">{inviterName.charAt(0)?.toUpperCase()}</span>
+                          </div>
+                          <span className="text-sm text-white flex-1">{inviterName}</span>
+                          <button 
+                            onClick={() => { setViewEditForm(prev => ({ ...prev, referred_by_user_id: '' })); setInviterName(''); }}
+                            className="text-[11px] text-zinc-500 hover:text-red-400 transition-colors"
+                            data-testid="clear-inviter-btn"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="relative mt-1">
+                          <Input
+                            value={inviterQuery}
+                            onChange={(e) => handleInviterSearch(e.target.value)}
+                            className="input-dark pl-8 text-sm"
+                            placeholder="Search by name or email..."
+                            data-testid="admin-inviter-search"
+                          />
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                          {inviterSearching && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 animate-spin" />}
+                          {inviterResults.length > 0 && (
+                            <div className="absolute z-50 mt-1 w-full rounded-md border border-white/[0.06] bg-[#111111] overflow-hidden shadow-xl max-h-[160px] overflow-y-auto" data-testid="admin-inviter-results">
+                              {inviterResults.map(r => (
+                                <button
+                                  key={r.id}
+                                  onClick={() => handleSelectInviter(r)}
+                                  className="w-full flex items-center gap-2 px-3 py-2 hover:bg-orange-500/[0.06] text-left transition-colors"
+                                  data-testid={`admin-inviter-option-${r.id}`}
+                                >
+                                  <span className="text-sm text-white">{r.name}</span>
+                                  <span className="text-[10px] text-zinc-500">{r.masked_email}</span>
+                                  <span className="ml-auto text-[10px] font-mono text-orange-400/70">{r.merin_code}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-[#0d0d0d]/50">
                         <p className="text-xs text-zinc-500">Role</p>
@@ -988,6 +1078,12 @@ export const AdminMembersPage = () => {
                           Copy
                         </Button>
                       </div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-[#0d0d0d]/50 col-span-2">
+                      <p className="text-xs text-zinc-500">Inviter</p>
+                      <p className="text-white font-medium mt-1" data-testid="member-inviter-display">
+                        {inviterName || memberDetails.user.referred_by || <span className="text-zinc-500 italic">Not set</span>}
+                      </p>
                     </div>
                   </div>
                   

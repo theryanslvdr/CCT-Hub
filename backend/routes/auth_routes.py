@@ -226,6 +226,7 @@ async def login(data: UserLogin):
             "timezone": user.get("timezone", "UTC"),
             "allowed_dashboards": user.get("allowed_dashboards"),
             "license_type": user.get("license_type"),
+            "referred_by": user.get("referred_by"),
         },
     }
     

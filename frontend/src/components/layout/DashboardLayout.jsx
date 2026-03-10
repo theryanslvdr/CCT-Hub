@@ -14,6 +14,7 @@ import { ContentProtection } from '@/components/ContentProtection';
 import { NoticeBanner } from '@/components/NoticeBanner';
 import { PromotionPopup } from '@/components/PromotionPopup';
 import OnboardingGate from '@/components/OnboardingGate';
+import InviterModal from '@/components/InviterModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Settings, ExternalLink, X, Info, CheckCircle, Bell } from 'lucide-react';
@@ -137,6 +138,18 @@ export const DashboardLayout = () => {
   });
   const location = useLocation();
   const { showTour, completeTour, resetTour } = useOnboarding();
+
+  // Inviter modal state - show for members without an inviter set
+  const [showInviterModal, setShowInviterModal] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !['master_admin', 'super_admin', 'basic_admin'].includes(user.role)) {
+      // Check if user has referred_by set
+      if (!user.referred_by) {
+        setShowInviterModal(true);
+      }
+    }
+  }, [isAuthenticated, user]);
 
   const handleDismissAnnouncement = (id) => {
     const newDismissed = [...dismissedAnnouncements, id];
@@ -292,6 +305,12 @@ export const DashboardLayout = () => {
         
         {/* Onboarding Tour */}
         <OnboardingTour isOpen={showTour} onClose={completeTour} />
+
+        {/* Who Invited You Modal - one-time for members without inviter */}
+        <InviterModal
+          open={showInviterModal}
+          onComplete={() => setShowInviterModal(false)}
+        />
 
         {/* Missing API Keys Modal - Only for Master Admin */}
         <Dialog open={showMissingKeysModal} onOpenChange={setShowMissingKeysModal}>

@@ -529,6 +529,7 @@ export const referralAPI = {
   getLeaderboard: () => api.get('/referrals/leaderboard'),
   getAdminStats: () => api.get('/referrals/admin/stats'),
   lookupMembers: (q) => api.get('/referrals/lookup-members', { params: { q } }),
+  setInviter: (inviterId) => api.post('/referrals/set-inviter', { inviter_id: inviterId }),
 };
 
 // Quiz System API

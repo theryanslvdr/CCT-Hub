@@ -29,6 +29,9 @@ def _rewards_headers():
 class SetReferralCodeRequest(BaseModel):
     referral_code: str
 
+class SetInviterRequest(BaseModel):
+    inviter_id: str
+
 
 class AdminSetReferralRequest(BaseModel):
     user_id: str
@@ -146,6 +149,55 @@ async def set_referred_by(data: SetReferralCodeRequest, user: dict = Depends(get
         "id": str(uuid.uuid4()),
         "user_id": user["id"],
         "event": "referred_by_set",
+        "referral_code": code,
+        "inviter_id": inviter["id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    return {
+        "success": True,
+        "referred_by": code,
+        "inviter_name": inviter.get("full_name", "Unknown"),
+    }
+
+
+@router.post("/set-inviter")
+async def set_inviter(data: SetInviterRequest, user: dict = Depends(get_current_user)):
+    """Set who invited this user by inviter's user ID (from member lookup)."""
+    db = deps.db
+
+    # Check if already set
+    existing = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referred_by": 1})
+    if existing and existing.get("referred_by"):
+        raise HTTPException(status_code=400, detail="Inviter already set.")
+
+    # Find the inviter by user ID
+    inviter = await db.users.find_one(
+        {"id": data.inviter_id},
+        {"_id": 0, "id": 1, "full_name": 1, "referral_code": 1, "merin_referral_code": 1},
+    )
+    if not inviter:
+        raise HTTPException(status_code=404, detail="Inviter not found.")
+
+    if inviter["id"] == user["id"]:
+        raise HTTPException(status_code=400, detail="You cannot invite yourself.")
+
+    # Use referral_code if available, else merin_referral_code, else the user ID as fallback
+    code = inviter.get("referral_code") or inviter.get("merin_referral_code") or inviter["id"]
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "referred_by": code,
+            "referred_by_user_id": inviter["id"],
+            "referred_at": datetime.now(timezone.utc).isoformat(),
+        }}
+    )
+
+    await db.referral_events.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "event": "inviter_set_via_lookup",
         "referral_code": code,
         "inviter_id": inviter["id"],
         "created_at": datetime.now(timezone.utc).isoformat(),

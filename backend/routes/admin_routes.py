@@ -76,6 +76,7 @@ class AdminUserUpdate(BaseModel):
     referral_code: Optional[str] = None
     merin_referral_code: Optional[str] = None
     trading_start_date: Optional[str] = None
+    referred_by_user_id: Optional[str] = None
 
 class TempPasswordSet(BaseModel):
     temp_password: str
@@ -1103,6 +1104,20 @@ async def update_member(user_id: str, data: AdminUserUpdate, user: dict = Depend
             update_data["email"] = data.email.lower()
         if data.trading_start_date:
             update_data["trading_start_date"] = data.trading_start_date
+        if data.referred_by_user_id is not None:
+            if data.referred_by_user_id == "":
+                # Clear inviter
+                update_data["referred_by"] = None
+                update_data["referred_by_user_id"] = None
+            else:
+                inviter = await deps.db.users.find_one(
+                    {"id": data.referred_by_user_id},
+                    {"_id": 0, "id": 1, "referral_code": 1, "merin_referral_code": 1},
+                )
+                if inviter:
+                    code = inviter.get("referral_code") or inviter.get("merin_referral_code") or inviter["id"]
+                    update_data["referred_by"] = code
+                    update_data["referred_by_user_id"] = inviter["id"]
     
     await deps.db.users.update_one({"id": user_id}, {"$set": update_data})
     return {"message": "User updated"}
