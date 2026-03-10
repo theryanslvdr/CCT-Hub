@@ -884,45 +884,46 @@ export default function MyRewardsPage() {
       {/* Top stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Points balance */}
-        <Card className="glass-card" data-testid="rewards-points-card">
-          <CardContent className="pt-6">
+        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-points-card">
+          <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-amber-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
+          <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Points Balance</p>
-                <p className="text-3xl font-bold font-mono text-white mt-1">
+                <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Points Balance</p>
+                <p className="text-3xl font-bold font-mono text-white mt-1.5">
                   {(summary?.lifetime_points || 0).toLocaleString()}
                 </p>
                 <p className="text-sm text-emerald-400 mt-1 font-mono">
                   ~ ${(summary?.estimated_usdt || 0).toFixed(2)} USDT
                 </p>
               </div>
-              <div className="p-3 rounded-xl bg-amber-500/10">
-                <Star className="w-6 h-6 text-amber-400" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                <Star className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Level with Progress */}
-        <Card className="glass-card" data-testid="rewards-level-card">
-          <CardContent className="pt-6">
+        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-level-card">
+          <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-purple-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
+          <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <p className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Level</p>
+                <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Level</p>
                 <div className="mt-2">
                   <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${levelStyle.badge} ${levelStyle.text}`}>
                     {summary?.level || 'Newbie'}
                   </span>
                 </div>
               </div>
-              <div className="p-3 rounded-xl bg-purple-500/10">
-                <Award className="w-6 h-6 text-purple-400" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <Award className="w-5 h-5 text-white" />
               </div>
             </div>
-            {/* Progress bar */}
             {levelProgress.next && (
               <div className="mt-3">
-                <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
                   <span>{levelProgress.current.name}</span>
                   <span>{levelProgress.next.name}</span>
                 </div>
@@ -932,8 +933,8 @@ export default function MyRewardsPage() {
                     style={{ width: `${levelProgress.progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-zinc-500 mt-1 text-center">
-                  <span className="text-cyan-400 font-mono">{levelProgress.pointsToNext.toLocaleString()}</span> pts to next level
+                <p className="text-[10px] text-zinc-500 mt-1 text-center">
+                  <span className="text-orange-400 font-mono">{levelProgress.pointsToNext.toLocaleString()}</span> pts to next level
                 </p>
               </div>
             )}
@@ -946,23 +947,24 @@ export default function MyRewardsPage() {
         </Card>
 
         {/* Rank */}
-        <Card className="glass-card" data-testid="rewards-rank-card">
-          <CardContent className="pt-6">
+        <Card className="relative overflow-hidden bg-[#111111]/80 border border-white/[0.06] rounded-xl" data-testid="rewards-rank-card">
+          <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-teal-500/[0.06] to-transparent rounded-full blur-2xl pointer-events-none" />
+          <CardContent className="pt-6 relative">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Monthly Rank</p>
-                <p className="text-3xl font-bold font-mono text-white mt-1">
+                <p className="text-[11px] uppercase tracking-wider text-zinc-500 font-medium">Monthly Rank</p>
+                <p className="text-3xl font-bold font-mono text-white mt-1.5">
                   {leaderboard?.current_rank ? `#${leaderboard.current_rank}` : '--'}
                 </p>
                 {leaderboard?.distance_to_next > 0 && (
-                  <p className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-teal-400 mt-1 flex items-center gap-1">
                     <ArrowUp className="w-3 h-3" />
                     {leaderboard.distance_to_next} pts to pass {leaderboard.next_user_name}
                   </p>
                 )}
               </div>
-              <div className="p-3 rounded-xl bg-cyan-500/10">
-                <Trophy className="w-6 h-6 text-cyan-400" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-lg">
+                <Trophy className="w-5 h-5 text-white" />
               </div>
             </div>
           </CardContent>
@@ -971,42 +973,24 @@ export default function MyRewardsPage() {
 
       {/* Streak & Activity Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
-          <div className="flex items-center gap-2 text-orange-400 mb-1">
-            <Flame className="w-4 h-4" />
-            <span className="text-xs font-medium">Current Streak</span>
-          </div>
-          <p className="text-xl font-bold text-white font-mono">
-            {summary?.current_streak || 0} days
-          </p>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
-          <div className="flex items-center gap-2 text-emerald-400 mb-1">
-            <Target className="w-4 h-4" />
-            <span className="text-xs font-medium">Best Streak</span>
-          </div>
-          <p className="text-xl font-bold text-white font-mono">
-            {summary?.best_streak || 0} days
-          </p>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
-          <div className="flex items-center gap-2 text-orange-400 mb-1">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-xs font-medium">This Month</span>
-          </div>
-          <p className="text-xl font-bold text-white font-mono">
-            +{(summary?.monthly_points || 0).toLocaleString()}
-          </p>
-        </div>
-        <div className="p-4 rounded-xl bg-[#0d0d0d]/50 border border-white/[0.06]">
-          <div className="flex items-center gap-2 text-purple-400 mb-1">
-            <Users className="w-4 h-4" />
-            <span className="text-xs font-medium">Referrals</span>
-          </div>
-          <p className="text-xl font-bold text-white font-mono">
-            {summary?.referral_count || 0}
-          </p>
-        </div>
+        {[
+          { icon: Flame, label: 'Current Streak', value: `${summary?.current_streak || 0} days`, color: 'text-orange-400', bg: 'from-orange-500/[0.06]' },
+          { icon: Target, label: 'Best Streak', value: `${summary?.best_streak || 0} days`, color: 'text-emerald-400', bg: 'from-emerald-500/[0.06]' },
+          { icon: TrendingUp, label: 'This Month', value: `+${(summary?.monthly_points || 0).toLocaleString()}`, color: 'text-orange-400', bg: 'from-orange-500/[0.06]' },
+          { icon: Users, label: 'Referrals', value: `${summary?.referral_count || 0}`, color: 'text-purple-400', bg: 'from-purple-500/[0.06]' },
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <div key={i} className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/60 border border-white/[0.06]">
+              <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br ${stat.bg} to-transparent rounded-full blur-xl pointer-events-none`} />
+              <div className="flex items-center gap-2 mb-1 relative">
+                <Icon className={`w-4 h-4 ${stat.color}`} />
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{stat.label}</span>
+              </div>
+              <p className="text-xl font-bold text-white font-mono relative">{stat.value}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Motivational message */}

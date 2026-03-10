@@ -363,26 +363,23 @@ const HabitTrackerPage = () => {
 
       {/* Streak badges */}
       <div className="grid grid-cols-3 gap-3" data-testid="streak-badges">
-        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Flame className={`w-5 h-5 ${streak.current_streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
-          </div>
-          <p className="text-2xl font-bold text-white">{streak.current_streak}</p>
-          <p className="text-[11px] text-zinc-500">Current Streak</p>
+        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+          <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-orange-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
+          <Flame className={`w-6 h-6 mx-auto mb-1.5 ${streak.current_streak > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
+          <p className="text-3xl font-bold font-mono text-white">{streak.current_streak}</p>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Current Streak</p>
         </div>
-        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Trophy className={`w-5 h-5 ${streak.longest_streak > 0 ? 'text-amber-400' : 'text-zinc-600'}`} />
-          </div>
-          <p className="text-2xl font-bold text-white">{streak.longest_streak}</p>
-          <p className="text-[11px] text-zinc-500">Best Streak</p>
+        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+          <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-amber-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
+          <Trophy className={`w-6 h-6 mx-auto mb-1.5 ${streak.longest_streak > 0 ? 'text-amber-400' : 'text-zinc-600'}`} />
+          <p className="text-3xl font-bold font-mono text-white">{streak.longest_streak}</p>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Best Streak</p>
         </div>
-        <div className="p-3 rounded-xl bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Calendar className="w-5 h-5 text-orange-400" />
-          </div>
-          <p className="text-2xl font-bold text-white">{streak.total_days}</p>
-          <p className="text-[11px] text-zinc-500">Total Days</p>
+        <div className="relative overflow-hidden p-4 rounded-xl bg-[#111111]/80 border border-white/[0.06] text-center">
+          <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-emerald-500/[0.08] to-transparent rounded-full blur-xl pointer-events-none" />
+          <Calendar className="w-6 h-6 mx-auto mb-1.5 text-emerald-400" />
+          <p className="text-3xl font-bold font-mono text-white">{streak.total_days}</p>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Total Days</p>
         </div>
       </div>
 

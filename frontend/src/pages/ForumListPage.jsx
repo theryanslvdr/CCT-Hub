@@ -307,107 +307,165 @@ export default function ForumListPage() {
         </div>
         <Button
           onClick={() => setNewPostOpen(true)}
-          className="gap-2 bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
+          className="gap-2 bg-orange-500 hover:bg-orange-400 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)] w-full sm:w-auto"
           data-testid="new-post-btn"
         >
           <Plus className="w-4 h-4" /> New Post
         </Button>
       </div>
 
-      {/* Stats bar */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'Total Posts', value: stats.total_posts, color: 'text-white' },
-            { label: 'Open', value: stats.open_posts, color: 'text-emerald-400' },
-            { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
-            { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
-          ].map(s => (
-            <div key={s.label} className="p-3 rounded-lg bg-[#0d0d0d]/60 border border-white/[0.06] text-center">
-              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-[10px] text-zinc-500 uppercase">{s.label}</p>
+      {/* Main layout: Posts + Sidebar */}
+      <div className="flex gap-5">
+        {/* Posts column */}
+        <div className="flex-1 min-w-0 space-y-4">
+          {/* Stats bar */}
+          {stats && (
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: 'Posts', value: stats.total_posts, color: 'text-white' },
+                { label: 'Open', value: stats.open_posts, color: 'text-emerald-400' },
+                { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
+                { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
+              ].map(s => (
+                <div key={s.label} className="p-2.5 rounded-lg bg-[#111111]/80 border border-white/[0.06] text-center">
+                  <p className={`text-lg font-bold font-mono ${s.color}`}>{s.value}</p>
+                  <p className="text-[9px] text-zinc-600 uppercase tracking-wider">{s.label}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Top Contributors */}
-      <TopContributorsCard contributors={stats?.top_contributors} />
-
-      {/* Filters */}
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <Input
-              placeholder="Search posts..."
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
-              className="pl-9 input-dark"
-              data-testid="forum-search-input"
-            />
+          {/* Filters */}
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <Input
+                  placeholder="Search posts..."
+                  value={searchQuery}
+                  onChange={e => { setSearchQuery(e.target.value); setPage(1); }}
+                  className="pl-9 input-dark"
+                  data-testid="forum-search-input"
+                />
+              </div>
+              <div className="flex gap-1">
+                {['', 'open', 'closed'].map(s => (
+                  <Button
+                    key={s}
+                    variant={statusFilter === s ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => { setStatusFilter(s); setPage(1); }}
+                    className={`h-9 ${statusFilter === s ? 'bg-orange-500 text-white' : 'bg-white/[0.04] border-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/[0.08]'}`}
+                    data-testid={`filter-${s || 'all'}`}
+                  >
+                    {s === '' ? 'All' : s === 'open' ? 'Open' : 'Solved'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {/* Category pills */}
+            <div className="flex gap-1.5 flex-wrap">
+              {['', 'general', 'trading', 'technical', 'announcements'].map(c => (
+                <button
+                  key={c}
+                  onClick={() => { setCategoryFilter(c); setPage(1); }}
+                  className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                    categoryFilter === c 
+                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' 
+                      : 'bg-transparent text-zinc-500 border-white/[0.06] hover:text-zinc-300 hover:border-white/[0.1]'
+                  }`}
+                  data-testid={`category-${c || 'all'}`}
+                >
+                  {c === '' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-2">
-            {['', 'open', 'closed'].map(s => (
-              <Button
-                key={s}
-                variant={statusFilter === s ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => { setStatusFilter(s); setPage(1); }}
-                className={statusFilter === s ? 'bg-orange-600 text-white' : 'btn-secondary'}
-                data-testid={`filter-${s || 'all'}`}
-              >
-                {s === '' ? 'All' : s === 'open' ? 'Open' : 'Solved'}
+
+          {/* Posts list */}
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-zinc-500" /></div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12 text-zinc-500">
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No posts yet. Be the first to ask a question!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {posts.map(p => (
+                <PostCard key={p.id} post={p} onClick={() => navigate(`/forum/${p.id}`)} />
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="btn-secondary">
+                <ChevronLeft className="w-4 h-4" />
               </Button>
-            ))}
-          </div>
+              <span className="text-xs text-zinc-400">Page {page} of {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
-        {/* Category Filter */}
-        <div className="flex gap-2 flex-wrap">
-          <span className="text-xs text-zinc-500 flex items-center gap-1 mr-1"><Tag className="w-3 h-3" /> Category:</span>
-          {['', 'general', 'trading', 'technical', 'announcements'].map(c => (
-            <Button
-              key={c}
-              variant={categoryFilter === c ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => { setCategoryFilter(c); setPage(1); }}
-              className={`h-7 text-xs ${categoryFilter === c ? 'bg-orange-600 text-white' : 'btn-secondary'}`}
-              data-testid={`category-${c || 'all'}`}
-            >
-              {c === '' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
-            </Button>
-          ))}
+
+        {/* Right Sidebar - Desktop only */}
+        <div className="hidden lg:block w-72 flex-shrink-0 space-y-4">
+          {/* Community Info Card */}
+          <div className="rounded-xl bg-[#111111]/80 border border-white/[0.06] overflow-hidden">
+            <div className="h-20 bg-gradient-to-br from-orange-500/20 to-amber-600/10 relative">
+              <div className="absolute -bottom-5 left-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
+                  <MessageSquare className="w-5 h-5 text-white" />
+                </div>
+              </div>
+            </div>
+            <div className="pt-8 px-4 pb-4">
+              <h3 className="text-sm font-semibold text-white">CrossCurrent Community</h3>
+              <p className="text-[11px] text-zinc-500 mt-0.5">Share knowledge, ask questions, and help fellow traders grow.</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="p-2 rounded-lg bg-white/[0.03] text-center">
+                  <p className="text-sm font-bold text-white">{stats?.total_posts || 0}</p>
+                  <p className="text-[9px] text-zinc-600">Posts</p>
+                </div>
+                <div className="p-2 rounded-lg bg-white/[0.03] text-center">
+                  <p className="text-sm font-bold text-white">{stats?.total_comments || 0}</p>
+                  <p className="text-[9px] text-zinc-600">Comments</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Contributors */}
+          <TopContributorsCard contributors={stats?.top_contributors} />
+
+          {/* Category Guide */}
+          <div className="rounded-xl bg-[#111111]/80 border border-white/[0.06] p-4">
+            <p className="text-xs font-semibold text-zinc-400 mb-3 flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-orange-400" /> Categories
+            </p>
+            <div className="space-y-2">
+              {[
+                { name: 'General', desc: 'General questions & discussions', color: 'bg-zinc-500' },
+                { name: 'Trading', desc: 'Trading strategies & signals', color: 'bg-orange-500' },
+                { name: 'Technical', desc: 'Platform bugs & features', color: 'bg-purple-500' },
+                { name: 'Announcements', desc: 'Official updates', color: 'bg-amber-500' },
+              ].map(c => (
+                <div key={c.name} className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${c.color}`} />
+                  <div>
+                    <p className="text-xs text-zinc-300">{c.name}</p>
+                    <p className="text-[10px] text-zinc-600">{c.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Posts list */}
-      {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-zinc-500" /></div>
-      ) : posts.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
-          <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">No posts yet. Be the first to ask a question!</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {posts.map(p => (
-            <PostCard key={p.id} post={p} onClick={() => navigate(`/forum/${p.id}`)} />
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="btn-secondary">
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <span className="text-xs text-zinc-400">Page {page} of {totalPages}</span>
-          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="btn-secondary">
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
 
       {/* New Post Dialog with Similar Posts */}
       <Dialog open={newPostOpen} onOpenChange={setNewPostOpen}>
