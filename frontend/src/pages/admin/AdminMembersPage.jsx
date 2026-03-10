@@ -18,6 +18,7 @@ import {
   UserX, UserCheck, ArrowUpDown, ArrowUp, ArrowDown, Download, Radio
 } from 'lucide-react';
 import api, { adminAPI } from '@/lib/api';
+import { AIMemberRisk } from '@/components/AIFeatures';
 
 export const AdminMembersPage = () => {
   const { user, isSuperAdmin, isMasterAdmin, simulateMemberView } = useAuth();
@@ -815,6 +816,7 @@ export const AdminMembersPage = () => {
             <DialogTitle className="text-white flex items-center gap-2">
               <Eye className="w-5 h-5" /> Member Details - {selectedMember?.full_name}
               {getLicenseBadge(selectedMember?.id)}
+              {selectedMember?.id && <AIMemberRisk userId={selectedMember.id} memberName={selectedMember.full_name} />}
             </DialogTitle>
           </DialogHeader>
           {memberDetails ? (

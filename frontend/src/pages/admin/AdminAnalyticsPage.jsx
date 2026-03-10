@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatNumber } from '@/lib/utils';
+import { AIDailyReport } from '@/components/AIFeatures';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -374,6 +375,9 @@ export const AdminAnalyticsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI Daily Report */}
+      <AIDailyReport />
 
       {/* Team KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

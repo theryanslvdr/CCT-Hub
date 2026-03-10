@@ -15,7 +15,7 @@ import {
   ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X,
   Edit3, Pin, MoreHorizontal, Merge, ShieldCheck, Calendar, Search
 } from 'lucide-react';
-import { AIForumSummary } from '@/components/AIFeatures';
+import { AIForumSummary, AIAnswerSuggestion } from '@/components/AIFeatures';
 
 // Image gallery lightbox component
 function ImageGallery({ images }) {
@@ -732,7 +732,8 @@ export default function ForumPostPage() {
               disabled={submitting}
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            <AIAnswerSuggestion postId={postId} />
             <Button
               onClick={handleComment}
               disabled={submitting || !comment.trim()}

@@ -553,3 +553,356 @@ async def check_anomalies(user: dict = Depends(get_current_user)):
         },
         "ai_powered": True,
     }
+
+
+# ═══════ Phase 3: Community, Admin & Notifications ═══════
+
+
+# ─── AI Answer Suggestions ───
+
+@router.get("/answer-suggestion/{post_id}")
+async def get_answer_suggestion(post_id: str, user: dict = Depends(get_current_user)):
+    """Suggest answers from solved posts for the current forum thread."""
+    db = deps.db
+
+    post = await db.forum_posts.find_one({"id": post_id}, {"_id": 0, "title": 1, "content": 1})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # Find solved posts with best answers
+    solved = await db.forum_posts.find(
+        {"status": "closed", "best_answer_id": {"$exists": True, "$ne": None}},
+        {"_id": 0, "id": 1, "title": 1, "content": 1, "best_answer_id": 1},
+    ).sort("created_at", -1).limit(15).to_list(15)
+
+    if not solved:
+        return {"suggestion": None, "reason": "No solved posts to reference"}
+
+    # Get best answer content for each solved post
+    refs = []
+    for sp in solved:
+        ba = await db.forum_comments.find_one(
+            {"id": sp["best_answer_id"]}, {"_id": 0, "content": 1}
+        )
+        if ba:
+            refs.append(f"Q: {sp['title'][:80]}\nA: {ba['content'][:200]}")
+
+    if not refs:
+        return {"suggestion": None, "reason": "No best answers found"}
+
+    system = (
+        "You are a forum assistant. Based on solved Q&As, suggest a helpful answer for the current question. "
+        "If no solved post is relevant, say so. Keep the suggestion concise and directly applicable. "
+        "Do NOT make up information — only reference what's in the solved posts."
+    )
+
+    prompt = (
+        f"Current question:\nTitle: {post['title']}\nContent: {post.get('content','')[:300]}\n\n"
+        f"Solved Q&As for reference:\n" + "\n---\n".join(refs[:8]) + "\n\n"
+        "Suggest an answer based on the solved posts. If none are relevant, say 'No similar solved questions found.'"
+    )
+
+    result = await call_llm(system, prompt, "answer_suggestion", user["id"], post_id)
+    if not result:
+        return {"suggestion": None, "reason": "Unable to generate suggestion"}
+
+    return {"suggestion": result, "post_id": post_id, "ai_powered": True}
+
+
+# ─── AI Member Risk Scoring (Admin only) ───
+
+@router.get("/member-risk/{user_id}")
+async def get_member_risk(user_id: str, user: dict = Depends(get_current_user)):
+    """Admin-only: AI flags members showing concerning patterns with a risk score."""
+    if user.get("role") not in ("master_admin", "super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    db = deps.db
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "id": 1, "full_name": 1, "email": 1, "streak": 1, "role": 1, "created_at": 1})
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    # Get trade history
+    trades = await db.trade_logs.find(
+        {"user_id": user_id}, {"_id": 0, "actual_profit": 1, "performance": 1, "created_at": 1}
+    ).sort("created_at", -1).limit(30).to_list(30)
+
+    # Get recent activity
+    last_trade_date = trades[0].get("created_at", "")[:10] if trades else "Never"
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    below_count = sum(1 for t in trades if t.get("performance") == "below")
+    streak = member.get("streak", 0)
+
+    # Check deposits
+    deposits = await db.deposits.find(
+        {"user_id": user_id, "type": "deposit"}, {"_id": 0, "amount": 1}
+    ).sort("created_at", -1).limit(5).to_list(5)
+
+    system = (
+        "You are a member risk analyst for a trading platform admin. Score the member's risk level (Low/Medium/High) "
+        "and explain in 2-3 bullet points. Focus on: inactivity, performance decline, missed trades. "
+        "Be objective and data-driven. End with one recommended admin action."
+    )
+
+    prompt = (
+        f"Member: {member.get('full_name', member.get('email','?'))}\n"
+        f"Role: {member.get('role','member')}, Joined: {member.get('created_at','?')[:10]}\n"
+        f"Last trade: {last_trade_date}, Current streak: {streak}\n"
+        f"Last {len(trades)} trades: total profit ${total_profit:.2f}, below target: {below_count}\n"
+        f"Recent deposits: {len(deposits)}\n\n"
+        f"Assess this member's risk level and recommend action."
+    )
+
+    result = await call_llm(system, prompt, "member_risk", user["id"], user_id)
+    if not result:
+        return {"risk_assessment": None, "member_id": user_id}
+
+    return {
+        "risk_assessment": result,
+        "member_id": user_id,
+        "member_name": member.get("full_name") or member.get("email"),
+        "stats": {
+            "streak": streak,
+            "last_trade": last_trade_date,
+            "total_profit": round(total_profit, 2),
+            "below_count": below_count,
+            "trade_count": len(trades),
+        },
+        "ai_powered": True,
+    }
+
+
+# ─── AI Daily Trade Report (Admin only) ───
+
+@router.get("/daily-report")
+async def get_daily_report(user: dict = Depends(get_current_user)):
+    """Admin-only: Auto-generated daily summary of all member trading activity."""
+    if user.get("role") not in ("master_admin", "super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    db = deps.db
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    since = f"{today}T00:00:00"
+
+    # Today's trades across all members
+    all_trades = await db.trade_logs.find(
+        {"created_at": {"$gte": since}}, {"_id": 0}
+    ).to_list(200)
+
+    # Today's signals
+    signals = await db.trading_signals.find(
+        {"created_at": {"$gte": since}}, {"_id": 0, "direction": 1, "product": 1, "profit_points": 1}
+    ).to_list(10)
+
+    # Active members count
+    active_members = len(set(t.get("user_id") for t in all_trades))
+    total_members = await db.users.count_documents({"role": {"$in": ["member", "licensee"]}})
+
+    # Performance breakdown
+    total_profit = sum(t.get("actual_profit", 0) for t in all_trades)
+    exceeded = sum(1 for t in all_trades if t.get("performance") == "exceeded")
+    below = sum(1 for t in all_trades if t.get("performance") == "below")
+    perfect = sum(1 for t in all_trades if t.get("performance") == "perfect")
+
+    # New deposits today
+    new_deposits = await db.deposits.count_documents(
+        {"type": "deposit", "created_at": {"$gte": since}}
+    )
+
+    cache_extra = f"daily_{today}"
+
+    system = (
+        "You are a trading platform daily report generator for admins. Write a concise executive summary. "
+        "Include: trading activity overview, member participation, performance highlights, outliers, "
+        "and one action item. Keep it under 5 bullet points. Use data."
+    )
+
+    prompt = (
+        f"Date: {today}\n"
+        f"Signals issued: {len(signals)}\n"
+        f"Total trades: {len(all_trades)} by {active_members}/{total_members} members\n"
+        f"Total profit: ${total_profit:.2f}\n"
+        f"Performance: {exceeded} exceeded, {perfect} perfect, {below} below\n"
+        f"New deposits: {new_deposits}\n\n"
+        f"Generate the daily trading report."
+    )
+
+    result = await call_llm(system, prompt, "daily_report", user["id"], cache_extra)
+    if not result:
+        return {"report": None, "date": today}
+
+    return {
+        "report": result,
+        "date": today,
+        "stats": {
+            "trade_count": len(all_trades),
+            "active_members": active_members,
+            "total_members": total_members,
+            "total_profit": round(total_profit, 2),
+            "exceeded": exceeded,
+            "below": below,
+            "perfect": perfect,
+            "signals": len(signals),
+            "deposits": new_deposits,
+        },
+        "ai_powered": True,
+    }
+
+
+# ─── AI Smart Notifications ───
+
+class SmartNotifRequest(BaseModel):
+    event_type: str  # e.g. "trade_logged", "streak_milestone", "deposit_received"
+    context: dict = {}
+
+
+@router.post("/smart-notification")
+async def generate_smart_notification(body: SmartNotifRequest, user: dict = Depends(get_current_user)):
+    """Generate a personalized notification message based on member context."""
+    db = deps.db
+
+    # Get user context
+    user_doc = await db.users.find_one(
+        {"id": user["id"]}, {"_id": 0, "full_name": 1, "streak": 1}
+    )
+    name = (user_doc or {}).get("full_name", "Member")
+    streak = (user_doc or {}).get("streak", 0)
+
+    system = (
+        "Generate a short, personalized notification message (1-2 sentences max). "
+        "Be warm, encouraging, and specific. Use the member's name."
+    )
+
+    prompt = (
+        f"Member: {name}, Streak: {streak} days\n"
+        f"Event: {body.event_type}\n"
+        f"Context: {str(body.context)[:200]}\n\n"
+        f"Generate a personalized notification message."
+    )
+
+    cache_extra = f"{body.event_type}_{datetime.now(timezone.utc).strftime('%Y-%m-%d-%H')}"
+    result = await call_llm(system, prompt, "smart_notification", user["id"], cache_extra)
+
+    return {"message": result or f"Great job, {name}!", "event_type": body.event_type, "ai_powered": result is not None}
+
+
+# ─── AI Commission Optimizer ───
+
+@router.get("/commission-insights")
+async def get_commission_insights(user: dict = Depends(get_current_user)):
+    """Analyze referral commission patterns and suggest optimization strategies."""
+    db = deps.db
+
+    commissions = await db.commissions.find(
+        {"user_id": user["id"], "skip_deposit": {"$ne": True}},
+        {"_id": 0, "amount": 1, "traders_count": 1, "commission_date": 1, "created_at": 1},
+    ).sort("created_at", -1).limit(30).to_list(30)
+
+    if not commissions:
+        return {"insights": None, "reason": "No commission history found"}
+
+    total = sum(c.get("amount", 0) for c in commissions)
+    avg = total / len(commissions)
+    total_traders = sum(c.get("traders_count", 0) for c in commissions)
+
+    # Analyze day-of-week patterns
+    day_totals = {}
+    for c in commissions:
+        date_str = c.get("commission_date") or c.get("created_at", "")[:10]
+        try:
+            day = datetime.fromisoformat(date_str).strftime("%A")
+            day_totals[day] = day_totals.get(day, 0) + c.get("amount", 0)
+        except (ValueError, TypeError):
+            pass
+
+    best_day = max(day_totals, key=day_totals.get) if day_totals else "Unknown"
+
+    cache_extra = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    system = (
+        "You are a referral commission analyst. Analyze the pattern and suggest optimization. "
+        "Be specific: mention best performing days, trends, and one actionable tip. "
+        "Keep it to 3-4 concise points."
+    )
+
+    prompt = (
+        f"Commission history (last {len(commissions)} entries):\n"
+        f"Total earned: ${total:.2f}, Average per entry: ${avg:.2f}\n"
+        f"Total referral traders: {total_traders}\n"
+        f"Best day of week: {best_day} (${day_totals.get(best_day, 0):.2f})\n"
+        f"Day breakdown: {', '.join(f'{d}: ${v:.2f}' for d, v in sorted(day_totals.items(), key=lambda x: -x[1]))}\n\n"
+        f"Analyze patterns and suggest how to optimize referral commissions."
+    )
+
+    result = await call_llm(system, prompt, "commission_optimizer", user["id"], cache_extra)
+    if not result:
+        return {"insights": None, "reason": "Unable to generate insights"}
+
+    return {
+        "insights": result,
+        "stats": {
+            "total_earned": round(total, 2),
+            "avg_per_entry": round(avg, 2),
+            "total_traders": total_traders,
+            "best_day": best_day,
+            "entries_analyzed": len(commissions),
+        },
+        "ai_powered": True,
+    }
+
+
+# ─── AI Milestone Motivation ───
+
+@router.get("/milestone/{goal_id}")
+async def get_milestone_motivation(goal_id: str, user: dict = Depends(get_current_user)):
+    """Generate personalized encouragement at goal milestones (25/50/75/100%)."""
+    db = deps.db
+
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    progress = (goal["current_amount"] / goal["target_amount"] * 100) if goal["target_amount"] > 0 else 0
+
+    # Determine milestone bracket
+    if progress >= 100:
+        milestone = "completed"
+    elif progress >= 75:
+        milestone = "75%"
+    elif progress >= 50:
+        milestone = "50%"
+    elif progress >= 25:
+        milestone = "25%"
+    else:
+        milestone = "started"
+
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "full_name": 1, "streak": 1})
+    name = (user_doc or {}).get("full_name", "Member")
+
+    system = (
+        "You are a motivational coach celebrating a financial milestone. "
+        "Write a short, personalized message (2-3 sentences). Be genuine, not generic. "
+        "Reference the specific goal and progress. End with encouragement for the next step."
+    )
+
+    prompt = (
+        f"Member: {name}\n"
+        f"Goal: {goal.get('name','')}\n"
+        f"Target: ${goal['target_amount']:.2f}\n"
+        f"Current: ${goal['current_amount']:.2f} ({progress:.1f}%)\n"
+        f"Milestone: {milestone}\n\n"
+        f"Generate a personalized milestone celebration message."
+    )
+
+    cache_extra = f"{goal_id}_{milestone}"
+    result = await call_llm(system, prompt, "milestone_motivation", user["id"], cache_extra)
+    if not result:
+        return {"motivation": None, "milestone": milestone}
+
+    return {
+        "motivation": result,
+        "milestone": milestone,
+        "progress": round(progress, 1),
+        "goal_name": goal.get("name"),
+        "ai_powered": True,
+    }

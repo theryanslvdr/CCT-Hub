@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LicenseeWelcomeScreen } from '@/components/LicenseeWelcomeScreen';
-import { AIFinancialSummary, AIBalanceForecast } from '@/components/AIFeatures';
+import { AIFinancialSummary, AIBalanceForecast, AICommissionInsights } from '@/components/AIFeatures';
 import { toast } from 'sonner';
 import { 
   Plus, ArrowDownToLine, ArrowUpFromLine, Calculator, 
@@ -3803,9 +3803,10 @@ export const ProfitTrackerPage = () => {
 
       {/* AI Insights Section */}
       {!isLicensee && !simulatedView && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <AIFinancialSummary />
           <AIBalanceForecast />
+          <AICommissionInsights />
         </div>
       )}
 

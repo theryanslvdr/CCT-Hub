@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { aiAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, TrendingUp, Brain, BookOpen, Target, AlertTriangle, Zap } from 'lucide-react';
+import { Loader2, Sparkles, TrendingUp, Brain, BookOpen, Target, AlertTriangle, Zap, MessageSquare, Shield, FileText, DollarSign, Trophy } from 'lucide-react';
 
 export function AITradeCoach({ tradeId }) {
   const [coaching, setCoaching] = useState(null);
@@ -438,5 +438,243 @@ export function AIAnomalyAlert() {
         Re-check
       </Button>
     </div>
+  );
+}
+
+
+// ─── Phase 3 Components ───
+
+export function AIAnswerSuggestion({ postId }) {
+  const [suggestion, setSuggestion] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await aiAPI.getAnswerSuggestion(postId);
+      setSuggestion(res.data.suggestion || res.data.reason);
+    } catch {
+      setSuggestion('Unable to generate suggestion.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (suggestion) {
+    return (
+      <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 text-xs space-y-1.5" data-testid="ai-answer-suggestion">
+        <div className="flex items-center gap-1.5 text-blue-400 font-medium text-[11px] uppercase tracking-wider">
+          <MessageSquare className="w-3.5 h-3.5" /> AI Suggested Answer
+        </div>
+        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{suggestion}</div>
+        <p className="text-[10px] text-zinc-600 italic">Based on previously solved questions</p>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" variant="outline" onClick={load} disabled={loading}
+      className="text-[11px] gap-1.5 btn-secondary text-blue-400 hover:text-blue-300 border-blue-500/20 h-7"
+      data-testid="ai-answer-btn">
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageSquare className="w-3 h-3" />}
+      AI Suggest Answer
+    </Button>
+  );
+}
+
+export function AIMemberRisk({ userId, memberName }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await aiAPI.getMemberRisk(userId);
+      setData(res.data);
+    } catch {
+      setData({ risk_assessment: 'Unable to assess risk.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (data) {
+    return (
+      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 text-xs space-y-1.5" data-testid="ai-member-risk">
+        <div className="flex items-center gap-1.5 text-red-400 font-medium text-[11px] uppercase tracking-wider">
+          <Shield className="w-3.5 h-3.5" /> AI Risk Assessment
+        </div>
+        <div className="text-zinc-300 whitespace-pre-wrap leading-relaxed">{data.risk_assessment}</div>
+        {data.stats && (
+          <div className="flex gap-3 text-[10px] text-zinc-500 pt-1">
+            <span>Streak: {data.stats.streak}d</span>
+            <span>Below: {data.stats.below_count}/{data.stats.trade_count}</span>
+            <span>Last trade: {data.stats.last_trade}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" variant="outline" onClick={load} disabled={loading}
+      className="text-[11px] gap-1.5 btn-secondary text-red-400 hover:text-red-300 border-red-500/20 h-7"
+      data-testid={`ai-risk-btn-${userId}`}>
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Shield className="w-3 h-3" />}
+      AI Risk
+    </Button>
+  );
+}
+
+export function AIDailyReport() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await aiAPI.getDailyReport();
+      setData(res.data);
+      setLoaded(true);
+    } catch {
+      setData({ report: 'Unable to generate report.' });
+      setLoaded(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!loaded) {
+    return (
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-indigo-500/20 transition-colors" data-testid="ai-daily-report">
+        <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
+          <FileText className="w-4 h-4 text-indigo-400" /> AI Daily Trade Report
+        </h3>
+        <p className="text-xs text-zinc-500 mb-3">Auto-generated executive summary of today's trading activity.</p>
+        <Button size="sm" onClick={load} disabled={loading} className="text-xs gap-1 bg-indigo-600 hover:bg-indigo-700 h-7" data-testid="ai-report-btn">
+          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} Generate Report
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-indigo-500/20" data-testid="ai-daily-report">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-indigo-400" /> AI Daily Report
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{data?.date}</span>
+        </h3>
+      </div>
+      {data?.stats && (
+        <div className="flex flex-wrap gap-3 mb-2 text-[10px] text-zinc-500">
+          <span>Trades: <span className="text-zinc-300">{data.stats.trade_count}</span></span>
+          <span>Active: <span className="text-zinc-300">{data.stats.active_members}/{data.stats.total_members}</span></span>
+          <span>Profit: <span className="text-emerald-400 font-mono">${data.stats.total_profit}</span></span>
+        </div>
+      )}
+      {loading ? (
+        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-indigo-400" /></div>
+      ) : (
+        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{data?.report}</div>
+      )}
+      <Button size="sm" variant="ghost" onClick={load} disabled={loading} className="text-[10px] text-zinc-500 mt-2 h-6 px-2">Refresh</Button>
+    </div>
+  );
+}
+
+export function AICommissionInsights() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await aiAPI.getCommissionInsights();
+      setData(res.data);
+      setLoaded(true);
+    } catch {
+      setData({ insights: 'Unable to analyze commissions.' });
+      setLoaded(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!loaded) {
+    return (
+      <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-zinc-800 hover:border-purple-500/20 transition-colors" data-testid="ai-commission-insights">
+        <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
+          <DollarSign className="w-4 h-4 text-purple-400" /> AI Commission Optimizer
+        </h3>
+        <p className="text-xs text-zinc-500 mb-3">Analyze your referral commission patterns for optimization.</p>
+        <Button size="sm" onClick={load} disabled={loading} className="text-xs gap-1 bg-purple-600 hover:bg-purple-700 h-7" data-testid="ai-commission-btn">
+          {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <DollarSign className="w-3 h-3" />} Analyze
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-900/50 border border-purple-500/20" data-testid="ai-commission-insights">
+      <h3 className="text-sm font-semibold text-zinc-200 flex items-center gap-2 mb-2">
+        <DollarSign className="w-4 h-4 text-purple-400" /> AI Commission Optimizer
+      </h3>
+      {data?.stats && (
+        <div className="flex flex-wrap gap-3 mb-2 text-[10px] text-zinc-500">
+          <span>Total: <span className="text-purple-400 font-mono">${data.stats.total_earned}</span></span>
+          <span>Avg: <span className="text-zinc-300">${data.stats.avg_per_entry}/entry</span></span>
+          <span>Best day: <span className="text-zinc-300">{data.stats.best_day}</span></span>
+        </div>
+      )}
+      {loading ? (
+        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-purple-400" /></div>
+      ) : (
+        <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">{data?.insights}</div>
+      )}
+    </div>
+  );
+}
+
+export function AIMilestoneMotivation({ goalId, progress, goalName }) {
+  const [motivation, setMotivation] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Only show at milestone boundaries
+  const milestone = progress >= 100 ? 'completed' : progress >= 75 ? '75%' : progress >= 50 ? '50%' : progress >= 25 ? '25%' : null;
+  if (!milestone) return null;
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await aiAPI.getMilestoneMotivation(goalId);
+      setMotivation(res.data.motivation);
+    } catch {
+      setMotivation(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (motivation) {
+    return (
+      <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 text-xs" data-testid="ai-milestone">
+        <div className="flex items-center gap-1.5 text-amber-400 font-medium text-[11px] mb-1">
+          <Trophy className="w-3.5 h-3.5" /> {milestone} Milestone
+        </div>
+        <p className="text-zinc-300 leading-relaxed">{motivation}</p>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" variant="ghost" onClick={load} disabled={loading}
+      className="text-[10px] gap-1 text-amber-400 hover:text-amber-300 h-6 px-2"
+      data-testid={`ai-milestone-btn-${goalId}`}>
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trophy className="w-3 h-3" />}
+      {milestone} Milestone
+    </Button>
   );
 }
