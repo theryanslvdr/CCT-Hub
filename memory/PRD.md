@@ -82,18 +82,22 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 ### P0 — Remaining UI Refresh Phases
 - All 6 phases COMPLETE (verified iteration_164)
 
-### P1 — Feature Enhancements
-- Share Trade/Projection as rich shareable card
-- AI-consolidated profit notifications  
-- Separate Admin Dashboard home page
-- Public member profile view
-- Step-progress indicators for deposits/withdrawals
-- Smart prompt suggestions on AI Assistant (learn from popular user questions via active learning data)
+### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
+- Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
+- Daily Profit Summary: AI-consolidated notification on dashboard for today's trades (DONE)
+- Admin Dashboard: Dedicated admin home page with stats (DONE — previous session)
+- Public Member Profile: View any member's profile from Admin Members page or /member/:id (DONE)
+- Transaction Stepper: Step-progress indicators in deposit/withdrawal dialogs (DONE)
+- AI Smart Prompts: Popular questions shown in AI Assistant from active learning data (DONE)
 
-### P2 — Future Features
-- AI for Debt Management
+### P2 — Upcoming
 - Smoother onboarding (pre-fill referral from website)
+
+### P3 — Future Features
+- AI for Debt Management
+- Gamified Leaderboards
 - Performance optimization (caching, pagination)
+- Refactor ProfitTrackerPage.jsx (~4300 lines) and TradeMonitorPage.jsx (~2600 lines)
 
 ## Key Database Collections
 - `users`, `trade_logs`, `signals`, `forum_posts`, `habits`, `quizzes`, `rewards`
