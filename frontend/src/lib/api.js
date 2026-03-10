@@ -509,3 +509,11 @@ export const versionAPI = {
 };
 
 export default api;
+
+// AI Features API
+export const aiAPI = {
+  getTradeCoach: (tradeId) => api.get(`/ai/trade-coach/${tradeId}`),
+  getFinancialSummary: (period = 'weekly') => api.get('/ai/financial-summary', { params: { period } }),
+  getBalanceForecast: () => api.get('/ai/balance-forecast'),
+  getForumSummary: (postId) => api.get(`/ai/forum-summary/${postId}`),
+};

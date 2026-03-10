@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import { MobileNotice } from '@/components/MobileNotice';
+import { AITradeCoach } from '@/components/AIFeatures';
 import { usePullToRefresh, PullToRefreshIndicator } from '@/hooks/usePullToRefresh';
 import { 
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
@@ -2082,7 +2083,8 @@ export const TradeMonitorPage = () => {
                   </thead>
                   <tbody>
                     {tradeHistory.map((trade) => (
-                      <tr key={trade.id}>
+                      <React.Fragment key={trade.id}>
+                      <tr>
                         <td>
                           <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xs">
                             {trade.trade_day_number || '-'}
@@ -2169,6 +2171,14 @@ export const TradeMonitorPage = () => {
                           )}
                         </td>
                       </tr>
+                      <tr>
+                        <td colSpan="10" className="p-0 border-t-0">
+                          <div className="px-4 pb-2">
+                            <AITradeCoach tradeId={trade.id} />
+                          </div>
+                        </td>
+                      </tr>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>

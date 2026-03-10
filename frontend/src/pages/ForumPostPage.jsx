@@ -15,6 +15,7 @@ import {
   ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, ImageIcon, X,
   Edit3, Pin, MoreHorizontal, Merge, ShieldCheck, Calendar, Search
 } from 'lucide-react';
+import { AIForumSummary } from '@/components/AIFeatures';
 
 // Image gallery lightbox component
 function ImageGallery({ images }) {
@@ -584,9 +585,12 @@ export default function ForumPostPage() {
 
       {/* Comments */}
       <div>
-        <h2 className="text-sm font-semibold text-zinc-400 mb-3 flex items-center gap-1.5">
-          <MessageCircle className="w-4 h-4" /> {post.comments?.length || 0} Comments
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
+            <MessageCircle className="w-4 h-4" /> {post.comments?.length || 0} Comments
+          </h2>
+          <AIForumSummary postId={postId} commentCount={post.comments?.length || 0} />
+        </div>
 
         {(!post.comments || post.comments.length === 0) ? (
           <p className="text-center text-zinc-600 py-8 text-sm">No comments yet. Be the first to help!</p>

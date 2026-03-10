@@ -125,6 +125,7 @@ from routes.rewards import router as _rewards_router
 from routes.forum import router as _forum_router
 from routes.publitio import router as _publitio_router
 from routes.system_health import router as _system_health_router
+from routes.ai_routes import router as _ai_router
 
 # ─── Register Routers ───
 api_router.include_router(_auth_router)
@@ -149,6 +150,7 @@ api_router.include_router(_rewards_router)
 api_router.include_router(_forum_router)
 api_router.include_router(_publitio_router)
 api_router.include_router(_system_health_router)
+api_router.include_router(_ai_router)
 
 app.include_router(api_router)
 
