@@ -71,6 +71,8 @@ export const AdminSettingsPage = () => {
     content_protection_disable_copy: true,
     content_protection_disable_rightclick: true,
     content_protection_disable_shortcuts: true,
+    // Onboarding
+    onboarding_enabled: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1683,6 +1685,34 @@ export const AdminSettingsPage = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Onboarding Tour Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Smartphone className="w-5 h-5 text-orange-400" />
+                  Onboarding Tour
+                </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Control whether the interactive onboarding tour is shown to new members.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a]">
+                  <div>
+                    <p className="text-white font-medium">Enable Onboarding Tour</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      When disabled, the tour will not appear for any member — even new ones.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={settings.onboarding_enabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, onboarding_enabled: checked })}
+                    data-testid="onboarding-toggle"
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>

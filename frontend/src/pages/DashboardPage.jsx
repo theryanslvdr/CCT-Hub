@@ -338,7 +338,7 @@ export const DashboardPage = () => {
       )}
 
       {/* Welcome Section - Mobile: 2 rows when signal active */}
-      <div className="glass-card-elevated p-5 md:p-7">
+      <div className="glass-card p-5 md:p-7">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           {/* Row 1: Greeting */}
           <div>
@@ -567,31 +567,31 @@ export const DashboardPage = () => {
       {/* Tabbed Interface for Members */}
       {isMember && !isLicenseeView && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 rounded-xl p-1" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.95), rgba(10,10,10,0.98))', border: '1px solid rgba(255,255,255,0.05)' }} data-testid="dashboard-tabs">
+          <TabsList className="grid w-full grid-cols-4 bg-[#1a1a1a] rounded-xl p-1" data-testid="dashboard-tabs">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
+              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white rounded-lg gap-2 text-gray-500"
               data-testid="tab-overview"
             >
               <Wallet className="w-4 h-4" /> Overview
             </TabsTrigger>
             <TabsTrigger 
               value="profit" 
-              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
+              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white rounded-lg gap-2 text-gray-500"
               data-testid="tab-profit"
             >
               <TrendingUp className="w-4 h-4" /> Profit
             </TabsTrigger>
             <TabsTrigger 
               value="trades" 
-              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
+              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white rounded-lg gap-2 text-gray-500"
               data-testid="tab-trades"
             >
               <History className="w-4 h-4" /> Trades
             </TabsTrigger>
             <TabsTrigger 
               value="charts" 
-              className="data-[state=active]:bg-orange-500/90 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(249,115,22,0.2)] rounded-lg gap-2 text-zinc-500"
+              className="data-[state=active]:bg-[#2a2a2a] data-[state=active]:text-white rounded-lg gap-2 text-gray-500"
               data-testid="tab-charts"
             >
               <BarChart3 className="w-4 h-4" /> Charts
@@ -602,7 +602,7 @@ export const DashboardPage = () => {
           <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Performance Chart */}
-              <Card className="glass-card-elevated lg:col-span-2">
+              <Card className="lg:col-span-2 bg-[#111111] border-[#222222]">
                 <CardHeader>
                   <CardTitle className="text-white text-lg">Performance Overview</CardTitle>
                 </CardHeader>

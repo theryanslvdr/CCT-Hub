@@ -36,7 +36,7 @@ const StatCard = ({ label, value, subtext, icon: Icon, color, link }) => {
 };
 
 const QuickAction = ({ label, desc, icon: Icon, color, link }) => (
-  <Link to={link} className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/[0.02] transition-all group" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))', border: '1px solid rgba(255,255,255,0.04)' }} data-testid={`quick-action-${label.toLowerCase().replace(/\s/g, '-')}`}>
+  <Link to={link} className="flex items-center gap-4 p-4 rounded-2xl bg-[#111111] border border-[#222222] hover:border-[#2a2a2a] transition-all group" data-testid={`quick-action-${label.toLowerCase().replace(/\s/g, '-')}`}>
     <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
       <Icon className="w-5 h-5 text-white" />
     </div>

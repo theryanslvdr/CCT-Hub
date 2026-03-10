@@ -344,14 +344,9 @@ export const LoginPage = () => {
       <div className="absolute -bottom-40 -right-20 w-[400px] h-[400px] bg-amber-500/[0.03] rounded-full blur-[130px]" />
       
       <div className="relative z-10 w-full max-w-[420px]">
-        {/* Premium glass card */}
+        {/* Premium opaque dark card */}
         <div 
-          className="backdrop-blur-2xl rounded-2xl p-9"
-          style={{
-            background: 'linear-gradient(145deg, rgba(18,18,18,0.92), rgba(10,10,10,0.96))',
-            border: '1px solid rgba(255,255,255,0.07)',
-            boxShadow: '0 8px 60px rgba(0,0,0,0.6), 0 0 80px rgba(249,115,22,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-          }}
+          className="rounded-3xl p-9 bg-[#111111] border border-[#222222] shadow-[0_8px_60px_rgba(0,0,0,0.6)]"
         >
           {/* Logo */}
           <div className="flex flex-col items-center mb-10">
@@ -398,12 +393,7 @@ export const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="pl-11 h-12 rounded-xl text-zinc-100 placeholder:text-zinc-600"
-                  style={{
-                    background: 'rgba(6,6,6,0.8)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="pl-11 h-12 rounded-xl text-white placeholder:text-gray-600 bg-[#1a1a1a] border-[#2a2a2a] focus-visible:border-orange-500/50"
                   required
                   data-testid="login-email"
                 />
@@ -420,12 +410,7 @@ export const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-11 h-12 rounded-xl text-zinc-100 placeholder:text-zinc-600"
-                  style={{
-                    background: 'rgba(6,6,6,0.8)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="pl-11 h-12 rounded-xl text-white placeholder:text-gray-600 bg-[#1a1a1a] border-[#2a2a2a] focus-visible:border-orange-500/50"
                   required
                   data-testid="login-password"
                 />
@@ -434,12 +419,7 @@ export const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                border: '1px solid rgba(249,115,22,0.3)',
-                boxShadow: '0 0 30px rgba(249,115,22,0.3), 0 4px 12px rgba(0,0,0,0.4)',
-              }}
+              className="w-full h-12 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
               disabled={isLoading}
               data-testid="login-submit"
             >

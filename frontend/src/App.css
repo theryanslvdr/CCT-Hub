@@ -6,9 +6,7 @@
 
 /* Sidebar */
 .sidebar {
-    @apply fixed left-0 top-0 h-full w-64 z-40;
-    background: linear-gradient(180deg, #0c0c0c 0%, #080808 100%);
-    border-right: 1px solid rgba(255,255,255,0.04);
+    @apply fixed left-0 top-0 h-full w-64 z-40 bg-[#0d0d0d] border-r border-[#1f1f1f];
 }
 
 .sidebar-collapsed {
@@ -16,14 +14,12 @@
 }
 
 .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all rounded-lg mx-2 cursor-pointer;
+    @apply flex items-center gap-3 px-4 py-3 text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all rounded-lg mx-2 cursor-pointer;
 }
 
 .sidebar-item.active {
-    @apply text-orange-400;
-    background: rgba(249,115,22,0.08);
-    border: 1px solid rgba(249,115,22,0.12);
-    box-shadow: 0 0 20px rgba(249,115,22,0.04);
+    @apply text-white font-medium bg-[#1a1a1a];
+    border: 1px solid rgba(249,115,22,0.2);
 }
 
 /* Main content area */
@@ -37,10 +33,7 @@
 
 /* Header */
 .app-header {
-    @apply sticky top-0 z-30 h-16 flex items-center justify-between px-6;
-    background: rgba(8,8,8,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    @apply sticky top-0 z-30 h-16 flex items-center justify-between px-6 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-[#1f1f1f];
 }
 
 /* Dashboard grid */
@@ -139,10 +132,8 @@
 }
 
 .auth-card {
-    @apply w-full max-w-md p-9 backdrop-blur-2xl rounded-2xl;
-    background: linear-gradient(145deg, rgba(18,18,18,0.92), rgba(10,10,10,0.96));
-    border: 1px solid rgba(255,255,255,0.07);
-    box-shadow: 0 8px 60px rgba(0,0,0,0.6), 0 0 80px rgba(249,115,22,0.06), inset 0 1px 0 rgba(255,255,255,0.04);
+    @apply w-full max-w-md p-9 rounded-3xl bg-[#111111] border border-[#222222];
+    box-shadow: 0 8px 60px rgba(0,0,0,0.6);
 }
 
 /* Admin pages */
@@ -205,8 +196,8 @@
 
 /* Toast customization */
 [data-sonner-toast] {
-    background: linear-gradient(145deg, rgba(20,20,20,0.98), rgba(12,12,12,0.99)) !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
+    background: #111111 !important;
+    border: 1px solid #222222 !important;
     color: #e4e4e7 !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
 }

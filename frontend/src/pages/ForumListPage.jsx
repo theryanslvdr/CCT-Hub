@@ -43,13 +43,9 @@ function PostCard({ post, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-5 rounded-xl transition-all duration-200 group ${
-        post.pinned ? 'border border-amber-500/20 bg-amber-500/[0.03]' : 'hover:bg-white/[0.02]'
+      className={`w-full text-left p-5 rounded-2xl transition-all duration-200 group ${
+        post.pinned ? 'border border-amber-500/20 bg-amber-500/[0.03]' : 'bg-[#111111] border border-[#222222] hover:border-[#2a2a2a]'
       }`}
-      style={post.pinned ? {} : {
-        background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))',
-        border: '1px solid rgba(255,255,255,0.04)',
-      }}
       data-testid={`forum-post-${post.id}`}
     >
       <div className="flex items-start gap-3">
@@ -173,7 +169,7 @@ function TopContributorsCard({ contributors }) {
   const medals = ['text-amber-400', 'text-zinc-400', 'text-amber-700'];
 
   return (
-    <div className="p-4 rounded-xl" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.6), rgba(10,10,10,0.8))', border: '1px solid rgba(255,255,255,0.04)' }} data-testid="top-contributors-section">
+    <div className="p-4 rounded-2xl bg-[#111111] border border-[#222222]" data-testid="top-contributors-section">
       <p className="text-xs font-semibold text-zinc-300 mb-3 flex items-center gap-1.5">
         <Trophy className="w-4 h-4 text-amber-400" /> Top Contributors
       </p>
@@ -331,7 +327,7 @@ export default function ForumListPage() {
                 { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
                 { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
               ].map(s => (
-                <div key={s.label} className="p-3 rounded-xl text-center" style={{ background: 'linear-gradient(145deg, rgba(16,16,16,0.7), rgba(10,10,10,0.9))', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div key={s.label} className="p-3 rounded-xl text-center bg-[#1a1a1a] border border-[#222222]">
                   <p className={`text-xl font-bold font-mono ${s.color}`}>{s.value}</p>
                   <p className="text-[9px] text-zinc-600 uppercase tracking-widest mt-0.5">{s.label}</p>
                 </div>

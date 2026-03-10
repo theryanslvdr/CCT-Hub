@@ -72,9 +72,9 @@ export const NotificationPanel = () => {
           <span className={cn("absolute bottom-0 right-0 w-2 h-2 rounded-full border border-background", connected ? "bg-emerald-500" : "bg-zinc-600")} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 bg-[#111111] border-white/[0.08] shadow-2xl" align="end" data-testid="notification-panel">
+      <PopoverContent className="w-80 p-0 bg-[#111111] border border-[#222222] shadow-[0_25px_80px_rgba(0,0,0,0.7)] rounded-2xl" align="end" data-testid="notification-panel">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#1f1f1f]">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-white text-sm">Notifications</h3>
             {unreadCount > 0 && (
@@ -110,7 +110,7 @@ export const NotificationPanel = () => {
                     <span className="text-[10px] text-zinc-600">{items.length}</span>
                   </div>
                   {items.map((n, i) => (
-                    <div key={n.id || i} className="px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer" data-testid={`notification-item-${i}`}>
+                    <div key={n.id || i} className={cn("px-4 py-3 hover:bg-[#1a1a1a] transition-colors cursor-pointer border-b border-[#1f1f1f] last:border-0", !n.read && "bg-orange-500/[0.03]")} data-testid={`notification-item-${i}`}>
                       <div className="flex items-start gap-3">
                         <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", iconBg[n.type] || 'bg-white/[0.05]')}>
                           <NotificationIcon type={n.type} />
@@ -133,7 +133,7 @@ export const NotificationPanel = () => {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 border-t border-white/[0.06]">
+        <div className="px-4 py-2.5 border-t border-[#1f1f1f]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[10px] text-zinc-600">
               <span className={cn("w-1.5 h-1.5 rounded-full", connected ? "bg-emerald-500" : "bg-zinc-600")} />

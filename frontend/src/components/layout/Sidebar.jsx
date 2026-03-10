@@ -232,14 +232,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const navLinkClass = ({ isActive }) => 
     `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
       isActive 
-        ? 'text-orange-400 bg-orange-500/[0.07] shadow-[0_0_20px_rgba(249,115,22,0.04)] border border-orange-500/[0.12]' 
-        : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent'
+        ? 'text-white font-medium bg-[#1a1a1a] border border-orange-500/20' 
+        : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.03] border border-transparent'
     }`;
-  const navLinkStyle = (isActive) => isActive ? {
-    background: 'rgba(249,115,22,0.08)',
-    border: '1px solid rgba(249,115,22,0.12)',
-    boxShadow: '0 0 20px rgba(249,115,22,0.04)',
-  } : { border: '1px solid transparent' };
 
   // Special class for hidden features - purple text on hover
   const hiddenNavLinkClass = ({ isActive }) => 
@@ -316,7 +311,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const hasFavicon = platformSettings?.favicon_url;
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''} flex flex-col`} style={{ background: 'linear-gradient(180deg, #0c0c0c 0%, #080808 100%)', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+    <aside className={`sidebar ${isOpen ? 'open' : ''} ${collapsed ? 'sidebar-collapsed' : ''} flex flex-col bg-[#0d0d0d] border-r border-[#1f1f1f]`}>
       {/* Logo Section */}
       <div className="p-5 pb-4">
         <div className="flex items-center gap-3">

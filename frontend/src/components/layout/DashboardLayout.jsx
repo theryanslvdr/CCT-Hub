@@ -216,7 +216,10 @@ export const DashboardLayout = () => {
 
   return (
     <ApiKeyStatusContext.Provider value={{ missingKeys, hasMissingKeys: missingKeys.length > 0 }}>
-      <div className="min-h-screen flex flex-col" style={{ background: '#070707' }}>
+      <div className="min-h-screen flex flex-col relative" style={{ background: '#080808' }}>
+        {/* Ambient glow blobs */}
+        <div className="fixed top-0 right-0 w-64 h-64 rounded-full bg-orange-500/10 blur-[120px] pointer-events-none z-0" />
+        <div className="fixed bottom-0 left-0 w-64 h-64 rounded-full bg-white/5 blur-[100px] pointer-events-none z-0" />
         {/* Desktop Sidebar */}
         <div className="hidden md:block">
           <Sidebar

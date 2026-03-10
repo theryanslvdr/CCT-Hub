@@ -331,23 +331,25 @@ export const useOnboarding = () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    fetch(`${API_URL}/api/users/tour-status`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.tour_completed) {
+    // Check both: platform setting (onboarding_enabled) and user's tour_completed
+    Promise.all([
+      fetch(`${API_URL}/api/users/tour-status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.json()),
+      fetch(`${API_URL}/api/settings/public`).then(r => r.json()).catch(() => ({ onboarding_enabled: true })),
+    ])
+      .then(([tourData, settingsData]) => {
+        // If platform has onboarding disabled, don't show
+        if (settingsData.onboarding_enabled === false) return;
+
+        if (tourData.tour_completed) {
           localStorage.setItem('crosscurrent_tour_completed', 'true');
         } else {
           const timer = setTimeout(() => setShowTour(true), 1000);
           return () => clearTimeout(timer);
         }
       })
-      .catch(() => {
-        // Fallback: show tour if we can't check backend
-        const timer = setTimeout(() => setShowTour(true), 1000);
-        return () => clearTimeout(timer);
-      });
+      .catch(() => {});
   }, []);
 
   const completeTour = () => {

@@ -136,9 +136,9 @@ const AIAssistantPage = () => {
   return (
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-0 -m-3 sm:-m-4 md:-m-6" data-testid="ai-assistant-page">
       {/* Sidebar - sessions */}
-      <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden flex flex-col`} style={{ background: 'rgba(8,8,8,0.95)', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+      <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden flex flex-col bg-[#0d0d0d] border-r border-[#1f1f1f]`}>
         {/* Header */}
-        <div className="p-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="p-3 border-b border-[#1f1f1f]">
           <div className="flex items-center gap-2 px-2 py-1.5 mb-3">
             <Bot className="w-4 h-4 text-orange-400" />
             <span className="text-xs font-semibold text-white">CrossCurrent AI</span>
@@ -176,7 +176,7 @@ const AIAssistantPage = () => {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat header */}
-        <div className="flex items-center gap-3 px-4 py-3" style={{ background: 'rgba(10,10,10,0.6)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="flex items-center gap-3 px-4 py-3 bg-[#0d0d0d] border-b border-[#1f1f1f]">
           <button onClick={() => setShowSidebar(!showSidebar)} className="text-zinc-500 hover:text-white transition-colors md:block hidden">
             <ChevronLeft className={`w-5 h-5 transition-transform ${!showSidebar ? 'rotate-180' : ''}`} />
           </button>
@@ -274,7 +274,7 @@ const AIAssistantPage = () => {
         </div>
 
         {/* Input area */}
-        <div className="p-4" style={{ background: 'rgba(10,10,10,0.6)', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="p-4 bg-[#0d0d0d] border-t border-[#1f1f1f]">
           <div className="flex gap-2 max-w-3xl mx-auto">
             <input
               ref={inputRef}
@@ -283,7 +283,7 @@ const AIAssistantPage = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               placeholder="Ask anything about CrossCurrent..."
-              className="flex-1 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/30 focus:ring-1 focus:ring-orange-500/20 focus:outline-none transition-all"
+              className="flex-1 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 bg-[#1a1a1a] border border-[#2a2a2a] focus:border-orange-500/50 focus:outline-none transition-all"
               style={{ background: 'rgba(14,14,14,0.95)', border: '1px solid rgba(255,255,255,0.06)' }}
               disabled={sending}
               data-testid="chat-input"

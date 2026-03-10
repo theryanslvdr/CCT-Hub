@@ -115,6 +115,7 @@ export const ProfitTrackerPage = () => {
   // Dialog states
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [depositStep, setDepositStep] = useState('input');
+  const [depositPlatform, setDepositPlatform] = useState('binance');
   const [withdrawalDialogOpen, setWithdrawalDialogOpen] = useState(false);
   const [withdrawalStep, setWithdrawalStep] = useState('input');
   const [initialBalanceDialogOpen, setInitialBalanceDialogOpen] = useState(false);
@@ -1874,7 +1875,7 @@ export const ProfitTrackerPage = () => {
                 <Calculator className="w-4 h-4" /> Simulate Actions
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card border-white/[0.06] max-w-sm">
+            <DialogContent className="glass-card border-[#222222] max-w-sm">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
                   <Calculator className="w-5 h-5 text-orange-400" /> Simulate Actions
@@ -2180,7 +2181,7 @@ export const ProfitTrackerPage = () => {
         
         {/* Simulate Error Dialog - Desktop */}
         <Dialog open={errorDialogOpen} onOpenChange={(open) => { if (!open) resetErrorDialog(); else setErrorDialogOpen(true); }}>
-          <DialogContent className="glass-card border-white/[0.06] max-w-md hidden md:block">
+          <DialogContent className="glass-card border-[#222222] max-w-md hidden md:block">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-red-400" /> Report Error Trade
@@ -3165,7 +3166,7 @@ export const ProfitTrackerPage = () => {
         
         {/* Simulate Deposit Dialog - Desktop Only */}
         <Dialog open={depositDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetDepositDialog(); else setDepositDialogOpen(true); }}>
-          <DialogContent className="glass-card border-white/[0.06] max-w-md">
+          <DialogContent className="bg-[#111111] border-[#222222] max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {depositStep === 'input' && 'Simulate Deposit'}
@@ -3188,8 +3189,33 @@ export const ProfitTrackerPage = () => {
               <div className="space-y-4 mt-4">
                 {!manualDepositMode ? (
                   <>
+                    {/* Platform Selector */}
                     <div>
-                      <Label className="text-zinc-300">Binance USDT Amount</Label>
+                      <Label className="text-gray-500 text-xs">Select Platform</Label>
+                      <div className="grid grid-cols-3 gap-2 mt-1.5">
+                        {[
+                          { id: 'binance', label: 'Binance', fee: '~$1.00 TRC20' },
+                          { id: 'okx', label: 'OKX', fee: '~$1.00 TRC20' },
+                          { id: 'coinsph', label: 'Coins.ph', fee: '~$1.50' },
+                        ].map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => setDepositPlatform(p.id)}
+                            className={`p-3 rounded-xl border text-center transition-all ${
+                              depositPlatform === p.id
+                                ? 'bg-[#1a1a1a] border-orange-500/30 text-white'
+                                : 'bg-[#141414] border-[#222222] text-gray-500 hover:border-[#2a2a2a]'
+                            }`}
+                            data-testid={`platform-${p.id}`}
+                          >
+                            <p className="text-sm font-medium">{p.label}</p>
+                            <p className="text-[10px] text-gray-600 mt-0.5">{p.fee}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-xs">USDT Amount</Label>
                       <div className="relative mt-1">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
                         <Input
@@ -3356,7 +3382,7 @@ export const ProfitTrackerPage = () => {
 
         {/* Withdrawal Dialog - Desktop Only */}
         <Dialog open={withdrawalDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetWithdrawalDialog(); else setWithdrawalDialogOpen(true); }}>
-          <DialogContent className="glass-card border-white/[0.06] max-w-md">
+          <DialogContent className="bg-[#111111] border-[#222222] max-w-md rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {withdrawalStep === 'input' && 'Simulate Withdrawal'}
@@ -3488,7 +3514,7 @@ export const ProfitTrackerPage = () => {
 
         {/* Commission Dialog - Desktop Only */}
         <Dialog open={commissionDialogOpen && !isMobile} onOpenChange={(open) => { if (!open) resetCommissionDialog(); else setCommissionDialogOpen(true); }}>
-          <DialogContent className="glass-card border-white/[0.06] max-w-md">
+          <DialogContent className="glass-card border-[#222222] max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <Award className="w-5 h-5 text-purple-400" /> Simulate Commission
@@ -3638,7 +3664,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Balance Verification Dialog - shown after onboarding to sync with Merin */}
       <Dialog open={balanceVerificationOpen} onOpenChange={setBalanceVerificationOpen}>
-        <DialogContent className="glass-card border-white/[0.06] max-w-md">
+        <DialogContent className="glass-card border-[#222222] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Verify Your Balance
@@ -3711,7 +3737,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Legacy Initial Balance Dialog - kept for backwards compatibility */}
       <Dialog open={initialBalanceDialogOpen} onOpenChange={setInitialBalanceDialogOpen}>
-        <DialogContent className="glass-card border-white/[0.06]">
+        <DialogContent className="glass-card border-[#222222]">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Rocket className="w-5 h-5 text-orange-400" /> Welcome to Profit Tracker!
@@ -3771,7 +3797,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Adjust Commission Dialog */}
       <Dialog open={adjustCommissionOpen} onOpenChange={setAdjustCommissionOpen}>
-        <DialogContent className="glass-card border-white/[0.06] max-w-md">
+        <DialogContent className="glass-card border-[#222222] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Award className="w-5 h-5 text-cyan-400" /> Adjust Commission
@@ -4105,7 +4131,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Adjust Trade Dialog - Desktop Only */}
       <Dialog open={enterAPDialogOpen && !isMobile} onOpenChange={setEnterAPDialogOpen}>
-        <DialogContent className="glass-card border-white/[0.06] max-w-md">
+        <DialogContent className="glass-card border-[#222222] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Edit3 className="w-5 h-5 text-amber-400" /> Adjust Trade
