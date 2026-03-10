@@ -116,12 +116,38 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] AI Post Summarizer — TL;DR for forum threads with 3+ comments
 - [x] AI Service Layer — Shared backend module with DB caching, token limits, credit-efficient batching
 
+## Referral & Rewards Expansion (March 2026)
+
+### Phase 1 — Referral System Backend & Onboarding — DONE
+- [x] Referral code management (set, validate, check uniqueness)
+- [x] External rewards platform validation (best-effort via rewards.crosscur.rent)
+- [x] Referred-by tracking (inviter code linking)
+- [x] Mandatory onboarding modal for non-admin users
+- [x] UserResponse model updated with referral_code, referred_by fields
+- [x] Admin override for setting/changing referral codes
+- [x] Referral events logging (code_set, referred_by_set)
+
+### Phase 2 — Admin Referral Tree Visualization — DONE
+- [x] Admin endpoint returns full referral tree data structure
+- [x] Interactive collapsible tree view
+- [x] D3 visual graph (react-d3-tree) with drag/zoom
+- [x] Flat table view with search/pagination
+- [x] Stats cards (Total Users, With Code, Referred, Onboarded %)
+- [x] Sidebar nav item for super/master admin
+
+### Phase 3 — Habit Rewards — DONE
+- [x] Streak-based reward points (5/10/20/35 pts scaling with tier)
+- [x] Auto-award on habit completion and social task all-done
+- [x] Daily dedup prevents double-awarding
+- [x] Manual habit-reward endpoint available
+
 ## Prioritized Backlog
 
 ### P0 (Critical)
 - None currently
 
 ### P1 (High)
+- [ ] Expand Social Media Growth Engine with more levels, tasks, and complexity
 - [ ] Publitio: Needs user to re-enter API keys in Platform Settings
 
 ### P2 (Medium)
