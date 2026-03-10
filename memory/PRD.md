@@ -1,224 +1,92 @@
-# CrossCurrent Hub - Product Requirements Document
+# CrossCurrent Hub — Product Requirements Document
 
 ## Original Problem Statement
-Financial tracking and community platform for CrossCurrent trading group. Features include profit tracking, trade monitoring, community forums, admin management, rewards, and real-time notifications.
+Build a comprehensive financial tracking and community platform for CrossCurrent's trading community. The platform manages trade profit tracking, commission calculations, member management, and community engagement.
 
-## Core Requirements
-1. **Profit Tracker** - Track deposits, withdrawals, commissions, daily projections, lot sizes, balance audit trails
-2. **Trade Monitor** - Log trades, view signals, track streak, manage products/holidays
-3. **Admin Panel** - Member management, transaction correction, license management, analytics, email templates
-4. **Community Forum** - Posts, comments, categories, pinning, @mentions, merge, duplicate safeguard, solution validation
-5. **Rewards System** - Points, badges, leaderboard, promotions
-6. **Real-time Notifications** - WebSocket-based notifications for trades, forum activity, deposits
-7. **BVE (Backtesting Virtual Environment)** - Isolated backtesting environment with separate data collections
-
-## User Personas
-- **Master Admin**: Full control — can merge posts, manage members, manage licenses
-- **Super Admin / Admin**: Can manage members, merge forum posts
-- **Member**: Trade logging, profit tracking, forum participation, rewards
-- **Licensee**: View-only profit tracking with manager-traded status
-
-## Architecture
-### Backend (FastAPI + MongoDB)
-```
-/app/backend/
-├── server.py              (slim entry point, CORS, WebSocket, startup)
-├── deps.py                (shared auth, DB access, JWT)
-├── helpers.py             (notification, push, calculation helpers)
-├── database.py            (Database connection class)
-├── routes/
-│   ├── auth_routes.py     (login, register, password reset, heartbeat)
-│   ├── profit_routes.py   (deposits, withdrawals, daily-balances, onboarding, commissions)
-│   ├── trade_routes.py    (trade logging, streak, signals, products)
-│   ├── admin_routes.py    (members, licenses, analytics, transactions, email)
-│   ├── general_routes.py  (notifications, uploads, health, version)
-│   ├── forum.py           (posts, comments, categories, pinning, mentions, merge, validation, sidebar)
-│   ├── rewards.py         (points, badges, leaderboard, promotions)
-│   ├── bve.py             (BVE sessions, rewind, trade history, isolated trade delete)
-│   ├── family.py, settings.py, currency.py, etc.
-│   └── __init__.py
-├── models/                (Pydantic models)
-├── services/              (email, websocket, file upload, reports)
-└── utils/                 (calculations, trading_days, rewards_engine)
-```
-
-### Frontend (React + ShadcnUI)
-```
-/app/frontend/src/
-├── pages/
-│   ├── ProfitTrackerPage.jsx   (main profit dashboard)
-│   ├── TradeMonitorPage.jsx     (trade monitoring with BVE-aware data loading)
-│   ├── ForumListPage.jsx        (forum listing with duplicate safeguard)
-│   ├── ForumPostPage.jsx        (post view with sidebar, merge dialog)
-│   └── admin/                   (admin pages)
-├── components/
-│   ├── profit/ DailyProjectionDialog.jsx
-│   ├── BalanceAuditTrail.jsx
-│   └── MyTransactionEdit.jsx
-├── utils/
-│   └── profitCalculations.js    (extracted pure functions)
-├── contexts/
-│   ├── BVEContext.jsx
-│   └── WebSocketProvider.jsx
-└── lib/
-    └── api.js                   (API client with all endpoints)
-```
-
-## Key DB Collections
-- `users` - User accounts with roles
-- `deposits` - Financial transactions (deposits, withdrawals, profits)
-- `commissions` - Commission records (with skip_deposit flag)
-- `trade_logs` - Production individual trade records
-- `trading_signals` - Admin-created trade signals
-- `bve_sessions`, `bve_trade_logs`, `bve_deposits`, `bve_trading_signals` - BVE-isolated data
-- `forum_posts`, `forum_comments` - Forum data
-- `forum_merge_logs` - Audit trail for merged posts
-- `rewards_stats`, `rewards_leaderboard`, `rewards_point_logs` - Rewards system
-- `admin_notifications`, `user_notifications` - Notification system
-
-## 3rd Party Integrations
-- **Emailit** - Password reset and notification emails
-- **Heartbeat** - Community member verification
-- **CoinGecko** - Currency conversion rates
-- **Cloudinary** - Image uploads
-- **Publitio** - Forum image hosting
-- **Rewards Platform (rewards.crosscur.rent)** - External rewards API with auto-sync
-- **OpenRouter** - AI-powered semantic duplicate detection for forum (gpt-4o-mini)
+## Core Architecture
+- **Frontend:** React 19 + Tailwind CSS + ShadcnUI
+- **Backend:** FastAPI (Python) 
+- **Database:** MongoDB
+- **AI:** OpenRouter API (gpt-4o-mini)
+- **File Storage:** Publitio
 
 ## What's Been Implemented
-- [x] Profit tracking (deposits, withdrawals, commissions, projections)
-- [x] Trade monitoring (signals, streak, products, holidays)
-- [x] Admin panel (members, licenses, transactions, analytics)
-- [x] Community forum (CRUD, categories, pinning, @mentions)
-- [x] Rewards system (points, badges, leaderboard)
-- [x] Real-time notifications (WebSocket)
-- [x] Balance audit trail
-- [x] Member self-edit transactions
-- [x] Admin transaction correction/deletion
-- [x] Trade history streak fix (non-trading days handling)
-- [x] Backend refactoring - server.py decomposed
-- [x] Frontend refactoring - ProfitTrackerPage utilities extracted
-- [x] Commission backfill with skip_deposit option (kept subtly for future use)
-- [x] Clear Cache & Reload button
-- [x] Auto batch sync every 4 hours
-- [x] BVE data isolation fix (P0) — trade history and reset in BVE mode never touch production
-- [x] Forum: Merge duplicate posts (master_admin + super_admin only, 8pts to source OP)
-- [x] Forum: Duplicate post safeguard (pre-submission title+content similarity check)
-- [x] Forum: Post details sidebar (contributors, awards, post date, solution validation)
-- [x] Forum: Enhanced similar search (both title AND content)
-- [x] Forum: "Solution still valid" button with timestamp
-- [x] Commission Records: Type column distinguishing Balance vs Historical (skip_deposit)
-- [x] OpenRouter AI-powered semantic duplicate detection for forum posts
-- [x] Exit Trade function verified (all flows tested, performance calculation confirmed)
-- [x] AI Trade Coach — Post-trade personalized coaching feedback per trade
-- [x] AI Financial Summary — Weekly/monthly AI-powered profit analysis
-- [x] AI Balance Forecast — 7/30/90 day balance projection
-- [x] AI Post Summarizer — TL;DR for forum threads with 3+ comments
-- [x] AI Service Layer — Shared backend module with DB caching, token limits, credit-efficient batching
 
-## Referral & Rewards Expansion (March 2026)
+### Phase: Foundation Features (Complete)
+- User authentication (JWT-based)
+- Dashboard with profit tracking, KPIs, performance charts
+- Profit Tracker with detailed trade logging
+- Trade Monitor with live signals
+- Admin panel (Members, Signals, Analytics, Transactions)
+- Notification system (WebSocket + in-app)
+- Forum with posts, replies, upvotes
+- Family accounts system
+- Licensee management
+- Rewards & leaderboard system
+- Referral system with admin tree visualization
 
-### Phase 1 — Referral System Backend & Onboarding — DONE
-- [x] Referral code management (set, validate, check uniqueness)
-- [x] External rewards platform validation (best-effort via rewards.crosscur.rent)
-- [x] Referred-by tracking (inviter code linking)
-- [x] Mandatory onboarding modal for non-admin users
-- [x] UserResponse model updated with referral_code, referred_by fields
-- [x] Admin override for setting/changing referral codes
-- [x] Referral events logging (code_set, referred_by_set)
+### Phase: Community & Growth (Complete)
+- Quiz system (AI-generated, admin-managed, user-facing)
+- Habit tracker with proof-of-completion
+- Markdown rendering for AI content
+- Quiz editing with AI verification
+- Bonus points for correct quiz answers
+- New badges for habit/quiz achievements
 
-### Phase 2 — Admin Referral Tree Visualization — DONE
-- [x] Admin endpoint returns full referral tree data structure
-- [x] Interactive collapsible tree view
-- [x] D3 visual graph (react-d3-tree) with drag/zoom
-- [x] Flat table view with search/pagination
-- [x] Stats cards (Total Users, With Code, Referred, Onboarded %)
-- [x] Sidebar nav item for super/master admin
-
-### Phase 3 — Habit Rewards — DONE
-- [x] Streak-based reward points (5/10/20/35/50/70/100 pts scaling with 7 tiers)
-- [x] Auto-award on habit completion and social task all-done
-- [x] Daily dedup prevents double-awarding
-- [x] Manual habit-reward endpoint available
-
-### Social Media Growth Engine Expansion — DONE (March 2026)
-- [x] Expanded from 4 to 7 levels: Getting Started, Active Engager, Content Creator, Thought Leader, Brand Ambassador, Growth Hacker, Community Leader
-- [x] Dynamic task counts: L1-3 = 3 tasks/day, L4-5 = 4 tasks/day, L6-7 = 5 tasks/day
-- [x] Task types: engage, create, invite, collaborate, lead
-- [x] Referral-aware AI prompts (includes user's referral code in task generation)
-- [x] 7-level roadmap visualization (Seed → Sprout → Bloom → Crown → Star → Rocket → Diamond)
-- [x] Reward point scaling: 5/10/20/35/50/70/100 per streak tier
-
-### Social Growth → Admin-Controlled Quiz System — DONE (March 2026)
-- [x] Replaced auto-generated social tasks with admin-controlled quiz system
-- [x] Admin generates quiz questions about Hub ecosystem (Rewards, Hub, Website, Merin, MOIL10)
-- [x] Master admin reviews and approves questions before publishing
-- [x] Admin publishes approved quizzes for specific dates
-- [x] Members answer multiple-choice quizzes; wrong answers show explanations
-- [x] Quiz completion awards habit reward points (streak-scaled)
-- [x] Admin Quiz Manager page at /admin/quizzes
-
-### Habit Validation Safeguards — DONE (March 2026)
-- [x] Proof-of-completion upload (screenshot_url on habit completion)
-- [x] Admin pending proofs list with user/habit details
-- [x] Admin spot-check approve/reject with auto-deletion of proof files
-- [x] Spot-check stats endpoint (pending/approved/rejected counts)
-
-### Bug Fixes — March 2026
-- [x] "Did Not Trade" bug: direction:None caused Pydantic validation failure, wiping all trade data display
-- [x] daily-balances: actual_profit=0 converted to None due to 0-is-falsy comparison
-- [x] AI Cards: Raw markdown (**bold**) now renders properly via ReactMarkdown
-
-### profitCalculations.js Refactoring — DONE (March 2026)
-- [x] Split 620-line monolith into 3 focused modules:
-  - formatters.js: Currency & number formatting
-  - tradingDays.js: Business day, holiday, trading day checks
-  - projections.js: Balance projection calculations
-- [x] Barrel re-export file preserves all existing import paths
+### Phase: UI Refresh & AI Assistant (In Progress — 2026-03-10)
+- **Orange Theme Migration (COMPLETE):**
+  - Changed primary color from blue (#3B82F6) to orange (#F97316) across entire app
+  - Updated 63+ JSX/JS files, CSS variables, utility classes
+  - Login page redesigned: glass-morphism card, dot-pattern background, orange CTA
+  - Sidebar: orange active states, amber gradient avatars
+  - Mobile bottom nav: orange accents
+  - All modals, buttons, form inputs updated to orange theme
+  
+- **AI Knowledge Assistant (COMPLETE):**
+  - Two AI personalities: RyAI (Technical/Safeguard) and zxAI (Knowledge/Encouragement)
+  - Multi-turn conversation with session persistence
+  - Admin-trainable knowledge base
+  - Active learning from interactions
+  - Escalation system: AI flags questions it can't answer for admin review
+  - Admin answers are automatically added to knowledge base
+  - Admin config: personality, system prompt, greeting, model selection
+  - Analytics dashboard: sessions, messages, escalation rate
+  - Backend: `/api/ai-assistant/*` routes
+  - Frontend: `/ai-assistant` (user), `/admin/ai-training` (admin)
 
 ## Prioritized Backlog
 
-### P0 (Critical)
-- None currently
+### P0 — Remaining UI Refresh Phases
+- Phase 2: Profit Tracker & Financial Modals (stat cards, deposit/withdrawal modals, share trade card)
+- Phase 3: Trade Monitor & Notifications (dense stats table, signal cards, notification panel)
+- Phase 4: Admin Dashboard Overhaul (separate admin dashboard, analytics, member detail modal, settings)
+- Phase 5: Community & Growth UI (forum refresh, habit tracker progress, quiz polish)
+- Phase 6: Profiles & Polish (public member profile, licensee dashboard, final responsive pass)
 
-### P1 (High)
-- [ ] Publitio: Needs user to re-enter API keys in Platform Settings
+### P1 — Feature Enhancements
+- Share Trade/Projection as rich shareable card
+- AI-consolidated profit notifications  
+- Separate Admin Dashboard home page
+- Public member profile view
+- Step-progress indicators for deposits/withdrawals
 
-### P2 (Medium)
-- [ ] Backend Pydantic model audit across all routes
-- [ ] Further ProfitTrackerPage.jsx decomposition
-- [ ] Performance optimization (caching, pagination improvements)
+### P2 — Future Features
+- AI for Debt Management
+- Smoother onboarding (pre-fill referral from website)
+- Performance optimization (caching, pagination)
 
-### Future
-- [ ] UI Refresh (major overhaul — awaiting user direction)
+## Key Database Collections
+- `users`, `trade_logs`, `signals`, `forum_posts`, `habits`, `quizzes`, `rewards`
+- `ai_assistants` — AI bot configs (RyAI, zxAI)
+- `ai_sessions` — Chat sessions per user
+- `ai_messages` — Individual chat messages
+- `ai_knowledge` — Admin-curated training data
+- `ai_unanswered` — Escalated questions pending admin answer
+- `ai_interactions` — Active learning interaction log
 
-## AI Integration Roadmap
+## Credentials
+- Master Admin: `iam@ryansalvador.com` / `admin123`
+- API: OpenRouter key in `backend/.env`
 
-### Phase 1 — DONE
-- [x] AI Trade Coach
-- [x] AI Financial Summary (weekly/monthly)
-- [x] AI Balance Forecast (7/30/90 day)
-- [x] AI Post Summarizer
-- [x] AI Duplicate Detection
-
-### Phase 2 — Trading Intelligence — DONE
-- [x] AI Signal Insights — Market context when signals drop
-- [x] AI Trade Journal — Auto-generated daily/weekly trade summary
-- [x] AI Goal Advisor — Evaluates goal realism
-- [x] AI Anomaly Alert — Detects concerning performance patterns
-
-### Phase 3 — Community, Admin & Notifications — DONE
-- [x] AI Answer Suggestions — Suggests answers from solved posts
-- [x] AI Member Risk Scoring — Admin risk flags
-- [x] AI Daily Trade Report — Auto admin summary
-- [x] AI Smart Notifications — Personalized alerts
-- [x] AI Commission Optimizer — Referral commission insights
-- [x] AI Milestone Motivation — Goal encouragement
-
-### Phase 4 — Habit Tracker: Social Media Growth Engine — DONE
-- [x] AI-generated daily social media task sets (3 tasks/day)
-- [x] 4-level progression system (Getting Started → Active Engager → Content Creator → Thought Leader)
-- [x] Task completion tracking with all_done detection
-- [x] Level roadmap visualization (Seed → Sprout → Bloom → Crown)
-- [x] Platform-specific tasks (Instagram, Twitter, YouTube, LinkedIn, TikTok)
-- [x] Streak-based level progression with next-level indicator
+## Tech Stack
+React 19, FastAPI, MongoDB, Tailwind CSS, ShadcnUI, OpenRouter API, react-d3-tree, react-markdown, @tailwindcss/typography
