@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 class CrossCurrentAPITester:
-    def __init__(self, base_url="https://referral-rewards-34.preview.emergentagent.com"):
+    def __init__(self, base_url="https://admin-quiz-lab.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
