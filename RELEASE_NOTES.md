@@ -1,191 +1,175 @@
-# CrossCurrent Hub — What's New (March 9–10, 2026)
+# What's New in CrossCurrent Hub
 
-Here's everything that was built, fixed, and improved over the past two days. Each section includes what it does, how to use it, and a screenshot for reference.
+**Updated: March 10, 2026**
+
+Hey team! We've made some big improvements to the Hub. Here's what's new and how to use each feature. If you get stuck, reach out in the community chat.
 
 ---
 
-## 1. Login Page Redesign
+## The Login Page Looks Different
 
-**What changed:** The login screen now uses a modern split-panel layout — clean form on the left, decorative orange accent on the right. Dark, minimal, and consistent with the platform theme.
+When you go to the Hub login page, you'll notice it looks completely different. Don't worry — it works the same way.
 
-- Desktop: Two-column layout with abstract orange orb
-- Mobile: Single column, form only — right panel is hidden
+- **Left side:** Your email and password fields, just like before
+- **Right side:** A decorative design element (only visible on desktop/laptop)
+- On your phone, you'll just see the login form — clean and simple
+
+**Nothing changed about how you log in.** Same email, same password.
 
 ![Login Page](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/01_login.png)
 
 ---
 
-## 2. Dashboard
+## "Who Invited You?" — You'll See This Pop Up
 
-Your home base. All KPIs, trading stats, and quick actions at a glance.
+**Where:** It pops up automatically after you log in.
 
-![Dashboard](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/02_dashboard.png)
+**What it is:** A one-time prompt asking you to confirm who invited you to CrossCurrent. This helps us build an accurate referral tree so everyone gets proper credit.
+
+**What to do:**
+
+1. After logging in, a popup will appear asking **"Who invited you?"**
+2. **If it already shows the right person** — just click the green **Confirm** button. Done!
+3. **If it's wrong or empty:**
+   - Type your inviter's name or email in the search box
+   - A list of matching members will appear
+   - Tap the correct person
+   - Click **Confirm Inviter**
+4. The popup goes away and won't bother you again until your next session
+
+> **Important:** This is required. You can't skip it. If you genuinely don't know who invited you, ask in the community chat.
 
 ---
 
-## 3. Invite Someone + Member Lookup (Affiliate Center)
+## How to Invite New Members
 
-**What it does:** Members can now generate a shareable invite link and look up any member's Merin code.
+**Where:** Sidebar → **Growth** → **Affiliate Center**
 
-**How to use it:**
-1. Navigate to **Affiliate Center** (sidebar → Growth → Affiliate Center, or profile dropdown → Affiliate Center)
-2. **Invite Someone** card (top) — your unique onboarding link is displayed:
+You can also get there by clicking your **profile picture** (bottom-left corner of the sidebar) → **Affiliate Center**
+
+**What it is:** Your personal invite link. When someone opens this link, they land on the onboarding site with YOUR referral code already filled in — they don't have to type anything.
+
+**Step by step:**
+
+1. Go to **Affiliate Center**
+2. At the top, you'll see the **"Invite Someone"** card
+3. Your personal invite link is displayed. It looks like this:
    `https://crosscur.rent/onboarding?merin_code=YOUR_CODE`
-   Click **Copy** and share with your prospect.
-3. **Find a Member** card — type a name or email, instantly see:
-   **Name** · **Masked email** · **Merin Code** (click to copy)
+4. Click the orange **Copy** button
+5. Paste and send it to whoever you want to invite (WhatsApp, Telegram, email, etc.)
+6. When they click it, your Merin code is automatically filled in for them
 
-> **Note:** You need a Merin referral code set in your Profile for the invite link to work.
+> **Don't have an invite link?** That means you haven't set your Merin referral code yet. Go to your **Profile** page and enter it there first.
 
 ![Affiliate Center](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/03_affiliate_center.png)
 
 ---
 
-## 4. Referral Tracking & Milestone Rewards (Invite & Earn)
+## How to Look Up Someone's Merin Code
 
-**What it does:** Track your referrals, earn points at milestones, and compete on the leaderboard.
+**Where:** Sidebar → **Growth** → **Affiliate Center** → scroll down to **"Find a Member"**
 
-**How to use it:**
-1. Go to **Invite & Earn** (sidebar → Growth → Invite & Earn)
-2. Your onboarding invite link is at the top — copy and share it
-3. See your referral count and each person's onboarding status
-4. **Milestones** are earned automatically:
+**What it is:** A search tool to find any member's Merin referral code. Useful when you need someone's code but don't have it handy.
 
-| Referrals | Reward |
-|-----------|--------|
-| 3 | 100 points |
-| 5 | 200 points |
-| 10 | 500 points |
-| 25 | 1,000 points + "Network Builder" badge |
-| 50 | 2,500 points + "Community Architect" badge |
+**Step by step:**
 
-5. Check the **Leaderboard** (sidebar → Growth → Leaderboard) for rankings
+1. Go to **Affiliate Center**
+2. Scroll down to the **"Find a Member"** card
+3. Type a name or email address in the search box
+4. Results appear instantly showing:
+   - Their **name**
+   - Their **email** (partially hidden for privacy, e.g., `r***n@email.com`)
+   - Their **Merin code**
+5. Click the code to **copy it** to your clipboard
+
+---
+
+## Track Your Referrals & Earn Rewards
+
+**Where:** Sidebar → **Growth** → **Invite & Earn**
+
+**What it is:** See how many people you've invited, track their onboarding progress, and earn milestone rewards.
+
+**Step by step:**
+
+1. Go to **Invite & Earn**
+2. Your invite link is at the top — copy and share it
+3. Below that, you'll see:
+   - **How many people** you've referred
+   - **Each person's status** (did they complete onboarding?)
+4. **Milestones** — you earn points automatically as you hit these:
+
+| People You've Invited | What You Earn |
+|----------------------|---------------|
+| 3 people | 100 points |
+| 5 people | 200 points |
+| 10 people | 500 points |
+| 25 people | 1,000 points + "Network Builder" badge |
+| 50 people | 2,500 points + "Community Architect" badge |
+
+5. Check the **Leaderboard** (sidebar → Growth → Leaderboard) to see where you rank
 
 ![Referral Tracking](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/04_referral_tracking.png)
 
 ---
 
-## 5. "Who Invited You?" Modal
+## The AI Assistant Got Smarter
 
-**What it does:** Every non-admin member is prompted once per session to confirm who invited them. This keeps the referral tree accurate.
+**Where:** Sidebar → **AI Assistant**
 
-**How it works:**
-1. Log in as a member (non-admin)
-2. The "Who invited you?" modal appears automatically
-3. **Already have an inviter?** You'll see their name — click **Confirm** to keep them
-4. **Need to change?** Type a name or email in the search → select the correct person → **Confirm Inviter**
-5. Won't appear again until the next browser session
+**What changed:** You no longer need to switch between different AI modes. The assistant now automatically figures out what kind of help you need.
 
-> Admins never see this modal.
+- **Ask a trading question** (e.g., "What's a good risk-to-reward ratio?") → You get a technical, analytical answer
+- **Ask for motivation** (e.g., "I had a rough trading day") → You get an encouraging, supportive response
 
----
-
-## 6. Adaptive AI Assistant
-
-**What it does:** The AI assistant now auto-detects your intent — technical question gets RyAI (analytical), motivational question gets zxAI (encouraging). No manual switching.
-
-**How to use it:**
-1. Go to **AI Assistant** (sidebar)
-2. Chat naturally — the AI picks the right persona per message
-3. Each response shows which persona is speaking
-
-**Admin control:** Platform Settings → Security → toggle **Adaptive AI** on/off
+Each message shows which AI persona responded so you always know who's talking.
 
 ![AI Assistant](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/05_ai_assistant.png)
 
 ---
 
-## 7. Dynamic AI Model Selector (Admin)
+## Notifications Are Cleaner Now
 
-**What it does:** Choose from 346+ AI models via a live searchable dropdown, pulled directly from OpenRouter.
+**Where:** The bell icon in the header (on mobile) or notification panel
 
-**How to use it:**
-1. Go to **Admin Dashboard** → AI & Platform → **AI Training**
-2. Click the model dropdown, search by name (e.g., "gpt-4", "claude", "llama")
-3. Select a model → Save
+**What changed:** Instead of getting flooded with 30+ individual notifications that all say the same thing, they're now **grouped together**.
 
----
+**Before:** "John submitted a trade" / "Jane submitted a trade" / "Mike submitted a trade" (x30)
 
-## 8. Admin — Manage Member Inviter & Merin Code
+**After:** "John, Jane, Mike and 27 more submitted trades" (1 notification)
 
-**What it does:** Admins can view and edit any member's inviter and Merin referral code.
-
-**How to use it:**
-1. Go to **Admin Dashboard** → **Members**
-2. Click the eye icon to view a member's profile
-3. See the **Inviter** field (or "Not set")
-4. Click **Edit Profile** to:
-   - **Set/change inviter:** Search by name or email → select → Save
-   - **Clear inviter:** Click Clear → Save
-   - **Set Merin Code:** Type the code (auto-uppercased) → Save
-
-![Admin Members](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/06_admin_members.png)
+Much easier to read. You can switch between **Unread**, **Read**, and **All** tabs.
 
 ---
 
-## 9. Sidebar — Affiliate Center Quick Access
+## The Mobile Menu Matches Desktop Now
 
-**What changed:** "Affiliate Center" is now in the profile dropdown (bottom-left of sidebar). One click to get there — available in both expanded and collapsed sidebar modes.
+**Where:** The hamburger menu on your phone
 
----
-
-## 10. 7-Step Onboarding Gate
-
-**What it does:** New members must complete all 7 onboarding steps before accessing the platform.
-
-**Steps:** Heartbeat → Merin → Hub → Exchange → Tutorials → Live Trade → Rewards
-
-**Admin control:** Platform Settings → Security → toggle **Onboarding Gate** on/off
-
-**External API endpoints (for the onboarding site):**
-- `GET /api/onboarding/status/{user_id}` — check progress
-- `POST /api/onboarding/complete-step-external` — mark a step complete
+**What changed:** The mobile menu used to be different from the desktop sidebar. Now they're identical — same items, same order, same sections. If you can find something on desktop, you can find it on mobile too.
 
 ---
 
-## 11. Notification Consolidation
+## If Something Goes Wrong, You Won't See a Black Screen Anymore
 
-**What changed:** Similar notifications are now grouped. Instead of 34 separate "Member X submitted a trade" notifications, you see:
+**What happened before:** If the app hit an error, the entire screen would go black with no way to recover except clearing your browser data.
 
-> **"Member1, Member2 and 32 more submitted trades"**
-
-Tabs: **Unread** · **Read** · **All** — with action buttons per type.
+**What happens now:** You'll see a friendly message that says **"Something went wrong"** with a **Reload App** button. One click and you're back to the login page.
 
 ---
 
-## 12. Mobile Menu Sync
+## Quick Reference: Where to Find Everything
 
-**What changed:** The mobile nav menu now matches the desktop sidebar exactly — same items, same order, same sections.
-
----
-
-## 13. Merged Forum Post Tagging
-
-**What it does:** Merged forum posts now show a tag with a link to the original post for context.
-
----
-
-## 14. Error Boundary (Safety Net)
-
-**What it does:** If anything in the app crashes, users now see a friendly recovery screen instead of a black/blank page.
-
-- "Something went wrong" message
-- **Reload App** button that clears state and redirects to login
+| Feature | How to Get There |
+|---------|-----------------|
+| Invite link | Sidebar → Growth → Affiliate Center |
+| Find a member's Merin code | Sidebar → Growth → Affiliate Center → "Find a Member" |
+| Referral stats & rewards | Sidebar → Growth → Invite & Earn |
+| Leaderboard | Sidebar → Growth → Leaderboard |
+| AI Assistant | Sidebar → AI Assistant |
+| Your profile & Merin code | Sidebar → Profile (or click your name bottom-left) |
+| Affiliate Center shortcut | Click your profile picture (bottom-left) → Affiliate Center |
 
 ---
 
-## Bug Fixes
-
-| Bug | Fix |
-|-----|-----|
-| **Black screen after login** | `InviterModal.jsx` crashed React (missing import). Fixed + added global Error Boundary. |
-| **Daily projections showing $0** | Missing helper import. Fixed. |
-| **Trading streak wrong** | Was reading non-existent field. Now computed from actual trade logs. |
-| **Timezone DST errors** | Hardcoded offsets → dynamic `Intl.DateTimeFormat` API. |
-| **AI journal cut off** | Increased `max_tokens` from 350 → 800. |
-| **Family member projections crash** | Broken import path. Fixed. |
-| **Licensee "Below target" label** | Changed to "Account Growth / +X% since inception". |
-
----
-
-*All features tested across iterations 165–179 with 100% pass rates.*
+Questions? Ask in the community chat. Happy trading!
