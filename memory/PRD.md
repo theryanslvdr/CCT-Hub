@@ -136,10 +136,25 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] Sidebar nav item for super/master admin
 
 ### Phase 3 — Habit Rewards — DONE
-- [x] Streak-based reward points (5/10/20/35 pts scaling with tier)
+- [x] Streak-based reward points (5/10/20/35/50/70/100 pts scaling with 7 tiers)
 - [x] Auto-award on habit completion and social task all-done
 - [x] Daily dedup prevents double-awarding
 - [x] Manual habit-reward endpoint available
+
+### Social Media Growth Engine Expansion — DONE (March 2026)
+- [x] Expanded from 4 to 7 levels: Getting Started, Active Engager, Content Creator, Thought Leader, Brand Ambassador, Growth Hacker, Community Leader
+- [x] Dynamic task counts: L1-3 = 3 tasks/day, L4-5 = 4 tasks/day, L6-7 = 5 tasks/day
+- [x] Task types: engage, create, invite, collaborate, lead
+- [x] Referral-aware AI prompts (includes user's referral code in task generation)
+- [x] 7-level roadmap visualization (Seed → Sprout → Bloom → Crown → Star → Rocket → Diamond)
+- [x] Reward point scaling: 5/10/20/35/50/70/100 per streak tier
+
+### profitCalculations.js Refactoring — DONE (March 2026)
+- [x] Split 620-line monolith into 3 focused modules:
+  - formatters.js: Currency & number formatting
+  - tradingDays.js: Business day, holiday, trading day checks
+  - projections.js: Balance projection calculations
+- [x] Barrel re-export file preserves all existing import paths
 
 ## Prioritized Backlog
 
@@ -147,11 +162,9 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - None currently
 
 ### P1 (High)
-- [ ] Expand Social Media Growth Engine with more levels, tasks, and complexity
 - [ ] Publitio: Needs user to re-enter API keys in Platform Settings
 
 ### P2 (Medium)
-- [ ] profitCalculations.js refactoring (currently fragile, overly complex)
 - [ ] Backend Pydantic model audit across all routes
 - [ ] Further ProfitTrackerPage.jsx decomposition
 - [ ] Performance optimization (caching, pagination improvements)
