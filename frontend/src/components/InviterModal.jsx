@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,28 @@ const InviterModal = ({ open, onComplete }) => {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [currentInviter, setCurrentInviter] = useState(null);
+  const [loadingCurrent, setLoadingCurrent] = useState(true);
   const debounce = useRef(null);
+
+  // Load current inviter info on mount
+  useEffect(() => {
+    if (!open) return;
+    const loadCurrent = async () => {
+      try {
+        const res = await referralAPI.getTracking();
+        const data = res.data;
+        if (data?.referred_by_user_id) {
+          // Try to look up the current inviter name
+          const lookup = await referralAPI.lookupMembers(data.referred_by || '');
+          const match = lookup.data?.results?.find(r => r.id === data.referred_by_user_id);
+          if (match) setCurrentInviter(match);
+        }
+      } catch { /* ignore */ }
+      setLoadingCurrent(false);
+    };
+    loadCurrent();
+  }, [open]);
 
   const handleSearch = (value) => {
     setQuery(value);
@@ -62,15 +83,42 @@ const InviterModal = ({ open, onComplete }) => {
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
-          {!selected ? (
+          {loadingCurrent ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+            </div>
+          ) : !selected ? (
             <>
+              {currentInviter && (
+                <div className="p-3 rounded-lg bg-[#1a1a1a] border border-white/[0.06]">
+                  <p className="text-[11px] text-zinc-500 mb-2">Currently linked to:</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                      <span className="text-xs font-bold text-orange-400">{currentInviter.name?.charAt(0)?.toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white font-medium">{currentInviter.name}</p>
+                      <p className="text-[11px] text-zinc-500">{currentInviter.masked_email}</p>
+                    </div>
+                    <Button
+                      onClick={() => onComplete({ kept_current: true })}
+                      variant="ghost"
+                      size="sm"
+                      className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 text-xs"
+                      data-testid="inviter-keep-current"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Confirm
+                    </Button>
+                  </div>
+                </div>
+              )}
               <div className="relative">
                 <Input
                   value={query}
                   onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Type their name or email..."
+                  placeholder={currentInviter ? "Or search for a different inviter..." : "Type their name or email..."}
                   className="bg-[#0a0a0a] border-white/[0.06] text-white text-sm pl-9"
-                  autoFocus
+                  autoFocus={!currentInviter}
                   data-testid="inviter-search-input"
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />

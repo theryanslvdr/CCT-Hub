@@ -9,6 +9,7 @@ import { Toaster } from "./components/ui/sonner";
 import { PWAInstallBanner } from "./lib/pwa";
 import { VersionBanner } from "./components/VersionBanner";
 import ReferralOnboardingModal from "./components/ReferralOnboardingModal";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages
 import { LoginPage } from "./pages/LoginPage";
@@ -73,6 +74,7 @@ function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <WebSocketProvider>
         <BrowserRouter>
@@ -136,6 +138,7 @@ function App() {
         <VersionBanner />
       </WebSocketProvider>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

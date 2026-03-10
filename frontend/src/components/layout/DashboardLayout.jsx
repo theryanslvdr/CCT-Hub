@@ -139,13 +139,14 @@ export const DashboardLayout = () => {
   const location = useLocation();
   const { showTour, completeTour, resetTour } = useOnboarding();
 
-  // Inviter modal state - show for members without an inviter set
+  // Inviter modal state - show once per session for all non-admin members
   const [showInviterModal, setShowInviterModal] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && user && !['master_admin', 'super_admin', 'basic_admin'].includes(user.role)) {
-      // Check if user has referred_by set
-      if (!user.referred_by) {
+      // Show once per session (use sessionStorage so it resets on refresh)
+      const dismissedKey = `inviter_modal_dismissed_${user.id}`;
+      if (!sessionStorage.getItem(dismissedKey)) {
         setShowInviterModal(true);
       }
     }
@@ -306,10 +307,13 @@ export const DashboardLayout = () => {
         {/* Onboarding Tour */}
         <OnboardingTour isOpen={showTour} onClose={completeTour} />
 
-        {/* Who Invited You Modal - one-time for members without inviter */}
+        {/* Who Invited You Modal - once per session for all non-admin members */}
         <InviterModal
           open={showInviterModal}
-          onComplete={() => setShowInviterModal(false)}
+          onComplete={() => {
+            sessionStorage.setItem(`inviter_modal_dismissed_${user?.id}`, '1');
+            setShowInviterModal(false);
+          }}
         />
 
         {/* Missing API Keys Modal - Only for Master Admin */}

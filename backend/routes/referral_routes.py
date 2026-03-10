@@ -163,13 +163,8 @@ async def set_referred_by(data: SetReferralCodeRequest, user: dict = Depends(get
 
 @router.post("/set-inviter")
 async def set_inviter(data: SetInviterRequest, user: dict = Depends(get_current_user)):
-    """Set who invited this user by inviter's user ID (from member lookup)."""
+    """Set or update who invited this user by inviter's user ID (from member lookup)."""
     db = deps.db
-
-    # Check if already set
-    existing = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referred_by": 1})
-    if existing and existing.get("referred_by"):
-        raise HTTPException(status_code=400, detail="Inviter already set.")
 
     # Find the inviter by user ID
     inviter = await db.users.find_one(
@@ -579,6 +574,8 @@ async def get_referral_tracking(user: dict = Depends(get_current_user)):
         "referral_code": referral_code,
         "merin_code": merin_code,
         "direct_count": direct_count,
+        "referred_by": user_doc.get("referred_by") if user_doc else None,
+        "referred_by_user_id": user_doc.get("referred_by_user_id") if user_doc else None,
         "referrals": [
             {
                 "name": r.get("full_name", "Unknown"),
