@@ -270,7 +270,16 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
     streak = streak_data.get("current_streak", 0)
 
     # Determine level based on streak
-    if streak >= 46:
+    if streak >= 100:
+        level = 7
+        level_name = "Community Leader"
+    elif streak >= 80:
+        level = 6
+        level_name = "Growth Hacker"
+    elif streak >= 60:
+        level = 5
+        level_name = "Brand Ambassador"
+    elif streak >= 46:
         level = 4
         level_name = "Thought Leader"
     elif streak >= 22:
@@ -298,28 +307,47 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
             "next_level_at": _next_level_streak(level),
         }
 
+    # Task count scales with level: L1-3 = 3 tasks, L4-5 = 4 tasks, L6-7 = 5 tasks
+    task_count = 3 if level <= 3 else 4 if level <= 5 else 5
+
     # Generate tasks via AI
     level_descriptions = {
         1: "Easy social media tasks for a beginner: liking trading posts, following key accounts, browsing trading forums. Max 5 minutes each.",
-        2: "Medium tasks: commenting on trading discussions, sharing useful content, engaging with trading communities. Max 10 minutes each.",
-        3: "Content creation tasks: sharing trading insights, posting about personal trading journey, creating short educational content. Max 15 minutes each.",
-        4: "Thought leadership: creating original trading tips, hosting discussions, creating educational threads that attract followers. Max 20 minutes each.",
+        2: "Medium engagement tasks: commenting on trading discussions, sharing useful content, engaging with trading communities, asking questions in groups. Max 10 minutes each.",
+        3: "Content creation tasks: sharing trading insights, posting about personal trading journey, creating short educational content, tagging relevant people. Max 15 minutes each.",
+        4: "Thought leadership: creating original trading tips, hosting discussions, creating educational threads, doing live Q&As, inviting friends to explore trading. Max 20 minutes each.",
+        5: "Ambassador tasks: writing testimonials, recording short video reviews, reaching out via DMs to people who might benefit from trading, posting comparison/results content. Max 20 minutes each.",
+        6: "Growth hacking: creating referral-driven challenges, running mini-campaigns to attract new traders, collaborating with other creators, building a funnel post series. Max 25 minutes each.",
+        7: "Community leadership: mentoring newcomers, organizing virtual meetups, creating evergreen resource posts, cross-platform syndication, leading community initiatives. Max 30 minutes each.",
     }
 
+    referral_context = ""
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1})
+    ref_code = (user_doc or {}).get("referral_code")
+    if ref_code:
+        referral_context = (
+            f"\nThis member has referral code '{ref_code}'. "
+            "Include at least 1 task that naturally encourages sharing their referral code or inviting people. "
+            "Frame it as helping others discover trading, not hard-selling."
+        )
+
     system = (
-        "You are a social media growth coach for a trading community member. "
-        "Generate exactly 3 daily tasks as a JSON array. Each task has: "
-        '{"title": "short title", "description": "1-2 sentence instruction", "platform": "Instagram|Twitter|YouTube|TikTok|LinkedIn|Facebook|Any", "time_estimate": "5 min"}\n'
-        "Tasks should build the member's credibility and attract people to ask them about trading. "
-        "Make tasks specific and actionable. Vary platforms. Return ONLY the JSON array."
+        "You are a social media growth coach for a trading community. "
+        "Your goal is to help members build an authentic personal brand that attracts new members organically. "
+        f"Generate exactly {task_count} daily tasks as a JSON array. Each task has: "
+        '{"title": "short title", "description": "1-2 sentence instruction", "platform": "Instagram|Twitter|YouTube|TikTok|LinkedIn|Facebook|Any", "task_type": "engage|create|invite|collaborate|lead", "time_estimate": "X min"}\n'
+        "Tasks should feel natural and achievable. Mix task types so the member both engages AND creates AND invites. "
+        "Vary platforms across tasks. Return ONLY the JSON array, no markdown."
+        + referral_context
     )
 
     prompt = (
         f"Level: {level} ({level_name})\n"
         f"Streak: {streak} days\n"
         f"Task difficulty: {level_descriptions[level]}\n"
-        f"Day of week: {datetime.now(timezone.utc).strftime('%A')}\n\n"
-        f"Generate 3 social media growth tasks for today."
+        f"Day of week: {datetime.now(timezone.utc).strftime('%A')}\n"
+        f"Number of tasks: {task_count}\n\n"
+        f"Generate {task_count} social media growth tasks for today."
     )
 
     result = await call_llm(system, prompt, "habit_tasks", user["id"], today, temperature=0.7)
@@ -337,7 +365,7 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
                 clean = clean.strip()
             parsed = json_mod.loads(clean)
             if isinstance(parsed, list):
-                for i, t in enumerate(parsed[:3]):
+                for i, t in enumerate(parsed[:task_count]):
                     task = {
                         "id": str(uuid.uuid4()),
                         "user_id": user["id"],
@@ -345,6 +373,7 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
                         "title": t.get("title", f"Task {i+1}"),
                         "description": t.get("description", ""),
                         "platform": t.get("platform", "Any"),
+                        "task_type": t.get("task_type", "engage"),
                         "time_estimate": t.get("time_estimate", "5 min"),
                         "level": level,
                         "completed": False,
@@ -357,11 +386,15 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
     # Fallback if AI failed
     if not tasks:
         fallback_tasks = [
-            {"title": "Like 3 trading posts", "description": "Find and like 3 interesting posts about trading on your feed.", "platform": "Any", "time_estimate": "3 min"},
-            {"title": "Follow a trader", "description": "Follow one new trading account or influencer.", "platform": "Instagram", "time_estimate": "2 min"},
-            {"title": "Save a trading tip", "description": "Save or bookmark one useful trading tip you find today.", "platform": "Any", "time_estimate": "2 min"},
+            {"title": "Like 3 trading posts", "description": "Find and like 3 interesting posts about trading on your feed.", "platform": "Any", "task_type": "engage", "time_estimate": "3 min"},
+            {"title": "Follow a trader", "description": "Follow one new trading account or influencer.", "platform": "Instagram", "task_type": "engage", "time_estimate": "2 min"},
+            {"title": "Share a trading win", "description": "Post a quick update about something positive in your trading journey.", "platform": "Twitter", "task_type": "create", "time_estimate": "5 min"},
         ]
-        for i, ft in enumerate(fallback_tasks):
+        if level >= 4:
+            fallback_tasks.append({"title": "Invite a friend", "description": "Send a DM to someone who might be interested in trading about your experience.", "platform": "Any", "task_type": "invite", "time_estimate": "5 min"})
+        if level >= 6:
+            fallback_tasks.append({"title": "Collaborate post", "description": "Reach out to another community member to do a joint insight post.", "platform": "LinkedIn", "task_type": "collaborate", "time_estimate": "10 min"})
+        for i, ft in enumerate(fallback_tasks[:task_count]):
             tasks.append({
                 "id": str(uuid.uuid4()),
                 "user_id": user["id"],
@@ -391,7 +424,7 @@ async def get_social_tasks(user: dict = Depends(get_current_user)):
 
 def _next_level_streak(current_level):
     """Return the streak needed to reach the next level."""
-    thresholds = {1: 8, 2: 22, 3: 46, 4: None}
+    thresholds = {1: 8, 2: 22, 3: 46, 4: 60, 5: 80, 6: 100, 7: None}
     return thresholds.get(current_level)
 
 

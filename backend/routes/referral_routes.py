@@ -389,8 +389,21 @@ async def _award_habit_points(user_id: str) -> dict:
     streak_data = await _calc_habit_streak(user_id)
     streak = streak_data.get("current_streak", 0)
 
-    # Scaling rewards
-    if streak >= 46:
+    # Scaling rewards: minimal at start, significant over time
+    # Day 1-7: 5 pts/day
+    # Day 8-21: 10 pts/day
+    # Day 22-45: 20 pts/day
+    # Day 46-59: 35 pts/day
+    # Day 60-79: 50 pts/day
+    # Day 80-99: 70 pts/day
+    # Day 100+: 100 pts/day
+    if streak >= 100:
+        points = 100
+    elif streak >= 80:
+        points = 70
+    elif streak >= 60:
+        points = 50
+    elif streak >= 46:
         points = 35
     elif streak >= 22:
         points = 20
@@ -402,7 +415,15 @@ async def _award_habit_points(user_id: str) -> dict:
     await award_points(db, user_id, points, "habit_completion", {
         "date": today,
         "streak": streak,
-        "streak_tier": "thought_leader" if streak >= 46 else "content_creator" if streak >= 22 else "active_engager" if streak >= 8 else "getting_started",
+        "streak_tier": (
+            "community_leader" if streak >= 100 else
+            "growth_hacker" if streak >= 80 else
+            "brand_ambassador" if streak >= 60 else
+            "thought_leader" if streak >= 46 else
+            "content_creator" if streak >= 22 else
+            "active_engager" if streak >= 8 else
+            "getting_started"
+        ),
     })
 
     return {"points": points, "streak": streak}

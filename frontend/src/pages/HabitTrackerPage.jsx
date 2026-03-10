@@ -31,6 +31,17 @@ const LEVEL_CONFIGS = {
   2: { name: 'Active Engager', color: 'text-blue-400', accent: 'from-blue-500 to-cyan-400', emoji: 'Sprout' },
   3: { name: 'Content Creator', color: 'text-purple-400', accent: 'from-purple-500 to-pink-400', emoji: 'Bloom' },
   4: { name: 'Thought Leader', color: 'text-amber-400', accent: 'from-amber-500 to-orange-400', emoji: 'Crown' },
+  5: { name: 'Brand Ambassador', color: 'text-rose-400', accent: 'from-rose-500 to-red-400', emoji: 'Star' },
+  6: { name: 'Growth Hacker', color: 'text-emerald-400', accent: 'from-emerald-500 to-teal-400', emoji: 'Rocket' },
+  7: { name: 'Community Leader', color: 'text-yellow-400', accent: 'from-yellow-500 to-amber-300', emoji: 'Diamond' },
+};
+
+const TASK_TYPE_LABELS = {
+  engage: { label: 'Engage', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20' },
+  create: { label: 'Create', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+  invite: { label: 'Invite', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  collaborate: { label: 'Collab', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+  lead: { label: 'Lead', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
 };
 
 function SocialGrowthEngine() {
@@ -58,8 +69,13 @@ function SocialGrowthEngine() {
         await habitAPI.uncompleteSocialTask(taskId);
       } else {
         const res = await habitAPI.completeSocialTask(taskId);
-        if (res.data.all_done) toast.success('All social tasks done for today!');
-        else toast.success('Task completed!');
+        if (res.data.reward) {
+          toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
+        } else if (res.data.all_done) {
+          toast.success('All social tasks done for today!');
+        } else {
+          toast.success('Task completed!');
+        }
       }
       await loadTasks();
     } catch {
@@ -87,7 +103,8 @@ function SocialGrowthEngine() {
   // Progress to next level
   let levelProgress = 0;
   if (next_level_at) {
-    const prevThreshold = level === 1 ? 0 : level === 2 ? 8 : level === 3 ? 22 : 46;
+    const prevThresholds = { 1: 0, 2: 8, 3: 22, 4: 46, 5: 60, 6: 80, 7: 100 };
+    const prevThreshold = prevThresholds[level] || 0;
     levelProgress = Math.min(100, ((streak - prevThreshold) / (next_level_at - prevThreshold)) * 100);
   } else {
     levelProgress = 100;
@@ -175,6 +192,11 @@ function SocialGrowthEngine() {
                     <span className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 ${platformColor}`}>
                       <PlatformIcon className="w-2.5 h-2.5" /> {task.platform}
                     </span>
+                    {task.task_type && TASK_TYPE_LABELS[task.task_type] && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border ${TASK_TYPE_LABELS[task.task_type].color}`}>
+                        {TASK_TYPE_LABELS[task.task_type].label}
+                      </span>
+                    )}
                     <span className="text-[10px] text-zinc-600">{task.time_estimate}</span>
                   </div>
                 </div>
@@ -187,8 +209,8 @@ function SocialGrowthEngine() {
       {/* Level roadmap */}
       <div className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
         <p className="text-[11px] text-zinc-500 font-medium mb-2 uppercase tracking-wider">Growth Roadmap</p>
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, 4].map((l) => {
+        <div className="flex items-center gap-1 flex-wrap">
+          {[1, 2, 3, 4, 5, 6, 7].map((l) => {
             const cfg = LEVEL_CONFIGS[l];
             const isActive = l === level;
             const isDone = l < level;
@@ -200,7 +222,7 @@ function SocialGrowthEngine() {
                   {isDone ? <CheckCircle2 className="w-3 h-3" /> : isActive ? <Zap className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
                   {cfg.emoji}
                 </div>
-                {l < 4 && <ArrowRight className="w-3 h-3 text-zinc-700 flex-shrink-0" />}
+                {l < 7 && <ArrowRight className="w-3 h-3 text-zinc-700 flex-shrink-0" />}
               </React.Fragment>
             );
           })}
@@ -248,7 +270,11 @@ const HabitTrackerPage = () => {
         toast.info('Habit unmarked');
       } else {
         const res = await habitAPI.completeHabit(habitId);
-        if (!res.data.already) toast.success('Habit completed!');
+        if (res.data.reward) {
+          toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
+        } else if (!res.data.already) {
+          toast.success('Habit completed!');
+        }
       }
       await loadHabits();
     } catch {
