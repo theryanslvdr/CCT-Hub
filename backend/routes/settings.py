@@ -74,6 +74,8 @@ class PlatformSettings(BaseModel):
     promo_popup_cta_text: str = "Learn More"
     promo_popup_cta_url: str = ""
     promo_popup_frequency: str = "once_per_session"
+    # Adaptive AI
+    adaptive_ai_enabled: bool = True
 
     # Coerce None to "" for all str fields
     @field_validator('*', mode='before')

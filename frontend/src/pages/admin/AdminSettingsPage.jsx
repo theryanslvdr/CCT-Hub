@@ -73,6 +73,8 @@ export const AdminSettingsPage = () => {
     content_protection_disable_shortcuts: true,
     // Onboarding
     onboarding_enabled: true,
+    // Adaptive AI
+    adaptive_ai_enabled: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1685,6 +1687,34 @@ export const AdminSettingsPage = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Adaptive AI Toggle Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-orange-400" />
+                  Adaptive AI Assistant
+                </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Control the AI assistant's automatic persona routing behavior.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a]">
+                  <div>
+                    <p className="text-white font-medium">Enable Adaptive Mode</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      When enabled, the AI automatically detects intent and switches between RyAI (technical) and zxAI (motivational). When disabled, all responses default to RyAI.
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={settings.adaptive_ai_enabled}
+                    onCheckedChange={(checked) => setSettings({ ...settings, adaptive_ai_enabled: checked })}
+                    data-testid="adaptive-ai-toggle"
+                  />
+                </div>
               </CardContent>
             </Card>
 

@@ -283,8 +283,15 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
         result = await db.ai_sessions.insert_one(session_doc)
         session_id = str(result.inserted_id)
 
+    # Check if adaptive AI is enabled in platform settings
+    effective_assistant_id = req.assistant_id
+    if req.assistant_id == "adaptive":
+        platform_settings = await db.platform_settings.find_one({}, {"_id": 0, "adaptive_ai_enabled": 1})
+        if platform_settings and platform_settings.get("adaptive_ai_enabled") is False:
+            effective_assistant_id = "ryai"  # fallback to RyAI when adaptive is disabled
+
     # Build context with knowledge base and history
-    config, messages = await build_context(req.assistant_id, session_id, req.message)
+    config, messages = await build_context(effective_assistant_id, session_id, req.message)
     if not config:
         raise HTTPException(status_code=404, detail="Assistant not found")
 
@@ -304,8 +311,8 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
         ai_response = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
 
     # Detect which persona responded (for adaptive mode)
-    detected_persona = req.assistant_id
-    if req.assistant_id == "adaptive":
+    detected_persona = effective_assistant_id
+    if effective_assistant_id == "adaptive":
         if ai_response.startswith("[RyAI]"):
             detected_persona = "ryai"
             ai_response = ai_response[6:].strip()

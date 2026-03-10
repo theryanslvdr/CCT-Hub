@@ -1,0 +1,43 @@
+{
+  "summary": "Adaptive AI Toggle feature fully tested and working. Backend tests (7/7 passed) confirmed: login works, platform settings include adaptive_ai_enabled field, PUT can toggle the setting, AI chat respects the toggle (returns persona='ryai' when disabled, appropriate persona when enabled). Frontend tests confirmed: Security tab shows 'Adaptive AI Assistant' card with data-testid='adaptive-ai-toggle', toggle defaults to ON, clicking changes state, existing onboarding toggle still works.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_adaptive_ai_toggle.py",
+    "/app/test_reports/pytest/pytest_iteration_169.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_adaptive_ai_toggle.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Adaptive AI Toggle feature verified in Admin Settings > Security tab. The toggle data-testid='adaptive-ai-toggle' controls whether AI chat uses adaptive routing (RyAI/zxAI) or defaults to RyAI. Backend endpoint PUT /api/settings/platform accepts adaptive_ai_enabled boolean. POST /api/ai-assistant/chat with assistant_id='adaptive' checks this setting and falls back to 'ryai' when disabled. Existing onboarding toggle (data-testid='onboarding-toggle') still works in the same Security tab.",
+  "tests_executed": {
+    "login_endpoint": {"status": "PASS", "notes": "POST /api/auth/login returns access_token"},
+    "platform_settings_get": {"status": "PASS", "notes": "GET /api/settings/platform returns adaptive_ai_enabled field"},
+    "platform_settings_disable_adaptive": {"status": "PASS", "notes": "PUT with adaptive_ai_enabled=false persists correctly"},
+    "ai_chat_adaptive_disabled": {"status": "PASS", "notes": "POST /api/ai-assistant/chat returns persona='ryai' when adaptive disabled"},
+    "platform_settings_enable_adaptive": {"status": "PASS", "notes": "PUT with adaptive_ai_enabled=true persists correctly"},
+    "ai_chat_adaptive_enabled": {"status": "PASS", "notes": "POST /api/ai-assistant/chat returns appropriate persona when enabled"},
+    "onboarding_field_exists": {"status": "PASS", "notes": "onboarding_enabled field present in platform settings"},
+    "frontend_security_tab": {"status": "PASS", "notes": "Security tab accessible in Admin Settings"},
+    "frontend_adaptive_toggle_found": {"status": "PASS", "notes": "Toggle with data-testid='adaptive-ai-toggle' found"},
+    "frontend_adaptive_toggle_default_on": {"status": "PASS", "notes": "Toggle defaults to ON (enabled)"},
+    "frontend_adaptive_toggle_click": {"status": "PASS", "notes": "Clicking toggle changes state from ON to OFF and back"},
+    "frontend_onboarding_toggle": {"status": "PASS", "notes": "data-testid='onboarding-toggle' found and working"}
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Rewards Platform external API"]
+  }
+}
