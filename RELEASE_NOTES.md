@@ -11,7 +11,7 @@ Here's everything that was built, fixed, and improved over the past two days. Ea
 - Desktop: Two-column layout with abstract orange orb
 - Mobile: Single column, form only — right panel is hidden
 
-![Login Page](screenshots/01_login.png)
+![Login Page](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/01_login.png)
 
 ---
 
@@ -19,7 +19,7 @@ Here's everything that was built, fixed, and improved over the past two days. Ea
 
 Your home base. All KPIs, trading stats, and quick actions at a glance.
 
-![Dashboard](screenshots/02_dashboard.png)
+![Dashboard](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/02_dashboard.png)
 
 ---
 
@@ -37,7 +37,7 @@ Your home base. All KPIs, trading stats, and quick actions at a glance.
 
 > **Note:** You need a Merin referral code set in your Profile for the invite link to work.
 
-![Affiliate Center](screenshots/03_affiliate_center.png)
+![Affiliate Center](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/03_affiliate_center.png)
 
 ---
 
@@ -61,7 +61,7 @@ Your home base. All KPIs, trading stats, and quick actions at a glance.
 
 5. Check the **Leaderboard** (sidebar → Growth → Leaderboard) for rankings
 
-![Referral Tracking](screenshots/04_referral_tracking.png)
+![Referral Tracking](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/04_referral_tracking.png)
 
 ---
 
@@ -91,7 +91,7 @@ Your home base. All KPIs, trading stats, and quick actions at a glance.
 
 **Admin control:** Platform Settings → Security → toggle **Adaptive AI** on/off
 
-![AI Assistant](screenshots/05_ai_assistant.png)
+![AI Assistant](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/05_ai_assistant.png)
 
 ---
 
@@ -119,7 +119,7 @@ Your home base. All KPIs, trading stats, and quick actions at a glance.
    - **Clear inviter:** Click Clear → Save
    - **Set Merin Code:** Type the code (auto-uppercased) → Save
 
-![Admin Members](screenshots/06_admin_members.png)
+![Admin Members](https://dark-theme-overhaul-4.preview.emergentagent.com/screenshots/06_admin_members.png)
 
 ---
 
