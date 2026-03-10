@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
   User, Settings, LogOut, X, Award, Wallet, Target, CreditCard,
-  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog, MessageSquare
+  ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog, MessageSquare,
+  CheckSquare, Share2, UserPlus, Trophy, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -104,14 +105,23 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     loadSettings();
   }, []);
 
-  // Navigation items
+  // Navigation items - matches desktop Sidebar
   const mainNavItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', hideForLicensee: true },
-    { path: '/forum', icon: MessageSquare, label: 'Community Forum' },
-    { path: '/ai-assistant', icon: Star, label: 'AI Assistant' },
+    { path: '/forum', icon: MessageSquare, label: 'Community Forum', hideForLicensee: true },
+    { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', licenseeOnly: true },
+    { path: '/family-accounts', icon: Users, label: 'Family Accounts', licenseeOnly: true },
+  ];
+
+  const growthNavItems = [
+    { path: '/habits', icon: CheckSquare, label: 'Daily Habits', hideForLicensee: true },
+    { path: '/affiliate', icon: Share2, label: 'Affiliate Center', hideForLicensee: true },
+    { path: '/referral-tracking', icon: UserPlus, label: 'Invite & Earn', hideForLicensee: true },
+    { path: '/my-rewards', icon: Star, label: 'My Rewards', hideForLicensee: true },
+    { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', hideForLicensee: true },
   ];
 
   const adminNavItems = [
@@ -177,6 +187,13 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     return mainNavItems.filter(item => {
       if (item.hideForLicensee && isLicenseeView) return false;
       if (item.licenseeOnly && !isLicenseeView) return false;
+      return true;
+    });
+  };
+
+  const getVisibleGrowthItems = () => {
+    return growthNavItems.filter(item => {
+      if (item.hideForLicensee && isLicenseeView) return false;
       return true;
     });
   };
@@ -289,6 +306,32 @@ export const MobileMenu = ({ isOpen, onClose }) => {
             );
           })}
         </div>
+
+        {/* Growth & Rewards */}
+        {getVisibleGrowthItems().length > 0 && !simulatedView && (
+          <div className="space-y-1 mb-6">
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider px-3 mb-2">Growth</p>
+            {getVisibleGrowthItems().map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={onClose}
+                  className={({ isActive }) => cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                    isActive 
+                      ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                      : "text-zinc-300 active:bg-[#1a1a1a]"
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </NavLink>
+              );
+            })}
+          </div>
+        )}
 
         {/* Admin Navigation */}
         {isAdmin() && !simulatedView && (
