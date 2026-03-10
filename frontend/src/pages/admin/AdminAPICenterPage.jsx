@@ -88,7 +88,7 @@ export const AdminAPICenterPage = () => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" /></div>;
   }
 
   return (
@@ -97,13 +97,13 @@ export const AdminAPICenterPage = () => {
       <Card className="glass-highlight">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
               <Webhook className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Webhook Receiver</h3>
               <p className="text-zinc-400 text-sm mt-1">External apps can send data to this endpoint:</p>
-              <code className="block mt-2 p-3 rounded-lg bg-zinc-900 text-blue-400 font-mono text-sm">
+              <code className="block mt-2 p-3 rounded-lg bg-zinc-900 text-orange-400 font-mono text-sm">
                 POST {BACKEND_URL}/api/api-center/receive
               </code>
               <p className="text-xs text-zinc-500 mt-2">
@@ -182,8 +182,8 @@ export const AdminAPICenterPage = () => {
                 <div key={conn.id} className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${conn.is_active ? 'bg-blue-500/20' : 'bg-zinc-700/50'}`}>
-                        <Link2 className={`w-5 h-5 ${conn.is_active ? 'text-blue-400' : 'text-zinc-500'}`} />
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${conn.is_active ? 'bg-orange-500/10' : 'bg-zinc-700/50'}`}>
+                        <Link2 className={`w-5 h-5 ${conn.is_active ? 'text-orange-400' : 'text-zinc-500'}`} />
                       </div>
                       <div>
                         <p className="font-medium text-white">{conn.name}</p>

@@ -276,7 +276,7 @@ export const AdminSignalsPage = () => {
     <div className="space-y-6">
       {/* BVE Mode Banner */}
       {isInBVE && (
-        <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-purple-500/20 border border-orange-500/20 rounded-xl p-4 flex items-center gap-3">
           <FlaskConical className="w-6 h-6 text-purple-400 animate-pulse" />
           <div>
             <h3 className="text-purple-300 font-semibold">Beta Virtual Environment Active</h3>
@@ -415,7 +415,7 @@ export const AdminSignalsPage = () => {
             <DialogContent className="glass-card border-zinc-800">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
-                  <Radio className="w-5 h-5 text-blue-400" /> Create Trading Signal
+                  <Radio className="w-5 h-5 text-orange-400" /> Create Trading Signal
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 mt-4">
@@ -506,10 +506,10 @@ export const AdminSignalsPage = () => {
                 
                 {/* Auto-send Email Toggle - only show when is_official is true */}
                 {newSignal.is_official && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
                     <div>
-                      <Label className="text-blue-300 cursor-pointer">Send Email to Members</Label>
-                      <p className="text-xs text-blue-400/70 mt-0.5">Auto-send signal email to all active members</p>
+                      <Label className="text-orange-300 cursor-pointer">Send Email to Members</Label>
+                      <p className="text-xs text-orange-400/70 mt-0.5">Auto-send signal email to all active members</p>
                     </div>
                     <Switch
                       checked={newSignal.send_email}
@@ -530,10 +530,10 @@ export const AdminSignalsPage = () => {
 
       {/* Active Signal Card */}
       {activeSignal && (
-        <Card className="glass-highlight border-blue-500/30">
+        <Card className="glass-highlight border-orange-500/20">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Radio className="w-5 h-5 text-blue-400 animate-pulse" /> Active Signal
+              <Radio className="w-5 h-5 text-orange-400 animate-pulse" /> Active Signal
               {activeSignal.is_official && (
                 <span className="ml-2 px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full flex items-center gap-1">
                   <Zap className="w-3 h-3" /> OFFICIAL
@@ -560,7 +560,7 @@ export const AdminSignalsPage = () => {
                 <p className="text-xs text-zinc-400 flex items-center gap-1">
                   <Clock className="w-3 h-3" /> Trade Time ({activeSignal.trade_timezone || 'Asia/Manila'})
                 </p>
-                <p className="text-2xl font-mono font-bold text-blue-400">{activeSignal.trade_time}</p>
+                <p className="text-2xl font-mono font-bold text-orange-400">{activeSignal.trade_time}</p>
               </div>
               <div>
                 <p className="text-xs text-zinc-400 flex items-center gap-1">
@@ -612,7 +612,7 @@ export const AdminSignalsPage = () => {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           ) : signals.length > 0 ? (
             <>
@@ -631,7 +631,7 @@ export const AdminSignalsPage = () => {
                   </thead>
                   <tbody>
                     {signals.map((signal) => (
-                      <tr key={signal.id} className={signal.is_active ? 'bg-blue-500/5' : ''}>
+                      <tr key={signal.id} className={signal.is_active ? 'bg-orange-500/5' : ''}>
                         <td className="font-mono text-zinc-400">
                           {formatDate(signal.created_at)}
                         </td>
@@ -641,7 +641,7 @@ export const AdminSignalsPage = () => {
                             {signal.direction}
                           </span>
                         </td>
-                        <td className="font-mono text-blue-400">{signal.trade_time}</td>
+                        <td className="font-mono text-orange-400">{signal.trade_time}</td>
                         <td className="font-mono text-purple-400">×{signal.profit_points || 15}</td>
                         <td>
                           {signal.is_simulated ? (
@@ -660,7 +660,7 @@ export const AdminSignalsPage = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleEditSignal(signal)}
-                              className="text-zinc-400 hover:text-blue-400"
+                              className="text-zinc-400 hover:text-orange-400"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -726,13 +726,13 @@ export const AdminSignalsPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Archive className="w-5 h-5 text-blue-400" /> Monthly Signal Archive
+              <Archive className="w-5 h-5 text-orange-400" /> Monthly Signal Archive
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4">
             {archiveLoading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
               </div>
             ) : archiveData.length > 0 ? (
               <Accordion type="single" collapsible className="space-y-2">
@@ -744,7 +744,7 @@ export const AdminSignalsPage = () => {
                   >
                     <AccordionTrigger className="px-4 py-3 hover:bg-zinc-800/50">
                       <div className="flex items-center gap-3">
-                        <Calendar className="w-5 h-5 text-blue-400" />
+                        <Calendar className="w-5 h-5 text-orange-400" />
                         <span className="text-white font-medium">{month.month_label}</span>
                         <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">
                           {month.signals.length} signals
@@ -768,7 +768,7 @@ export const AdminSignalsPage = () => {
                               }`}>
                                 {signal.direction}
                               </span>
-                              <span className="text-blue-400 font-mono">{signal.trade_time}</span>
+                              <span className="text-orange-400 font-mono">{signal.trade_time}</span>
                               <span className="text-purple-400 font-mono">×{signal.profit_points || 15}</span>
                             </div>
                             {signal.is_simulated && (

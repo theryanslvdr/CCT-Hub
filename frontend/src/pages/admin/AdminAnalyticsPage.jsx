@@ -213,7 +213,7 @@ export const AdminAnalyticsPage = () => {
       case 'master_admin': return 'bg-amber-500/20 text-amber-400';
       case 'super_admin': return 'bg-purple-500/20 text-purple-400';
       case 'basic_admin': 
-      case 'admin': return 'bg-blue-500/20 text-blue-400';
+      case 'admin': return 'bg-orange-500/10 text-orange-400';
       default: return 'bg-zinc-500/20 text-zinc-400';
     }
   };
@@ -384,14 +384,14 @@ export const AdminAnalyticsPage = () => {
         {kpiCards.map((card, index) => {
           const Icon = card.icon;
           const colorClasses = {
-            blue: 'from-blue-500 to-blue-600',
+            blue: 'from-orange-500 to-amber-600',
             emerald: 'from-emerald-500 to-emerald-600',
             cyan: 'from-cyan-500 to-cyan-600',
             purple: 'from-purple-500 to-purple-600',
           };
 
           return (
-            <Card key={index} className="glass-card hover:border-blue-500/30 transition-all" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
+            <Card key={index} className="glass-card hover:border-orange-500/20 transition-all" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
@@ -420,7 +420,7 @@ export const AdminAnalyticsPage = () => {
           <CardHeader>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-400" /> Performance Overview
+                <BarChart3 className="w-5 h-5 text-orange-400" /> Performance Overview
               </CardTitle>
               
               {/* Date Range Filter */}
@@ -469,7 +469,7 @@ export const AdminAnalyticsPage = () => {
           <CardContent>
             <Tabs defaultValue="account_value" className="w-full">
               <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50">
-                <TabsTrigger value="account_value" className="data-[state=active]:bg-blue-500/20">
+                <TabsTrigger value="account_value" className="data-[state=active]:bg-orange-500/10">
                   Account Value
                 </TabsTrigger>
                 <TabsTrigger value="profit" className="data-[state=active]:bg-emerald-500/20">
@@ -671,7 +671,7 @@ export const AdminAnalyticsPage = () => {
                         .then(res => setTopPerformers(res.data.performers || []))
                         .catch(() => {});
                     }}
-                    className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-blue-500 focus:ring-blue-500"
+                    className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-orange-500 focus:ring-orange-500"
                   />
                   Active traders only
                 </label>
@@ -760,7 +760,7 @@ export const AdminAnalyticsPage = () => {
                           </span>
                         </td>
                         <td className="font-mono text-purple-400">{trade.lot_size?.toFixed(2)}</td>
-                        <td className="font-mono text-blue-400">${formatNumber(trade.projected_profit, 2)}</td>
+                        <td className="font-mono text-orange-400">${formatNumber(trade.projected_profit, 2)}</td>
                         <td className="font-mono text-emerald-400">${formatNumber(trade.actual_profit, 2)}</td>
                         <td className={`font-mono ${trade.profit_difference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {trade.profit_difference >= 0 ? '+' : ''}${formatNumber(trade.profit_difference, 2)}
@@ -830,7 +830,7 @@ export const AdminAnalyticsPage = () => {
                     index === 0 ? 'bg-gradient-to-br from-amber-500 to-orange-500' :
                     index === 1 ? 'bg-gradient-to-br from-zinc-400 to-zinc-500' :
                     index === 2 ? 'bg-gradient-to-br from-amber-700 to-amber-800' :
-                    'bg-gradient-to-br from-blue-500 to-cyan-500'
+                    'bg-gradient-to-br from-orange-500 to-amber-500'
                   }`}>
                     {index < 3 ? index + 1 : member.name?.charAt(0)}
                   </div>
@@ -868,7 +868,7 @@ export const AdminAnalyticsPage = () => {
             <div className="space-y-6 mt-4">
               {/* Member Info */}
               <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-900/50">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xl font-bold">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xl font-bold">
                   {memberAnalytics.member.name?.charAt(0)}
                 </div>
                 <div>
@@ -887,7 +887,7 @@ export const AdminAnalyticsPage = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
                   <p className="text-xs text-zinc-500">Account Value</p>
-                  <p className="text-xl font-bold text-blue-400 font-mono">${formatNumber(memberAnalytics.stats.account_value, 2)}</p>
+                  <p className="text-xl font-bold text-orange-400 font-mono">${formatNumber(memberAnalytics.stats.account_value, 2)}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-zinc-900/50 text-center">
                   <p className="text-xs text-zinc-500">LOT Size</p>
@@ -943,7 +943,7 @@ export const AdminAnalyticsPage = () => {
             </div>
           ) : (
             <div className="flex items-center justify-center h-32">
-              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           )}
         </DialogContent>

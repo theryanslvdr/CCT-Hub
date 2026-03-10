@@ -38,13 +38,13 @@ export const DailyProjectionDialog = ({
         <DialogHeader className="text-left">
           <DialogTitle className="text-white flex flex-col md:flex-row md:items-center gap-2">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-400" />
+              <Calendar className="w-5 h-5 text-orange-400" />
               <span className="hidden md:inline">Daily Projection - </span>
               <span className="md:hidden text-left">{selectedMonth?.monthName}</span>
               <span className="hidden md:inline">{selectedMonth?.monthName}</span>
             </div>
             {selectedMonth?.isCurrentMonth && (
-              <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full md:ml-2 w-fit">
+              <span className="text-xs bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full md:ml-2 w-fit">
                 <span className="hidden md:inline">{dailyData.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days remaining</span>
                 <span className="md:hidden">{dailyData.filter(day => day.actualProfit === undefined && day.status !== 'completed').length} Days</span>
               </span>
@@ -55,9 +55,9 @@ export const DailyProjectionDialog = ({
         {/* Monthly Summary Card */}
         {dailyData.length > 0 && (
           <div className={`grid ${isLicensee ? 'grid-cols-2' : 'grid-cols-3'} gap-3 mt-4`}>
-            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-              <p className="text-xs text-blue-400 uppercase tracking-wider">Monthly Target</p>
-              <p className="text-lg font-bold font-mono text-blue-400 mt-1">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/15">
+              <p className="text-xs text-orange-400 uppercase tracking-wider">Monthly Target</p>
+              <p className="text-lg font-bold font-mono text-orange-400 mt-1">
                 ${formatNumber(
                   dailyData.reduce((sum, day) => sum + (day.targetProfit || 0), 0)
                 )}
@@ -85,7 +85,7 @@ export const DailyProjectionDialog = ({
               </p>
             </div>
             {!isLicensee && (
-              <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20">
+              <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/10 to-amber-500/5 border border-cyan-500/20">
                 <p className="text-xs text-cyan-400 uppercase tracking-wider">Total Commission</p>
                 <p className="text-lg font-bold font-mono text-cyan-400 mt-1">
                   ${formatNumber(
@@ -133,7 +133,7 @@ export const DailyProjectionDialog = ({
                   if (isGlobalHoliday) {
                     rowClass = 'bg-emerald-500/10 border-l-2 border-l-emerald-500';
                   } else if (day.isToday) {
-                    rowClass = 'bg-blue-500/20 border-l-2 border-l-blue-500';
+                    rowClass = 'bg-orange-500/10 border-l-2 border-l-orange-500';
                   } else if (day.status === 'completed') {
                     rowClass = 'bg-emerald-500/5';
                   } else if (day.status === 'missed') {
@@ -165,7 +165,7 @@ export const DailyProjectionDialog = ({
                       <td className="font-medium">
                         {day.dateStr}
                         {day.isToday && (
-                          <span className="ml-2 text-xs bg-blue-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
+                          <span className="ml-2 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">TODAY</span>
                         )}
                         {day.status === 'completed' && !day.isToday && (
                           <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">&#10003;</span>
@@ -402,7 +402,7 @@ export const DailyProjectionDialog = ({
           ) : (
             <>
               <p className="break-words">&#8226; <span className="text-amber-400">Adjust Trade</span> = Click to enter your actual profit for missed trades</p>
-              <p className="break-words">&#8226; <span className="text-blue-400">Trade Now</span> = Active signal available</p>
+              <p className="break-words">&#8226; <span className="text-orange-400">Trade Now</span> = Active signal available</p>
               <p className="break-words">&#8226; Actual profits update your Account Value when recorded</p>
             </>
           )}

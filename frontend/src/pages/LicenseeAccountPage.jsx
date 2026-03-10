@@ -205,7 +205,7 @@ export const LicenseeAccountPage = () => {
   const getStatusBadge = (status) => {
     const badges = {
       'pending': { bg: 'bg-yellow-500/20', text: 'text-yellow-400', icon: Clock, label: 'Pending' },
-      'processing': { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: RefreshCw, label: 'Processing' },
+      'processing': { bg: 'bg-orange-500/10', text: 'text-orange-400', icon: RefreshCw, label: 'Processing' },
       'awaiting_confirmation': { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: AlertCircle, label: 'Awaiting Your Confirmation' },
       'approved': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: CheckCircle2, label: 'Approved' },
       'completed': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: CheckCircle2, label: 'Completed' },
@@ -245,7 +245,7 @@ export const LicenseeAccountPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -355,7 +355,7 @@ export const LicenseeAccountPage = () => {
 
       {/* Awaiting Confirmation Banner */}
       {awaitingCount > 0 && !isSimulatingLicensee && (
-        <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+        <div className="p-4 rounded-lg bg-purple-500/10 border border-orange-500/20">
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-purple-400 shrink-0" />
             <div>
@@ -374,7 +374,7 @@ export const LicenseeAccountPage = () => {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-400" /> Transaction History
+            <FileText className="w-5 h-5 text-orange-400" /> Transaction History
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -412,7 +412,7 @@ export const LicenseeAccountPage = () => {
                         key={tx.id}
                         className={`p-4 rounded-lg border transition-all ${
                           tx.status === 'awaiting_confirmation'
-                            ? 'bg-purple-500/5 border-purple-500/30'
+                            ? 'bg-purple-500/5 border-orange-500/20'
                             : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                         }`}
                       >
@@ -472,7 +472,7 @@ export const LicenseeAccountPage = () => {
                                   setSelectedTransaction(tx);
                                   setViewTransactionOpen(true);
                                 }}
-                                className="text-blue-400 hover:text-blue-300"
+                                className="text-orange-400 hover:text-orange-300"
                                 data-testid={`view-tx-${tx.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" /> View
@@ -622,8 +622,8 @@ export const LicenseeAccountPage = () => {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-sm text-blue-400">
+            <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
+              <p className="text-sm text-orange-400">
                 Available Balance: <span className="font-bold">${(accountSummary?.current_balance || 0).toLocaleString()}</span>
               </p>
             </div>
@@ -757,7 +757,7 @@ export const LicenseeAccountPage = () => {
                     <img 
                       src={selectedTransaction.screenshot_url} 
                       alt="Deposit screenshot" 
-                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-blue-500 transition-colors"
+                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-orange-500 transition-colors"
                     />
                   </a>
                 </div>
@@ -775,7 +775,7 @@ export const LicenseeAccountPage = () => {
                     <img 
                       src={selectedTransaction.proof_url} 
                       alt="Proof of transfer" 
-                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-blue-500 transition-colors"
+                      className="w-full max-h-48 object-cover rounded-lg border border-zinc-700 hover:border-orange-500 transition-colors"
                     />
                   </a>
                 </div>
@@ -800,7 +800,7 @@ export const LicenseeAccountPage = () => {
                             href={fb.screenshot_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-400 hover:underline text-xs mt-1"
+                            className="inline-flex items-center gap-1 text-orange-400 hover:underline text-xs mt-1"
                           >
                             <ImageIcon className="w-3 h-3" /> View Attachment
                           </a>

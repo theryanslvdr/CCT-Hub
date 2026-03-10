@@ -411,7 +411,7 @@ export const MissedTradersWidget = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => openTemplateDialog()}
-                  className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300"
+                  className="h-8 w-8 p-0 text-orange-400 hover:text-orange-300"
                   title="Manage Templates"
                 >
                   <FileText className="w-4 h-4" />
@@ -477,7 +477,7 @@ export const MissedTradersWidget = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 h-8 text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
+                    className="flex-1 h-8 text-xs border-orange-500/20 text-orange-400 hover:bg-orange-500/10"
                     onClick={handleNotifyAll}
                     disabled={bulkNotifying}
                     data-testid="notify-all-btn"
@@ -548,7 +548,7 @@ export const MissedTradersWidget = () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                        className="h-8 w-8 p-0 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
                         onClick={() => handleNotify(trader)}
                         disabled={sendingNotify === trader.id}
                         title="Send Notification"
@@ -574,7 +574,7 @@ export const MissedTradersWidget = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Mail className="w-5 h-5 text-blue-400" />
+              <Mail className="w-5 h-5 text-orange-400" />
               Compose Email to {selectedUser?.full_name}
               {selectedUser?.missed_trades_count > 0 && (
                 <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 ml-2">
@@ -655,7 +655,7 @@ export const MissedTradersWidget = () => {
                       onClick={() => insertShortcode(sc.code)}
                       className="text-left p-2 rounded bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors"
                     >
-                      <code className="text-blue-400 text-sm">{sc.code}</code>
+                      <code className="text-orange-400 text-sm">{sc.code}</code>
                       <p className="text-xs text-zinc-500 mt-0.5">{sc.description}</p>
                     </button>
                   ))}
@@ -726,7 +726,7 @@ export const MissedTradersWidget = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-400" />
+              <FileText className="w-5 h-5 text-orange-400" />
               {editingTemplate ? 'Edit Template' : 'Email Templates'}
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
@@ -775,7 +775,7 @@ export const MissedTradersWidget = () => {
                         <div className="flex items-center gap-2">
                           <h4 className="text-white font-medium truncate">{template.name}</h4>
                           {template.is_html && (
-                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
+                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-orange-500/20 text-xs">
                               HTML
                             </Badge>
                           )}
@@ -798,7 +798,7 @@ export const MissedTradersWidget = () => {
                             setTemplateCategory(template.category || 'general');
                             setTemplateEditorMode(template.is_html ? 'code' : 'visual');
                           }}
-                          className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300"
+                          className="h-8 w-8 p-0 text-orange-400 hover:text-orange-300"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
@@ -862,7 +862,7 @@ export const MissedTradersWidget = () => {
                   {SHORTCODES.map((sc) => (
                     <code 
                       key={sc.code}
-                      className="text-xs bg-zinc-800 text-blue-400 px-2 py-1 rounded cursor-pointer hover:bg-zinc-700"
+                      className="text-xs bg-zinc-800 text-orange-400 px-2 py-1 rounded cursor-pointer hover:bg-zinc-700"
                       onClick={() => {
                         if (templateEditorMode === 'code') {
                           setEmailBody(prev => prev + sc.code);

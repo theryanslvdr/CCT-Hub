@@ -43,7 +43,7 @@ function RewardsPlatformSync() {
   return (
     <div className="space-y-4">
       <h3 className="text-white font-medium flex items-center gap-2">
-        <ArrowRightLeft className="w-4 h-4 text-blue-400" /> Rewards Platform Sync
+        <ArrowRightLeft className="w-4 h-4 text-orange-400" /> Rewards Platform Sync
       </h3>
       {syncStatus && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -68,7 +68,7 @@ function RewardsPlatformSync() {
       <Button
         onClick={handleBatchSync}
         disabled={syncing}
-        className="gap-2 bg-blue-600 hover:bg-blue-700"
+        className="gap-2 bg-orange-600 hover:bg-orange-700"
       >
         {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
         Batch Sync to Rewards Platform
@@ -379,7 +379,7 @@ export function DiagnosticsTab() {
                   onClick={() => forceSync(diagnosticResult.user_id)}
                   disabled={syncingUser}
                   size="sm"
-                  className="gap-2 bg-blue-600 hover:bg-blue-700"
+                  className="gap-2 bg-orange-600 hover:bg-orange-700"
                   data-testid="force-sync-btn"
                 >
                   {syncingUser ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}

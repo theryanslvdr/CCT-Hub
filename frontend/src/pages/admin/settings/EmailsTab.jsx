@@ -164,7 +164,7 @@ export function EmailsTab() {
                     key={template.type}
                     className={`p-4 rounded-lg border transition-all cursor-pointer ${
                       selectedTemplate?.type === template.type
-                        ? 'bg-blue-500/10 border-blue-500/30'
+                        ? 'bg-orange-500/10 border-orange-500/20'
                         : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                     }`}
                     onClick={() => {
@@ -177,7 +177,7 @@ export function EmailsTab() {
                         <p className="text-white font-medium capitalize">{template.type.replace(/_/g, ' ')}</p>
                         <p className="text-xs text-zinc-500 mt-0.5 truncate max-w-[200px]">{template.subject}</p>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-blue-400 hover:text-blue-300 shrink-0">
+                      <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 shrink-0">
                         Edit
                       </Button>
                     </div>
@@ -196,7 +196,7 @@ export function EmailsTab() {
                           size="sm"
                           variant={editorMode === 'code' ? 'default' : 'outline'}
                           onClick={() => setEditorMode('code')}
-                          className={editorMode === 'code' ? 'bg-blue-600' : 'btn-secondary'}
+                          className={editorMode === 'code' ? 'bg-orange-600' : 'btn-secondary'}
                         >
                           <Code className="w-3 h-3 mr-1" /> Code
                         </Button>
@@ -204,7 +204,7 @@ export function EmailsTab() {
                           size="sm"
                           variant={editorMode === 'preview' ? 'default' : 'outline'}
                           onClick={() => setEditorMode('preview')}
-                          className={editorMode === 'preview' ? 'bg-blue-600' : 'btn-secondary'}
+                          className={editorMode === 'preview' ? 'bg-orange-600' : 'btn-secondary'}
                         >
                           <EyePreview className="w-3 h-3 mr-1" /> Preview
                         </Button>
@@ -226,7 +226,7 @@ export function EmailsTab() {
                         <textarea
                           value={editingTemplate.body}
                           onChange={(e) => setEditingTemplate((prev) => ({ ...prev, body: e.target.value }))}
-                          className="w-full h-64 mt-1 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 p-3 font-mono text-xs resize-none focus:outline-none focus:border-blue-500"
+                          className="w-full h-64 mt-1 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 p-3 font-mono text-xs resize-none focus:outline-none focus:border-orange-500"
                         />
                       </div>
                     ) : (

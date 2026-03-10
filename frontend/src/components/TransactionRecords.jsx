@@ -103,7 +103,7 @@ export function WithdrawalRecordsDialog({ open, onOpenChange, withdrawals, onCon
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-7 text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                          className="text-xs h-7 text-orange-400 border-orange-400/20 hover:bg-orange-400/10"
                           onClick={() => onConfirmReceipt(w.id)}
                           data-testid={`confirm-receipt-${w.id}`}
                         >

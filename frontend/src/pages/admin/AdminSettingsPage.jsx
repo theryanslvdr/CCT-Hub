@@ -352,7 +352,7 @@ export const AdminSettingsPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -404,7 +404,7 @@ export const AdminSettingsPage = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                   activeTab === tab.key 
-                    ? 'bg-blue-500 text-white' 
+                    ? 'bg-orange-500 text-white' 
                     : 'bg-zinc-800 text-zinc-400 hover:text-white'
                 }`}
               >
@@ -425,7 +425,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('seo')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'seo' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'seo' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-seo"
             >
@@ -434,7 +434,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('branding')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'branding' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'branding' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-branding"
             >
@@ -443,7 +443,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('ui')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'ui' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'ui' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-ui"
             >
@@ -452,7 +452,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('integrations')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'integrations' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'integrations' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-integrations"
             >
@@ -461,7 +461,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('links')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'links' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'links' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-links"
             >
@@ -470,7 +470,7 @@ export const AdminSettingsPage = () => {
             <button
               onClick={() => setActiveTab('emails')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                activeTab === 'emails' ? 'bg-blue-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                activeTab === 'emails' ? 'bg-orange-500 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
               }`}
               data-testid="tab-emails"
             >
@@ -559,7 +559,7 @@ export const AdminSettingsPage = () => {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Globe className="w-5 h-5 text-blue-400" /> SEO & Meta Settings
+                <Globe className="w-5 h-5 text-orange-400" /> SEO & Meta Settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -830,7 +830,7 @@ export const AdminSettingsPage = () => {
               <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                 <p className="text-xs text-zinc-500 mb-3">Preview:</p>
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-2">
                     <Settings className="w-6 h-6 text-white" />
                   </div>
                   {settings.login_title && (
@@ -957,7 +957,7 @@ export const AdminSettingsPage = () => {
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">
-                  Get your API key from <a href="https://emailit.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">emailit.com</a>
+                  Get your API key from <a href="https://emailit.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">emailit.com</a>
                 </p>
               </div>
             </CardContent>
@@ -968,7 +968,7 @@ export const AdminSettingsPage = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-blue-400" /> Cloudinary
+                  <Cloud className="w-5 h-5 text-orange-400" /> Cloudinary
                 </div>
                 <Button 
                   variant="outline" 
@@ -1044,7 +1044,7 @@ export const AdminSettingsPage = () => {
                 </div>
               </div>
               <p className="text-xs text-zinc-500">
-                Get your credentials from <a href="https://cloudinary.com/console" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">cloudinary.com/console</a>
+                Get your credentials from <a href="https://cloudinary.com/console" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">cloudinary.com/console</a>
               </p>
             </CardContent>
           </Card>
@@ -1099,7 +1099,7 @@ export const AdminSettingsPage = () => {
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 mt-1">
-                  Get your API key from <a href="https://heartbeat.chat" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">heartbeat.chat</a> dashboard
+                  Get your API key from <a href="https://heartbeat.chat" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">heartbeat.chat</a> dashboard
                 </p>
               </div>
             </CardContent>
@@ -1178,7 +1178,7 @@ export const AdminSettingsPage = () => {
               <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
                 <p className="text-sm text-purple-300 font-medium mb-2">How to get Publitio API credentials:</p>
                 <ol className="text-xs text-zinc-400 space-y-1 list-decimal list-inside">
-                  <li>Go to <a href="https://publit.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">publit.io</a> and create a free account</li>
+                  <li>Go to <a href="https://publit.io" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">publit.io</a> and create a free account</li>
                   <li>Navigate to Dashboard → Settings → API</li>
                   <li>Copy your API Key and API Secret</li>
                   <li>Paste them here and click "Save All Changes"</li>
@@ -1211,7 +1211,7 @@ export const AdminSettingsPage = () => {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Link className="w-5 h-5 text-blue-400" /> Registration Link
+                <Link className="w-5 h-5 text-orange-400" /> Registration Link
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1234,7 +1234,7 @@ export const AdminSettingsPage = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open(settings.custom_registration_link, '_blank')}
-                    className="text-blue-400 hover:text-blue-300 mt-2"
+                    className="text-orange-400 hover:text-orange-300 mt-2"
                   >
                     <ExternalLink className="w-4 h-4 mr-1" /> Test Link
                   </Button>
@@ -1387,7 +1387,7 @@ export const AdminSettingsPage = () => {
           <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-blue-400" /> Announcements
+                <Megaphone className="w-5 h-5 text-orange-400" /> Announcements
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -1420,7 +1420,7 @@ export const AdminSettingsPage = () => {
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-900 border-zinc-800">
                         <SelectItem value="info" className="text-white hover:bg-zinc-800">
-                          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-500" /> Info</span>
+                          <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-orange-500" /> Info</span>
                         </SelectItem>
                         <SelectItem value="warning" className="text-white hover:bg-zinc-800">
                           <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500" /> Warning</span>
@@ -1488,7 +1488,7 @@ export const AdminSettingsPage = () => {
                       className={`p-4 rounded-lg border ${
                         announcement.type === 'warning' ? 'bg-amber-500/10 border-amber-500/30' :
                         announcement.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/30' :
-                        'bg-blue-500/10 border-blue-500/30'
+                        'bg-orange-500/10 border-orange-500/20'
                       } ${!announcement.active ? 'opacity-50' : ''}`}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -1499,14 +1499,14 @@ export const AdminSettingsPage = () => {
                           <p className={`text-sm ${
                             announcement.type === 'warning' ? 'text-amber-200' :
                             announcement.type === 'success' ? 'text-emerald-200' :
-                            'text-blue-200'
+                            'text-orange-200'
                           }`}>{announcement.message}</p>
                           {announcement.link_url && (
                             <a 
                               href={announcement.link_url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-xs text-blue-400 hover:underline mt-1 inline-flex items-center gap-1"
+                              className="text-xs text-orange-400 hover:underline mt-1 inline-flex items-center gap-1"
                             >
                               {announcement.link_text || 'Learn more'} <ExternalLink className="w-3 h-3" />
                             </a>
@@ -1602,7 +1602,7 @@ export const AdminSettingsPage = () => {
 
                     {/* Custom Watermark Text (Master Admin Only) */}
                     {settings.content_protection_watermark && (
-                      <div className="p-4 rounded-lg bg-zinc-900/50 border border-purple-500/30">
+                      <div className="p-4 rounded-lg bg-zinc-900/50 border border-orange-500/20">
                         <div className="flex items-center gap-2 mb-3">
                           <Crown className="w-4 h-4 text-purple-400" />
                           <p className="text-purple-400 font-medium text-sm">Master Admin Only</p>
@@ -1813,7 +1813,7 @@ export const AdminSettingsPage = () => {
                                         : pages.filter(p => p !== page.key)
                                     }));
                                   }}
-                                  className="rounded border-zinc-600 bg-zinc-800 text-blue-500"
+                                  className="rounded border-zinc-600 bg-zinc-800 text-orange-500"
                                   data-testid={`notice-page-${page.key}`}
                                 />
                                 <span className="text-sm text-zinc-300">{page.label}</span>
@@ -1871,7 +1871,7 @@ export const AdminSettingsPage = () => {
                         <Label className="text-zinc-300">Preset Style</Label>
                         <div className="grid grid-cols-3 gap-2 mt-1">
                           {[
-                            { key: 'announcement', label: 'Announcement', color: 'border-blue-500/50 bg-blue-500/10 text-blue-400' },
+                            { key: 'announcement', label: 'Announcement', color: 'border-orange-500/30 bg-orange-500/10 text-orange-400' },
                             { key: 'promo', label: 'Promo', color: 'border-amber-500/50 bg-amber-500/10 text-amber-400' },
                             { key: 'feature_update', label: 'Feature Update', color: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' },
                           ].map(preset => (

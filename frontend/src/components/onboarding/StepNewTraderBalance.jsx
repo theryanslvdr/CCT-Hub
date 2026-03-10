@@ -92,11 +92,11 @@ export const StepNewTraderBalance = ({ startingBalance, setStartingBalance }) =>
           </div>
         )}
         
-        <div className="mt-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+        <div className="mt-6 p-4 rounded-lg bg-orange-500/10 border border-orange-500/15">
           <div className="flex items-start gap-3">
-            <TrendingUp className="w-5 h-5 text-blue-400 mt-0.5" />
+            <TrendingUp className="w-5 h-5 text-orange-400 mt-0.5" />
             <div>
-              <p className="text-sm text-blue-400 font-medium">How it works</p>
+              <p className="text-sm text-orange-400 font-medium">How it works</p>
               <p className="text-xs text-zinc-400 mt-1">
                 LOT Size = Balance ÷ 980<br />
                 Daily Target = LOT × $15

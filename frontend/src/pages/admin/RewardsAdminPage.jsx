@@ -105,10 +105,10 @@ function UserSearchInput({ onUserSelect, selectedUser }) {
         </div>
       )}
       {selectedUser && (
-        <div className="mt-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
-          <User className="w-4 h-4 text-blue-400" />
-          <span className="text-sm text-blue-300 font-medium">{selectedUser.full_name}</span>
-          <span className="text-xs text-blue-400/60">{selectedUser.email}</span>
+        <div className="mt-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/15 flex items-center gap-2">
+          <User className="w-4 h-4 text-orange-400" />
+          <span className="text-sm text-orange-300 font-medium">{selectedUser.full_name}</span>
+          <span className="text-xs text-orange-400/60">{selectedUser.email}</span>
           <button onClick={() => { onUserSelect(null); setQuery(''); }} className="ml-auto text-zinc-500 hover:text-white">
             <X className="w-3.5 h-3.5" />
           </button>
@@ -177,7 +177,7 @@ function OverviewTab() {
       {overview && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {[
-            { label: 'Members', value: overview.total_members, icon: Users, color: 'text-blue-400' },
+            { label: 'Members', value: overview.total_members, icon: Users, color: 'text-orange-400' },
             { label: 'In Circulation', value: maskValue(overview.points_in_circulation?.toLocaleString()), icon: TrendingUp, color: 'text-emerald-400' },
             { label: 'Total Spent', value: maskValue(overview.total_spent_points?.toLocaleString()), icon: Target, color: 'text-amber-400' },
             { label: 'Avg / Member', value: maskValue(overview.avg_points_per_member?.toLocaleString()), icon: BarChart3, color: 'text-cyan-400' },
@@ -238,7 +238,7 @@ function OverviewTab() {
                 >
                   <span className="flex items-center gap-1">
                     {col.label}
-                    {sortBy === col.key && <ArrowUpDown className="w-3 h-3 text-blue-400" />}
+                    {sortBy === col.key && <ArrowUpDown className="w-3 h-3 text-orange-400" />}
                   </span>
                 </th>
               ))}
@@ -260,7 +260,7 @@ function OverviewTab() {
                 <td className="py-2 px-3 text-xs text-zinc-300">{m.level}</td>
                 <td className="py-2 px-3 text-xs text-purple-400">{m.badges_count}</td>
                 <td className="py-2 px-3 text-xs text-cyan-400">{m.best_trade_streak}</td>
-                <td className="py-2 px-3 text-xs text-blue-400">{m.streak_freezes}</td>
+                <td className="py-2 px-3 text-xs text-orange-400">{m.streak_freezes}</td>
               </tr>
             ))}
           </tbody>
@@ -577,7 +577,7 @@ export default function RewardsAdminPage() {
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === t.key ? 'bg-blue-500 text-white' : 'text-zinc-400 hover:text-white'
+              activeTab === t.key ? 'bg-orange-500 text-white' : 'text-zinc-400 hover:text-white'
             }`}
             data-testid={`tab-${t.key}`}
           >
@@ -597,11 +597,11 @@ export default function RewardsAdminPage() {
         <>
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2"><Search className="w-5 h-5 text-blue-400" /> User Rewards Lookup</CardTitle>
+              <CardTitle className="text-white flex items-center gap-2"><Search className="w-5 h-5 text-orange-400" /> User Rewards Lookup</CardTitle>
             </CardHeader>
             <CardContent>
               <UserSearchInput onUserSelect={handleUserSelect} selectedUser={selectedUser} />
-              {lookupLoading && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-blue-500" /></div>}
+              {lookupLoading && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-orange-500" /></div>}
               {lookupResult && !lookupLoading && (
                 <div className="mt-4 space-y-3" data-testid="lookup-result">
                   <div className="p-4 rounded-lg bg-zinc-800/60 border border-zinc-700/50">
@@ -637,7 +637,7 @@ export default function RewardsAdminPage() {
                       <Button size="sm" onClick={() => setBadgeDialogOpen(true)} className="gap-1 bg-purple-600 hover:bg-purple-700 text-xs h-7" data-testid="manage-badges-btn">
                         <Award className="w-3 h-3" /> Award/Revoke Badge
                       </Button>
-                      <Button size="sm" onClick={() => setFreezeDialogOpen(true)} className="gap-1 bg-blue-600 hover:bg-blue-700 text-xs h-7" data-testid="manage-freezes-btn">
+                      <Button size="sm" onClick={() => setFreezeDialogOpen(true)} className="gap-1 bg-orange-600 hover:bg-orange-700 text-xs h-7" data-testid="manage-freezes-btn">
                         <Snowflake className="w-3 h-3" /> Edit Freezes
                       </Button>
                     </div>
@@ -681,7 +681,7 @@ export default function RewardsAdminPage() {
 
               {/* Manual Adjustment */}
               <Card className="glass-card">
-                <CardHeader><CardTitle className="text-white flex items-center gap-2 text-base"><Star className="w-5 h-5 text-blue-400" /> Manual Adjustment</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-white flex items-center gap-2 text-base"><Star className="w-5 h-5 text-orange-400" /> Manual Adjustment</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
                     <button onClick={() => setAdjIsDeduction(false)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${!adjIsDeduction ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`} data-testid="adj-credit-btn">
@@ -709,7 +709,7 @@ export default function RewardsAdminPage() {
                   <CardTitle className="text-white flex items-center gap-2"><Clock className="w-5 h-5 text-zinc-400" /> Transaction History</CardTitle>
                   <div className="flex gap-1.5 flex-wrap">
                     {[{ value: 'all', label: 'All' }, { value: 'earn', label: 'Earned' }, { value: 'spend', label: 'Spent' }, { value: 'admin', label: 'Admin' }].map(f => (
-                      <button key={f.value} onClick={() => { setHistoryFilter(f.value); setHistoryPage(1); }} className={`px-3 py-1 rounded-full text-xs font-medium ${historyFilter === f.value ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}>
+                      <button key={f.value} onClick={() => { setHistoryFilter(f.value); setHistoryPage(1); }} className={`px-3 py-1 rounded-full text-xs font-medium ${historyFilter === f.value ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}>
                         {f.label}
                       </button>
                     ))}
@@ -858,11 +858,11 @@ export default function RewardsAdminPage() {
       {/* Edit Streak Freezes Dialog */}
       <Dialog open={freezeDialogOpen} onOpenChange={setFreezeDialogOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
-          <DialogHeader><DialogTitle className="text-white flex items-center gap-2"><Snowflake className="w-5 h-5 text-blue-400" /> Edit Streak Freezes</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-white flex items-center gap-2"><Snowflake className="w-5 h-5 text-orange-400" /> Edit Streak Freezes</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-2">
               {['trade', 'habit'].map(t => (
-                <button key={t} onClick={() => setFreezeType(t)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeType === t ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`}>
+                <button key={t} onClick={() => setFreezeType(t)} className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 ${freezeType === t ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}`}>
                   {t === 'trade' ? <TrendingUp className="w-4 h-4" /> : <Flame className="w-4 h-4" />} {t.charAt(0).toUpperCase() + t.slice(1)}
                 </button>
               ))}

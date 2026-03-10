@@ -140,7 +140,7 @@ export const MobileBottomNav = () => {
 
   return (
     <nav 
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/95 backdrop-blur-lg border-t border-zinc-800 safe-area-bottom"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-white/[0.06] safe-area-bottom"
       data-testid="mobile-bottom-nav"
     >
       <div className="flex items-center justify-around h-16 px-2">
@@ -162,8 +162,8 @@ export const MobileBottomNav = () => {
                   "relative flex flex-col items-center justify-center -mt-6",
                   "w-16 h-16 rounded-full",
                   isActive 
-                    ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/30" 
-                    : "bg-zinc-800 border-2 border-zinc-700"
+                    ? "bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30" 
+                    : "bg-[#1a1a1a] border-2 border-white/[0.08]"
                 )}
                 data-testid={item.testId}
               >
@@ -220,23 +220,23 @@ export const MobileBottomNav = () => {
                 "relative flex flex-col items-center justify-center py-2 px-3 rounded-lg min-w-[60px]",
                 "transition-all duration-200 active:scale-95",
                 isActive 
-                  ? "text-blue-400" 
+                  ? "text-orange-400" 
                   : "text-zinc-500 hover:text-zinc-300"
               )}
               data-testid={item.testId}
             >
               <Icon className={cn(
                 "w-5 h-5",
-                isActive && "text-blue-400"
+                isActive && "text-orange-400"
               )} />
               <span className={cn(
                 "text-[10px] font-medium mt-1",
-                isActive ? "text-blue-400" : "text-zinc-500"
+                isActive ? "text-orange-400" : "text-zinc-500"
               )}>
                 {item.label}
               </span>
               {isActive && (
-                <div className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-blue-400" />
+                <div className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-orange-400" />
               )}
             </NavLink>
           );

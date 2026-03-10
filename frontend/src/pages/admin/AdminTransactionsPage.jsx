@@ -194,10 +194,10 @@ export const AdminTransactionsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Unique Depositors</p>
-                <p className="text-3xl font-bold font-mono text-blue-400 mt-2">{stats?.unique_depositors || 0}</p>
+                <p className="text-3xl font-bold font-mono text-orange-400 mt-2">{stats?.unique_depositors || 0}</p>
                 <p className="text-xs text-zinc-500 mt-1">Team members with deposits</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -207,11 +207,11 @@ export const AdminTransactionsPage = () => {
 
       {/* Today's Activity */}
       {(stats?.today_deposits > 0 || stats?.today_withdrawals > 0) && (
-        <Card className="glass-card border-blue-500/30">
+        <Card className="glass-card border-orange-500/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-blue-400" />
+                <DollarSign className="w-4 h-4 text-orange-400" />
                 <span className="text-sm text-zinc-400">Today:</span>
               </div>
               <div className="flex items-center gap-2">
@@ -237,7 +237,7 @@ export const AdminTransactionsPage = () => {
               <CardTitle className="text-white">Transaction History</CardTitle>
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="text-zinc-500 hover:text-blue-400 transition-colors" data-testid="admin-tx-help-button">
+                  <button className="text-zinc-500 hover:text-orange-400 transition-colors" data-testid="admin-tx-help-button">
                     <HelpCircle className="w-3.5 h-3.5" />
                   </button>
                 </PopoverTrigger>
@@ -246,20 +246,20 @@ export const AdminTransactionsPage = () => {
                     <p className="text-xs font-semibold text-white">How to Correct a Transaction</p>
                     <div className="space-y-2">
                       <div className="flex gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[10px] font-bold text-blue-400">1</span>
+                        <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-orange-400">1</span>
                         </div>
-                        <p className="text-[11px] text-zinc-400">Find the transaction and click the <Edit3 className="w-3 h-3 inline text-blue-400" /> <span className="text-blue-400">pencil icon</span> in the Actions column.</p>
+                        <p className="text-[11px] text-zinc-400">Find the transaction and click the <Edit3 className="w-3 h-3 inline text-orange-400" /> <span className="text-orange-400">pencil icon</span> in the Actions column.</p>
                       </div>
                       <div className="flex gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[10px] font-bold text-blue-400">2</span>
+                        <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-orange-400">2</span>
                         </div>
                         <p className="text-[11px] text-zinc-400">Enter the correct amount and a reason for the correction.</p>
                       </div>
                       <div className="flex gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[10px] font-bold text-blue-400">3</span>
+                        <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-orange-400">3</span>
                         </div>
                         <p className="text-[11px] text-zinc-400">Click <span className="text-white font-medium">Apply Correction</span>. The member&apos;s balance updates immediately.</p>
                       </div>
@@ -273,10 +273,10 @@ export const AdminTransactionsPage = () => {
             </div>
             <Tabs value={filterType} onValueChange={(v) => { setFilterType(v); setPage(1); }}>
               <TabsList className="bg-zinc-900/50">
-                <TabsTrigger value="all" className="data-[state=active]:bg-blue-500/20">All</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-orange-500/10">All</TabsTrigger>
                 <TabsTrigger value="deposit" className="data-[state=active]:bg-emerald-500/20">Deposits</TabsTrigger>
                 <TabsTrigger value="withdrawal" className="data-[state=active]:bg-orange-500/20">Withdrawals</TabsTrigger>
-                <TabsTrigger value="profit" className="data-[state=active]:bg-blue-500/20">Profits</TabsTrigger>
+                <TabsTrigger value="profit" className="data-[state=active]:bg-orange-500/10">Profits</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -294,7 +294,7 @@ export const AdminTransactionsPage = () => {
                 data-testid="user-search-input"
               />
             </div>
-            <Button onClick={handleSearch} size="sm" className="bg-blue-600 hover:bg-blue-700" data-testid="user-search-btn">
+            <Button onClick={handleSearch} size="sm" className="bg-orange-600 hover:bg-orange-700" data-testid="user-search-btn">
               Search
             </Button>
             {userSearch && (
@@ -305,14 +305,14 @@ export const AdminTransactionsPage = () => {
           </div>
           
           {userSearch && (
-            <p className="text-xs text-blue-400">Filtered by: "{userSearch}" — {total} result{total !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-orange-400">Filtered by: "{userSearch}" — {total} result{total !== 1 ? 's' : ''}</p>
           )}
         </CardHeader>
         
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           ) : transactions.length > 0 ? (
             <>
@@ -340,8 +340,8 @@ export const AdminTransactionsPage = () => {
                               </>
                             ) : tx.type === 'profit' ? (
                               <>
-                                <TrendingUp className="w-4 h-4 text-blue-400" />
-                                <span className="status-badge bg-blue-500/20 text-blue-400">Profit</span>
+                                <TrendingUp className="w-4 h-4 text-orange-400" />
+                                <span className="status-badge bg-orange-500/10 text-orange-400">Profit</span>
                               </>
                             ) : (
                               <>
@@ -358,7 +358,7 @@ export const AdminTransactionsPage = () => {
                           </div>
                         </td>
                         <td>
-                          <span className={`font-mono font-bold ${tx.type === 'withdrawal' ? 'text-orange-400' : tx.type === 'profit' ? 'text-blue-400' : 'text-emerald-400'}`}>
+                          <span className={`font-mono font-bold ${tx.type === 'withdrawal' ? 'text-orange-400' : tx.type === 'profit' ? 'text-orange-400' : 'text-emerald-400'}`}>
                             {tx.type === 'withdrawal' ? '-' : '+'} ${formatNumber(Math.abs(tx.amount), 2)}
                           </span>
                           {tx.type === 'withdrawal' && tx.net_amount && (
@@ -378,7 +378,7 @@ export const AdminTransactionsPage = () => {
                             )}
                             {tx.type !== 'profit' && (
                               <>
-                                <Button size="sm" variant="ghost" onClick={() => openCorrection(tx)} className="text-zinc-500 hover:text-blue-400 h-7 w-7 p-0" title="Correct amount" data-testid={`correct-tx-${tx.id}`}>
+                                <Button size="sm" variant="ghost" onClick={() => openCorrection(tx)} className="text-zinc-500 hover:text-orange-400 h-7 w-7 p-0" title="Correct amount" data-testid={`correct-tx-${tx.id}`}>
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button size="sm" variant="ghost" onClick={() => handleDeleteTx(tx)} className="text-zinc-500 hover:text-red-400 h-7 w-7 p-0" title="Delete transaction" data-testid={`delete-tx-${tx.id}`}>
@@ -449,7 +449,7 @@ export const AdminTransactionsPage = () => {
             </div>
             <div className="flex gap-2 justify-end pt-2">
               <Button variant="outline" onClick={() => setCorrectDialogOpen(false)} className="btn-secondary">Cancel</Button>
-              <Button onClick={handleCorrect} className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="confirm-correction-btn">
+              <Button onClick={handleCorrect} className="bg-orange-600 hover:bg-orange-700 gap-2" data-testid="confirm-correction-btn">
                 <CheckCircle2 className="w-4 h-4" /> Apply Correction
               </Button>
             </div>

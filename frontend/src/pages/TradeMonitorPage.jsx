@@ -1427,7 +1427,7 @@ export const TradeMonitorPage = () => {
             </div>
             <div className="text-center">
               <p className="text-[10px] text-zinc-500">Time</p>
-              <p className="text-xs font-mono text-blue-400">{signal.trade_time}</p>
+              <p className="text-xs font-mono text-orange-400">{signal.trade_time}</p>
             </div>
           </div>
         </div>
@@ -1509,10 +1509,10 @@ export const TradeMonitorPage = () => {
                 {habitGateStep === 'onit' && habitGateActive && (
                   <>
                     <div className="text-center">
-                      <div className="w-12 h-12 mx-auto rounded-full bg-blue-500/10 flex items-center justify-center mb-3">
-                        <Camera className="w-6 h-6 text-blue-400" />
+                      <div className="w-12 h-12 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center mb-3">
+                        <Camera className="w-6 h-6 text-orange-400" />
                       </div>
-                      <h3 className="text-base font-semibold text-blue-300">Working on: {habitGateActive.title}</h3>
+                      <h3 className="text-base font-semibold text-orange-300">Working on: {habitGateActive.title}</h3>
                       <p className="text-xs text-zinc-500 mt-1">Upload a screenshot (optional) then mark done</p>
                     </div>
 
@@ -1520,7 +1520,7 @@ export const TradeMonitorPage = () => {
                       <div className="p-3 bg-zinc-900/60 rounded-lg border border-zinc-800">
                         <p className="text-xs text-zinc-500 mb-1">Copy and send this message:</p>
                         <p className="text-sm text-zinc-300 whitespace-pre-wrap">{habitGateActive.action_data}</p>
-                        <Button variant="ghost" size="sm" className="mt-2 text-blue-400 gap-1" onClick={() => { navigator.clipboard.writeText(habitGateActive.action_data); toast.success('Copied!'); }} data-testid="gate-copy-msg">
+                        <Button variant="ghost" size="sm" className="mt-2 text-orange-400 gap-1" onClick={() => { navigator.clipboard.writeText(habitGateActive.action_data); toast.success('Copied!'); }} data-testid="gate-copy-msg">
                           <ClipboardCopy className="w-3.5 h-3.5" /> Copy Message
                         </Button>
                       </div>
@@ -1606,11 +1606,11 @@ export const TradeMonitorPage = () => {
             </Card>
           )
         ) : signal ? (
-          <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-blue-500/30'}`} data-testid="active-signal-card">
+          <Card className={`glass-highlight ${signal.is_simulated ? 'border-amber-500/30' : 'border-orange-500/20'}`} data-testid="active-signal-card">
             <CardHeader className="pb-2 px-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex items-center gap-2 text-base">
-                  <Radio className="w-4 h-4 text-blue-400 animate-pulse" />
+                  <Radio className="w-4 h-4 text-orange-400 animate-pulse" />
                   Active Signal
                 </CardTitle>
                 {signal.is_simulated && (
@@ -1647,7 +1647,7 @@ export const TradeMonitorPage = () => {
                     <p className="text-[10px] text-zinc-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" /> Trade Time
                     </p>
-                    <p className="text-lg font-mono font-bold text-blue-400">{signal.trade_time}</p>
+                    <p className="text-lg font-mono font-bold text-orange-400">{signal.trade_time}</p>
                     <p className="text-[10px] text-zinc-600">{signal.trade_timezone || 'Asia/Manila'}</p>
                   </div>
                   {!isPhilippines && (
@@ -1671,7 +1671,7 @@ export const TradeMonitorPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full mt-3 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 text-xs gap-2"
+                  className="w-full mt-3 border-orange-500/20 text-orange-400 hover:bg-orange-500/10 text-xs gap-2"
                   onClick={async () => {
                     try {
                       const res = await api.post('/admin/signals/force-notify');
@@ -1805,7 +1805,7 @@ export const TradeMonitorPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="hidden sm:block mt-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-center">
+              <div className="hidden sm:block mt-3 p-3 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/15 text-center">
                 <p className="text-xs text-zinc-300" data-testid="encouragement-message">{getDailyPerformanceMessage()}</p>
               </div>
             </CardContent>
@@ -1819,7 +1819,7 @@ export const TradeMonitorPage = () => {
         <CardHeader className="pb-2 flex-shrink-0">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white flex items-center gap-2 text-base">
-              <ExternalLink className="w-4 h-4 text-blue-400" />
+              <ExternalLink className="w-4 h-4 text-orange-400" />
               Merin Trading
             </CardTitle>
             <Button
@@ -1829,7 +1829,7 @@ export const TradeMonitorPage = () => {
                 const iframe = document.querySelector('[data-testid="merin-iframe"]');
                 if (iframe) iframe.src = iframe.src;
               }}
-              className="text-zinc-400 hover:text-blue-400 h-7 w-7"
+              className="text-zinc-400 hover:text-orange-400 h-7 w-7"
               data-testid="merin-refresh-button"
             >
               <RefreshCw className="w-4 h-4" />
@@ -1874,7 +1874,7 @@ export const TradeMonitorPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-zinc-900/50">
                   <p className="text-xs text-zinc-500 uppercase">Target</p>
-                  <p className="text-lg md:text-xl font-mono font-bold text-blue-400">{formatLargeNumber(exitValue)}</p>
+                  <p className="text-lg md:text-xl font-mono font-bold text-orange-400">{formatLargeNumber(exitValue)}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-zinc-900/50">
                   <p className="text-xs text-zinc-500 uppercase">Actual</p>
@@ -1964,9 +1964,9 @@ export const TradeMonitorPage = () => {
               </div>
               
               {/* Target Reference - Compact */}
-              <div className="inline-block px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="inline-block px-4 py-2 rounded-lg bg-orange-500/10 border border-orange-500/15">
                 <span className="text-xs text-zinc-400">Target: </span>
-                <span className="text-lg font-mono font-bold text-blue-400">{formatLargeNumber(exitValue)}</span>
+                <span className="text-lg font-mono font-bold text-orange-400">{formatLargeNumber(exitValue)}</span>
               </div>
               
               <Button onClick={submitActualProfit} className="btn-primary py-4 px-6 md:px-8 w-full md:w-auto text-base md:text-lg" data-testid="submit-actual-button">
@@ -1992,8 +1992,8 @@ export const TradeMonitorPage = () => {
                 // Within 20 min of trade time - can check in
                 <div className="space-y-4">
                   <p className="text-zinc-400 text-sm md:text-base">Ready to trade? The window is open!</p>
-                  <div className="p-3 md:p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-blue-400 text-sm">Trade time: <span className="font-mono font-bold">{signal?.trade_time}</span></p>
+                  <div className="p-3 md:p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                    <p className="text-orange-400 text-sm">Trade time: <span className="font-mono font-bold">{signal?.trade_time}</span></p>
                     <p className="text-[10px] text-zinc-500 mt-1">{signal?.trade_timezone || 'Asia/Manila'}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-zinc-900/50">
@@ -2053,7 +2053,7 @@ export const TradeMonitorPage = () => {
               variant="ghost"
               size="sm"
               onClick={() => window.location.href = '/profit-tracker'}
-              className="text-xs text-blue-400 hover:text-blue-300 h-7 px-2"
+              className="text-xs text-orange-400 hover:text-orange-300 h-7 px-2"
               data-testid="check-past-trades-btn"
             >
               <Calendar className="w-3 h-3 mr-1" />
@@ -2067,8 +2067,8 @@ export const TradeMonitorPage = () => {
             </div>
             {/* Total trade days */}
             {historyTotal > 0 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                <span className="font-bold text-blue-400 text-sm">{historyTotal}</span>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 border border-orange-500/15">
+                <span className="font-bold text-orange-400 text-sm">{historyTotal}</span>
                 <span className="text-[10px] text-zinc-400 hidden sm:inline">trades</span>
               </div>
             )}
@@ -2098,7 +2098,7 @@ export const TradeMonitorPage = () => {
                       <React.Fragment key={trade.id}>
                       <tr>
                         <td>
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-xs">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-orange-500/10 border border-orange-500/15 text-orange-400 font-bold text-xs">
                             {trade.trade_day_number || '-'}
                           </span>
                         </td>
@@ -2114,7 +2114,7 @@ export const TradeMonitorPage = () => {
                           </span>
                         </td>
                         <td className="font-mono text-purple-400">{trade.lot_size?.toFixed(2)}</td>
-                        <td className="font-mono text-blue-400">${formatNumber(trade.projected_profit || 0)}</td>
+                        <td className="font-mono text-orange-400">${formatNumber(trade.projected_profit || 0)}</td>
                         <td className="font-mono text-emerald-400">${formatNumber(trade.actual_profit || 0)}</td>
                         <td className={`font-mono font-bold ${(trade.profit_difference || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {(trade.profit_difference || 0) >= 0 ? '+' : ''}${formatNumber(trade.profit_difference || (trade.actual_profit - trade.projected_profit) || 0)}
@@ -2202,7 +2202,7 @@ export const TradeMonitorPage = () => {
                   <div key={trade.id} className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-[10px]">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500/10 border border-orange-500/15 text-orange-400 font-bold text-[10px]">
                           {trade.trade_day_number || '-'}
                         </span>
                         <span className="text-xs font-mono text-zinc-500">
@@ -2236,7 +2236,7 @@ export const TradeMonitorPage = () => {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
                         <p className="text-[10px] text-zinc-500">Projected</p>
-                        <p className="text-sm font-mono text-blue-400">{formatLargeNumber(trade.projected_profit || 0)}</p>
+                        <p className="text-sm font-mono text-orange-400">{formatLargeNumber(trade.projected_profit || 0)}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-zinc-500">Actual</p>
@@ -2333,7 +2333,7 @@ export const TradeMonitorPage = () => {
                 
                 <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20">
                   <p className="text-sm text-zinc-400 mb-2">Amount You Need to Add</p>
-                  <p className={`text-4xl font-mono font-bold ${Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue) > 0 ? 'text-emerald-400' : 'text-blue-400'}`} data-testid="amount-to-add">
+                  <p className={`text-4xl font-mono font-bold ${Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue) > 0 ? 'text-emerald-400' : 'text-orange-400'}`} data-testid="amount-to-add">
                     {Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue) > 0 
                       ? `+${formatLargeNumber(Math.max(0, ((parseFloat(dreamDailyProfit) * 980) / 15) - accountValue))}`
                       : 'You already have enough!'}
@@ -2354,7 +2354,7 @@ export const TradeMonitorPage = () => {
 
       {/* Celebration Popup - Shows after entering actual profit */}
       <Dialog open={showCelebration} onOpenChange={setShowCelebration}>
-        <DialogContent className={`glass-card border-zinc-800 ${lastTrade?.performance === 'exceeded' ? 'border-emerald-500/50' : lastTrade?.performance === 'perfect' ? 'border-blue-500/50' : 'border-amber-500/50'}`}>
+        <DialogContent className={`glass-card border-zinc-800 ${lastTrade?.performance === 'exceeded' ? 'border-emerald-500/50' : lastTrade?.performance === 'perfect' ? 'border-orange-500/30' : 'border-amber-500/50'}`}>
           <div className="text-center space-y-6 py-4">
             {lastTrade?.performance === 'exceeded' && (
               <div className="animate-bounce">
@@ -2362,7 +2362,7 @@ export const TradeMonitorPage = () => {
               </div>
             )}
             {lastTrade?.performance === 'perfect' && (
-              <Target className="w-20 h-20 text-blue-400 mx-auto" />
+              <Target className="w-20 h-20 text-orange-400 mx-auto" />
             )}
             {lastTrade?.performance === 'below' && (
               <TrendingDown className="w-20 h-20 text-amber-400 mx-auto" />
@@ -2373,7 +2373,7 @@ export const TradeMonitorPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-sm text-zinc-400">Projected</p>
-                <p className="text-2xl font-mono font-bold text-blue-400">{formatLargeNumber(lastTrade?.projected_profit || 0)}</p>
+                <p className="text-2xl font-mono font-bold text-orange-400">{formatLargeNumber(lastTrade?.projected_profit || 0)}</p>
               </div>
               <div className="p-4 rounded-lg bg-zinc-900/50">
                 <p className="text-sm text-zinc-400">Actual</p>
@@ -2403,7 +2403,7 @@ export const TradeMonitorPage = () => {
                   setShowCelebration(false);
                   window.location.href = '/profit-tracker';
                 }}
-                className="gap-2 w-full text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                className="gap-2 w-full text-orange-400 border-orange-400/30 hover:bg-orange-400/10"
                 data-testid="view-daily-projection-button"
               >
                 <Eye className="w-4 h-4" /> View Daily Projection
@@ -2439,7 +2439,7 @@ export const TradeMonitorPage = () => {
               </div>
               <div className="flex items-center justify-between mt-2">
                 <span className="text-zinc-400">Trade Time</span>
-                <span className="font-mono text-blue-400">{signal?.trade_time}</span>
+                <span className="font-mono text-orange-400">{signal?.trade_time}</span>
               </div>
             </div>
 
@@ -2558,12 +2558,12 @@ export const TradeMonitorPage = () => {
                   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                 }, 100);
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 active:bg-blue-500/30"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 active:bg-orange-500/15"
             >
               <Eye className="w-5 h-5" />
               <div className="flex-1 text-left">
                 <p className="font-medium">View in Hub</p>
-                <p className="text-xs text-blue-300/70">Open embedded view below</p>
+                <p className="text-xs text-orange-300/70">Open embedded view below</p>
               </div>
             </button>
             
@@ -2584,7 +2584,7 @@ export const TradeMonitorPage = () => {
         ) : (
           <button
             onClick={() => setShowMerinOptions(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-transform"
             data-testid="merin-open-button"
           >
             <ExternalLink className="w-5 h-5" />
@@ -2600,7 +2600,7 @@ export const TradeMonitorPage = () => {
             <CardHeader className="py-3 px-4 border-b border-zinc-800">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base text-white flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4 text-blue-400" />
+                  <ExternalLink className="w-4 h-4 text-orange-400" />
                   Merin Trading Platform
                 </CardTitle>
                 <button

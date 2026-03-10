@@ -7,7 +7,7 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, ChevronLeft, Chev
 const EVENT_STYLES = {
   deposit: { icon: ArrowDownRight, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', label: 'Deposit' },
   withdrawal: { icon: ArrowUpRight, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', label: 'Withdrawal' },
-  trade: { icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', label: 'Trade Profit' },
+  trade: { icon: TrendingUp, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20', label: 'Trade Profit' },
   commission: { icon: DollarSign, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', label: 'Commission' },
 };
 
@@ -104,7 +104,7 @@ export function BalanceAuditPreview({ userId, onViewAll }) {
             variant="ghost"
             size="sm"
             onClick={onViewAll}
-            className="text-xs text-blue-400 hover:text-blue-300 h-7 px-2 gap-1"
+            className="text-xs text-orange-400 hover:text-orange-300 h-7 px-2 gap-1"
             data-testid="view-all-audit-btn"
           >
             View All <ExternalLink className="w-3 h-3" />
@@ -206,9 +206,9 @@ export function BalanceAuditModal({ open, onClose, userId }) {
             <p className="text-[10px] text-red-400/70">Withdrawals</p>
             <p className="text-xs font-mono font-bold text-red-400">{formatCurrency(totalWithdrawals)}</p>
           </div>
-          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2 text-center">
-            <p className="text-[10px] text-blue-400/70">Trade Profit</p>
-            <p className="text-xs font-mono font-bold text-blue-400">{formatCurrency(totalProfit)}</p>
+          <div className="rounded-lg bg-orange-500/10 border border-orange-500/15 p-2 text-center">
+            <p className="text-[10px] text-orange-400/70">Trade Profit</p>
+            <p className="text-xs font-mono font-bold text-orange-400">{formatCurrency(totalProfit)}</p>
           </div>
           <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-center">
             <p className="text-[10px] text-amber-400/70">Commission</p>

@@ -19,11 +19,11 @@ function MemberCard({ member, onView, onEdit, onRemove }) {
     : '0.0';
 
   return (
-    <Card data-testid={`family-member-card-${member.id}`} className="bg-zinc-900/60 border-zinc-800 hover:border-blue-500/40 transition-all cursor-pointer group">
+    <Card data-testid={`family-member-card-${member.id}`} className="bg-zinc-900/60 border-zinc-800 hover:border-orange-500/40 transition-all cursor-pointer group">
       <CardContent className="p-5" onClick={() => onView(member)}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
               {member.name?.charAt(0)?.toUpperCase() || '?'}
             </div>
             <div>
@@ -31,7 +31,7 @@ function MemberCard({ member, onView, onEdit, onRemove }) {
               <p className="text-zinc-500 text-xs capitalize">{member.relationship}</p>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-blue-400 transition-colors" />
+          <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-orange-400 transition-colors" />
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div>
@@ -166,7 +166,7 @@ function MemberFormDialog({ open, onClose, onSubmit, editMember }) {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} className="text-zinc-400">Cancel</Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700" data-testid="member-form-submit">
+          <Button onClick={handleSubmit} disabled={loading} className="bg-orange-600 hover:bg-orange-700" data-testid="member-form-submit">
             {loading ? 'Saving...' : editMember ? 'Save Changes' : 'Add Member'}
           </Button>
         </DialogFooter>
@@ -219,7 +219,7 @@ function WithdrawalDialog({ open, onClose, member, onSubmit }) {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} className="text-zinc-400">Cancel</Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700" data-testid="submit-withdrawal-btn">
+          <Button onClick={handleSubmit} disabled={loading} className="bg-orange-600 hover:bg-orange-700" data-testid="submit-withdrawal-btn">
             {loading ? 'Submitting...' : 'Submit Request'}
           </Button>
         </DialogFooter>
@@ -270,7 +270,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
       </Button>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
           {member.name?.charAt(0)?.toUpperCase()}
         </div>
         <div>
@@ -284,7 +284,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
         <Card className="bg-zinc-900/60 border-zinc-800">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Wallet className="w-4 h-4 text-blue-400" />
+              <Wallet className="w-4 h-4 text-orange-400" />
               <p className="text-zinc-500 text-xs">Account Value</p>
             </div>
             <p className="text-white font-bold text-lg">{formatCurrency(currentBalance)}</p>
@@ -340,7 +340,7 @@ function MemberDetailView({ member, onBack, isAdminSimulation, parentUserId }) {
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -407,7 +407,7 @@ function WithdrawalsSection({ withdrawals, onApprove, onReject }) {
 
   const statusColor = (s) => ({
     'pending_parent_approval': 'text-amber-400',
-    'pending_admin_approval': 'text-blue-400',
+    'pending_admin_approval': 'text-orange-400',
     'approved': 'text-emerald-400',
     'rejected_by_parent': 'text-red-400',
     'rejected_by_admin': 'text-red-400'
@@ -608,13 +608,13 @@ export default function FamilyAccountsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-400" /> Family Accounts
+            <Users className="w-6 h-6 text-orange-400" /> Family Accounts
           </h1>
           <p className="text-zinc-500 text-sm mt-1">Manage family members under your license</p>
         </div>
         {(!isAdminSimulation || (isAdminSimulation && simulatedUserId)) && !isDemoSimulation && (
           <Button onClick={() => { setEditMember(null); setShowForm(true); }}
-            className="bg-blue-600 hover:bg-blue-700" data-testid="add-family-member-btn">
+            className="bg-orange-600 hover:bg-orange-700" data-testid="add-family-member-btn">
             <UserPlus className="w-4 h-4 mr-2" /> Add Member
           </Button>
         )}
@@ -664,7 +664,7 @@ export default function FamilyAccountsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : activeTab === 'members' ? (
         <div>
@@ -674,7 +674,7 @@ export default function FamilyAccountsPage() {
                 <Users className="w-12 h-12 text-zinc-600 mb-4" />
                 <p className="text-zinc-400 text-base mb-2">No family members yet</p>
                 <p className="text-zinc-600 text-sm mb-6">Add your first family member to get started</p>
-                <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => setShowForm(true)} className="bg-orange-600 hover:bg-orange-700">
                   <UserPlus className="w-4 h-4 mr-2" /> Add Family Member
                 </Button>
               </CardContent>

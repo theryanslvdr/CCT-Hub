@@ -215,7 +215,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
             <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
               isLastStep 
                 ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
-                : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                : 'bg-gradient-to-br from-orange-500 to-amber-500'
             }`}>
               <Icon className="w-7 h-7 text-white" />
             </div>
@@ -223,7 +223,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
               <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-zinc-500">Step {currentStep + 1} of {tourSteps.length}</p>
                 {step.type === 'page' && (
-                  <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
+                  <span className="text-xs px-2 py-0.5 bg-orange-500/10 text-orange-400 rounded-full flex items-center gap-1">
                     <Eye className="w-3 h-3" /> {step.path}
                   </span>
                 )}
@@ -249,8 +249,8 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
 
           {/* Tip box */}
           {step.tip && !isNavigating && (
-            <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-sm text-blue-400">{step.tip}</p>
+            <div className="mb-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
+              <p className="text-sm text-orange-400">{step.tip}</p>
             </div>
           )}
 
@@ -262,7 +262,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
                 onClick={() => setCurrentStep(index)}
                 className={`h-2 rounded-full transition-all cursor-pointer hover:opacity-80 ${
                   index === currentStep 
-                    ? 'w-8 bg-gradient-to-r from-blue-500 to-cyan-500' 
+                    ? 'w-8 bg-gradient-to-r from-orange-500 to-amber-500' 
                     : index < currentStep 
                       ? 'w-2 bg-emerald-500' 
                       : 'w-2 bg-zinc-700 hover:bg-zinc-600'
@@ -297,7 +297,7 @@ export const OnboardingTour = ({ isOpen, onClose }) => {
               )}
               <Button
                 onClick={handleNext}
-                className={isLastStep ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700' : 'bg-blue-600 hover:bg-blue-700'}
+                className={isLastStep ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700' : 'bg-orange-600 hover:bg-orange-700'}
                 disabled={isNavigating}
                 data-testid="tour-next-btn"
               >

@@ -100,8 +100,10 @@ export const LoginPage = () => {
   // Maintenance Page
   if (maintenanceMode && !showLoginOverride) {
     return (
-      <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl text-center">
+      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#0a0a0a' }}>
+        <div className="absolute inset-0 grid-bg opacity-50" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/[0.05] rounded-full blur-[120px]" />
+        <div className="relative z-10 w-full max-w-2xl text-center">
           {/* Logo */}
           <div className="mb-8">
             {platformSettings?.logo_url ? (
@@ -112,7 +114,7 @@ export const LoginPage = () => {
               />
             ) : (
               <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
                   <TrendingUp className="w-7 h-7 text-white" />
                 </div>
                 <span className="text-2xl font-bold text-white tracking-wider">
@@ -124,7 +126,7 @@ export const LoginPage = () => {
 
           {/* Maintenance Icon */}
           <div className="mb-8">
-            <div className="w-24 h-24 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center animate-pulse">
+            <div className="w-24 h-24 mx-auto rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center animate-pulse">
               <Wrench className="w-12 h-12 text-amber-400" />
             </div>
           </div>
@@ -150,13 +152,13 @@ export const LoginPage = () => {
                 </React.Fragment>
               ))}
             </p>
-            <p className="text-zinc-500 mt-6 text-sm">
+            <p className="text-zinc-600 mt-6 text-sm">
               We're working hard to bring you an improved experience. Please check back later.
             </p>
           </div>
 
           {/* Footer */}
-          <p className="mt-8 text-zinc-600 text-sm">
+          <p className="mt-8 text-zinc-700 text-sm">
             {platformSettings?.footer_copyright || '© 2024 CrossCurrent Finance Center'}
           </p>
         </div>
@@ -333,124 +335,136 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 grid-bg">
-      <div className="glass-card w-full max-w-md p-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          {platformSettings?.logo_url ? (
-            <img 
-              src={platformSettings.logo_url} 
-              alt={platformSettings?.platform_name || 'Platform'} 
-              className="max-w-[200px] max-h-[80px] object-contain mb-2"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-2">
-              <TrendingUp className="w-8 h-8 text-white" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#0a0a0a' }}>
+      {/* Subtle dot pattern background */}
+      <div className="absolute inset-0 grid-bg opacity-50" />
+      {/* Top-left warm glow */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-orange-500/[0.07] rounded-full blur-[120px]" />
+      {/* Bottom-right subtle glow */}
+      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-amber-500/[0.04] rounded-full blur-[100px]" />
+      
+      <div className="relative z-10 w-full max-w-md">
+        {/* Glass card with orange border glow */}
+        <div className="bg-[#111111]/90 border border-white/[0.08] backdrop-blur-xl rounded-2xl p-8 shadow-[0_0_60px_-15px_rgba(249,115,22,0.15)]">
+          {/* Logo */}
+          <div className="flex flex-col items-center mb-8">
+            {platformSettings?.logo_url ? (
+              <img 
+                src={platformSettings.logo_url} 
+                alt={platformSettings?.platform_name || 'Platform'} 
+                className="max-w-[200px] max-h-[80px] object-contain mb-3"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(249,115,22,0.4)]">
+                <TrendingUp className="w-7 h-7 text-white" />
+              </div>
+            )}
+            {platformSettings?.login_title && (
+              <h1 className="text-2xl font-bold text-white tracking-tight">{platformSettings.login_title}</h1>
+            )}
+            <p className="text-zinc-500 text-sm mt-1">{platformSettings?.login_tagline || platformSettings?.tagline || 'Finance Center'}</p>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-3" data-testid="login-error">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
-          {platformSettings?.login_title && (
-            <h1 className="text-2xl font-bold text-white">{platformSettings.login_title}</h1>
-          )}
-          <p className="text-zinc-400 text-sm mt-1">{platformSettings?.login_tagline || platformSettings?.tagline || 'Finance Center'}</p>
-        </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-3" data-testid="login-error">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-zinc-300">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="pl-10 input-dark"
-                required
-                data-testid="login-email"
-              />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-zinc-400 text-xs uppercase tracking-wider">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="pl-10 bg-[#0a0a0a] border-white/[0.06] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 h-11"
+                  required
+                  data-testid="login-email"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-zinc-300">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="pl-10 input-dark"
-                required
-                data-testid="login-password"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-zinc-400 text-xs uppercase tracking-wider">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="pl-10 bg-[#0a0a0a] border-white/[0.06] focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 h-11"
+                  required
+                  data-testid="login-password"
+                />
+              </div>
             </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-lg shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all active:scale-[0.98]"
+              disabled={isLoading}
+              data-testid="login-submit"
+            >
+              {isLoading ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...</>
+              ) : 'Sign In'}
+            </Button>
+          </form>
+
+          {/* Forgot Password Link */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => {
+                setForgotPasswordOpen(true);
+                setForgotStep('email');
+                setForgotEmail('');
+                setResetToken('');
+                setResetNewPassword('');
+                setResetConfirmPassword('');
+              }}
+              className="text-zinc-500 hover:text-zinc-300 transition-colors text-sm"
+              data-testid="forgot-password-link"
+            >
+              Forgot Password?
+            </button>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full btn-primary py-3"
-            disabled={isLoading}
-            data-testid="login-submit"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
+          {/* No Account Link */}
+          <div className="mt-5 text-center">
+            <button
+              onClick={handleOpenNoAccount}
+              className="text-orange-400/80 hover:text-orange-400 transition-colors text-sm flex items-center gap-1.5 mx-auto"
+            >
+              <HelpCircle className="w-4 h-4" />
+              Don't have an account/password?
+            </button>
+          </div>
 
-        {/* Forgot Password Link */}
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => {
-              setForgotPasswordOpen(true);
-              setForgotStep('email');
-              setForgotEmail('');
-              setResetToken('');
-              setResetNewPassword('');
-              setResetConfirmPassword('');
-            }}
-            className="text-zinc-400 hover:text-zinc-300 transition-colors text-sm"
-            data-testid="forgot-password-link"
-          >
-            Forgot Password?
-          </button>
-        </div>
-
-        {/* No Account Link */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleOpenNoAccount}
-            className="text-blue-400 hover:text-blue-300 transition-colors text-sm flex items-center gap-1 mx-auto"
-          >
-            <HelpCircle className="w-4 h-4" />
-            Don't have an account/password?
-          </button>
-        </div>
-
-        {/* Community notice */}
-        <div className="mt-6 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-          <p className="text-xs text-zinc-500 text-center">
-            {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
-          </p>
+          {/* Community notice */}
+          <div className="mt-6 pt-5 border-t border-white/[0.06]">
+            <p className="text-[11px] text-zinc-600 text-center leading-relaxed">
+              {platformSettings?.login_notice || 'Only CrossCurrent community members can access this platform.'}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* No Account Dialog */}
       <Dialog open={noAccountOpen} onOpenChange={setNoAccountOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md">
+        <DialogContent className="bg-[#111111] border-white/[0.08] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-blue-400" />
+              <HelpCircle className="w-5 h-5 text-orange-400" />
               {step === 'ask' && 'Account Setup'}
               {step === 'verify' && 'Verify Membership'}
               {step === 'password' && 'Set Your Password'}
@@ -614,35 +628,35 @@ export const LoginPage = () => {
 
       {/* Force Change Password Dialog */}
       <Dialog open={showForceChangePassword} onOpenChange={() => {}}>
-        <DialogContent className="bg-zinc-900 border-zinc-800" data-testid="force-change-password-dialog">
+        <DialogContent className="bg-[#111111] border-white/[0.08]" data-testid="force-change-password-dialog">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Key className="w-5 h-5 text-amber-400" /> Password Reset Required
             </DialogTitle>
-            <DialogDescription className="text-zinc-400">
+            <DialogDescription className="text-zinc-500">
               Your admin has assigned you a temporary password. Please set a new password to continue.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <Label className="text-zinc-300">New Password</Label>
+              <Label className="text-zinc-400 text-xs uppercase tracking-wider">New Password</Label>
               <Input
                 type="password"
                 value={forceNewPassword}
                 onChange={(e) => setForceNewPassword(e.target.value)}
                 placeholder="Enter new password (min 6 chars)"
-                className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                className="bg-[#0a0a0a] border-white/[0.06] text-white mt-1"
                 data-testid="force-new-password-input"
               />
             </div>
             <div>
-              <Label className="text-zinc-300">Confirm Password</Label>
+              <Label className="text-zinc-400 text-xs uppercase tracking-wider">Confirm Password</Label>
               <Input
                 type="password"
                 value={forceConfirmPassword}
                 onChange={(e) => setForceConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
-                className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                className="bg-[#0a0a0a] border-white/[0.06] text-white mt-1"
                 data-testid="force-confirm-password-input"
               />
             </div>
@@ -661,10 +675,10 @@ export const LoginPage = () => {
 
       {/* Forgot Password Dialog */}
       <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
-        <DialogContent className="glass-card border-zinc-800 max-w-md" data-testid="forgot-password-dialog">
+        <DialogContent className="bg-[#111111] border-white/[0.08] max-w-md" data-testid="forgot-password-dialog">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Key className="w-5 h-5 text-blue-400" />
+              <Key className="w-5 h-5 text-orange-400" />
               {forgotStep === 'email' && 'Reset Your Password'}
               {forgotStep === 'sent' && 'Check Your Email'}
               {forgotStep === 'token' && 'Enter Reset Token'}
@@ -705,9 +719,9 @@ export const LoginPage = () => {
             )}
             {forgotStep === 'sent' && (
               <div className="space-y-4">
-                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
-                  <Mail className="w-10 h-10 text-blue-400 mx-auto mb-2" />
-                  <p className="text-blue-300 font-medium">Reset link sent!</p>
+                <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/15 text-center">
+                  <Mail className="w-10 h-10 text-orange-400 mx-auto mb-2" />
+                  <p className="text-orange-300 font-medium">Reset link sent!</p>
                   <p className="text-zinc-400 text-sm mt-1">
                     If an account exists for <span className="text-zinc-300">{forgotEmail}</span>, you&apos;ll receive a password reset link shortly. Check your inbox and spam folder.
                   </p>
@@ -731,8 +745,8 @@ export const LoginPage = () => {
             )}
             {forgotStep === 'token' && (
               <div className="space-y-4">
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-blue-400 text-sm">
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
+                  <p className="text-orange-400 text-sm">
                     Enter the reset token from your email, then set your new password.
                   </p>
                 </div>

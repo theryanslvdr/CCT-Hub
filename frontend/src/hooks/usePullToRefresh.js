@@ -144,7 +144,7 @@ export const PullToRefreshIndicator = ({
         ${isRefreshing ? 'animate-spin' : ''}
       `}>
         <svg 
-          className="w-5 h-5 text-blue-400" 
+          className="w-5 h-5 text-orange-400" 
           viewBox="0 0 24 24"
           style={{ transform: isRefreshing ? 'none' : `rotate(${rotation}deg)` }}
         >

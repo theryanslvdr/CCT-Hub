@@ -46,11 +46,11 @@ export const LicenseeWelcomeScreen = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 flex items-center justify-center p-4">
-      <Card className="glass-card max-w-lg w-full border-blue-500/30" data-testid="licensee-welcome-screen">
+      <Card className="glass-card max-w-lg w-full border-orange-500/20" data-testid="licensee-welcome-screen">
         <CardContent className="p-6 md:p-8">
           {/* Sparkle Animation */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center animate-pulse">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center animate-pulse">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
           </div>
@@ -66,7 +66,7 @@ export const LicenseeWelcomeScreen = ({
                 {formatCurrency(welcomeInfo.starting_balance)}
               </span>{' '}
               to{' '}
-              <span className="text-blue-400 font-semibold">
+              <span className="text-orange-400 font-semibold">
                 {welcomeInfo.master_admin_name}
               </span>{' '}
               and your effective start date is{' '}
@@ -107,7 +107,7 @@ export const LicenseeWelcomeScreen = ({
           <div className="text-center mb-6">
             <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
               welcomeInfo.license_type === 'extended' 
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' 
+                ? 'bg-purple-500/20 text-purple-400 border border-orange-500/20' 
                 : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
             }`}>
               {welcomeInfo.license_type === 'extended' ? '💎 Extended Licensee' : '⭐ Honorary Licensee'}

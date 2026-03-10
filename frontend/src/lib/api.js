@@ -561,3 +561,22 @@ export const aiAPI = {
   getCommissionInsights: () => api.get('/ai/commission-insights'),
   getMilestoneMotivation: (goalId) => api.get(`/ai/milestone/${goalId}`),
 };
+
+// AI Assistant API (RyAI & zxAI)
+export const aiAssistantAPI = {
+  listAssistants: () => api.get('/ai-assistant/assistants'),
+  chat: (data) => api.post('/ai-assistant/chat', data),
+  getSessions: (assistantId) => api.get('/ai-assistant/sessions', { params: { assistant_id: assistantId } }),
+  getSessionMessages: (sessionId) => api.get(`/ai-assistant/sessions/${sessionId}/messages`),
+  deleteSession: (sessionId) => api.delete(`/ai-assistant/sessions/${sessionId}`),
+  // Admin endpoints
+  getAdminConfig: () => api.get('/ai-assistant/admin/config'),
+  updateConfig: (assistantId, data) => api.put(`/ai-assistant/admin/config/${assistantId}`, data),
+  getKnowledge: (assistantId) => api.get('/ai-assistant/admin/knowledge', { params: { assistant_id: assistantId } }),
+  addTraining: (data) => api.post('/ai-assistant/admin/train', data),
+  deleteKnowledge: (entryId) => api.delete(`/ai-assistant/admin/knowledge/${entryId}`),
+  getUnanswered: (assistantId) => api.get('/ai-assistant/admin/unanswered', { params: { assistant_id: assistantId } }),
+  answerUnanswered: (itemId, answer) => api.post(`/ai-assistant/admin/unanswered/${itemId}/answer`, { answer }),
+  getStats: () => api.get('/ai-assistant/admin/stats'),
+};
+

@@ -6,7 +6,7 @@
 
 /* Sidebar */
 .sidebar {
-    @apply fixed left-0 top-0 h-full w-64 bg-zinc-950 border-r border-zinc-800/50 z-40;
+    @apply fixed left-0 top-0 h-full w-64 bg-[#0a0a0a] border-r border-white/[0.06] z-40;
 }
 
 .sidebar-collapsed {
@@ -18,7 +18,7 @@
 }
 
 .sidebar-item.active {
-    @apply bg-blue-600/10 text-blue-400 border border-blue-500/20;
+    @apply bg-orange-500/10 text-orange-400 border border-orange-500/20;
 }
 
 /* Main content area */
@@ -32,7 +32,7 @@
 
 /* Header */
 .app-header {
-    @apply sticky top-0 z-30 h-16 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-6;
+    @apply sticky top-0 z-30 h-16 border-b border-white/[0.06] bg-[#0a0a0a]/80 backdrop-blur-xl flex items-center justify-between px-6;
 }
 
 /* Dashboard grid */
@@ -210,7 +210,7 @@
 .tour-highlight {
     @apply relative;
     animation: tour-pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.5), 0 0 20px rgba(249, 115, 22, 0.3);
     border-radius: 12px;
     z-index: 10000 !important;
     position: relative !important;
@@ -223,7 +223,7 @@
     bottom: -28px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(59, 130, 246, 0.9);
+    background: rgba(249, 115, 22, 0.9);
     color: white;
     padding: 4px 12px;
     border-radius: 6px;
@@ -241,9 +241,9 @@
 
 @keyframes tour-pulse {
     0%, 100% {
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.5), 0 0 20px rgba(249, 115, 22, 0.3);
     }
     50% {
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.3), 0 0 30px rgba(249, 115, 22, 0.2);
     }
 }

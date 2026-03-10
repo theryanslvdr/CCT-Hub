@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 const LEVEL_CONFIGS = {
   1: { name: 'Getting Started', color: 'text-zinc-400', accent: 'from-zinc-500 to-zinc-400', emoji: 'Seed' },
-  2: { name: 'Active Engager', color: 'text-blue-400', accent: 'from-blue-500 to-cyan-400', emoji: 'Sprout' },
+  2: { name: 'Active Engager', color: 'text-orange-400', accent: 'from-orange-500 to-amber-400', emoji: 'Sprout' },
   3: { name: 'Content Creator', color: 'text-purple-400', accent: 'from-purple-500 to-pink-400', emoji: 'Bloom' },
   4: { name: 'Thought Leader', color: 'text-amber-400', accent: 'from-amber-500 to-orange-400', emoji: 'Crown' },
   5: { name: 'Brand Ambassador', color: 'text-rose-400', accent: 'from-rose-500 to-red-400', emoji: 'Star' },
@@ -18,7 +18,7 @@ const LEVEL_CONFIGS = {
 
 const TOPIC_COLORS = {
   Rewards: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  Hub: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+  Hub: 'text-orange-400 bg-orange-500/10 border-orange-500/15',
   Website: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   Merin: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
   MOIL10: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
@@ -76,7 +76,7 @@ function SocialGrowthEngine() {
   };
 
   if (loading) {
-    return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-blue-400" /></div>;
+    return <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-orange-400" /></div>;
   }
 
   const level = streakData?.level || 1;
@@ -125,7 +125,7 @@ function SocialGrowthEngine() {
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-all duration-500 rounded-full" style={{ width: `${progress}%` }} />
           </div>
           <span className="text-xs text-zinc-500 whitespace-nowrap">
             {answeredCount}/{quizzes.length} answered {correctCount > 0 && `(${correctCount} correct)`}
@@ -197,7 +197,7 @@ function QuizCard({ quiz, index, selectedAnswer, onSelectAnswer, onSubmit, submi
       {/* Question header */}
       <div className="flex items-start gap-3 mb-3">
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-          quiz.answered ? (quiz.is_correct ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400') : 'bg-blue-500/20 text-blue-400'
+          quiz.answered ? (quiz.is_correct ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400') : 'bg-orange-500/10 text-orange-400'
         }`}>
           {quiz.answered ? (quiz.is_correct ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />) : index + 1}
         </div>
@@ -223,7 +223,7 @@ function QuizCard({ quiz, index, selectedAnswer, onSelectAnswer, onSubmit, submi
             else if (isWrongPick) optClasses = 'bg-red-500/10 border-red-500/40 text-red-300';
             else optClasses = 'bg-zinc-800/30 border-zinc-800 text-zinc-500';
           } else if (isSelected) {
-            optClasses = 'bg-blue-500/10 border-blue-500/40 text-blue-300 ring-1 ring-blue-500/30';
+            optClasses = 'bg-orange-500/10 border-orange-500/40 text-orange-300 ring-1 ring-orange-500/30';
           }
 
           return (
@@ -327,7 +327,7 @@ const HabitTrackerPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -379,7 +379,7 @@ const HabitTrackerPage = () => {
         </div>
         <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Calendar className="w-5 h-5 text-blue-400" />
+            <Calendar className="w-5 h-5 text-orange-400" />
           </div>
           <p className="text-2xl font-bold text-white">{streak.total_days}</p>
           <p className="text-[11px] text-zinc-500">Total Days</p>
@@ -397,7 +397,7 @@ const HabitTrackerPage = () => {
             <p className="text-xs text-zinc-500 mb-3">{completedCount} of {habits.length} completed</p>
             <div className="h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-orange-500 to-emerald-500 transition-all duration-500"
                 style={{ width: `${habits.length ? (completedCount / habits.length) * 100 : 0}%` }}
               />
             </div>
@@ -421,7 +421,7 @@ const HabitTrackerPage = () => {
                         data-testid={`habit-toggle-${habit.id}`}
                       >
                         {completing === habit.id ? (
-                          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                         ) : done ? (
                           <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                         ) : (
@@ -443,7 +443,7 @@ const HabitTrackerPage = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="mt-2 text-blue-400 hover:text-blue-300 gap-1.5"
+                              className="mt-2 text-orange-400 hover:text-orange-300 gap-1.5"
                               onClick={() => handleCopyAction(habit.action_data)}
                               data-testid={`copy-invite-${habit.id}`}
                             >
@@ -457,7 +457,7 @@ const HabitTrackerPage = () => {
                             href={habit.action_data}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-2 inline-flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
+                            className="mt-2 inline-flex items-center gap-1 text-sm text-orange-400 hover:text-orange-300"
                           >
                             <ExternalLink className="w-3.5 h-3.5" /> Open Link
                           </a>

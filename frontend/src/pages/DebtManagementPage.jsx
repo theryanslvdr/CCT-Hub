@@ -104,7 +104,7 @@ export const DebtManagementPage = () => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" /></div>;
   }
 
   return (
@@ -162,7 +162,7 @@ export const DebtManagementPage = () => {
                     ${formatNumber(plan?.account_value || 0)}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-white" />
                 </div>
               </div>

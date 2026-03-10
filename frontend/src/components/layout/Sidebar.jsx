@@ -159,6 +159,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards', hideForLicensee: true },
     { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', id: 'leaderboard', hideForLicensee: true },
     { path: '/forum', icon: MessageSquare, label: 'Community Forum', id: 'forum', hideForLicensee: true },
+    { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', id: 'ai_assistant', hideForLicensee: true },
   ];
 
   // Hidden features (only for Master Admin) - with crown indicator
@@ -180,6 +181,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/admin/rewards', icon: Star, label: 'Rewards Admin' },
     { path: '/admin/referrals', icon: GitBranch, label: 'Referral Tree' },
     { path: '/admin/quizzes', icon: HelpCircle, label: 'Quiz Manager' },
+    { path: '/admin/ai-training', icon: Sparkles, label: 'AI Training' },
   ];
 
   // Master Admin only items
@@ -229,16 +231,16 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
   const navLinkClass = ({ isActive }) => 
     `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
       isActive 
-        ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30' 
-        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+        ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' 
+        : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
     }`;
 
   // Special class for hidden features - purple text on hover
   const hiddenNavLinkClass = ({ isActive }) => 
     `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
       isActive 
-        ? 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border border-purple-500/30' 
-        : 'text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10'
+        ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20' 
+        : 'text-zinc-500 hover:text-purple-400 hover:bg-purple-500/5'
     }`;
 
   const handleNavClick = () => {
@@ -317,7 +319,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
             hasFavicon ? (
               <img src={platformSettings.favicon_url} alt="Logo" className="w-9 h-9 rounded-lg object-contain" />
             ) : (
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
             )
@@ -327,7 +329,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
               <img src={platformSettings.logo_url} alt="CrossCurrent" className="h-10 max-w-[180px] object-contain" />
             ) : (
               <>
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -379,7 +381,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   onClick={() => simulateMemberView({ role: 'member', displayName: 'Member' })}
                   className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
                 >
-                  <User className="w-4 h-4 mr-2 text-blue-400" />
+                  <User className="w-4 h-4 mr-2 text-orange-400" />
                   Member View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
@@ -409,7 +411,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   onClick={() => handleLicenseeSimulationClick('honorary_fa')}
                   className="text-zinc-300 hover:bg-zinc-800 cursor-pointer"
                 >
-                  <Users className="w-4 h-4 mr-2 text-blue-400" />
+                  <Users className="w-4 h-4 mr-2 text-orange-400" />
                   Honorary FA (Family) View
                 </DropdownMenuItem>
                 <DropdownMenuItem 
@@ -430,7 +432,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                     {selectedLicenseType === 'honorary' ? (
                       <Star className="w-5 h-5 text-amber-400" />
                     ) : selectedLicenseType === 'honorary_fa' ? (
-                      <Users className="w-5 h-5 text-blue-400" />
+                      <Users className="w-5 h-5 text-orange-400" />
                     ) : (
                       <Sparkles className="w-5 h-5 text-purple-400" />
                     )}
@@ -578,7 +580,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
 
         {/* Community section */}
         {(() => {
-          const communityItems = getVisibleMemberItems().filter(i => ['forum'].includes(i.id));
+          const communityItems = getVisibleMemberItems().filter(i => ['forum', 'ai_assistant'].includes(i.id));
           if (communityItems.length === 0) return null;
           return (
             <>
@@ -694,13 +696,13 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center gap-2.5 p-2.5 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
                   <p className="text-xs text-zinc-500 truncate flex items-center gap-1">
-                    {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-purple-400" />}
+                    {user?.role === 'master_admin' && <Crown className="w-3 h-3 text-orange-400" />}
                     {user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </p>
                 </div>
@@ -746,7 +748,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
                     onClick={() => setPwaInstructionsOpen(true)}
-                    className="cursor-pointer text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 focus:bg-blue-500/10"
+                    className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
                     data-testid="install-app-menu-item"
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -779,7 +781,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center justify-center p-2 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-sm font-bold">
                   {user?.full_name?.charAt(0) || 'U'}
                 </div>
               </button>
@@ -827,7 +829,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 
                     onClick={() => setPwaInstructionsOpen(true)}
-                    className="cursor-pointer text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 focus:bg-blue-500/10"
+                    className="cursor-pointer text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 focus:bg-orange-500/10"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Install App

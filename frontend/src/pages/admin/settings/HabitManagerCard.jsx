@@ -163,7 +163,7 @@ export const HabitManagerCard = () => {
                   <p className="text-sm font-medium text-white">{h.title}</p>
                   {h.is_gate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Gate</span>}
                   {(h.validity_days || 1) > 1 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 flex items-center gap-0.5">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 flex items-center gap-0.5">
                       <Clock className="w-2.5 h-2.5" /> {h.validity_days}d
                     </span>
                   )}

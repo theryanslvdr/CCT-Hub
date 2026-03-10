@@ -197,7 +197,7 @@ export const Header = ({ onMenuClick, title }) => {
       case 'trade_underperform':
         return <AlertTriangle className="w-4 h-4 text-amber-400" />;
       default:
-        return <Bell className="w-4 h-4 text-blue-400" />;
+        return <Bell className="w-4 h-4 text-orange-400" />;
     }
   };
 
@@ -225,7 +225,7 @@ export const Header = ({ onMenuClick, title }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-6">
+      <header className="sticky top-0 z-30 h-16 border-b border-white/[0.06] bg-[#0a0a0a]/80 backdrop-blur-xl flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
@@ -247,7 +247,7 @@ export const Header = ({ onMenuClick, title }) => {
             <div className="w-px h-8 bg-zinc-800" />
             <div className="flex flex-col items-center">
               <span className="text-zinc-500">{user?.timezone || 'Local'}</span>
-              <span className="text-blue-400 font-medium">{formatTime(currentTime, user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)}</span>
+              <span className="text-orange-400 font-medium">{formatTime(currentTime, user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)}</span>
             </div>
           </div>
 
@@ -278,7 +278,7 @@ export const Header = ({ onMenuClick, title }) => {
               {isInBVE ? (
                 <>
                   {/* BVE Active Badge */}
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/20 border border-orange-500/20">
                     <FlaskConical className="w-4 h-4 text-purple-400 animate-pulse" />
                     <span className="text-xs font-medium text-purple-300">BVE Active</span>
                   </div>

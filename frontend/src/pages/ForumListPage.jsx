@@ -34,7 +34,7 @@ function timeSince(dateStr) {
 
 const CATEGORY_COLORS = {
   general: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-  trading: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  trading: 'bg-orange-500/10 text-orange-400 border-orange-500/15',
   technical: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   announcements: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
 };
@@ -73,7 +73,7 @@ function PostCard({ post, onClick }) {
               <span className="text-[10px] text-zinc-600 italic">edited</span>
             )}
           </div>
-          <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors truncate">
+          <h3 className="text-sm font-semibold text-white group-hover:text-orange-400 transition-colors truncate">
             {post.title}
           </h3>
           <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{post.content}</p>
@@ -128,7 +128,7 @@ function SimilarPostsSuggestion({ query, navigate, onSelect }) {
   return (
     <div className="mt-2 rounded-lg border border-zinc-700 bg-zinc-800/80 overflow-hidden" data-testid="similar-posts-suggestions">
       <div className="px-3 py-2 border-b border-zinc-700 flex items-center gap-1.5">
-        <Search className="w-3 h-3 text-blue-400" />
+        <Search className="w-3 h-3 text-orange-400" />
         <span className="text-[11px] text-zinc-400 font-medium">Similar existing posts</span>
         {loading && <Loader2 className="w-3 h-3 animate-spin text-zinc-500 ml-auto" />}
       </div>
@@ -201,7 +201,7 @@ function TopContributorsCard({ contributors }) {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold text-blue-400">{c.reputation}</p>
+              <p className="text-sm font-bold text-orange-400">{c.reputation}</p>
               <p className="text-[9px] text-zinc-500">rep</p>
             </div>
           </div>
@@ -301,13 +301,13 @@ export default function ForumListPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-blue-400" /> Community Forum
+            <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-orange-400" /> Community Forum
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">Ask questions, share knowledge, earn points</p>
         </div>
         <Button
           onClick={() => setNewPostOpen(true)}
-          className="gap-2 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          className="gap-2 bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
           data-testid="new-post-btn"
         >
           <Plus className="w-4 h-4" /> New Post
@@ -321,7 +321,7 @@ export default function ForumListPage() {
             { label: 'Total Posts', value: stats.total_posts, color: 'text-white' },
             { label: 'Open', value: stats.open_posts, color: 'text-emerald-400' },
             { label: 'Solved', value: stats.closed_posts, color: 'text-zinc-400' },
-            { label: 'Comments', value: stats.total_comments, color: 'text-blue-400' },
+            { label: 'Comments', value: stats.total_comments, color: 'text-orange-400' },
           ].map(s => (
             <div key={s.label} className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-center">
               <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
@@ -354,7 +354,7 @@ export default function ForumListPage() {
                 variant={statusFilter === s ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => { setStatusFilter(s); setPage(1); }}
-                className={statusFilter === s ? 'bg-blue-600 text-white' : 'btn-secondary'}
+                className={statusFilter === s ? 'bg-orange-600 text-white' : 'btn-secondary'}
                 data-testid={`filter-${s || 'all'}`}
               >
                 {s === '' ? 'All' : s === 'open' ? 'Open' : 'Solved'}
@@ -371,7 +371,7 @@ export default function ForumListPage() {
               variant={categoryFilter === c ? 'default' : 'outline'}
               size="sm"
               onClick={() => { setCategoryFilter(c); setPage(1); }}
-              className={`h-7 text-xs ${categoryFilter === c ? 'bg-blue-600 text-white' : 'btn-secondary'}`}
+              className={`h-7 text-xs ${categoryFilter === c ? 'bg-orange-600 text-white' : 'btn-secondary'}`}
               data-testid={`category-${c || 'all'}`}
             >
               {c === '' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
@@ -487,7 +487,7 @@ export default function ForumListPage() {
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2" data-testid="duplicate-warning">
               <p className="text-xs font-medium text-amber-400 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5" /> Similar posts found — your question may already be answered!
-                {similarWarning.ai && <span className="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">AI-powered</span>}
+                {similarWarning.ai && <span className="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/15">AI-powered</span>}
               </p>
               <div className="max-h-32 overflow-y-auto space-y-1">
                 {(similarWarning.results || similarWarning).map(r => (
@@ -520,7 +520,7 @@ export default function ForumListPage() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewPostOpen(false)} className="btn-secondary">Cancel</Button>
-            <Button onClick={handleCreatePost} disabled={creating} className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="submit-post-btn">
+            <Button onClick={handleCreatePost} disabled={creating} className="bg-orange-600 hover:bg-orange-700 gap-2" data-testid="submit-post-btn">
               {creating ? <><Loader2 className="w-4 h-4 animate-spin" /> Posting...</> : 'Post'}
             </Button>
           </DialogFooter>

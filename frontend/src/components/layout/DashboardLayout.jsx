@@ -42,7 +42,7 @@ const AnnouncementBanner = ({ announcements, onDismiss }) => {
       case 'success':
         return 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
       default:
-        return 'bg-blue-500/20 border-blue-500/50 text-blue-200';
+        return 'bg-orange-500/10 border-orange-500/30 text-orange-200';
     }
   };
 
@@ -53,7 +53,7 @@ const AnnouncementBanner = ({ announcements, onDismiss }) => {
       case 'success':
         return <CheckCircle className="w-4 h-4 text-emerald-400" />;
       default:
-        return <Info className="w-4 h-4 text-blue-400" />;
+        return <Info className="w-4 h-4 text-orange-400" />;
     }
   };
 
@@ -77,7 +77,7 @@ const AnnouncementBanner = ({ announcements, onDismiss }) => {
                   href={announcement.link_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs mt-1 text-blue-400 hover:text-blue-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs mt-1 text-orange-400 hover:text-orange-300 hover:underline"
                 >
                   {announcement.link_text || 'Learn more'} <ExternalLink className="w-3 h-3" />
                 </a>
@@ -113,6 +113,8 @@ const pagesTitles = {
   '/admin/transactions': 'Team Transactions',
   '/admin/referrals': 'Referral Network',
   '/admin/quizzes': 'Quiz Manager',
+  '/admin/ai-training': 'AI Training Center',
+  '/ai-assistant': 'AI Assistant',
   '/profit-planner': 'Profit Planner',
   '/debt-management': 'Debt Management',
 };
@@ -196,7 +198,7 @@ export const DashboardLayout = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
           <p className="text-zinc-400">Loading...</p>
         </div>
       </div>
@@ -232,8 +234,8 @@ export const DashboardLayout = () => {
         
         <main className={cn(
           "flex-1 flex flex-col transition-all duration-300",
-          "ml-0 lg:ml-16",  // No margin on mobile, sidebar margin on desktop
-          !sidebarCollapsed && "lg:ml-64"  // Expanded sidebar margin only on desktop
+          "ml-0 lg:ml-16",
+          !sidebarCollapsed && "lg:ml-64"
         )}>
           <Header
             title={currentTitle}
@@ -284,21 +286,21 @@ export const DashboardLayout = () => {
 
         {/* Missing API Keys Modal - Only for Master Admin */}
         <Dialog open={showMissingKeysModal} onOpenChange={setShowMissingKeysModal}>
-          <DialogContent className="glass-card border-amber-500/30 max-w-md">
+          <DialogContent className="bg-[#111111] border-amber-500/20 max-w-md">
             <DialogHeader>
               <DialogTitle className="text-amber-400 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5" /> Missing API Keys
               </DialogTitle>
-              <DialogDescription className="text-zinc-400">
+              <DialogDescription className="text-zinc-500">
                 Some integrations are not configured. The application may not work correctly without these API keys.
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-3 my-4">
               {missingKeys.map((key, index) => (
-                <div key={index} className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <div key={index} className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/15">
                   <p className="text-white font-medium">{key.name}</p>
-                  <p className="text-xs text-zinc-400 mt-1">{key.description}</p>
+                  <p className="text-xs text-zinc-500 mt-1">{key.description}</p>
                 </div>
               ))}
             </div>
@@ -330,11 +332,11 @@ export const DashboardLayout = () => {
             href="https://emergentagent.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/50 text-xs text-zinc-400 hover:text-white hover:border-zinc-600 transition-all backdrop-blur-sm"
+            className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111111]/90 border border-white/[0.06] text-xs text-zinc-500 hover:text-white hover:border-white/[0.12] transition-all backdrop-blur-sm"
             data-testid="emergent-badge"
           >
             <span>Made with</span>
-            <span className="font-semibold text-blue-400">Emergent</span>
+            <span className="font-semibold text-orange-400">Emergent</span>
           </a>
         )}
       </div>

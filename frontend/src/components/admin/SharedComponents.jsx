@@ -20,7 +20,7 @@ export const StatsCard = ({
   title, 
   value, 
   icon: Icon, 
-  iconColor = 'from-blue-500 to-blue-600',
+  iconColor = 'from-orange-500 to-amber-600',
   valueColor = 'text-white',
   testId
 }) => (
@@ -159,7 +159,7 @@ export const RoleBadge = ({ role }) => {
         return { 
           icon: Crown, 
           label: 'Master Admin',
-          className: 'bg-purple-500/20 text-purple-400 border-purple-500/30' 
+          className: 'bg-purple-500/20 text-purple-400 border-orange-500/20' 
         };
       case 'super_admin':
         return { 
@@ -171,7 +171,7 @@ export const RoleBadge = ({ role }) => {
         return { 
           icon: ShieldCheck, 
           label: 'Admin',
-          className: 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+          className: 'bg-orange-500/10 text-orange-400 border-orange-500/20' 
         };
       default:
         return { 
@@ -200,7 +200,7 @@ export const LicenseBadge = ({ type }) => {
   if (!type) return null;
   
   const config = type === 'extended' 
-    ? { label: 'EXT', className: 'bg-purple-500/20 text-purple-400 border-purple-500/30' }
+    ? { label: 'EXT', className: 'bg-purple-500/20 text-purple-400 border-orange-500/20' }
     : { label: 'HON', className: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
 
   return (
@@ -222,7 +222,7 @@ export const StatusBadge = ({ status, type = 'default' }) => {
         case 'pending':
           return { label: 'Pending', className: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
         case 'processing':
-          return { label: 'Processing', className: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+          return { label: 'Processing', className: 'bg-orange-500/10 text-orange-400 border-orange-500/20' };
         case 'awaiting_confirmation':
           return { label: 'Awaiting Confirm', className: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
         case 'rejected':
@@ -262,7 +262,7 @@ export const LoadingSpinner = ({ size = 'default', text = 'Loading...' }) => {
   
   return (
     <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <Loader2 className={`${sizeClass} text-blue-500 animate-spin`} />
+      <Loader2 className={`${sizeClass} text-orange-500 animate-spin`} />
       {text && <p className="text-zinc-400 text-sm">{text}</p>}
     </div>
   );

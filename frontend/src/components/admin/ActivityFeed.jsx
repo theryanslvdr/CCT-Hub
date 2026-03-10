@@ -7,7 +7,7 @@ const POLL_INTERVAL = 8000; // Poll every 8 seconds
 
 const ACTIVITY_CONFIG = {
   habit_completed: { icon: CheckCircle2, color: 'text-teal-400', bg: 'bg-teal-500/10', label: 'Habit' },
-  trade_logged: { icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Trade' },
+  trade_logged: { icon: TrendingUp, color: 'text-orange-400', bg: 'bg-orange-500/10', label: 'Trade' },
 };
 
 const timeAgo = (ts) => {

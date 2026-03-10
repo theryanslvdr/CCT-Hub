@@ -110,6 +110,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     { path: '/profit-tracker', icon: TrendingUp, label: 'Profit Tracker' },
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', hideForLicensee: true },
     { path: '/forum', icon: MessageSquare, label: 'Community Forum' },
+    { path: '/ai-assistant', icon: Star, label: 'AI Assistant' },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', licenseeOnly: true },
   ];
 
@@ -128,6 +129,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   const masterAdminItems = [
     { path: '/admin/system-check', icon: Shield, label: 'System Check' },
     { path: '/admin/settings', icon: Cog, label: 'Platform Settings' },
+    { path: '/admin/ai-training', icon: Star, label: 'AI Training' },
     { path: '/admin/api-center', icon: Plug, label: 'API Center' },
     { path: '/admin/licenses', icon: Award, label: 'Licenses' },
   ];
@@ -181,9 +183,9 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="md:hidden fixed inset-0 z-[9999] flex flex-col bg-zinc-950/98 backdrop-blur-xl">
+    <div className="md:hidden fixed inset-0 z-[9999] flex flex-col bg-[#0a0a0a]/98 backdrop-blur-xl">
       {/* Header with logo and close button */}
-      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-zinc-800">
+      <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
           {platformSettings?.logo_url ? (
             <div className="flex items-center gap-2">
@@ -207,7 +209,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <span className="text-zinc-500 text-lg font-light">|</span>
@@ -253,7 +255,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
           onClick={() => handleNavClick('/profile')}
           className="flex items-center gap-3 p-4 mb-4 rounded-xl bg-zinc-900/50 border border-zinc-800 active:bg-zinc-800"
         >
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
             <User className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
@@ -276,7 +278,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                 className={({ isActive }) => cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                   isActive 
-                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
+                    ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
                     : "text-zinc-300 active:bg-zinc-800"
                 )}
               >
@@ -301,8 +303,8 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                   className={({ isActive }) => cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
-                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
-                      : "text-zinc-300 active:bg-zinc-800"
+                      ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                    : "text-zinc-300 active:bg-zinc-800"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -322,8 +324,8 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                   className={({ isActive }) => cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
-                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
-                      : "text-zinc-300 active:bg-zinc-800"
+                      ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                    : "text-zinc-300 active:bg-zinc-800"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -343,8 +345,8 @@ export const MobileMenu = ({ isOpen, onClose }) => {
                   className={({ isActive }) => cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     isActive 
-                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
-                      : "text-zinc-300 active:bg-zinc-800"
+                      ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                    : "text-zinc-300 active:bg-zinc-800"
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -376,7 +378,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
       </div>
 
       {/* Sticky Logout Footer */}
-      <div className="flex-shrink-0 p-4 border-t border-zinc-800 bg-zinc-950">
+      <div className="flex-shrink-0 p-4 border-t border-white/[0.06] bg-[#0a0a0a]">
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 active:bg-red-500/20 transition-all"

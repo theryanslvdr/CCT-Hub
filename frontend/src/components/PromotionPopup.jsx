@@ -9,11 +9,11 @@ const DAY_KEY = 'promo_popup_day_dismissed';
 
 const PRESET_STYLES = {
   announcement: {
-    accent: 'from-blue-500 to-indigo-600',
+    accent: 'from-orange-500 to-indigo-600',
     icon: Megaphone,
-    iconBg: 'bg-blue-500/20',
-    iconColor: 'text-blue-400',
-    btnClass: 'bg-blue-600 hover:bg-blue-700',
+    iconBg: 'bg-orange-500/10',
+    iconColor: 'text-orange-400',
+    btnClass: 'bg-orange-600 hover:bg-orange-700',
   },
   promo: {
     accent: 'from-amber-500 to-orange-600',

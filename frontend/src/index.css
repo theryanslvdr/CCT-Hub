@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,26 +6,26 @@
 
 @layer base {
     :root {
-        --background: 240 6% 4%;
-        --foreground: 0 0% 98%;
-        --card: 240 6% 10%;
-        --card-foreground: 0 0% 98%;
-        --popover: 240 6% 10%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 217 91% 60%;
+        --background: 0 0% 4%;
+        --foreground: 0 0% 95%;
+        --card: 0 0% 7%;
+        --card-foreground: 0 0% 95%;
+        --popover: 0 0% 7%;
+        --popover-foreground: 0 0% 95%;
+        --primary: 24 95% 53%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 240 4% 16%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 240 4% 16%;
-        --muted-foreground: 240 5% 65%;
-        --accent: 187 94% 43%;
+        --secondary: 0 0% 12%;
+        --secondary-foreground: 0 0% 95%;
+        --muted: 0 0% 12%;
+        --muted-foreground: 0 0% 55%;
+        --accent: 24 80% 45%;
         --accent-foreground: 0 0% 100%;
         --destructive: 0 84% 60%;
         --destructive-foreground: 0 0% 98%;
-        --border: 240 4% 16%;
-        --input: 240 4% 16%;
-        --ring: 217 91% 60%;
-        --chart-1: 217 91% 60%;
+        --border: 0 0% 14%;
+        --input: 0 0% 14%;
+        --ring: 24 95% 53%;
+        --chart-1: 24 95% 53%;
         --chart-2: 160 84% 39%;
         --chart-3: 38 92% 50%;
         --chart-4: 270 70% 62%;
@@ -43,7 +43,7 @@
     body {
         @apply bg-background text-foreground font-sans antialiased;
         font-family: 'Inter', sans-serif;
-        background-color: #09090B;
+        background-color: #0a0a0a;
     }
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Manrope', sans-serif;
@@ -56,19 +56,19 @@
 
 @layer utilities {
     .glass {
-        @apply backdrop-blur-xl bg-black/40 border border-white/10;
+        @apply backdrop-blur-xl bg-black/50 border border-white/[0.06];
     }
     .glass-card {
-        @apply bg-zinc-900/50 border border-white/10 backdrop-blur-md shadow-xl rounded-xl;
+        @apply bg-[#111111]/80 border border-white/[0.08] backdrop-blur-md shadow-xl rounded-xl;
     }
     .glass-highlight {
-        @apply bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-blue-500/20 shadow-blue-900/10 rounded-xl;
+        @apply bg-gradient-to-br from-[#1a1a1a] to-[#111111] border border-orange-500/20 shadow-orange-900/10 rounded-xl;
     }
     .neon-glow {
-        @apply shadow-[0_0_20px_rgba(59,130,246,0.15)];
+        @apply shadow-[0_0_20px_rgba(249,115,22,0.15)];
     }
     .neon-glow-strong {
-        @apply shadow-[0_0_30px_rgba(59,130,246,0.3)];
+        @apply shadow-[0_0_30px_rgba(249,115,22,0.3)];
     }
     .neon-success {
         @apply shadow-[0_0_20px_rgba(16,185,129,0.3)];
@@ -80,38 +80,40 @@
         @apply shadow-[0_0_20px_rgba(239,68,68,0.3)];
     }
     .grid-bg {
-        background-image: linear-gradient(to right, rgba(128, 128, 128, 0.07) 1px, transparent 1px),
-                          linear-gradient(to bottom, rgba(128, 128, 128, 0.07) 1px, transparent 1px);
-        background-size: 24px 24px;
+        background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+        background-size: 32px 32px;
     }
     .text-gradient {
-        @apply bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent;
+        @apply bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent;
     }
     .btn-primary {
-        @apply bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-400/20 rounded-lg font-medium transition-all active:scale-95;
+        @apply bg-orange-500 hover:bg-orange-400 text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-orange-400/20 rounded-lg font-medium transition-all active:scale-[0.98];
     }
     .btn-secondary {
-        @apply bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 hover:border-zinc-600 rounded-lg font-medium transition-all;
+        @apply bg-[#1a1a1a] hover:bg-[#222222] text-zinc-100 border border-white/[0.08] hover:border-white/[0.15] rounded-lg font-medium transition-all;
     }
     .btn-ghost {
         @apply hover:bg-white/5 text-zinc-400 hover:text-white transition-colors rounded-lg;
     }
     .input-dark {
-        @apply bg-zinc-950/50 border-zinc-800 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 transition-all;
+        @apply bg-[#0d0d0d] border-white/[0.08] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 rounded-lg text-zinc-100 placeholder:text-zinc-600 transition-all;
     }
     .scrollbar-dark {
         scrollbar-width: thin;
-        scrollbar-color: #3f3f46 #18181b;
+        scrollbar-color: #262626 #0a0a0a;
     }
     .scrollbar-dark::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
     }
     .scrollbar-dark::-webkit-scrollbar-track {
-        background: #18181b;
+        background: #0a0a0a;
     }
     .scrollbar-dark::-webkit-scrollbar-thumb {
-        background: #3f3f46;
-        border-radius: 4px;
+        background: #262626;
+        border-radius: 3px;
+    }
+    .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+        background: #333333;
     }
     .animate-pulse-slow {
         animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -121,10 +123,10 @@
     }
     @keyframes glow {
         from {
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
         }
         to {
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.6);
         }
     }
 }
@@ -137,7 +139,7 @@
 
 /* Custom styles for trading dashboard */
 .trade-card {
-    @apply glass-card p-6 transition-all duration-300 hover:border-blue-500/30;
+    @apply glass-card p-6 transition-all duration-300 hover:border-orange-500/20;
 }
 
 .kpi-value {
@@ -182,7 +184,7 @@
 
 /* Table styles */
 .data-table th {
-    @apply text-xs uppercase tracking-wider text-zinc-500 font-medium bg-zinc-900/50 px-4 py-3 text-left;
+    @apply text-xs uppercase tracking-wider text-zinc-500 font-medium bg-[#0d0d0d]/80 px-4 py-3 text-left;
 }
 
 .data-table td {
@@ -355,7 +357,7 @@
 
 .mobile-bottom-nav a.active,
 .mobile-bottom-nav button.active {
-    @apply text-blue-400 bg-blue-500/10;
+    @apply text-orange-400 bg-orange-500/10;
 }
 
 .mobile-bottom-nav .nav-icon {
@@ -375,7 +377,7 @@
 
 /* Mobile iframe replacement button */
 .mobile-external-link-btn {
-    @apply w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-base flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95;
+    @apply w-full py-4 px-6 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl font-semibold text-base flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95;
 }
 
 /* Mobile accordion */

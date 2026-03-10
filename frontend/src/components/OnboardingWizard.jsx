@@ -787,7 +787,7 @@ const OnboardingWizardDesktop = ({ isOpen, onClose, onComplete, isReset = false 
                     </div>
                     <div className="bg-zinc-900/50 rounded p-2">
                       <p className="text-[10px] text-zinc-500 uppercase">Projected</p>
-                      <p className="font-mono text-blue-400 text-sm mt-1">{formatMoney(currentProjected)}</p>
+                      <p className="font-mono text-orange-400 text-sm mt-1">{formatMoney(currentProjected)}</p>
                     </div>
                   </div>
                   

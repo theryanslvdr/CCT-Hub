@@ -47,7 +47,7 @@ export const VSDDialog = ({ open, onOpenChange, vsdData, loading }) => {
         ) : vsdData ? (
           <div className="space-y-6 mt-4">
             {/* Summary Header */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20">
+            <div className="p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-purple-500/20">
               <div className="text-sm text-zinc-400 mb-1">Total Pool (Merin Balance)</div>
               <div className="text-2xl font-bold text-white">${formatNumber(vsdData.total_pool)}</div>
               <div className="grid grid-cols-2 gap-4 mt-4">

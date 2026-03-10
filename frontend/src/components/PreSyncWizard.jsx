@@ -25,12 +25,12 @@ function StepIndicator({ currentStep, totalSteps = 4 }) {
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
                 ${isDone ? 'bg-emerald-500 text-white' : ''}
-                ${isActive ? 'bg-blue-500 text-white ring-2 ring-blue-400/50' : ''}
+                ${isActive ? 'bg-orange-500 text-white ring-2 ring-orange-400/50' : ''}
                 ${!isActive && !isDone ? 'bg-zinc-800 text-zinc-500' : ''}
               `}>
                 {isDone ? <CheckCircle2 className="w-4 h-4" /> : stepNum}
               </div>
-              <span className={`text-[10px] mt-1 ${isActive ? 'text-blue-400' : isDone ? 'text-emerald-400' : 'text-zinc-600'}`}>
+              <span className={`text-[10px] mt-1 ${isActive ? 'text-orange-400' : isDone ? 'text-emerald-400' : 'text-zinc-600'}`}>
                 {label}
               </span>
             </div>
@@ -71,7 +71,7 @@ function StepStartDate({ validation, newStartDate, onStartDateChange, onSetStart
         {suggested && (
           <button
             onClick={() => onStartDateChange(suggested)}
-            className="text-xs text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1"
+            className="text-xs text-orange-400 hover:text-orange-300 mt-2 flex items-center gap-1"
             data-testid="use-suggested-date-btn"
           >
             <Calendar className="w-3 h-3" />
@@ -83,7 +83,7 @@ function StepStartDate({ validation, newStartDate, onStartDateChange, onSetStart
       <Button
         onClick={onSetStartDate}
         disabled={!newStartDate || loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
         data-testid="set-start-date-btn"
       >
         {loading ? (
@@ -135,7 +135,7 @@ function StepMissingDays({ validation, onMarkDidNotTrade, onMarkAllDidNotTrade, 
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-7 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                className="h-7 px-2 text-xs text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"
                 onClick={() => onAdjustTrade(day.date)}
                 data-testid={`adjust-trade-${day.date}`}
               >
@@ -219,7 +219,7 @@ function StepPreStartWarning({ validation, acknowledged, onToggleAcknowledge, on
           type="checkbox"
           checked={acknowledged}
           onChange={(e) => onToggleAcknowledge(e.target.checked)}
-          className="mt-1 accent-blue-500"
+          className="mt-1 accent-orange-500"
           data-testid="acknowledge-pre-start-checkbox"
         />
         <span className="text-xs text-zinc-400">
@@ -230,7 +230,7 @@ function StepPreStartWarning({ validation, acknowledged, onToggleAcknowledge, on
       <Button
         onClick={onContinue}
         disabled={!acknowledged}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
         data-testid="acknowledge-pre-start-btn"
       >
         <ArrowRight className="w-4 h-4 mr-2" /> Continue to Sync
@@ -378,7 +378,7 @@ export function PreSyncWizard({
       return (
         <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 via-zinc-950 to-black">
-            <Loader2 className="w-10 h-10 animate-spin text-blue-400" />
+            <Loader2 className="w-10 h-10 animate-spin text-orange-400" />
             <p className="text-sm text-zinc-400 mt-4">Validating your account...</p>
           </div>
         </div>
@@ -388,7 +388,7 @@ export function PreSyncWizard({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="glass-card border-zinc-800 max-w-md">
           <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
             <p className="text-sm text-zinc-400">Validating your account...</p>
           </div>
         </DialogContent>
@@ -412,8 +412,8 @@ export function PreSyncWizard({
           <div className="flex-shrink-0 p-6 pb-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-                  <ShieldCheck className="w-6 h-6 text-blue-400" />
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-orange-400" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Balance Sync Wizard</h1>

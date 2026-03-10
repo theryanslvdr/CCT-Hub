@@ -88,7 +88,7 @@ export default function MyTransactionEdit() {
             <h3 className="text-sm font-semibold text-white">My Recent Transactions</h3>
             <Popover>
               <PopoverTrigger asChild>
-                <button className="text-zinc-500 hover:text-blue-400 transition-colors" data-testid="transaction-help-button">
+                <button className="text-zinc-500 hover:text-orange-400 transition-colors" data-testid="transaction-help-button">
                   <HelpCircle className="w-3.5 h-3.5" />
                 </button>
               </PopoverTrigger>
@@ -97,20 +97,20 @@ export default function MyTransactionEdit() {
                   <p className="text-xs font-semibold text-white">How Transaction Editing Works</p>
                   <div className="space-y-2">
                     <div className="flex gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[10px] font-bold text-blue-400">1</span>
+                      <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-orange-400">1</span>
                       </div>
-                      <p className="text-[11px] text-zinc-400">Click <span className="text-blue-400 font-medium">Edit</span> on any recent deposit or withdrawal to correct its amount.</p>
+                      <p className="text-[11px] text-zinc-400">Click <span className="text-orange-400 font-medium">Edit</span> on any recent deposit or withdrawal to correct its amount.</p>
                     </div>
                     <div className="flex gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[10px] font-bold text-blue-400">2</span>
+                      <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-orange-400">2</span>
                       </div>
                       <p className="text-[11px] text-zinc-400">Enter the correct amount and an optional reason, then click <span className="text-white font-medium">Update</span>.</p>
                     </div>
                     <div className="flex gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[10px] font-bold text-blue-400">3</span>
+                      <div className="w-5 h-5 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-bold text-orange-400">3</span>
                       </div>
                       <p className="text-[11px] text-zinc-400">Your balance updates immediately. The admin is notified.</p>
                     </div>
@@ -158,7 +158,7 @@ export default function MyTransactionEdit() {
                         size="sm"
                         variant="outline"
                         onClick={() => openEdit(tx)}
-                        className="btn-secondary text-blue-400 hover:text-blue-300 h-7 px-2 gap-1"
+                        className="btn-secondary text-orange-400 hover:text-orange-300 h-7 px-2 gap-1"
                         data-testid={`edit-my-tx-${tx.id}`}
                       >
                         <Edit3 className="w-3 h-3" /> Edit
@@ -179,7 +179,7 @@ export default function MyTransactionEdit() {
         <DialogContent className="dialog-content max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Edit3 className="w-5 h-5 text-blue-400" /> Edit Transaction
+              <Edit3 className="w-5 h-5 text-orange-400" /> Edit Transaction
             </DialogTitle>
             <DialogDescription className="text-zinc-400">
               Correct the amount for this {selectedTx?.is_withdrawal ? 'withdrawal' : 'deposit'}. Current: {formatCurrency(selectedTx?.amount || 0)}
@@ -217,7 +217,7 @@ export default function MyTransactionEdit() {
             </div>
             <div className="flex gap-2 justify-end pt-1">
               <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="btn-secondary">Cancel</Button>
-              <Button onClick={handleEdit} className="bg-blue-600 hover:bg-blue-700 gap-2" data-testid="my-tx-confirm-btn">
+              <Button onClick={handleEdit} className="bg-orange-600 hover:bg-orange-700 gap-2" data-testid="my-tx-confirm-btn">
                 <CheckCircle2 className="w-4 h-4" /> Update
               </Button>
             </div>

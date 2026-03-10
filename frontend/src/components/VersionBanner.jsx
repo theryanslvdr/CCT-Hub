@@ -50,14 +50,14 @@ export const VersionBanner = () => {
   return (
     <div
       data-testid="version-update-banner"
-      className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex items-center justify-center gap-3 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-orange-600 to-indigo-600 text-white px-4 py-3 flex items-center justify-center gap-3 shadow-lg"
     >
       <RefreshCw className="w-4 h-4 animate-spin" />
       <span className="text-sm font-medium">A new version has been deployed.</span>
       <button
         data-testid="version-refresh-btn"
         onClick={handleRefresh}
-        className="px-3 py-1 text-xs font-bold bg-white text-blue-700 rounded-full hover:bg-blue-50 transition-colors"
+        className="px-3 py-1 text-xs font-bold bg-white text-orange-700 rounded-full hover:bg-orange-50 transition-colors"
       >
         Refresh Now
       </button>

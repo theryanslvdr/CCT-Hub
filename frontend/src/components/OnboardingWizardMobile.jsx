@@ -974,8 +974,8 @@ export const OnboardingWizardMobile = ({ isOpen, onClose, onComplete, isReset = 
               disabled={isLoading || (currentStep === 1 && !userType)}
               className={`
                 flex-1 py-6 rounded-xl font-bold text-white
-                bg-gradient-to-r from-cyan-600 to-blue-600 
-                hover:from-cyan-500 hover:to-blue-500
+                bg-gradient-to-r from-cyan-600 to-amber-600 
+                hover:from-cyan-500 hover:to-amber-500
                 shadow-[0_0_20px_rgba(6,182,212,0.3)]
                 disabled:opacity-50 disabled:cursor-not-allowed
                 transition-all duration-300 active:scale-95

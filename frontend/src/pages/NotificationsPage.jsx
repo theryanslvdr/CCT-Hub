@@ -25,7 +25,7 @@ const NotificationIcon = ({ type }) => {
     case 'withdrawal':
       return <Wallet className="w-4 h-4 text-amber-400" />;
     case 'trading_signal':
-      return <Radio className="w-4 h-4 text-blue-400" />;
+      return <Radio className="w-4 h-4 text-orange-400" />;
     case 'profit_submitted':
       return <TrendingUp className="w-4 h-4 text-cyan-400" />;
     case 'trade_underperform':
@@ -33,7 +33,7 @@ const NotificationIcon = ({ type }) => {
     case 'tracker_reset':
       return <RotateCcw className="w-4 h-4 text-purple-400" />;
     case 'daily_summary':
-      return <BarChart3 className="w-4 h-4 text-blue-400" />;
+      return <BarChart3 className="w-4 h-4 text-orange-400" />;
     default:
       return <Bell className="w-4 h-4 text-zinc-400" />;
   }
@@ -59,7 +59,7 @@ const NotificationCard = ({ notification, isAdmin, navigate }) => {
       case 'admin':
         return <Badge variant="outline" className="text-xs bg-red-500/20 text-red-400 border-red-500/30">Admin</Badge>;
       case 'community':
-        return <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/30">Community</Badge>;
+        return <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-400 border-orange-500/20">Community</Badge>;
       default:
         return <Badge variant="outline" className="text-xs bg-zinc-500/20 text-zinc-400 border-zinc-500/30">Personal</Badge>;
     }
@@ -80,7 +80,7 @@ const NotificationCard = ({ notification, isAdmin, navigate }) => {
 
   return (
     <div 
-      className={`flex items-start gap-3 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800 transition-colors ${isClickable ? 'hover:border-blue-500/30 cursor-pointer' : 'hover:border-zinc-700'}`}
+      className={`flex items-start gap-3 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800 transition-colors ${isClickable ? 'hover:border-orange-500/20 cursor-pointer' : 'hover:border-zinc-700'}`}
       onClick={handleClick}
       data-testid={`notification-card-${notification.id || ''}`}
     >
@@ -96,7 +96,7 @@ const NotificationCard = ({ notification, isAdmin, navigate }) => {
         <div className="flex items-center justify-between mt-1">
           <p className="text-[10px] text-zinc-500">{timeAgo}</p>
           {isClickable && (
-            <span className="text-[10px] text-blue-400 flex items-center gap-0.5">
+            <span className="text-[10px] text-orange-400 flex items-center gap-0.5">
               View Details <ArrowRight className="w-3 h-3" />
             </span>
           )}

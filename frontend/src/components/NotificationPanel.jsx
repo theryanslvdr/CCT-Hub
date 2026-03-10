@@ -13,7 +13,7 @@ const NotificationIcon = ({ type }) => {
     case 'withdrawal_request':
       return <ArrowUpRight className="w-4 h-4 text-amber-400" />;
     case 'transaction_status':
-      return <DollarSign className="w-4 h-4 text-blue-400" />;
+      return <DollarSign className="w-4 h-4 text-orange-400" />;
     case 'trade_signal':
       return <Radio className="w-4 h-4 text-purple-400" />;
     case 'system_announcement':
@@ -82,7 +82,7 @@ export const NotificationPanel = () => {
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-white">Notifications</h3>
             {unreadCount > 0 && (
-              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+              <span className="px-2 py-0.5 bg-orange-500/10 text-orange-400 text-xs rounded-full">
                 {unreadCount} new
               </span>
             )}

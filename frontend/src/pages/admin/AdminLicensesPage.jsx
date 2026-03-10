@@ -619,7 +619,7 @@ export const AdminLicensesPage = () => {
     const badges = {
       active: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Active</span>,
       pending: <span className="px-2 py-1 rounded text-xs bg-amber-500/20 text-amber-400">Pending</span>,
-      processing: <span className="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400">Processing</span>,
+      processing: <span className="px-2 py-1 rounded text-xs bg-orange-500/10 text-orange-400">Processing</span>,
       awaiting_confirmation: <span className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-400">Awaiting Confirmation</span>,
       completed: <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Completed</span>,
       rejected: <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400">Rejected</span>,
@@ -635,7 +635,7 @@ export const AdminLicensesPage = () => {
       return <span className="px-2 py-1 rounded text-xs bg-amber-500/20 text-amber-400">Expired</span>;
     }
     if (invite.is_fully_used) {
-      return <span className="px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400">Used</span>;
+      return <span className="px-2 py-1 rounded text-xs bg-orange-500/10 text-orange-400">Used</span>;
     }
     return <span className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">Active</span>;
   };
@@ -661,7 +661,7 @@ export const AdminLicensesPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -716,7 +716,7 @@ export const AdminLicensesPage = () => {
                 <p className="text-sm text-zinc-400">Total Invites</p>
                 <p className="text-2xl font-bold text-white">{invites.length}</p>
               </div>
-              <FileText className="w-8 h-8 text-blue-400" />
+              <FileText className="w-8 h-8 text-orange-400" />
             </div>
           </CardContent>
         </Card>
@@ -775,13 +775,13 @@ export const AdminLicensesPage = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-zinc-900/50 border border-zinc-800">
-          <TabsTrigger value="invites" className="data-[state=active]:bg-blue-500">
+          <TabsTrigger value="invites" className="data-[state=active]:bg-orange-500">
             License Invites ({invites.length})
           </TabsTrigger>
-          <TabsTrigger value="active" className="data-[state=active]:bg-blue-500">
+          <TabsTrigger value="active" className="data-[state=active]:bg-orange-500">
             Active Licenses ({licenses.filter(l => l.is_active).length})
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-blue-500">
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-orange-500">
             Transactions ({licenseeTransactions.length})
             {pendingTransactions.length > 0 && (
               <span className="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-amber-500 text-white">
@@ -864,7 +864,7 @@ export const AdminLicensesPage = () => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleCopyLink(invite)}
-                                className="text-zinc-400 hover:text-blue-400"
+                                className="text-zinc-400 hover:text-orange-400"
                                 title="Copy Link"
                               >
                                 <Copy className="w-4 h-4" />
@@ -974,14 +974,14 @@ export const AdminLicensesPage = () => {
                           <td className="text-zinc-400">
                             {license.start_date?.split('T')[0]}
                           </td>
-                          <td className="text-blue-400">
+                          <td className="text-orange-400">
                             <div className="flex items-center gap-1">
                               <span>{license.effective_start_date || license.start_date?.split('T')[0]}</span>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleOpenEditEffectiveDate(license)}
-                                className="w-6 h-6 text-zinc-400 hover:text-blue-400"
+                                className="w-6 h-6 text-zinc-400 hover:text-orange-400"
                                 title="Edit Effective Start Date"
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -994,7 +994,7 @@ export const AdminLicensesPage = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleOpenEditProfile(license)}
-                                className="text-zinc-400 hover:text-blue-400"
+                                className="text-zinc-400 hover:text-orange-400"
                                 title="Edit Profile"
                                 data-testid={`edit-profile-${license.id}`}
                               >
@@ -1023,7 +1023,7 @@ export const AdminLicensesPage = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleOpenAddFamily(license)}
-                                  className="text-zinc-400 hover:text-blue-400"
+                                  className="text-zinc-400 hover:text-orange-400"
                                   title="Add Family Member"
                                   data-testid={`add-family-${license.id}`}
                                 >
@@ -1118,7 +1118,7 @@ export const AdminLicensesPage = () => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleOpenEditTx(tx)}
-                                className="text-zinc-400 hover:text-blue-400"
+                                className="text-zinc-400 hover:text-orange-400"
                                 title="Edit Transaction"
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -1136,7 +1136,7 @@ export const AdminLicensesPage = () => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleOpenFeedbackDialog(tx)}
-                                className="text-zinc-400 hover:text-blue-400"
+                                className="text-zinc-400 hover:text-orange-400"
                                 title="Send Feedback"
                               >
                                 <MessageSquare className="w-4 h-4" />
@@ -1181,7 +1181,7 @@ export const AdminLicensesPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-blue-400" /> Generate License Invite
+              <Plus className="w-5 h-5 text-orange-400" /> Generate License Invite
             </DialogTitle>
           </DialogHeader>
           
@@ -1203,7 +1203,7 @@ export const AdminLicensesPage = () => {
                     <span className="text-amber-400">Honorary Licensee</span>
                   </SelectItem>
                   <SelectItem value="honorary_fa">
-                    <span className="text-blue-400">Honorary FA (Family Account)</span>
+                    <span className="text-orange-400">Honorary FA (Family Account)</span>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -1351,7 +1351,7 @@ export const AdminLicensesPage = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <p className="text-zinc-500">Code</p>
-                    <code className="text-blue-400">{selectedInvite.code}</code>
+                    <code className="text-orange-400">{selectedInvite.code}</code>
                   </div>
                   <div>
                     <p className="text-zinc-500">Type</p>
@@ -1395,7 +1395,7 @@ export const AdminLicensesPage = () => {
             <div className="space-y-4 mt-4">
               <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                 <div className="flex items-center justify-between mb-3">
-                  <code className="text-base font-mono text-blue-400">{selectedInvite.code}</code>
+                  <code className="text-base font-mono text-orange-400">{selectedInvite.code}</code>
                   {getInviteStatusBadge(selectedInvite)}
                 </div>
                 
@@ -1429,17 +1429,17 @@ export const AdminLicensesPage = () => {
               </div>
 
               {/* Registration Link - Compact */}
-              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
                 <p className="text-xs text-zinc-400 mb-2">Registration Link</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-blue-400 bg-zinc-900/50 px-2 py-1 rounded truncate max-w-[200px]">
+                  <code className="text-xs text-orange-400 bg-zinc-900/50 px-2 py-1 rounded truncate max-w-[200px]">
                     .../register/license/{selectedInvite.code?.slice(0, 8)}...
                   </code>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyLink(selectedInvite)}
-                    className="text-blue-400 hover:text-blue-300 shrink-0"
+                    className="text-orange-400 hover:text-orange-300 shrink-0"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -1548,9 +1548,9 @@ export const AdminLicensesPage = () => {
                   <p className="text-sm text-zinc-400 mb-2">Communication History</p>
                   <div className="space-y-3">
                     {selectedTransaction.feedback.map((fb, idx) => (
-                      <div key={fb.id || idx} className={`p-3 rounded-lg ${fb.from_admin ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-zinc-900/50 border border-zinc-800'}`}>
+                      <div key={fb.id || idx} className={`p-3 rounded-lg ${fb.from_admin ? 'bg-orange-500/10 border border-orange-500/15' : 'bg-zinc-900/50 border border-zinc-800'}`}>
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-xs ${fb.from_admin ? 'text-blue-400' : 'text-zinc-400'}`}>
+                          <span className={`text-xs ${fb.from_admin ? 'text-orange-400' : 'text-zinc-400'}`}>
                             {fb.from_admin ? fb.created_by_name || 'Admin' : 'Licensee'}
                           </span>
                           <span className="text-xs text-zinc-500">
@@ -1616,7 +1616,7 @@ export const AdminLicensesPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-blue-400" /> Send Feedback
+              <MessageSquare className="w-5 h-5 text-orange-400" /> Send Feedback
             </DialogTitle>
           </DialogHeader>
           
@@ -1885,14 +1885,14 @@ export const AdminLicensesPage = () => {
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <UserCog className="w-5 h-5 text-blue-400" /> Edit Licensee Profile
+              <UserCog className="w-5 h-5 text-orange-400" /> Edit Licensee Profile
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {selectedLicense && (
               <div className="p-3 rounded-lg bg-zinc-900/50 text-sm mb-4">
                 <p className="text-zinc-400">Email: <span className="text-white">{selectedLicense.user_email}</span></p>
-                <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : selectedLicense.license_type === 'honorary_fa' ? 'text-blue-400' : 'text-amber-400'}>{selectedLicense.license_type === 'honorary_fa' ? 'Honorary FA' : selectedLicense.license_type}</span></p>
+                <p className="text-zinc-400 mt-1">License: <span className={selectedLicense.license_type === 'extended' ? 'text-purple-400' : selectedLicense.license_type === 'honorary_fa' ? 'text-orange-400' : 'text-amber-400'}>{selectedLicense.license_type === 'honorary_fa' ? 'Honorary FA' : selectedLicense.license_type}</span></p>
               </div>
             )}
             
@@ -2030,7 +2030,7 @@ export const AdminLicensesPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-blue-400" /> Edit Transaction
+              <Edit2 className="w-5 h-5 text-orange-400" /> Edit Transaction
             </DialogTitle>
           </DialogHeader>
           {selectedTx && (
@@ -2177,7 +2177,7 @@ export const AdminLicensesPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-400" /> Edit Effective Start Date
+              <Calendar className="w-5 h-5 text-orange-400" /> Edit Effective Start Date
             </DialogTitle>
           </DialogHeader>
           {selectedLicense && (
@@ -2232,7 +2232,7 @@ export const AdminLicensesPage = () => {
         <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" /> Add Family Member
+              <Users className="w-5 h-5 text-orange-400" /> Add Family Member
             </DialogTitle>
           </DialogHeader>
           {selectedLicense && (
@@ -2419,8 +2419,8 @@ export const AdminLicensesPage = () => {
                 
                 {/* Sync Result */}
                 {diagnosticResult.sync_result && (
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                    <p className="text-blue-400 font-medium flex items-center gap-2">
+                  <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+                    <p className="text-orange-400 font-medium flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" /> Sync Complete
                     </p>
                     <p className="text-sm text-zinc-300 mt-1">{diagnosticResult.sync_result.message}</p>

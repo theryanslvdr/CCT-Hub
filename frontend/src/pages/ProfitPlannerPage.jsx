@@ -113,7 +113,7 @@ export const ProfitPlannerPage = () => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" /></div>;
   }
 
   const totalTarget = goals.reduce((sum, g) => sum + g.target_amount, 0);
@@ -159,7 +159,7 @@ export const ProfitPlannerPage = () => {
                 <p className="text-sm text-zinc-400">Total Target</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">${formatNumber(totalTarget)}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -265,7 +265,7 @@ export const ProfitPlannerPage = () => {
             const remaining = goal.target_amount - goal.current_amount;
             
             return (
-              <Card key={goal.id} className={`glass-card hover:border-blue-500/30 transition-all ${isCompleted ? 'border-emerald-500/30 neon-success' : ''}`}>
+              <Card key={goal.id} className={`glass-card hover:border-orange-500/20 transition-all ${isCompleted ? 'border-emerald-500/30 neon-success' : ''}`}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -402,8 +402,8 @@ export const ProfitPlannerPage = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-lg ${goalPlan?.suggestion?.type === 'ready' ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-blue-500/10 border border-blue-500/30'}`}>
-              <p className={`text-sm ${goalPlan?.suggestion?.type === 'ready' ? 'text-emerald-400' : 'text-blue-400'}`}>
+            <div className={`p-4 rounded-lg ${goalPlan?.suggestion?.type === 'ready' ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-orange-500/10 border border-orange-500/20'}`}>
+              <p className={`text-sm ${goalPlan?.suggestion?.type === 'ready' ? 'text-emerald-400' : 'text-orange-400'}`}>
                 {goalPlan?.suggestion?.message}
               </p>
               {goalPlan?.suggestion?.trades_needed && (

@@ -71,7 +71,7 @@ export const ValueTooltip = ({
             bg-zinc-800 border border-zinc-700 text-white
             bottom-full left-1/2 -translate-x-1/2 mb-2
             animate-in fade-in-0 zoom-in-95 duration-200
-            ${isLocked ? 'ring-2 ring-blue-500/50' : ''}
+            ${isLocked ? 'ring-2 ring-orange-500/50' : ''}
           `}
         >
           <div className="flex items-center gap-2">

@@ -238,7 +238,7 @@ export const CustomEmailTemplates = () => {
                 key={template.id}
                 className={`p-4 rounded-lg border transition-all cursor-pointer ${
                   selectedTemplate?.id === template.id
-                    ? 'bg-purple-500/10 border-purple-500/30'
+                    ? 'bg-purple-500/10 border-orange-500/20'
                     : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                 }`}
                 onClick={() => handleSelectTemplate(template)}
@@ -248,7 +248,7 @@ export const CustomEmailTemplates = () => {
                     <div className="flex items-center gap-2">
                       <p className="text-white font-medium truncate">{template.name}</p>
                       {template.is_html && (
-                        <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs shrink-0">
+                        <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-orange-500/20 text-xs shrink-0">
                           HTML
                         </Badge>
                       )}
@@ -266,7 +266,7 @@ export const CustomEmailTemplates = () => {
                         e.stopPropagation();
                         handleSelectTemplate(template);
                       }}
-                      className="h-8 w-8 p-0 text-blue-400 hover:text-blue-300"
+                      className="h-8 w-8 p-0 text-orange-400 hover:text-orange-300"
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
@@ -408,7 +408,7 @@ export const CustomEmailTemplates = () => {
                   variant="outline"
                   onClick={() => setPreviewOpen(true)}
                   disabled={!templateBody.trim()}
-                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                  className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
                   data-testid="preview-template-btn"
                 >
                   <Eye className="w-4 h-4 mr-2" />
@@ -445,7 +445,7 @@ export const CustomEmailTemplates = () => {
                 <DialogContent className="bg-zinc-900 border-zinc-800 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-white flex items-center gap-2">
-                      <Eye className="w-5 h-5 text-blue-400" />
+                      <Eye className="w-5 h-5 text-orange-400" />
                       Email Preview
                     </DialogTitle>
                   </DialogHeader>

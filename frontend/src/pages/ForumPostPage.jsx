@@ -31,7 +31,7 @@ function ImageGallery({ images }) {
           <button
             key={idx}
             onClick={() => { setActiveIndex(idx); setLightboxOpen(true); }}
-            className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-700 hover:border-blue-500 transition-colors"
+            className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-700 hover:border-orange-500 transition-colors"
           >
             <img src={url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
           </button>
@@ -60,7 +60,7 @@ function ImageGallery({ images }) {
                     key={idx}
                     onClick={() => setActiveIndex(idx)}
                     className={`w-2 h-2 rounded-full transition-colors ${
-                      idx === activeIndex ? 'bg-blue-500' : 'bg-zinc-600 hover:bg-zinc-500'
+                      idx === activeIndex ? 'bg-orange-500' : 'bg-zinc-600 hover:bg-zinc-500'
                     }`}
                   />
                 ))}
@@ -88,7 +88,7 @@ function timeSince(dateStr) {
 function RoleBadge({ role }) {
   if (role === 'master_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Admin</span>;
   if (role === 'super_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 font-medium">Super</span>;
-  if (role === 'basic_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-medium">Admin</span>;
+  if (role === 'basic_admin') return <span className="text-[9px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 font-medium">Admin</span>;
   return null;
 }
 
@@ -493,7 +493,7 @@ export default function ForumPostPage() {
                 {post.status === 'open' ? 'Open' : 'Solved'}
               </span>
               {post.category && post.category !== 'general' && (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border bg-blue-500/10 text-blue-400 border-blue-500/20">
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border bg-orange-500/10 text-orange-400 border-orange-500/15">
                   {post.category}
                 </span>
               )}
@@ -522,7 +522,7 @@ export default function ForumPostPage() {
                   data-testid="edit-post-content"
                 />
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleEditPost} className="bg-blue-600 hover:bg-blue-700" data-testid="save-post-edit-btn">Save</Button>
+                  <Button size="sm" onClick={handleEditPost} className="bg-orange-600 hover:bg-orange-700" data-testid="save-post-edit-btn">Save</Button>
                   <Button size="sm" variant="outline" onClick={() => setEditingPost(false)} className="btn-secondary">Cancel</Button>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function ForumPostPage() {
                 </Button>
               )}
               {canEditPost && (
-                <Button size="sm" variant="outline" onClick={() => { setEditPostData({ title: post.title, content: post.content }); setEditingPost(true); }} className="btn-secondary text-blue-400" data-testid="edit-post-btn">
+                <Button size="sm" variant="outline" onClick={() => { setEditPostData({ title: post.title, content: post.content }); setEditingPost(true); }} className="btn-secondary text-orange-400" data-testid="edit-post-btn">
                   <Edit3 className="w-3.5 h-3.5" />
                 </Button>
               )}
@@ -622,7 +622,7 @@ export default function ForumPostPage() {
                       data-testid={`edit-comment-input-${c.id}`}
                     />
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => handleEditComment(c.id)} className="bg-blue-600 hover:bg-blue-700" data-testid={`save-comment-edit-${c.id}`}>Save</Button>
+                      <Button size="sm" onClick={() => handleEditComment(c.id)} className="bg-orange-600 hover:bg-orange-700" data-testid={`save-comment-edit-${c.id}`}>Save</Button>
                       <Button size="sm" variant="outline" onClick={() => { setEditingCommentId(null); setEditCommentContent(''); }} className="btn-secondary">Cancel</Button>
                     </div>
                   </div>
@@ -655,7 +655,7 @@ export default function ForumPostPage() {
                         <Button
                           size="sm" variant="ghost"
                           onClick={() => { setEditingCommentId(c.id); setEditCommentContent(c.content); }}
-                          className="text-xs text-zinc-500 hover:text-blue-400 h-7 px-2"
+                          className="text-xs text-zinc-500 hover:text-orange-400 h-7 px-2"
                           data-testid={`edit-comment-${c.id}`}
                         >
                           <Edit3 className="w-3 h-3" />
@@ -737,7 +737,7 @@ export default function ForumPostPage() {
             <Button
               onClick={handleComment}
               disabled={submitting || !comment.trim()}
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
+              className="gap-2 bg-orange-600 hover:bg-orange-700"
               data-testid="submit-comment-btn"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -882,7 +882,7 @@ export default function ForumPostPage() {
             {/* Active Collaborators */}
             <div>
               <p className="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-blue-400" /> Active Collaborators (+15 pts each)
+                <Users className="w-4 h-4 text-orange-400" /> Active Collaborators (+15 pts each)
               </p>
               {commenters.length === 0 ? (
                 <p className="text-xs text-zinc-500">No collaborators to select.</p>
@@ -908,7 +908,7 @@ export default function ForumPostPage() {
                           isBestAuthor
                             ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-not-allowed'
                             : selectedCollaborators.includes(c.user_id)
-                            ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                            ? 'bg-orange-500/10 border-orange-500/20 text-orange-400'
                             : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                         }`}
                         data-testid={`select-collab-${c.user_id}`}

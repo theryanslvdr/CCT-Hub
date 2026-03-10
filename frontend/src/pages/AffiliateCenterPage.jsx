@@ -10,7 +10,7 @@ import { MessageSquare, BookOpen, Image, HelpCircle, Bot, ClipboardCopy, Chevron
 import { toast } from 'sonner';
 
 const CATEGORIES = [
-  { key: 'conversation_starters', label: 'Conversation Starters', icon: MessageSquare, color: 'text-blue-400', desc: 'Ready-to-use messages to start inviting conversations' },
+  { key: 'conversation_starters', label: 'Conversation Starters', icon: MessageSquare, color: 'text-orange-400', desc: 'Ready-to-use messages to start inviting conversations' },
   { key: 'story_templates', label: 'Story Templates', icon: BookOpen, color: 'text-purple-400', desc: 'Social media and story templates to share' },
   { key: 'marketing', label: 'Marketing Materials', icon: Image, color: 'text-amber-400', desc: 'Graphics, images, and promotional content' },
   { key: 'faqs', label: 'FAQs', icon: HelpCircle, color: 'text-emerald-400', desc: 'Common questions and answers for prospects' },
@@ -29,7 +29,7 @@ const ResourceCard = ({ resource, isAdmin, onDelete }) => {
       <div className="flex items-start justify-between gap-2">
         <h4 className="text-sm font-medium text-white">{resource.title}</h4>
         <div className="flex gap-1 shrink-0">
-          <Button variant="ghost" size="sm" onClick={handleCopy} className="text-zinc-400 hover:text-blue-400" data-testid={`copy-resource-${resource.id}`}>
+          <Button variant="ghost" size="sm" onClick={handleCopy} className="text-zinc-400 hover:text-orange-400" data-testid={`copy-resource-${resource.id}`}>
             <ClipboardCopy className="w-3.5 h-3.5" />
           </Button>
           {isAdmin && onDelete && (
@@ -43,7 +43,7 @@ const ResourceCard = ({ resource, isAdmin, onDelete }) => {
         {resource.content}
       </div>
       {isLong && (
-        <button onClick={() => setExpanded(!expanded)} className="text-xs text-blue-400 hover:text-blue-300 mt-1.5 flex items-center gap-1">
+        <button onClick={() => setExpanded(!expanded)} className="text-xs text-orange-400 hover:text-orange-300 mt-1.5 flex items-center gap-1">
           {expanded ? <><ChevronUp className="w-3 h-3" /> Show less</> : <><ChevronDown className="w-3 h-3" /> Show more</>}
         </button>
       )}
@@ -124,7 +124,7 @@ const AffiliateCenterPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

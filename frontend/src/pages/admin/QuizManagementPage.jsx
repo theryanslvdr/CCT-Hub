@@ -192,7 +192,7 @@ const QuizManagementPage = () => {
       <Card className="glass-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-lg">
-            <Sparkles className="w-5 h-5 text-blue-400" /> Generate Quiz Questions
+            <Sparkles className="w-5 h-5 text-orange-400" /> Generate Quiz Questions
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -307,7 +307,7 @@ const QuizManagementPage = () => {
                     key={s || 'all'}
                     onClick={() => { setStatusFilter(s); setPage(1); }}
                     className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      statusFilter === s ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                      statusFilter === s ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                     }`}
                     data-testid={`filter-${s || 'all'}-btn`}
                   >
@@ -329,8 +329,8 @@ const QuizManagementPage = () => {
         <CardContent>
           {/* Bulk actions */}
           {selected.size > 0 && (
-            <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <span className="text-xs text-blue-300">{selected.size} selected</span>
+            <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-orange-500/10 border border-orange-500/15">
+              <span className="text-xs text-orange-300">{selected.size} selected</span>
               <div className="flex gap-1.5 ml-auto">
                 {isMasterAdmin() && (
                   <Button size="sm" onClick={handleApprove} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 gap-1" data-testid="bulk-approve-btn">
@@ -341,7 +341,7 @@ const QuizManagementPage = () => {
                   <XCircle className="w-3 h-3" /> Reject
                 </Button>
                 {statusFilter === 'approved' && (
-                  <Button size="sm" onClick={handlePublish} disabled={publishing} className="h-7 text-xs bg-blue-600 hover:bg-blue-700 gap-1" data-testid="bulk-publish-btn">
+                  <Button size="sm" onClick={handlePublish} disabled={publishing} className="h-7 text-xs bg-orange-600 hover:bg-orange-700 gap-1" data-testid="bulk-publish-btn">
                     {publishing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                     Publish for {publishDate}
                   </Button>
@@ -351,7 +351,7 @@ const QuizManagementPage = () => {
           )}
 
           {loading ? (
-            <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-blue-400" /></div>
+            <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-orange-400" /></div>
           ) : pool.length === 0 ? (
             <div className="text-center py-8 text-zinc-500">
               <HelpCircle className="w-10 h-10 mx-auto mb-2 opacity-30" />
@@ -373,14 +373,14 @@ const QuizManagementPage = () => {
                   <div
                     key={quiz.id}
                     className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                      selected.has(quiz.id) ? 'bg-blue-500/10 border-blue-500/30' : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
+                      selected.has(quiz.id) ? 'bg-orange-500/10 border-orange-500/20' : 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-700'
                     }`}
                     onClick={() => toggleSelect(quiz.id)}
                     data-testid={`quiz-pool-${quiz.id}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                        selected.has(quiz.id) ? 'border-blue-400 bg-blue-500' : 'border-zinc-600'
+                        selected.has(quiz.id) ? 'border-orange-400 bg-orange-500' : 'border-zinc-600'
                       }`}>
                         {selected.has(quiz.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
@@ -407,7 +407,7 @@ const QuizManagementPage = () => {
                           <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS[quiz.status]}`}>
                             {quiz.status}
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full border text-blue-400 bg-blue-500/10 border-blue-500/20">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full border text-orange-400 bg-orange-500/10 border-orange-500/15">
                             {quiz.platform_topic}
                           </span>
                           <span className="text-[10px] text-zinc-600">Lvl {quiz.difficulty}</span>
@@ -444,7 +444,7 @@ const QuizManagementPage = () => {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-white font-semibold flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-blue-400" /> Edit Quiz Question
+                <Pencil className="w-4 h-4 text-orange-400" /> Edit Quiz Question
               </h3>
               <button onClick={() => setEditQuiz(null)} className="text-zinc-400 hover:text-white">
                 <X className="w-5 h-5" />

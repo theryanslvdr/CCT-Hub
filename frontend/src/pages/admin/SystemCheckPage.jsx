@@ -32,7 +32,7 @@ export default function SystemCheckPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-6 h-6 text-blue-400" />
+            <Shield className="w-6 h-6 text-orange-400" />
             Rewards System Check
           </h1>
           <p className="text-sm text-zinc-400 mt-1">
@@ -42,7 +42,7 @@ export default function SystemCheckPage() {
         <Button
           onClick={runCheck}
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-orange-600 hover:bg-orange-700"
           data-testid="run-system-check-btn"
         >
           {loading ? (

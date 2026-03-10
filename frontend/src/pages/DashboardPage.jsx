@@ -348,7 +348,7 @@ export const DashboardPage = () => {
           {signal && !isLicenseeView && (
             <div 
               onClick={() => window.location.href = '/trade-monitor'}
-              className="glass-highlight px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-blue-500/50 transition-all"
+              className="glass-highlight px-4 md:px-6 py-3 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-orange-500/30 transition-all"
               data-testid="dashboard-signal-card"
             >
               <div className={`w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2 rounded-lg font-bold flex items-center justify-center ${signal.direction === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -369,7 +369,7 @@ export const DashboardPage = () => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] md:text-xs text-zinc-400">Trade Time</p>
-                <p className="text-sm md:text-lg font-mono text-blue-400">{signal.trade_time}</p>
+                <p className="text-sm md:text-lg font-mono text-orange-400">{signal.trade_time}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-zinc-500 hidden md:block" />
             </div>
@@ -382,7 +382,7 @@ export const DashboardPage = () => {
         {kpiCards.map((card, index) => {
           const Icon = card.icon;
           const colorClasses = {
-            blue: 'from-blue-500 to-blue-600',
+            blue: 'from-orange-500 to-amber-600',
             emerald: 'from-emerald-500 to-emerald-600',
             cyan: 'from-cyan-500 to-cyan-600',
             purple: 'from-purple-500 to-purple-600',
@@ -413,7 +413,7 @@ export const DashboardPage = () => {
             : `${formatNumber(card.value, 1)}%`;
 
           return (
-            <Card key={index} className="glass-card hover:border-blue-500/30 transition-all" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
+            <Card key={index} className="glass-card hover:border-orange-500/20 transition-all" data-testid={`kpi-${card.title.toLowerCase().replace(/\s/g, '-')}`}>
               <CardContent className="p-3 md:p-6">
                 <div className="flex items-start justify-between gap-1 md:gap-2">
                   <div className="flex-1 min-w-0 overflow-hidden">
@@ -445,7 +445,7 @@ export const DashboardPage = () => {
                       </ValueTooltip>
                     )}
                     {card.subtitle && (
-                      <p className={`text-[9px] md:text-xs mt-1 truncate ${card.value > 100 ? 'text-emerald-400' : card.value === 100 ? 'text-blue-400' : 'text-amber-400'}`}>
+                      <p className={`text-[9px] md:text-xs mt-1 truncate ${card.value > 100 ? 'text-emerald-400' : card.value === 100 ? 'text-orange-400' : 'text-amber-400'}`}>
                         {card.subtitle}
                       </p>
                     )}
@@ -527,8 +527,8 @@ export const DashboardPage = () => {
                 </div>
               </div>
               {rewardsLeaderboard?.suggested_message && (
-                <div className="mt-3 px-3 py-2 rounded-lg bg-blue-500/8 border border-blue-500/15">
-                  <p className="text-xs text-blue-300 flex items-center gap-1.5">
+                <div className="mt-3 px-3 py-2 rounded-lg bg-orange-500/8 border border-orange-500/10">
+                  <p className="text-xs text-orange-300 flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 flex-shrink-0" />
                     {rewardsLeaderboard.suggested_message}
                   </p>
@@ -545,28 +545,28 @@ export const DashboardPage = () => {
           <TabsList className="grid w-full grid-cols-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-1" data-testid="dashboard-tabs">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
               data-testid="tab-overview"
             >
               <Wallet className="w-4 h-4" /> Overview
             </TabsTrigger>
             <TabsTrigger 
               value="profit" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
               data-testid="tab-profit"
             >
               <TrendingUp className="w-4 h-4" /> Profit
             </TabsTrigger>
             <TabsTrigger 
               value="trades" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
               data-testid="tab-trades"
             >
               <History className="w-4 h-4" /> Trades
             </TabsTrigger>
             <TabsTrigger 
               value="charts" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-md gap-2"
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-md gap-2"
               data-testid="tab-charts"
             >
               <BarChart3 className="w-4 h-4" /> Charts
@@ -624,9 +624,9 @@ export const DashboardPage = () => {
                         {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
                       </p>
                     </div>
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                      <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
-                      <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/15">
+                      <p className="text-xs text-orange-400 uppercase tracking-wider">LOT Size</p>
+                      <p className="text-2xl font-bold font-mono text-orange-400 mt-1">
                         {((summary?.account_value || 0) / 980).toFixed(2)}
                       </p>
                       <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
@@ -665,7 +665,7 @@ export const DashboardPage = () => {
                     </div>
                     <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
                       <span className="text-zinc-400">Projected Profit</span>
-                      <span className="text-xl font-mono text-blue-400">{formatCurrency(summary?.total_projected_profit || 0, 'USD')}</span>
+                      <span className="text-xl font-mono text-orange-400">{formatCurrency(summary?.total_projected_profit || 0, 'USD')}</span>
                     </div>
                     <div className="flex justify-between items-center p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                       <span className="text-zinc-300 font-medium">Current Balance</span>
@@ -699,7 +699,7 @@ export const DashboardPage = () => {
                     </div>
                     <div className="flex justify-between items-center p-4 rounded-lg bg-zinc-900/50">
                       <span className="text-zinc-400">Current LOT Size</span>
-                      <span className="text-xl font-mono text-blue-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
+                      <span className="text-xl font-mono text-orange-400">{((summary?.account_value || 0) / 980).toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -825,7 +825,7 @@ export const DashboardPage = () => {
           <Card className="glass-card" data-testid="licensee-year-projections">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-400" /> Growth Projections
+                <Calendar className="w-5 h-5 text-orange-400" /> Growth Projections
               </CardTitle>
               <p className="text-sm text-zinc-400">Projected values based on quarterly compounding (250 trading days/year)</p>
             </CardHeader>
@@ -876,13 +876,13 @@ export const DashboardPage = () => {
                   {/* Forward Projections - From Today */}
                   <div className="mb-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Forward Projections</span>
+                      <span className="text-xs font-semibold text-orange-400 uppercase tracking-wider">Forward Projections</span>
                       <span className="text-xs text-zinc-500">(from today's balance)</span>
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                       {yearProjections.projections?.map((p) => {
                         const colors = {
-                          1: { border: 'border-blue-500/30', bg: 'from-blue-500/15 to-blue-500/5', text: 'text-blue-400', label: 'text-blue-300' },
+                          1: { border: 'border-orange-500/20', bg: 'from-orange-500/10 to-amber-500/5', text: 'text-orange-400', label: 'text-orange-300' },
                           2: { border: 'border-emerald-500/30', bg: 'from-emerald-500/15 to-emerald-500/5', text: 'text-emerald-400', label: 'text-emerald-300' },
                           3: { border: 'border-purple-500/30', bg: 'from-purple-500/15 to-purple-500/5', text: 'text-purple-400', label: 'text-purple-300' },
                           5: { border: 'border-amber-500/30', bg: 'from-amber-500/15 to-amber-500/5', text: 'text-amber-400', label: 'text-amber-300' },
@@ -937,7 +937,7 @@ export const DashboardPage = () => {
                   <AlertTriangle className="w-8 h-8 text-amber-500/50" />
                   <p>Failed to load projections</p>
                   <div className="flex gap-2">
-                    <button onClick={loadLicenseeData} className="text-blue-400 text-sm hover:underline">Retry</button>
+                    <button onClick={loadLicenseeData} className="text-orange-400 text-sm hover:underline">Retry</button>
                     <span className="text-zinc-600">|</span>
                     <button 
                       onClick={async () => {
@@ -998,7 +998,7 @@ export const DashboardPage = () => {
                               </div>
                             </td>
                             <td className="font-mono">{formatCurrency(member.starting_amount || 0, 'USD')}</td>
-                            <td className="font-mono text-blue-400">{formatCurrency(member.account_value || member.starting_amount || 0, 'USD')}</td>
+                            <td className="font-mono text-orange-400">{formatCurrency(member.account_value || member.starting_amount || 0, 'USD')}</td>
                             <td className={`font-mono ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {profit >= 0 ? '+' : ''}{formatCurrency(profit, 'USD')}
                             </td>
@@ -1028,7 +1028,7 @@ export const DashboardPage = () => {
             <Card className="glass-card" data-testid="combined-account-overview">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-blue-400" /> Overall Account Growth
+                  <Wallet className="w-5 h-5 text-orange-400" /> Overall Account Growth
                 </CardTitle>
                 <p className="text-sm text-zinc-400">Your account + family members combined</p>
               </CardHeader>
@@ -1041,9 +1041,9 @@ export const DashboardPage = () => {
                   const combinedProfit = (summary?.total_actual_profit || 0) + familyProfit;
                   return (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="p-4 rounded-xl bg-gradient-to-b from-blue-500/15 to-blue-500/5 border border-blue-500/30">
-                        <p className="text-xs text-blue-300 uppercase tracking-wider font-semibold">Your Account</p>
-                        <p className="text-xl font-bold font-mono text-blue-400 mt-2">{formatCurrencyCompact(ownValue)}</p>
+                      <div className="p-4 rounded-xl bg-gradient-to-b from-orange-500/10 to-amber-500/5 border border-orange-500/20">
+                        <p className="text-xs text-orange-300 uppercase tracking-wider font-semibold">Your Account</p>
+                        <p className="text-xl font-bold font-mono text-orange-400 mt-2">{formatCurrencyCompact(ownValue)}</p>
                         <p className="text-[10px] text-zinc-500 mt-1">{formatCurrency(ownValue, 'USD')}</p>
                       </div>
                       <div className="p-4 rounded-xl bg-gradient-to-b from-purple-500/15 to-purple-500/5 border border-purple-500/30">
@@ -1082,9 +1082,9 @@ export const DashboardPage = () => {
             </Card>
             <Card className="glass-card">
               <CardContent className="p-6">
-                <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                  <p className="text-xs text-blue-400 uppercase tracking-wider">Days Manager Traded</p>
-                  <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/15">
+                  <p className="text-xs text-orange-400 uppercase tracking-wider">Days Manager Traded</p>
+                  <p className="text-2xl font-bold font-mono text-orange-400 mt-1">
                     {summary?.total_trades || 0}
                   </p>
                 </div>
@@ -1174,9 +1174,9 @@ export const DashboardPage = () => {
                   {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                <p className="text-xs text-blue-400 uppercase tracking-wider">LOT Size</p>
-                <p className="text-2xl font-bold font-mono text-blue-400 mt-1">
+              <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/15">
+                <p className="text-xs text-orange-400 uppercase tracking-wider">LOT Size</p>
+                <p className="text-2xl font-bold font-mono text-orange-400 mt-1">
                   {((summary?.account_value || 0) / 980).toFixed(2)}
                 </p>
                 <p className="text-xs text-zinc-500 mt-1">Based on account value</p>

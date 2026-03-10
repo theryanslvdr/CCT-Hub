@@ -30,7 +30,7 @@ const timezones = [
 ];
 
 const MEMBER_NOTIFICATION_ITEMS = [
-  { key: 'trading_signal', label: 'Trading Signal Alerts', desc: 'Get notified when a new trading signal is published', icon: Radio, color: 'text-blue-400' },
+  { key: 'trading_signal', label: 'Trading Signal Alerts', desc: 'Get notified when a new trading signal is published', icon: Radio, color: 'text-orange-400' },
   { key: 'pre_trade_10min', label: '10-Minute Pre-Trade Alert', desc: 'Reminder 10 minutes before scheduled trade time', icon: Clock, color: 'text-amber-400' },
   { key: 'pre_trade_5min', label: '5-Minute Pre-Trade Alert', desc: 'Reminder 5 minutes before scheduled trade time', icon: Clock, color: 'text-orange-400' },
   { key: 'missed_trade_report', label: 'Missed Trade Reports', desc: 'Get notified when you miss a trading day', icon: AlertTriangle, color: 'text-red-400' },
@@ -81,10 +81,10 @@ const PushNotificationToggle = () => {
   }
 
   return (
-    <div className="p-3 rounded-lg bg-zinc-900/50 border border-blue-500/30 hover:border-blue-500/50 transition-colors" data-testid="push-notification-toggle">
+    <div className="p-3 rounded-lg bg-zinc-900/50 border border-orange-500/20 hover:border-orange-500/30 transition-colors" data-testid="push-notification-toggle">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSubscribed ? 'bg-blue-500/20 text-blue-400' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSubscribed ? 'bg-orange-500/10 text-orange-400' : 'bg-zinc-800 text-zinc-400'}`}>
             {isSubscribed ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
           </div>
           <div>

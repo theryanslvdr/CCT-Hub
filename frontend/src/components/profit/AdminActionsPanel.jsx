@@ -39,7 +39,7 @@ export function AdminActionsPanel({
         <DialogContent className="glass-card border-zinc-800 max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <FolderOpen className="w-5 h-5 text-blue-400" /> Access Records
+              <FolderOpen className="w-5 h-5 text-orange-400" /> Access Records
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 mt-4">
@@ -82,7 +82,7 @@ export function AdminActionsPanel({
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {resetStep === 'confirm' && <><RotateCcw className="w-5 h-5 text-red-400" /> Reset Profit Tracker</>}
-              {resetStep === 'newBalance' && <><Wallet className="w-5 h-5 text-blue-400" /> Set New Account Value</>}
+              {resetStep === 'newBalance' && <><Wallet className="w-5 h-5 text-orange-400" /> Set New Account Value</>}
               {resetStep === 'password' && <><Lock className="w-5 h-5 text-amber-400" /> Security Verification</>}
             </DialogTitle>
           </DialogHeader>

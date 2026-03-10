@@ -132,7 +132,7 @@ export const LicenseRegistrationPage = () => {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
           <p className="text-zinc-400">Validating invite code...</p>
         </div>
       </div>
@@ -163,7 +163,7 @@ export const LicenseRegistrationPage = () => {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">CrossCurrent Finance Center</h1>
@@ -173,7 +173,7 @@ export const LicenseRegistrationPage = () => {
         {/* License Info Card */}
         <Card className={`glass-card mb-6 border ${
           inviteData?.license_type === 'extended' 
-            ? 'border-purple-500/30' 
+            ? 'border-orange-500/20' 
             : 'border-amber-500/30'
         }`}>
           <CardContent className="p-4">
@@ -318,7 +318,7 @@ export const LicenseRegistrationPage = () => {
                 Already have an account?{' '}
                 <button 
                   onClick={() => navigate('/login')} 
-                  className="text-blue-400 hover:underline"
+                  className="text-orange-400 hover:underline"
                 >
                   Sign in
                 </button>

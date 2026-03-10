@@ -128,6 +128,7 @@ from routes.system_health import router as _system_health_router
 from routes.ai_routes import router as _ai_router
 from routes.referral_routes import router as _referral_router
 from routes.quiz_routes import router as _quiz_router
+from routes.ai_assistant_routes import router as _ai_assistant_router
 
 # ─── Register Routers ───
 api_router.include_router(_auth_router)
@@ -155,6 +156,7 @@ api_router.include_router(_system_health_router)
 api_router.include_router(_ai_router)
 api_router.include_router(_referral_router)
 api_router.include_router(_quiz_router)
+api_router.include_router(_ai_assistant_router)
 
 app.include_router(api_router)
 

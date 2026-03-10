@@ -67,7 +67,7 @@ export const RegisterPage = () => {
       <div className="glass-card w-full max-w-md p-8">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center mb-4">
             <TrendingUp className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white">Join CrossCurrent</h1>
@@ -189,7 +189,7 @@ export const RegisterPage = () => {
         <div className="mt-6 text-center">
           <p className="text-zinc-500 text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+            <Link to="/login" className="text-orange-400 hover:text-orange-300 transition-colors">
               Sign In
             </Link>
           </p>

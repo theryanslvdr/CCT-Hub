@@ -175,7 +175,7 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
       <DialogContent className="glass-card border-zinc-800 max-w-lg max-h-[85vh] overflow-y-auto" data-testid="pwa-instructions-dialog">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
-            <Download className="w-5 h-5 text-blue-400" /> Install The CrossCurrent Hub
+            <Download className="w-5 h-5 text-orange-400" /> Install The CrossCurrent Hub
           </DialogTitle>
         </DialogHeader>
 
@@ -184,7 +184,7 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
           {deferredPrompt && (
             <Button
               onClick={async () => { await install(); onOpenChange(false); }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white"
               data-testid="pwa-quick-install-btn"
             >
               <Download className="w-4 h-4 mr-2" /> Install Now (One Click)
@@ -192,10 +192,10 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
           )}
 
           {/* Auto-detected platform */}
-          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+          <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <IconComponent className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <IconComponent className="w-5 h-5 text-orange-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-white">{instructions.title}</p>
@@ -211,7 +211,7 @@ export const PWAInstallInstructions = ({ open, onOpenChange }) => {
                 <ol className="space-y-1.5 ml-1">
                   {browser.steps.map((step, i) => (
                     <li key={i} className="flex gap-2 text-xs text-zinc-400">
-                      <span className="text-blue-400 font-bold min-w-[16px]">{i + 1}.</span>
+                      <span className="text-orange-400 font-bold min-w-[16px]">{i + 1}.</span>
                       <span>{step}</span>
                     </li>
                   ))}
@@ -275,9 +275,9 @@ export const PWAInstallBanner = () => {
         className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-[380px] z-50 animate-in slide-in-from-bottom-4 duration-300"
         data-testid="pwa-install-banner"
       >
-        <div className="glass-card border border-blue-500/30 rounded-xl p-4 flex items-center gap-3 shadow-lg shadow-blue-500/10">
-          <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-            <Download className="w-5 h-5 text-blue-400" />
+        <div className="glass-card border border-orange-500/20 rounded-xl p-4 flex items-center gap-3 shadow-lg shadow-orange-500/10">
+          <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+            <Download className="w-5 h-5 text-orange-400" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white">Install CrossCurrent Hub</p>
@@ -292,7 +292,7 @@ export const PWAInstallBanner = () => {
                 setShowInstructions(true);
               }
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 px-3 flex-shrink-0"
+            className="bg-orange-600 hover:bg-orange-700 text-white text-xs h-8 px-3 flex-shrink-0"
             data-testid="pwa-install-button"
           >
             Install

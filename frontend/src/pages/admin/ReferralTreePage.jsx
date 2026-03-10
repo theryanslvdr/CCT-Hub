@@ -44,7 +44,7 @@ const TreeNode = ({ node, depth = 0 }) => {
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-white truncate">{node.name}</span>
             {node.referral_code && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono shrink-0">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-300 font-mono shrink-0">
                 {node.referral_code}
               </span>
             )}
@@ -203,7 +203,7 @@ const FlatListView = ({ search }) => {
                 </td>
                 <td className="py-2.5 px-3">
                   {u.referral_code ? (
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">{u.referral_code}</span>
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-orange-500/10 text-orange-300">{u.referral_code}</span>
                   ) : (
                     <span className="text-zinc-600 text-xs">Not set</span>
                   )}
@@ -224,7 +224,7 @@ const FlatListView = ({ search }) => {
                   <span className={`text-xs px-2 py-0.5 rounded ${
                     u.role === 'master_admin' ? 'bg-amber-500/20 text-amber-300' :
                     u.role === 'super_admin' ? 'bg-purple-500/20 text-purple-300' :
-                    u.role?.includes('admin') ? 'bg-blue-500/20 text-blue-300' :
+                    u.role?.includes('admin') ? 'bg-orange-500/10 text-orange-300' :
                     'bg-zinc-700 text-zinc-300'
                   }`}>
                     {u.role}
@@ -285,8 +285,8 @@ const ReferralTreePage = () => {
           <Card className="glass-card">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.total_users}</p>
@@ -342,7 +342,7 @@ const ReferralTreePage = () => {
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <CardTitle className="text-white flex items-center gap-2 text-lg">
-              <GitBranch className="w-5 h-5 text-blue-400" /> Referral Network
+              <GitBranch className="w-5 h-5 text-orange-400" /> Referral Network
             </CardTitle>
             <div className="flex items-center gap-2">
               <div className="flex rounded-lg overflow-hidden border border-zinc-700">
@@ -350,7 +350,7 @@ const ReferralTreePage = () => {
                   data-testid="view-tree-btn"
                   onClick={() => setView('tree')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'tree' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'tree' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                   }`}
                 >
                   <Network className="w-3.5 h-3.5 inline mr-1" />Tree
@@ -359,7 +359,7 @@ const ReferralTreePage = () => {
                   data-testid="view-d3-btn"
                   onClick={() => setView('d3')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'd3' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'd3' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                   }`}
                 >
                   <GitBranch className="w-3.5 h-3.5 inline mr-1" />Visual
@@ -368,7 +368,7 @@ const ReferralTreePage = () => {
                   data-testid="view-list-btn"
                   onClick={() => setView('list')}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    view === 'list' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    view === 'list' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                   }`}
                 >
                   <List className="w-3.5 h-3.5 inline mr-1" />Table

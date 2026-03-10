@@ -1691,7 +1691,7 @@ export const ProfitTrackerPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -1733,11 +1733,11 @@ export const ProfitTrackerPage = () => {
 
       {/* Trading Signal Banner - Desktop Only - Hidden for licensees (they don't trade) */}
       {activeSignal && !isLicensee && (
-        <Card className="hidden md:block glass-highlight border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+        <Card className="hidden md:block glass-highlight bg-gradient-to-r from-orange-500/10 to-amber-500/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Radio className="w-5 h-5 text-blue-400 animate-pulse" />
+                <Radio className="w-5 h-5 text-orange-400 animate-pulse" />
                 <div>
                   <p className="text-xs text-zinc-400">Today&apos;s Trading Signal</p>
                   <div className="flex items-center gap-3 mt-1">
@@ -1746,7 +1746,7 @@ export const ProfitTrackerPage = () => {
                       {activeSignal.direction}
                     </span>
                     <span className="text-zinc-400">at</span>
-                    <span className="font-mono text-blue-400 font-bold">{activeSignal.trade_time}</span>
+                    <span className="font-mono text-orange-400 font-bold">{activeSignal.trade_time}</span>
                     <span className="text-zinc-500 text-sm">({activeSignal.trade_timezone || 'Asia/Manila'})</span>
                   </div>
                 </div>
@@ -1765,7 +1765,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Mobile Signal Card - Compact "Trade Now" button that navigates to Trade Monitor - Hidden for licensees */}
       {activeSignal && !isLicensee && (
-        <Card className="md:hidden glass-card border-blue-500/30 bg-blue-500/5" data-testid="mobile-signal-card">
+        <Card className="md:hidden glass-card border-orange-500/20 bg-orange-500/5" data-testid="mobile-signal-card">
           <CardContent className="p-3">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -1820,7 +1820,7 @@ export const ProfitTrackerPage = () => {
 
       {/* Compact Active Signal Card for Profit Tracker - Mobile Only (desktop version is in summary cards) - Hidden for licensees */}
       {activeSignal && !isLicensee && (
-        <Card className="md:hidden glass-card border-blue-500/30 bg-blue-500/5">
+        <Card className="md:hidden glass-card border-orange-500/20 bg-orange-500/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -1876,7 +1876,7 @@ export const ProfitTrackerPage = () => {
             <DialogContent className="glass-card border-zinc-800 max-w-sm">
               <DialogHeader>
                 <DialogTitle className="text-white flex items-center gap-2">
-                  <Calculator className="w-5 h-5 text-blue-400" /> Simulate Actions
+                  <Calculator className="w-5 h-5 text-orange-400" /> Simulate Actions
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-3 mt-4">
@@ -1961,7 +1961,7 @@ export const ProfitTrackerPage = () => {
             onClick={() => setAuditTrailModalOpen(true)}
             data-testid="balance-trail-button"
           >
-            <TrendingUp className="w-4 h-4 text-blue-400" /> Balance Trail
+            <TrendingUp className="w-4 h-4 text-orange-400" /> Balance Trail
           </Button>
           </div>
         )}
@@ -1981,7 +1981,7 @@ export const ProfitTrackerPage = () => {
             onClick={() => setAuditTrailModalOpen(true)}
             data-testid="balance-trail-button-mobile"
           >
-            <TrendingUp className="w-4 h-4 text-blue-400" />
+            <TrendingUp className="w-4 h-4 text-orange-400" />
           </Button>
         </div>
 
@@ -1994,8 +1994,8 @@ export const ProfitTrackerPage = () => {
               <div className="flex-shrink-0 p-6 pb-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-                      <Calculator className="w-6 h-6 text-blue-400" />
+                    <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+                      <Calculator className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
                       <h1 className="text-xl font-bold text-white">Simulate Actions</h1>
@@ -2585,15 +2585,15 @@ export const ProfitTrackerPage = () => {
                           </button>
                           <button 
                             onClick={() => setManualDepositMode(true)}
-                            className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                            className="w-full text-center text-sm text-zinc-500 hover:text-orange-400 underline transition-colors"
                           >
                             Wrong Calculations? Enter your total deposit manually
                           </button>
                         </>
                       ) : (
                         <>
-                          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
-                            <p className="text-blue-400 font-medium">Manual Override Mode</p>
+                          <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
+                            <p className="text-orange-400 font-medium">Manual Override Mode</p>
                             <p className="text-xs text-zinc-400 mt-1">Enter the exact amount that will be added to your Merin balance.</p>
                           </div>
                           <div className="space-y-2">
@@ -2607,7 +2607,7 @@ export const ProfitTrackerPage = () => {
                                 value={manualDepositAmount}
                                 onChange={(e) => setManualDepositAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-blue-500"
+                                className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white text-lg font-mono pl-10 pr-4 py-5 focus:outline-none focus:border-orange-500"
                               />
                             </div>
                           </div>
@@ -2619,7 +2619,7 @@ export const ProfitTrackerPage = () => {
                               value={depositNotes}
                               onChange={(e) => setDepositNotes(e.target.value)}
                               placeholder="Add notes..."
-                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-blue-500"
+                              className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl text-white px-4 py-4 focus:outline-none focus:border-orange-500"
                             />
                           </div>
                           <button 
@@ -2636,7 +2636,7 @@ export const ProfitTrackerPage = () => {
                               });
                               setDepositStep('simulate');
                             }} 
-                            className="w-full py-4 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors"
+                            className="w-full py-4 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors"
                           >
                             Continue
                           </button>
@@ -3190,7 +3190,7 @@ export const ProfitTrackerPage = () => {
                     </Button>
                     <button 
                       onClick={() => setManualDepositMode(true)}
-                      className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                      className="w-full text-center text-sm text-zinc-500 hover:text-orange-400 underline transition-colors"
                       data-testid="manual-deposit-link"
                     >
                       Wrong Calculations? Enter your total deposit manually
@@ -3198,8 +3198,8 @@ export const ProfitTrackerPage = () => {
                   </>
                 ) : (
                   <>
-                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                      <p className="text-sm text-blue-400">Manual Override Mode</p>
+                    <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                      <p className="text-sm text-orange-400">Manual Override Mode</p>
                       <p className="text-xs text-zinc-400 mt-1">Enter the exact amount that will be added to your Merin balance.</p>
                     </div>
                     <div>
@@ -3247,7 +3247,7 @@ export const ProfitTrackerPage = () => {
                     </Button>
                     <button 
                       onClick={() => setManualDepositMode(false)}
-                      className="w-full text-center text-sm text-zinc-500 hover:text-blue-400 underline transition-colors"
+                      className="w-full text-center text-sm text-zinc-500 hover:text-orange-400 underline transition-colors"
                     >
                       Back to automatic calculation
                     </button>
@@ -3261,8 +3261,8 @@ export const ProfitTrackerPage = () => {
                 <div className="space-y-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
                   {depositSimulation.isManualOverride ? (
                     <>
-                      <div className="p-2 rounded bg-blue-500/10 border border-blue-500/30 mb-3">
-                        <p className="text-xs text-blue-400 text-center">Manual Override - No fees applied</p>
+                      <div className="p-2 rounded bg-orange-500/10 border border-orange-500/20 mb-3">
+                        <p className="text-xs text-orange-400 text-center">Manual Override - No fees applied</p>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-zinc-300 font-medium">Deposit Amount</span>
@@ -3303,11 +3303,11 @@ export const ProfitTrackerPage = () => {
 
             {depositStep === 'confirm' && (
               <div className="space-y-4 mt-4">
-                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-blue-400 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5" />
                     <div>
-                      <p className="text-blue-400 font-medium">Confirm Your Action</p>
+                      <p className="text-orange-400 font-medium">Confirm Your Action</p>
                       <p className="text-sm text-zinc-400 mt-1">
                         By proceeding, you&apos;re confirming that you&apos;re adding <span className="text-white font-mono">{formatMoney(depositSimulation?.receiveAmount)}</span> to your Merin Account.
                       </p>
@@ -3394,8 +3394,8 @@ export const ProfitTrackerPage = () => {
                   </div>
                 </div>
                 
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <div className="flex items-center gap-2 text-blue-400 mb-1">
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15">
+                  <div className="flex items-center gap-2 text-orange-400 mb-1">
                     <Clock className="w-4 h-4" />
                     <span className="text-sm font-medium">Processing Time</span>
                   </div>
@@ -3677,7 +3677,7 @@ export const ProfitTrackerPage = () => {
         <DialogContent className="glass-card border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Rocket className="w-5 h-5 text-blue-400" /> Welcome to Profit Tracker!
+              <Rocket className="w-5 h-5 text-orange-400" /> Welcome to Profit Tracker!
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
@@ -3811,10 +3811,10 @@ export const ProfitTrackerPage = () => {
       )}
 
       {/* Projection Vision Card */}
-      <Card className="glass-highlight border-blue-500/30">
+      <Card className="glass-highlight">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" /> Projection Vision
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" /> Projection Vision
             {!isLicensee && !simulatedView && dataHealth && (
               <DataHealthBadge healthData={dataHealth} onClick={() => openBalanceVerification(displayAccountValue)} />
             )}
@@ -3911,9 +3911,9 @@ export const ProfitTrackerPage = () => {
               {/* Projection Grid - Mobile optimized */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 {projectionData.slice(1, 4).map((p, i) => (
-                  <div key={p.period} className={`p-2 sm:p-4 rounded-lg border ${i === 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-zinc-900/50 border-zinc-800'}`}>
-                    <p className={`text-[10px] sm:text-xs ${i === 0 ? 'text-blue-400' : 'text-zinc-500'}`}>{p.period}</p>
-                    <p className={`font-mono text-sm sm:text-lg ${i === 0 ? 'text-blue-400' : 'text-white'} mt-0.5 sm:mt-1 truncate`}>
+                  <div key={p.period} className={`p-2 sm:p-4 rounded-lg border ${i === 0 ? 'bg-orange-500/10 border-orange-500/20' : 'bg-zinc-900/50 border-zinc-800'}`}>
+                    <p className={`text-[10px] sm:text-xs ${i === 0 ? 'text-orange-400' : 'text-zinc-500'}`}>{p.period}</p>
+                    <p className={`font-mono text-sm sm:text-lg ${i === 0 ? 'text-orange-400' : 'text-white'} mt-0.5 sm:mt-1 truncate`}>
                       {formatLargeNumber(p.balance)}
                     </p>
                     <p className="text-[9px] sm:text-xs text-zinc-500 mt-0.5 sm:mt-1 truncate">
@@ -3923,7 +3923,7 @@ export const ProfitTrackerPage = () => {
                 ))}
                 
                 {/* Year selector card */}
-                <div className="p-2 sm:p-4 rounded-lg border bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/30">
+                <div className="p-2 sm:p-4 rounded-lg border bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20">
                   <div className="flex items-center justify-between mb-1 sm:mb-2">
                     <p className="text-[10px] sm:text-xs text-purple-400">Year</p>
                     <Select value={selectedYears.toString()} onValueChange={(v) => setSelectedYears(parseInt(v))}>
@@ -3989,11 +3989,11 @@ export const ProfitTrackerPage = () => {
                           </thead>
                           <tbody>
                             {months.map((m) => (
-                              <tr key={m.monthKey} className={m.isCurrentMonth ? 'bg-blue-500/10' : ''}>
+                              <tr key={m.monthKey} className={m.isCurrentMonth ? 'bg-orange-500/10' : ''}>
                                 <td className="font-medium">
                                   {m.monthName}
                                   {m.isCurrentMonth && (
-                                    <span className="ml-2 text-xs text-blue-400">(Current)</span>
+                                    <span className="ml-2 text-xs text-orange-400">(Current)</span>
                                   )}
                                 </td>
                                 <td className="font-mono text-zinc-400">
@@ -4017,7 +4017,7 @@ export const ProfitTrackerPage = () => {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-7 text-xs text-blue-400 border-blue-400/30 hover:bg-blue-400/10"
+                                    className="h-7 text-xs text-orange-400 border-orange-400/30 hover:bg-orange-400/10"
                                     onClick={() => handleOpenDailyProjection(m)}
                                     data-testid={`daily-projection-${m.monthKey}`}
                                   >

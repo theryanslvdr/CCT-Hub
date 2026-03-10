@@ -120,7 +120,7 @@ export function TradingTab() {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-400" /> Trading Products
+            <TrendingUp className="w-5 h-5 text-orange-400" /> Trading Products
           </CardTitle>
           <p className="text-sm text-zinc-400 mt-1">Manage the list of tradeable products available to all users.</p>
         </CardHeader>

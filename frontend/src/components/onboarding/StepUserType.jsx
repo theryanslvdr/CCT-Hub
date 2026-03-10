@@ -10,7 +10,7 @@ export const StepUserType = ({ userType, setUserType, isReset }) => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
           <Sparkles className="w-10 h-10 text-white" />
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">
@@ -23,7 +23,7 @@ export const StepUserType = ({ userType, setUserType, isReset }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card 
-          className={`cursor-pointer transition-all hover:border-blue-500/50 ${userType === 'new' ? 'border-blue-500 bg-blue-500/10' : 'glass-card'}`}
+          className={`cursor-pointer transition-all hover:border-orange-500/30 ${userType === 'new' ? 'border-orange-500 bg-orange-500/10' : 'glass-card'}`}
           onClick={() => setUserType('new')}
           data-testid="user-type-new"
         >
@@ -44,7 +44,7 @@ export const StepUserType = ({ userType, setUserType, isReset }) => {
         </Card>
         
         <Card 
-          className={`cursor-pointer transition-all hover:border-blue-500/50 ${userType === 'experienced' ? 'border-blue-500 bg-blue-500/10' : 'glass-card'}`}
+          className={`cursor-pointer transition-all hover:border-orange-500/30 ${userType === 'experienced' ? 'border-orange-500 bg-orange-500/10' : 'glass-card'}`}
           onClick={() => setUserType('experienced')}
           data-testid="user-type-experienced"
         >

@@ -486,7 +486,7 @@ export const AdminMembersPage = () => {
   const getRoleIcon = (role) => {
     switch (role) {
       case 'super_admin': return <ShieldAlert className="w-4 h-4 text-amber-400" />;
-      case 'admin': return <ShieldCheck className="w-4 h-4 text-blue-400" />;
+      case 'admin': return <ShieldCheck className="w-4 h-4 text-orange-400" />;
       default: return <Users className="w-4 h-4 text-zinc-400" />;
     }
   };
@@ -494,7 +494,7 @@ export const AdminMembersPage = () => {
   const getRoleBadgeClass = (role) => {
     switch (role) {
       case 'super_admin': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-      case 'admin': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'admin': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       default: return 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
     }
   };
@@ -505,7 +505,7 @@ export const AdminMembersPage = () => {
     
     if (license.license_type === 'extended') {
       return (
-        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/20 text-purple-400 border border-orange-500/20">
           EXT
         </span>
       );
@@ -519,7 +519,7 @@ export const AdminMembersPage = () => {
     }
     if (license.license_type === 'honorary_fa') {
       return (
-        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
           FA
         </span>
       );
@@ -544,7 +544,7 @@ export const AdminMembersPage = () => {
                 <p className="text-sm text-zinc-400">Total Members</p>
                 <p className="text-3xl font-bold font-mono text-white mt-2">{totalMembers}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -570,9 +570,9 @@ export const AdminMembersPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-400">Admins</p>
-                <p className="text-3xl font-bold font-mono text-blue-400 mt-2">{adminCount}</p>
+                <p className="text-3xl font-bold font-mono text-orange-400 mt-2">{adminCount}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
                 <ShieldCheck className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -664,7 +664,7 @@ export const AdminMembersPage = () => {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           ) : (
             <>
@@ -686,7 +686,7 @@ export const AdminMembersPage = () => {
                       <tr key={member.id} className={member.is_suspended ? 'opacity-50' : ''}>
                         <td>
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-medium">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-medium">
                               {member.full_name?.charAt(0) || 'U'}
                             </div>
                             <span className="font-medium text-white">
@@ -843,7 +843,7 @@ export const AdminMembersPage = () => {
                         });
                         setIsEditingProfile(true);
                       }}
-                      className="text-blue-400 hover:text-blue-300"
+                      className="text-orange-400 hover:text-orange-300"
                     >
                       <UserCog className="w-4 h-4 mr-1" /> Edit
                     </Button>
@@ -967,7 +967,7 @@ export const AdminMembersPage = () => {
                     <div className="mt-4 space-y-2">
                       <Button
                         onClick={() => handleRunDiagnostic(memberDetails.user.id)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
                         data-testid="run-diagnostic-button"
                       >
                         <Activity className="w-4 h-4 mr-2" />
@@ -992,7 +992,7 @@ export const AdminMembersPage = () => {
 
                 {/* License Info in Profile */}
                 {memberLicense && (
-                  <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                  <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-orange-500/20">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <Award className="w-5 h-5 text-purple-400" />
@@ -1032,8 +1032,8 @@ export const AdminMembersPage = () => {
               <TabsContent value="stats" className="mt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg bg-zinc-900/50 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-blue-400" />
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <Activity className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
                       <p className="text-xs text-zinc-500">Total Trades</p>
@@ -1148,7 +1148,7 @@ export const AdminMembersPage = () => {
                               onClick={handleOpenChangeLicense}
                               variant="outline"
                               size="sm"
-                              className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                              className="border-orange-500/20 text-purple-400 hover:bg-purple-500/10"
                             >
                               <RefreshCw className="w-4 h-4 mr-1" /> Change Type
                             </Button>
@@ -1302,7 +1302,7 @@ export const AdminMembersPage = () => {
             </Tabs>
           ) : (
             <div className="flex items-center justify-center h-32">
-              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           )}
         </DialogContent>
@@ -1434,7 +1434,7 @@ export const AdminMembersPage = () => {
           {memberLicense ? (
             // View/Remove existing license
             <div className="space-y-4 mt-4">
-              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+              <div className="p-4 rounded-lg bg-purple-500/10 border border-orange-500/20">
                 <div className="flex items-center gap-2 mb-3">
                   <FileCheck className="w-5 h-5 text-purple-400" />
                   <span className="text-purple-400 font-medium">
@@ -1468,8 +1468,8 @@ export const AdminMembersPage = () => {
               </div>
 
               {memberLicense.license_type === 'extended' && (
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
-                  <p className="text-blue-400 font-medium mb-1">Extended License Calculation</p>
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15 text-sm">
+                  <p className="text-orange-400 font-medium mb-1">Extended License Calculation</p>
                   <p className="text-zinc-400">
                     Daily profit is fixed per quarter: <span className="text-white font-mono">(Balance ÷ 980) × 15</span>
                   </p>
@@ -1489,8 +1489,8 @@ export const AdminMembersPage = () => {
               )}
 
               {memberLicense.license_type === 'honorary_fa' && (
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
-                  <p className="text-blue-400 font-medium mb-1">Honorary FA (Family Account)</p>
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15 text-sm">
+                  <p className="text-orange-400 font-medium mb-1">Honorary FA (Family Account)</p>
                   <p className="text-zinc-400">
                     Family Account license. Licensee can add up to 5 family members with independent profit tracking.
                   </p>
@@ -1531,7 +1531,7 @@ export const AdminMembersPage = () => {
                     </SelectItem>
                     <SelectItem value="honorary_fa">
                       <div className="flex items-center gap-2">
-                        <span className="text-blue-400">Honorary FA (Family Account)</span>
+                        <span className="text-orange-400">Honorary FA (Family Account)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -1557,8 +1557,8 @@ export const AdminMembersPage = () => {
               )}
 
               {licenseForm.license_type === 'honorary_fa' && (
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
-                  <p className="text-blue-400 font-medium mb-1">Honorary FA (Family Account)</p>
+                <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/15 text-sm">
+                  <p className="text-orange-400 font-medium mb-1">Honorary FA (Family Account)</p>
                   <p className="text-zinc-400">
                     Licensee can add up to 5 family members, each with their own starting amount and independent profit tracking.
                   </p>
@@ -1658,12 +1658,12 @@ export const AdminMembersPage = () => {
                 </div>
                 <div className="p-4 rounded-lg bg-zinc-900/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-blue-400" />
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
                       <p className="text-xs text-zinc-500">Total Profit</p>
-                      <p className="text-xl font-bold text-blue-400">
+                      <p className="text-xl font-bold text-orange-400">
                         ${simulationData.total_profit?.toFixed(2) || '0.00'}
                       </p>
                     </div>
@@ -1748,7 +1748,7 @@ export const AdminMembersPage = () => {
             </div>
           ) : (
             <div className="flex items-center justify-center h-32">
-              <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
             </div>
           )}
         </DialogContent>
@@ -1856,14 +1856,14 @@ export const AdminMembersPage = () => {
         <DialogContent className="glass-card border-zinc-800 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-400" />
+              <Activity className="w-5 h-5 text-orange-400" />
               Account Diagnostic - {diagnosticData?.user?.full_name || 'Loading...'}
             </DialogTitle>
           </DialogHeader>
           
           {diagnosticLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+              <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
               <span className="ml-3 text-zinc-400">Running diagnostic...</span>
             </div>
           ) : diagnosticData && diagnosticData.summary ? (
@@ -1981,11 +1981,11 @@ export const AdminMembersPage = () => {
                     <p className="text-2xl font-bold text-red-400">${diagnosticData.summary.total_withdrawals.toLocaleString()}</p>
                     <p className="text-xs text-zinc-400">Total Withdrawals</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-2xl font-bold text-blue-400">${diagnosticData.summary.total_profit.toLocaleString()}</p>
+                  <div className="text-center p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <p className="text-2xl font-bold text-orange-400">${diagnosticData.summary.total_profit.toLocaleString()}</p>
                     <p className="text-xs text-zinc-400">Total Profit</p>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                  <div className="text-center p-3 rounded-lg bg-purple-500/10 border border-orange-500/20">
                     <p className="text-2xl font-bold text-purple-400">${diagnosticData.summary.total_commission.toLocaleString()}</p>
                     <p className="text-xs text-zinc-400">Total Commission</p>
                   </div>
@@ -2088,7 +2088,7 @@ export const AdminMembersPage = () => {
                             </td>
                             <td className="py-2 px-2 text-center">
                               <span className={`px-2 py-0.5 rounded text-xs ${
-                                dep.type === 'initial' ? 'bg-blue-500/20 text-blue-400' :
+                                dep.type === 'initial' ? 'bg-orange-500/10 text-orange-400' :
                                 dep.amount >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                               }`}>
                                 {dep.type || (dep.amount >= 0 ? 'Deposit' : 'Withdrawal')}

@@ -26,15 +26,15 @@ const LEVELS = [
 
 const LEVEL_COLORS = {
   'Newbie': { bg: 'from-zinc-500/20 to-zinc-600/10', border: 'border-zinc-500/30', text: 'text-zinc-300', badge: 'bg-zinc-700', progress: 'bg-zinc-500' },
-  'Trader': { bg: 'from-blue-500/20 to-blue-600/10', border: 'border-blue-500/30', text: 'text-blue-300', badge: 'bg-blue-900', progress: 'bg-blue-500' },
+  'Trader': { bg: 'from-orange-500/10 to-amber-600/10', border: 'border-orange-500/20', text: 'text-orange-300', badge: 'bg-orange-900', progress: 'bg-orange-500' },
   'Investor': { bg: 'from-emerald-500/20 to-emerald-600/10', border: 'border-emerald-500/30', text: 'text-emerald-300', badge: 'bg-emerald-900', progress: 'bg-emerald-500' },
-  'Connector': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
+  'Connector': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-orange-500/20', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
   'Trade Novice': { bg: 'from-cyan-500/20 to-cyan-600/10', border: 'border-cyan-500/30', text: 'text-cyan-300', badge: 'bg-cyan-900', progress: 'bg-cyan-500' },
   'Amateur Trader': { bg: 'from-teal-500/20 to-teal-600/10', border: 'border-teal-500/30', text: 'text-teal-300', badge: 'bg-teal-900', progress: 'bg-teal-500' },
   'Seasoned Trader': { bg: 'from-orange-500/20 to-orange-600/10', border: 'border-orange-500/30', text: 'text-orange-300', badge: 'bg-orange-900', progress: 'bg-orange-500' },
   'Pro Trader': { bg: 'from-amber-500/20 to-amber-600/10', border: 'border-amber-500/30', text: 'text-amber-300', badge: 'bg-amber-900', progress: 'bg-amber-500' },
   'Elite': { bg: 'from-yellow-500/20 to-yellow-600/10', border: 'border-yellow-500/30', text: 'text-yellow-300', badge: 'bg-yellow-900', progress: 'bg-yellow-500' },
-  'Legend': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
+  'Legend': { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-orange-500/20', text: 'text-purple-300', badge: 'bg-purple-900', progress: 'bg-purple-500' },
 };
 
 const SOURCE_LABELS = {
@@ -115,7 +115,7 @@ const BADGE_ICONS = {
 };
 
 const BADGE_CATEGORY_COLORS = {
-  trading: { bg: 'bg-blue-500/15', border: 'border-blue-500/40', text: 'text-blue-400', glow: 'shadow-blue-500/20' },
+  trading: { bg: 'bg-orange-500/10', border: 'border-orange-500/40', text: 'text-orange-400', glow: 'shadow-orange-500/20' },
   streaks: { bg: 'bg-orange-500/15', border: 'border-orange-500/40', text: 'text-orange-400', glow: 'shadow-orange-500/20' },
   points: { bg: 'bg-amber-500/15', border: 'border-amber-500/40', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
   referrals: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
@@ -254,9 +254,9 @@ const EARNING_ACTION_ICONS = {
 
 const EARNING_ACTION_COLORS = {
   onboarding: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', icon: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-400' },
-  trading: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', icon: 'text-blue-400', badge: 'bg-blue-500/20 text-blue-400' },
+  trading: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', icon: 'text-orange-400', badge: 'bg-orange-500/10 text-orange-400' },
   streaks: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: 'text-orange-400', badge: 'bg-orange-500/20 text-orange-400' },
-  referrals: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', icon: 'text-purple-400', badge: 'bg-purple-500/20 text-purple-400' },
+  referrals: { bg: 'bg-purple-500/10', border: 'border-orange-500/20', icon: 'text-purple-400', badge: 'bg-purple-500/20 text-purple-400' },
   deposits: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', icon: 'text-cyan-400', badge: 'bg-cyan-500/20 text-cyan-400' },
 };
 
@@ -462,7 +462,7 @@ function BadgesSection({ userId }) {
           </CardTitle>
           <button
             onClick={() => setShowFullList(true)}
-            className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+            className="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors"
             data-testid="see-full-list-btn"
           >
             <List className="w-3.5 h-3.5" /> See Full List
@@ -867,7 +867,7 @@ export default function MyRewardsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
@@ -990,7 +990,7 @@ export default function MyRewardsPage() {
           </p>
         </div>
         <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
-          <div className="flex items-center gap-2 text-blue-400 mb-1">
+          <div className="flex items-center gap-2 text-orange-400 mb-1">
             <TrendingUp className="w-4 h-4" />
             <span className="text-xs font-medium">This Month</span>
           </div>
@@ -1011,8 +1011,8 @@ export default function MyRewardsPage() {
 
       {/* Motivational message */}
       {leaderboard?.suggested_message && (
-        <div className="px-4 py-3 rounded-lg bg-blue-500/10 border border-blue-500/20" data-testid="rewards-message">
-          <p className="text-sm text-blue-300 flex items-center gap-2">
+        <div className="px-4 py-3 rounded-lg bg-orange-500/10 border border-orange-500/15" data-testid="rewards-message">
+          <p className="text-sm text-orange-300 flex items-center gap-2">
             <Zap className="w-4 h-4 flex-shrink-0" />
             {leaderboard.suggested_message}
           </p>
@@ -1081,7 +1081,7 @@ export default function MyRewardsPage() {
                         onClick={() => setDateFilter(opt.value)}
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           dateFilter === opt.value 
-                            ? 'bg-blue-500 text-white' 
+                            ? 'bg-orange-500 text-white' 
                             : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                         }`}
                       >

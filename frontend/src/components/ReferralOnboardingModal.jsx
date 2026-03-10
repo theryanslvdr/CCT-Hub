@@ -85,14 +85,14 @@ const ReferralOnboardingModal = () => {
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
-        className="glass-card border-blue-500/30 max-w-md [&>button]:hidden"
+        className="glass-card border-orange-500/20 max-w-md [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         data-testid="referral-onboarding-modal"
       >
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
-            {step === 1 && <><Link2 className="w-5 h-5 text-blue-400" /> Set Your Merin Referral Code</>}
+            {step === 1 && <><Link2 className="w-5 h-5 text-orange-400" /> Set Your Merin Referral Code</>}
             {step === 2 && <><Users className="w-5 h-5 text-green-400" /> Who Referred You?</>}
             {step === 3 && <><Sparkles className="w-5 h-5 text-amber-400" /> You're All Set!</>}
           </DialogTitle>
@@ -109,7 +109,7 @@ const ReferralOnboardingModal = () => {
             <div key={s} className="flex items-center gap-2 flex-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 s < step ? 'bg-green-500 text-white' :
-                s === step ? 'bg-blue-500 text-white ring-2 ring-blue-400/50' :
+                s === step ? 'bg-orange-500 text-white ring-2 ring-orange-400/50' :
                 'bg-zinc-700 text-zinc-400'
               }`}>
                 {s < step ? <Check className="w-4 h-4" /> : s}

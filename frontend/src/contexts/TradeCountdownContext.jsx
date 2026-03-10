@@ -129,16 +129,16 @@ export const TradeCountdownProvider = ({ children }) => {
       {/* Floating countdown popup - only show when NOT on trade monitor/merin/admin and countdown is active */}
       {activeCountdown && countdown && !shouldHideFloatingPopup && (
         <div 
-          className={`fixed bottom-6 right-6 z-50 bg-zinc-900/95 border ${countdown.total <= 30000 ? 'border-red-500 animate-pulse' : 'border-blue-500/50'} rounded-xl shadow-2xl p-4 max-w-sm backdrop-blur-lg`}
+          className={`fixed bottom-6 right-6 z-50 bg-zinc-900/95 border ${countdown.total <= 30000 ? 'border-red-500 animate-pulse' : 'border-orange-500/30'} rounded-xl shadow-2xl p-4 max-w-sm backdrop-blur-lg`}
           data-testid="floating-countdown"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-10 h-10 rounded-lg ${countdown.total <= 30000 ? 'bg-red-500/20' : 'bg-blue-500/20'} flex items-center justify-center`}>
-              <Clock className={`w-5 h-5 ${countdown.total <= 30000 ? 'text-red-400' : 'text-blue-400'}`} />
+            <div className={`w-10 h-10 rounded-lg ${countdown.total <= 30000 ? 'bg-red-500/20' : 'bg-orange-500/10'} flex items-center justify-center`}>
+              <Clock className={`w-5 h-5 ${countdown.total <= 30000 ? 'text-red-400' : 'text-orange-400'}`} />
             </div>
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wider">Trade Starting In</p>
-              <p className={`text-2xl font-mono font-bold ${countdown.total <= 30000 ? 'text-red-400' : 'text-blue-400'}`}>
+              <p className={`text-2xl font-mono font-bold ${countdown.total <= 30000 ? 'text-red-400' : 'text-orange-400'}`}>
                 {formatCountdown()}
               </p>
             </div>

@@ -19,7 +19,7 @@ const MetricCard = ({ icon: Icon, title, value, subtitle, status, className = ''
             status === 'good' ? 'bg-emerald-500/15 text-emerald-400' :
             status === 'warn' ? 'bg-amber-500/15 text-amber-400' :
             status === 'bad' ? 'bg-red-500/15 text-red-400' :
-            'bg-blue-500/15 text-blue-400'
+            'bg-orange-500/10 text-orange-400'
           }`}>
             <Icon className="w-4 h-4" />
           </div>
@@ -29,7 +29,7 @@ const MetricCard = ({ icon: Icon, title, value, subtitle, status, className = ''
           <div className={`w-2 h-2 rounded-full ${
             status === 'good' ? 'bg-emerald-400' :
             status === 'warn' ? 'bg-amber-400' :
-            status === 'bad' ? 'bg-red-400' : 'bg-blue-400'
+            status === 'bad' ? 'bg-red-400' : 'bg-orange-400'
           }`} />
         )}
       </div>
@@ -115,7 +115,7 @@ export default function SystemHealthPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64" data-testid="health-loading">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-400" />
+        <RefreshCw className="w-8 h-8 animate-spin text-orange-400" />
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function SystemHealthPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Gauge className="w-6 h-6 text-blue-400" />
+            <Gauge className="w-6 h-6 text-orange-400" />
             System Health
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
@@ -213,7 +213,7 @@ export default function SystemHealthPage() {
         <Card className="glass-card border-zinc-800/50" data-testid="cpu-card">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-blue-400" /> CPU
+              <Cpu className="w-4 h-4 text-orange-400" /> CPU
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
@@ -273,7 +273,7 @@ export default function SystemHealthPage() {
           <CardHeader className="pb-2 px-4 pt-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm text-zinc-400 flex items-center gap-2">
-                <Database className="w-4 h-4 text-blue-400" /> Database
+                <Database className="w-4 h-4 text-orange-400" /> Database
               </CardTitle>
               <Badge variant="outline" className={`text-xs ${
                 db.status === 'healthy' ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-400'

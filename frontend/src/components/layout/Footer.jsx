@@ -19,7 +19,7 @@ export const Footer = () => {
   }, []);
 
   return (
-    <footer className="mt-auto py-4 px-6 border-t border-zinc-800 bg-zinc-950/50" data-testid="app-footer">
+    <footer className="mt-auto py-4 px-6 border-t border-white/[0.06] bg-[#0a0a0a]/50" data-testid="app-footer">
       <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
         {/* Copyright */}
         <span className="text-zinc-500">
