@@ -249,3 +249,307 @@ async def get_forum_summary(post_id: str, user: dict = Depends(get_current_user)
         return {"summary": None, "reason": "Unable to generate summary", "comment_count": len(comments)}
 
     return {"summary": result, "post_id": post_id, "comment_count": len(comments), "ai_powered": True}
+
+
+# ─── Phase 2: AI Signal Insights ───
+
+@router.get("/signal-insights/{signal_id}")
+async def get_signal_insights(signal_id: str, user: dict = Depends(get_current_user)):
+    """Get AI-generated market context and insights for a trading signal."""
+    db = deps.db
+
+    signal = await db.trading_signals.find_one({"id": signal_id}, {"_id": 0})
+    if not signal:
+        raise HTTPException(status_code=404, detail="Signal not found")
+
+    # Get recent signal history for context
+    recent_signals = await db.trading_signals.find(
+        {}, {"_id": 0, "direction": 1, "product": 1, "profit_points": 1, "created_at": 1}
+    ).sort("created_at", -1).limit(10).to_list(10)
+
+    # Get member performance on this product
+    product_trades = await db.trade_logs.find(
+        {"user_id": user["id"], "signal_id": {"$exists": True}},
+        {"_id": 0, "direction": 1, "actual_profit": 1, "performance": 1, "lot_size": 1}
+    ).sort("created_at", -1).limit(20).to_list(20)
+
+    signal_history = "\n".join(
+        f"  {s.get('created_at','')[:10]} {s.get('direction','')} {s.get('product','')} pts:{s.get('profit_points','')}"
+        for s in recent_signals
+    )
+
+    perf_summary = ""
+    if product_trades:
+        avg_profit = sum(t.get("actual_profit", 0) for t in product_trades) / len(product_trades)
+        exceeded = sum(1 for t in product_trades if t.get("performance") == "exceeded")
+        perf_summary = (
+            f"Your last {len(product_trades)} trades: avg profit ${avg_profit:.2f}, "
+            f"{exceeded}/{len(product_trades)} exceeded target."
+        )
+
+    system = (
+        "You are a trading signal analyst. When a new signal drops, explain what to watch for. "
+        "Be concise (3-4 bullet points), practical, and confidence-boosting without being reckless. "
+        "Mention key considerations: timing, lot sizing, exit strategy."
+    )
+
+    prompt = (
+        f"New signal: {signal.get('direction','')} on {signal.get('product','')}\n"
+        f"Trade time: {signal.get('trade_time','')} {signal.get('trade_timezone','')}\n"
+        f"Profit multiplier: {signal.get('profit_points','')}\n"
+        f"Notes from admin: {signal.get('notes','None')}\n\n"
+        f"Recent signal history:\n{signal_history}\n\n"
+        f"{perf_summary}\n\n"
+        f"Give the member practical insights for this signal."
+    )
+
+    result = await call_llm(system, prompt, "signal_insights", user["id"], signal_id)
+    if not result:
+        return {"insights": None, "signal_id": signal_id}
+
+    return {"insights": result, "signal_id": signal_id, "ai_powered": True}
+
+
+# ─── Phase 2: AI Trade Journal ───
+
+@router.get("/trade-journal")
+async def get_trade_journal(
+    period: str = Query("daily", regex="^(daily|weekly)$"),
+    user: dict = Depends(get_current_user),
+):
+    """AI-generated trade journal summarizing patterns, streaks, and discipline."""
+    db = deps.db
+
+    if period == "daily":
+        since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    else:
+        since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+
+    trades = await db.trade_logs.find(
+        {"user_id": user["id"], "created_at": {"$gte": since}}, {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+
+    if not trades:
+        return {"journal": "No trades found for this period.", "period": period, "trade_count": 0}
+
+    # Build trade details
+    trade_lines = []
+    for t in trades:
+        trade_lines.append(
+            f"{t.get('created_at','')[:16]}: {t.get('direction','')} "
+            f"lot:{t.get('lot_size',0):.2f} "
+            f"projected:${t.get('projected_profit',0):.2f} "
+            f"actual:${t.get('actual_profit',0):.2f} "
+            f"({t.get('performance','')})"
+        )
+
+    # Get streak
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "streak": 1})
+    streak = user_doc.get("streak", 0) if user_doc else 0
+
+    total_profit = sum(t.get("actual_profit", 0) for t in trades)
+    exceeded = sum(1 for t in trades if t.get("performance") == "exceeded")
+    below = sum(1 for t in trades if t.get("performance") == "below")
+    buy_trades = [t for t in trades if t.get("direction") == "BUY"]
+    sell_trades = [t for t in trades if t.get("direction") == "SELL"]
+    buy_profit = sum(t.get("actual_profit", 0) for t in buy_trades)
+    sell_profit = sum(t.get("actual_profit", 0) for t in sell_trades)
+
+    cache_extra = f"{period}_{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
+
+    system = (
+        "You are a trading journal AI. Write a reflective journal entry about the trader's recent performance. "
+        "Analyze patterns: BUY vs SELL performance, consistency, discipline, and emotional indicators. "
+        "Be insightful and supportive. Format with clear sections. Keep to 4-5 key observations."
+    )
+
+    prompt = (
+        f"Period: {'Today' if period == 'daily' else 'This Week'}\n"
+        f"Trades ({len(trades)}):\n" + "\n".join(trade_lines) + "\n\n"
+        f"Stats: Total profit: ${total_profit:.2f}, Exceeded: {exceeded}, Below: {below}\n"
+        f"BUY trades: {len(buy_trades)} (${buy_profit:.2f}), SELL trades: {len(sell_trades)} (${sell_profit:.2f})\n"
+        f"Current streak: {streak} days\n\n"
+        f"Write a trade journal entry with patterns, observations, and one actionable tip."
+    )
+
+    result = await call_llm(system, prompt, "trade_journal", user["id"], cache_extra)
+    if not result:
+        return {"journal": None, "period": period, "trade_count": len(trades)}
+
+    return {
+        "journal": result,
+        "period": period,
+        "trade_count": len(trades),
+        "stats": {
+            "total_profit": round(total_profit, 2),
+            "exceeded": exceeded,
+            "below": below,
+            "buy_profit": round(buy_profit, 2),
+            "sell_profit": round(sell_profit, 2),
+            "streak": streak,
+        },
+        "ai_powered": True,
+    }
+
+
+# ─── Phase 2: AI Goal Advisor ───
+
+@router.get("/goal-advisor/{goal_id}")
+async def get_goal_advisor(goal_id: str, user: dict = Depends(get_current_user)):
+    """AI evaluates if a goal is realistic based on current performance."""
+    db = deps.db
+
+    goal = await db.goals.find_one({"id": goal_id, "user_id": user["id"]}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    # Get recent trade performance
+    trades = await db.trade_logs.find(
+        {"user_id": user["id"]}, {"_id": 0, "actual_profit": 1, "created_at": 1}
+    ).sort("created_at", -1).limit(30).to_list(30)
+
+    # Get account value
+    from utils.calculations import calculate_account_value
+    account_value = await calculate_account_value(db, user["id"], user)
+
+    remaining = goal["target_amount"] - goal["current_amount"]
+    progress = (goal["current_amount"] / goal["target_amount"] * 100) if goal["target_amount"] > 0 else 0
+
+    avg_daily_profit = sum(t.get("actual_profit", 0) for t in trades) / max(len(trades), 1) if trades else 0
+
+    # Calculate days to goal at current pace
+    days_to_goal = remaining / avg_daily_profit if avg_daily_profit > 0 else float("inf")
+
+    target_date_str = "No deadline set"
+    days_left = None
+    if goal.get("target_date"):
+        try:
+            td = datetime.fromisoformat(goal["target_date"])
+            days_left = (td - datetime.now(timezone.utc)).days
+            target_date_str = f"{days_left} days left (deadline: {td.strftime('%Y-%m-%d')})"
+        except (ValueError, TypeError):
+            pass
+
+    system = (
+        "You are a financial goal advisor. Evaluate whether the goal is realistic. "
+        "Consider pace, deadline, and account trajectory. Give honest, practical advice. "
+        "If ahead of schedule, celebrate. If behind, suggest adjustments (not guilt). "
+        "Keep response to 3-4 concise points."
+    )
+
+    prompt = (
+        f"Goal: {goal.get('name','')}\n"
+        f"Target: ${goal['target_amount']:.2f}, Current: ${goal['current_amount']:.2f} ({progress:.1f}%)\n"
+        f"Remaining: ${remaining:.2f}\n"
+        f"Timeline: {target_date_str}\n"
+        f"Account value: ${account_value:.2f}\n"
+        f"Avg profit/trade: ${avg_daily_profit:.2f} (last {len(trades)} trades)\n"
+        f"Days to goal at current pace: {days_to_goal:.0f}\n\n"
+        f"Is this goal realistic? What adjustments should the member consider?"
+    )
+
+    result = await call_llm(system, prompt, "goal_advisor", user["id"], goal_id)
+    if not result:
+        return {"advice": None, "goal_id": goal_id}
+
+    return {
+        "advice": result,
+        "goal_id": goal_id,
+        "progress": round(progress, 1),
+        "days_to_goal": round(days_to_goal) if days_to_goal != float("inf") else None,
+        "days_left": days_left,
+        "ai_powered": True,
+    }
+
+
+# ─── Phase 2: AI Anomaly Alert ───
+
+@router.get("/anomaly-check")
+async def check_anomalies(user: dict = Depends(get_current_user)):
+    """Detect unusual trading patterns and provide proactive advice."""
+    db = deps.db
+
+    # Get last 30 trades
+    trades = await db.trade_logs.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).limit(30).to_list(30)
+
+    if len(trades) < 5:
+        return {"anomalies": None, "reason": "Not enough trade history for analysis", "trade_count": len(trades)}
+
+    # Compute pattern metrics
+    recent_5 = trades[:5]
+    older_25 = trades[5:]
+
+    recent_profit = sum(t.get("actual_profit", 0) for t in recent_5) / len(recent_5)
+    older_profit = sum(t.get("actual_profit", 0) for t in older_25) / max(len(older_25), 1)
+
+    recent_below = sum(1 for t in recent_5 if t.get("performance") == "below")
+
+    # Check for missed trades (gaps in trading days)
+    trade_dates = sorted(set(t.get("created_at", "")[:10] for t in trades if t.get("created_at")))
+    gaps = 0
+    for i in range(1, len(trade_dates)):
+        try:
+            d1 = datetime.fromisoformat(trade_dates[i - 1])
+            d2 = datetime.fromisoformat(trade_dates[i])
+            if (d2 - d1).days > 3:
+                gaps += 1
+        except (ValueError, TypeError):
+            pass
+
+    # Get streak
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "streak": 1})
+    streak = user_doc.get("streak", 0) if user_doc else 0
+
+    # Detect flags
+    flags = []
+    if recent_profit < older_profit * 0.5 and older_profit > 0:
+        flags.append(f"Profit dropped: recent avg ${recent_profit:.2f} vs older avg ${older_profit:.2f}")
+    if recent_below >= 3:
+        flags.append(f"3+ below-target trades in last 5 ({recent_below}/5)")
+    if gaps >= 2:
+        flags.append(f"{gaps} extended gaps (3+ days) in trading schedule")
+    if streak == 0 and len(trades) > 10:
+        flags.append("Streak broken — currently at 0 days")
+
+    if not flags:
+        return {
+            "anomalies": None,
+            "status": "healthy",
+            "message": "No concerning patterns detected. Keep up the good work!",
+            "trade_count": len(trades),
+        }
+
+    cache_extra = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    system = (
+        "You are a trading performance monitor. You've detected concerning patterns. "
+        "Be empathetic, not alarming. Give 2-3 actionable suggestions. "
+        "Frame issues as opportunities for improvement. Keep it brief."
+    )
+
+    prompt = (
+        "Detected patterns:\n" + "\n".join(f"- {f}" for f in flags) + "\n\n"
+        f"Last 5 trades avg profit: ${recent_profit:.2f}\n"
+        f"Previous trades avg profit: ${older_profit:.2f}\n"
+        f"Current streak: {streak} days\n"
+        f"Below target: {recent_below}/5 recent trades\n\n"
+        f"Provide supportive feedback and actionable advice."
+    )
+
+    result = await call_llm(system, prompt, "anomaly_alert", user["id"], cache_extra)
+
+    return {
+        "anomalies": result,
+        "flags": flags,
+        "status": "warning",
+        "stats": {
+            "recent_avg_profit": round(recent_profit, 2),
+            "older_avg_profit": round(older_profit, 2),
+            "recent_below": recent_below,
+            "streak": streak,
+            "gaps": gaps,
+        },
+        "ai_powered": True,
+    }

@@ -516,4 +516,8 @@ export const aiAPI = {
   getFinancialSummary: (period = 'weekly') => api.get('/ai/financial-summary', { params: { period } }),
   getBalanceForecast: () => api.get('/ai/balance-forecast'),
   getForumSummary: (postId) => api.get(`/ai/forum-summary/${postId}`),
+  getSignalInsights: (signalId) => api.get(`/ai/signal-insights/${signalId}`),
+  getTradeJournal: (period = 'daily') => api.get('/ai/trade-journal', { params: { period } }),
+  getGoalAdvisor: (goalId) => api.get(`/ai/goal-advisor/${goalId}`),
+  getAnomalyCheck: () => api.get('/ai/anomaly-check'),
 };

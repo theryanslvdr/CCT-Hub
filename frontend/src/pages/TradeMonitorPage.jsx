@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import { MobileNotice } from '@/components/MobileNotice';
-import { AITradeCoach } from '@/components/AIFeatures';
+import { AITradeCoach, AITradeJournal, AIAnomalyAlert, AISignalInsights } from '@/components/AIFeatures';
 import { usePullToRefresh, PullToRefreshIndicator } from '@/hooks/usePullToRefresh';
 import { 
   Play, Square, Calculator, Clock, AlertTriangle, Trophy, Target, 
@@ -1685,6 +1685,12 @@ export const TradeMonitorPage = () => {
                   <Send className="w-3.5 h-3.5" /> Notify All Members
                 </Button>
               )}
+              {/* AI Signal Insights */}
+              {signal?.id && (
+                <div className="mt-3 pt-3 border-t border-zinc-800">
+                  <AISignalInsights signalId={signal.id} />
+                </div>
+              )}
             </CardContent>
           </Card>
         ) : (
@@ -2025,6 +2031,12 @@ export const TradeMonitorPage = () => {
         </CardContent>
       </Card>
 
+
+      {/* AI Intelligence Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <AITradeJournal />
+        <AIAnomalyAlert />
+      </div>
 
       {/* Trade History Card - Full width */}
       <Card className="glass-card" data-testid="trade-history-card">
