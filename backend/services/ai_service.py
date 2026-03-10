@@ -20,7 +20,7 @@ TOKEN_LIMITS = {
     "balance_forecast": 250,
     "post_summarizer": 250,
     "signal_insights": 250,
-    "trade_journal": 350,
+    "trade_journal": 800,
     "goal_advisor": 200,
     "anomaly_alert": 200,
     "answer_suggestion": 200,

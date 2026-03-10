@@ -39,9 +39,9 @@ async def get_trade_coach(trade_id: str, user: dict = Depends(get_current_user))
             f"({t.get('performance','?')})"
         )
 
-    # Get streak
-    streak_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "streak": 1})
-    streak = streak_doc.get("streak", 0) if streak_doc else 0
+    # Get streak (computed dynamically)
+    from utils.streak import compute_trading_streak
+    streak = await compute_trading_streak(db, user["id"])
 
     system = (
         "You are a trading coach for a copy-trading platform. Give brief, actionable feedback. "
@@ -343,9 +343,9 @@ async def get_trade_journal(
             f"({t.get('performance','')})"
         )
 
-    # Get streak
-    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "streak": 1})
-    streak = user_doc.get("streak", 0) if user_doc else 0
+    # Get streak (computed dynamically from trade history)
+    from utils.streak import compute_trading_streak
+    streak = await compute_trading_streak(db, user["id"])
 
     total_profit = sum(t.get("actual_profit", 0) for t in trades)
     exceeded = sum(1 for t in trades if t.get("performance") == "exceeded")
@@ -498,11 +498,9 @@ async def check_anomalies(user: dict = Depends(get_current_user)):
         except (ValueError, TypeError):
             pass
 
-    # Get streak
-    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "streak": 1})
-    streak = user_doc.get("streak", 0) if user_doc else 0
-
-    # Detect flags
+    # Get streak (computed dynamically)
+    from utils.streak import compute_trading_streak
+    streak = await compute_trading_streak(db, user["id"])
     flags = []
     if recent_profit < older_profit * 0.5 and older_profit > 0:
         flags.append(f"Profit dropped: recent avg ${recent_profit:.2f} vs older avg ${older_profit:.2f}")

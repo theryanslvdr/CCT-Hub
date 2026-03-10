@@ -1,0 +1,74 @@
+{
+  "summary": "Testing 4 bug fixes in iteration 173. Backend tests (8/8 passed): Anomaly check streak computation, Trade journal not truncated (max_tokens=800), Shared streak utility verified. Frontend: Timezone DST fix verified (uses Intl API). ISSUE FOUND: NotificationPanel.jsx has all required features but is NOT wired into Header.jsx - Header uses old NotificationSheet instead.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "critical": [
+      {
+        "component": "Header.jsx / NotificationPanel",
+        "issue": "NotificationPanel.jsx has all required features (tabs, consolidation, action buttons) but is NOT imported or used in Header.jsx. Header.jsx still uses the old NotificationSheet component which lacks these features.",
+        "selector": "Header.jsx line 14 imports NotificationSheet, line 271 renders <NotificationSheet />",
+        "priority": "HIGH",
+        "fix": "In /app/frontend/src/components/layout/Header.jsx, replace import { NotificationSheet } with import { NotificationPanel } and replace <NotificationSheet /> with <NotificationPanel />"
+      }
+    ],
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_173_bugs.py",
+    "/app/test_reports/pytest/pytest_iteration_173.xml"
+  ],
+  "action_items": [
+    "HIGH PRIORITY: Wire NotificationPanel into Header.jsx - Replace NotificationSheet with NotificationPanel import and usage",
+    "File to edit: /app/frontend/src/components/layout/Header.jsx line 14 and line 271"
+  ],
+  "critical_code_review_comments": [
+    "NotificationPanel.jsx was created with all required features but never wired into the application",
+    "The fix is simple: change import and component usage in Header.jsx"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration_173_bugs.py"],
+  "success_rate": {"backend": "100%", "frontend": "75%"},
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123",
+  "seed_data_creation": "",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 173 tested 4 bug fixes: 1) Anomaly streak fix - VERIFIED using compute_trading_streak utility, 2) Trade journal truncation fix - VERIFIED max_tokens=800, 3) Timezone DST fix - VERIFIED uses Intl API not hardcoded offsets, 4) NotificationPanel - CODE EXISTS but NOT WIRED into Header.jsx. The NotificationPanel.jsx has tabs (tab-unread, tab-read, tab-all), consolidation (consolidateByType function), and action buttons (notification-action-*) but Header.jsx still imports and uses NotificationSheet instead.",
+  "tests_executed": {
+    "backend_health": {"status": "PASS", "notes": "Server healthy"},
+    "login_endpoint": {"status": "PASS", "notes": "Returns access_token"},
+    "anomaly_check_streak": {"status": "PASS", "notes": "Uses compute_trading_streak from utils/streak.py"},
+    "trade_journal_not_truncated": {"status": "PASS", "notes": "max_tokens increased to 800"},
+    "trade_journal_streak_in_stats": {"status": "PASS", "notes": "stats.streak computed from trade_logs"},
+    "streak_computation_shared": {"status": "PASS", "notes": "ai_routes.py imports compute_trading_streak"},
+    "ai_service_token_limits": {"status": "PASS", "notes": "trade_journal: 800 tokens"},
+    "timezone_dst_fix": {"status": "PASS", "notes": "getTimezoneOffset uses Intl.DateTimeFormat, no hardcoded offsets"},
+    "notification_panel_features": {"status": "PARTIAL", "notes": "NotificationPanel.jsx has all features but is NOT used in Header"}
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["Rewards Platform external API"]
+  },
+  "bug_fix_verification": {
+    "bug1_anomaly_streak": {
+      "status": "FIXED",
+      "detail": "ai_routes.py lines 42-44, 346-349, 501-503 now use 'from utils.streak import compute_trading_streak' instead of users.streak"
+    },
+    "bug2_trade_journal_truncation": {
+      "status": "FIXED",
+      "detail": "ai_service.py TOKEN_LIMITS['trade_journal'] increased from 350 to 800"
+    },
+    "bug3_timezone_dst": {
+      "status": "FIXED",
+      "detail": "TradeMonitorPage.jsx getTimezoneOffset (lines 103-114) uses Intl API, no hardcoded America/Los_Angeles"
+    },
+    "bug4_notification_panel": {
+      "status": "CODE EXISTS BUT NOT WIRED",
+      "detail": "NotificationPanel.jsx has tabs, consolidation, action buttons BUT Header.jsx still uses NotificationSheet",
+      "required_fix": "In Header.jsx: import { NotificationPanel } from '@/components/NotificationPanel' and use <NotificationPanel /> instead of <NotificationSheet />"
+    }
+  }
+}

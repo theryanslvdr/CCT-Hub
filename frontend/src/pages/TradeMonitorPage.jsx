@@ -99,38 +99,18 @@ const convertTimeToTimezone = (timeStr, fromTz, toTz) => {
   }
 };
 
-// Get timezone offset in hours
+// Get timezone offset in hours — DST-aware using Intl API
 const getTimezoneOffset = (tz) => {
-  const offsets = {
-    'Asia/Manila': 8,
-    'Asia/Singapore': 8,
-    'Asia/Taipei': 8,
-    'America/New_York': -5,
-    'America/Chicago': -6,
-    'America/Denver': -7,
-    'America/Los_Angeles': -8,
-    'Europe/London': 0,
-    'Europe/Paris': 1,
-    'Europe/Berlin': 1,
-    'Australia/Sydney': 11,
-    'Asia/Tokyo': 9,
-    'Asia/Shanghai': 8,
-    'UTC': 0,
-  };
-  
-  // Try to get from browser if not in list
-  if (!offsets[tz]) {
-    try {
-      const date = new Date();
-      const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-      const tzDate = new Date(date.toLocaleString('en-US', { timeZone: tz }));
-      return Math.round((tzDate - utcDate) / (1000 * 60 * 60));
-    } catch {
-      return 0;
-    }
+  try {
+    const now = new Date();
+    const utcStr = now.toLocaleString('en-US', { timeZone: 'UTC' });
+    const tzStr = now.toLocaleString('en-US', { timeZone: tz });
+    const utcDate = new Date(utcStr);
+    const tzDate = new Date(tzStr);
+    return Math.round((tzDate - utcDate) / (1000 * 60 * 60));
+  } catch {
+    return 0;
   }
-  
-  return offsets[tz];
 };
 
 // Get user's local timezone
