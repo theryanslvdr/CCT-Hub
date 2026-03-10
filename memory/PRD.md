@@ -142,11 +142,11 @@ Financial tracking and community platform for CrossCurrent trading group. Featur
 - [x] AI Post Summarizer
 - [x] AI Duplicate Detection
 
-### Phase 2 — Trading Intelligence (Next)
-- [ ] AI Signal Insights — Market context when signals drop
-- [ ] AI Trade Journal — Auto-generated daily/weekly trade summary
-- [ ] AI Goal Advisor — Evaluates goal realism
-- [ ] AI Anomaly Alert — Detects concerning performance patterns
+### Phase 2 — Trading Intelligence — DONE
+- [x] AI Signal Insights — Market context when signals drop
+- [x] AI Trade Journal — Auto-generated daily/weekly trade summary
+- [x] AI Goal Advisor — Evaluates goal realism
+- [x] AI Anomaly Alert — Detects concerning performance patterns
 
 ### Phase 3 — Community, Admin & Notifications
 - [ ] AI Answer Suggestions — Suggests answers from solved posts

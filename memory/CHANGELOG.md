@@ -42,6 +42,19 @@
 - 100% frontend verification
 - All 4 AI endpoints confirmed working with OpenRouter + caching
 
+## 2026-03-10 — Phase 2: Trading Intelligence AI
+
+### New Features
+- **AI Signal Insights**: Market context & tips inside Active Signal card (Zap icon button)
+- **AI Trade Journal**: Daily/Weekly reflective journal on Trade Monitor with BUY/SELL analysis, streak tracking
+- **AI Goal Advisor**: Per-goal realism assessment on Profit Planner with days-to-goal projection
+- **AI Anomaly Alert**: Detects trading gaps, streak breaks, profit drops — shows flags with supportive advice
+
+### Testing
+- 19/20 backend tests passed, 1 skipped (no active signal) (iteration 155)
+- Phase 1 regression: all 4 features still working
+- 100% frontend verification
+
 ## 2026-03-06 - Commission & Stability Fixes
 
 ### Bug Fixes
