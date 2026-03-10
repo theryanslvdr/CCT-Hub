@@ -635,64 +635,18 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         )}
       </nav>
 
-      {/* Admin Section - Collapsible, anchored at bottom */}
+      {/* Admin Section - Single button to admin dashboard */}
       {((isAdmin() && !simulatedView) || (simulatedView && ['basic_admin', 'super_admin', 'master_admin'].includes(simulatedView.role))) && (
         <div className="px-3 pb-2 border-t border-white/[0.03] pt-2">
-          <button
-            onClick={() => setAdminExpanded(!adminExpanded)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors"
-            data-testid="admin-section-toggle"
+          <NavLink
+            to="/admin/dashboard"
+            className={navLinkClass}
+            onClick={handleNavClick}
+            data-testid="admin-dashboard-btn"
           >
-            {!collapsed && <span className="text-xs uppercase tracking-wider font-medium">Admin</span>}
-            {collapsed ? (
-              <Shield className="w-4 h-4 mx-auto" />
-            ) : (
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${adminExpanded ? 'rotate-180' : ''}`} />
-            )}
-          </button>
-          
-          <div className={`space-y-1 overflow-hidden transition-all duration-200 ${adminExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-            {adminNavItems.map((item) => (
-              <NavLink 
-                key={item.path} 
-                to={item.path} 
-                className={navLinkClass}
-                onClick={handleNavClick}
-                title={collapsed ? item.label : undefined}
-              >
-                <item.icon className="w-4 h-4" />
-                {!collapsed && <span className="text-sm">{item.label}</span>}
-              </NavLink>
-            ))}
-            
-            {/* Super/Master Admin only items */}
-            {((!simulatedView && (isSuperAdmin() || isMasterAdmin())) || (simulatedView && ['super_admin', 'master_admin'].includes(simulatedView.role))) && superAdminItems.map((item) => (
-              <NavLink 
-                key={item.path} 
-                to={item.path} 
-                className={navLinkClass}
-                onClick={handleNavClick}
-                title={collapsed ? item.label : undefined}
-              >
-                <item.icon className="w-4 h-4" />
-                {!collapsed && <span className="text-sm">{item.label}</span>}
-              </NavLink>
-            ))}
-
-            {/* Master Admin only items */}
-            {((!simulatedView && isMasterAdmin()) || (simulatedView && simulatedView.role === 'master_admin')) && masterAdminItems.map((item) => (
-              <NavLink 
-                key={item.path} 
-                to={item.path} 
-                className={navLinkClass}
-                onClick={handleNavClick}
-                title={collapsed ? item.label : undefined}
-              >
-                <item.icon className="w-4 h-4" />
-                {!collapsed && <span className="text-sm">{item.label}</span>}
-              </NavLink>
-            ))}
-          </div>
+            <Shield className="w-4 h-4" />
+            {!collapsed && <span className="text-sm font-medium">Admin Dashboard</span>}
+          </NavLink>
         </div>
       )}
 

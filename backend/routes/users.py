@@ -64,6 +64,24 @@ DEFAULT_ADMIN_PREFS = {
 }
 
 
+@router.post("/complete-tour")
+async def complete_tour(user: dict = Depends(get_current_user)):
+    """Mark the onboarding tour as completed for this user."""
+    db = deps.db
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"tour_completed": True, "tour_completed_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Tour marked as completed"}
+
+
+@router.get("/tour-status")
+async def get_tour_status(user: dict = Depends(get_current_user)):
+    """Check if the user has completed the onboarding tour."""
+    return {"tour_completed": user.get("tour_completed", False)}
+
+
+
 @router.get("/notification-preferences")
 async def get_notification_preferences(user: dict = Depends(get_current_user)):
     db = deps.db

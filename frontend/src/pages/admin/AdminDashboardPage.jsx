@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
 import { adminAPI, aiAssistantAPI } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   Users, TrendingUp, DollarSign, Activity, Shield, Settings,
-  BarChart3, Radio, HelpCircle, Sparkles, Award, MessageSquare,
-  ArrowUpRight, Clock, AlertTriangle, ChevronRight, BrainCircuit
+  BarChart3, Radio, HelpCircle, Sparkles, Award,
+  ArrowUpRight, AlertTriangle, ChevronRight, BrainCircuit
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -92,41 +91,35 @@ const AdminDashboardPage = () => {
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
+        {/* Management */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Quick Actions</h2>
+          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">Management</h2>
           <div className="space-y-2">
             <QuickAction label="Manage Members" desc="View, edit, and manage all members" icon={Users} color="from-orange-500 to-amber-600" link="/admin/members" />
             <QuickAction label="Trading Signals" desc="Create and manage trade signals" icon={Radio} color="from-emerald-500 to-emerald-600" link="/admin/signals" />
-            <QuickAction label="Quiz Manager" desc="Generate and approve community quizzes" icon={HelpCircle} color="from-purple-500 to-purple-600" link="/admin/quizzes" />
-            <QuickAction label="AI Training" desc="Configure RyAI and zxAI assistants" icon={BrainCircuit} color="from-teal-500 to-teal-600" link="/admin/ai-training" />
-            <QuickAction label="Rewards Admin" desc="Manage points, badges, and leaderboard" icon={Award} color="from-amber-500 to-amber-600" link="/admin/rewards" />
-            <QuickAction label="Platform Settings" desc="Configure platform appearance and features" icon={Settings} color="from-zinc-500 to-zinc-600" link="/admin/settings" />
+            <QuickAction label="Transactions" desc="Review deposits and withdrawals" icon={DollarSign} color="from-amber-500 to-amber-600" link="/admin/transactions" />
+            <QuickAction label="Licenses" desc="Manage member licenses" icon={Award} color="from-purple-500 to-purple-600" link="/admin/licenses" />
           </div>
         </div>
 
-        {/* System Status */}
+        {/* Analytics & Tools */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Platform Overview</h2>
-          <Card className="bg-[#111111]/80 border-white/[0.06] rounded-xl overflow-hidden">
-            <CardContent className="p-0">
-              {[
-                { label: 'Members', link: '/admin/members', icon: Users, stat: `${stats.totalMembers ?? 0} total`, color: 'text-orange-400' },
-                { label: 'AI Conversations', link: '/admin/ai-training', icon: MessageSquare, stat: `${aiStats.total_messages ?? 0} messages`, color: 'text-purple-400' },
-                { label: 'Analytics', link: '/admin/analytics', icon: BarChart3, stat: 'View insights', color: 'text-emerald-400' },
-                { label: 'Transactions', link: '/admin/transactions', icon: DollarSign, stat: 'Review pending', color: 'text-amber-400' },
-                { label: 'System Health', link: '/admin/system-health', icon: Shield, stat: 'Check status', color: 'text-teal-400' },
-                { label: 'Referral Tree', link: '/admin/referral-tree', icon: TrendingUp, stat: 'View network', color: 'text-pink-400' },
-              ].map((item, i) => (
-                <Link key={i} to={item.link} className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] transition-colors group">
-                  <item.icon className={`w-4 h-4 ${item.color}`} />
-                  <span className="flex-1 text-sm text-zinc-300">{item.label}</span>
-                  <span className="text-xs text-zinc-600">{item.stat}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
+          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">Analytics & Tools</h2>
+          <div className="space-y-2">
+            <QuickAction label="Team Analytics" desc="View performance insights and reports" icon={BarChart3} color="from-teal-500 to-teal-600" link="/admin/analytics" />
+            <QuickAction label="Referral Tree" desc="View and manage referral network" icon={TrendingUp} color="from-pink-500 to-rose-600" link="/admin/referrals" />
+            <QuickAction label="Rewards Admin" desc="Manage points, badges, and leaderboard" icon={Award} color="from-amber-500 to-amber-600" link="/admin/rewards" />
+            <QuickAction label="Quiz Manager" desc="Generate and approve community quizzes" icon={HelpCircle} color="from-indigo-500 to-indigo-600" link="/admin/quizzes" />
+          </div>
+        </div>
+
+        {/* AI & Platform */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">AI & Platform</h2>
+          <div className="space-y-2">
+            <QuickAction label="AI Training Center" desc="Configure and train the adaptive AI assistant" icon={BrainCircuit} color="from-violet-500 to-violet-600" link="/admin/ai-training" />
+            <QuickAction label="Platform Settings" desc="Configure appearance, features, and branding" icon={Settings} color="from-zinc-500 to-zinc-600" link="/admin/settings" />
+          </div>
 
           {/* AI Assistant Status */}
           {aiStats.pending_unanswered > 0 && (
@@ -139,6 +132,15 @@ const AdminDashboardPage = () => {
               <ArrowUpRight className="w-4 h-4 text-amber-400" />
             </Link>
           )}
+        </div>
+
+        {/* System */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest">System</h2>
+          <div className="space-y-2">
+            <QuickAction label="System Check" desc="Run integrity checks and validations" icon={Shield} color="from-red-500 to-red-600" link="/admin/system-check" />
+            <QuickAction label="System Health" desc="Monitor server and database status" icon={Activity} color="from-cyan-500 to-cyan-600" link="/admin/system-health" />
+          </div>
         </div>
       </div>
     </div>

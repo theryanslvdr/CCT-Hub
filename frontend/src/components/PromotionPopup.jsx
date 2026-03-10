@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { settingsAPI } from '@/lib/api';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ const PRESET_STYLES = {
 export const PromotionPopup = () => {
   const [popup, setPopup] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     settingsAPI.getPromotionPopup()
@@ -61,6 +63,20 @@ export const PromotionPopup = () => {
       sessionStorage.setItem(SESSION_KEY, '1');
       if (popup.frequency === 'once_per_day') {
         localStorage.setItem(DAY_KEY, new Date().toISOString().slice(0, 10));
+      }
+    }
+  };
+
+  const handleCTA = (e) => {
+    e.preventDefault();
+    settingsAPI.trackBannerEvent('click', 'promo_popup').catch(() => {});
+    const url = popup?.cta_url;
+    handleClose();
+    if (url) {
+      if (url.startsWith('/')) {
+        navigate(url);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
       }
     }
   };
@@ -114,11 +130,11 @@ export const PromotionPopup = () => {
           {/* CTA */}
           {popup.cta_text && popup.cta_url && (
             <Button
-              asChild
+              onClick={handleCTA}
               className={`w-full ${style.btnClass} text-white`}
               data-testid="promo-popup-cta"
             >
-              <a href={popup.cta_url} target="_blank" rel="noopener noreferrer">{popup.cta_text}</a>
+              {popup.cta_text}
             </Button>
           )}
 

@@ -61,7 +61,7 @@ DEFAULT_ASSISTANTS = [
 
 # ── Request / Response Models ───────────────────────────────────
 class ChatRequest(BaseModel):
-    assistant_id: str  # "ryai" or "zxai"
+    assistant_id: str = "adaptive"  # default to adaptive mode
     message: str
     session_id: Optional[str] = None
 
@@ -113,6 +113,67 @@ async def get_assistant_config(assistant_id: str):
 async def build_context(assistant_id: str, session_id: str, user_message: str):
     """Build conversation context including knowledge base and chat history."""
     db = deps.db
+
+    if assistant_id == "adaptive":
+        # Adaptive mode: merge both RyAI and zxAI knowledge into a single context
+        ryai_config = await get_assistant_config("ryai")
+        zxai_config = await get_assistant_config("zxai")
+
+        # Build merged system prompt
+        system_prompt = (
+            "You are the CrossCurrent AI Assistant — an adaptive intelligence that serves two roles:\n\n"
+            "**RyAI Mode** — Technical & Safeguard Intelligence:\n"
+            f"{ryai_config.get('system_prompt', '') if ryai_config else 'Platform guidance, feature help, and security.'}\n\n"
+            "**zxAI Mode** — Knowledge & Encouragement Engine:\n"
+            f"{zxai_config.get('system_prompt', '') if zxai_config else 'Motivation, community encouragement, and education.'}\n\n"
+            "IMPORTANT RULES:\n"
+            "1. Automatically detect the user's intent. If they ask about platform features, how-to, "
+            "technical issues, or reporting — respond as RyAI. If they seek encouragement, motivation, "
+            "community topics, or emotional support — respond as zxAI.\n"
+            "2. Start EVERY response with exactly [RyAI] or [zxAI] to indicate which mode you're using.\n"
+            "3. You may switch modes mid-conversation naturally. If a technical question has an emotional component, "
+            "you can blend both modes but still pick the primary one for the tag.\n"
+            "4. Keep responses concise and helpful.\n"
+        )
+
+        # Merge knowledge bases from both assistants
+        knowledge_entries = []
+        for aid in ["ryai", "zxai"]:
+            cursor = db.ai_knowledge.find(
+                {"assistant_id": aid},
+                {"_id": 0, "question": 1, "answer": 1, "category": 1}
+            ).sort("created_at", -1).limit(25)
+            async for entry in cursor:
+                knowledge_entries.append(entry)
+
+        if knowledge_entries:
+            kb_text = "\n\n--- KNOWLEDGE BASE (Use this to answer questions) ---\n"
+            for entry in knowledge_entries:
+                kb_text += f"Q: {entry['question']}\nA: {entry['answer']}\n\n"
+            system_prompt += kb_text
+
+        system_prompt += (
+            "\n--- INSTRUCTIONS ---\n"
+            "1. Always answer based on the knowledge base and CrossCurrent-specific information.\n"
+            "2. If you don't know the answer, respond EXACTLY with: "
+            "[ESCALATE] followed by a brief explanation.\n"
+            "3. Never provide generic financial advice. Only CrossCurrent-specific guidance.\n"
+        )
+
+        config = ryai_config or zxai_config or {"model": DEFAULT_MODEL}
+        messages = [{"role": "system", "content": system_prompt}]
+
+        if session_id:
+            history_cursor = db.ai_messages.find(
+                {"session_id": session_id}
+            ).sort("created_at", 1).limit(20)
+            async for msg in history_cursor:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+        messages.append({"role": "user", "content": user_message})
+        return config, messages
+
+    # Original single-assistant mode (for admin training endpoints)
     config = await get_assistant_config(assistant_id)
     if not config:
         return None, None
@@ -242,13 +303,25 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
     if not ai_response:
         ai_response = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
 
+    # Detect which persona responded (for adaptive mode)
+    detected_persona = req.assistant_id
+    if req.assistant_id == "adaptive":
+        if ai_response.startswith("[RyAI]"):
+            detected_persona = "ryai"
+            ai_response = ai_response[6:].strip()
+        elif ai_response.startswith("[zxAI]"):
+            detected_persona = "zxai"
+            ai_response = ai_response[6:].strip()
+        else:
+            detected_persona = "ryai"  # default fallback
+
     # Check if AI escalated
     escalated = False
     if "[ESCALATE]" in ai_response:
         escalated = True
         # Store unanswered question for admin
         await db.ai_unanswered.insert_one({
-            "assistant_id": req.assistant_id,
+            "assistant_id": detected_persona,
             "session_id": session_id,
             "question": req.message,
             "user_id": user_id,
@@ -263,9 +336,9 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
             ai_response = "That's a great question! I've flagged this for our team to provide you with the most accurate answer. Check back soon!"
 
     # Active learning: store the interaction
-    if config.get("active_learning"):
+    if config.get("active_learning", True):
         await db.ai_interactions.insert_one({
-            "assistant_id": req.assistant_id,
+            "assistant_id": detected_persona,
             "user_id": user_id,
             "question": req.message,
             "response": ai_response,
@@ -273,11 +346,12 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
 
-    # Save assistant message
+    # Save assistant message with persona tag
     await db.ai_messages.insert_one({
         "session_id": session_id,
         "role": "assistant",
         "content": ai_response,
+        "persona": detected_persona,
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
 
@@ -292,6 +366,7 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
         "response": ai_response,
         "escalated": escalated,
         "assistant_id": req.assistant_id,
+        "persona": detected_persona,
     }
 
 

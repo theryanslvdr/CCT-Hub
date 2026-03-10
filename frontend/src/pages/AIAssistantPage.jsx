@@ -1,43 +1,62 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Shield, Sparkles, Send, Plus, Trash2, MessageSquare, Clock, ChevronLeft, Loader2 } from 'lucide-react';
+import { Shield, Sparkles, Send, Plus, Trash2, MessageSquare, ChevronLeft, Loader2, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { aiAssistantAPI } from '@/lib/api';
 import { toast } from 'sonner';
 import Md from '@/components/Md';
 
-const ICONS = { shield: Shield, sparkles: Sparkles };
-const COLORS = { ryai: '#F97316', zxai: '#10B981' };
+const PERSONA_META = {
+  ryai: { icon: Shield, color: '#F97316', label: 'RyAI', bg: 'rgba(249,115,22,0.12)' },
+  zxai: { icon: Sparkles, color: '#10B981', label: 'zxAI', bg: 'rgba(16,185,129,0.12)' },
+};
 
 const AIAssistantPage = () => {
-  const [assistants, setAssistants] = useState([]);
-  const [activeAssistant, setActiveAssistant] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [activeSession, setActiveSession] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [popularPrompts, setPopularPrompts] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    aiAssistantAPI.listAssistants().then(r => {
-      setAssistants(r.data.assistants || []);
-      if (r.data.assistants?.length > 0) setActiveAssistant(r.data.assistants[0]);
-    }).catch(() => toast.error('Failed to load assistants'));
-  }, []);
-
-  const loadSessions = useCallback(async (assistantId) => {
+  // Load sessions
+  const loadSessions = useCallback(async () => {
     try {
-      const r = await aiAssistantAPI.getSessions(assistantId);
+      const r = await aiAssistantAPI.getSessions('adaptive');
       setSessions(r.data.sessions || []);
     } catch { /* ignore */ }
   }, []);
 
+  useEffect(() => { loadSessions(); }, [loadSessions]);
+
+  // Load popular prompts from both personas
   useEffect(() => {
-    if (activeAssistant) loadSessions(activeAssistant.assistant_id);
-  }, [activeAssistant, loadSessions]);
+    aiAssistantAPI.getPopularPrompts('ryai')
+      .then(r => {
+        const learned = (r.data.prompts || []).map(p => p.question);
+        const defaults = [
+          'How do I log my trades?',
+          'What are the trading rules?',
+          'How do commissions work?',
+          'Why is consistency important?',
+          'What benefits does CrossCurrent offer?',
+          'How do I build good habits?',
+        ];
+        setPopularPrompts([...learned, ...defaults].slice(0, 6));
+      })
+      .catch(() => {
+        setPopularPrompts([
+          'How do I log my trades?',
+          'What are the trading rules?',
+          'How do commissions work?',
+          'Why is consistency important?',
+          'What benefits does CrossCurrent offer?',
+          'How do I build good habits?',
+        ]);
+      });
+  }, []);
 
   const loadMessages = async (sessionId) => {
     try {
@@ -55,29 +74,29 @@ const AIAssistantPage = () => {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || sending || !activeAssistant) return;
+    if (!input.trim() || sending) return;
     const msg = input.trim();
     setInput('');
     setSending(true);
 
-    // Optimistic user message
     setMessages(prev => [...prev, { role: 'user', content: msg, created_at: new Date().toISOString() }]);
 
     try {
       const r = await aiAssistantAPI.chat({
-        assistant_id: activeAssistant.assistant_id,
+        assistant_id: 'adaptive',
         message: msg,
         session_id: activeSession,
       });
 
       if (!activeSession) {
         setActiveSession(r.data.session_id);
-        loadSessions(activeAssistant.assistant_id);
+        loadSessions();
       }
 
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: r.data.response,
+        persona: r.data.persona || 'ryai',
         created_at: new Date().toISOString(),
       }]);
     } catch {
@@ -104,68 +123,33 @@ const AIAssistantPage = () => {
     } catch { toast.error('Delete failed'); }
   };
 
-  const [popularPrompts, setPopularPrompts] = useState([]);
-
-  const color = activeAssistant ? COLORS[activeAssistant.assistant_id] || '#F97316' : '#F97316';
-  const Icon = activeAssistant ? ICONS[activeAssistant.icon] || MessageSquare : MessageSquare;
-
-  // Load popular prompts from active learning
-  useEffect(() => {
-    if (!activeAssistant) return;
-    aiAssistantAPI.getPopularPrompts(activeAssistant.assistant_id)
-      .then(r => {
-        const learned = (r.data.prompts || []).map(p => p.question);
-        if (learned.length >= 4) {
-          setPopularPrompts(learned.slice(0, 6));
-        } else {
-          // Fallback defaults
-          const defaults = activeAssistant.assistant_id === 'ryai'
-            ? ['How do I track my trades?', 'What are the trading rules?', 'How do commissions work?', 'Explain the profit tracker']
-            : ['Why is consistency important?', 'How do I build good habits?', 'What benefits does CrossCurrent offer?', 'Tell me about rewards'];
-          setPopularPrompts([...learned, ...defaults].slice(0, 6));
-        }
-      })
-      .catch(() => {
-        setPopularPrompts(activeAssistant.assistant_id === 'ryai'
-          ? ['How do I track my trades?', 'What are the trading rules?', 'How do commissions work?', 'Explain the profit tracker']
-          : ['Why is consistency important?', 'How do I build good habits?', 'What benefits does CrossCurrent offer?', 'Tell me about rewards']);
-      });
-  }, [activeAssistant]);
+  const renderPersonaIcon = (persona) => {
+    const meta = PERSONA_META[persona] || PERSONA_META.ryai;
+    const PIcon = meta.icon;
+    return (
+      <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: meta.bg }}>
+        <PIcon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-0 -m-3 sm:-m-4 md:-m-6" data-testid="ai-assistant-page">
       {/* Sidebar - sessions */}
       <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden flex flex-col`} style={{ background: 'rgba(8,8,8,0.95)', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
-        {/* Assistant selector tabs */}
-        <div className="p-3 border-b border-white/[0.06] flex gap-1">
-          {assistants.map(a => {
-            const AIcon = ICONS[a.icon] || MessageSquare;
-            const isActive = activeAssistant?.assistant_id === a.assistant_id;
-            return (
-              <button
-                key={a.assistant_id}
-                onClick={() => { setActiveAssistant(a); setActiveSession(null); setMessages([]); }}
-                className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  isActive ? 'bg-white/[0.08] text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]'
-                }`}
-                data-testid={`select-${a.assistant_id}`}
-              >
-                <AIcon className="w-3.5 h-3.5" style={{ color: COLORS[a.assistant_id] }} />
-                {a.display_name}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* New chat button */}
-        <div className="p-3">
-          <Button onClick={handleNewChat} className="w-full h-9 text-xs bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-300 gap-2" data-testid="new-chat-btn">
+        {/* Header */}
+        <div className="p-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="flex items-center gap-2 px-2 py-1.5 mb-3">
+            <Bot className="w-4 h-4 text-orange-400" />
+            <span className="text-xs font-semibold text-white">CrossCurrent AI</span>
+          </div>
+          <Button onClick={handleNewChat} className="w-full h-9 text-xs bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.06] text-zinc-300 gap-2" data-testid="new-chat-btn">
             <Plus className="w-3.5 h-3.5" /> New Chat
           </Button>
         </div>
 
         {/* Sessions list */}
-        <div className="flex-1 overflow-y-auto scrollbar-dark px-3 space-y-1">
+        <div className="flex-1 overflow-y-auto scrollbar-dark px-3 py-2 space-y-1">
           {sessions.map(s => (
             <button
               key={s.id}
@@ -196,12 +180,17 @@ const AIAssistantPage = () => {
           <button onClick={() => setShowSidebar(!showSidebar)} className="text-zinc-500 hover:text-white transition-colors md:block hidden">
             <ChevronLeft className={`w-5 h-5 transition-transform ${!showSidebar ? 'rotate-180' : ''}`} />
           </button>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
-            <Icon className="w-4 h-4" style={{ color }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(249,115,22,0.15)' }}>
+            <Bot className="w-4 h-4 text-orange-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-white">{activeAssistant?.display_name || 'AI Assistant'}</h3>
-            <p className="text-[11px] text-zinc-500 truncate">{activeAssistant?.tagline || ''}</p>
+            <h3 className="text-sm font-semibold text-white">CrossCurrent AI</h3>
+            <p className="text-[11px] text-zinc-500 truncate">
+              <span className="inline-flex items-center gap-1"><Shield className="w-3 h-3 text-orange-400" /> RyAI</span>
+              <span className="text-zinc-700 mx-1.5">&</span>
+              <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3 text-emerald-400" /> zxAI</span>
+              <span className="text-zinc-700 ml-1.5">— adapts to your needs</span>
+            </p>
           </div>
         </div>
 
@@ -209,13 +198,23 @@ const AIAssistantPage = () => {
         <div className="flex-1 overflow-y-auto scrollbar-dark px-4 py-4 space-y-4" data-testid="chat-messages">
           {messages.length === 0 && !activeSession && (
             <div className="flex flex-col items-center justify-center h-full max-w-lg mx-auto text-center">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: `${color}15` }}>
-                <Icon className="w-8 h-8" style={{ color }} />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(249,115,22,0.1)' }}>
+                <Bot className="w-8 h-8 text-orange-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-1">{activeAssistant?.display_name || 'AI Assistant'}</h2>
-              <p className="text-sm text-zinc-500 mb-6">{activeAssistant?.greeting || 'How can I help you today?'}</p>
+              <h2 className="text-xl font-bold text-white mb-1">CrossCurrent AI</h2>
+              <p className="text-sm text-zinc-500 mb-2">Your adaptive assistant — powered by two specialized AI engines</p>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                  <Shield className="w-3.5 h-3.5 text-orange-400" />
+                  <span><span className="text-orange-400 font-medium">RyAI</span> — Platform Guide</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <span><span className="text-emerald-400 font-medium">zxAI</span> — Encouragement</span>
+                </div>
+              </div>
 
-              {/* Quick prompts grid - powered by active learning */}
+              {/* Quick prompts grid */}
               <div className="grid grid-cols-2 gap-2 w-full">
                 {popularPrompts.map((p, i) => (
                   <button
@@ -228,33 +227,39 @@ const AIAssistantPage = () => {
                   </button>
                 ))}
               </div>
-              {popularPrompts.some((_, i) => i > 3) && (
-                <p className="text-[10px] text-zinc-600 mt-2">Trending questions from the community</p>
-              )}
+              <p className="text-[10px] text-zinc-600 mt-3">The AI automatically detects which engine best serves your question</p>
             </div>
           )}
 
-          {messages.map((m, i) => (
-            <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
-              {m.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: `${color}20` }}>
-                  <Icon className="w-3.5 h-3.5" style={{ color }} />
+          {messages.map((m, i) => {
+            const persona = m.persona || 'ryai';
+            const meta = PERSONA_META[persona] || PERSONA_META.ryai;
+
+            return (
+              <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
+                {m.role === 'assistant' && renderPersonaIcon(persona)}
+                <div className={`max-w-[75%] ${m.role === 'user' ? '' : ''}`}>
+                  {m.role === 'assistant' && (
+                    <span className="text-[10px] font-semibold ml-1 mb-0.5 block" style={{ color: meta.color }}>
+                      {meta.label}
+                    </span>
+                  )}
+                  <div className={`rounded-2xl px-4 py-2.5 text-sm ${
+                    m.role === 'user'
+                      ? 'bg-orange-500/15 text-zinc-100 rounded-br-md'
+                      : 'bg-white/[0.05] text-zinc-200 rounded-bl-md'
+                  }`}>
+                    {m.role === 'assistant' ? <Md>{m.content}</Md> : m.content}
+                  </div>
                 </div>
-              )}
-              <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                m.role === 'user'
-                  ? 'bg-orange-500/15 text-zinc-100 rounded-br-md'
-                  : 'bg-white/[0.05] text-zinc-200 rounded-bl-md'
-              }`}>
-                {m.role === 'assistant' ? <Md>{m.content}</Md> : m.content}
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {sending && (
             <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
+              <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(249,115,22,0.12)' }}>
+                <Bot className="w-3.5 h-3.5 text-orange-400" />
               </div>
               <div className="bg-white/[0.05] rounded-2xl rounded-bl-md px-4 py-3">
                 <div className="flex gap-1">
@@ -277,7 +282,7 @@ const AIAssistantPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder={`Ask ${activeAssistant?.display_name || 'AI'}...`}
+              placeholder="Ask anything about CrossCurrent..."
               className="flex-1 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-orange-500/30 focus:ring-1 focus:ring-orange-500/20 focus:outline-none transition-all"
               style={{ background: 'rgba(14,14,14,0.95)', border: '1px solid rgba(255,255,255,0.06)' }}
               disabled={sending}
@@ -287,7 +292,7 @@ const AIAssistantPage = () => {
               onClick={handleSend}
               disabled={!input.trim() || sending}
               className="h-auto px-4 rounded-xl text-white transition-all"
-              style={{ backgroundColor: sending ? '#333' : color }}
+              style={{ backgroundColor: sending ? '#333' : '#F97316' }}
               data-testid="chat-send-btn"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
