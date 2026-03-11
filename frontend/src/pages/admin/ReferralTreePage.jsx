@@ -19,32 +19,32 @@ const TreeNode = ({ node, depth = 0 }) => {
   return (
     <div className="select-none" data-testid={`tree-node-${node.id}`}>
       <div
-        className={`flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-all hover:bg-white/[0.04] ${
-          depth === 0 ? 'bg-[#1a1a1a]/40' : ''
+        className={`flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-all hover:bg-zinc-200/80 ${
+          depth === 0 ? 'bg-zinc-100/90' : 'bg-zinc-50/70'
         }`}
         style={{ marginLeft: depth * 24 }}
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
         {hasChildren ? (
-          expanded ? <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" /> : <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0" />
+          expanded ? <ChevronDown className="w-4 h-4 text-zinc-600 shrink-0" /> : <ChevronRight className="w-4 h-4 text-zinc-600 shrink-0" />
         ) : (
           <div className="w-4 h-4 shrink-0" />
         )}
 
         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-          node.role === 'master_admin' ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/40' :
-          node.role === 'super_admin' ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500/40' :
-          node.direct_referrals > 0 ? 'bg-green-500/20 text-green-400 ring-1 ring-green-500/40' :
-          'bg-zinc-700 text-zinc-300'
+          node.role === 'master_admin' ? 'bg-amber-500/30 text-amber-700 ring-1 ring-amber-500/50' :
+          node.role === 'super_admin' ? 'bg-purple-500/30 text-purple-700 ring-1 ring-purple-500/50' :
+          node.direct_referrals > 0 ? 'bg-green-500/30 text-green-700 ring-1 ring-green-500/50' :
+          'bg-zinc-300 text-zinc-700'
         }`}>
           {node.name?.charAt(0)?.toUpperCase() || '?'}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-white truncate">{node.name}</span>
+            <span className="text-sm font-medium text-zinc-900 truncate">{node.name}</span>
             {node.referral_code && (
-              <span className="text-xs px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-300 font-mono shrink-0">
+              <span className="text-xs px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-700 font-mono shrink-0">
                 {node.referral_code}
               </span>
             )}
@@ -53,14 +53,14 @@ const TreeNode = ({ node, depth = 0 }) => {
         </div>
 
         {hasChildren && (
-          <span className="text-xs text-zinc-400 shrink-0 bg-zinc-700/50 px-2 py-0.5 rounded-full">
+          <span className="text-xs text-zinc-600 shrink-0 bg-zinc-300/60 px-2 py-0.5 rounded-full">
             {node.direct_referrals} referral{node.direct_referrals !== 1 ? 's' : ''}
           </span>
         )}
       </div>
 
       {expanded && hasChildren && (
-        <div className="border-l border-white/[0.08]/50 ml-6">
+        <div className="border-l-2 border-zinc-300 ml-6">
           {node.children.map((child) => (
             <TreeNode key={child.id} node={child} depth={depth + 1} />
           ))}
@@ -397,7 +397,7 @@ const ReferralTreePage = () => {
           ) : (
             <>
               {view === 'tree' && treeData && (
-                <div className="space-y-1" data-testid="referral-tree-view">
+                <div className="space-y-1 p-4 rounded-xl bg-[#f5f5f0]" data-testid="referral-tree-view">
                   {treeData.filter(n => n.referral_code || n.direct_referrals > 0).length === 0 ? (
                     <div className="text-center py-12 text-zinc-500">
                       <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />

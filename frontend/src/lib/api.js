@@ -272,6 +272,7 @@ export const adminAPI = {
   deleteSignal: (id) => api.delete(`/admin/signals/${id}`),
   updateSignal: (id, data) => api.put(`/admin/signals/${id}`, data),
   getMembers: () => api.get('/admin/members'),
+  getMemberStatsOverview: () => api.get('/admin/members/stats/overview'),
   getMemberDetails: (userId) => api.get(`/admin/members/${userId}`),
   getMemberSimulation: (userId) => api.get(`/admin/members/${userId}/simulate`),
   updateMember: (userId, data) => api.put(`/admin/members/${userId}`, data),

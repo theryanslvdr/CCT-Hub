@@ -371,6 +371,7 @@ export const AdminMembersPage = () => {
       await api.post(`/admin/members/${member.id}/${action}`);
       toast.success(`User ${action}ed successfully`);
       loadMembers();
+      loadStatCards();
     } catch (error) {
       toast.error(`Failed to ${action} user`);
     }
@@ -578,21 +579,33 @@ export const AdminMembersPage = () => {
   };
 
   // Count members (merged "user" into "member")
-  const memberCount = members.filter(m => m.role === 'member').length;
-  const adminCount = members.filter(m => m.role === 'admin').length;
-  const superAdminCount = members.filter(m => m.role === 'super_admin').length;
+  const [statCards, setStatCards] = useState({ active_members: 0, team_leaders: 0, suspended: 0, in_danger: 0 });
+
+  const loadStatCards = useCallback(async () => {
+    try {
+      const res = await adminAPI.getMemberStatsOverview();
+      setStatCards(res.data);
+    } catch (err) {
+      console.error('Failed to load member stats:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStatCards();
+  }, [loadStatCards]);
 
   return (
     <MobileNotice featureName="Member Management" showOnMobile={true}>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="glass-card">
+        <Card className="glass-card" data-testid="stat-active-members">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Total Members</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">{totalMembers}</p>
+                <p className="text-sm text-zinc-400">Total Active Members</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Incl. Team Leaders</p>
+                <p className="text-3xl font-bold font-mono text-white mt-1">{statCards.active_members}</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
@@ -601,45 +614,44 @@ export const AdminMembersPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="glass-card" data-testid="stat-team-leaders">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Members</p>
-                <p className="text-3xl font-bold font-mono text-white mt-2">{memberCount}</p>
+                <p className="text-sm text-zinc-400">Team Leaders</p>
+                <p className="text-3xl font-bold font-mono text-cyan-400 mt-2">{statCards.team_leaders}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-600 to-zinc-700 flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="glass-card" data-testid="stat-suspended">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Admins</p>
-                <p className="text-3xl font-bold font-mono text-orange-400 mt-2">{adminCount}</p>
+                <p className="text-sm text-zinc-400">Suspended Users</p>
+                <p className="text-3xl font-bold font-mono text-red-400 mt-2">{statCards.suspended}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center">
+                <Ban className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="glass-card" data-testid="stat-in-danger">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-zinc-400">Licensed Users</p>
-                <p className="text-3xl font-bold font-mono text-purple-400 mt-2">
-                  {licenses.filter(l => l.is_active).length}
-                </p>
+                <p className="text-sm text-zinc-400">In Danger</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">No trades in 7+ days</p>
+                <p className="text-3xl font-bold font-mono text-amber-400 mt-1">{statCards.in_danger}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Award className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-white" />
               </div>
             </div>
           </CardContent>

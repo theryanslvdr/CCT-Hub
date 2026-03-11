@@ -401,9 +401,25 @@ async def startup_db():
             id="rewards_auto_sync",
             replace_existing=True
         )
+
+        # Mid-day streak sync (12:00 UTC)
+        scheduler.add_job(
+            auto_batch_sync,
+            CronTrigger(hour=12, minute=0),
+            id="midday_streak_sync",
+            replace_existing=True
+        )
+
+        # End-of-day streak sync (23:30 UTC)
+        scheduler.add_job(
+            auto_batch_sync,
+            CronTrigger(hour=23, minute=30),
+            id="eod_streak_sync",
+            replace_existing=True
+        )
         
         scheduler.start()
-        logger.info("Scheduler started for missed trade notifications and rewards auto-sync (every 4h)")
+        logger.info("Scheduler started for missed trade notifications, rewards auto-sync (every 4h), and streak sync (mid-day + end-of-day)")
     except Exception as e:
         logger.warning(f"Scheduler startup warning: {e}")
 

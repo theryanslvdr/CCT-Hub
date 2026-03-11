@@ -709,6 +709,10 @@ async def get_members(
     elif status == "active":
         query["is_suspended"] = {"$ne": True}
         query["is_deactivated"] = {"$ne": True}
+    else:
+        # Default "all" excludes suspended and deactivated users
+        query["is_suspended"] = {"$ne": True}
+        query["is_deactivated"] = {"$ne": True}
     
     # IMPORTANT: Exclude licensees from standard member list
     # Licensees should be managed through the Licenses page, not Member Management
@@ -760,6 +764,100 @@ async def get_members(
         "page": page,
         "limit": limit,
         "pages": (total + limit - 1) // limit
+    }
+
+
+
+@router.get("/members/stats/overview")
+async def get_member_stats_overview(user: dict = Depends(deps.require_admin)):
+    """Return stat card counts: active members, team leaders, suspended, in danger."""
+    db = deps.db
+
+    # Exclude licensees from all counts (consistent with member list)
+    base_q = {"license_type": {"$exists": False}}
+
+    # Total active = not suspended, not deactivated
+    active_count = await db.users.count_documents({
+        **base_q,
+        "is_suspended": {"$ne": True},
+        "is_deactivated": {"$ne": True},
+    })
+
+    # Team leaders = users who have at least one referral
+    # A user is a team leader if anyone has referred_by matching their referral_code or merin_referral_code
+    all_codes = set()
+    async for u in db.users.find(
+        {"$or": [{"referral_code": {"$exists": True, "$ne": None}}, {"merin_referral_code": {"$exists": True, "$ne": None}}]},
+        {"_id": 0, "referral_code": 1, "merin_referral_code": 1}
+    ):
+        if u.get("referral_code"):
+            all_codes.add(u["referral_code"])
+        if u.get("merin_referral_code"):
+            all_codes.add(u["merin_referral_code"])
+
+    team_leader_count = 0
+    if all_codes:
+        # Find codes that actually appear as referred_by
+        pipeline = [
+            {"$match": {"referred_by": {"$in": list(all_codes)}}},
+            {"$group": {"_id": "$referred_by"}},
+        ]
+        active_codes = set()
+        async for doc in db.users.aggregate(pipeline):
+            active_codes.add(doc["_id"])
+        # Count distinct users who own those codes
+        if active_codes:
+            tl_query = {"$or": [
+                {"referral_code": {"$in": list(active_codes)}},
+                {"merin_referral_code": {"$in": list(active_codes)}},
+            ]}
+            team_leader_count = await db.users.count_documents(tl_query)
+
+    # Suspended count
+    suspended_count = await db.users.count_documents({
+        **base_q,
+        "is_suspended": True,
+    })
+
+    # In Danger: members who haven't logged a trade in 7+ days (but are active)
+    from datetime import datetime, timezone, timedelta
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    # Get active user IDs
+    active_user_ids = []
+    async for u in db.users.find(
+        {**base_q, "is_suspended": {"$ne": True}, "is_deactivated": {"$ne": True}, "role": "member"},
+        {"_id": 0, "id": 1}
+    ):
+        active_user_ids.append(u["id"])
+
+    in_danger_count = 0
+    if active_user_ids:
+        # Users who have at least one trade but none in last 7 days
+        users_with_recent = set()
+        pipeline_recent = [
+            {"$match": {"user_id": {"$in": active_user_ids}, "created_at": {"$gte": cutoff}}},
+            {"$group": {"_id": "$user_id"}},
+        ]
+        async for doc in db.trade_logs.aggregate(pipeline_recent):
+            users_with_recent.add(doc["_id"])
+
+        # Users with at least one trade ever
+        users_with_any_trade = set()
+        pipeline_any = [
+            {"$match": {"user_id": {"$in": active_user_ids}}},
+            {"$group": {"_id": "$user_id"}},
+        ]
+        async for doc in db.trade_logs.aggregate(pipeline_any):
+            users_with_any_trade.add(doc["_id"])
+
+        # In danger = has traded before but not in last 7 days
+        in_danger_count = len(users_with_any_trade - users_with_recent)
+
+    return {
+        "active_members": active_count,
+        "team_leaders": team_leader_count,
+        "suspended": suspended_count,
+        "in_danger": in_danger_count,
     }
 
 
