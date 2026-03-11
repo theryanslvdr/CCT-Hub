@@ -1,53 +1,59 @@
-# CrossCurrent Hub — Product Requirements Document
+# CrossCurrent Hub - Product Requirements Document
 
 ## Original Problem Statement
-Build a comprehensive financial tracking and community platform for CrossCurrent's trading community.
+Full-stack trading community platform with admin/member management, habits tracking, referral system, profit tracking, store, and forum features. The user requested comprehensive bug fixes, feature development (stricter habits, smart registration, AI forum merging, team invitations), and significant codebase refactoring.
 
 ## Core Architecture
-- **Frontend:** React 19 + Tailwind CSS + ShadcnUI
-- **Backend:** FastAPI (Python) + APScheduler
-- **Database:** MongoDB
-- **AI:** OpenRouter API (gpt-4o-mini)
-- **File Storage:** Publitio
+- **Frontend:** React (port 3000) with Shadcn/UI components, dark theme
+- **Backend:** FastAPI (port 8001) with MongoDB
+- **3rd Party:** OpenRouter AI, Publitio (image hosting), Heartbeat (verification)
 
-## Implemented Features (All Verified — Iteration 186)
+## Test Credentials
+- Master Admin: `iam@ryansalvador.com` / `admin123`
 
-### Foundation (Complete)
-- JWT Auth, Dashboard, Profit Tracker, Trade Monitor, Admin Panel
-- WebSocket Notifications, Forum, Family Accounts, Licensee Management
-- Rewards & Leaderboard, Referral System, Quiz System, Habit Tracker
-- Premium Dark Theme, AI Knowledge Assistant, 7-Step Onboarding Gate
+## What's Been Implemented
 
-### P0 Bug Fixes (2026-03-11)
-- Profit Tracker crash (model field mismatch)
-- Streak sync (wrong DB field names)
-- Referral tree (merin_referral_code mapping)
-- Member count (use response.total)
+### P0 Bug Fixes (DONE)
+- Fixed Profit Tracker "Failed to log trade" error
+- Fixed streak synchronization between dashboard and Rewards Platform
+- Fixed referral tree not populating + improved UI readability
+- Fixed member count discrepancy on admin dashboard
 
-### P1 Features (2026-03-11)
-- Auto Streak Sync (CronTrigger mid-day + end-of-day)
-- Referral Tree off-white background (Tree + Visual views)
-- Suspended Members Isolation (stat cards, excluded from default list)
-- Forum Solved Tab (Open/Solved/All tabs)
+### P1 Features (DONE)
+- Auto streak sync (twice-daily via APScheduler)
+- Referral tree D3 visualization fix
+- Suspended member isolation in admin
+- Forum "Solved" tab
 
-### P2 Features (2026-03-11)
-- **Habits Overhaul:** Day-of-week habits, screenshot proof required, admin management
-- **Fraud Warning System:** Admin reject → warning → popup → acknowledge → 7-day countdown → auto-suspend
-- **Team System:** My Team page with member activity, stats, danger status
-- **Smart Registration Security:** Auto-flag suspicious signups, admin approval queue
-- **Admin Cleanup Page:** One-stop hub (Pending Proofs, Fraud Warnings, In Danger, Auto-Suspended, Pending Registrations)
-- **AI Forum Merging:** OpenRouter-powered content blending with fallback concatenation
-- **Dashboard Integration:** Cleanup alerts embedded in Admin Dashboard
+### P2 Features (DONE)
+- Day-of-week specific habits with mandatory screenshot proofs
+- Fraud warning system + weekly check
+- "My Team" page for team leaders
+- Smart Registration Security layer
+- Admin Cleanup Hub (integrated in dashboard)
+- AI-powered forum post merging
+- Store for Signal Gate Immunity Credits
+- Admin Dashboard stat card overhaul
+- **AI Visual Review for Screenshots** — pending proofs with AI badges on Admin Cleanup page (2026-03-11)
+- **AI Recommendations for Team Leaders** — AI Insights button on Team page with per-member suggestions (2026-03-11)
 
-## Remaining Backlog
+### Refactoring (DONE - 2026-03-11)
+- Extracted `admin_cleanup_routes.py` from `admin_routes.py`
+- Extracted `admin_members_routes.py` from `admin_routes.py` (~730 lines moved)
+- Extracted `ProjectionVision.jsx` from ProfitTrackerPage (~226 lines)
+- Extracted `AdjustTradeDialog.jsx` from ProfitTrackerPage (~183 lines)
+- ProfitTrackerPage reduced from 4319 → 3954 lines
+- admin_routes.py reduced from 4631 → 3800 lines
+- Text search index on forum `posts` collection
+- `referred_by` data normalization startup task
 
-### P2 — Remaining
-- Signal Gate Immunity Credits (purchasable bypass)
-- AI Visual Review for screenshots (automatic flagging)
+## Prioritized Backlog
 
-### P3 — Long-term
-- Refactor ProfitTrackerPage.jsx (~4300 lines) and admin_routes.py (~4700 lines)
+### P2 (Future)
+- Store enhancements (expand item catalog)
+- Normalize `referred_by` usage across codebase
 - Performance optimization (caching, pagination)
 
-## Credentials
-- Master Admin: `iam@ryansalvador.com` / `admin123`
+### P3 (Backlog)
+- Further ProfitTrackerPage refactoring (mobile overlays extraction)
+- Additional admin_routes.py extraction (signals, analytics sections)
