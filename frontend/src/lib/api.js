@@ -360,6 +360,10 @@ export const adminAPI = {
   rejectRegistration: (userId) => api.post(`/admin/reject-registration/${userId}`),
   // Admin Cleanup
   getCleanupOverview: () => api.get('/admin/cleanup-overview'),
+  // Pending Proofs (AI Visual Review)
+  getPendingProofs: (page = 1) => api.get(`/habits/admin/pending-proofs?page=${page}`),
+  spotCheckProof: (completionId, action, reason = '') => api.post(`/habits/admin/spot-check/${completionId}`, { action, reason }),
+  getSpotCheckStats: () => api.get('/habits/admin/spot-check-stats'),
 };
 
 // Licensee APIs (for licensed users)
@@ -548,6 +552,7 @@ export const referralAPI = {
   setInviter: (inviterId) => api.post('/referrals/set-inviter', { inviter_id: inviterId }),
   // Team System
   getMyTeam: () => api.get('/referrals/my-team'),
+  getTeamRecommendations: () => api.get('/referrals/my-team/recommendations'),
 };
 
 // Quiz System API

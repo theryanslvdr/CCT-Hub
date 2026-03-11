@@ -859,3 +859,116 @@ async def get_my_team(user: dict = Depends(get_current_user)):
             "new_this_week": new_this_week,
         },
     }
+
+
+
+@router.get("/my-team/recommendations")
+async def get_team_recommendations(user: dict = Depends(get_current_user)):
+    """Generate AI-powered recommendations for team members who are in danger or inactive."""
+    import os
+    db = deps.db
+
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1, "merin_referral_code": 1})
+    if not user_doc:
+        return {"recommendations": []}
+
+    codes = [c for c in [user_doc.get("referral_code"), user_doc.get("merin_referral_code")] if c]
+    if not codes:
+        return {"recommendations": []}
+
+    query = {"$or": [{"referred_by": {"$in": codes}}, {"referred_by_user_id": user["id"]}]}
+    members = await db.users.find(
+        query,
+        {"_id": 0, "id": 1, "full_name": 1, "is_suspended": 1, "created_at": 1}
+    ).to_list(500)
+
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    seven_days_ago = (now - timedelta(days=7)).isoformat()
+
+    at_risk = []
+    for m in members:
+        if m.get("is_suspended"):
+            continue
+        mid = m["id"]
+        recent_trades = await db.trade_logs.count_documents({
+            "user_id": mid, "created_at": {"$gte": seven_days_ago}
+        })
+        any_trade = await db.trade_logs.find_one({"user_id": mid}, {"_id": 0, "created_at": 1}, sort=[("created_at", -1)])
+        habits_week = await db.habit_completions.count_documents({
+            "user_id": mid, "completed_at": {"$gte": seven_days_ago}
+        })
+
+        if recent_trades == 0 and any_trade:
+            days_inactive = (now - datetime.fromisoformat(any_trade["created_at"].replace("Z", "+00:00"))).days if any_trade.get("created_at") else 0
+            at_risk.append({
+                "name": m.get("full_name", "Unknown"),
+                "days_inactive": days_inactive,
+                "habits_this_week": habits_week,
+                "last_trade": any_trade.get("created_at") if any_trade else None,
+            })
+
+    if not at_risk:
+        return {"recommendations": [{"type": "all_clear", "message": "All your team members are active. Great leadership!"}]}
+
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    if not openrouter_key:
+        # Fallback: rule-based recommendations
+        recs = []
+        for m in at_risk[:5]:
+            if m["days_inactive"] >= 14:
+                recs.append({"member": m["name"], "urgency": "high", "suggestion": f"{m['name']} has been inactive for {m['days_inactive']} days. Consider a personal check-in call or message to re-engage them before they get suspended."})
+            elif m["days_inactive"] >= 7:
+                recs.append({"member": m["name"], "urgency": "medium", "suggestion": f"{m['name']} hasn't traded in {m['days_inactive']} days but completed {m['habits_this_week']} habits this week. A friendly nudge about logging trades could help."})
+        return {"recommendations": recs}
+
+    # AI-powered recommendations
+    summary_text = "\n".join([
+        f"- {m['name']}: inactive {m['days_inactive']} days, {m['habits_this_week']} habits this week"
+        for m in at_risk[:8]
+    ])
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {openrouter_key}", "Content-Type": "application/json"},
+                json={
+                    "model": "openai/gpt-4o-mini",
+                    "messages": [{"role": "user", "content": f"""You are a team leadership advisor for a trading community. 
+These team members are at risk of being suspended for inactivity (no trades in 7+ days).
+
+{summary_text}
+
+Give 1 brief, actionable recommendation per member (max 2 sentences each). Focus on re-engagement strategies.
+Format each as: NAME | URGENCY(high/medium) | Suggestion
+Keep it direct and practical."""}],
+                    "max_tokens": 500,
+                    "temperature": 0.7,
+                },
+            )
+            resp.raise_for_status()
+            content = resp.json()["choices"][0]["message"]["content"].strip()
+
+            recs = []
+            for line in content.split("\n"):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split("|")
+                if len(parts) >= 3:
+                    recs.append({
+                        "member": parts[0].strip().lstrip("- "),
+                        "urgency": parts[1].strip().lower(),
+                        "suggestion": parts[2].strip(),
+                    })
+                elif line:
+                    recs.append({"member": "", "urgency": "medium", "suggestion": line})
+            return {"recommendations": recs[:8]}
+    except Exception as e:
+        logger.warning(f"AI team recommendations failed: {e}")
+        recs = []
+        for m in at_risk[:5]:
+            recs.append({"member": m["name"], "urgency": "high" if m["days_inactive"] >= 14 else "medium",
+                          "suggestion": f"{m['name']} has been inactive for {m['days_inactive']} days. Send a personal message to re-engage."})
+        return {"recommendations": recs}

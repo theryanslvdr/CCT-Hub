@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { referralAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame, Bot, Lightbulb, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STATUS_COLORS = {
@@ -11,10 +12,19 @@ const STATUS_COLORS = {
   suspended: 'bg-red-500/15 text-red-400 border-red-500/20',
 };
 
+const URGENCY_COLORS = {
+  high: 'border-red-500/30 bg-red-500/5',
+  medium: 'border-amber-500/30 bg-amber-500/5',
+  low: 'border-blue-500/30 bg-blue-500/5',
+};
+
 const TeamPage = () => {
   const [team, setTeam] = useState([]);
   const [stats, setStats] = useState({ total: 0, active: 0, in_danger: 0, new_this_week: 0 });
   const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(false);
+  const [showRecs, setShowRecs] = useState(false);
 
   const loadTeam = useCallback(async () => {
     try {
@@ -30,6 +40,19 @@ const TeamPage = () => {
 
   useEffect(() => { loadTeam(); }, [loadTeam]);
 
+  const loadRecommendations = async () => {
+    setRecsLoading(true);
+    setShowRecs(true);
+    try {
+      const res = await referralAPI.getTeamRecommendations();
+      setRecommendations(res.data.recommendations || []);
+    } catch {
+      toast.error('Failed to load AI recommendations');
+    } finally {
+      setRecsLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -40,9 +63,24 @@ const TeamPage = () => {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto" data-testid="team-page">
-      <div>
-        <h1 className="text-2xl font-bold text-white">My Team</h1>
-        <p className="text-sm text-zinc-400 mt-1">Members you've invited and their activity</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">My Team</h1>
+          <p className="text-sm text-zinc-400 mt-1">Members you've invited and their activity</p>
+        </div>
+        {stats.in_danger > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadRecommendations}
+            disabled={recsLoading}
+            className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+            data-testid="ai-recommendations-btn"
+          >
+            {recsLoading ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Bot className="w-4 h-4 mr-1" />}
+            AI Insights
+          </Button>
+        )}
       </div>
 
       {/* Stat Cards */}
@@ -100,6 +138,52 @@ const TeamPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Recommendations Panel */}
+      {showRecs && (
+        <Card className="glass-card border-amber-500/20" data-testid="ai-recommendations-panel">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-amber-400" /> AI Recommendations
+              <span className="text-xs text-zinc-500 font-normal ml-1">Personalized suggestions for your team</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recsLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Bot className="w-5 h-5 text-amber-400 animate-pulse mr-2" />
+                <span className="text-sm text-zinc-400">Analyzing team activity...</span>
+              </div>
+            ) : recommendations.length === 0 ? (
+              <p className="text-sm text-zinc-500 py-4 text-center">No recommendations at this time.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {recommendations.map((rec, i) => (
+                  <div
+                    key={i}
+                    className={`p-3 rounded-lg border ${URGENCY_COLORS[rec.urgency] || URGENCY_COLORS.medium}`}
+                    data-testid={`recommendation-${i}`}
+                  >
+                    {rec.type === 'all_clear' ? (
+                      <p className="text-sm text-emerald-400">{rec.message}</p>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 mb-1">
+                          {rec.member && <span className="text-xs font-semibold text-white">{rec.member}</span>}
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-semibold ${
+                            rec.urgency === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                          }`}>{rec.urgency}</span>
+                        </div>
+                        <p className="text-xs text-zinc-300 leading-relaxed">{rec.suggestion}</p>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Team Members List */}
       {team.length === 0 ? (

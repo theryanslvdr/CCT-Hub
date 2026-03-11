@@ -773,3 +773,117 @@ async def check_and_auto_suspend(db):
             logger.info(f"Fraud warning cleared for user {user_id} — no new fraud during countdown")
 
     return suspended_count
+
+
+
+# ─── Admin: Pending Proofs with AI Review ───
+
+@router.get("/admin/pending-proofs")
+async def get_pending_proofs(page: int = 1, limit: int = 20, user: dict = Depends(require_admin)):
+    """Get habit completions with pending screenshots for admin review, including AI analysis results."""
+    db = deps.db
+    skip = (page - 1) * limit
+
+    pipeline = [
+        {"$match": {
+            "screenshot_url": {"$exists": True, "$ne": None},
+            "review_status": {"$in": ["pending", "ai_flagged", None]},
+        }},
+        {"$sort": {"completed_at": -1}},
+        {"$skip": skip},
+        {"$limit": limit},
+    ]
+    completions = await db.habit_completions.aggregate(pipeline).to_list(limit)
+
+    results = []
+    for c in completions:
+        # Fetch user info
+        u = await db.users.find_one({"id": c.get("user_id")}, {"_id": 0, "full_name": 1, "email": 1})
+        # Fetch habit info
+        h = await db.habits.find_one({"id": c.get("habit_id")}, {"_id": 0, "title": 1})
+
+        results.append({
+            "id": c.get("id"),
+            "user_id": c.get("user_id"),
+            "user_name": u.get("full_name", "Unknown") if u else "Unknown",
+            "user_email": u.get("email", "") if u else "",
+            "habit_id": c.get("habit_id"),
+            "habit_title": h.get("title", "Unknown") if h else "Unknown",
+            "screenshot_url": c.get("screenshot_url"),
+            "date": str(c.get("completed_at", ""))[:10],
+            "ai_review": c.get("ai_review"),
+            "ai_flagged": c.get("ai_flagged", False),
+            "ai_reviewed_at": c.get("ai_reviewed_at"),
+            "review_status": c.get("review_status", "pending"),
+        })
+
+    return {"completions": results, "page": page}
+
+
+@router.post("/admin/spot-check/{completion_id}")
+async def spot_check_proof(completion_id: str, data: dict, user: dict = Depends(require_admin)):
+    """Admin approve or reject a screenshot proof. Rejection issues a fraud warning."""
+    db = deps.db
+    action = data.get("action")
+    reason = data.get("reason", "")
+
+    comp = await db.habit_completions.find_one({"id": completion_id}, {"_id": 0})
+    if not comp:
+        raise HTTPException(status_code=404, detail="Completion not found")
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    if action == "approve":
+        await db.habit_completions.update_one(
+            {"id": completion_id},
+            {"$set": {"review_status": "approved", "reviewed_by": user["id"], "reviewed_at": now}}
+        )
+        return {"message": "Proof approved"}
+
+    elif action == "reject":
+        await db.habit_completions.update_one(
+            {"id": completion_id},
+            {"$set": {
+                "review_status": "rejected",
+                "reviewed_by": user["id"],
+                "reviewed_at": now,
+                "rejection_reason": reason,
+            }}
+        )
+        # Issue fraud warning to the user
+        target_user_id = comp.get("user_id")
+        warning = {
+            "id": str(uuid.uuid4()),
+            "user_id": target_user_id,
+            "type": "screenshot_fraud",
+            "reason": reason or "Screenshot proof rejected by admin",
+            "completion_id": completion_id,
+            "issued_by": user["id"],
+            "issued_at": now,
+            "acknowledged": False,
+        }
+        await db.fraud_warnings.insert_one(warning)
+
+        # Update user's fraud_warnings array
+        await db.users.update_one(
+            {"id": target_user_id},
+            {"$push": {"fraud_warnings": warning["id"]}}
+        )
+
+        return {"message": "Proof rejected, fraud warning issued"}
+
+    raise HTTPException(status_code=400, detail="Invalid action. Use 'approve' or 'reject'.")
+
+
+@router.get("/admin/spot-check-stats")
+async def get_spot_check_stats(user: dict = Depends(require_admin)):
+    """Get counts of pending, approved, rejected proofs."""
+    db = deps.db
+    pending = await db.habit_completions.count_documents({
+        "screenshot_url": {"$exists": True, "$ne": None},
+        "review_status": {"$in": ["pending", "ai_flagged", None]},
+    })
+    approved = await db.habit_completions.count_documents({"review_status": "approved"})
+    rejected = await db.habit_completions.count_documents({"review_status": "rejected"})
+
+    return {"pending": pending, "approved": approved, "rejected": rejected}

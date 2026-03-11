@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Shield, AlertTriangle, UserX, UserCheck, Camera, Clock,
-  CheckCircle2, XCircle, ChevronRight, RefreshCw
+  CheckCircle2, XCircle, ChevronRight, RefreshCw, Eye, Bot,
+  ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -12,17 +13,25 @@ export const AdminCleanupPage = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pendingRegs, setPendingRegs] = useState([]);
+  const [pendingProofs, setPendingProofs] = useState([]);
+  const [proofStats, setProofStats] = useState(null);
   const [actioning, setActioning] = useState(null);
+  const [expandedProof, setExpandedProof] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [cleanupRes, regsRes] = await Promise.all([
+      const [cleanupRes, regsRes, proofsRes, statsRes] = await Promise.all([
         adminAPI.getCleanupOverview(),
         adminAPI.getPendingRegistrations(),
+        adminAPI.getPendingProofs(1),
+        adminAPI.getSpotCheckStats(),
       ]);
       setData(cleanupRes.data);
       setPendingRegs(regsRes.data.pending || []);
+      setPendingProofs(proofsRes.data.completions || []);
+      setProofStats(statsRes.data);
     } catch {
       toast.error('Failed to load cleanup data');
     } finally {
@@ -50,6 +59,32 @@ export const AdminCleanupPage = () => {
       toast.success('Registration rejected — user suspended');
       loadData();
     } catch { toast.error('Failed to reject'); }
+    setActioning(null);
+  };
+
+  const handleApproveProof = async (completionId) => {
+    setActioning(completionId);
+    try {
+      await adminAPI.spotCheckProof(completionId, 'approve');
+      toast.success('Proof approved');
+      setPendingProofs(prev => prev.filter(p => p.id !== completionId));
+    } catch { toast.error('Failed to approve proof'); }
+    setActioning(null);
+  };
+
+  const handleRejectProof = async (completionId) => {
+    if (!rejectReason.trim()) {
+      toast.error('Please provide a rejection reason');
+      return;
+    }
+    setActioning(completionId);
+    try {
+      await adminAPI.spotCheckProof(completionId, 'reject', rejectReason);
+      toast.success('Proof rejected — fraud warning issued');
+      setPendingProofs(prev => prev.filter(p => p.id !== completionId));
+      setRejectReason('');
+      setExpandedProof(null);
+    } catch { toast.error('Failed to reject proof'); }
     setActioning(null);
   };
 
@@ -91,6 +126,137 @@ export const AdminCleanupPage = () => {
           </Card>
         ))}
       </div>
+
+      {/* Proof Stats Bar */}
+      {proofStats && (
+        <div className="flex items-center gap-4 text-xs text-zinc-500">
+          <span className="flex items-center gap-1"><Camera className="w-3 h-3" /> {proofStats.pending} pending</span>
+          <span className="flex items-center gap-1 text-emerald-400"><ThumbsUp className="w-3 h-3" /> {proofStats.approved} approved</span>
+          <span className="flex items-center gap-1 text-red-400"><ThumbsDown className="w-3 h-3" /> {proofStats.rejected} rejected</span>
+        </div>
+      )}
+
+      {/* Pending Screenshot Proofs with AI Review */}
+      {pendingProofs.length > 0 && (
+        <Card className="glass-card border-blue-500/20" data-testid="pending-proofs-section">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Camera className="w-4 h-4 text-blue-400" /> Pending Screenshot Proofs
+              <span className="text-xs text-zinc-500 font-normal ml-1">{pendingProofs.length} to review</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-white/[0.04]">
+              {pendingProofs.map(proof => (
+                <div key={proof.id} className="px-4 py-3" data-testid={`proof-${proof.id}`}>
+                  <div className="flex items-start gap-3">
+                    {/* Screenshot Thumbnail */}
+                    {proof.screenshot_url && (
+                      <button
+                        onClick={() => setExpandedProof(expandedProof === proof.id ? null : proof.id)}
+                        className="w-14 h-14 rounded-lg overflow-hidden border border-zinc-700 shrink-0 hover:border-blue-500/50 transition-colors"
+                        data-testid={`proof-thumb-${proof.id}`}
+                      >
+                        <img
+                          src={proof.screenshot_url}
+                          alt="Proof"
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      </button>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-white">{proof.user_name}</span>
+                        <span className="text-[10px] text-zinc-500">{proof.user_email}</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 mt-0.5">Habit: {proof.habit_title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] text-zinc-600">{proof.date}</span>
+                        {/* AI Review Badge */}
+                        {proof.ai_review && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 ${
+                            proof.ai_flagged
+                              ? 'bg-red-500/15 text-red-400 border border-red-500/20'
+                              : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                          }`} data-testid={`ai-badge-${proof.id}`}>
+                            <Bot className="w-2.5 h-2.5" />
+                            {proof.ai_flagged ? 'AI: Suspicious' : 'AI: Legitimate'}
+                          </span>
+                        )}
+                        {!proof.ai_review && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700/50 text-zinc-500">
+                            No AI review
+                          </span>
+                        )}
+                      </div>
+                      {proof.ai_flagged && proof.ai_review && (
+                        <p className="text-[10px] text-red-400/70 mt-1 italic">{proof.ai_review}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      <Button
+                        size="sm"
+                        onClick={() => handleApproveProof(proof.id)}
+                        disabled={actioning === proof.id}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 text-xs px-2"
+                        data-testid={`approve-proof-${proof.id}`}
+                      >
+                        <CheckCircle2 className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setExpandedProof(expandedProof === proof.id ? null : proof.id)}
+                        disabled={actioning === proof.id}
+                        className="h-7 text-xs px-2"
+                        data-testid={`reject-proof-btn-${proof.id}`}
+                      >
+                        <XCircle className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Expanded View for rejection / full image */}
+                  {expandedProof === proof.id && (
+                    <div className="mt-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800" data-testid={`proof-expanded-${proof.id}`}>
+                      {proof.screenshot_url && (
+                        <div className="mb-3">
+                          <img
+                            src={proof.screenshot_url}
+                            alt="Full proof"
+                            className="max-h-64 rounded-lg border border-zinc-700"
+                          />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="Rejection reason..."
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          className="flex-1 bg-zinc-800 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-white placeholder:text-zinc-500"
+                          data-testid={`reject-reason-${proof.id}`}
+                        />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRejectProof(proof.id)}
+                          disabled={actioning === proof.id}
+                          className="h-8 text-xs"
+                          data-testid={`confirm-reject-proof-${proof.id}`}
+                        >
+                          Reject & Warn
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Flagged Registrations */}
       {pendingRegs.length > 0 && (

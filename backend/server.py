@@ -108,6 +108,7 @@ from routes.profit_routes import router as _profit_router
 from routes.trade_routes import router as _trade_router
 from routes.admin_routes import router as _admin_router
 from routes.admin_cleanup_routes import router as _admin_cleanup_router
+from routes.admin_members_routes import router as _admin_members_router
 from routes.general_routes import router as _general_router
 
 # Previously extracted routes
@@ -140,6 +141,7 @@ api_router.include_router(_profit_router)
 api_router.include_router(_trade_router)
 api_router.include_router(_admin_router)
 api_router.include_router(_admin_cleanup_router)
+api_router.include_router(_admin_members_router)
 api_router.include_router(_general_router)
 api_router.include_router(_habits_router)
 api_router.include_router(_affiliate_router)
