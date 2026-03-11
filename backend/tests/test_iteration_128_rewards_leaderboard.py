@@ -8,7 +8,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dark-theme-overhaul-4.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://streaks-referral.preview.emergentagent.com')
 
 class TestRewardsAPIEndpoints:
     """Test rewards API endpoints for Phase 2 features"""

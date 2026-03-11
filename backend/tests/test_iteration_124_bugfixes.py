@@ -9,7 +9,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dark-theme-overhaul-4.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://streaks-referral.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 ADMIN_EMAIL = "iam@ryansalvador.com"

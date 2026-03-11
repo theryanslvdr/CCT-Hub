@@ -13,7 +13,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://dark-theme-overhaul-4.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://streaks-referral.preview.emergentagent.com')
 TEST_EMAIL = "iam@ryansalvador.com"
 TEST_PASSWORD = "admin123"
 TEST_SIGNAL_ID = "4121c573-9099-4acf-b3f8-03efae3bb70e"

@@ -17,7 +17,7 @@
   "critical_code_review_comments": [],
   "updated_files": ["/app/backend/tests/test_iteration_178_inviter_modal.py"],
   "success_rate": {"backend": "100% (11/11)", "frontend": "100%"},
-  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123, Test member: J J (id=07062f66-d9ea-49ba-8fed-86ac6628b4e8), Test inviter: Ryan Salvador TEST (id=a9566813-3880-47c5-8703-7fa22fdb601d)",
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123, Test member: J J (id=streaks-referral), Test inviter: Ryan Salvador TEST (id=streaks-referral)",
   "seed_data_creation": "",
   "retest_needed": false,
   "should_main_agent_self_test": false,

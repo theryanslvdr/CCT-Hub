@@ -6,7 +6,7 @@ import pytest
 import httpx
 import os
 
-BASE_URL = os.environ.get("TEST_API_URL", "https://dark-theme-overhaul-4.preview.emergentagent.com")
+BASE_URL = os.environ.get("TEST_API_URL", "https://streaks-referral.preview.emergentagent.com")
 TEST_EMAIL = "iam@ryansalvador.com"
 TEST_PASSWORD = "admin123"
 
