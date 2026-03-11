@@ -1176,26 +1176,36 @@ async def get_signal_block_status(user: dict = Depends(deps.get_current_user)):
     # Check habit gate: if there are gate habits, user must have completed one within its validity window
     habit_gate_locked = False
     gate_deadline = None
-    gate_habits = await deps.db.habits.find({"active": True, "is_gate": True}, {"_id": 0, "id": 1, "validity_days": 1}).to_list(100)
-    if gate_habits:
-        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        today_date = datetime.now(timezone.utc).date()
-        gate_unlocked = False
-        for gh in gate_habits:
-            validity = gh.get("validity_days", 1)
-            window_start = (today_date - timedelta(days=validity - 1)).isoformat()
-            recent = await deps.db.habit_completions.find_one(
-                {"user_id": user_id, "habit_id": gh["id"], "date": {"$gte": window_start}},
-                {"_id": 0, "date": 1}
-            )
-            if recent:
-                gate_unlocked = True
-                completion_date = datetime.strptime(recent["date"], "%Y-%m-%d").date()
-                expires = completion_date + timedelta(days=validity)
-                if gate_deadline is None or expires > gate_deadline:
-                    gate_deadline = expires
-        if not gate_unlocked:
-            habit_gate_locked = True
+
+    # Check for active immunity credit first
+    immunity = await deps.db.immunity_credits.find_one(
+        {"user_id": user_id, "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}, "used": True},
+        {"_id": 0, "expires_at": 1}
+    )
+    if immunity:
+        # Immunity credit active — skip habit gate check
+        habit_gate_locked = False
+    else:
+        gate_habits = await deps.db.habits.find({"active": True, "is_gate": True}, {"_id": 0, "id": 1, "validity_days": 1}).to_list(100)
+        if gate_habits:
+            today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            today_date = datetime.now(timezone.utc).date()
+            gate_unlocked = False
+            for gh in gate_habits:
+                validity = gh.get("validity_days", 1)
+                window_start = (today_date - timedelta(days=validity - 1)).isoformat()
+                recent = await deps.db.habit_completions.find_one(
+                    {"user_id": user_id, "habit_id": gh["id"], "date": {"$gte": window_start}},
+                    {"_id": 0, "date": 1}
+                )
+                if recent:
+                    gate_unlocked = True
+                    completion_date = datetime.strptime(recent["date"], "%Y-%m-%d").date()
+                    expires = completion_date + timedelta(days=validity)
+                    if gate_deadline is None or expires > gate_deadline:
+                        gate_deadline = expires
+            if not gate_unlocked:
+                habit_gate_locked = True
 
     today = datetime.now(timezone.utc).date()
     seven_days_ago = today - timedelta(days=7)

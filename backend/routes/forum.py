@@ -163,10 +163,14 @@ async def list_posts(
     if category:
         query["category"] = category
     if search:
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"content": {"$regex": search, "$options": "i"}},
-        ]
+        # Use text index for full-word search, fallback to regex for partial
+        if len(search.strip()) >= 3:
+            query["$text"] = {"$search": search}
+        else:
+            query["$or"] = [
+                {"title": {"$regex": search, "$options": "i"}},
+                {"content": {"$regex": search, "$options": "i"}},
+            ]
 
     total = await db.forum_posts.count_documents(query)
     # Sort: pinned posts first, then by created_at descending

@@ -213,14 +213,22 @@ async def complete_habit(habit_id: str, data: HabitCompleteRequest = None, scree
     if existing:
         return {"message": "Already completed today", "already": True}
 
+    completion_id = str(uuid.uuid4())
     await db.habit_completions.insert_one({
-        "id": str(uuid.uuid4()),
+        "id": completion_id,
         "user_id": user["id"],
         "habit_id": habit_id,
         "date": today,
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "screenshot_url": effective_screenshot_url,
     })
+
+    # AI Visual Review — auto-flag suspicious screenshots
+    if effective_screenshot_url:
+        try:
+            await _ai_review_screenshot(db, completion_id, effective_screenshot_url, user["id"], habit.get("title", ""))
+        except Exception as e:
+            logger.warning(f"AI screenshot review failed (non-blocking): {e}")
 
     try:
         user_name = user.get("full_name", "A member")
@@ -579,6 +587,61 @@ async def spot_check_stats(user: dict = Depends(require_admin)):
     rejected = await db.habit_completions.count_documents({"verification_status": "rejected"})
 
     return {"pending": pending, "approved": approved, "rejected": rejected}
+
+
+async def _ai_review_screenshot(db, completion_id: str, screenshot_url: str, user_id: str, habit_title: str):
+    """Use AI vision to review a screenshot for suspicious content. Non-blocking."""
+    import os
+    import httpx
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    if not openrouter_key:
+        return
+
+    prompt = f"""You are reviewing a screenshot proof for a daily habit: "{habit_title}".
+Analyze this image and determine if it appears to be a legitimate screenshot proof of completing this habit.
+
+Flag as SUSPICIOUS if:
+- The image is a generic stock photo or unrelated content
+- The image appears to be a previously used/recycled screenshot (same layout repeated)
+- The image is blurry, cropped to hide details, or clearly manipulated
+- The image doesn't relate to the habit described
+
+Respond with ONLY one of:
+LEGITIMATE - if it appears to be a genuine proof
+SUSPICIOUS - [brief reason] if it looks fraudulent"""
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {openrouter_key}", "Content-Type": "application/json"},
+                json={
+                    "model": "openai/gpt-4o-mini",
+                    "messages": [{"role": "user", "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": screenshot_url}},
+                    ]}],
+                    "max_tokens": 100,
+                    "temperature": 0.1,
+                },
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"].strip()
+
+            is_suspicious = result.upper().startswith("SUSPICIOUS")
+            await db.habit_completions.update_one(
+                {"id": completion_id},
+                {"$set": {
+                    "ai_review": result,
+                    "ai_flagged": is_suspicious,
+                    "ai_reviewed_at": datetime.now(timezone.utc).isoformat(),
+                }}
+            )
+            if is_suspicious:
+                logger.info(f"AI flagged screenshot for user {user_id}: {result}")
+    except Exception as e:
+        logger.warning(f"AI screenshot review error: {e}")
+
 
 
 # ─── Fraud Warning System ───

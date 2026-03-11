@@ -51,6 +51,7 @@ import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 import ReferralTrackingPage from "./pages/ReferralTrackingPage";
 import TeamPage from "./pages/TeamPage";
+import StorePage from "./pages/StorePage";
 import { AdminCleanupPage } from "./pages/admin/AdminCleanupPage";
 import FraudWarningPopup from "./components/FraudWarningPopup";
 
@@ -110,6 +111,7 @@ function App() {
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/referral-tracking" element={<ReferralTrackingPage />} />
             <Route path="/my-team" element={<TeamPage />} />
+            <Route path="/store" element={<StorePage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />

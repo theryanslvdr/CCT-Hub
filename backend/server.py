@@ -107,6 +107,7 @@ from routes.auth_routes import router as _auth_router
 from routes.profit_routes import router as _profit_router
 from routes.trade_routes import router as _trade_router
 from routes.admin_routes import router as _admin_router
+from routes.admin_cleanup_routes import router as _admin_cleanup_router
 from routes.general_routes import router as _general_router
 
 # Previously extracted routes
@@ -130,6 +131,7 @@ from routes.ai_routes import router as _ai_router
 from routes.referral_routes import router as _referral_router
 from routes.quiz_routes import router as _quiz_router
 from routes.ai_assistant_routes import router as _ai_assistant_router
+from routes.store_routes import router as _store_router
 
 # ─── Register Routers ───
 api_router.include_router(_auth_router)
@@ -137,6 +139,7 @@ api_router.include_router(_users_router)
 api_router.include_router(_profit_router)
 api_router.include_router(_trade_router)
 api_router.include_router(_admin_router)
+api_router.include_router(_admin_cleanup_router)
 api_router.include_router(_general_router)
 api_router.include_router(_habits_router)
 api_router.include_router(_affiliate_router)
@@ -159,6 +162,7 @@ api_router.include_router(_ai_router)
 api_router.include_router(_referral_router)
 api_router.include_router(_quiz_router)
 api_router.include_router(_ai_assistant_router)
+api_router.include_router(_store_router)
 
 app.include_router(api_router)
 
@@ -318,9 +322,57 @@ async def startup_db():
         await db.rewards_promotions.create_index("is_active")
         await db.users.create_index("referral_code", sparse=True)
         await db.referral_events.create_index([("user_id", 1), ("created_at", -1)])
+        # Forum text search index
+        await db.forum_posts.create_index([("title", "text"), ("content", "text")])
+        await db.forum_posts.create_index([("status", 1), ("created_at", -1)])
+        # Store indexes
+        await db.immunity_credits.create_index([("user_id", 1), ("expires_at", -1)])
+        await db.fraud_warnings.create_index([("user_id", 1), ("resolution", 1)])
+        await db.users.create_index("merin_referral_code", sparse=True)
         logger.info("Database indexes created")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
+
+    # Normalize referred_by values to use referral_code consistently
+    try:
+        # Build a map of merin_referral_code -> referral_code
+        code_map = {}
+        id_to_code = {}
+        async for u in db.users.find(
+            {"$or": [{"referral_code": {"$exists": True}}, {"merin_referral_code": {"$exists": True}}]},
+            {"_id": 0, "id": 1, "referral_code": 1, "merin_referral_code": 1}
+        ):
+            rc = u.get("referral_code")
+            mc = u.get("merin_referral_code")
+            uid = u["id"]
+            if rc:
+                id_to_code[uid] = rc
+            if mc and rc and mc != rc:
+                code_map[mc] = rc
+            if not rc and mc:
+                id_to_code[uid] = mc
+
+        # Normalize referred_by where it's a merin_referral_code or user_id
+        normalized = 0
+        async for u in db.users.find(
+            {"referred_by": {"$exists": True, "$ne": None}},
+            {"_id": 0, "id": 1, "referred_by": 1, "referred_by_user_id": 1}
+        ):
+            ref = u.get("referred_by")
+            new_ref = None
+            if ref in code_map:
+                new_ref = code_map[ref]
+            elif ref in id_to_code:
+                new_ref = id_to_code[ref]
+
+            if new_ref and new_ref != ref:
+                await db.users.update_one({"id": u["id"]}, {"$set": {"referred_by": new_ref}})
+                normalized += 1
+
+        if normalized > 0:
+            logger.info(f"Normalized {normalized} referred_by values to use referral_code")
+    except Exception as e:
+        logger.warning(f"referred_by normalization warning: {e}")
 
     # Seed rewards promotion rules
     try:

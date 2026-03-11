@@ -466,6 +466,12 @@ export const habitAPI = {
   acknowledgeWarning: (warningId) => api.post(`/habits/acknowledge-warning/${warningId}`),
 };
 
+export const storeAPI = {
+  getItems: () => api.get('/store/items'),
+  purchase: (itemId) => api.post('/store/purchase', { item_id: itemId }),
+  getMyCredits: () => api.get('/store/my-credits'),
+};
+
 // Admin Habit APIs
 export const adminHabitAPI = {
   getHabits: () => api.get('/admin/habits'),

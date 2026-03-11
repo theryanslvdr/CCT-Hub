@@ -156,6 +156,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/affiliate', icon: Share2, label: 'Affiliate Center', id: 'affiliate', hideForLicensee: true },
     { path: '/referral-tracking', icon: UserPlus, label: 'Invite & Earn', id: 'referral_tracking', hideForLicensee: true },
     { path: '/my-team', icon: Users, label: 'My Team', id: 'my_team', hideForLicensee: true },
+    { path: '/store', icon: Award, label: 'Store', id: 'store', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', id: 'licensee_account', licenseeOnly: true },
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', id: 'family_accounts', honoraryFaOnly: true },
     { path: '/my-rewards', icon: Star, label: 'My Rewards', id: 'my_rewards', hideForLicensee: true },
@@ -208,7 +209,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     // For licensees, only include dashboard and profile (no habits/affiliate)
     const alwaysInclude = isLicenseeView
       ? ['dashboard', 'profile', 'my_rewards']
-      : ['dashboard', 'profile', 'habits', 'affiliate', 'referral_tracking', 'my_team', 'my_rewards', 'leaderboard', 'forum'];
+      : ['dashboard', 'profile', 'habits', 'affiliate', 'referral_tracking', 'my_team', 'store', 'my_rewards', 'leaderboard', 'forum'];
     const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
     
     return memberNavItems.filter(item => {
@@ -559,7 +560,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
         {/* Growth section */}
         {(() => {
           const growthItems = getVisibleMemberItems().filter(i => 
-            ['habits', 'affiliate', 'referral_tracking', 'my_team', 'my_rewards', 'leaderboard', 'licensee_account', 'family_accounts'].includes(i.id)
+            ['habits', 'affiliate', 'referral_tracking', 'my_team', 'store', 'my_rewards', 'leaderboard', 'licensee_account', 'family_accounts'].includes(i.id)
           );
           if (growthItems.length === 0) return null;
           return (
