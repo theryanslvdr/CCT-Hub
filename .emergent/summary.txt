@@ -1,192 +1,377 @@
 <analysis>**original_problem_statement:**
-The user has provided a comprehensive list of 10 bugs and feature requests that need to be addressed. This includes critical bug fixes for core functionalities like profit tracking, streak calculations, referral tree population, and member counts. It also includes significant new feature development around stricter habit tracking, a smart registration security layer, AI-powered forum merging, and a team invitation pipeline with leader dashboards.
-
-The work is planned in three phases (P0, P1, P2), with the immediate focus on fixing the four most critical (P0) bugs.
+The user has provided a comprehensive list of 10 bugs and feature requests that need to be addressed. This includes critical bug fixes for core functionalities like profit tracking, streak calculations, referral tree population, and member counts. It also includes significant new feature development around stricter habit tracking, a smart registration security layer, AI-powered forum merging, and a team invitation pipeline with leader dashboards. The user also requested several enhancements and refactoring tasks throughout the session.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack platform with a sophisticated dark UI. Core features include an adaptive AI assistant, an admin dashboard, a gamified referral system with a member lookup feature, a 7-step onboarding gate, and consolidated notifications. A critical black screen bug affecting new users upon their first login has been resolved by fixing a missing import in the  component and implementing a global . The login page has been redesigned to a modern split-panel layout. A comprehensive  document has been created to guide users on the new features.
+The application is a full-stack platform with a sophisticated dark UI. In this session, the agent has resolved all four initial high-priority (P0) bugs related to the profit tracker, streak synchronization, referral tree, and admin member counts.
+
+The following features and enhancements have been implemented:
+- **Admin Dashboard Overhaul:** Stat cards were updated to show 'Total Active Members', 'Team Leaders', 'Suspended Users', and 'In Danger'. The Admin Cleanup Hub is now integrated directly into the dashboard for quick access.
+- **Member Management:** Suspended members are now correctly excluded from the main member list and have a dedicated Suspended tab.
+- **Referral System:** The unreadable visual referral tree UI has been fixed. A My Team page was created for team leaders to view their downline.
+- **Habits Overhaul:** Habits can now be set for specific days of the week, and screenshot uploads are now mandatory for completion.
+- **Forum:** A Solved tab was added to separate solved posts, which remain searchable. AI is now used to intelligently merge forum posts.
+- **Security & Moderation:** A Smart Registration Security layer was added to flag suspicious signups for admin approval. A fraud warning system for habit submissions was implemented, along with a weekly check. An Admin Cleanup page was created as a central hub for all moderation tasks.
+- **Store:** A new store feature was added, allowing users to purchase Signal Gate Immunity Credits.
+- **Backend Improvements:** A scheduler was implemented for twice-daily streak syncs and weekly fraud checks. A text search index was added to the forum. A startup task to normalize  data was created. Refactoring of the massive  has begun.
 
 **Last working item**:
-    - **Last item agent was working:** The agent began investigating a list of four high-priority (P0) bugs reported by the user. This involved parallel exploration of the relevant frontend and backend files to understand the root cause of each issue.
-    - **Status:** IN PROGRESS
-    - **Agent Testing Done:** N
-    - **Which testing method agent to use?** After fixing the bugs, use  commands to validate backend endpoints individually. Once all P0 bugs are fixed, run a full regression test using  covering profit tracking, streaks, the referral network, and admin dashboard stats.
+    - **Last item agent was working:** The agent attempted to run a comprehensive, end-to-end test using the testing agent after implementing a large batch of features and refactoring tasks. This included the new Store, AI Visual Review for screenshots, forum text indexing,  normalization, and the extraction of cleanup routes from .
+    - **Status:** BLOCKED
+    - **Agent Testing Done:** Y
+    - **Which testing method agent to use?**  to diagnose the widespread failure and then re-verify all functionality.
     - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-  - **Issue 1: Profit Tracker Failed to log trade Error (P0)**
-     - **Description:** When a new trader uses the Profit Tracker for the first time and enters their initial fund amount, the submission fails with an error.
-     - **Attempted fixes:** The agent has viewed  and .
+  - **Issue 1: Comprehensive Test Failure (P0)**
+     - **Description:** The last comprehensive test run failed with a 0% pass rate across both backend and frontend, indicating a critical, application-wide failure. This occurred immediately after a major implementation and refactoring push.
+     - **Attempted fixes:** The agent ran the . The result was a complete failure.
      - **Next debug checklist:**
-        1. Examine the payload sent from  during the initial fund setup.
-        2. Inspect the Pydantic model ( or similar) in  for validation mismatches.
-        3. Replicate the failure with a  command.
-        4. Adjust the frontend payload or backend model to resolve the validation error.
-     - **Status:** IN PROGRESS
-     - **Is recurring issue?** Y
-     - **Should Test frontend/backend/both after fix?** Both.
-     - **Blocked on other issue:** None.
+        1.  **Analyze Test Report:** Carefully review the failed test report at  to identify the first point of failure and see if there's a common error pattern.
+        2.  **Check Backend Logs:** Inspect the backend logs for startup errors using ==> /var/log/supervisor/backend.err.log <==
+2026-03-11 18:42:49,222 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:42:54,880 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:42:54,886 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.132.11', 54758) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:42:55,022 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.132.11', 54778) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:42:55,515 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:42:55,596 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:00,959 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:00,961 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.129.83', 47632) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:01,088 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.129.83', 47636) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:01,293 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.132.11', 48736) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:01,600 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:43:06,881 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:06,895 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.132.11', 48760) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:06,984 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.132.11', 48776) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:07,150 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:43:12,877 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:12,880 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.132.11', 49822) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:13,126 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.132.11', 49834) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:13,481 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:43:18,877 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:18,883 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.132.11', 39404) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:19,018 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.129.83', 41662) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:19,198 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:43:24,883 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:24,891 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.129.83', 41182) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:24,987 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.129.83', 41190) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:25,194 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+2026-03-11 18:43:30,887 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+2026-03-11 18:43:30,888 - services.websocket_service - INFO - WebSocket disconnected: user=system-restore-lab
+INFO:     connection closed
+INFO:     ('10.64.129.83', 41206) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:30,967 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     ('10.64.132.11', 56744) - "WebSocket /api/ws/b4628e3e-9dec-42ef-8c75-dcba08194cd2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNDYyOGUzZS05ZGVjLTQyZWYtOGM3NS1kY2JhMDgxOTRjZDIiLCJlbWFpbCI6ImlhbUByeWFuc2FsdmFkb3IuY29tIiwicm9sZSI6Im1hc3Rlcl9hZG1pbiIsImV4cCI6MTc3MzMzNDc1OX0.bNbk7cncrd9aExK0WLaOaBHGjZtAVHPW4F_tO2loEgg" [accepted]
+2026-03-11 18:43:31,178 - services.websocket_service - INFO - WebSocket connected: user=system-restore-lab, role=master_admin
+INFO:     connection open
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [48] using WatchFiles
+2026-03-11 18:43:57,956 - server - INFO - Using database: crosscurrent_finance
+INFO:     Started server process [78]
+INFO:     Waiting for application startup.
+2026-03-11 18:43:58,539 - server - INFO - Successfully connected to MongoDB (attempt 1)
+2026-03-11 18:43:58,550 - server - INFO - Database indexes created
+2026-03-11 18:43:58,575 - server - INFO - Badge definitions seeded
+2026-03-11 18:43:58,575 - server - INFO - WebSocket service initialized with database
+2026-03-11 18:43:58,575 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-11 18:43:58,576 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-11 18:43:58,576 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-11 18:43:58,576 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-11 18:43:58,576 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Added job "check_missed_trades" to job store "default"
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Added job "startup_db.<locals>.auto_batch_sync" to job store "default"
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Added job "startup_db.<locals>.auto_batch_sync" to job store "default"
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Added job "startup_db.<locals>.auto_batch_sync" to job store "default"
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Added job "startup_db.<locals>.weekly_fraud_check" to job store "default"
+2026-03-11 18:43:58,577 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-11 18:43:58,577 - server - INFO - Scheduler started: rewards sync (4h), streak sync (mid-day+EOD), fraud check (weekly Sun)
+INFO:     Application startup complete.
 
-  - **Issue 2: Streak Synchronization Issue (P0)**
-     - **Description:** A member's trading streak count is inconsistent across different parts of the platform (e.g., main dashboard shows 67, while the Rewards Platform shows 0).
-     - **Attempted fixes:** The agent has started viewing  and .
-     - **Next debug checklist:**
-        1. Identify all backend locations where the streak is calculated or fetched.
-        2. Compare the calculation logic between the main user profile endpoint and the rewards/referral endpoints.
-        3. Unify the logic to use a single source of truth for the streak value.
-     - **Status:** IN PROGRESS
+==> /var/log/supervisor/backend.out.log <==
+INFO:     10.64.129.83:60150 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:60150 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:45250 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:60660 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:60670 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:51440 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:33478 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:51442 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:33506 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:41992 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48544 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48544 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48544 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:60992 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:60992 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:60348 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:60348 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:60366 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53062 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53070 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:33558 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53070 - "GET /api/version HTTP/1.1" 200 OK
+INFO:     10.64.129.83:33558 - "GET /api/admin/notifications?limit=20&unread_only=false HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53070 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:33558 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52472 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52472 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52498 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52498 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:41558 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:37416 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:50908 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:50908 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:43068 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:43068 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:35578 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:58778 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:35578 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:58804 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:48658 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53576 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53576 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53598 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53598 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:53598 - "GET /api/version HTTP/1.1" 200 OK
+INFO:     10.64.129.83:45818 - "GET /api/admin/notifications?limit=20&unread_only=false HTTP/1.1" 200 OK
+INFO:     10.64.129.83:45834 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:45834 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52720 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52720 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:43508 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:52722 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:43518 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:42584 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:51680 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:42600 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36500 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36500 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36588 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36588 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:54320 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:54320 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:54320 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:34354 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:34354 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:36820 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:34382 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:34382 - "GET /api/version HTTP/1.1" 200 OK
+INFO:     10.64.129.83:36820 - "GET /api/admin/notifications?limit=20&unread_only=false HTTP/1.1" 200 OK
+INFO:     10.64.129.83:36820 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:54686 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36560 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36560 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36588 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:36588 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:36576 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:36576 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:53010 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:37430 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:41800 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:53042 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:54730 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:54730 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:47622 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:54774 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48734 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48734 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48734 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48752 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:48752 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:58256 - "GET /api/admin/notifications?limit=20&unread_only=false HTTP/1.1" 200 OK
+INFO:     10.64.129.83:58256 - "GET /api/version HTTP/1.1" 200 OK
+INFO:     10.64.129.83:58256 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:49820 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:39400 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:41654 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:39418 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.132.11:39418 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:41192 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK
+INFO:     10.64.129.83:41192 - "GET /api/notifications?limit=50 HTTP/1.1" 200 OK. The issue could be related to the newly registered routers (, ) or the application startup tasks (, ).
+        3.  **Isolate with Curl:** Manually test the most recently added or modified endpoints with  to see if the backend is responsive at all. Start with simple, known-good endpoints, then move to the new ones (, ).
+        4.  **Review :** Double-check  to ensure all new routers and startup tasks are correctly imported and registered without circular dependencies or other configuration errors.
+     - **Status:** BLOCKED
      - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** Backend.
-
-  - **Issue 3: Referral Tree Not Populating and Unreadable UI (P0)**
-     - **Description:** The referral network tree page is not populating with the correct member hierarchy, and the current UI is difficult to read.
-     - **Attempted fixes:** The agent has viewed  and the  endpoint.
-     - **Next debug checklist:**
-        1.  Verify the data structure returned by the  endpoint.
-        2.  Debug the frontend component in  that processes this data to build the tree.
-        3.  Correct the data processing logic to render the hierarchy correctly.
-        4.  Fix the CSS styling to improve the readability of the tree.
-     - **Status:** IN PROGRESS
-     - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** Both.
-
-  - **Issue 4: Member Count Discrepancy (P0)**
-     - **Description:** The total member count on the admin dashboard is different from the count on the dedicated member list page.
-     - **Attempted fixes:** The agent has reviewed  and .
-     - **Next debug checklist:**
-        1. Compare the database queries used for counting members on the dashboard versus the member list.
-        2. The discrepancy is likely due to different filters (e.g., one includes admins/suspended users, the other doesn't).
-        3. Standardize the definition of an active member and apply it consistently to both counts.
-     - **Status:** IN PROGRESS
-     - **Is recurring issue?** Y
-     - **Should Test frontend/backend/both after fix?** Backend.
+     - **Blocked on other issue:** This is the primary blocker.
 
 **In progress Task List**:
-- None.
+  - **Task 1: Complete Refactoring of  (P2)**
+     - **Where to resume:** The agent successfully extracted the cleanup routes. The next step is to extract the large members section (approx. lines 688-1430 in the original file) into a new file: .
+     - **What will be achieved with this?** Significantly improve code maintainability and organization by breaking down the monolithic  file.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Backend.
+     - **Blocked on something:** Issue 1: Comprehensive Test Failure.
 
 **Upcoming and Future Tasks**
+**Upcoming Tasks:**
+*   **Refactor  (P2):** This large frontend component needs to be broken down into smaller, more manageable child components to improve readability and maintainability. (Status: NOT STARTED)
+*   **AI Visual Review for Screenshots (P2):** The backend logic for calling the AI service is in place, but it needs to be fully integrated with the admin cleanup page so admins can see and act on AI-flagged submissions. (Status: IN PROGRESS)
+*   **AI Recommendations for Team Leaders (P2):** Implement AI-powered suggestions on the My Team page to flag members who are In Danger of suspension based on their activity (or lack thereof). (Status: NOT STARTED)
 
-**Upcoming Tasks (P1):**
-*   **Verify/Confirm Admin Editing:** Confirm that the master admin can edit a member's Merin referral code and their selected inviter through the  page.
-*   **Isolate Suspended Members:**
-    *   On the admin members page, replace the 'Admins' card with a 'Suspended' card showing the count of suspended members.
-    *   Add a new 'Suspended' tab to the members list to display these users separately.
-    *   Ensure suspended members are excluded from the 'Total Active Members' count.
-*   **Separate Solved Forum Posts:**
-    *   In the forum, create a new 'Solved' tab.
-    *   When a post is marked as solved, move it to this tab while ensuring it remains available in search results.
-
-**Future Tasks (P2 & Beyond):**
-*   **Habits Overhaul (P2):**
-    *   Allow the master admin to set Occasional Habits (e.g., Monday Story Day).
-    *   Require screenshot proof for all habit completions.
-    *   Implement an admin cleanup page for reviewing suspicious submissions and managing suspensions.
-    *   Create a warning and punishment system for fraudulent submissions.
-    *   (Future) Explore AI visual review for screenshots and a store for Signal Gate Immunity Credits.
-*   **Smart Registration Security Layer (P2):**
-    *   Develop a system to flag suspicious new registrations (e.g., using a suspended user's email).
-    *   Require admin approval for flagged accounts before they can access the hub.
-*   **AI-Powered Forum Merging (P2):**
-    *   When merging forum posts, use AI to intelligently blend the content into the master post.
-*   **Team & Invitation Pipeline (P2):**
-    *   Build team pages based on the referral tree, where Team Leaders (inviters) can view their team's members, activity, and balances.
-    *   Add AI recommendations for leaders (e.g., members In Danger).
-    *   Create an invitation pipeline for leaders to monitor their team's invites.
+**Future Tasks:**
+*   **Store Enhancements:** Expand the store with more items, such as Signal Gate Immunity Credits.
+*   **Refactor  Usage:** Although a data normalization script was created, the codebase should be refactored to consistently use a single field (e.g.,  ObjectId) instead of redundant fields like .
 
 **Completed work in this session**
-- **Invite Someone & Member Lookup Feature (DONE):** Implemented a comprehensive referral section in the Affiliate Center where members can get their onboarding invite link and look up other members' Merin codes.
-- **Who Invited You? Modal (DONE):** Created a one-time modal for users to set their inviter, ensuring the referral tree is populated.
-- **Login Page Redesign (DONE):** The login page was completely redesigned with a modern, split-panel layout.
-- **Critical Black Screen Bug Fix (DONE):** Fixed a React crash in the  that caused a blank page for new users on first login. Also implemented a global  to prevent future crashes from taking down the app.
-- **Multiple Bug Fixes (DONE):**
-    - Fixed an error in the set password flow by making  optional.
-    - Fixed an error in the trade logging flow by making  optional.
-- **User Documentation (DONE):** Created and refined , a non-technical guide for members on the new features, complete with embedded screenshots.
+- **Critical Bug Fixes (DONE):**
+  - Fixed Profit Tracker Failed to log trade error for new users.
+  - Fixed streak synchronization issue between the dashboard and Rewards Platform.
+  - Fixed referral tree not populating and improved its UI readability.
+  - Fixed member count discrepancy on the admin dashboard.
+- **Feature Implementation (DONE):**
+  - Implemented suspended member isolation on the admin page.
+  - Created a Solved tab in the forum.
+  - Implemented day-of-week specific habits with mandatory screenshot proofs.
+  - Built the My Team page for team leaders.
+  - Developed the Smart Registration Security layer and Admin Cleanup Page.
+  - Implemented AI-powered merging for forum posts.
+  - Created a store for purchasing Signal Gate Immunity Credits.
+- **Enhancements (DONE):**
+  - Overhauled admin dashboard stat cards.
+  - Fixed the visual layout of the D3 referral tree.
+  - Added twice-daily automated streak synchronization.
+- **Backend Refactoring (IN PROGRESS):**
+  - Began splitting  by creating .
+  - Added a text search index to the  collection in MongoDB.
+  - Created a one-time startup task to normalize  data.
 
 **Earlier issues found/mentioned but not fixed**
--   All known issues are now captured in the **All Pending/In progress Issue list** or **Upcoming and Future Tasks**.
+- None.
 
 **Known issue recurrence from previous fork**
--   None.
+- None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Error Boundary:** Implemented a React Error Boundary () to catch JavaScript errors anywhere in the component tree, displaying a fallback UI instead of a crashed white/black screen.
--   **HAR File Debugging:** Analyzed a  file to identify a client-side request error (a missing field in a POST payload), allowing for a precise backend fix.
--   **API-Driven Conditional UI:** The  is rendered conditionally based on the  field, which is fetched from the backend upon user login.
--   **Debounced API Calls:** The member lookup feature uses a debounced input to make API calls, preventing excessive requests to the backend while the user is typing.
+- **Scheduled Jobs (APScheduler):** Used for periodic tasks like syncing user streaks and checking for fraudulent habit submissions.
+- **API Route Refactoring:** The process of breaking down a monolithic FastAPI router () into smaller, domain-specific routers () to improve maintainability.
+- **Database Indexing & Startup Tasks:** Implemented a text index on the  collection for faster searches and created a one-time startup task to perform data normalization.
+- **AI Integration (OpenRouter):** Utilized an external AI service for advanced features like blending content for forum post merges and analyzing images for screenshot verification.
 
 **key DB schema**
--   **users:**
-    -    (Reference to the  collection document of the inviter)
-    -    (The string  of the inviter. This is redundant and should be refactored to use only the ObjectId reference).
+-   **users:** added , , .
+-   **habits:** added , .
+-   **habit_logs:** added , .
+-   **posts:** Added a text index on  and .
+-   **store_items (New Collection):** .
 
 **changes in tech stack**
--   None.
+- None.
 
 **All files of reference**
--    (P0 Profit Tracker Bug)
--    (P0 Profit Tracker Bug)
--    (P0 Streak & Referral Tree Bugs)
--    (P0 Referral Tree Bug)
--    (P0 Member Count Bug)
--    (P0 Member Count Bug)
+-  (Failed test report)
+-  (Potential source of startup error)
+-  (Refactoring in progress)
+-  (Newly created file)
+-  (Newly created file)
 
 **Areas that need refactoring**:
--   The  collection contains both  (ObjectId) and  (string), which is redundant. The code should be refactored to use only the  ObjectId reference to maintain data integrity.
--   As noted in the previous session,  and  are very large and should be broken down into smaller, more manageable modules.
+- ****: Still over 3000 lines long and requires the members section to be extracted.
+- ****: A large, complex component that should be broken down.
+- ** Data Usage**: The codebase should be updated to exclusively use the normalized  field, removing reliance on .
 
 **key api endpoints**
--   : (New) Searches for members to find their Merin code.
--   : (New) Allows a user to set their inviter.
--   : (Existing) Fetches the referral tree data; **currently has a bug**.
--   : (Fixed) Allows a new user to set their password.
--   : (Fixed) Allows logging a trade; **currently has a bug for new traders**.
+- **New Endpoints:**
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+- **Modified Endpoints:**
+  -  (Now uses AI)
+  -  (Now enforces screenshots and has AI review)
 
 **Critical Info for New Agent**
-1.  **Focus on P0 Bugs:** Your immediate priority is to fix the four P0 bugs: Profit Tracker error, inconsistent streaks, broken referral tree, and mismatched member counts. Do not start any new features until these are resolved and verified.
-2.  **Black Screen Bug is Solved:** The user has repeatedly mentioned a black screen or Something went wrong error after setting a password. This was caused by the  crashing. The root cause has been fixed in the current codebase by adding a missing import and implementing an . Do not try to re-solve this issue; simply inform the user it has been fixed and will be resolved in the next deployment.
-3.  **User Has a Long-Term Vision:** The user has provided detailed plans for P1 and P2 tasks. Acknowledge them but stay focused on the P0 items first. Refer to messages #509, #512, and #515 for the detailed requirements when you are ready to tackle them.
+1.  **Start with the Blocker:** Your immediate and only priority is to fix the critical test failure. The entire application is non-functional. Begin by analyzing the failed test report () and the backend logs for startup errors. The failure is almost certainly due to the last batch of backend changes (new routes, refactoring, startup tasks).
+2.  **Incremental Debugging:** Do not run the full testing agent again until you have a high degree of confidence. Use  to test individual endpoints and  to monitor logs as you bring services up.
+3.  **Resume Refactoring After Fix:** Once the application is stable, your next task is to continue the planned refactoring. This includes finishing the  split and then tackling .
+4.  **User-Approved Plan:** The user has already approved the plan to implement Signal Gate Immunity Credits, AI Visual Review, and the major refactoring tasks. Proceed with these once the primary blocker is resolved.
 
 **documents and test reports created in this job**
--   
--    (Passed, but before new bugs were reported)
+- 
+- 
+-  (CRITICAL FAILURE)
+-  (Updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request:** Start with a list of 10 bugs/features. **Status: IN PROGRESS**
-2.  **Clarification:** Provided detailed requirements for Occasional Habits and Team Pipelines. **Status: PLANNED**
-3.  **Clarification:** Added more requirements for In Danger status and Habit fraud. **Status: PLANNED**
-4.  **Approval:** User approved the agent's multi-phase plan. **Status: COMPLETE**
-5.  **Bug Report:** Reported black screen error after  with a HAR file and asked for the inviter modal to show only once. **Status: RESOLVED**
-6.  **Bug Report:** Reported Failed to log trade and re-reported the  error. **Status: RESOLVED (for password), IN PROGRESS (for trade log)**
-7.  **Request:** Rewrite  to be non-technical. **Status: RESOLVED**
-8.  **Feedback:** images are broken in the document. **Status: RESOLVED**
-9.  **Request:** Add screenshots to . **Status: RESOLVED**
-10. **Request:** Create a document explaining new features. **Status: RESOLVED**
+1.  **Request:** Add the Admin Cleanup page inside the Admin Dashboard for ease of access and then proceed with the next items. **Status: COMPLETE**
+2.  **Request:** After the next items, perform extensive comprehensive testing and list potential improvements. **Status: IN PROGRESS**
+3.  **Clarification:** User clarified that missing API Keys are fine in the preview environment. **Status: ACKNOWLEDGED**
+4.  **Request:** Approved the agent's list of improvements and requested the implementation of items #2 (AI Visual Review), #3 (Refactor ProfitTrackerPage), #4 (Refactor admin_routes), and #5 (Normalize referred_by), followed by comprehensive testing. **Status: IN PROGRESS** (This is the last active instruction set).
+5.  **Continuation:** Proceed with the next action items. **Status: IN PROGRESS**
+6.  **Request:** Add the admin cleanup page inside the admin dashboard for ease of access. **Status: COMPLETE**
+7.  **Approval:** User approved of the implemented features and requested to proceed to the next items. **Status: COMPLETE**
+8.  **Feedback:** User pointed out the visual referral tree view was still unreadable. **Status: RESOLVED**
+9.  **Feedback/Request:** User provided feedback on implemented features and requested new stat cards, suspended member isolation fix, and auto streak sync. **Status: RESOLVED**
+10. **Approval:** All 4 P0 bugs verified fixed... Let me now update the PRD and finish. User then provides the next set of requests. **Status: COMPLETE**
 
 **Project Health Check:**
--   **Broken:**
-    -   Profit Tracker submission for new traders.
-    -   Streak calculation is inconsistent across the platform.
-    -   The referral tree UI is not populating or displaying correctly.
-    -   The admin dashboard member count is incorrect.
+-   **Broken:** The entire application is currently in a broken state. The last comprehensive test run resulted in a 0% pass rate, indicating a catastrophic failure likely originating from recent backend refactoring and feature additions.
 -   **Mocked:**
-    -   The external Rewards Platform API () remains a placeholder.
+    -   The external Rewards Platform API ().
+    -   AI Visual Review is implemented on the backend but not fully wired to the admin frontend for review.
 
 **3rd Party Integrations**
--   **OpenRouter:** Used for AI features.
+-   **OpenRouter:** Used for AI features (Forum Merging, Visual Screenshot Review).
 -   **Publitio:** Used for image hosting.
 -   **Heartbeat:** A critical external API used for user verification during registration and login.
 
 **Testing status**
 -   **Testing agent used after significant changes:** YES
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None.
--   **Known regressions:** Four new P0 bugs have been identified since the last successful test run.
+-   **Test files created:** None
+-   **Known regressions:** The entire application is considered regressed due to the 100% test failure.
 
 **Credentials to test flow:**
 -   **Role:** Master Admin
@@ -194,6 +379,6 @@ The application is a full-stack platform with a sophisticated dark UI. Core feat
 -   **Password:** 
 
 **What agent forgot to execute**
--   The previous implementation of the  flow did not account for all use cases, causing a critical bug that required a HAR file to diagnose.
--   The  was implemented without its required  import, leading to a site-wide crash for non-admin users.
--   A redundant field () was added to the user model alongside , which should be refactored to use a single source of truth.</analysis>
+- The agent did not perform incremental backend testing (, log checks) after a large-scale refactoring and addition of new routes/startup tasks. This resulted in a complete test failure that is now difficult to debug, rather than catching a smaller issue earlier.
+- The planned refactoring of  was not started.
+- The planned refactoring of  was only partially completed.</analysis>

@@ -23,7 +23,7 @@ from datetime import datetime, timezone, timedelta
 # Get BASE_URL from environment
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://streaks-referral.preview.emergentagent.com"
+    BASE_URL = "https://system-restore-lab.preview.emergentagent.com"
 
 # Test credentials - Master Admin for creating test user
 ADMIN_EMAIL = "iam@ryansalvador.com"
