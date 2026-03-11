@@ -34,129 +34,62 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 - New badges for habit/quiz achievements
 
 ### Phase: UI Refresh & AI Assistant (2026-03-10)
-- **Premium Dark Theme Redesign (COMPLETE):**
-  - Upgraded from basic color swap to full premium fintech aesthetic
-  - Global component overhaul: Card, Dialog, Input, Tabs, Badge shadcn components updated with dark gradient bases
-  - CSS utilities: glass-card, glass-card-elevated, kpi-card (with accent variants), star-bg, btn-primary, btn-secondary, input-dark
-  - Login: Particle star background (#050505), premium glass-morphic card with ambient glow
-  - Dashboard: KPI cards with colored left accent glow bars, 3xl stat numbers, icon glow effects
-  - Sidebar: Gradient background (#0c0c0c → #080808), refined section labels, orange glow active states
-  - Header: Transparent bg with 20px backdrop blur
-  - Admin Dashboard: Premium StatCard + QuickAction components
-  - Forum: Refined post cards with gradient backgrounds, pill category filters
-  - AI Assistant: Premium sidebar/chat backgrounds
-  - Main background: #070707 (nearly black) for depth
-  - All dialogs: Dark gradient backgrounds with premium shadow
-  - Borders: Switched from white/[0.08] to subtle white/[0.04]-[0.06]
-  
-- **AI Knowledge Assistant (COMPLETE):**
-  - Two AI personalities: RyAI (Technical/Safeguard) and zxAI (Knowledge/Encouragement)
-  - Multi-turn conversation with session persistence
-  - Admin-trainable knowledge base
-  - Active learning from interactions
-  - Escalation system: AI flags questions it can't answer for admin review
-  - Admin answers are automatically added to knowledge base
-  - Admin config: personality, system prompt, greeting, model selection
-  - Analytics dashboard: sessions, messages, escalation rate
-  - Backend: `/api/ai-assistant/*` routes
-  - Frontend: `/ai-assistant` (user), `/admin/ai-training` (admin)
+- Premium Dark Theme Redesign (COMPLETE)
+- AI Knowledge Assistant (COMPLETE)
+- Forum Enhancement (COMPLETE)
+- Habit Tracker Enhancement (COMPLETE)
+- Rewards Page Polish (COMPLETE)
+- Dark Theme Refinements (COMPLETE)
 
-- **Forum Enhancement (COMPLETE):**
-  - Community info sidebar with gradient banner, stats, Top Contributors
-  - Category pills (All, General, Trading, Technical, Announcements)
-  - Posts + sidebar layout for desktop
+### Onboarding & Invite System (COMPLETE)
+- 7-Step Onboarding Gate
+- Merin Referral Code
+- Cross-Platform API
+- Admin Gate Toggle
+- Referral Tracking Page
+- Referral Milestone Rewards
+- Referral Leaderboard
+- Admin Stats
 
-- **Habit Tracker Enhancement (COMPLETE):**
-  - Streak badges with gradient glow effects
-  - Current Streak, Best Streak, Total Days cards
+### Black Screen Bug Fix & Affiliate Center (COMPLETE)
+- Error Boundary added
+- InviterModal fixed
+- Affiliate Center with invite link, member lookup
+- Admin Inviter Management
+- Login Page Redesign
 
-- **Rewards Page Polish (COMPLETE):**
-  - Points Balance, Level, Rank cards with gradient icons and glow
-  - Level progress bar with points-to-next-level
-  - Streak & Activity Stats grid (4 items)
-
-- **Dark Theme Refinements (COMPLETE):**
-  - All zinc backgrounds → true dark (#0a0a0a, #111111, #1a1a1a)
-  - Chart grid strokes refined (subtle rgba)
-  - Chart tooltips updated (dark glass-morphism)
-  - Notification panel with date grouping
+### P0 Bug Fixes (2026-03-11)
+- **Profit Tracker "New Trader" crash (FIXED):** OnboardingData Pydantic model updated to accept frontend fields (user_type, start_date, trade_entries, total_commission) with proper optional defaults. Was returning 422 due to field name mismatch.
+- **Streak not syncing to Rewards (FIXED):** rewards.py summary endpoint was reading `current_streak` and `best_streak` but DB stores them as `current_streak_days` and `best_streak_days`. Fixed to read correct field names with fallback.
+- **Referral tree not populating (FIXED):** Tree-building code now maps both `referral_code` and `merin_referral_code` to users, and also resolves `referred_by_user_id` for direct ID lookups. Referral counting in tracking/my-code endpoints also updated.
+- **Member count discrepancy (FIXED):** Admin Dashboard was counting `members.length` (capped at page limit=20) instead of using `response.total`. Fixed to use `membersRes.data.total`.
+- Tested: iteration 182 — 100% pass (13/13 backend, all frontend).
 
 ## Prioritized Backlog
 
-### P0 — Core Changes (2026-03-10, Session 2)
-- **Fix Persistent Popup (DONE):** PromotionPopup CTA now closes dialog before navigating (uses react-router for internal URLs)
-- **Onboarding Tour Persistence (DONE):** Tour completion saved to backend DB via /api/users/complete-tour, checked on load via /api/users/tour-status
-- **Adaptive AI Assistant (DONE):** Merged RyAI/zxAI into single unified chat. Backend auto-detects intent and routes to correct persona (technical → RyAI, encouragement → zxAI). Persona indicated per message.
-- **Admin Sidebar Simplified (DONE):** Replaced accordion with single "Admin Dashboard" button. AdminDashboardPage reorganized into 4 categories: Management, Analytics & Tools, AI & Platform, System.
-- **Admin Toggle for Adaptive AI (DONE — 2026-03-10, Session 3):** Added `adaptive_ai_enabled` setting to platform_settings. Toggle in Admin Settings > Security tab. When disabled, all chat requests fall back to RyAI (no adaptive persona routing). Tested: iteration_169 — 100% pass.
+### P1 — Upcoming Tasks
+- **Verify/Confirm Admin Editing:** Confirm master admin can edit member's Merin referral code and inviter
+- **Isolate Suspended Members:** Replace Admins card with Suspended card, add Suspended tab, exclude from active count
+- **Separate Solved Forum Posts:** New 'Solved' tab, move solved posts there, keep searchable
 
-### Bug Fixes (2026-03-10, Session 3)
-- **Family Member Projections Fix (DONE):** Fixed broken import `from server import get_quarter` → `from utils.trading_days import get_quarter` in family.py. FA Licensee family projections now load correctly.
-- **Daily Projection Table Fix (DONE):** Added missing `get_quarter` import to profit_routes.py and admin_routes.py. Licensee daily projection endpoint no longer crashes with NameError. Also fixed undefined `get_first_trading_day_of_quarter` function.
-- **Dashboard Licensee Label Fix (DONE):** Changed "Actual vs Projected / Below target" to "Account Growth / +X% since inception" for licensees in DashboardPage.jsx. No more misleading "Below target" label.
-- **AI Training Model Dropdown (DONE):** Dynamic model selector pulling 346+ models from OpenRouter API with searchable dropdown. Backend endpoint: `/api/ai-assistant/models` (1h cache).
-- **Habits Pagination (DONE):** Added pagination (10 items/page) with prev/next and page number buttons to HabitManagerCard.jsx.
-- **Anomaly Detection Streak Fix (DONE):** Created shared `utils/streak.py` utility. Anomaly check, trade journal, and trade coach now compute streak from trade_logs instead of non-existent `users.streak` field.
-- **AI Trade Journal Truncation Fix (DONE):** Increased `max_tokens` from 350 to 800 in ai_service.py. Journals now complete fully.
-- **Timezone DST Fix (DONE):** Replaced hardcoded timezone offsets with dynamic `Intl.DateTimeFormat` API in TradeMonitorPage.jsx. Now correctly handles DST transitions.
-- **Notification Consolidation (DONE):** Rewrote NotificationPanel with Unread/Read/All tabs, type-based consolidation (e.g., "Member1, Member2 and 32 more submitted trades"), and action buttons per notification type.
-- Tested: iterations 170-173.
+### P2 — Future Features
+- **Habits Overhaul:** Day-of-week habits (Mon Story Day, etc.) admin-configurable, screenshot proof required, AI visual review, admin spot checks, fraudulent screenshot flow with warnings/suspension, Signal Gate Immunity Credits
+- **Team System:** Inviters = Team Leaders (auto from referral tree), team pages with members/activity/balances, invite pipeline, AI recommendations with "In Danger" status, team stats dashboard
+- **Smart Registration Security:** Auto-flag suspicious registrations (same email domain as suspended, similar names, matching codes), admin approval queue, notifications
+- **AI Forum Merging:** AI rewrites/blends merged content into Master Post, credits original submitter
+- **Admin Cleanup Page:** Central review page for flagged screenshots, danger status members, auto-suspended members, pending registration approvals
 
-### Onboarding & Invite System (2026-03-10, Session 4)
-- **7-Step Onboarding Gate (DONE):** New `/api/onboarding/*` routes. Blocks platform access until all steps complete (Heartbeat, Merin, Hub, Exchange, Tutorials, Live Trade, Rewards). Admin always bypasses.
-- **Merin Referral Code (DONE):** Members store their Merin code in profile. Invite link auto-generates: `https://www.meringlobaltrading.com/#/pages/login/regist?code={CODE}&lang=en_US`
-- **Cross-Platform API (DONE):** Public endpoints for external onboarding site: `GET /api/onboarding/status/{user_id}`, `POST /api/onboarding/complete-step-external`
-- **Admin Gate Toggle (DONE):** `onboarding_gate_enabled` setting in Admin Settings > Security tab.
-
-### Referral Tracking & Milestone Rewards (2026-03-10, Session 4)
-- **Referral Tracking Page (DONE):** New `/referral-tracking` page ("Invite & Earn") with invite link, stats, milestones, leaderboard, and referral list.
-- **Referral Milestone Rewards (DONE):** Points awarded at 3 (100pts), 5 (200pts), 10 (500pts), 25 (1000pts), 50 (2500pts) referrals. New badges: `referral_25` (Network Builder), `referral_50` (Community Architect).
-- **Referral Leaderboard (DONE):** Ranked by referral count with badge display.
-- **Admin Stats (DONE):** `/api/referrals/admin/stats` returns total_members, code_adoption_rate, referral_rate, top_referrers.
-- Tested: iteration 174 — 100% pass.
-
-### P1 — Feature Enhancements (ALL COMPLETE — iteration_165)
-- Share Trade Card: Dashboard "Share" button → opens rich card dialog with copy/download (DONE)
-- Daily Profit Summary: AI-consolidated notification on dashboard for today's trades (DONE)
-- Admin Dashboard: Dedicated admin home page with stats (DONE — previous session)
-- Public Member Profile: View any member's profile from Admin Members page or /member/:id (DONE)
-- Transaction Stepper: Step-progress indicators in deposit/withdrawal dialogs (DONE)
-- AI Smart Prompts: Popular questions shown in AI Assistant from active learning data (DONE)
-
-### P2 — Upcoming
-- Smoother onboarding (pre-fill referral from website) — Partially done via onboarding gate system
-- External onboarding wizard site (prompt provided to user for separate Emergent deployment)
-
-### Black Screen Bug Fix (2026-03-10, Session 5)
-- **Root Cause (FIXED):** `InviterModal.jsx` was missing `useEffect` import. When the modal tried to render for non-admin members, React crashed and unmounted the entire tree, leaving only the dark background (black screen).
-- **Error Boundary (ADDED):** Global `ErrorBoundary` component wraps the entire App. If any React component crashes, users see a "Something went wrong" recovery screen with a "Reload App" button instead of a black/blank page.
-- **Inviter Modal Updated (DONE):** Now shows once per session (via sessionStorage) for ALL non-admin members, regardless of whether they already have an inviter set. Members with an existing inviter see their current inviter with "Confirm" button + option to change. The `set-inviter` endpoint now allows re-setting.
-- Tested: iteration 179 — 100% pass.
-- **Onboarding Invite Link (DONE):** Backend returns `onboarding_invite_link` (`https://crosscur.rent/onboarding?merin_code={CODE}`) in `/api/referrals/tracking`. Default Merin code is `BDVMAF` when no code is provided on the onboarding site.
-- **Affiliate Center Invite Card (DONE):** Prominent "Invite Someone" card at top of Affiliate Center page with copy-to-clipboard, view referral stats link, and direct Merin signup link.
-- **Sidebar Profile Link (DONE):** "Affiliate Center" link added to profile dropdown in sidebar (both expanded and collapsed modes) for quick access.
-- **Referral Tracking Update (DONE):** Updated Invite & Earn page to display the onboarding invite link instead of the direct Merin registration link, with direct Merin link shown below as secondary.
-- **Member Lookup (DONE):** "Find a Member" card in Affiliate Center — search by name/email, results show name + masked email + Merin code with copy button. Backend: `GET /api/referrals/lookup-members?q={query}`. Only returns members who have a Merin code set.
-- **"Who Invited You?" Modal (DONE):** One-time modal pushed to all non-admin members who haven't set their inviter. Non-dismissable — they MUST search and select their inviter via member lookup. Backend: `POST /api/referrals/set-inviter` (accepts inviter_id). Stores `referred_by` (code) and `referred_by_user_id`. Login response now includes `referred_by` field. Admins are excluded.
-- **Admin Inviter Management (DONE):** Admin Members page shows "Inviter" field in read-only view. Edit mode provides inviter lookup (search by name/email) with results dropdown. Admin can also clear a member's inviter. Backend: `PUT /api/admin/members/{id}` with `referred_by_user_id` field.
-- Tested: iterations 176-178 — 100% pass.
-
-### P3 — Future Features
+### P3 — Long-term
 - AI for Debt Management
 - Gamified Leaderboards
 - Performance optimization (caching, pagination)
-- Refactor ProfitTrackerPage.jsx (~4300 lines) and TradeMonitorPage.jsx (~2600 lines)
+- Refactor ProfitTrackerPage.jsx (~4300 lines) and admin_routes.py (~4500 lines)
 
 ## Key Database Collections
 - `users`, `trade_logs`, `signals`, `forum_posts`, `habits`, `quizzes`, `rewards`
-- `ai_assistants` — AI bot configs (RyAI, zxAI)
-- `ai_sessions` — Chat sessions per user
-- `ai_messages` — Individual chat messages
-- `ai_knowledge` — Admin-curated training data
-- `ai_unanswered` — Escalated questions pending admin answer
-- `ai_interactions` — Active learning interaction log
-- `onboarding_checklists` — Per-user 7-step onboarding progress
-- `platform_settings` — Admin toggles (adaptive_ai_enabled, onboarding_gate_enabled, etc.)
+- `ai_assistants`, `ai_sessions`, `ai_messages`, `ai_knowledge`, `ai_unanswered`, `ai_interactions`
+- `onboarding_checklists`, `platform_settings`
+- `rewards_stats` (stores `current_streak_days`, `best_streak_days`)
 
 ## Credentials
 - Master Admin: `iam@ryansalvador.com` / `admin123`
