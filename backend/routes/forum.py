@@ -921,6 +921,49 @@ async def merge_posts(
 
     now = datetime.now(timezone.utc).isoformat()
 
+    # AI-powered content blending
+    merged_content = target.get("content", "")
+    source_author = await db.users.find_one({"id": source.get("author_id")}, {"_id": 0, "full_name": 1})
+    source_author_name = (source_author or {}).get("full_name", "A member")
+
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+    if openrouter_key and source.get("content"):
+        try:
+            import httpx
+            ai_prompt = f"""You are merging two community forum posts into one cohesive post. The target (master) post should incorporate relevant information from the source post.
+
+TARGET POST (keep as the base):
+Title: {target.get('title', '')}
+Content: {target.get('content', '')}
+
+SOURCE POST (to be merged in):
+Title: {source.get('title', '')}
+Content: {source.get('content', '')}
+Author: {source_author_name}
+
+Instructions:
+- Keep the target post's structure and main message
+- Weave in any unique or valuable information from the source post
+- Add a brief credit note at the end: "(Includes contributions from {source_author_name})"
+- Keep the tone consistent
+- Don't make it longer than necessary
+- Return ONLY the merged content, no explanations"""
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {openrouter_key}", "Content-Type": "application/json"},
+                    json={"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": ai_prompt}], "temperature": 0.3, "max_tokens": 2000},
+                )
+                resp.raise_for_status()
+                merged_content = resp.json()["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            logger.warning(f"AI merge failed, using fallback: {e}")
+            merged_content = f"{target.get('content', '')}\n\n---\n\n*Merged from: \"{source.get('title', '')}\" by {source_author_name}*\n\n{source.get('content', '')}"
+    elif source.get("content"):
+        # Fallback: simple concatenation with credit
+        merged_content = f"{target.get('content', '')}\n\n---\n\n*Merged from: \"{source.get('title', '')}\" by {source_author_name}*\n\n{source.get('content', '')}"
+
     # 1. Move all comments from source to target
     source_comments = await db.forum_comments.find(
         {"post_id": body.source_post_id}, {"_id": 0}
@@ -937,16 +980,18 @@ async def merge_posts(
         if comment["author_id"] != source["author_id"]:
             contributor_ids.add(comment["author_id"])
 
-    # 2. Update target post comment count
+    # 2. Update target post with merged content and comment count
     await db.forum_posts.update_one(
         {"id": body.target_post_id},
         {
             "$inc": {"comment_count": moved_count},
             "$set": {
+                "content": merged_content,
                 "updated_at": now,
                 "merged_from": body.source_post_id,
                 "merged_at": now,
                 "merged_by": user["id"],
+                "merge_source_author": source_author_name,
             },
         },
     )

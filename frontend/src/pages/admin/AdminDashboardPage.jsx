@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import {
   Users, TrendingUp, DollarSign, Activity, Shield, Settings,
   BarChart3, Radio, HelpCircle, Sparkles, Award,
-  ArrowUpRight, AlertTriangle, ChevronRight, BrainCircuit
+  ArrowUpRight, AlertTriangle, ChevronRight, BrainCircuit,
+  Camera, UserCheck, UserX
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -52,14 +53,16 @@ const AdminDashboardPage = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({});
   const [aiStats, setAiStats] = useState({});
+  const [cleanup, setCleanup] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [membersRes, aiRes] = await Promise.all([
+        const [membersRes, aiRes, cleanupRes] = await Promise.all([
           adminAPI.getMembers().catch(() => ({ data: { members: [] } })),
           aiAssistantAPI.getStats().catch(() => ({ data: {} })),
+          adminAPI.getCleanupOverview().catch(() => ({ data: null })),
         ]);
         const members = membersRes.data.members || membersRes.data || [];
         setStats({
@@ -67,6 +70,7 @@ const AdminDashboardPage = () => {
           activeToday: Array.isArray(members) ? members.filter(m => m.logged_today).length : 0,
         });
         setAiStats(aiRes.data || {});
+        setCleanup(cleanupRes.data);
       } catch { /* ignore */ }
       setLoading(false);
     };
@@ -89,6 +93,38 @@ const AdminDashboardPage = () => {
         <StatCard label="Knowledge Base" value={aiStats.knowledge_entries ?? '--'} subtext={`${aiStats.escalation_rate ?? 0}% escalation`} icon={Sparkles} color="from-teal-500 to-teal-600" link="/admin/ai-training" />
       </div>
 
+      {/* Cleanup Alerts */}
+      {cleanup && (cleanup.pending_proofs > 0 || cleanup.fraud_warning_count > 0 || cleanup.in_danger_count > 0 || cleanup.pending_registrations > 0) && (
+        <Link to="/admin/cleanup" className="block p-4 rounded-2xl bg-[#111111] border border-red-500/15 hover:border-red-500/25 transition-all group" data-testid="cleanup-alert-banner">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-red-400" />
+              <h2 className="text-sm font-semibold text-white">Action Required</h2>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">
+              View Cleanup Hub <ArrowUpRight className="w-3 h-3" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {[
+              { label: 'Pending Proofs', val: cleanup.pending_proofs, icon: Camera, color: 'text-blue-400', show: cleanup.pending_proofs > 0 },
+              { label: 'Fraud Warnings', val: cleanup.fraud_warning_count, icon: Shield, color: 'text-red-400', show: cleanup.fraud_warning_count > 0 },
+              { label: 'In Danger', val: cleanup.in_danger_count, icon: AlertTriangle, color: 'text-amber-400', show: cleanup.in_danger_count > 0 },
+              { label: 'Auto-Suspended', val: cleanup.auto_suspended_count, icon: UserX, color: 'text-rose-400', show: cleanup.auto_suspended_count > 0 },
+              { label: 'Pending Signups', val: cleanup.pending_registrations, icon: UserCheck, color: 'text-cyan-400', show: cleanup.pending_registrations > 0 },
+            ].filter(i => i.show).map(item => (
+              <div key={item.label} className="flex items-center gap-2 bg-white/[0.02] rounded-lg px-3 py-2">
+                <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                <div>
+                  <p className={`text-lg font-bold font-mono ${item.color}`}>{item.val}</p>
+                  <p className="text-[9px] text-zinc-500">{item.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Link>
+      )}
+
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Management */}
@@ -99,6 +135,7 @@ const AdminDashboardPage = () => {
             <QuickAction label="Trading Signals" desc="Create and manage trade signals" icon={Radio} color="from-emerald-500 to-emerald-600" link="/admin/signals" />
             <QuickAction label="Transactions" desc="Review deposits and withdrawals" icon={DollarSign} color="from-amber-500 to-amber-600" link="/admin/transactions" />
             <QuickAction label="Licenses" desc="Manage member licenses" icon={Award} color="from-purple-500 to-purple-600" link="/admin/licenses" />
+            <QuickAction label="Admin Cleanup" desc="Review flagged items and pending actions" icon={Shield} color="from-red-500 to-rose-600" link="/admin/cleanup" />
           </div>
         </div>
 
