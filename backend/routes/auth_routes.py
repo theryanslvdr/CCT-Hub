@@ -79,6 +79,45 @@ async def register(data: UserCreate):
             detail=f"Your Heartbeat account is deactivated. {reason}. Please contact support to reactivate your account."
         )
     
+    # ── Smart Registration Security ──
+    # Check for suspicious patterns
+    flags = []
+    email_domain = data.email.lower().split("@")[-1] if "@" in data.email else ""
+
+    # Flag 1: Same email domain as a suspended user
+    if email_domain:
+        suspended_with_domain = await deps.db.users.find_one({
+            "email": {"$regex": f"@{email_domain}$", "$options": "i"},
+            "is_suspended": True,
+        })
+        if suspended_with_domain:
+            flags.append(f"Email domain @{email_domain} matches suspended user {suspended_with_domain.get('email')}")
+
+    # Flag 2: Same inviter as a suspended user + similar name
+    if data.referred_by:
+        suspended_same_inviter = await deps.db.users.find_one({
+            "referred_by": data.referred_by,
+            "is_suspended": True,
+        })
+        if suspended_same_inviter:
+            flags.append(f"Same inviter code '{data.referred_by}' as suspended user {suspended_same_inviter.get('email')}")
+
+    # Flag 3: Name very similar to a suspended user
+    suspended_users = await deps.db.users.find(
+        {"is_suspended": True},
+        {"_id": 0, "full_name": 1, "email": 1}
+    ).to_list(100)
+    name_lower = data.full_name.lower().strip()
+    for su in suspended_users:
+        su_name = (su.get("full_name") or "").lower().strip()
+        if su_name and (su_name in name_lower or name_lower in su_name or
+                        (len(name_lower) > 3 and len(su_name) > 3 and
+                         sum(1 for a, b in zip(name_lower, su_name) if a == b) / max(len(name_lower), len(su_name)) > 0.8)):
+            flags.append(f"Name similar to suspended user '{su.get('full_name')}' ({su.get('email')})")
+            break
+
+    is_flagged = len(flags) > 0
+
     # Determine role based on secret code
     role = "member"  # Default to normal member
     if data.secret_code:
@@ -103,20 +142,36 @@ async def register(data: UserCreate):
         "timezone": "UTC",
         "allowed_dashboards": default_dashboards if role == "member" else None,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "registration_flagged": is_flagged,
+        "registration_flags": flags if is_flagged else [],
+        "registration_approved": not is_flagged,  # Auto-approved if not flagged
     }
+    
+    if hasattr(data, 'referred_by') and data.referred_by:
+        user["referred_by"] = data.referred_by
     
     await deps.db.users.insert_one(user)
     
     # Send notification to all admins about new registration
-    await create_admin_notification(
-        notification_type="new_user",
-        title="New User Registered",
-        message=f"{data.full_name} has joined the platform",
-        user_id=user_id,
-        user_name=data.full_name,
-        metadata={"email": data.email.lower(), "role": role}
-    )
+    if is_flagged:
+        await create_admin_notification(
+            notification_type="flagged_registration",
+            title="Flagged Registration",
+            message=f"{data.full_name} ({data.email}) was flagged: {'; '.join(flags)}",
+            user_id=user_id,
+            user_name=data.full_name,
+            metadata={"email": data.email.lower(), "role": role, "flags": flags}
+        )
+    else:
+        await create_admin_notification(
+            notification_type="new_user",
+            title="New User Registered",
+            message=f"{data.full_name} has joined the platform",
+            user_id=user_id,
+            user_name=data.full_name,
+            metadata={"email": data.email.lower(), "role": role}
+        )
     
     # Send notification to all members about new member (community notification)
     await create_member_notification(

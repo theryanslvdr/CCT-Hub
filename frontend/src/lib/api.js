@@ -354,6 +354,12 @@ export const adminAPI = {
   batchSyncAllLicensees: () => api.post('/admin/licensee/batch-sync-all'),
   // Run diagnostic for a licensee by email
   runDiagnostic: (email) => api.get(`/diagnostic/licensee/${encodeURIComponent(email)}`),
+  // Smart Registration
+  getPendingRegistrations: () => api.get('/admin/pending-registrations'),
+  approveRegistration: (userId) => api.post(`/admin/approve-registration/${userId}`),
+  rejectRegistration: (userId) => api.post(`/admin/reject-registration/${userId}`),
+  // Admin Cleanup
+  getCleanupOverview: () => api.get('/admin/cleanup-overview'),
 };
 
 // Licensee APIs (for licensed users)
@@ -455,6 +461,9 @@ export const habitAPI = {
   getSocialTasks: () => api.get('/habits/social-tasks'),
   completeSocialTask: (taskId) => api.post(`/habits/social-task/${taskId}/complete`),
   uncompleteSocialTask: (taskId) => api.post(`/habits/social-task/${taskId}/uncomplete`),
+  // Fraud warnings
+  getMyWarnings: () => api.get('/habits/my-warnings'),
+  acknowledgeWarning: (warningId) => api.post(`/habits/acknowledge-warning/${warningId}`),
 };
 
 // Admin Habit APIs
@@ -531,6 +540,8 @@ export const referralAPI = {
   getAdminStats: () => api.get('/referrals/admin/stats'),
   lookupMembers: (q) => api.get('/referrals/lookup-members', { params: { q } }),
   setInviter: (inviterId) => api.post('/referrals/set-inviter', { inviter_id: inviterId }),
+  // Team System
+  getMyTeam: () => api.get('/referrals/my-team'),
 };
 
 // Quiz System API

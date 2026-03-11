@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     full_name: str
     heartbeat_email: Optional[str] = None
     secret_code: Optional[str] = None  # For admin/super admin/master admin registration
+    referred_by: Optional[str] = None  # Referral code of the inviter
 
 
 class UserLogin(BaseModel):

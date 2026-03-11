@@ -557,8 +557,12 @@ async def admin_spot_check(
                 "screenshot_url": "",
             }}
         )
-        # Optionally: reset streak or deduct points for rejected proof
-        return {"message": "Proof rejected and deleted", "action": "rejected"}
+        # Create/increment fraud warning for the user
+        member_id = completion.get("user_id")
+        if member_id:
+            await create_fraud_warning(db, member_id, data.reason)
+
+        return {"message": "Proof rejected — fraud warning issued", "action": "rejected"}
 
     raise HTTPException(status_code=400, detail="Action must be 'approve' or 'reject'")
 
@@ -575,3 +579,134 @@ async def spot_check_stats(user: dict = Depends(require_admin)):
     rejected = await db.habit_completions.count_documents({"verification_status": "rejected"})
 
     return {"pending": pending, "approved": approved, "rejected": rejected}
+
+
+# ─── Fraud Warning System ───
+
+@router.get("/my-warnings")
+async def get_my_warnings(user: dict = Depends(get_current_user)):
+    """Get fraud warnings for the current user."""
+    db = deps.db
+    warnings = await db.fraud_warnings.find(
+        {"user_id": user["id"], "resolution": {"$ne": "cleared"}},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(20)
+
+    # Count total rejections
+    rejection_count = await db.habit_completions.count_documents({
+        "user_id": user["id"],
+        "verification_status": "rejected"
+    })
+
+    active_warning = next((w for w in warnings if w.get("resolution") == "pending"), None)
+
+    return {
+        "warnings": warnings,
+        "active_warning": active_warning,
+        "rejection_count": rejection_count,
+    }
+
+
+@router.post("/acknowledge-warning/{warning_id}")
+async def acknowledge_warning(warning_id: str, user: dict = Depends(get_current_user)):
+    """Member acknowledges a fraud warning — starts 7-day countdown."""
+    db = deps.db
+    warning = await db.fraud_warnings.find_one(
+        {"id": warning_id, "user_id": user["id"]}, {"_id": 0}
+    )
+    if not warning:
+        raise HTTPException(status_code=404, detail="Warning not found")
+    if warning.get("acknowledged"):
+        return {"message": "Already acknowledged", "countdown_end": warning.get("countdown_end")}
+
+    countdown_end = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+    await db.fraud_warnings.update_one(
+        {"id": warning_id},
+        {"$set": {
+            "acknowledged": True,
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "countdown_end": countdown_end,
+        }}
+    )
+    return {"message": "Warning acknowledged. You have 7 days to correct your behavior.", "countdown_end": countdown_end}
+
+
+async def create_fraud_warning(db, user_id: str, reason: str = ""):
+    """Create a fraud warning for a user after admin rejects their proof."""
+    # Check if there's already an active (pending) warning
+    existing = await db.fraud_warnings.find_one(
+        {"user_id": user_id, "resolution": "pending"}
+    )
+    if existing:
+        # Increment fraud count on existing warning
+        await db.fraud_warnings.update_one(
+            {"id": existing["id"]},
+            {"$inc": {"fraud_count": 1}, "$set": {"last_rejection_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        return existing["id"]
+
+    warning = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "reason": reason,
+        "fraud_count": 1,
+        "acknowledged": False,
+        "acknowledged_at": None,
+        "countdown_end": None,
+        "resolution": "pending",  # pending -> acknowledged -> cleared/suspended
+        "last_rejection_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.fraud_warnings.insert_one(warning)
+    warning.pop("_id", None)
+    return warning["id"]
+
+
+async def check_and_auto_suspend(db):
+    """Check for users whose countdown has expired with continued fraud — auto-suspend them."""
+    now = datetime.now(timezone.utc).isoformat()
+    # Find acknowledged warnings where countdown has expired
+    expired_warnings = await db.fraud_warnings.find(
+        {
+            "resolution": "pending",
+            "acknowledged": True,
+            "countdown_end": {"$lte": now},
+        },
+        {"_id": 0}
+    ).to_list(100)
+
+    suspended_count = 0
+    for w in expired_warnings:
+        user_id = w["user_id"]
+        # Check if they had MORE rejections after the warning was acknowledged
+        new_rejections = await db.habit_completions.count_documents({
+            "user_id": user_id,
+            "verification_status": "rejected",
+            "verified_at": {"$gte": w.get("acknowledged_at", "")},
+        })
+        if new_rejections > 0:
+            # Auto-suspend
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {
+                    "is_suspended": True,
+                    "suspended_at": now,
+                    "suspension_reason": "Auto-suspended: continued fraudulent screenshot submissions after warning",
+                    "suspension_type": "permanent",
+                }}
+            )
+            await db.fraud_warnings.update_one(
+                {"id": w["id"]},
+                {"$set": {"resolution": "suspended", "resolved_at": now}}
+            )
+            suspended_count += 1
+            logger.info(f"Auto-suspended user {user_id} for continued fraud after warning")
+        else:
+            # Cleared — no new fraud during countdown
+            await db.fraud_warnings.update_one(
+                {"id": w["id"]},
+                {"$set": {"resolution": "cleared", "resolved_at": now}}
+            )
+            logger.info(f"Fraud warning cleared for user {user_id} — no new fraud during countdown")
+
+    return suspended_count

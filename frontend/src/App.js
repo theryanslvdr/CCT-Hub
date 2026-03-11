@@ -50,6 +50,9 @@ import MemberProfilePage from "./pages/MemberProfilePage";
 import ForumListPage from "./pages/ForumListPage";
 import ForumPostPage from "./pages/ForumPostPage";
 import ReferralTrackingPage from "./pages/ReferralTrackingPage";
+import TeamPage from "./pages/TeamPage";
+import { AdminCleanupPage } from "./pages/admin/AdminCleanupPage";
+import FraudWarningPopup from "./components/FraudWarningPopup";
 
 // Layout
 import { DashboardLayout } from "./components/layout/DashboardLayout";
@@ -106,6 +109,7 @@ function App() {
             <Route path="/member/:memberId" element={<MemberProfilePage />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/referral-tracking" element={<ReferralTrackingPage />} />
+            <Route path="/my-team" element={<TeamPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />
@@ -123,6 +127,7 @@ function App() {
             <Route path="/admin/quizzes" element={<QuizManagementPage />} />
             <Route path="/admin/ai-training" element={<AITrainingPage />} />
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/cleanup" element={<AdminCleanupPage />} />
           </Route>
 
           {/* Default redirect */}
@@ -134,6 +139,7 @@ function App() {
         </BrowserRouter>
         <Toaster position="top-right" richColors theme="dark" />
         <ReferralOnboardingModal />
+        <FraudWarningPopup />
         <PWAInstallBanner />
         <VersionBanner />
       </WebSocketProvider>

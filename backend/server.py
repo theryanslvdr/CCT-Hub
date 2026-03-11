@@ -417,9 +417,25 @@ async def startup_db():
             id="eod_streak_sync",
             replace_existing=True
         )
+
+        # Weekly fraud check — every Sunday at 23:00 UTC
+        async def weekly_fraud_check():
+            try:
+                from routes.habits import check_and_auto_suspend
+                count = await check_and_auto_suspend(db)
+                logger.info(f"Weekly fraud check complete: {count} users auto-suspended")
+            except Exception as e:
+                logger.warning(f"Weekly fraud check failed: {e}")
+
+        scheduler.add_job(
+            weekly_fraud_check,
+            CronTrigger(day_of_week="sun", hour=23, minute=0),
+            id="weekly_fraud_check",
+            replace_existing=True
+        )
         
         scheduler.start()
-        logger.info("Scheduler started for missed trade notifications, rewards auto-sync (every 4h), and streak sync (mid-day + end-of-day)")
+        logger.info("Scheduler started: rewards sync (4h), streak sync (mid-day+EOD), fraud check (weekly Sun)")
     except Exception as e:
         logger.warning(f"Scheduler startup warning: {e}")
 

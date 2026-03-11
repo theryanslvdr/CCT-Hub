@@ -767,3 +767,95 @@ async def get_admin_referral_stats(user: dict = Depends(require_admin)):
         "code_adoption_rate": round(members_with_code / max(total_members, 1) * 100, 1),
         "top_referrers": top_referrers,
     }
+
+
+# ─── Team System ───
+
+@router.get("/my-team")
+async def get_my_team(user: dict = Depends(get_current_user)):
+    """Get the current user's team — members they referred (directly + indirectly)."""
+    db = deps.db
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1, "merin_referral_code": 1})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    codes = [c for c in [user_doc.get("referral_code"), user_doc.get("merin_referral_code")] if c]
+    if not codes:
+        return {"team": [], "stats": {"total": 0, "active": 0, "in_danger": 0, "new_this_week": 0}}
+
+    # Find direct referrals
+    query = {"$or": [{"referred_by": {"$in": codes}}, {"referred_by_user_id": user["id"]}]}
+    members = await db.users.find(
+        query,
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "created_at": 1,
+         "is_suspended": 1, "referral_code": 1, "merin_referral_code": 1}
+    ).sort("created_at", -1).to_list(500)
+
+    # Enrich with activity data
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    seven_days_ago = (now - timedelta(days=7)).isoformat()
+    one_day_ago = (now - timedelta(days=1)).isoformat()
+
+    enriched = []
+    active_count = 0
+    in_danger_count = 0
+    new_this_week = 0
+
+    for m in members:
+        mid = m["id"]
+
+        # Last trade
+        last_trade = await db.trade_logs.find_one(
+            {"user_id": mid}, {"_id": 0, "created_at": 1}
+        , sort=[("created_at", -1)])
+
+        # Trade count last 7 days
+        recent_trades = await db.trade_logs.count_documents({
+            "user_id": mid, "created_at": {"$gte": seven_days_ago}
+        })
+
+        # Habit completions today
+        today = now.strftime("%Y-%m-%d")
+        habits_today = await db.habit_completions.count_documents({
+            "user_id": mid, "date": today
+        })
+
+        # Fraud warnings
+        fraud_warnings = await db.fraud_warnings.count_documents({
+            "user_id": mid, "resolution": "pending"
+        })
+
+        is_active = recent_trades > 0 or habits_today > 0
+        has_any_trade = last_trade is not None
+        is_danger = has_any_trade and recent_trades == 0 and not m.get("is_suspended")
+
+        if is_active:
+            active_count += 1
+        if is_danger:
+            in_danger_count += 1
+        if m.get("created_at", "") >= seven_days_ago:
+            new_this_week += 1
+
+        enriched.append({
+            "id": mid,
+            "name": m.get("full_name", "Unknown"),
+            "email": m.get("email", ""),
+            "joined": m.get("created_at", ""),
+            "is_suspended": m.get("is_suspended", False),
+            "last_trade": last_trade.get("created_at") if last_trade else None,
+            "recent_trades": recent_trades,
+            "habits_today": habits_today,
+            "fraud_warnings": fraud_warnings,
+            "status": "suspended" if m.get("is_suspended") else ("danger" if is_danger else ("active" if is_active else "inactive")),
+        })
+
+    return {
+        "team": enriched,
+        "stats": {
+            "total": len(members),
+            "active": active_count,
+            "in_danger": in_danger_count,
+            "new_this_week": new_this_week,
+        },
+    }
