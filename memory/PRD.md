@@ -13,69 +13,76 @@ Build a comprehensive financial tracking and community platform for CrossCurrent
 ## What's Been Implemented
 
 ### Foundation Features (Complete)
-- User authentication (JWT), Dashboard, Profit Tracker, Trade Monitor, Admin panel
-- Notifications (WebSocket + in-app), Forum, Family accounts, Licensee management
-- Rewards & leaderboard, Referral system, Quiz system, Habit tracker
+- User auth (JWT), Dashboard, Profit Tracker, Trade Monitor, Admin panel
+- Notifications (WebSocket), Forum, Family accounts, Licensee management
+- Rewards, Referral system, Quiz system, Habit tracker
 
 ### UI Refresh & AI Assistant (Complete)
 - Premium Dark Theme, AI Knowledge Assistant, Forum Enhancement, Rewards Polish
 
 ### Onboarding & Invite System (Complete)
-- 7-Step Onboarding Gate, Merin Referral Code, Affiliate Center, Login Redesign, ErrorBoundary
+- 7-Step Onboarding Gate, Merin Referral Code, Affiliate Center, Login Redesign
 
 ### P0 Bug Fixes (2026-03-11)
-- Profit Tracker crash (OnboardingData model mismatch)
-- Streak sync (wrong field names in rewards.py)
-- Referral tree (merin_referral_code mapping)
-- Member count (use response.total)
+- Profit Tracker crash, Streak sync, Referral tree, Member count mismatch
 
 ### P1 Features (2026-03-11)
-- **Auto Streak Sync:** Mid-day (12:00 UTC) + end-of-day (23:30 UTC) CronTrigger jobs
-- **Referral Tree Readability:** Off-white background (#f5f5f0) with dark text on both Tree and Visual views
-- **Suspended Members Isolation:** Excluded from default list, new stat cards (Active, Team Leaders, Suspended, In Danger), new `/admin/members/stats/overview` endpoint
-- **Admin Referral Edit:** Verified admin can edit Merin code and inviter
-- **Forum Solved Tab:** Open/Solved/All tabs using ShadcnUI Tabs, default to Open, search across all statuses
+- Auto Streak Sync (mid-day + end-of-day CronTrigger)
+- Referral Tree Readability (off-white background on both Tree + Visual views)
+- Suspended Members Isolation (new stat cards, excluded from default list)
+- Forum Solved Tab (Open/Solved/All tabs, default Open, search across all)
 
 ### P2 Features — Habits Overhaul Phase 1 (2026-03-11)
-- **Day-of-Week Habits:** Admin can set habits for specific days (e.g., Monday Story Day). `day_of_week` field on habit model. User-facing endpoint filters habits to only show today's.
-- **Screenshot Proof Required:** `requires_screenshot` field on habits. Backend returns 400 if screenshot missing. Frontend shows file upload UI.
-- **Admin Habit Management:** Updated HabitManagerCard with day selector dropdown and screenshot toggle. Badges show day-of-week and screenshot status.
+- Day-of-week habits (admin configurable, `day_of_week` field)
+- Screenshot proof required (`requires_screenshot` enforced backend + frontend upload UI)
+
+### P2 Features — Fraud Warning System (2026-03-11)
+- Admin rejects habit proof → creates `fraud_warning` in DB
+- Member sees `FraudWarningPopup` on next page load
+- Member acknowledges → 7-day countdown starts
+- Weekly scheduler (Sunday 23:00 UTC) checks expired countdowns → auto-suspend if new rejections
+- `fraud_warnings` collection tracks: user_id, fraud_count, acknowledged, countdown_end, resolution
+
+### P2 Features — Team System (2026-03-11)
+- `GET /api/referrals/my-team` — team leader views their referred members
+- Activity data: recent trades, habits today, last trade date, fraud warnings
+- Status classification: active, inactive, danger, suspended
+- Stats: total, active, in_danger, new_this_week
+- Frontend `TeamPage.jsx` with stat cards and member list, sidebar link "My Team"
+
+### P2 Features — Smart Registration Security (2026-03-11)
+- Auto-flag on registration: same email domain as suspended, same inviter as suspended, similar name
+- `registration_flagged`, `registration_flags`, `registration_approved` fields on user document
+- Admin notification on flagged registrations
+- `GET /api/admin/pending-registrations` — admin review queue
+- `POST /api/admin/approve-registration/{id}` and `reject-registration/{id}`
+
+### P2 Features — Admin Cleanup Page (2026-03-11)
+- `GET /api/admin/cleanup-overview` — one-stop hub returning all admin review metrics
+- Frontend `AdminCleanupPage.jsx` with 5 stat cards + expandable sections
+- Sections: Pending Proofs, Fraud Warnings, In Danger Members, Auto-Suspended, Pending Registrations
+- Approve/Reject actions for flagged registrations
 
 ## Prioritized Backlog
 
-### P2 — In Progress: Habits Overhaul Phase 2
-- Admin spot checks on random completions (endpoints exist, need UI polish)
-- Fraudulent screenshot flow: warning popup, member acknowledgment, countdown timer, auto-suspend if behavior continues
-- Signal Gate Immunity Credits (purchasable from store)
-- AI visual review for suspicious screenshots (needs AI integration)
+### Remaining P2 Items
+- **AI Forum Merging:** AI rewrites/blends merged content into Master Post, credits original submitter
+- **Signal Gate Immunity Credits:** Purchasable credits from store to bypass gate
+- **AI Visual Review:** Flag suspicious screenshots automatically (needs AI integration)
 
-### P2 — Team System
-- Inviters = Team Leaders (auto from referral tree)
-- Team pages: members, activity, balances (leader-only view)
-- Invite Pipeline: track each member's invites, flag leeches
-- AI recommendations with "In Danger" status
-- Team stats dashboard
+### P3 — Long-term
+- AI for Debt Management
+- Gamified Leaderboards
+- Performance optimization (caching, pagination)
+- Refactor ProfitTrackerPage.jsx (~4300 lines) and admin_routes.py (~4700 lines)
 
-### P2 — Smart Registration Security
-- Auto-flag suspicious registrations (same email domain as suspended, similar names, matching codes)
-- Admin approval queue for flagged registrations
-- Notification to admin on triggers
-
-### P2 — AI Forum Merging
-- AI rewrites/blends merged content into Master Post
-- Credits original submitter, merged post removed from main list
-
-### P2 — Admin Cleanup Page
-- Central review page for: flagged screenshots, danger status members, auto-suspended members, pending registration approvals
-
-## Key Database Collections
-- `users`, `trade_logs`, `signals`, `forum_posts`, `habits`, `habit_completions`
-- `quizzes`, `rewards`, `rewards_stats` (current_streak_days, best_streak_days)
-- `ai_assistants`, `ai_sessions`, `ai_messages`, `ai_knowledge`
-- `onboarding_checklists`, `platform_settings`
+## Key Endpoints
+- `GET /api/habits/my-warnings` — user's fraud warnings
+- `POST /api/habits/acknowledge-warning/{id}` — acknowledge warning
+- `GET /api/referrals/my-team` — team leader's team data
+- `GET /api/admin/pending-registrations` — flagged signups
+- `GET /api/admin/cleanup-overview` — admin cleanup hub
+- `GET /api/admin/members/stats/overview` — member stat cards
 
 ## Credentials
 - Master Admin: `iam@ryansalvador.com` / `admin123`
-
-## Tech Stack
-React 19, FastAPI, MongoDB, Tailwind CSS, ShadcnUI, OpenRouter API, APScheduler, react-d3-tree
