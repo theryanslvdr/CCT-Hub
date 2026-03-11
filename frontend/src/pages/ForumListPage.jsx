@@ -14,6 +14,7 @@ import {
   Eye, MessageCircle, Loader2, ChevronLeft, ChevronRight,
   Award, ThumbsUp, Trophy, Star, ImageIcon, Pin, Tag, AlertTriangle
 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const STATUS_COLORS = {
   open: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -218,7 +219,7 @@ export default function ForumListPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('open');
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(null);
   const [newPostOpen, setNewPostOpen] = useState(false);
@@ -233,9 +234,14 @@ export default function ForumListPage() {
     setLoading(true);
     try {
       const params = { page, page_size: pageSize };
-      if (statusFilter) params.status = statusFilter;
+      // When searching, search across all statuses; otherwise use tab filter
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+        // Don't apply status filter during search so solved posts are findable
+      } else if (statusFilter) {
+        params.status = statusFilter;
+      }
       if (categoryFilter) params.category = categoryFilter;
-      if (searchQuery.trim()) params.search = searchQuery.trim();
       const res = await forumAPI.listPosts(params);
       setPosts(res.data.posts || []);
       setTotal(res.data.total || 0);
@@ -336,7 +342,35 @@ export default function ForumListPage() {
           )}
 
           {/* Filters */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
+            {/* Status Tabs */}
+            <Tabs value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+              <TabsList className="bg-[#111111] border border-[#222222] p-0.5 h-auto" data-testid="forum-status-tabs">
+                <TabsTrigger
+                  value="open"
+                  className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-zinc-400 text-xs px-4 py-1.5"
+                  data-testid="filter-open"
+                >
+                  Open
+                </TabsTrigger>
+                <TabsTrigger
+                  value="closed"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-zinc-400 text-xs px-4 py-1.5"
+                  data-testid="filter-solved"
+                >
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Solved
+                </TabsTrigger>
+                <TabsTrigger
+                  value=""
+                  className="data-[state=active]:bg-zinc-600 data-[state=active]:text-white text-zinc-400 text-xs px-4 py-1.5"
+                  data-testid="filter-all"
+                >
+                  All
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -347,20 +381,6 @@ export default function ForumListPage() {
                   className="pl-9 input-dark"
                   data-testid="forum-search-input"
                 />
-              </div>
-              <div className="flex gap-1">
-                {['', 'open', 'closed'].map(s => (
-                  <Button
-                    key={s}
-                    variant={statusFilter === s ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => { setStatusFilter(s); setPage(1); }}
-                    className={`h-9 ${statusFilter === s ? 'bg-orange-500 text-white' : 'bg-white/[0.04] border-white/[0.06] text-zinc-400 hover:text-white hover:bg-white/[0.08]'}`}
-                    data-testid={`filter-${s || 'all'}`}
-                  >
-                    {s === '' ? 'All' : s === 'open' ? 'Open' : 'Solved'}
-                  </Button>
-                ))}
               </div>
             </div>
             {/* Category pills */}

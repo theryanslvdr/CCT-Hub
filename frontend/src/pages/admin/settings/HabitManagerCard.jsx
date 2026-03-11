@@ -27,7 +27,8 @@ export const HabitManagerCard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [form, setForm] = useState({
     title: '', description: '', action_type: 'generic',
-    action_data: '', is_gate: true, validity_days: 1
+    action_data: '', is_gate: true, validity_days: 1,
+    requires_screenshot: true, day_of_week: ''
   });
 
   const loadHabits = async () => {
@@ -43,7 +44,7 @@ export const HabitManagerCard = () => {
   useEffect(() => { loadHabits(); }, []);
 
   const resetForm = () => {
-    setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true, validity_days: 1 });
+    setForm({ title: '', description: '', action_type: 'generic', action_data: '', is_gate: true, validity_days: 1, requires_screenshot: true, day_of_week: '' });
     setEditingId(null);
     setShowForm(false);
     setSaving(false);
@@ -52,12 +53,13 @@ export const HabitManagerCard = () => {
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error('Title is required'); return; }
     setSaving(true);
+    const payload = { ...form, day_of_week: form.day_of_week || null };
     try {
       if (editingId) {
-        await adminHabitAPI.updateHabit(editingId, form);
+        await adminHabitAPI.updateHabit(editingId, payload);
         toast.success('Habit updated');
       } else {
-        await adminHabitAPI.createHabit(form);
+        await adminHabitAPI.createHabit(payload);
         toast.success('Habit created');
       }
       resetForm();
@@ -74,7 +76,9 @@ export const HabitManagerCard = () => {
     setForm({
       title: h.title, description: h.description || '',
       action_type: h.action_type, action_data: h.action_data || '',
-      is_gate: h.is_gate, validity_days: h.validity_days || 1
+      is_gate: h.is_gate, validity_days: h.validity_days || 1,
+      requires_screenshot: h.requires_screenshot !== false,
+      day_of_week: h.day_of_week || ''
     });
     setEditingId(h.id);
     setShowForm(true);
@@ -126,6 +130,22 @@ export const HabitManagerCard = () => {
                 </Select>
               </div>
               <div>
+                <Label className="text-zinc-300 text-xs">Day of Week</Label>
+                <Select value={form.day_of_week || 'daily'} onValueChange={(v) => setForm(p => ({ ...p, day_of_week: v === 'daily' ? '' : v }))}>
+                  <SelectTrigger className="input-dark mt-1" data-testid="habit-day-of-week"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Every Day</SelectItem>
+                    <SelectItem value="monday">Monday</SelectItem>
+                    <SelectItem value="tuesday">Tuesday</SelectItem>
+                    <SelectItem value="wednesday">Wednesday</SelectItem>
+                    <SelectItem value="thursday">Thursday</SelectItem>
+                    <SelectItem value="friday">Friday</SelectItem>
+                    <SelectItem value="saturday">Saturday</SelectItem>
+                    <SelectItem value="sunday">Sunday</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label className="text-zinc-300 text-xs flex items-center gap-1"><Clock className="w-3 h-3" /> Valid for (days)</Label>
                 <Input
                   type="number" min={1} max={365}
@@ -134,11 +154,16 @@ export const HabitManagerCard = () => {
                   className="input-dark mt-1"
                   data-testid="habit-validity-days"
                 />
-                <p className="text-[10px] text-zinc-500 mt-0.5">Signal stays unlocked this many days after completion</p>
               </div>
-              <div className="flex items-center gap-2 pt-5">
+            </div>
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-2">
                 <Switch checked={form.is_gate} onCheckedChange={(v) => setForm(p => ({ ...p, is_gate: v }))} />
                 <Label className="text-zinc-300 text-sm">Gate (unlocks signal)</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.requires_screenshot} onCheckedChange={(v) => setForm(p => ({ ...p, requires_screenshot: v }))} data-testid="habit-requires-screenshot" />
+                <Label className="text-zinc-300 text-sm">Require Screenshot</Label>
               </div>
             </div>
             {form.action_type !== 'generic' && (
@@ -163,9 +188,11 @@ export const HabitManagerCard = () => {
             {habits.slice((currentPage - 1) * HABITS_PER_PAGE, currentPage * HABITS_PER_PAGE).map(h => (
               <div key={h.id} className={`p-3 rounded-lg border flex items-center justify-between ${h.active ? 'bg-[#0d0d0d]/40 border-white/[0.06]' : 'bg-[#0d0d0d]/20 border-white/[0.06]/50 opacity-60'}`} data-testid={`admin-habit-${h.id}`}>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-medium text-white">{h.title}</p>
                     {h.is_gate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400">Gate</span>}
+                    {h.requires_screenshot !== false && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400">Screenshot</span>}
+                    {h.day_of_week && <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 capitalize">{h.day_of_week}</span>}
                     {(h.validity_days || 1) > 1 && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 flex items-center gap-0.5">
                         <Clock className="w-2.5 h-2.5" /> {h.validity_days}d

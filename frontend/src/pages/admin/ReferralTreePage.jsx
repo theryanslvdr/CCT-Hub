@@ -121,15 +121,15 @@ const D3TreeView = ({ treeData }) => {
 
   const renderCustomNode = ({ nodeDatum, toggleNode }) => (
     <g onClick={toggleNode}>
-      <circle r={20} fill={nodeDatum.children?.length > 0 ? '#F97316' : '#52525b'} stroke="#71717a" strokeWidth={1} />
+      <circle r={20} fill={nodeDatum.children?.length > 0 ? '#F97316' : '#a1a1aa'} stroke="#d4d4d8" strokeWidth={1.5} />
       <text fill="white" x={0} y={5} textAnchor="middle" fontSize={10} fontWeight="bold">
         {nodeDatum.name?.charAt(0)?.toUpperCase() || '?'}
       </text>
-      <text fill="#d4d4d8" x={30} y={-5} fontSize={11} fontWeight="500">
+      <text fill="#18181b" x={30} y={-5} fontSize={11} fontWeight="600">
         {nodeDatum.name}
       </text>
       {nodeDatum.attributes?.code && nodeDatum.attributes.code !== 'N/A' && (
-        <text fill="#93c5fd" x={30} y={10} fontSize={9} fontFamily="monospace">
+        <text fill="#c2410c" x={30} y={10} fontSize={9} fontFamily="monospace" fontWeight="500">
           {nodeDatum.attributes.code}
         </text>
       )}
@@ -137,7 +137,7 @@ const D3TreeView = ({ treeData }) => {
   );
 
   return (
-    <div ref={containerRef} className="w-full h-[500px] bg-[#0d0d0d]/50 rounded-lg border border-white/[0.08]/50 overflow-hidden" data-testid="d3-tree-container">
+    <div ref={containerRef} className="w-full h-[500px] bg-[#f5f5f0] rounded-lg border border-zinc-300 overflow-hidden" data-testid="d3-tree-container">
       <TreeComponent
         data={d3Data}
         translate={translate}
@@ -146,6 +146,7 @@ const D3TreeView = ({ treeData }) => {
         separation={{ siblings: 1.5, nonSiblings: 2 }}
         nodeSize={{ x: 200, y: 80 }}
         renderCustomNodeElement={renderCustomNode}
+        pathClassFunc={() => 'dark-tree-link'}
         collapsible
         zoomable
         draggable

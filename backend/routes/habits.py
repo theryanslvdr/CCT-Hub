@@ -29,9 +29,16 @@ class HabitCreate(BaseModel):
 async def get_habits(user: dict = Depends(get_current_user)):
     """Get all active habits and the user's completion status."""
     db = deps.db
-    habits = await db.habits.find({"active": True}, {"_id": 0}).to_list(100)
+    all_habits = await db.habits.find({"active": True}, {"_id": 0}).to_list(100)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     today_date = datetime.strptime(today, "%Y-%m-%d").date()
+    today_day = today_date.strftime("%A").lower()  # "monday", "tuesday", etc.
+
+    # Filter: show only habits for today (daily habits + matching day_of_week)
+    habits = [
+        h for h in all_habits
+        if not h.get("day_of_week") or h.get("day_of_week") == today_day
+    ]
 
     # Get today's completions for display
     completions_today = await db.habit_completions.find(
@@ -194,6 +201,10 @@ async def complete_habit(habit_id: str, data: HabitCompleteRequest = None, scree
     habit = await db.habits.find_one({"id": habit_id, "active": True}, {"_id": 0})
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
+
+    # Check if screenshot is required
+    if habit.get("requires_screenshot", False) and not effective_screenshot_url:
+        raise HTTPException(status_code=400, detail="Screenshot proof is required for this habit")
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     existing = await db.habit_completions.find_one(

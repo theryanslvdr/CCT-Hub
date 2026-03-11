@@ -117,11 +117,12 @@ class NotifyRequest(BaseModel):
 class _HabitBase(BaseModel):
     title: str
     description: Optional[str] = None
-    frequency: str = "daily"
-    icon: Optional[str] = None
-    category: Optional[str] = None
-    requires_screenshot: bool = False
-    is_active: bool = True
+    action_type: str = "generic"
+    action_data: Optional[str] = ""
+    is_gate: bool = True
+    validity_days: int = 1
+    requires_screenshot: bool = True
+    day_of_week: Optional[str] = None  # "monday","tuesday",...,"sunday" or None for daily
 
 class _HabitCreate(_HabitBase):
     pass
@@ -4580,11 +4581,13 @@ async def admin_create_habit(data: _HabitCreate, user: dict = Depends(deps.requi
     habit = {
         "id": str(uuid.uuid4()),
         "title": data.title,
-        "description": data.description,
+        "description": data.description or "",
         "action_type": data.action_type,
-        "action_data": data.action_data,
+        "action_data": data.action_data or "",
         "is_gate": data.is_gate,
         "validity_days": max(1, data.validity_days),
+        "requires_screenshot": data.requires_screenshot,
+        "day_of_week": data.day_of_week,  # None = daily, "monday" = Mon only
         "active": True,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": user["id"],
@@ -4600,11 +4603,13 @@ async def admin_update_habit(habit_id: str, data: _HabitCreate, user: dict = Dep
         {"id": habit_id},
         {"$set": {
             "title": data.title,
-            "description": data.description,
+            "description": data.description or "",
             "action_type": data.action_type,
-            "action_data": data.action_data,
+            "action_data": data.action_data or "",
             "is_gate": data.is_gate,
             "validity_days": max(1, data.validity_days),
+            "requires_screenshot": data.requires_screenshot,
+            "day_of_week": data.day_of_week,
         }}
     )
     if result.matched_count == 0:

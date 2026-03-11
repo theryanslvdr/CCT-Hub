@@ -3,7 +3,7 @@ import { habitAPI, quizAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy, Flame, Trophy, Calendar, Sparkles, Loader2, ArrowRight, Zap, HelpCircle, Check, X, BookOpen } from 'lucide-react';
+import { CheckCircle2, Circle, Lock, Unlock, Send, ExternalLink, ClipboardCopy, Flame, Trophy, Calendar, Sparkles, Loader2, ArrowRight, Zap, HelpCircle, Check, X, BookOpen, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LEVEL_CONFIGS = {
@@ -298,15 +298,36 @@ const HabitTrackerPage = () => {
 
   useEffect(() => { loadHabits(); }, [loadHabits]);
 
+  const [screenshotFile, setScreenshotFile] = useState(null);
+  const [uploadingFor, setUploadingFor] = useState(null);
+
   const handleToggle = async (habitId) => {
     const isCompleted = completions.includes(habitId);
+    const habit = habits.find(h => h.id === habitId);
+
+    // If requires screenshot and not yet completed, need screenshot first
+    if (!isCompleted && habit?.requires_screenshot) {
+      if (!screenshotFile || uploadingFor !== habitId) {
+        toast.error('Please upload a screenshot proof first');
+        return;
+      }
+    }
+
     setCompleting(habitId);
     try {
       if (isCompleted) {
         await habitAPI.uncompleteHabit(habitId);
         toast.info('Habit unmarked');
       } else {
-        const res = await habitAPI.completeHabit(habitId);
+        let screenshotUrl = '';
+        // Upload screenshot if required
+        if (habit?.requires_screenshot && screenshotFile && uploadingFor === habitId) {
+          const uploadRes = await habitAPI.uploadScreenshot(screenshotFile);
+          screenshotUrl = uploadRes.data.url || '';
+          setScreenshotFile(null);
+          setUploadingFor(null);
+        }
+        const res = await habitAPI.completeHabit(habitId, screenshotUrl);
         if (res.data.reward) {
           toast.success(`+${res.data.reward.points} reward points! (Day ${res.data.reward.streak} streak)`);
         } else if (!res.data.already) {
@@ -314,10 +335,16 @@ const HabitTrackerPage = () => {
         }
       }
       await loadHabits();
-    } catch {
-      toast.error('Failed to update habit');
+    } catch (err) {
+      const detail = err?.response?.data?.detail || 'Failed to update habit';
+      toast.error(detail);
     }
     setCompleting(null);
+  };
+
+  const handleScreenshotSelect = (habitId, file) => {
+    setScreenshotFile(file);
+    setUploadingFor(habitId);
   };
 
   const handleCopyAction = (text) => {
@@ -468,6 +495,32 @@ const HabitTrackerPage = () => {
                         )}
                         {habit.is_gate && done && (habit.validity_days || 1) > 1 && (
                           <p className="text-xs text-emerald-500/70 mt-2">Signal unlocked for {habit.validity_days} days</p>
+                        )}
+
+                        {/* Day of week badge */}
+                        {habit.day_of_week && (
+                          <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 capitalize">
+                            <Calendar className="w-3 h-3 inline mr-0.5 -mt-0.5" />{habit.day_of_week} only
+                          </span>
+                        )}
+
+                        {/* Screenshot upload for required habits */}
+                        {habit.requires_screenshot && !done && (
+                          <div className="mt-3 p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/15" data-testid={`screenshot-upload-${habit.id}`}>
+                            <p className="text-[11px] text-blue-400 mb-2 flex items-center gap-1">
+                              <Camera className="w-3 h-3" /> Screenshot proof required
+                            </p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => e.target.files?.[0] && handleScreenshotSelect(habit.id, e.target.files[0])}
+                              className="text-xs text-zinc-400 file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-blue-500/20 file:text-blue-300 hover:file:bg-blue-500/30"
+                              data-testid={`screenshot-input-${habit.id}`}
+                            />
+                            {screenshotFile && uploadingFor === habit.id && (
+                              <p className="text-[10px] text-emerald-400 mt-1">Ready: {screenshotFile.name}</p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

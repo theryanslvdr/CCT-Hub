@@ -483,3 +483,9 @@
     @apply text-xs text-zinc-400 uppercase tracking-wide;
 }
 
+
+/* D3 tree link style for referral network visual view */
+.dark-tree-link {
+    stroke: #71717a !important;
+    stroke-width: 1.5 !important;
+}
