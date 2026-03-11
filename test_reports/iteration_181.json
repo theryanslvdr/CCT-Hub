@@ -1,0 +1,70 @@
+{
+  "summary": "Iteration 181: Set-Password Bug Fix & InviterModal One-Time Logic Testing Complete. All 10 backend tests passed (100%). Frontend verified: Admin login works, Dashboard loads successfully, InviterModal does NOT appear for admin users (correct behavior based on role exclusion logic).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_181_setpassword_inviter.py",
+    "/app/test_reports/pytest/pytest_iteration_181.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "BUG 1 VERIFIED FIXED: SetPasswordRequest.secret_code is now Optional[str] = None (line 46 auth_routes.py) - endpoint returns 400 'Email not verified' instead of 422 validation error",
+    "BUG 2 VERIFIED FIXED: InviterModal shows based on !user.referred_by (permanent check) instead of sessionStorage (per-session). Admin roles correctly excluded via line 148 condition",
+    "Login response correctly includes referred_by field for InviterModal logic",
+    "/api/auth/me endpoint returns referred_by in UserResponse",
+    "/api/referrals/set-inviter endpoint updates referred_by permanently"
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration_181_setpassword_inviter.py"],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "100%"},
+  "test_credentials": "Master Admin: iam@ryansalvador.com / admin123",
+  "seed_data_creation": "None - used existing test data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 181 verified two critical bug fixes: 1) set-password endpoint no longer returns 422 for missing secret_code - Pydantic model accepts Optional[str] = None. 2) InviterModal uses user.referred_by (permanent) instead of sessionStorage (per-session) - admin roles are correctly excluded. Both fixes working correctly.",
+  "tests_executed": {
+    "backend": {
+      "test_server_health": {"status": "PASS", "notes": "Server healthy"},
+      "test_set_password_without_secret_code_no_422": {"status": "PASS", "notes": "CRITICAL: Returns 400 'Email not verified' not 422 validation error"},
+      "test_set_password_with_secret_code_backward_compat": {"status": "PASS", "notes": "With secret_code still works - backward compatible"},
+      "test_set_password_validation_still_works": {"status": "PASS", "notes": "Password length validation returns 400 for short passwords"},
+      "test_admin_login_includes_referred_by": {"status": "PASS", "notes": "Login response includes referred_by field"},
+      "test_set_inviter_endpoint_exists": {"status": "PASS", "notes": "POST /api/referrals/set-inviter returns proper error for invalid inviter"},
+      "test_set_inviter_updates_referred_by": {"status": "PASS", "notes": "Tracking endpoint shows referred_by field"},
+      "test_login_response_has_all_inviter_modal_fields": {"status": "PASS", "notes": "Login response has role and referred_by for InviterModal logic"},
+      "test_admin_should_not_see_inviter_modal": {"status": "PASS", "notes": "Admin role correctly excluded from InviterModal"},
+      "test_me_endpoint_includes_referred_by": {"status": "PASS", "notes": "/api/auth/me returns referred_by"}
+    },
+    "frontend": {
+      "login_page_loads": {"status": "PASS", "notes": "Split-panel design with CrossCurrent branding"},
+      "admin_login_successful": {"status": "PASS", "notes": "Admin logs in and redirects to dashboard"},
+      "dashboard_loads": {"status": "PASS", "notes": "Dashboard shows 'Welcome back, Ryan!' with full content"},
+      "no_inviter_modal_for_admin": {"status": "PASS", "notes": "InviterModal NOT visible for admin user (correct behavior)"},
+      "missing_api_keys_modal_dismissable": {"status": "PASS", "notes": "'Remind Me Later' button works to dismiss modal"}
+    }
+  },
+  "verified_bug_fixes": {
+    "bug_1_set_password_422_error": {
+      "issue": "POST /api/auth/set-password returned 422 'secret_code field required' when frontend sent only {email, password}",
+      "fix": "SetPasswordRequest.secret_code changed from str to Optional[str] = None",
+      "status": "VERIFIED FIXED",
+      "evidence": "Endpoint now returns 400 with business logic error ('Email not verified') instead of 422 validation error"
+    },
+    "bug_2_inviter_modal_showing_every_session": {
+      "issue": "InviterModal appeared every session because it used sessionStorage to track dismissal",
+      "fix": "Changed to check user.referred_by (permanent field) - modal only shows when !user.referred_by",
+      "status": "VERIFIED FIXED",
+      "evidence": "Admin user (excluded by role) does not see modal, modal logic now uses permanent referred_by field"
+    }
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": ["_validate_merin_code in referral_routes.py (external Rewards Platform API)"]
+  }
+}

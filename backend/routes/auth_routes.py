@@ -43,7 +43,7 @@ class HeartbeatVerifyRequest(BaseModel):
 class SetPasswordRequest(BaseModel):
     email: EmailStr
     password: str
-    secret_code: str
+    secret_code: Optional[str] = None
 
 class SecretUpgradeRequest(BaseModel):
     secret_code: str
