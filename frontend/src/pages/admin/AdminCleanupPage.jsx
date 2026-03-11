@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Shield, AlertTriangle, UserX, UserCheck, Camera, Clock,
   CheckCircle2, XCircle, ChevronRight, RefreshCw, Eye, Bot,
-  ThumbsUp, ThumbsDown
+  ThumbsUp, ThumbsDown, Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -191,7 +191,14 @@ export const AdminCleanupPage = () => {
                         )}
                       </div>
                       {proof.ai_flagged && proof.ai_review && (
-                        <p className="text-[10px] text-red-400/70 mt-1 italic">{proof.ai_review}</p>
+                        <p className="text-[10px] text-red-400/70 mt-1 italic flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5 shrink-0" /> <span className="font-semibold">RyAI:</span> {proof.ai_review.replace(/^SUSPICIOUS\s*[-–]\s*/i, '')}
+                        </p>
+                      )}
+                      {!proof.ai_flagged && proof.ai_review && (
+                        <p className="text-[10px] text-emerald-400/60 mt-1 italic flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5 shrink-0" /> <span className="font-semibold">RyAI:</span> Looks legitimate
+                        </p>
                       )}
                     </div>
                     <div className="flex gap-1.5 shrink-0">

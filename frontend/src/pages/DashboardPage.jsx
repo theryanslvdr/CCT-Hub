@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ValueTooltip } from '@/components/ui/value-tooltip';
 import { MissedTradersWidget } from '@/components/admin/MissedTradersWidget';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap, Share2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity, Target, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Wallet, BarChart3, History, FlaskConical, ChevronRight, Users, Calendar, AlertTriangle, Star, ExternalLink, Trophy, Award, Zap, Share2, CheckSquare, MessageSquare, ShoppingBag } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 import ShareTradeCard from '@/components/ShareTradeCard';
 import DailyProfitSummary from '@/components/DailyProfitSummary';
@@ -503,6 +503,28 @@ export const DashboardPage = () => {
         })}
       </div>
 
+      {/* Quick Actions */}
+      {(isMember || isSimulating) && !isLicenseeView && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" data-testid="quick-actions">
+          <a href="/profit-tracker" className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-orange-500/20 hover:bg-orange-500/[0.03] transition-all group" data-testid="qa-track-profits">
+            <div className="p-2 rounded-lg bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors"><TrendingUp className="w-4 h-4 text-orange-400" /></div>
+            <span className="text-sm text-zinc-400 group-hover:text-white transition-colors">Track Profits</span>
+          </a>
+          <a href="/my-team" className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-emerald-500/20 hover:bg-emerald-500/[0.03] transition-all group" data-testid="qa-manage-team">
+            <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors"><Users className="w-4 h-4 text-emerald-400" /></div>
+            <span className="text-sm text-zinc-400 group-hover:text-white transition-colors">Manage Team</span>
+          </a>
+          <a href="/store" className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-purple-500/20 hover:bg-purple-500/[0.03] transition-all group" data-testid="qa-hub-store">
+            <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors"><ShoppingBag className="w-4 h-4 text-purple-400" /></div>
+            <span className="text-sm text-zinc-400 group-hover:text-white transition-colors">Hub Store</span>
+          </a>
+          <a href="/forum" className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-cyan-500/20 hover:bg-cyan-500/[0.03] transition-all group" data-testid="qa-community">
+            <div className="p-2 rounded-lg bg-cyan-500/10 group-hover:bg-cyan-500/20 transition-colors"><MessageSquare className="w-4 h-4 text-cyan-400" /></div>
+            <span className="text-sm text-zinc-400 group-hover:text-white transition-colors">Community Help</span>
+          </a>
+        </div>
+      )}
+
       {/* Rewards section — prominent, right after KPI cards. HIDDEN for licensees. */}
       {(isMember || isSimulating) && !isLicenseeView && (
         <Card className="glass-card overflow-hidden" data-testid="rewards-card">
@@ -644,26 +666,52 @@ export const DashboardPage = () => {
                   <CardTitle className="text-white">Your Stats</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
-                      <p className="text-xs text-emerald-400 uppercase tracking-wider">Total Profit</p>
-                      <p className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                      <p className="text-[10px] text-emerald-400 uppercase tracking-wider">Total Profit</p>
+                      <p className="text-xl font-bold font-mono text-emerald-400 mt-0.5">
                         {formatCurrency(summary?.total_actual_profit || 0, 'USD')}
                       </p>
                     </div>
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-orange-500/10 to-amber-500/5 border border-orange-500/15">
-                      <p className="text-xs text-orange-400 uppercase tracking-wider">LOT Size</p>
-                      <p className="text-2xl font-bold font-mono text-orange-400 mt-1">
-                        {((summary?.account_value || 0) / 980).toFixed(2)}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">Based on account value</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-orange-400 uppercase tracking-wider">LOT Size</p>
+                        <p className="text-lg font-bold font-mono text-orange-400 mt-0.5">
+                          {((summary?.account_value || 0) / 980).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-purple-400 uppercase tracking-wider">Daily Target</p>
+                        <p className="text-lg font-bold font-mono text-purple-400 mt-0.5">
+                          {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                      <p className="text-xs text-purple-400 uppercase tracking-wider">Projected Daily</p>
-                      <p className="text-2xl font-bold font-mono text-purple-400 mt-1">
-                        {formatCurrency(((summary?.account_value || 0) / 980) * 15, 'USD')}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">LOT x 15 multiplier</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-cyan-400 uppercase tracking-wider">Total Trades</p>
+                        <p className="text-lg font-bold font-mono text-cyan-400 mt-0.5">{summary?.total_trades || 0}</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-amber-400 uppercase tracking-wider">Win Rate</p>
+                        <p className="text-lg font-bold font-mono text-amber-400 mt-0.5">
+                          {summary?.total_trades > 0 
+                            ? Math.round(((summary?.total_actual_profit > 0 ? summary.total_trades : Math.max(0, summary.total_trades - 1)) / summary.total_trades) * 100)
+                            : 0}%
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Streak</p>
+                        <p className="text-lg font-bold font-mono text-white mt-0.5">{rewardsSummary?.current_streak || 0} days</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-[#0d0d0d]/50 border border-white/[0.04]">
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Perf Rate</p>
+                        <p className={`text-lg font-bold font-mono mt-0.5 ${(summary?.performance_rate || 0) >= 100 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                          {formatNumber(summary?.performance_rate || 0, 1)}%
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -1291,7 +1339,7 @@ export const DashboardPage = () => {
           totalProfit: summary?.total_actual_profit || 0,
           totalDeposits: summary?.total_deposits || 0,
           tradingDays: summary?.total_trades || 0,
-          currentStreak: 0,
+          currentStreak: rewardsSummary?.current_streak || 0,
           dateRange: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
           userName: displayName || 'Trader',
         }}

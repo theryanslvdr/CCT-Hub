@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { referralAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame, Bot, Lightbulb, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame, Bot, Lightbulb, RefreshCw, Link2, Copy, ExternalLink, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STATUS_COLORS = {
@@ -25,12 +26,17 @@ const TeamPage = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [recsLoading, setRecsLoading] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
+  const [tracking, setTracking] = useState(null);
 
   const loadTeam = useCallback(async () => {
     try {
-      const res = await referralAPI.getMyTeam();
-      setTeam(res.data.team || []);
-      setStats(res.data.stats || {});
+      const [teamRes, trackRes] = await Promise.all([
+        referralAPI.getMyTeam(),
+        referralAPI.getTracking().catch(() => ({ data: null })),
+      ]);
+      setTeam(teamRes.data.team || []);
+      setStats(teamRes.data.stats || {});
+      setTracking(trackRes.data);
     } catch {
       toast.error('Failed to load team data');
     } finally {
@@ -53,6 +59,11 @@ const TeamPage = () => {
     }
   };
 
+  const copyLink = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -66,12 +77,11 @@ const TeamPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">My Team</h1>
-          <p className="text-sm text-zinc-400 mt-1">Members you've invited and their activity</p>
+          <p className="text-sm text-zinc-400 mt-1">Invite members, manage your team, and track activity</p>
         </div>
         {stats.in_danger > 0 && (
           <Button
-            variant="outline"
-            size="sm"
+            variant="outline" size="sm"
             onClick={loadRecommendations}
             disabled={recsLoading}
             className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
@@ -83,69 +93,100 @@ const TeamPage = () => {
         )}
       </div>
 
+      {/* Invite Link Card - Prominent at top */}
+      <Card className="border-orange-500/20 bg-gradient-to-r from-orange-500/[0.04] to-transparent" data-testid="invite-link-card">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+              <Link2 className="w-6 h-6 text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-white">Invite & Earn</h3>
+              <p className="text-xs text-zinc-500 mt-1 mb-3">
+                Share your invite link to grow your team. Your code: <span className="text-orange-400 font-mono">{tracking?.merin_code || tracking?.referral_code || '—'}</span>
+              </p>
+              {tracking?.onboarding_invite_link ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      value={tracking.onboarding_invite_link}
+                      readOnly
+                      className="bg-[#0a0a0a] border-white/[0.06] text-white font-mono text-xs"
+                      data-testid="invite-link-display"
+                    />
+                    <Button
+                      onClick={() => copyLink(tracking.onboarding_invite_link)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white shrink-0"
+                      data-testid="copy-invite-link"
+                    >
+                      <Copy className="w-4 h-4 mr-1.5" /> Copy
+                    </Button>
+                  </div>
+                  {tracking?.invite_link && (
+                    <div className="flex items-center gap-1 text-[11px] text-zinc-500">
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Direct signup:</span>
+                      <a href={tracking.invite_link} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-300 underline truncate max-w-[300px]">
+                        {tracking.invite_link}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-amber-400">Set your Merin referral code in Profile to generate an invite link.</p>
+              )}
+            </div>
+          </div>
+          {/* Quick referral stats */}
+          <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center gap-6 text-xs text-zinc-400">
+            <span className="flex items-center gap-1"><UserPlus className="w-3 h-3 text-emerald-400" /> <strong className="text-white">{tracking?.direct_count || 0}</strong> Direct Referrals</span>
+            <span className="flex items-center gap-1"><Trophy className="w-3 h-3 text-purple-400" /> <strong className="text-white">{tracking?.milestones?.filter(m => m.achieved).length || 0}</strong> Milestones</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="glass-card" data-testid="team-stat-total">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-500/15 flex items-center justify-center">
-                <Users className="w-5 h-5 text-orange-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white font-mono">{stats.total}</p>
-                <p className="text-[11px] text-zinc-500">Total Members</p>
-              </div>
+              <div className="w-10 h-10 rounded-lg bg-orange-500/15 flex items-center justify-center"><Users className="w-5 h-5 text-orange-400" /></div>
+              <div><p className="text-2xl font-bold text-white font-mono">{stats.total}</p><p className="text-[11px] text-zinc-500">Total Members</p></div>
             </div>
           </CardContent>
         </Card>
         <Card className="glass-card" data-testid="team-stat-active">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-emerald-400 font-mono">{stats.active}</p>
-                <p className="text-[11px] text-zinc-500">Active This Week</p>
-              </div>
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center"><Activity className="w-5 h-5 text-emerald-400" /></div>
+              <div><p className="text-2xl font-bold text-emerald-400 font-mono">{stats.active}</p><p className="text-[11px] text-zinc-500">Active This Week</p></div>
             </div>
           </CardContent>
         </Card>
         <Card className="glass-card" data-testid="team-stat-danger">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-amber-400 font-mono">{stats.in_danger}</p>
-                <p className="text-[11px] text-zinc-500">In Danger</p>
-              </div>
+              <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center"><AlertTriangle className="w-5 h-5 text-amber-400" /></div>
+              <div><p className="text-2xl font-bold text-amber-400 font-mono">{stats.in_danger}</p><p className="text-[11px] text-zinc-500">In Danger</p></div>
             </div>
           </CardContent>
         </Card>
         <Card className="glass-card" data-testid="team-stat-new">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-cyan-400 font-mono">{stats.new_this_week}</p>
-                <p className="text-[11px] text-zinc-500">New This Week</p>
-              </div>
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center"><UserPlus className="w-5 h-5 text-cyan-400" /></div>
+              <div><p className="text-2xl font-bold text-cyan-400 font-mono">{stats.new_this_week}</p><p className="text-[11px] text-zinc-500">New This Week</p></div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* AI Recommendations Panel */}
+      {/* AI Recommendations */}
       {showRecs && (
         <Card className="glass-card border-amber-500/20" data-testid="ai-recommendations-panel">
           <CardHeader className="pb-2">
             <CardTitle className="text-white text-base flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-amber-400" /> AI Recommendations
-              <span className="text-xs text-zinc-500 font-normal ml-1">Personalized suggestions for your team</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -159,20 +200,14 @@ const TeamPage = () => {
             ) : (
               <div className="space-y-2.5">
                 {recommendations.map((rec, i) => (
-                  <div
-                    key={i}
-                    className={`p-3 rounded-lg border ${URGENCY_COLORS[rec.urgency] || URGENCY_COLORS.medium}`}
-                    data-testid={`recommendation-${i}`}
-                  >
+                  <div key={i} className={`p-3 rounded-lg border ${URGENCY_COLORS[rec.urgency] || URGENCY_COLORS.medium}`} data-testid={`recommendation-${i}`}>
                     {rec.type === 'all_clear' ? (
                       <p className="text-sm text-emerald-400">{rec.message}</p>
                     ) : (
                       <>
                         <div className="flex items-center gap-2 mb-1">
                           {rec.member && <span className="text-xs font-semibold text-white">{rec.member}</span>}
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-semibold ${
-                            rec.urgency === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
-                          }`}>{rec.urgency}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-semibold ${rec.urgency === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>{rec.urgency}</span>
                         </div>
                         <p className="text-xs text-zinc-300 leading-relaxed">{rec.suggestion}</p>
                       </>
@@ -185,20 +220,18 @@ const TeamPage = () => {
         </Card>
       )}
 
-      {/* Team Members List */}
+      {/* Team Members */}
       {team.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="py-16 text-center">
             <Users className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
             <p className="text-zinc-400">No team members yet</p>
-            <p className="text-sm text-zinc-500 mt-1">Share your referral code to grow your team</p>
+            <p className="text-sm text-zinc-500 mt-1">Share your invite link above to grow your team</p>
           </CardContent>
         </Card>
       ) : (
         <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-base">Team Members</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-white text-base">Team Members</CardTitle></CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-white/[0.04]">
               {team.map(m => (
@@ -208,38 +241,26 @@ const TeamPage = () => {
                     m.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
                     m.status === 'suspended' ? 'bg-red-500/20 text-red-400' :
                     'bg-zinc-700 text-zinc-400'
-                  }`}>
-                    {m.name?.charAt(0)?.toUpperCase() || '?'}
-                  </div>
+                  }`}>{m.name?.charAt(0)?.toUpperCase() || '?'}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-white truncate">{m.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full border capitalize ${STATUS_COLORS[m.status] || STATUS_COLORS.inactive}`}>
-                        {m.status}
-                      </span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full border capitalize ${STATUS_COLORS[m.status] || STATUS_COLORS.inactive}`}>{m.status}</span>
                       {m.fraud_warnings > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 flex items-center gap-0.5">
-                          <Shield className="w-2.5 h-2.5" /> {m.fraud_warnings} warning{m.fraud_warnings > 1 ? 's' : ''}
-                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 flex items-center gap-0.5"><Shield className="w-2.5 h-2.5" /> {m.fraud_warnings}</span>
                       )}
                     </div>
                     <p className="text-[11px] text-zinc-500">{m.email}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-1 text-xs text-zinc-400">
-                      <TrendingUp className="w-3 h-3" />
-                      <span>{m.recent_trades} trade{m.recent_trades !== 1 ? 's' : ''} this week</span>
+                      <TrendingUp className="w-3 h-3" /> {m.recent_trades} trade{m.recent_trades !== 1 ? 's' : ''}/wk
                     </div>
                     {m.habits_today > 0 && (
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-400 mt-0.5 justify-end">
-                        <Flame className="w-3 h-3" /> {m.habits_today} habit{m.habits_today !== 1 ? 's' : ''} today
-                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-emerald-400 mt-0.5 justify-end"><Flame className="w-3 h-3" /> {m.habits_today} habit{m.habits_today !== 1 ? 's' : ''}</div>
                     )}
                     {m.last_trade && (
-                      <p className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-1 justify-end">
-                        <Clock className="w-2.5 h-2.5" />
-                        Last: {new Date(m.last_trade).toLocaleDateString()}
-                      </p>
+                      <p className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-1 justify-end"><Clock className="w-2.5 h-2.5" /> {new Date(m.last_trade).toLocaleDateString()}</p>
                     )}
                   </div>
                 </div>

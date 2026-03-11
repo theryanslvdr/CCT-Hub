@@ -1,28 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { storeAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Coins, Clock, CheckCircle2, Loader2, Zap, ShoppingBag } from 'lucide-react';
+import { storeAPI, rewardsAPI } from '@/lib/api';
+import { ShoppingBag, Shield, Snowflake, TrendingUp, Flame, Loader2, ShieldCheck, Minus, Plus, Coins, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 
-const StorePage = () => {
+const HubStorePage = () => {
   const [items, setItems] = useState([]);
-  const [points, setPoints] = useState(0);
-  const [activeImmunity, setActiveImmunity] = useState(null);
-  const [credits, setCredits] = useState([]);
-  const [purchasing, setPurchasing] = useState(null);
+  const [credits, setCredits] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(null);
+  // Streak freeze state
+  const [freezeData, setFreezeData] = useState(null);
+  const [freezeQty, setFreezeQty] = useState({ trade: 1, habit: 1 });
+  const [freezePurchasing, setFreezePurchasing] = useState(null);
 
-  const loadStore = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
-      const [itemsRes, creditsRes] = await Promise.all([
+      const [itemsRes, creditsRes, freezeRes] = await Promise.all([
         storeAPI.getItems(),
         storeAPI.getMyCredits(),
+        rewardsAPI.getStreakFreezes().catch(() => ({ data: null })),
       ]);
-      setItems(itemsRes.data.items || []);
-      setPoints(itemsRes.data.user_points || 0);
-      setActiveImmunity(itemsRes.data.active_immunity);
-      setCredits(creditsRes.data.active_credits || []);
+      setItems(itemsRes.data?.items || itemsRes.data || []);
+      setCredits(creditsRes.data);
+      setFreezeData(freezeRes.data);
     } catch {
       toast.error('Failed to load store');
     } finally {
@@ -30,19 +32,33 @@ const StorePage = () => {
     }
   }, []);
 
-  useEffect(() => { loadStore(); }, [loadStore]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   const handlePurchase = async (itemId) => {
     setPurchasing(itemId);
     try {
-      const res = await storeAPI.purchase(itemId);
-      toast.success(res.data.message);
-      setPoints(res.data.remaining_points);
-      loadStore();
-    } catch (err) {
-      toast.error(err?.response?.data?.detail || 'Purchase failed');
+      await storeAPI.purchase(itemId);
+      toast.success('Purchase successful!');
+      loadData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Purchase failed');
+    } finally {
+      setPurchasing(null);
     }
-    setPurchasing(null);
+  };
+
+  const handleFreezePurchase = async (type) => {
+    setFreezePurchasing(type);
+    try {
+      await rewardsAPI.purchaseStreakFreeze(type, freezeQty[type]);
+      toast.success(`Purchased ${freezeQty[type]} ${type} streak freeze${freezeQty[type] > 1 ? 's' : ''}!`);
+      setFreezeQty(prev => ({ ...prev, [type]: 1 }));
+      loadData();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to purchase');
+    } finally {
+      setFreezePurchasing(null);
+    }
   };
 
   if (loading) {
@@ -53,107 +69,169 @@ const StorePage = () => {
     );
   }
 
+  const freezeTypes = [
+    { key: 'trade', label: 'Trade Streak Freeze', desc: 'Protects your trading streak when you miss a trading day', icon: TrendingUp, available: freezeData?.trade_freezes || 0, used: freezeData?.trade_freezes_used || 0, cost: freezeData?.costs?.trade || 200, color: 'blue' },
+    { key: 'habit', label: 'Habit Streak Freeze', desc: 'Protects your daily habit streak when you miss a day', icon: Flame, available: freezeData?.habit_freezes || 0, used: freezeData?.habit_freezes_used || 0, cost: freezeData?.costs?.habit || 150, color: 'orange' },
+  ];
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto" data-testid="store-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ShoppingBag className="w-6 h-6 text-orange-400" /> Store
-          </h1>
-          <p className="text-sm text-zinc-400 mt-1">Spend your reward points on useful items</p>
-        </div>
-        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2" data-testid="points-balance">
-          <Coins className="w-5 h-5 text-amber-400" />
-          <span className="text-lg font-bold text-amber-400 font-mono">{points}</span>
-          <span className="text-xs text-zinc-500">points</span>
-        </div>
+    <div className="space-y-6 max-w-4xl mx-auto" data-testid="hub-store-page">
+      <div>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <ShoppingBag className="w-6 h-6 text-orange-400" /> Hub Store
+        </h1>
+        <p className="text-sm text-zinc-400 mt-1">Purchase items to enhance your Hub experience</p>
       </div>
 
-      {/* Active immunity status */}
-      {credits.length > 0 && (
-        <Card className="glass-card border-emerald-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-emerald-400">Gate Immunity Active</p>
-                <p className="text-xs text-zinc-500">
-                  Expires: {new Date(credits[0].expires_at).toLocaleDateString()} {new Date(credits[0].expires_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </p>
-              </div>
+      {/* Credits summary */}
+      {(credits || freezeData) && (
+        <div className="flex items-center gap-4 text-xs text-zinc-400">
+          {credits && <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-cyan-400" /> Active Credits: <strong className="text-cyan-400 font-mono">{credits.active_credits?.length || 0}</strong></span>}
+          {freezeData && <span className="flex items-center gap-1"><Coins className="w-3 h-3 text-amber-400" /> Reward Points: <strong className="text-amber-400 font-mono">{freezeData.available_points || 0}</strong></span>}
+        </div>
+      )}
+
+      {/* Signal Gate Immunity & Other Items */}
+      {items.length > 0 && (
+        <Card className="glass-card border-cyan-500/20" data-testid="immunity-section">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Shield className="w-4 h-4 text-cyan-400" /> Signal Gate Immunity
+              <Tag className="w-3 h-3 text-zinc-600 ml-auto" />
+            </CardTitle>
+            <p className="text-xs text-zinc-500 mt-1">Bypass the signal gate when you miss a trade — your access stays open</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {items.map(item => (
+                <div key={item.id || item.name} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-cyan-500/30 transition-all" data-testid={`store-item-${item.name?.replace(/\s/g, '-')}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-cyan-500/10">
+                      <Shield className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.name}</p>
+                      <p className="text-[11px] text-zinc-400">{item.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-mono text-amber-400">{item.cost || item.price} pts</span>
+                    <Button
+                      size="sm"
+                      onClick={() => handlePurchase(item.id)}
+                      disabled={purchasing === item.id}
+                      className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs h-8"
+                      data-testid={`buy-${item.name?.replace(/\s/g, '-')}`}
+                    >
+                      {purchasing === item.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <ShoppingBag className="w-3 h-3 mr-1" />}
+                      Purchase
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Store Items */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {items.map(item => {
-          const canAfford = points >= item.cost;
-          return (
-            <Card key={item.id} className={`glass-card transition-all ${canAfford ? 'hover:border-orange-500/30' : 'opacity-60'}`} data-testid={`store-item-${item.id}`}>
-              <CardContent className="p-5 flex flex-col h-full">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">{item.name}</p>
-                    <div className="flex items-center gap-1 text-xs text-zinc-500">
-                      <Clock className="w-3 h-3" /> {item.duration_days} day{item.duration_days > 1 ? 's' : ''}
+      {/* Streak Freezes Section */}
+      {freezeData && (
+        <Card className="glass-card border-blue-500/20" data-testid="streak-freeze-section">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Snowflake className="w-4 h-4 text-cyan-400" /> Streak Freezes
+              <Tag className="w-3 h-3 text-zinc-600 ml-auto" />
+            </CardTitle>
+            <p className="text-xs text-zinc-500 mt-1">Purchase with reward points. When you miss a day, a freeze is automatically applied to keep your streak alive.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {freezeTypes.map((ft) => {
+                const Icon = ft.icon;
+                const qty = freezeQty[ft.key];
+                const totalCost = ft.cost * qty;
+                const canAfford = (freezeData?.available_points || 0) >= totalCost;
+                return (
+                  <div key={ft.key} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-blue-500/30 transition-all" data-testid={`streak-freeze-${ft.key}`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`p-2 rounded-lg bg-${ft.color}-500/10`}>
+                        <Icon className={`w-5 h-5 text-${ft.color}-400`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{ft.label}</p>
+                        <p className="text-[11px] text-zinc-400">{ft.desc}</p>
+                      </div>
                     </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase">Available</p>
+                          <p className="text-lg font-bold font-mono text-cyan-400">{ft.available}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 uppercase">Used</p>
+                          <p className="text-lg font-bold font-mono text-zinc-400">{ft.used}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-zinc-500 uppercase">Cost Each</p>
+                        <p className="text-sm font-mono text-amber-400">{ft.cost} pts</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-lg px-1 py-1">
+                        <button onClick={() => setFreezeQty(p => ({ ...p, [ft.key]: Math.max(1, qty - 1) }))} className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"><Minus className="w-3.5 h-3.5" /></button>
+                        <span className="text-sm font-mono text-white w-6 text-center">{qty}</span>
+                        <button onClick={() => setFreezeQty(p => ({ ...p, [ft.key]: Math.min(10, qty + 1) }))} className="p-1 rounded hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"><Plus className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <Button
+                        onClick={() => handleFreezePurchase(ft.key)}
+                        disabled={!canAfford || freezePurchasing === ft.key}
+                        className={`flex-1 bg-${ft.color}-600 hover:bg-${ft.color}-500 text-white text-sm disabled:opacity-40`}
+                        data-testid={`buy-${ft.key}-freeze-btn`}
+                      >
+                        {freezePurchasing === ft.key ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <ShieldCheck className="w-4 h-4 mr-1" />}
+                        Buy for {totalCost} pts
+                      </Button>
+                    </div>
+                    {!canAfford && <p className="text-[10px] text-red-400 mt-1.5">Not enough points ({freezeData?.available_points || 0} available)</p>}
                   </div>
-                </div>
-                <p className="text-xs text-zinc-400 flex-1 leading-relaxed mb-4">{item.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <Coins className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm font-bold text-amber-400 font-mono">{item.cost}</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    disabled={!canAfford || purchasing === item.id}
-                    onClick={() => handlePurchase(item.id)}
-                    className="bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs disabled:opacity-40"
-                    data-testid={`buy-${item.id}`}
-                  >
-                    {purchasing === item.id ? <Loader2 className="w-3 h-3 animate-spin" /> : canAfford ? 'Purchase' : 'Not enough'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                );
+              })}
+            </div>
 
-      {/* How it works */}
-      <Card className="glass-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-white text-sm">How Gate Immunity Works</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            Signal Gate Immunity Credits let you access trading signals without completing your daily habits.
-            Perfect for days when you're traveling, busy, or just need a break.
-          </p>
-          <div className="flex items-start gap-2 text-xs text-zinc-500">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-            <span>Once purchased, immunity activates immediately</span>
-          </div>
-          <div className="flex items-start gap-2 text-xs text-zinc-500">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-            <span>Your streak is preserved during immunity periods</span>
-          </div>
-          <div className="flex items-start gap-2 text-xs text-zinc-500">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-            <span>Earn points by completing habits, quizzes, and referring members</span>
-          </div>
-        </CardContent>
-      </Card>
+            {/* Usage History */}
+            {freezeData?.usage_history?.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                <p className="text-xs text-zinc-400 font-medium mb-2">Recent Freeze Usage</p>
+                <div className="space-y-1.5">
+                  {freezeData.usage_history.slice(0, 5).map((u, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-1.5 px-2 rounded bg-[#0d0d0d]/40">
+                      <div className="flex items-center gap-2">
+                        <Snowflake className="w-3 h-3 text-cyan-400" />
+                        <span className="text-zinc-300 capitalize">{u.freeze_type} freeze</span>
+                      </div>
+                      <span className="text-zinc-500 font-mono">{u.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {items.length === 0 && !freezeData && (
+        <Card className="glass-card">
+          <CardContent className="py-16 text-center">
+            <ShoppingBag className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+            <p className="text-zinc-400 text-lg">Coming Soon</p>
+            <p className="text-sm text-zinc-500 mt-1">New items will be available for purchase shortly</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
 
-export default StorePage;
+export default HubStorePage;

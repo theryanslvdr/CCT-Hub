@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Shield, Sparkles, Send, Plus, Trash2, MessageSquare, ChevronLeft, Loader2, Bot } from 'lucide-react';
+import { Shield, Sparkles, Send, Plus, Trash2, MessageSquare, ChevronLeft, Loader2, Bot, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { aiAssistantAPI } from '@/lib/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { aiAssistantAPI, forumAPI } from '@/lib/api';
 import { toast } from 'sonner';
 import Md from '@/components/Md';
 
@@ -17,6 +19,10 @@ const AIAssistantPage = () => {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [forumPostOpen, setForumPostOpen] = useState(false);
+  const [forumPostTitle, setForumPostTitle] = useState('');
+  const [forumPostContent, setForumPostContent] = useState('');
+  const [forumPosting, setForumPosting] = useState(false);
   const [popularPrompts, setPopularPrompts] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -123,6 +129,43 @@ const AIAssistantPage = () => {
     } catch { toast.error('Delete failed'); }
   };
 
+  const isUncertainResponse = (content) => {
+    const lc = content.toLowerCase();
+    const phrases = [
+      "i'm not sure", "i don't have", "i cannot", "i can't answer",
+      "beyond my scope", "not able to", "don't have information",
+      "unable to", "no information", "not equipped to",
+      "recommend asking", "suggest reaching out", "community",
+      "i don't know", "outside my", "no data on",
+    ];
+    return phrases.some(p => lc.includes(p));
+  };
+
+  const handlePostToForum = (userQuestion, aiResponse) => {
+    setForumPostTitle(userQuestion.length > 100 ? userQuestion.substring(0, 100) + '...' : userQuestion);
+    setForumPostContent(
+      `**My Question:**\n${userQuestion}\n\n**AI Assistant Response:**\n> ${aiResponse.substring(0, 200)}...\n\nThe AI couldn't fully answer this. Can anyone from the community help?`
+    );
+    setForumPostOpen(true);
+  };
+
+  const handleSubmitForumPost = async () => {
+    if (!forumPostTitle.trim() || !forumPostContent.trim()) {
+      toast.error('Please fill in both title and content');
+      return;
+    }
+    setForumPosting(true);
+    try {
+      await forumAPI.createPost({ title: forumPostTitle, content: forumPostContent, category: 'question' });
+      toast.success('Posted to Community Forum! Check the forum for replies.');
+      setForumPostOpen(false);
+    } catch {
+      toast.error('Failed to post to forum');
+    } finally {
+      setForumPosting(false);
+    }
+  };
+
   const renderPersonaIcon = (persona) => {
     const meta = PERSONA_META[persona] || PERSONA_META.ryai;
     const PIcon = meta.icon;
@@ -134,6 +177,7 @@ const AIAssistantPage = () => {
   };
 
   return (
+    <>
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-0 -m-3 sm:-m-4 md:-m-6" data-testid="ai-assistant-page">
       {/* Sidebar - sessions */}
       <div className={`${showSidebar ? 'w-72' : 'w-0'} transition-all duration-200 overflow-hidden flex flex-col bg-[#0d0d0d] border-r border-[#1f1f1f]`}>
@@ -234,6 +278,8 @@ const AIAssistantPage = () => {
           {messages.map((m, i) => {
             const persona = m.persona || 'ryai';
             const meta = PERSONA_META[persona] || PERSONA_META.ryai;
+            const isUncertain = m.role === 'assistant' && isUncertainResponse(m.content);
+            const prevUserMsg = m.role === 'assistant' && i > 0 ? messages[i - 1] : null;
 
             return (
               <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
@@ -251,6 +297,15 @@ const AIAssistantPage = () => {
                   }`}>
                     {m.role === 'assistant' ? <Md>{m.content}</Md> : m.content}
                   </div>
+                  {isUncertain && prevUserMsg?.role === 'user' && (
+                    <button
+                      onClick={() => handlePostToForum(prevUserMsg.content, m.content)}
+                      className="mt-1.5 ml-1 flex items-center gap-1.5 text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                      data-testid="post-to-forum-btn"
+                    >
+                      <ExternalLink className="w-3 h-3" /> Ask the Community Instead
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -302,6 +357,54 @@ const AIAssistantPage = () => {
         </div>
       </div>
     </div>
+
+    {/* Forum Post Dialog */}
+    <Dialog open={forumPostOpen} onOpenChange={setForumPostOpen}>
+      <DialogContent className="glass-card border-[#222222] max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-cyan-400" /> Post to Community Forum
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <p className="text-xs text-zinc-500">The AI couldn't fully answer your question. Post it to the community forum where other members can help.</p>
+          <div className="space-y-2">
+            <label className="text-sm text-zinc-300 font-medium">Title</label>
+            <Input
+              value={forumPostTitle}
+              onChange={(e) => setForumPostTitle(e.target.value)}
+              placeholder="Brief summary of your question"
+              className="bg-[#1a1a1a] border-white/[0.08] text-white"
+              data-testid="forum-post-title"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-zinc-300 font-medium">Content</label>
+            <textarea
+              value={forumPostContent}
+              onChange={(e) => setForumPostContent(e.target.value)}
+              placeholder="Describe your question in detail..."
+              rows={6}
+              className="w-full rounded-md bg-[#1a1a1a] border border-white/[0.08] text-white text-sm px-3 py-2 resize-none focus:outline-none focus:border-cyan-500/50"
+              data-testid="forum-post-content"
+            />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1 border-white/[0.08]" onClick={() => setForumPostOpen(false)}>Cancel</Button>
+            <Button
+              className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white"
+              onClick={handleSubmitForumPost}
+              disabled={forumPosting || !forumPostTitle.trim()}
+              data-testid="submit-forum-post"
+            >
+              {forumPosting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <MessageSquare className="w-4 h-4 mr-1" />}
+              Post to Forum
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
 

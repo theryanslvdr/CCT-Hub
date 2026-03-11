@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { rewardsAPI } from '@/lib/api';
+import { rewardsAPI, referralAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -738,6 +738,7 @@ export default function MyRewardsPage() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user?.id) return;
@@ -1009,10 +1010,47 @@ export default function MyRewardsPage() {
       {/* Badges Section */}
       <BadgesSection userId={user?.id} />
 
-      {/* Streak Freeze Section */}
-      <StreakFreezeSection />
+      {/* Leaderboard Button */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setLeaderboardOpen(true)}
+          className="flex items-center gap-2 text-sm text-purple-400 border-purple-500/30 hover:bg-purple-500/10"
+          data-testid="open-leaderboard-btn"
+        >
+          <Trophy className="w-4 h-4" /> View Leaderboard
+        </Button>
+        <p className="text-xs text-zinc-500">See how you rank against other members</p>
+      </div>
 
-      {/* CTA - Rewards Store */}
+      {/* Leaderboard Modal */}
+      <Dialog open={leaderboardOpen} onOpenChange={setLeaderboardOpen}>
+        <DialogContent className="glass-card border-[#222222] max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2"><Trophy className="w-5 h-5 text-purple-400" /> Leaderboard</DialogTitle>
+          </DialogHeader>
+          {leaderboard?.leaderboard?.length > 0 ? (
+            <div className="space-y-1.5 py-2">
+              {leaderboard.leaderboard.map((entry, i) => (
+                <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${entry.is_current_user ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-white/[0.02]'}`}>
+                  <span className={`text-sm font-bold font-mono w-8 text-center ${i === 0 ? 'text-amber-400' : i === 1 ? 'text-zinc-300' : i === 2 ? 'text-orange-600' : 'text-zinc-500'}`}>
+                    #{entry.rank || i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium truncate ${entry.is_current_user ? 'text-orange-400' : 'text-white'}`}>{entry.name || entry.full_name}</p>
+                    <p className="text-[10px] text-zinc-500">{entry.total_points?.toLocaleString() || 0} pts</p>
+                  </div>
+                  {entry.is_current_user && <span className="text-[10px] text-orange-400 font-semibold">YOU</span>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500 py-8 text-center">No leaderboard data yet</p>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* CTA - Hub Store */}
       <StoreButton />
 
       {/* Points History */}

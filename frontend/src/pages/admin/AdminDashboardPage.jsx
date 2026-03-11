@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { adminAPI, aiAssistantAPI } from '@/lib/api';
+import { adminAPI, aiAssistantAPI, referralAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 import {
   Users, TrendingUp, DollarSign, Activity, Shield, Settings,
   BarChart3, Radio, HelpCircle, Sparkles, Award,
   ArrowUpRight, AlertTriangle, ChevronRight, BrainCircuit,
-  Camera, UserCheck, UserX
+  Camera, UserCheck, UserX, Search, Loader2, ClipboardCopy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -55,6 +56,9 @@ const AdminDashboardPage = () => {
   const [aiStats, setAiStats] = useState({});
   const [cleanup, setCleanup] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupResults, setLookupResults] = useState([]);
+  const [lookupLoading, setLookupLoading] = useState(false);
 
   useEffect(() => {
     const loadStats = async () => {
@@ -124,6 +128,62 @@ const AdminDashboardPage = () => {
           </div>
         </Link>
       )}
+
+      {/* Find a Member — Admin Only */}
+      <div className="p-4 rounded-2xl bg-[#111111] border border-[#1f1f1f]" data-testid="admin-find-member">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center">
+            <Search className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-white">Find a Member</h2>
+            <p className="text-[10px] text-zinc-500">Quick lookup by name or email</p>
+          </div>
+        </div>
+        <div className="relative">
+          <Input
+            value={lookupQuery}
+            onChange={async (e) => {
+              const q = e.target.value;
+              setLookupQuery(q);
+              if (q.trim().length < 2) { setLookupResults([]); return; }
+              setLookupLoading(true);
+              try {
+                const res = await referralAPI.lookupMembers(q);
+                setLookupResults(res.data?.results || []);
+              } catch { setLookupResults([]); }
+              setLookupLoading(false);
+            }}
+            placeholder="Type a name or email..."
+            className="bg-[#0a0a0a] border-white/[0.06] text-white text-sm pl-9"
+            data-testid="admin-member-lookup-input"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          {lookupLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 animate-spin" />}
+        </div>
+        {lookupResults.length > 0 && (
+          <div className="mt-2 rounded-lg border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]" data-testid="admin-member-lookup-results">
+            {lookupResults.map(r => (
+              <div key={r.id} className="flex items-center gap-3 px-3 py-2.5 bg-[#0a0a0a]/60 hover:bg-white/[0.03] transition-colors">
+                <div className="w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                  <span className="text-xs font-medium text-zinc-400">{r.name?.charAt(0)?.toUpperCase() || '?'}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{r.name}</p>
+                  <p className="text-[11px] text-zinc-500 truncate">{r.masked_email}</p>
+                </div>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(r.merin_code); toast.success('Merin code copied!'); }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 text-xs font-mono hover:bg-orange-500/20 transition-colors shrink-0"
+                  data-testid={`admin-copy-merin-${r.id}`}
+                >
+                  <ClipboardCopy className="w-3 h-3" /> {r.merin_code}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
