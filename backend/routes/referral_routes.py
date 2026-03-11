@@ -44,15 +44,24 @@ class AdminSetReferralRequest(BaseModel):
 async def get_my_referral_code(user: dict = Depends(get_current_user)):
     """Get the current user's referral code and referral stats."""
     db = deps.db
-    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1, "referred_by": 1})
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1, "merin_referral_code": 1, "referred_by": 1})
 
     referral_code = (user_doc or {}).get("referral_code")
+    merin_code = (user_doc or {}).get("merin_referral_code")
     referred_by = (user_doc or {}).get("referred_by")
 
-    # Count direct referrals
+    # Count direct referrals by both codes and user ID
     direct_referrals = 0
-    if referral_code:
-        direct_referrals = await db.users.count_documents({"referred_by": referral_code})
+    codes_to_check = [c for c in [referral_code, merin_code] if c]
+    if codes_to_check:
+        direct_referrals = await db.users.count_documents({
+            "$or": [
+                {"referred_by": {"$in": codes_to_check}},
+                {"referred_by_user_id": user["id"]},
+            ]
+        })
+    else:
+        direct_referrals = await db.users.count_documents({"referred_by_user_id": user["id"]})
 
     return {
         "referral_code": referral_code,
@@ -236,30 +245,48 @@ async def get_referral_tree(user: dict = Depends(require_admin)):
     users = await db.users.find(
         {},
         {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1,
-         "referral_code": 1, "referred_by": 1, "created_at": 1}
+         "referral_code": 1, "merin_referral_code": 1, "referred_by": 1,
+         "referred_by_user_id": 1, "created_at": 1}
     ).to_list(5000)
 
     # Build tree structure
-    # Root nodes: users who were not referred by anyone
-    # Children: users whose referred_by matches parent's referral_code
+    # Map both referral_code and merin_referral_code to users
     code_to_user = {}
+    id_to_user = {}
     for u in users:
+        id_to_user[u["id"]] = u
         if u.get("referral_code"):
             code_to_user[u["referral_code"]] = u
+        if u.get("merin_referral_code"):
+            code_to_user[u["merin_referral_code"]] = u
 
     # Build adjacency list (parent code -> list of children)
+    # Try referred_by (code), then referred_by_user_id (direct ID)
     children_map = {}
     root_users = []
     for u in users:
         referred_by = u.get("referred_by")
+        referred_by_user_id = u.get("referred_by_user_id")
+        parent = None
         if referred_by and referred_by in code_to_user:
-            children_map.setdefault(referred_by, []).append(u)
+            parent = code_to_user[referred_by]
+        elif referred_by_user_id and referred_by_user_id in id_to_user:
+            parent = id_to_user[referred_by_user_id]
+
+        if parent and parent["id"] != u["id"]:
+            parent_code = parent.get("referral_code") or parent.get("merin_referral_code") or parent["id"]
+            children_map.setdefault(parent_code, []).append(u)
         else:
             root_users.append(u)
 
     def build_node(u):
-        code = u.get("referral_code", "")
-        children = children_map.get(code, [])
+        code = u.get("referral_code") or u.get("merin_referral_code") or ""
+        # Look up children by any of the user's codes
+        children = children_map.get(u.get("referral_code", ""), [])
+        if not children and u.get("merin_referral_code"):
+            children = children_map.get(u["merin_referral_code"], [])
+        if not children:
+            children = children_map.get(u["id"], [])
         return {
             "id": u["id"],
             "name": u.get("full_name", u.get("email", "Unknown")),
@@ -533,12 +560,18 @@ async def get_referral_tracking(user: dict = Depends(get_current_user)):
     referral_code = user_doc.get("referral_code") if user_doc else None
     merin_code = user_doc.get("merin_referral_code") or referral_code
 
-    # Count referrals
+    # Count referrals - check both referral_code and merin_referral_code
     direct_count = 0
     referrals = []
-    if referral_code:
+    codes_to_check = [c for c in [referral_code, merin_code] if c]
+    codes_to_check = list(set(codes_to_check))  # dedupe
+    if codes_to_check:
+        ref_query = {"$or": [
+            {"referred_by": {"$in": codes_to_check}},
+            {"referred_by_user_id": user["id"]},
+        ]}
         cursor = db.users.find(
-            {"referred_by": referral_code},
+            ref_query,
             {"_id": 0, "id": 1, "full_name": 1, "created_at": 1, "onboarding_completed": 1}
         ).sort("created_at", -1)
         referrals = await cursor.to_list(500)

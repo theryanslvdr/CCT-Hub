@@ -398,13 +398,13 @@ const ReferralTreePage = () => {
             <>
               {view === 'tree' && treeData && (
                 <div className="space-y-1" data-testid="referral-tree-view">
-                  {treeData.filter(n => n.referral_code).length === 0 ? (
+                  {treeData.filter(n => n.referral_code || n.direct_referrals > 0).length === 0 ? (
                     <div className="text-center py-12 text-zinc-500">
                       <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
                       <p>No referral codes set yet. Members need to complete onboarding.</p>
                     </div>
                   ) : (
-                    treeData.filter(n => n.referral_code).map((node) => (
+                    treeData.filter(n => n.referral_code || n.direct_referrals > 0).map((node) => (
                       <TreeNode key={node.id} node={node} />
                     ))
                   )}

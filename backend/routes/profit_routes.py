@@ -57,15 +57,23 @@ class OnboardingTransaction(BaseModel):
 
 class OnboardingTradeEntry(BaseModel):
     date: str
-    actual_profit: float
+    actual_profit: Optional[float] = None
     direction: str = "BUY"
     notes: Optional[str] = None
+    missed: Optional[bool] = False
+    balance: Optional[float] = None
+    product: Optional[str] = "MOIL10"
+    commission: Optional[float] = 0
 
 class OnboardingData(BaseModel):
     starting_balance: float
-    trading_start_date: str
+    trading_start_date: Optional[str] = None
+    start_date: Optional[str] = None
+    user_type: Optional[str] = None
     transactions: Optional[List[OnboardingTransaction]] = []
     trades: Optional[List[OnboardingTradeEntry]] = []
+    trade_entries: Optional[List[OnboardingTradeEntry]] = []
+    total_commission: Optional[float] = 0
 
 class BalanceOverrideData(BaseModel):
     override_balance: float
@@ -1890,7 +1898,7 @@ async def complete_onboarding(data: OnboardingData, user: dict = Depends(deps.ge
         
         # 1. Create the initial deposit (starting balance)
         initial_deposit_id = str(uuid.uuid4())
-        start_date = data.start_date if data.start_date else datetime.now(timezone.utc).isoformat()
+        start_date = data.start_date or data.trading_start_date or datetime.now(timezone.utc).isoformat()
         
         # Parse start date for ordering
         if isinstance(start_date, str):

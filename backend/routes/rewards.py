@@ -122,8 +122,8 @@ async def get_rewards_summary(user_id: str):
         "estimated_usdt": round(lifetime / 100, 2),
         "min_redeem_points": MIN_REDEEM_POINTS,
         "is_redeemable": lifetime >= MIN_REDEEM_POINTS,
-        "current_streak": stats.get("current_streak", 0),
-        "best_streak": stats.get("best_streak", 0),
+        "current_streak": stats.get("current_streak_days", stats.get("current_streak", 0)),
+        "best_streak": stats.get("best_streak_days", stats.get("best_streak", 0)),
         "referral_count": referral_count,
         "total_trades": stats.get("trade_count", 0),
     }

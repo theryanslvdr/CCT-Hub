@@ -63,7 +63,7 @@ const AdminDashboardPage = () => {
         ]);
         const members = membersRes.data.members || membersRes.data || [];
         setStats({
-          totalMembers: Array.isArray(members) ? members.length : 0,
+          totalMembers: membersRes.data.total || (Array.isArray(members) ? members.length : 0),
           activeToday: Array.isArray(members) ? members.filter(m => m.logged_today).length : 0,
         });
         setAiStats(aiRes.data || {});
