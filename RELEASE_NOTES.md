@@ -16,7 +16,7 @@ When you go to the Hub login page, you'll notice it looks completely different. 
 
 **Nothing changed about how you log in.** Same email, same password.
 
-![Login Page](https://system-restore-lab.preview.emergentagent.com/screenshots/01_login.png)
+![Login Page](https://ui-mobile-overhaul-3.preview.emergentagent.com/screenshots/01_login.png)
 
 ---
 
@@ -61,7 +61,7 @@ You can also get there by clicking your **profile picture** (bottom-left corner 
 
 > **Don't have an invite link?** That means you haven't set your Merin referral code yet. Go to your **Profile** page and enter it there first.
 
-![Affiliate Center](https://system-restore-lab.preview.emergentagent.com/screenshots/03_affiliate_center.png)
+![Affiliate Center](https://ui-mobile-overhaul-3.preview.emergentagent.com/screenshots/03_affiliate_center.png)
 
 ---
 
@@ -109,7 +109,7 @@ You can also get there by clicking your **profile picture** (bottom-left corner 
 
 5. Check the **Leaderboard** (sidebar → Growth → Leaderboard) to see where you rank
 
-![Referral Tracking](https://system-restore-lab.preview.emergentagent.com/screenshots/04_referral_tracking.png)
+![Referral Tracking](https://ui-mobile-overhaul-3.preview.emergentagent.com/screenshots/04_referral_tracking.png)
 
 ---
 
@@ -124,7 +124,7 @@ You can also get there by clicking your **profile picture** (bottom-left corner 
 
 Each message shows which AI persona responded so you always know who's talking.
 
-![AI Assistant](https://system-restore-lab.preview.emergentagent.com/screenshots/05_ai_assistant.png)
+![AI Assistant](https://ui-mobile-overhaul-3.preview.emergentagent.com/screenshots/05_ai_assistant.png)
 
 ---
 

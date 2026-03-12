@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 class CrossCurrentAPITester:
-    def __init__(self, base_url="https://system-restore-lab.preview.emergentagent.com"):
+    def __init__(self, base_url="https://ui-mobile-overhaul-3.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
