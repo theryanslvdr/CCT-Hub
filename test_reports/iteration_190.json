@@ -1,0 +1,85 @@
+{
+  "summary": "Iteration 190 Testing Complete - TidyCal Booking, Weekly Performance Report, Mobile Navigation Features. 12/12 backend tests passed (100%). All requested features verified working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "All pages",
+        "issues": ["'Missing API Keys' modal appears on all pages when logging in - expected behavior warning about optional integrations (Heartbeat, Publitio, OpenRouter)"]
+      }
+    ]
+  },
+  "features_verified": {
+    "FEATURE_1_tidycal_booking_embed_api": {
+      "status": "PASS",
+      "description": "GET /api/settings/booking-embed returns tidycal_embed_url field (public endpoint)"
+    },
+    "FEATURE_2_tidycal_admin_settings_card": {
+      "status": "PASS",
+      "description": "Admin Settings > API Keys tab has TidyCal Booking card with embed URL input field"
+    },
+    "FEATURE_3_booking_page_empty_state": {
+      "status": "PASS",
+      "description": "Booking page (/booking) shows 'Booking calendar not configured yet' when no URL is set"
+    },
+    "FEATURE_4_book_a_call_nav_community": {
+      "status": "PASS",
+      "description": "Sidebar shows 'Book a Call' nav item under COMMUNITY category"
+    },
+    "FEATURE_5_weekly_performance_report_api": {
+      "status": "PASS",
+      "description": "GET /api/referrals/my-team/weekly-report returns report with total_trades, total_profit, win_rate, active_traders, prev_week comparison, member_breakdown"
+    },
+    "FEATURE_6_weekly_report_team_page": {
+      "status": "PASS",
+      "description": "Team Page (/my-team) shows Weekly Performance Report section with Total Trades, Total Profit, Win Rate, Active Traders stats and week-over-week comparison"
+    },
+    "FEATURE_7_mobile_menu_book_a_call": {
+      "status": "PASS",
+      "description": "Mobile menu includes 'Book a Call' navigation item"
+    },
+    "FEATURE_8_mobile_menu_my_team": {
+      "status": "PASS",
+      "description": "Mobile menu includes 'My Team' in GROWTH category"
+    },
+    "FEATURE_9_mobile_menu_hub_store": {
+      "status": "PASS",
+      "description": "Mobile menu includes 'Hub Store' in navigation items"
+    },
+    "FEATURE_10_dashboard_margin": {
+      "status": "PASS",
+      "description": "Dashboard content area has proper 256px left margin (ml-64) matching sidebar width on desktop"
+    },
+    "FEATURE_11_mobile_bottom_nav": {
+      "status": "PASS",
+      "description": "Mobile view shows bottom navigation bar with Home, Tracker, Trade, Heartbeat, Rewards tabs"
+    },
+    "FEATURE_12_sidebar_categories": {
+      "status": "PASS",
+      "description": "Sidebar shows collapsible accordion categories: CORE, GROWTH, REWARDS, COMMUNITY, TOOLS, ADMIN"
+    }
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_190_new_features.py",
+    "/app/test_reports/pytest/pytest_iteration_190.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_190_new_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% (all 12 features verified working)"
+  },
+  "seed_data_creation": "No new seed data created - used existing admin account iam@ryansalvador.com for testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 190 complete. New features verified: (1) TidyCal Booking embed in Admin Settings API Keys tab with tidycal_embed_url field, (2) Booking page at /booking with empty state when URL not configured, (3) 'Book a Call' nav in sidebar under COMMUNITY category, (4) Weekly Performance Report on Team Page showing team trading stats with week-over-week comparison, (5) GET /api/referrals/my-team/weekly-report returns comprehensive report data, (6) Mobile menu includes Book a Call, My Team, Hub Store, (7) Dashboard has proper 256px left margin for sidebar, (8) Mobile bottom navigation works. All APIs are REAL (no mocks).",
+  "mocked_api_note": "None. All endpoints are real implementations."
+}

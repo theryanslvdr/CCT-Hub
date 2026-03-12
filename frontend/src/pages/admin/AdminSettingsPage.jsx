@@ -76,6 +76,8 @@ export const AdminSettingsPage = () => {
     onboarding_gate_enabled: true,
     // Adaptive AI
     adaptive_ai_enabled: true,
+    // TidyCal
+    tidycal_embed_url: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1190,6 +1192,45 @@ export const AdminSettingsPage = () => {
                 </ol>
                 <p className="text-xs text-zinc-500 mt-2">Free tier includes 500MB storage and 2GB bandwidth/month</p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* TidyCal Booking Embed */}
+          <Card className="glass-card" data-testid="tidycal-settings-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-cyan-400" /> TidyCal Booking
+              </CardTitle>
+              <p className="text-sm text-zinc-500">Embed a TidyCal booking calendar for members to schedule calls</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="text-zinc-300">TidyCal Embed URL</Label>
+                <Input
+                  value={settings.tidycal_embed_url || ''}
+                  onChange={(e) => setSettings({ ...settings, tidycal_embed_url: e.target.value })}
+                  placeholder="https://tidycal.com/your-username/your-event"
+                  className="input-dark mt-1"
+                  data-testid="tidycal-embed-url"
+                />
+                <p className="text-xs text-zinc-500 mt-1">
+                  Get your booking link from <a href="https://tidycal.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">tidycal.com</a>. Paste the full URL of your booking page.
+                </p>
+              </div>
+              {settings.tidycal_embed_url && (
+                <div className="space-y-2">
+                  <Label className="text-zinc-300 text-xs">Preview</Label>
+                  <div className="rounded-lg overflow-hidden border border-white/[0.08] bg-[#0a0a0a]">
+                    <iframe
+                      src={settings.tidycal_embed_url.startsWith('http') ? settings.tidycal_embed_url : `https://${settings.tidycal_embed_url}`}
+                      title="TidyCal Preview"
+                      className="w-full border-0"
+                      style={{ height: '400px' }}
+                      data-testid="tidycal-preview-iframe"
+                    />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -449,6 +449,7 @@ export const settingsAPI = {
   getPromotionPopup: () => api.get('/settings/promotion-popup'),
   trackBannerEvent: (eventType, bannerType) => api.post('/settings/banner-analytics/track', null, { params: { event_type: eventType, banner_type: bannerType } }),
   getBannerAnalytics: (days = 30) => api.get('/settings/banner-analytics', { params: { days } }),
+  getBookingEmbed: () => api.get('/settings/booking-embed'),
 };
 
 // Habit Tracker APIs
@@ -553,6 +554,7 @@ export const referralAPI = {
   // Team System
   getMyTeam: () => api.get('/referrals/my-team'),
   getTeamRecommendations: () => api.get('/referrals/my-team/recommendations'),
+  getTeamWeeklyReport: () => api.get('/referrals/my-team/weekly-report'),
 };
 
 // Quiz System API

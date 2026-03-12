@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Target, CreditCard, 
   Settings, Users, BarChart3, Radio, Cog, Eye, EyeOff,
   FlaskConical, Crown, LogOut, User, ChevronUp, Wallet, Plug, Award,
-  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch, HelpCircle, UserPlus, Bell, ShoppingBag, ChevronRight, Store
+  ChevronDown, UserCheck, Shield, ShieldCheck, Star, Sparkles, Loader2, Download, CheckSquare, Share2, Trophy, MessageSquare, Gauge, RotateCcw, GitBranch, HelpCircle, UserPlus, Bell, ShoppingBag, ChevronRight, Store, CalendarClock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -81,7 +81,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
       setExpandedCategory('growth');
     } else if (['/my-rewards', '/store'].some(p => path.startsWith(p))) {
       setExpandedCategory('rewards');
-    } else if (['/forum', '/ai-assistant'].some(p => path.startsWith(p))) {
+    } else if (['/forum', '/ai-assistant', '/booking'].some(p => path.startsWith(p))) {
       setExpandedCategory('community');
     } else if (['/profit-planner', '/debt-management'].some(p => path.startsWith(p))) {
       setExpandedCategory('tools');
@@ -152,6 +152,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     { path: '/store', icon: ShoppingBag, label: 'Hub Store', id: 'store', category: 'rewards', hideForLicensee: true },
     { path: '/forum', icon: MessageSquare, label: 'Community Forum', id: 'forum', category: 'community', hideForLicensee: true },
     { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', id: 'ai_assistant', category: 'community', hideForLicensee: true },
+    { path: '/booking', icon: CalendarClock, label: 'Book a Call', id: 'booking', category: 'community', hideForLicensee: true },
   ], []);
 
   const hiddenFeatures = [
@@ -185,7 +186,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false }) => {
     const baseDashboards = simulatedView?.allowed_dashboards || user?.allowed_dashboards || [];
     const alwaysInclude = isLicenseeView
       ? ['dashboard', 'profile', 'my_rewards']
-      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_team', 'store', 'my_rewards', 'forum', 'ai_assistant'];
+      : ['dashboard', 'profile', 'habits', 'affiliate', 'my_team', 'store', 'my_rewards', 'forum', 'ai_assistant', 'booking'];
     const effectiveDashboards = [...new Set([...baseDashboards, ...alwaysInclude])];
 
     return allNavItems.filter(item => {

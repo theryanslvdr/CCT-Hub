@@ -7,7 +7,7 @@ import {
   LayoutDashboard, TrendingUp, Activity, Radio, Users, BarChart3,
   User, Settings, LogOut, X, Award, Wallet, Target, CreditCard,
   ChevronRight, Shield, Eye, ExternalLink, Heart, Gift, Plug, Star, Cog, MessageSquare,
-  CheckSquare, Share2, UserPlus, Trophy, Sparkles
+  CheckSquare, Share2, UserPlus, Trophy, Sparkles, ShoppingBag, CalendarClock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -112,6 +112,7 @@ export const MobileMenu = ({ isOpen, onClose }) => {
     { path: '/trade-monitor', icon: Activity, label: 'Trade Monitor', hideForLicensee: true },
     { path: '/forum', icon: MessageSquare, label: 'Community Forum', hideForLicensee: true },
     { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', hideForLicensee: true },
+    { path: '/booking', icon: CalendarClock, label: 'Book a Call', hideForLicensee: true },
     { path: '/licensee-account', icon: Award, label: 'Deposit/Withdrawal', licenseeOnly: true },
     { path: '/family-accounts', icon: Users, label: 'Family Accounts', licenseeOnly: true },
   ];
@@ -119,9 +120,9 @@ export const MobileMenu = ({ isOpen, onClose }) => {
   const growthNavItems = [
     { path: '/habits', icon: CheckSquare, label: 'Daily Habits', hideForLicensee: true },
     { path: '/affiliate', icon: Share2, label: 'Affiliate Center', hideForLicensee: true },
-    { path: '/referral-tracking', icon: UserPlus, label: 'Invite & Earn', hideForLicensee: true },
+    { path: '/my-team', icon: Users, label: 'My Team', hideForLicensee: true },
     { path: '/my-rewards', icon: Star, label: 'My Rewards', hideForLicensee: true },
-    { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', hideForLicensee: true },
+    { path: '/store', icon: ShoppingBag, label: 'Hub Store', hideForLicensee: true },
   ];
 
   const adminNavItems = [

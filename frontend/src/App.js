@@ -52,6 +52,7 @@ import ForumPostPage from "./pages/ForumPostPage";
 import ReferralTrackingPage from "./pages/ReferralTrackingPage";
 import TeamPage from "./pages/TeamPage";
 import StorePage from "./pages/StorePage";
+import BookingPage from "./pages/BookingPage";
 import { AdminCleanupPage } from "./pages/admin/AdminCleanupPage";
 import FraudWarningPopup from "./components/FraudWarningPopup";
 
@@ -112,6 +113,7 @@ function App() {
             <Route path="/referral-tracking" element={<ReferralTrackingPage />} />
             <Route path="/my-team" element={<TeamPage />} />
             <Route path="/store" element={<StorePage />} />
+            <Route path="/booking" element={<BookingPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/signals" element={<AdminSignalsPage />} />

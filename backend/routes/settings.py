@@ -78,6 +78,8 @@ class PlatformSettings(BaseModel):
     adaptive_ai_enabled: bool = True
     # Onboarding Gate
     onboarding_gate_enabled: bool = True
+    # TidyCal Booking Embed
+    tidycal_embed_url: str = ""
 
     # Coerce None to "" for all str fields
     @field_validator('*', mode='before')
@@ -120,6 +122,14 @@ async def update_platform_settings(data: PlatformSettings, user: dict = Depends(
         upsert=True
     )
     return {"message": "Settings updated"}
+
+@router.get("/booking-embed")
+async def get_booking_embed():
+    """Get TidyCal embed URL for the booking page."""
+    db = deps.db
+    settings = await db.platform_settings.find_one({}, {"_id": 0, "tidycal_embed_url": 1})
+    return {"tidycal_embed_url": settings.get("tidycal_embed_url", "") if settings else ""}
+
 
 
 @router.get("/notice-banner")

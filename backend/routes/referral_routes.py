@@ -862,6 +862,110 @@ async def get_my_team(user: dict = Depends(get_current_user)):
 
 
 
+@router.get("/my-team/weekly-report")
+async def get_team_weekly_report(user: dict = Depends(get_current_user)):
+    """Get weekly performance report for the current user's team."""
+    from datetime import datetime, timezone, timedelta
+    db = deps.db
+
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "referral_code": 1, "merin_referral_code": 1})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    codes = [c for c in [user_doc.get("referral_code"), user_doc.get("merin_referral_code")] if c]
+    if not codes:
+        return {"report": None, "message": "No referral code set"}
+
+    query = {"$or": [{"referred_by": {"$in": codes}}, {"referred_by_user_id": user["id"]}]}
+    members = await db.users.find(query, {"_id": 0, "id": 1, "full_name": 1}).to_list(500)
+    member_ids = [m["id"] for m in members]
+
+    if not member_ids:
+        return {"report": None, "message": "No team members"}
+
+    now = datetime.now(timezone.utc)
+    # Current week: Monday to now
+    days_since_monday = now.weekday()
+    week_start = (now - timedelta(days=days_since_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+    prev_week_start = week_start - timedelta(days=7)
+
+    week_start_str = week_start.isoformat()
+    prev_week_start_str = prev_week_start.isoformat()
+    week_end_str = week_start.isoformat()  # prev week ends at this week's start
+
+    # Current week trades
+    current_trades = await db.trade_logs.find(
+        {"user_id": {"$in": member_ids}, "created_at": {"$gte": week_start_str}},
+        {"_id": 0, "user_id": 1, "profit": 1, "result": 1}
+    ).to_list(10000)
+
+    # Previous week trades
+    prev_trades = await db.trade_logs.find(
+        {"user_id": {"$in": member_ids}, "created_at": {"$gte": prev_week_start_str, "$lt": week_end_str}},
+        {"_id": 0, "user_id": 1, "profit": 1, "result": 1}
+    ).to_list(10000)
+
+    # Current week aggregation
+    total_trades = len(current_trades)
+    total_profit = sum(float(t.get("profit", 0) or 0) for t in current_trades)
+    wins = sum(1 for t in current_trades if str(t.get("result", "")).lower() in ("win", "tp", "take profit"))
+    win_rate = round((wins / total_trades * 100) if total_trades > 0 else 0, 1)
+
+    # Per-member breakdown
+    member_map = {m["id"]: m["full_name"] for m in members}
+    member_stats = {}
+    for t in current_trades:
+        uid = t["user_id"]
+        if uid not in member_stats:
+            member_stats[uid] = {"name": member_map.get(uid, "Unknown"), "trades": 0, "profit": 0, "wins": 0}
+        member_stats[uid]["trades"] += 1
+        member_stats[uid]["profit"] += float(t.get("profit", 0) or 0)
+        if str(t.get("result", "")).lower() in ("win", "tp", "take profit"):
+            member_stats[uid]["wins"] += 1
+
+    # Top performer by profit
+    top_performer = None
+    if member_stats:
+        best = max(member_stats.values(), key=lambda x: x["profit"])
+        top_performer = {"name": best["name"], "profit": round(best["profit"], 2), "trades": best["trades"]}
+
+    # Active traders (at least 1 trade this week)
+    active_traders = len(member_stats)
+
+    # Previous week for comparison
+    prev_total_trades = len(prev_trades)
+    prev_total_profit = sum(float(t.get("profit", 0) or 0) for t in prev_trades)
+    prev_wins = sum(1 for t in prev_trades if str(t.get("result", "")).lower() in ("win", "tp", "take profit"))
+    prev_win_rate = round((prev_wins / prev_total_trades * 100) if prev_total_trades > 0 else 0, 1)
+
+    return {
+        "report": {
+            "week_start": week_start_str,
+            "total_members": len(member_ids),
+            "active_traders": active_traders,
+            "total_trades": total_trades,
+            "total_profit": round(total_profit, 2),
+            "win_rate": win_rate,
+            "top_performer": top_performer,
+            "prev_week": {
+                "total_trades": prev_total_trades,
+                "total_profit": round(prev_total_profit, 2),
+                "win_rate": prev_win_rate,
+            },
+            "member_breakdown": [
+                {
+                    "name": s["name"],
+                    "trades": s["trades"],
+                    "profit": round(s["profit"], 2),
+                    "win_rate": round((s["wins"] / s["trades"] * 100) if s["trades"] > 0 else 0, 1),
+                }
+                for s in sorted(member_stats.values(), key=lambda x: x["profit"], reverse=True)
+            ],
+        }
+    }
+
+
+
 @router.get("/my-team/recommendations")
 async def get_team_recommendations(user: dict = Depends(get_current_user)):
     """Generate AI-powered recommendations for team members who are in danger or inactive."""

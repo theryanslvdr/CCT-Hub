@@ -3,7 +3,7 @@ import { referralAPI } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame, Bot, Lightbulb, RefreshCw, Link2, Copy, ExternalLink, Trophy } from 'lucide-react';
+import { Users, AlertTriangle, TrendingUp, UserPlus, Activity, Clock, Shield, Flame, Bot, Lightbulb, RefreshCw, Link2, Copy, ExternalLink, Trophy, BarChart3, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const STATUS_COLORS = {
@@ -19,6 +19,17 @@ const URGENCY_COLORS = {
   low: 'border-blue-500/30 bg-blue-500/5',
 };
 
+const TrendIndicator = ({ current, previous, isCurrency, isPercent }) => {
+  if (previous === undefined || previous === null) return null;
+  const diff = current - previous;
+  if (diff === 0) return <span className="flex items-center gap-0.5 text-[10px] text-zinc-500"><Minus className="w-3 h-3" /> No change</span>;
+  const isUp = diff > 0;
+  const Icon = isUp ? ArrowUpRight : ArrowDownRight;
+  const color = isUp ? 'text-emerald-400' : 'text-red-400';
+  const formatted = isCurrency ? `$${Math.abs(diff).toLocaleString()}` : isPercent ? `${Math.abs(diff).toFixed(1)}%` : Math.abs(diff);
+  return <span className={`flex items-center gap-0.5 text-[10px] ${color}`}><Icon className="w-3 h-3" /> {formatted} vs last wk</span>;
+};
+
 const TeamPage = () => {
   const [team, setTeam] = useState([]);
   const [stats, setStats] = useState({ total: 0, active: 0, in_danger: 0, new_this_week: 0 });
@@ -27,6 +38,8 @@ const TeamPage = () => {
   const [recsLoading, setRecsLoading] = useState(false);
   const [showRecs, setShowRecs] = useState(false);
   const [tracking, setTracking] = useState(null);
+  const [weeklyReport, setWeeklyReport] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
 
   const loadTeam = useCallback(async () => {
     try {
@@ -45,6 +58,18 @@ const TeamPage = () => {
   }, []);
 
   useEffect(() => { loadTeam(); }, [loadTeam]);
+
+  useEffect(() => {
+    const loadReport = async () => {
+      setReportLoading(true);
+      try {
+        const res = await referralAPI.getTeamWeeklyReport();
+        setWeeklyReport(res.data.report);
+      } catch {}
+      setReportLoading(false);
+    };
+    loadReport();
+  }, []);
 
   const loadRecommendations = async () => {
     setRecsLoading(true);
@@ -180,6 +205,89 @@ const TeamPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Weekly Performance Report */}
+      <Card className="glass-card border-cyan-500/10" data-testid="weekly-performance-report">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white text-base flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-cyan-400" /> Weekly Performance Report
+          </CardTitle>
+          <p className="text-xs text-zinc-500">Team trading performance for the current week</p>
+        </CardHeader>
+        <CardContent>
+          {reportLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : !weeklyReport ? (
+            <p className="text-sm text-zinc-500 py-4 text-center">No report data available yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {/* Summary Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[11px] text-zinc-500 mb-1">Total Trades</p>
+                  <p className="text-xl font-bold text-white font-mono" data-testid="report-total-trades">{weeklyReport.total_trades}</p>
+                  <TrendIndicator current={weeklyReport.total_trades} previous={weeklyReport.prev_week?.total_trades} />
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[11px] text-zinc-500 mb-1">Total Profit</p>
+                  <p className={`text-xl font-bold font-mono ${weeklyReport.total_profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`} data-testid="report-total-profit">
+                    ${weeklyReport.total_profit?.toLocaleString()}
+                  </p>
+                  <TrendIndicator current={weeklyReport.total_profit} previous={weeklyReport.prev_week?.total_profit} isCurrency />
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[11px] text-zinc-500 mb-1">Win Rate</p>
+                  <p className="text-xl font-bold text-orange-400 font-mono" data-testid="report-win-rate">{weeklyReport.win_rate}%</p>
+                  <TrendIndicator current={weeklyReport.win_rate} previous={weeklyReport.prev_week?.win_rate} isPercent />
+                </div>
+                <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <p className="text-[11px] text-zinc-500 mb-1">Active Traders</p>
+                  <p className="text-xl font-bold text-cyan-400 font-mono" data-testid="report-active-traders">
+                    {weeklyReport.active_traders}<span className="text-xs text-zinc-500 font-normal">/{weeklyReport.total_members}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Top Performer */}
+              {weeklyReport.top_performer && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/[0.06] border border-amber-500/15" data-testid="report-top-performer">
+                  <Trophy className="w-5 h-5 text-amber-400 shrink-0" />
+                  <div>
+                    <p className="text-xs text-zinc-500">Top Performer</p>
+                    <p className="text-sm font-semibold text-white">{weeklyReport.top_performer.name}</p>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <p className="text-sm font-bold text-emerald-400 font-mono">${weeklyReport.top_performer.profit?.toLocaleString()}</p>
+                    <p className="text-[10px] text-zinc-500">{weeklyReport.top_performer.trades} trades</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Member Breakdown */}
+              {weeklyReport.member_breakdown?.length > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-500 mb-2 uppercase tracking-wider">Member Breakdown</p>
+                  <div className="space-y-1.5">
+                    {weeklyReport.member_breakdown.map((m, i) => (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.01] hover:bg-white/[0.03] transition-colors" data-testid={`report-member-${i}`}>
+                        <span className="text-xs text-zinc-600 w-4 font-mono">{i + 1}.</span>
+                        <span className="text-sm text-white flex-1 truncate">{m.name}</span>
+                        <span className="text-xs text-zinc-400 font-mono">{m.trades} trades</span>
+                        <span className="text-xs text-zinc-400 font-mono">{m.win_rate}% WR</span>
+                        <span className={`text-xs font-mono font-semibold ${m.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${m.profit?.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* AI Recommendations */}
       {showRecs && (

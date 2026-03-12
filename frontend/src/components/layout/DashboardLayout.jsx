@@ -256,8 +256,8 @@ export const DashboardLayout = () => {
         
         <main className={cn(
           "flex-1 flex flex-col transition-all duration-300",
-          "ml-0 lg:ml-16",
-          !sidebarCollapsed && "lg:ml-64"
+          "ml-0 md:ml-16",
+          !sidebarCollapsed && "md:ml-64"
         )}>
           <Header
             title={currentTitle}
