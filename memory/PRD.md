@@ -6,7 +6,7 @@ Full-stack trading community platform with admin/member management, habits track
 ## Core Architecture
 - **Frontend:** React (port 3000) with Shadcn/UI, Tailwind CSS, dark theme
 - **Backend:** FastAPI (port 8001) with MongoDB
-- **3rd Party:** OpenRouter AI, Publitio (image hosting), Heartbeat (verification)
+- **3rd Party:** OpenRouter AI, Publitio (image hosting), Heartbeat (verification), TidyCal (booking embed)
 
 ## Test Credentials
 - Master Admin: `iam@ryansalvador.com` / `admin123`
@@ -18,7 +18,7 @@ Full-stack trading community platform with admin/member management, habits track
 - Fixed streak synchronization between dashboard and Rewards Platform
 - Fixed referral tree not populating + improved UI
 - Fixed member count discrepancy on admin dashboard
-- **Fixed Share Performance streak showing 0** (was hardcoded, now uses rewardsSummary.current_streak)
+- Fixed Share Performance streak showing 0
 
 ### P1 Features (DONE)
 - Auto streak sync (twice-daily via APScheduler)
@@ -36,32 +36,52 @@ Full-stack trading community platform with admin/member management, habits track
 - AI Recommendations for Team Leaders
 
 ### UI/UX Overhaul (DONE - 2026-03-11)
-- **Collapsible Nav Categories** — Core, Growth, Rewards, Community, Tools, Admin — only one expanded at a time
-- **Hub Store** — Renamed from "Store", now includes Signal Gate Immunity items AND Streak Freezes (moved from My Rewards)
-- **Rewards Category** — New nav category containing My Rewards + Hub Store
-- **Leaderboard Modal** — Moved from standalone page to button/modal in My Rewards
-- **Invite & Earn in My Team** — Invite link card at top of Team page with copy button + referral stats
-- **Dashboard Quick Actions** — Track Profits, Manage Team, Hub Store, Community Help buttons
-- **Notification Badge Counters** — Admin nav badge shows pending items count
-- **AI Assistant → Forum Posting** — When AI can't answer, "Ask the Community Instead" button pre-fills a forum post
-- **Find a Member (Admin)** — Search function moved from Affiliate Center to Admin Dashboard
-- **Enhanced Performance View** — Total Profit, LOT Size, Daily Target, Total Trades, Win Rate, Streak, Perf Rate
-- **Admin Cleanup RyAI Labels** — AI-flagged proofs show "RyAI: Suspicious" or "RyAI: Looks legitimate" with Sparkles icon
+- Collapsible Nav Categories (Core, Growth, Rewards, Community, Tools, Admin)
+- Hub Store (renamed from Store, includes Streak Freezes)
+- Leaderboard Modal in My Rewards
+- Invite & Earn in My Team page
+- Dashboard Quick Actions
+- Notification Badge Counters
+- AI Assistant to Forum Posting
+- Find a Member in Admin Dashboard
+- Enhanced Performance View
+- Admin Cleanup RyAI Labels
+
+### TidyCal Booking Integration (DONE - 2026-03-12)
+- Admin Settings > API Keys tab: TidyCal Booking card with embed URL input + live preview
+- New `/booking` page: Renders TidyCal calendar in iframe, shows empty state when not configured
+- "Book a Call" nav item added under Community category in sidebar and mobile menu
+- Public `GET /api/settings/booking-embed` endpoint serves the embed URL
+- Backend `tidycal_embed_url` field added to PlatformSettings model
+
+### Weekly Team Performance Report (DONE - 2026-03-12)
+- New `GET /api/referrals/my-team/weekly-report` endpoint aggregating team trades
+- Report shows: Total Trades, Total Profit, Win Rate, Active Traders
+- Week-over-week comparison with trend indicators
+- Top Performer highlight
+- Per-member breakdown table
+- Rendered on Team Page between stat cards and AI Recommendations
+
+### Mobile Readiness (DONE - 2026-03-12)
+- Fixed sidebar-to-content margin mismatch (md breakpoint alignment)
+- Mobile menu updated with Book a Call, My Team, Hub Store nav items
+- All pages use responsive grid classes
+- Mobile bottom nav, hamburger menu, slide-out drawer all functional
 
 ### Backend Refactoring (DONE - 2026-03-11)
 - Extracted `admin_cleanup_routes.py` from `admin_routes.py`
-- Extracted `admin_members_routes.py` from `admin_routes.py` (~730 lines, 15+ endpoints)
-- Extracted `ProjectionVision.jsx` and `AdjustTradeDialog.jsx` from ProfitTrackerPage
-- ProfitTrackerPage reduced from 4319 → 3954 lines
-- admin_routes.py reduced from 4631 → 3800 lines
-- `referred_by` data normalization (startup task + consistent $or queries)
+- Extracted `admin_members_routes.py` from `admin_routes.py`
+- Extracted `AdjustTradeDialog.jsx` from ProfitTrackerPage
+- `referred_by` data normalization
 
 ## Prioritized Backlog
 
 ### P2 (Future)
 - Store enhancements (expand item catalog beyond immunity credits)
-- Further ProfitTrackerPage mobile overlay extraction
+- Further ProfitTrackerPage.jsx refactoring (~3900 lines)
+- ProfitTrackerPage mobile overlay extraction
 
 ### P3 (Backlog)
 - Additional admin_routes.py extraction (signals, analytics sections)
 - Performance optimization (caching, pagination)
+- Refactor `referred_by` field usage for consistency
